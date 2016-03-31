@@ -1,0 +1,9 @@
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+   <soap:Body>
+      <ns6:listPendingMessagesResponse xmlns:ns6="http://org.ecodex.backend/1_1/">
+		<messageID>2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu</messageID>
+		<messageID>78a1d578-0cc7-41fb-9f35-86a5b2769a14@domibus.eu</messageID>
+		<messageID>2bbc05d8-b603-4742-a118-137898a81de3@domibus.eu</messageID>
+      </ns6:listPendingMessagesResponse>      
+   </soap:Body>
+</soap:Envelope>

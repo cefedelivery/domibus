@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<chapter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+
+         xml:id="installation"
+         version="5.0"
+         xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd">
+    <title>Domibus Deployment</title>
+    <para>
+        This chapter describes the deployment of Domibus from scratch. If you are performing an update instead please
+        refer to the
+        <computeroutput>upgrade-info.txt</computeroutput>
+        file from your downloaded artifact.
+    </para>
+    <note>
+        <para>
+            There is no upgrade path from Domibus/Holodeck 2.x and earlier. Domibus 3 requires a fresh install.
+        </para>
+    </note>
+    <xi:include href="3_1_single_server_installation.xml"/>
+    <xi:include href="3_2_cluster_installation.xml"/>
+</chapter>

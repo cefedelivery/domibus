@@ -1,0 +1,36 @@
+﻿## Eclipse config files ##
+.settings/
+.classpath
+.project
+
+## PMD Eclipse plugin files ##
+.pmd
+
+## soapUI test reports ##
+
+/holodeck/modules/holodeck-distribution/src/test/resources/soapui_testsuites/*.txt
+
+## Maven output folder ##
+target/
+
+## Compiled java classes ##
+*.class
+*.jar # There are still some required jars bundled with the holodeck sources. Until this is resolved they have to stay in the repo.
+*.war
+*.ear
+
+## generic files to ignore
+*~
+*.lock
+*.DS_Store
+*.swp
+*.out
+*.tmp
+*.log
+*.txt
+
+## Intellij IDEA files 
+.idea/
+*.iml
+*.ipr
+*.iws

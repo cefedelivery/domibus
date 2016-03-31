@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xml:id="system_overview"
+         version="5.0"
+         xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd">
+
+    <title>System Overview</title>
+    <para>The Domibus gateway must be installed on a server in a secure
+        networking area behind a firewall and a
+        proxy server (not shown). The database server used by the
+        application can either be deployed on the same
+        server as the gateway or a dedicated database server.
+        <figure>
+            <title>System overview</title>
+            <mediaobject>
+                <imageobject>
+                    <!-- FIXME: change the picture to ecodex-neutral annotations-->
+                    <imagedata fileref="graphics/systemlayout.png" scalefit="1"
+                               width="100%" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+    </para>
+    <important>
+        <para>
+            If the Domibus gateway is to deployed as a solution the use of a dedicated database server is required.
+        </para>
+    </important>
+</section>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<chapter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xml:id="introduction"
+         version="5.0"
+         xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xsi:schemaLocation="
+           http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+           http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd
+        ">
+    <title>Introduction</title>
+
+    <para>This document is intended for server administrators who are tasked
+        with installing the
+        <indexterm>
+            <primary>e-CODEX</primary>
+        </indexterm>
+        gateway software. Basic knowledge of operating systems, proxy servers,
+        servlet
+        containers and networking is assumed.
+        This manual is neither intended to be a guide to
+        <link xlink:href="http://www.e-codex.eu">e-CODEX</link>
+        or
+        <link xlink:href="http://www.esens.eu">e-SENS</link>
+        in general, nor does it contain the preliminary steps
+        required to participate in the e-CODEX or
+        <indexterm>
+            <primary>e-SENS</primary>
+        </indexterm>
+        e-SENS
+        project. If you are
+        looking for this kind of information please have a
+        look at the quick start guide of the project you are interested in
+    </para>
+    <section>
+        <title>Domibus</title>
+        <para>
+            Domibus is an ebMS3 gateway which is fully compliant with the
+            <citation>AS4-Profile</citation>
+            based
+            <citation>D6.2</citation>
+            e-SENS profile. A complete feature matrix can be found in<xref
+                linkend="a2_feature_list"/>.
+        </para>
+    </section>
+</chapter>

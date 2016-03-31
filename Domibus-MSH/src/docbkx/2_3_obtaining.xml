@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xml:id="obtaining"
+         version="5.0"
+         xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xsi:schemaLocation="
+           http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+           http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd
+           ">
+
+
+    <title>Obtaining the software</title>
+    <para>
+        As of now all Domibus software can be downloaded from the projects<link
+            xlink:href="https://secure.e-codex.eu/nexus">
+        repository</link>.
+        Required credentials will be provided to you by the local person
+        responsible for the
+        <indexterm>
+            <primary>e-CODEX</primary>
+        </indexterm>
+        e-CODEX or e-SENS
+        <indexterm>
+            <primary>e-SENS</primary>
+        </indexterm>
+        project. The artifacts can be directly downloaded from
+        <link xlink:href="https://secure.e-codex.eu/nexus/content/groups/public/eu/domibus/domibus/">
+            here
+        </link>
+    </para>
+    <note>
+        <title>Future planning</title>
+        <para>
+            It is expected that the final version of Domibus 3 will be hosted on
+            <link xlink:href="https://joinup.ec.europa.eu/">joinup</link>
+            by the European Commission.
+        </para>
+    </note>
+</section>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<!DOCTYPE section[
+        <!ENTITY check "&#x2713;">
+        <!ENTITY cross "&#x2717;">
+        ]>
+
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xml:id="artifact_description"
+         version="5.0"
+         xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd">
+
+    <title>Software Packages</title>
+    <para>
+        There are different release packagings available for the e-CODEX
+        gateway:
+    </para>
+    <table xml:id="artifact_table" width="100%">
+        <title>Software packages</title>
+        <tgroup cols="5">
+            <colspec colname="Filename: domibus-distribution"/>
+            <colspec colname="Gateway WAR-file"/>
+            <colspec colname="Fully configured Tomcat 8 Server"/>
+            <colspec colname="Configuration files"/>
+            <colspec
+                    colname="SQL-scripts for initial database generation and updates"/>
+            <thead>
+                <row>
+                    <entry>Filename: domibus-<?eval ${project.version}?></entry>
+                    <entry>Gateway WAR-file</entry>
+                    <entry>Fully configured Tomcat 8 Server</entry>
+                    <entry>Configuration files</entry>
+                    <entry>SQL-scripts for database generation / updates</entry>
+                </row>
+            </thead>
+            <tbody>
+                <row>
+                    <entry>.war</entry>
+                    <entry>&check;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                </row>
+                <row>
+                    <entry>-distribution-war.zip</entry>
+                    <entry>&check;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&check;</entry>
+                    <entry>&check;</entry>
+                </row>
+                <row>
+                    <entry>-tomcat-full.zip</entry>
+                    <entry>&check;</entry>
+                    <entry>&check;</entry>
+                    <entry>&check;</entry>
+                    <entry>&check;</entry>
+                </row>
+                <row>
+                    <entry>-sql-scripts.zip</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&check;</entry>
+                </row>
+                <row>
+                    <entry>-configuration.zip</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&check;</entry>
+                    <entry>&cross;</entry>
+                </row>
+            </tbody>
+        </tgroup>
+    </table>
+    <para>
+        <important>
+            <para>While the download packages
+                contain database scripts for Apache Derby use of this database engine is only recommended for testing
+                purposes and not for productive use.
+            </para>
+        </important>
+    </para>
+    <section>
+        <title>domibus-<?eval ${project.version}?>.war</title>
+        <para>This package contains only the web application. The usage of this
+            package is only recommended for
+            development and testing purposes
+        </para>
+    </section>
+    <section>
+        <title>domibus-<?eval ${project.version}?>-distribution-war.zip</title>
+        <para>This package contains the web application, tomcat configuration
+            files and database scripts. Use this
+            package if you are performing an update of an existing installation
+            or if you want to deploy the
+            software to a servlet container different from the one that is
+            available in the tomcat-full package.
+        </para>
+    </section>
+    <section>
+        <title>domibus-<?eval ${project.version}?>-tomcat-full.zip</title>
+        <para>This package contains a Tomcat 8 server with a preinstalled
+            Domibus gateway. This package is the easiest way to
+            deploy the Domibus gateway into a testing or production environment.
+            Usage of this package is recommended, and this manual
+            assumes that this package is used for deployment.
+        </para>
+    </section>
+    <section>
+        <title>domibus-<?eval ${project.version}?>-tomcat-configuration.zip
+        </title>
+        <para>This package only contains the configuration files for the
+            application.
+        </para>
+    </section>
+    <section>
+        <title>domibus-<?eval ${project.version}?>-sql-scripts.zip</title>
+        <para>This package only contains initial and delta SQL scripts for MySQL
+            and Oracle database engines.
+        </para>
+    </section>
+</section>
+

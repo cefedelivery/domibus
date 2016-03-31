@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xml:id="system_requirements"
+         version="5.0"
+         xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xsi:schemaLocation="
+           http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+           http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd
+           ">
+    <title>System Requirements</title>
+    <variablelist>
+        <varlistentry>
+            <term>Java Runtime</term>
+            <listitem>
+                <para>A Java runtime environment version 7 or higher is
+                    required.
+                </para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>Servlet Container
+                <indexterm>
+                    <primary>Servlet container</primary>
+                </indexterm>
+            </term>
+            <listitem>
+                <para>A Java Servlet container supporting Servlet v3.0 or
+                    higher,
+                    <link xlink:href="http://tomcat.apache.org/">
+                        <indexterm>
+                            <primary>Apache Tomcat</primary>
+                        </indexterm>
+                        Apache Tomcat 8.0
+                    </link>
+                    is recommended.
+                </para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>Proxy Server
+                <indexterm>
+                    <primary>Proxy Server</primary>
+                </indexterm>
+            </term>
+            <listitem>
+                <para>Due to the fact that Domibus exposes multiple webservices
+                    and administration interfaces by default the usage of a
+                    proxy server is highly recommended. Please see
+                    <xref linkend="proxyconfig"/>
+                    for details.
+                </para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>RDBMS
+                <indexterm>
+                    <primary>RDBMS</primary>
+                </indexterm>
+
+            </term>
+            <listitem>
+                <para>Supported databases are
+                    <indexterm>
+                        <primary>Oracle</primary>
+                        <secondary>10g</secondary>
+                    </indexterm>
+                    Oracle 10g
+                    and higher as well as
+                    <indexterm>
+                        <primary>MySQL</primary>
+                        <secondary>5.5</secondary>
+                    </indexterm>
+                    MySQL 5.5
+                    and higher.
+                </para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>x.509 v3 Certificate with private key
+                <indexterm>
+                    <primary>x.509 v3</primary>
+                </indexterm>
+            </term>
+            <listitem>
+                <para>While not required for basic use, a certificate with a
+                    public/private keypair is required to support any of the
+                    security options regarding encryption and/or signing.
+                    Additional requirements i.e. allowed issuers are subject of
+                    business agreements.
+                </para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>Hardware Requirements
+                <indexterm>
+                    <primary>Hardware</primary>
+                    <secondary>requirements</secondary>
+                </indexterm>
+
+            </term>
+            <listitem>
+                <para>The required hardware depends on your expected message
+                    load. See
+                    <xref linkend="loadtest"/>
+                    for details.
+                </para>
+            </listitem>
+        </varlistentry>
+    </variablelist>
+</section>

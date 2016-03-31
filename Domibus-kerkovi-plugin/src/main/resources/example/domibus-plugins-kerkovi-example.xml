@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://activemq.apache.org/schema/core
+       http://activemq.apache.org/schema/core/activemq-core.xsd">
+    <amq:queue id="notifyAdapterKerkoviQueue"
+               physicalName="domibus.notification.kerkovi"/>
+
+    <bean id="adapterKerkovi" class="eu.domibus.plugin.kerkovi.KerkoviAdapterImpl">
+        <property name="lister" ref="kerkoviNotificationListenerService"/>
+        <property name="partyIdDomibus" value="domibus-c2"/>
+        <property name="partyIdTypeDomibus" value=""/>
+        <property name="partyIdMinder" value="minder"/>
+        <property name="partyIdTypeMinder" value=""/>
+    </bean>
+
+    <bean id="kerkoviNotificationListenerService"
+          class="eu.domibus.plugin.NotificationListenerService"
+          c:queue-ref="notifyAdapterKerkoviQueue" c:mode="PUSH"
+          p:backendConnector-ref="adapterKerkovi"/>
+</beans>

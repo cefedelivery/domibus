@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<weblogic-web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns="http://xmlns.oracle.com/weblogic/weblogic-web-app"
+                  xsi:schemaLocation="http://xmlns.oracle.com/weblogic/weblogic-web-app http://xmlns.oracle.com/weblogic/weblogic-web-app/1.4/weblogic-web-app.xsd">
+    <context-root>/domibus-weblogic</context-root>
+    <container-descriptor>
+        <prefer-application-packages>
+            <package-name>org.codehaus.stax2.*</package-name>
+            <package-name>org.bouncycastle.*</package-name>
+            <package-name>org.apache.wss4j.*</package-name>
+            <package-name>org.apache.cxf.*</package-name>
+            <package-name>javax.wsdl.*</package-name>
+            <package-name>org.hibernate.*</package-name>
+            <package-name>org.springframework.*</package-name>
+            <package-name>javax.jws.*</package-name>
+            <package-name>com.ctc.wstx.*</package-name>
+            <package-name>javax.validation.*</package-name>
+            <package-name>org.log4j.*</package-name>
+            <package-name>org.slf4j</package-name>
+        </prefer-application-packages>
+        <allow-all-roles>true</allow-all-roles>
+    </container-descriptor>
+    <library-ref>
+        <library-name>domibus-default-jms-plugin</library-name>
+        <specification-version>3.1</specification-version>
+        <implementation-version>3.1</implementation-version>
+        <exact-match>false</exact-match>
+    </library-ref>
+    <library-ref>
+        <library-name>domibus-default-ws-plugin</library-name>
+        <specification-version>3.1</specification-version>
+        <implementation-version>3.1</implementation-version>
+        <exact-match>false</exact-match>
+    </library-ref>
+</weblogic-web-app>

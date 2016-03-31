@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<db:configuration xmlns:db="http://domibus.eu/configuration"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://domibus.eu/configuration file:/C:/development/git-repos/domibus/Domibus-MSH/domibus-configuration.xsd"
+                  party="blue_gw">
+    <mpcs>
+        <mpc name="defaultMpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMpc"
+             enabled="true"
+             default="true"
+             retention_downloaded="0"
+             retention_undownloaded="60"/>
+        <mpc name="anotherMpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/anotherMpc"
+             enabled="true"
+             default="true"
+             retention_downloaded="44"
+             retention_undownloaded="23"/>
+    </mpcs>
+    <businessProcesses>
+        <roles>
+            <role name="defaultInitiatorRole"
+                  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
+            <role name="defaultResponderRole"
+                  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
+        </roles>
+        <parties>
+            <partyIdTypes>
+                <partyIdType name="partyTypeEmpty" value=""/>
+            </partyIdTypes>
+            <party name="ibmgw"
+                   endpoint="http://5.153.46.53:29001/AS4"
+                   allowChunking="false"
+            >
+                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:IBMgw"
+                            partyIdType="partyTypeEmpty"/>
+            </party>
+            <party name="domibus_de"
+                   endpoint="http://test.edelivery.it.nrw.de/domibus-msh"
+                   allowChunking="false"
+            >
+                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-de"
+                            partyIdType="partyTypeEmpty"/>
+            </party>
+            <party name="flame"
+                   endpoint="http://fmstest.flame.co.za:8080/AS4"
+                   allowChunking="false"
+            >
+                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:flame"
+                            partyIdType="partyTypeEmpty"/>
+            </party>
+            <party name="holodeck"
+                   endpoint="http://msh.holodeck-b2b.org:8080/msh"
+                   allowChunking="false"
+            >
+                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:holodeck-b2b"
+                            partyIdType="partyTypeEmpty"/>
+            </party>
+            <party name="axway"
+                   endpoint="http://208.67.130.9/exchange/axwayas4"
+                   allowChunking="false"
+            >
+                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:axway"
+                            partyIdType="partyTypeEmpty"/>
+            </party>
+            <party name="cefgw"
+                   endpoint="https://secure.gateway.eu/as4"
+                   allowChunking="false"
+            >
+                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:CEF"
+                            partyIdType="partyTypeEmpty"/>
+            </party>
+            <party name="red_gw"
+                   endpoint="http://localhost:8180/domibus/services/msh"
+                   allowChunking="false"
+            >
+                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-red"
+                            partyIdType="partyTypeEmpty"/>
+            </party>
+            <party name="blue_gw"
+                   endpoint="http://localhost:8080/domibus/services/msh"
+                   allowChunking="false"
+            >
+                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-blue"
+                            partyIdType="partyTypeEmpty"/>
+            </party>
+        </parties>
+        <meps>
+            <mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
+            <mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
+            <binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+            <binding name="pushAndPush"
+                     value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
+        </meps>
+        <properties>
+            <property name="originalSenderProperty"
+                      key="originalSender"
+                      datatype="string"
+                      required="true"/>
+            <property name="finalRecipientProperty"
+                      key="finalRecipient"
+                      datatype="string"
+                      required="true"/>
+            <propertySet name="ecodexPropertySet">
+                <propertyRef property="finalRecipientProperty"/>
+                <propertyRef property="originalSenderProperty"/>
+            </propertySet>
+        </properties>
+        <payloadProfiles>
+        </payloadProfiles>
+        <securities>
+            <security name="signOnly"
+                      policy="signOnly.xml"
+                      signatureMethod="RSA_SHA256"/>
+            <security name="noSigNoEnc"
+                      policy="doNothingPolicy.xml"
+                      signatureMethod="RSA_SHA256"/>
+            <security name="signAndEncrypt"
+                      policy="signEncrypt.xml"
+                      signatureMethod="RSA_SHA256"/>
+        </securities>
+        <errorHandlings>
+            <errorHandling name="demoErrorHandling"
+                           errorAsResponse="true"
+                           businessErrorNotifyProducer="false"
+                           businessErrorNotifyConsumer="false"
+                           deliveryFailureNotifyProducer="false"/>
+        </errorHandlings>
+        <agreements>
+            <agreement name="agreementEmpty" value="" type=""/>
+        </agreements>
+        <services>
+            <service name="testService1" value="bdx:noprocess" type="tc1"/>
+            <service name="testService2" value="bdx:noprocess" type="tc2"/>
+            <service name="testService3" value="bdx:noprocess" type="tc3"/>
+            <service name="noSecService" value="InternalTesting"/>
+        </services>
+        <actions>
+            <action name="tc1Action" value="TC1Leg1"/>
+            <action name="tc2Action" value="TC2Leg1"/>
+            <action name="tc3ActionLeg1" value="TC3Leg1"/>
+            <action name="tc3ActionLeg2" value="TC3Leg2"/>
+            <action name="noSecAction" value="NoSecurity"/>
+        </actions>
+        <as4>
+            <receptionAwareness name="receptionAwareness" retry="5;4;CONSTANT" duplicateDetection="true"/>
+            <reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
+            <reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
+        </as4>
+        <legConfigurations>
+            <legConfiguration name="pushTestcase1tc1Action"
+                              service="testService1"
+                              action="tc1Action"
+                              defaultMpc="defaultMpc"
+                              reliability="AS4Reliability"
+                              security="signOnly"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="false">
+            </legConfiguration>
+            <legConfiguration name="pushTestcase2tc2Action"
+                              service="testService2"
+                              action="tc2Action"
+                              defaultMpc="defaultMpc"
+                              reliability="AS4Reliability"
+                              security="signAndEncrypt"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="false">
+            </legConfiguration>
+            <legConfiguration name="pushTestcase3Leg1tc3ActionLeg1"
+                              service="testService3"
+                              action="tc3ActionLeg1"
+                              defaultMpc="defaultMpc"
+                              reliability="AS4Reliability"
+                              security="signAndEncrypt"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="false">
+            </legConfiguration>
+            <legConfiguration name="pushTestcase3Leg2tc3ActionLeg2"
+                              service="testService3"
+                              action="tc3ActionLeg2"
+                              defaultMpc="defaultMpc"
+                              reliability="AS4Reliability"
+                              security="signAndEncrypt"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="false">
+            </legConfiguration>
+            <legConfiguration name="pushNoSecnoSecAction"
+                              service="noSecService"
+                              action="noSecAction"
+                              defaultMpc="defaultMpc"
+                              reliability="noReliability"
+                              security="noSigNoEnc"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="false">
+            </legConfiguration>
+        </legConfigurations>
+        <process name="tc1Process"
+                 agreement="agreementEmpty"
+                 mep="oneway"
+                 binding="push"
+                 initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="domibus_de"/>
+                <initiatorParty name="ibmgw"/>
+                <initiatorParty name="flame"/>
+                <initiatorParty name="holodeck"/>
+                <initiatorParty name="axway"/>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="domibus_de"/>
+                <responderParty name="ibmgw"/>
+                <responderParty name="flame"/>
+                <responderParty name="holodeck"/>
+                <responderParty name="axway"/>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase1tc1Action"/>
+            </legs>
+        </process>
+        <process name="tc2Process"
+                 agreement="agreementEmpty"
+                 mep="oneway"
+                 binding="push"
+                 initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="domibus_de"/>
+                <initiatorParty name="ibmgw"/>
+                <initiatorParty name="flame"/>
+                <initiatorParty name="holodeck"/>
+                <initiatorParty name="axway"/>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="domibus_de"/>
+                <responderParty name="ibmgw"/>
+                <responderParty name="flame"/>
+                <responderParty name="holodeck"/>
+                <responderParty name="axway"/>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase2tc2Action"/>
+            </legs>
+        </process>
+        <process name="tc3Process"
+                 agreement="agreementEmpty"
+                 mep="twoway"
+                 binding="pushAndPush"
+                 initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="domibus_de"/>
+                <initiatorParty name="ibmgw"/>
+                <initiatorParty name="flame"/>
+                <initiatorParty name="holodeck"/>
+                <initiatorParty name="axway"/>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="domibus_de"/>
+                <responderParty name="ibmgw"/>
+                <responderParty name="flame"/>
+                <responderParty name="holodeck"/>
+                <responderParty name="axway"/>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase3Leg1tc3ActionLeg1"/>
+                <leg name="pushTestcase3Leg2tc3ActionLeg2"/>
+            </legs>
+        </process>
+        <process name="noSecProcess"
+                 agreement="agreementEmpty"
+                 mep="oneway"
+                 binding="push"
+                 initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushNoSecnoSecAction"/>
+            </legs>
+        </process>
+    </businessProcesses>
+</db:configuration>

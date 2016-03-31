@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xml:id="proxyconfig"
+         version="5.0"
+         xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd">
+    <title>Proxy Configuration</title>
+    <para>The Domibus gateway exposes a number of different services listed in
+        the table below. Configure your proxy server in
+        a way that only authorized clients can reach the services intended for
+        them (i.e. if you are using an Apache2
+        webserver as proxy use
+        <computeroutput>ProxyPass</computeroutput>
+        and
+        <computeroutput>Allow</computeroutput>
+        directives for the
+        configuration, see the
+        <link xlink:href="http://httpd.apache.org/docs/2.2/mod/mod_proxy.html">
+            Apache documentation</link>). The standard server distributed in the
+        tomcat-full package
+        listens on
+        <link xlink:href="http://localhost:8080/domibus">
+            $domibus.local.context
+        </link>
+        <warning>
+            <para>IF YOU DO NOT SECURE THE ACCESS TO THE ADMINISTRATIVE SERVICES
+                THE CONFIDENTIALITY AND INTEGRITY OF
+                YOUR DATA IS AT RISK!
+            </para>
+        </warning>
+
+        <table xml:id="exposedinterface_table" width="100%">
+            <title>Exposed interfaces</title>
+            <tgroup cols="3">
+
+                <colspec colname="c1"/>
+                <colspec colname="c2"/>
+                <colspec colname="c3"/>
+                <thead>
+                    <row>
+                        <entry>URL: $domibus.local.context</entry>
+                        <entry>Exposed to</entry>
+                        <entry>Description</entry>
+                    </row>
+                </thead>
+                <tbody>
+                    <row>
+                        <entry>/services/msh</entry>
+                        <entry>business partners</entry>
+                        <entry>This is the URL of your gateway endpoint.</entry>
+                    </row>
+                    <row>
+                        <entry>/services/backend</entry>
+                        <entry>backend application</entry>
+                        <entry>This is the URL of the backend webservice
+                            delivered with domibus out of the box. If you use a
+                            custom interface please make sure it is only exposed
+                            to your backend application.
+                        </entry>
+                    </row>
+                    <row>
+                        <entry>/services</entry>
+                        <entry>service overview</entry>
+                        <entry>This is the URL of an overview of all deployed
+                            services. For security reasons this should not be
+                            exposed to the public.
+                        </entry>
+                    </row>
+                    <row>
+                        <entry>/home</entry>
+                        <entry>internal
+                        </entry>
+                        <entry>This is the URL of the administrative
+                            dashboard(see<xref linkend="admin_gui"/>).
+                            Only authorized users/admins should have access to
+                            it.
+                        </entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+    </para>
+</section>

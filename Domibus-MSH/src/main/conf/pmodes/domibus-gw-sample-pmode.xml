@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<db:configuration xmlns:db="http://domibus.eu/configuration"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://domibus.eu/configuration file:/C:/development/git-repos/domibus/Domibus-MSH/domibus-configuration.xsd" party="domibus_gw">
+	<mpcs>
+		<mpc name="defaultMpc" 
+				qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+				enabled="true" 
+				default="true" 
+				retention_downloaded="0" 
+				retention_undownloaded="60"/>
+	</mpcs>
+	<businessProcesses>
+		<roles>
+			<role name="defaultInitiatorRole" 
+					value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
+			<role name="defaultResponderRole" 
+					value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
+		</roles>
+		<parties>
+			<partyIdTypes>
+				<partyIdType name="partyTypeEmpty" value=""/>
+			</partyIdTypes>
+						<party name="red_gw" 
+					endpoint="http://localhost:7001/domibus-weblogic/services/msh" 
+					allowChunking="false"
+>
+				<identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-red" partyIdType="partyTypeEmpty"/>
+			</party>
+			<party name="blue_gw" 
+					endpoint="http://localhost:8080/domibus/services/msh" 
+					allowChunking="false"
+>
+				<identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-blue" partyIdType="partyTypeEmpty"/>
+			</party>
+		</parties>
+		<meps>
+			<mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
+			<mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
+			<binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+			<binding name="pushAndPush" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
+		</meps>
+		<properties>
+			<property name="originalSenderProperty" 
+					key="originalSender" 
+					datatype="string" 
+					required="true"/>
+			<property name="finalRecipientProperty" 
+					key="finalRecipient" 
+					datatype="string" 
+					required="true"/>
+			<propertySet name="ecodexPropertySet">
+				<propertyRef property="finalRecipientProperty"/>
+				<propertyRef property="originalSenderProperty"/>
+			</propertySet>
+		</properties>				
+		<payloadProfiles>
+			<payload name="businessContentPayload"
+					cid="cid:payload" 
+					required="true"
+					mimeType="text/xml"/>
+			<payload name="businessContentAttachment"
+					cid="cid:attachment" 
+					required="false"
+					mimeType="application/octet-stream"/>
+			<payloadProfile name="MessageProfile" 
+					maxSize="40894464">
+				<attachment name="businessContentPayload"/>
+				<attachment name="businessContentAttachment"/>
+			</payloadProfile>
+		</payloadProfiles>
+		<securities>
+			<security name="eSens"
+					policy="esens_policy.xml"
+					signatureMethod="RSA_SHA256" />	
+			<security name="noSigNoEnc"
+					policy="doNothingPolicy.xml"
+					signatureMethod="RSA_SHA256" />	
+		</securities>
+		<errorHandlings>
+			<errorHandling name="demoErrorHandling" 
+					errorAsResponse="true" 
+					businessErrorNotifyProducer="false"
+					businessErrorNotifyConsumer="false" 
+					deliveryFailureNotifyProducer="false"/>
+		</errorHandlings>
+		<agreements>
+			<agreement name="agreementEmpty" value="" type=""/>
+		</agreements>
+		<services>
+			<service name="testService1" value="bdx:noprocess" type="tc1"/>
+		</services>
+		<actions>
+			<action name="tc1Action" value="TC1Leg1"/>
+		</actions>
+		<as4>
+			<receptionAwareness name="receptionAwareness" retry="5;4;CONSTANT" duplicateDetection="true"/>
+			<reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
+			<reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
+		</as4>
+		<legConfigurations>
+			<legConfiguration name="pushTestcase1tc1Action" 
+					service="testService1" 
+					action="tc1Action" 
+					defaultMpc="defaultMpc" 
+					reliability="AS4Reliability" 
+					security="eSens" 
+					receptionAwareness="receptionAwareness" 
+					propertySet="ecodexPropertySet"
+					payloadProfile="MessageProfile"
+					errorHandling="demoErrorHandling"
+					compressPayloads="true">
+					</legConfiguration>
+		</legConfigurations>
+<process name="tc1Process" 
+		agreement="agreementEmpty" 
+		mep="oneway" 
+		binding="push" 
+		initiatorRole="defaultInitiatorRole" 
+		responderRole="defaultResponderRole">
+	<initiatorParties>
+		<initiatorParty name="blue_gw"/>
+		<initiatorParty name="red_gw"/>
+	</initiatorParties>
+	<responderParties>
+		<responderParty name="blue_gw"/>
+		<responderParty name="red_gw"/>
+	</responderParties>
+	<legs>
+		<leg name="pushTestcase1tc1Action"/>
+	</legs>
+</process>
+	</businessProcesses>
+</db:configuration>

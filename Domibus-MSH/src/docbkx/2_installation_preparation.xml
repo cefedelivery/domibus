@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<chapter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xml:id="installation_preparation"
+         version="5.0"
+         xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd">
+    <title>Installation preperation</title>
+    <para>This chapter describes the
+        <indexterm>
+            <primary>system requirements</primary>
+        </indexterm>
+        and required
+        <indexterm>
+            <primary>network configuration</primary>
+        </indexterm>
+        as well as how to obtain the software and what artifact to use.
+    </para>
+
+    <xi:include href="2_1_system_requirements.xml"/>
+    <xi:include href="2_2_artifact_description.xml"/>
+    <xi:include href="2_3_obtaining.xml"/>
+    <xi:include href="2_4_architectural_overview.xml"/>
+</chapter>

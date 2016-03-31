@@ -1,0 +1,2474 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<!--
+         ************* 
+         This PModes file is for the consumer (partyId,role): 
+         (AT, GW)
+         
+         Service: EPO 
+         
+         Creation date/time: 2013-12-05T16:13:44.299+01:00 
+         ************* 
+      -->
+<tns:PModes xmlns:tns="http://www.e-codex.eu/holodeck/pmodes/0.1"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.e-codex.eu/holodeck/pmodes/0.1 ../../xsd/pmodes.xsd"><!--
+         ************* 
+         Producers. A producer represents an entity
+         (person, application, corporation, etc...) that produces User Messages. A User Message is
+         simply a message that contains payload data, and therefore, it is intended to be consumed
+         by some entity that is beyond the MSH (i.e. sitting behind the MSH). A User Message always
+         contains in its SOAP Header the element <eb:UserMessage>. A Producer is
+         OPTIONAL. This means that the PMode could be used by many types of senders. When a sender
+         uses this PMode to send out a message, the sender must therefore tell the MSH about its
+         <eb:From> party. This is a way to share the same PMode with multiple
+         different senders. If the PMode has to be used by a single specific sender, a
+         <Producer> element MUST be declared; each element <Leg> must
+         point to a <Producer> element. 
+         ************* 
+      -->
+    <tns:Producer name="DE-GW">
+        <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">DE</tns:PartyId>
+        <tns:Role>GW</tns:Role>
+    </tns:Producer>
+    <tns:Producer name="ES-GW">
+        <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">ES</tns:PartyId>
+        <tns:Role>GW</tns:Role>
+    </tns:Producer>
+    <tns:Producer name="EE-GW">
+        <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">EE</tns:PartyId>
+        <tns:Role>GW</tns:Role>
+    </tns:Producer>
+    <tns:Producer name="IT-GW">
+        <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">IT</tns:PartyId>
+        <tns:Role>GW</tns:Role>
+    </tns:Producer>
+    <tns:Producer name="GR-GW">
+        <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">GR</tns:PartyId>
+        <tns:Role>GW</tns:Role>
+    </tns:Producer>
+    <tns:Producer name="NL-GW">
+        <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">NL</tns:PartyId>
+        <tns:Role>GW</tns:Role>
+    </tns:Producer>
+    <tns:Producer name="AT-GW">
+        <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">AT</tns:PartyId>
+        <tns:Role>GW</tns:Role>
+    </tns:Producer>
+    <!--
+          *************
+          UserServices. A UserService represents the
+          destination where the User Message will go. In the ebXML specification, this is represented
+          by the xml elements <eb:To>, <eb:CollaborationInfo>,
+          <eb:PayloadInfo> and <eb:MessageProperties>.
+          *************
+       -->
+    <tns:UserService name="EPO_Form_A_AT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">AT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_A</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_B_AT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">AT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_B</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_C_AT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">AT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_C</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_D_AT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">AT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_D</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_E_AT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">AT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_E</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_F_AT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">AT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_F</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_G_AT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">AT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_G</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_SubmissionAcceptanceRejection_AT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">AT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>SubmissionAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RelayREMMDAcceptanceRejection_AT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">AT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RelayREMMDAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_DeliveryNonDeliveryToRecipient_AT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">AT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>DeliveryNonDeliveryToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RetrievalNonRetrievalToRecipient_AT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">AT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RetrievalNonRetrievalToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_A_DE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">DE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_A</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_A_ES_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">ES</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_A</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_A_EE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">EE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_A</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_A_IT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">IT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_A</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_A_GR_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">GR</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_A</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_A_NL_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">NL</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_A</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_B_DE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">DE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_B</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_B_ES_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">ES</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_B</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_B_EE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">EE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_B</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_B_IT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">IT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_B</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_B_GR_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">GR</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_B</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_B_NL_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">NL</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_B</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_C_DE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">DE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_C</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_C_ES_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">ES</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_C</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_C_EE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">EE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_C</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_C_IT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">IT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_C</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_C_GR_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">GR</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_C</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_C_NL_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">NL</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_C</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_D_DE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">DE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_D</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_D_ES_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">ES</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_D</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_D_EE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">EE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_D</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_D_IT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">IT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_D</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_D_GR_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">GR</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_D</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_D_NL_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">NL</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_D</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_E_DE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">DE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_E</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_E_ES_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">ES</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_E</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_E_EE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">EE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_E</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_E_IT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">IT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_E</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_E_GR_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">GR</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_E</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_E_NL_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">NL</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_E</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_F_DE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">DE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_F</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_F_ES_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">ES</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_F</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_F_EE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">EE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_F</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_F_IT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">IT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_F</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_F_GR_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">GR</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_F</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_F_NL_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">NL</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_F</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_G_DE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">DE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_G</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_G_ES_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">ES</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_G</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_G_EE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">EE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_G</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_G_IT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">IT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_G</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_G_GR_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">GR</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_G</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_Form_G_NL_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">NL</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>Form_G</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_SubmissionAcceptanceRejection_DE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">DE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>SubmissionAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_SubmissionAcceptanceRejection_ES_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">ES</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>SubmissionAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_SubmissionAcceptanceRejection_EE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">EE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>SubmissionAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_SubmissionAcceptanceRejection_IT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">IT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>SubmissionAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_SubmissionAcceptanceRejection_GR_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">GR</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>SubmissionAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_SubmissionAcceptanceRejection_NL_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">NL</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>SubmissionAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RelayREMMDAcceptanceRejection_DE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">DE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RelayREMMDAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RelayREMMDAcceptanceRejection_ES_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">ES</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RelayREMMDAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RelayREMMDAcceptanceRejection_EE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">EE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RelayREMMDAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RelayREMMDAcceptanceRejection_IT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">IT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RelayREMMDAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RelayREMMDAcceptanceRejection_GR_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">GR</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RelayREMMDAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RelayREMMDAcceptanceRejection_NL_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">NL</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RelayREMMDAcceptanceRejection</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_DeliveryNonDeliveryToRecipient_DE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">DE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>DeliveryNonDeliveryToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_DeliveryNonDeliveryToRecipient_ES_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">ES</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>DeliveryNonDeliveryToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_DeliveryNonDeliveryToRecipient_EE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">EE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>DeliveryNonDeliveryToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_DeliveryNonDeliveryToRecipient_IT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">IT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>DeliveryNonDeliveryToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_DeliveryNonDeliveryToRecipient_GR_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">GR</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>DeliveryNonDeliveryToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_DeliveryNonDeliveryToRecipient_NL_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">NL</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>DeliveryNonDeliveryToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RetrievalNonRetrievalToRecipient_DE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">DE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RetrievalNonRetrievalToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RetrievalNonRetrievalToRecipient_ES_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">ES</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RetrievalNonRetrievalToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RetrievalNonRetrievalToRecipient_EE_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">EE</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RetrievalNonRetrievalToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RetrievalNonRetrievalToRecipient_IT_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">IT</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RetrievalNonRetrievalToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RetrievalNonRetrievalToRecipient_GR_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">GR</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RetrievalNonRetrievalToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <tns:UserService name="EPO_RetrievalNonRetrievalToRecipient_NL_GW">
+        <tns:ToPartyInfo>
+            <tns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:iso3166-1">NL</tns:PartyId>
+            <tns:Role>GW</tns:Role>
+        </tns:ToPartyInfo>
+        <tns:CollaborationInfo>
+            <tns:Service>EPO</tns:Service>
+            <tns:Action>RetrievalNonRetrievalToRecipient</tns:Action>
+        </tns:CollaborationInfo>
+    </tns:UserService>
+    <!--
+          *************
+          Bindings. A Binding contains information mostly
+          related to transport, such as the URL address of the destination, the soap version, the
+          soap action, and the MEP (Message Exchange Pattern) to use. The Binding element also
+          contains detailed information of each leg of the MEP being used.
+          *************
+       -->
+    <tns:Binding name="DE_AT_EPO_Form_A">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="DE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_A_AT_GW"
+                     security="sign-body-header_DE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="ES_AT_EPO_Form_A">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="ES-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_A_AT_GW"
+                     security="sign-body-header_ES_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="EE_AT_EPO_Form_A">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="EE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_A_AT_GW"
+                     security="sign-body-header_EE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="IT_AT_EPO_Form_A">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="IT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_A_AT_GW"
+                     security="sign-body-header_IT_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="GR_AT_EPO_Form_A">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="GR-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_A_AT_GW"
+                     security="sign-body-header_GR_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="NL_AT_EPO_Form_A">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="NL-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_A_AT_GW"
+                     security="sign-body-header_NL_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_DE_EPO_Form_A">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_A_DE_GW"
+                     security="sign-body-header_AT_DE">
+                <tns:Endpoint address="https://test.edelivery.it.nrw.de/gateway" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_ES_EPO_Form_A">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_A_ES_GW"
+                     security="sign-body-header_AT_ES">
+                <tns:Endpoint address="https://int-ecodex-sp-gw.justicia.es/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_EE_EPO_Form_A">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_A_EE_GW"
+                     security="sign-body-header_AT_EE">
+                <tns:Endpoint address="https://ecodex-gw.just.ee:4444/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_IT_EPO_Form_A">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_A_IT_GW"
+                     security="sign-body-header_AT_IT">
+                <tns:Endpoint address="https://217.133.94.62:8444/holodeck/services/msh" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_GR_EPO_Form_A">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_A_GR_GW"
+                     security="sign-body-header_AT_GR">
+                <tns:Endpoint address="https://ecodex.gen.auth.gr:8443/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_NL_EPO_Form_A">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_A_NL_GW"
+                     security="sign-body-header_AT_NL">
+                <tns:Endpoint address="https://jubes.minvenj.nl:4443" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="DE_AT_EPO_Form_B">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="DE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_B_AT_GW"
+                     security="sign-body-header_DE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="ES_AT_EPO_Form_B">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="ES-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_B_AT_GW"
+                     security="sign-body-header_ES_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="EE_AT_EPO_Form_B">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="EE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_B_AT_GW"
+                     security="sign-body-header_EE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="IT_AT_EPO_Form_B">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="IT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_B_AT_GW"
+                     security="sign-body-header_IT_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="GR_AT_EPO_Form_B">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="GR-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_B_AT_GW"
+                     security="sign-body-header_GR_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="NL_AT_EPO_Form_B">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="NL-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_B_AT_GW"
+                     security="sign-body-header_NL_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_DE_EPO_Form_B">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_B_DE_GW"
+                     security="sign-body-header_AT_DE">
+                <tns:Endpoint address="https://test.edelivery.it.nrw.de/gateway" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_ES_EPO_Form_B">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_B_ES_GW"
+                     security="sign-body-header_AT_ES">
+                <tns:Endpoint address="https://int-ecodex-sp-gw.justicia.es/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_EE_EPO_Form_B">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_B_EE_GW"
+                     security="sign-body-header_AT_EE">
+                <tns:Endpoint address="https://ecodex-gw.just.ee:4444/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_IT_EPO_Form_B">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_B_IT_GW"
+                     security="sign-body-header_AT_IT">
+                <tns:Endpoint address="https://217.133.94.62:8444/holodeck/services/msh" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_GR_EPO_Form_B">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_B_GR_GW"
+                     security="sign-body-header_AT_GR">
+                <tns:Endpoint address="https://ecodex.gen.auth.gr:8443/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_NL_EPO_Form_B">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_B_NL_GW"
+                     security="sign-body-header_AT_NL">
+                <tns:Endpoint address="https://jubes.minvenj.nl:4443" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="DE_AT_EPO_Form_C">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="DE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_C_AT_GW"
+                     security="sign-body-header_DE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="ES_AT_EPO_Form_C">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="ES-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_C_AT_GW"
+                     security="sign-body-header_ES_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="EE_AT_EPO_Form_C">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="EE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_C_AT_GW"
+                     security="sign-body-header_EE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="IT_AT_EPO_Form_C">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="IT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_C_AT_GW"
+                     security="sign-body-header_IT_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="GR_AT_EPO_Form_C">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="GR-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_C_AT_GW"
+                     security="sign-body-header_GR_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="NL_AT_EPO_Form_C">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="NL-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_C_AT_GW"
+                     security="sign-body-header_NL_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_DE_EPO_Form_C">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_C_DE_GW"
+                     security="sign-body-header_AT_DE">
+                <tns:Endpoint address="https://test.edelivery.it.nrw.de/gateway" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_ES_EPO_Form_C">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_C_ES_GW"
+                     security="sign-body-header_AT_ES">
+                <tns:Endpoint address="https://int-ecodex-sp-gw.justicia.es/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_EE_EPO_Form_C">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_C_EE_GW"
+                     security="sign-body-header_AT_EE">
+                <tns:Endpoint address="https://ecodex-gw.just.ee:4444/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_IT_EPO_Form_C">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_C_IT_GW"
+                     security="sign-body-header_AT_IT">
+                <tns:Endpoint address="https://217.133.94.62:8444/holodeck/services/msh" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_GR_EPO_Form_C">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_C_GR_GW"
+                     security="sign-body-header_AT_GR">
+                <tns:Endpoint address="https://ecodex.gen.auth.gr:8443/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_NL_EPO_Form_C">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_C_NL_GW"
+                     security="sign-body-header_AT_NL">
+                <tns:Endpoint address="https://jubes.minvenj.nl:4443" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="DE_AT_EPO_Form_D">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="DE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_D_AT_GW"
+                     security="sign-body-header_DE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="ES_AT_EPO_Form_D">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="ES-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_D_AT_GW"
+                     security="sign-body-header_ES_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="EE_AT_EPO_Form_D">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="EE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_D_AT_GW"
+                     security="sign-body-header_EE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="IT_AT_EPO_Form_D">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="IT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_D_AT_GW"
+                     security="sign-body-header_IT_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="GR_AT_EPO_Form_D">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="GR-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_D_AT_GW"
+                     security="sign-body-header_GR_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="NL_AT_EPO_Form_D">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="NL-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_D_AT_GW"
+                     security="sign-body-header_NL_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_DE_EPO_Form_D">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_D_DE_GW"
+                     security="sign-body-header_AT_DE">
+                <tns:Endpoint address="https://test.edelivery.it.nrw.de/gateway" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_ES_EPO_Form_D">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_D_ES_GW"
+                     security="sign-body-header_AT_ES">
+                <tns:Endpoint address="https://int-ecodex-sp-gw.justicia.es/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_EE_EPO_Form_D">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_D_EE_GW"
+                     security="sign-body-header_AT_EE">
+                <tns:Endpoint address="https://ecodex-gw.just.ee:4444/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_IT_EPO_Form_D">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_D_IT_GW"
+                     security="sign-body-header_AT_IT">
+                <tns:Endpoint address="https://217.133.94.62:8444/holodeck/services/msh" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_GR_EPO_Form_D">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_D_GR_GW"
+                     security="sign-body-header_AT_GR">
+                <tns:Endpoint address="https://ecodex.gen.auth.gr:8443/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_NL_EPO_Form_D">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_D_NL_GW"
+                     security="sign-body-header_AT_NL">
+                <tns:Endpoint address="https://jubes.minvenj.nl:4443" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="DE_AT_EPO_Form_E">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="DE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_E_AT_GW"
+                     security="sign-body-header_DE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="ES_AT_EPO_Form_E">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="ES-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_E_AT_GW"
+                     security="sign-body-header_ES_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="EE_AT_EPO_Form_E">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="EE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_E_AT_GW"
+                     security="sign-body-header_EE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="IT_AT_EPO_Form_E">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="IT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_E_AT_GW"
+                     security="sign-body-header_IT_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="GR_AT_EPO_Form_E">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="GR-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_E_AT_GW"
+                     security="sign-body-header_GR_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="NL_AT_EPO_Form_E">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="NL-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_E_AT_GW"
+                     security="sign-body-header_NL_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_DE_EPO_Form_E">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_E_DE_GW"
+                     security="sign-body-header_AT_DE">
+                <tns:Endpoint address="https://test.edelivery.it.nrw.de/gateway" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_ES_EPO_Form_E">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_E_ES_GW"
+                     security="sign-body-header_AT_ES">
+                <tns:Endpoint address="https://int-ecodex-sp-gw.justicia.es/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_EE_EPO_Form_E">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_E_EE_GW"
+                     security="sign-body-header_AT_EE">
+                <tns:Endpoint address="https://ecodex-gw.just.ee:4444/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_IT_EPO_Form_E">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_E_IT_GW"
+                     security="sign-body-header_AT_IT">
+                <tns:Endpoint address="https://217.133.94.62:8444/holodeck/services/msh" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_GR_EPO_Form_E">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_E_GR_GW"
+                     security="sign-body-header_AT_GR">
+                <tns:Endpoint address="https://ecodex.gen.auth.gr:8443/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_NL_EPO_Form_E">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_E_NL_GW"
+                     security="sign-body-header_AT_NL">
+                <tns:Endpoint address="https://jubes.minvenj.nl:4443" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="DE_AT_EPO_Form_F">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="DE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_F_AT_GW"
+                     security="sign-body-header_DE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="ES_AT_EPO_Form_F">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="ES-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_F_AT_GW"
+                     security="sign-body-header_ES_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="EE_AT_EPO_Form_F">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="EE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_F_AT_GW"
+                     security="sign-body-header_EE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="IT_AT_EPO_Form_F">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="IT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_F_AT_GW"
+                     security="sign-body-header_IT_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="GR_AT_EPO_Form_F">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="GR-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_F_AT_GW"
+                     security="sign-body-header_GR_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="NL_AT_EPO_Form_F">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="NL-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_F_AT_GW"
+                     security="sign-body-header_NL_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_DE_EPO_Form_F">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_F_DE_GW"
+                     security="sign-body-header_AT_DE">
+                <tns:Endpoint address="https://test.edelivery.it.nrw.de/gateway" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_ES_EPO_Form_F">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_F_ES_GW"
+                     security="sign-body-header_AT_ES">
+                <tns:Endpoint address="https://int-ecodex-sp-gw.justicia.es/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_EE_EPO_Form_F">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_F_EE_GW"
+                     security="sign-body-header_AT_EE">
+                <tns:Endpoint address="https://ecodex-gw.just.ee:4444/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_IT_EPO_Form_F">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_F_IT_GW"
+                     security="sign-body-header_AT_IT">
+                <tns:Endpoint address="https://217.133.94.62:8444/holodeck/services/msh" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_GR_EPO_Form_F">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_F_GR_GW"
+                     security="sign-body-header_AT_GR">
+                <tns:Endpoint address="https://ecodex.gen.auth.gr:8443/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_NL_EPO_Form_F">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_F_NL_GW"
+                     security="sign-body-header_AT_NL">
+                <tns:Endpoint address="https://jubes.minvenj.nl:4443" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="DE_AT_EPO_Form_G">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="DE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_G_AT_GW"
+                     security="sign-body-header_DE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="ES_AT_EPO_Form_G">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="ES-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_G_AT_GW"
+                     security="sign-body-header_ES_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="EE_AT_EPO_Form_G">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="EE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_G_AT_GW"
+                     security="sign-body-header_EE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="IT_AT_EPO_Form_G">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="IT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_G_AT_GW"
+                     security="sign-body-header_IT_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="GR_AT_EPO_Form_G">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="GR-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_G_AT_GW"
+                     security="sign-body-header_GR_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="NL_AT_EPO_Form_G">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="NL-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_G_AT_GW"
+                     security="sign-body-header_NL_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_DE_EPO_Form_G">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_G_DE_GW"
+                     security="sign-body-header_AT_DE">
+                <tns:Endpoint address="https://test.edelivery.it.nrw.de/gateway" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_ES_EPO_Form_G">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_G_ES_GW"
+                     security="sign-body-header_AT_ES">
+                <tns:Endpoint address="https://int-ecodex-sp-gw.justicia.es/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_EE_EPO_Form_G">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_G_EE_GW"
+                     security="sign-body-header_AT_EE">
+                <tns:Endpoint address="https://ecodex-gw.just.ee:4444/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_IT_EPO_Form_G">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_G_IT_GW"
+                     security="sign-body-header_AT_IT">
+                <tns:Endpoint address="https://217.133.94.62:8444/holodeck/services/msh" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_GR_EPO_Form_G">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_G_GR_GW"
+                     security="sign-body-header_AT_GR">
+                <tns:Endpoint address="https://ecodex.gen.auth.gr:8443/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_NL_EPO_Form_G">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_Form_G_NL_GW"
+                     security="sign-body-header_AT_NL">
+                <tns:Endpoint address="https://jubes.minvenj.nl:4443" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="DE_AT_EPO_SubmissionAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="DE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_SubmissionAcceptanceRejection_AT_GW"
+                     security="sign-body-header_DE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="ES_AT_EPO_SubmissionAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="ES-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_SubmissionAcceptanceRejection_AT_GW"
+                     security="sign-body-header_ES_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="EE_AT_EPO_SubmissionAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="EE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_SubmissionAcceptanceRejection_AT_GW"
+                     security="sign-body-header_EE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="IT_AT_EPO_SubmissionAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="IT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_SubmissionAcceptanceRejection_AT_GW"
+                     security="sign-body-header_IT_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="GR_AT_EPO_SubmissionAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="GR-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_SubmissionAcceptanceRejection_AT_GW"
+                     security="sign-body-header_GR_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="NL_AT_EPO_SubmissionAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="NL-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_SubmissionAcceptanceRejection_AT_GW"
+                     security="sign-body-header_NL_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_DE_EPO_SubmissionAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_SubmissionAcceptanceRejection_DE_GW"
+                     security="sign-body-header_AT_DE">
+                <tns:Endpoint address="https://test.edelivery.it.nrw.de/gateway" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_ES_EPO_SubmissionAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_SubmissionAcceptanceRejection_ES_GW"
+                     security="sign-body-header_AT_ES">
+                <tns:Endpoint address="https://int-ecodex-sp-gw.justicia.es/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_EE_EPO_SubmissionAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_SubmissionAcceptanceRejection_EE_GW"
+                     security="sign-body-header_AT_EE">
+                <tns:Endpoint address="https://ecodex-gw.just.ee:4444/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_IT_EPO_SubmissionAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_SubmissionAcceptanceRejection_IT_GW"
+                     security="sign-body-header_AT_IT">
+                <tns:Endpoint address="https://217.133.94.62:8444/holodeck/services/msh" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_GR_EPO_SubmissionAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_SubmissionAcceptanceRejection_GR_GW"
+                     security="sign-body-header_AT_GR">
+                <tns:Endpoint address="https://ecodex.gen.auth.gr:8443/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_NL_EPO_SubmissionAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_SubmissionAcceptanceRejection_NL_GW"
+                     security="sign-body-header_AT_NL">
+                <tns:Endpoint address="https://jubes.minvenj.nl:4443" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="DE_AT_EPO_RelayREMMDAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="DE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RelayREMMDAcceptanceRejection_AT_GW"
+                     security="sign-body-header_DE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="ES_AT_EPO_RelayREMMDAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="ES-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RelayREMMDAcceptanceRejection_AT_GW"
+                     security="sign-body-header_ES_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="EE_AT_EPO_RelayREMMDAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="EE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RelayREMMDAcceptanceRejection_AT_GW"
+                     security="sign-body-header_EE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="IT_AT_EPO_RelayREMMDAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="IT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RelayREMMDAcceptanceRejection_AT_GW"
+                     security="sign-body-header_IT_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="GR_AT_EPO_RelayREMMDAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="GR-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RelayREMMDAcceptanceRejection_AT_GW"
+                     security="sign-body-header_GR_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="NL_AT_EPO_RelayREMMDAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="NL-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RelayREMMDAcceptanceRejection_AT_GW"
+                     security="sign-body-header_NL_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_DE_EPO_RelayREMMDAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RelayREMMDAcceptanceRejection_DE_GW"
+                     security="sign-body-header_AT_DE">
+                <tns:Endpoint address="https://test.edelivery.it.nrw.de/gateway" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_ES_EPO_RelayREMMDAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RelayREMMDAcceptanceRejection_ES_GW"
+                     security="sign-body-header_AT_ES">
+                <tns:Endpoint address="https://int-ecodex-sp-gw.justicia.es/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_EE_EPO_RelayREMMDAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RelayREMMDAcceptanceRejection_EE_GW"
+                     security="sign-body-header_AT_EE">
+                <tns:Endpoint address="https://ecodex-gw.just.ee:4444/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_IT_EPO_RelayREMMDAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RelayREMMDAcceptanceRejection_IT_GW"
+                     security="sign-body-header_AT_IT">
+                <tns:Endpoint address="https://217.133.94.62:8444/holodeck/services/msh" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_GR_EPO_RelayREMMDAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RelayREMMDAcceptanceRejection_GR_GW"
+                     security="sign-body-header_AT_GR">
+                <tns:Endpoint address="https://ecodex.gen.auth.gr:8443/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_NL_EPO_RelayREMMDAcceptanceRejection">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RelayREMMDAcceptanceRejection_NL_GW"
+                     security="sign-body-header_AT_NL">
+                <tns:Endpoint address="https://jubes.minvenj.nl:4443" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="DE_AT_EPO_DeliveryNonDeliveryToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="DE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_DeliveryNonDeliveryToRecipient_AT_GW"
+                     security="sign-body-header_DE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="ES_AT_EPO_DeliveryNonDeliveryToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="ES-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_DeliveryNonDeliveryToRecipient_AT_GW"
+                     security="sign-body-header_ES_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="EE_AT_EPO_DeliveryNonDeliveryToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="EE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_DeliveryNonDeliveryToRecipient_AT_GW"
+                     security="sign-body-header_EE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="IT_AT_EPO_DeliveryNonDeliveryToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="IT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_DeliveryNonDeliveryToRecipient_AT_GW"
+                     security="sign-body-header_IT_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="GR_AT_EPO_DeliveryNonDeliveryToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="GR-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_DeliveryNonDeliveryToRecipient_AT_GW"
+                     security="sign-body-header_GR_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="NL_AT_EPO_DeliveryNonDeliveryToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="NL-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_DeliveryNonDeliveryToRecipient_AT_GW"
+                     security="sign-body-header_NL_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_DE_EPO_DeliveryNonDeliveryToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_DeliveryNonDeliveryToRecipient_DE_GW"
+                     security="sign-body-header_AT_DE">
+                <tns:Endpoint address="https://test.edelivery.it.nrw.de/gateway" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_ES_EPO_DeliveryNonDeliveryToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_DeliveryNonDeliveryToRecipient_ES_GW"
+                     security="sign-body-header_AT_ES">
+                <tns:Endpoint address="https://int-ecodex-sp-gw.justicia.es/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_EE_EPO_DeliveryNonDeliveryToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_DeliveryNonDeliveryToRecipient_EE_GW"
+                     security="sign-body-header_AT_EE">
+                <tns:Endpoint address="https://ecodex-gw.just.ee:4444/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_IT_EPO_DeliveryNonDeliveryToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_DeliveryNonDeliveryToRecipient_IT_GW"
+                     security="sign-body-header_AT_IT">
+                <tns:Endpoint address="https://217.133.94.62:8444/holodeck/services/msh" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_GR_EPO_DeliveryNonDeliveryToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_DeliveryNonDeliveryToRecipient_GR_GW"
+                     security="sign-body-header_AT_GR">
+                <tns:Endpoint address="https://ecodex.gen.auth.gr:8443/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_NL_EPO_DeliveryNonDeliveryToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_DeliveryNonDeliveryToRecipient_NL_GW"
+                     security="sign-body-header_AT_NL">
+                <tns:Endpoint address="https://jubes.minvenj.nl:4443" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="DE_AT_EPO_RetrievalNonRetrievalToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="DE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RetrievalNonRetrievalToRecipient_AT_GW"
+                     security="sign-body-header_DE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="ES_AT_EPO_RetrievalNonRetrievalToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="ES-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RetrievalNonRetrievalToRecipient_AT_GW"
+                     security="sign-body-header_ES_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="EE_AT_EPO_RetrievalNonRetrievalToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="EE-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RetrievalNonRetrievalToRecipient_AT_GW"
+                     security="sign-body-header_EE_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="IT_AT_EPO_RetrievalNonRetrievalToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="IT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RetrievalNonRetrievalToRecipient_AT_GW"
+                     security="sign-body-header_IT_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="GR_AT_EPO_RetrievalNonRetrievalToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="GR-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RetrievalNonRetrievalToRecipient_AT_GW"
+                     security="sign-body-header_GR_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="NL_AT_EPO_RetrievalNonRetrievalToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="NL-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RetrievalNonRetrievalToRecipient_AT_GW"
+                     security="sign-body-header_NL_AT">
+                <tns:Endpoint address="https://eCodex.justiz.gv.at:9091/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_DE_EPO_RetrievalNonRetrievalToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RetrievalNonRetrievalToRecipient_DE_GW"
+                     security="sign-body-header_AT_DE">
+                <tns:Endpoint address="https://test.edelivery.it.nrw.de/gateway" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_ES_EPO_RetrievalNonRetrievalToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RetrievalNonRetrievalToRecipient_ES_GW"
+                     security="sign-body-header_AT_ES">
+                <tns:Endpoint address="https://int-ecodex-sp-gw.justicia.es/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_EE_EPO_RetrievalNonRetrievalToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RetrievalNonRetrievalToRecipient_EE_GW"
+                     security="sign-body-header_AT_EE">
+                <tns:Endpoint address="https://ecodex-gw.just.ee:4444/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_IT_EPO_RetrievalNonRetrievalToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RetrievalNonRetrievalToRecipient_IT_GW"
+                     security="sign-body-header_AT_IT">
+                <tns:Endpoint address="https://217.133.94.62:8444/holodeck/services/msh" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_GR_EPO_RetrievalNonRetrievalToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RetrievalNonRetrievalToRecipient_GR_GW"
+                     security="sign-body-header_AT_GR">
+                <tns:Endpoint address="https://ecodex.gen.auth.gr:8443/holodeck/services/msh"
+                              soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <tns:Binding name="AT_NL_EPO_RetrievalNonRetrievalToRecipient">
+        <tns:MEP name="One-Way/Push">
+            <tns:Leg number="1" producer="AT-GW"
+                     mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+                     userService="EPO_RetrievalNonRetrievalToRecipient_NL_GW"
+                     security="sign-body-header_AT_NL">
+                <tns:Endpoint address="https://jubes.minvenj.nl:4443" soapVersion="1.2"/>
+            </tns:Leg>
+        </tns:MEP>
+    </tns:Binding>
+    <!--
+          *************
+          PModes. A PMode (short for Processing Mode) is a
+          concept introduced in the ebMS 3 core specifiction to deal with agreements. A Processing
+          Mode always has one single Binding.
+          *************
+       -->
+    <tns:PMode name="DE_AT_EPO_Form_A" binding="DE_AT_EPO_Form_A"/>
+    <tns:PMode name="ES_AT_EPO_Form_A" binding="ES_AT_EPO_Form_A"/>
+    <tns:PMode name="EE_AT_EPO_Form_A" binding="EE_AT_EPO_Form_A"/>
+    <tns:PMode name="IT_AT_EPO_Form_A" binding="IT_AT_EPO_Form_A"/>
+    <tns:PMode name="GR_AT_EPO_Form_A" binding="GR_AT_EPO_Form_A"/>
+    <tns:PMode name="NL_AT_EPO_Form_A" binding="NL_AT_EPO_Form_A"/>
+    <tns:PMode name="AT_DE_EPO_Form_A" binding="AT_DE_EPO_Form_A"/>
+    <tns:PMode name="AT_ES_EPO_Form_A" binding="AT_ES_EPO_Form_A"/>
+    <tns:PMode name="AT_EE_EPO_Form_A" binding="AT_EE_EPO_Form_A"/>
+    <tns:PMode name="AT_IT_EPO_Form_A" binding="AT_IT_EPO_Form_A"/>
+    <tns:PMode name="AT_GR_EPO_Form_A" binding="AT_GR_EPO_Form_A"/>
+    <tns:PMode name="AT_NL_EPO_Form_A" binding="AT_NL_EPO_Form_A"/>
+    <tns:PMode name="DE_AT_EPO_Form_B" binding="DE_AT_EPO_Form_B"/>
+    <tns:PMode name="ES_AT_EPO_Form_B" binding="ES_AT_EPO_Form_B"/>
+    <tns:PMode name="EE_AT_EPO_Form_B" binding="EE_AT_EPO_Form_B"/>
+    <tns:PMode name="IT_AT_EPO_Form_B" binding="IT_AT_EPO_Form_B"/>
+    <tns:PMode name="GR_AT_EPO_Form_B" binding="GR_AT_EPO_Form_B"/>
+    <tns:PMode name="NL_AT_EPO_Form_B" binding="NL_AT_EPO_Form_B"/>
+    <tns:PMode name="AT_DE_EPO_Form_B" binding="AT_DE_EPO_Form_B"/>
+    <tns:PMode name="AT_ES_EPO_Form_B" binding="AT_ES_EPO_Form_B"/>
+    <tns:PMode name="AT_EE_EPO_Form_B" binding="AT_EE_EPO_Form_B"/>
+    <tns:PMode name="AT_IT_EPO_Form_B" binding="AT_IT_EPO_Form_B"/>
+    <tns:PMode name="AT_GR_EPO_Form_B" binding="AT_GR_EPO_Form_B"/>
+    <tns:PMode name="AT_NL_EPO_Form_B" binding="AT_NL_EPO_Form_B"/>
+    <tns:PMode name="DE_AT_EPO_Form_C" binding="DE_AT_EPO_Form_C"/>
+    <tns:PMode name="ES_AT_EPO_Form_C" binding="ES_AT_EPO_Form_C"/>
+    <tns:PMode name="EE_AT_EPO_Form_C" binding="EE_AT_EPO_Form_C"/>
+    <tns:PMode name="IT_AT_EPO_Form_C" binding="IT_AT_EPO_Form_C"/>
+    <tns:PMode name="GR_AT_EPO_Form_C" binding="GR_AT_EPO_Form_C"/>
+    <tns:PMode name="NL_AT_EPO_Form_C" binding="NL_AT_EPO_Form_C"/>
+    <tns:PMode name="AT_DE_EPO_Form_C" binding="AT_DE_EPO_Form_C"/>
+    <tns:PMode name="AT_ES_EPO_Form_C" binding="AT_ES_EPO_Form_C"/>
+    <tns:PMode name="AT_EE_EPO_Form_C" binding="AT_EE_EPO_Form_C"/>
+    <tns:PMode name="AT_IT_EPO_Form_C" binding="AT_IT_EPO_Form_C"/>
+    <tns:PMode name="AT_GR_EPO_Form_C" binding="AT_GR_EPO_Form_C"/>
+    <tns:PMode name="AT_NL_EPO_Form_C" binding="AT_NL_EPO_Form_C"/>
+    <tns:PMode name="DE_AT_EPO_Form_D" binding="DE_AT_EPO_Form_D"/>
+    <tns:PMode name="ES_AT_EPO_Form_D" binding="ES_AT_EPO_Form_D"/>
+    <tns:PMode name="EE_AT_EPO_Form_D" binding="EE_AT_EPO_Form_D"/>
+    <tns:PMode name="IT_AT_EPO_Form_D" binding="IT_AT_EPO_Form_D"/>
+    <tns:PMode name="GR_AT_EPO_Form_D" binding="GR_AT_EPO_Form_D"/>
+    <tns:PMode name="NL_AT_EPO_Form_D" binding="NL_AT_EPO_Form_D"/>
+    <tns:PMode name="AT_DE_EPO_Form_D" binding="AT_DE_EPO_Form_D"/>
+    <tns:PMode name="AT_ES_EPO_Form_D" binding="AT_ES_EPO_Form_D"/>
+    <tns:PMode name="AT_EE_EPO_Form_D" binding="AT_EE_EPO_Form_D"/>
+    <tns:PMode name="AT_IT_EPO_Form_D" binding="AT_IT_EPO_Form_D"/>
+    <tns:PMode name="AT_GR_EPO_Form_D" binding="AT_GR_EPO_Form_D"/>
+    <tns:PMode name="AT_NL_EPO_Form_D" binding="AT_NL_EPO_Form_D"/>
+    <tns:PMode name="DE_AT_EPO_Form_E" binding="DE_AT_EPO_Form_E"/>
+    <tns:PMode name="ES_AT_EPO_Form_E" binding="ES_AT_EPO_Form_E"/>
+    <tns:PMode name="EE_AT_EPO_Form_E" binding="EE_AT_EPO_Form_E"/>
+    <tns:PMode name="IT_AT_EPO_Form_E" binding="IT_AT_EPO_Form_E"/>
+    <tns:PMode name="GR_AT_EPO_Form_E" binding="GR_AT_EPO_Form_E"/>
+    <tns:PMode name="NL_AT_EPO_Form_E" binding="NL_AT_EPO_Form_E"/>
+    <tns:PMode name="AT_DE_EPO_Form_E" binding="AT_DE_EPO_Form_E"/>
+    <tns:PMode name="AT_ES_EPO_Form_E" binding="AT_ES_EPO_Form_E"/>
+    <tns:PMode name="AT_EE_EPO_Form_E" binding="AT_EE_EPO_Form_E"/>
+    <tns:PMode name="AT_IT_EPO_Form_E" binding="AT_IT_EPO_Form_E"/>
+    <tns:PMode name="AT_GR_EPO_Form_E" binding="AT_GR_EPO_Form_E"/>
+    <tns:PMode name="AT_NL_EPO_Form_E" binding="AT_NL_EPO_Form_E"/>
+    <tns:PMode name="DE_AT_EPO_Form_F" binding="DE_AT_EPO_Form_F"/>
+    <tns:PMode name="ES_AT_EPO_Form_F" binding="ES_AT_EPO_Form_F"/>
+    <tns:PMode name="EE_AT_EPO_Form_F" binding="EE_AT_EPO_Form_F"/>
+    <tns:PMode name="IT_AT_EPO_Form_F" binding="IT_AT_EPO_Form_F"/>
+    <tns:PMode name="GR_AT_EPO_Form_F" binding="GR_AT_EPO_Form_F"/>
+    <tns:PMode name="NL_AT_EPO_Form_F" binding="NL_AT_EPO_Form_F"/>
+    <tns:PMode name="AT_DE_EPO_Form_F" binding="AT_DE_EPO_Form_F"/>
+    <tns:PMode name="AT_ES_EPO_Form_F" binding="AT_ES_EPO_Form_F"/>
+    <tns:PMode name="AT_EE_EPO_Form_F" binding="AT_EE_EPO_Form_F"/>
+    <tns:PMode name="AT_IT_EPO_Form_F" binding="AT_IT_EPO_Form_F"/>
+    <tns:PMode name="AT_GR_EPO_Form_F" binding="AT_GR_EPO_Form_F"/>
+    <tns:PMode name="AT_NL_EPO_Form_F" binding="AT_NL_EPO_Form_F"/>
+    <tns:PMode name="DE_AT_EPO_Form_G" binding="DE_AT_EPO_Form_G"/>
+    <tns:PMode name="ES_AT_EPO_Form_G" binding="ES_AT_EPO_Form_G"/>
+    <tns:PMode name="EE_AT_EPO_Form_G" binding="EE_AT_EPO_Form_G"/>
+    <tns:PMode name="IT_AT_EPO_Form_G" binding="IT_AT_EPO_Form_G"/>
+    <tns:PMode name="GR_AT_EPO_Form_G" binding="GR_AT_EPO_Form_G"/>
+    <tns:PMode name="NL_AT_EPO_Form_G" binding="NL_AT_EPO_Form_G"/>
+    <tns:PMode name="AT_DE_EPO_Form_G" binding="AT_DE_EPO_Form_G"/>
+    <tns:PMode name="AT_ES_EPO_Form_G" binding="AT_ES_EPO_Form_G"/>
+    <tns:PMode name="AT_EE_EPO_Form_G" binding="AT_EE_EPO_Form_G"/>
+    <tns:PMode name="AT_IT_EPO_Form_G" binding="AT_IT_EPO_Form_G"/>
+    <tns:PMode name="AT_GR_EPO_Form_G" binding="AT_GR_EPO_Form_G"/>
+    <tns:PMode name="AT_NL_EPO_Form_G" binding="AT_NL_EPO_Form_G"/>
+    <tns:PMode name="DE_AT_EPO_SubmissionAcceptanceRejection"
+               binding="DE_AT_EPO_SubmissionAcceptanceRejection"/>
+    <tns:PMode name="ES_AT_EPO_SubmissionAcceptanceRejection"
+               binding="ES_AT_EPO_SubmissionAcceptanceRejection"/>
+    <tns:PMode name="EE_AT_EPO_SubmissionAcceptanceRejection"
+               binding="EE_AT_EPO_SubmissionAcceptanceRejection"/>
+    <tns:PMode name="IT_AT_EPO_SubmissionAcceptanceRejection"
+               binding="IT_AT_EPO_SubmissionAcceptanceRejection"/>
+    <tns:PMode name="GR_AT_EPO_SubmissionAcceptanceRejection"
+               binding="GR_AT_EPO_SubmissionAcceptanceRejection"/>
+    <tns:PMode name="NL_AT_EPO_SubmissionAcceptanceRejection"
+               binding="NL_AT_EPO_SubmissionAcceptanceRejection"/>
+    <tns:PMode name="AT_DE_EPO_SubmissionAcceptanceRejection"
+               binding="AT_DE_EPO_SubmissionAcceptanceRejection"/>
+    <tns:PMode name="AT_ES_EPO_SubmissionAcceptanceRejection"
+               binding="AT_ES_EPO_SubmissionAcceptanceRejection"/>
+    <tns:PMode name="AT_EE_EPO_SubmissionAcceptanceRejection"
+               binding="AT_EE_EPO_SubmissionAcceptanceRejection"/>
+    <tns:PMode name="AT_IT_EPO_SubmissionAcceptanceRejection"
+               binding="AT_IT_EPO_SubmissionAcceptanceRejection"/>
+    <tns:PMode name="AT_GR_EPO_SubmissionAcceptanceRejection"
+               binding="AT_GR_EPO_SubmissionAcceptanceRejection"/>
+    <tns:PMode name="AT_NL_EPO_SubmissionAcceptanceRejection"
+               binding="AT_NL_EPO_SubmissionAcceptanceRejection"/>
+    <tns:PMode name="DE_AT_EPO_RelayREMMDAcceptanceRejection"
+               binding="DE_AT_EPO_RelayREMMDAcceptanceRejection"/>
+    <tns:PMode name="ES_AT_EPO_RelayREMMDAcceptanceRejection"
+               binding="ES_AT_EPO_RelayREMMDAcceptanceRejection"/>
+    <tns:PMode name="EE_AT_EPO_RelayREMMDAcceptanceRejection"
+               binding="EE_AT_EPO_RelayREMMDAcceptanceRejection"/>
+    <tns:PMode name="IT_AT_EPO_RelayREMMDAcceptanceRejection"
+               binding="IT_AT_EPO_RelayREMMDAcceptanceRejection"/>
+    <tns:PMode name="GR_AT_EPO_RelayREMMDAcceptanceRejection"
+               binding="GR_AT_EPO_RelayREMMDAcceptanceRejection"/>
+    <tns:PMode name="NL_AT_EPO_RelayREMMDAcceptanceRejection"
+               binding="NL_AT_EPO_RelayREMMDAcceptanceRejection"/>
+    <tns:PMode name="AT_DE_EPO_RelayREMMDAcceptanceRejection"
+               binding="AT_DE_EPO_RelayREMMDAcceptanceRejection"/>
+    <tns:PMode name="AT_ES_EPO_RelayREMMDAcceptanceRejection"
+               binding="AT_ES_EPO_RelayREMMDAcceptanceRejection"/>
+    <tns:PMode name="AT_EE_EPO_RelayREMMDAcceptanceRejection"
+               binding="AT_EE_EPO_RelayREMMDAcceptanceRejection"/>
+    <tns:PMode name="AT_IT_EPO_RelayREMMDAcceptanceRejection"
+               binding="AT_IT_EPO_RelayREMMDAcceptanceRejection"/>
+    <tns:PMode name="AT_GR_EPO_RelayREMMDAcceptanceRejection"
+               binding="AT_GR_EPO_RelayREMMDAcceptanceRejection"/>
+    <tns:PMode name="AT_NL_EPO_RelayREMMDAcceptanceRejection"
+               binding="AT_NL_EPO_RelayREMMDAcceptanceRejection"/>
+    <tns:PMode name="DE_AT_EPO_DeliveryNonDeliveryToRecipient"
+               binding="DE_AT_EPO_DeliveryNonDeliveryToRecipient"/>
+    <tns:PMode name="ES_AT_EPO_DeliveryNonDeliveryToRecipient"
+               binding="ES_AT_EPO_DeliveryNonDeliveryToRecipient"/>
+    <tns:PMode name="EE_AT_EPO_DeliveryNonDeliveryToRecipient"
+               binding="EE_AT_EPO_DeliveryNonDeliveryToRecipient"/>
+    <tns:PMode name="IT_AT_EPO_DeliveryNonDeliveryToRecipient"
+               binding="IT_AT_EPO_DeliveryNonDeliveryToRecipient"/>
+    <tns:PMode name="GR_AT_EPO_DeliveryNonDeliveryToRecipient"
+               binding="GR_AT_EPO_DeliveryNonDeliveryToRecipient"/>
+    <tns:PMode name="NL_AT_EPO_DeliveryNonDeliveryToRecipient"
+               binding="NL_AT_EPO_DeliveryNonDeliveryToRecipient"/>
+    <tns:PMode name="AT_DE_EPO_DeliveryNonDeliveryToRecipient"
+               binding="AT_DE_EPO_DeliveryNonDeliveryToRecipient"/>
+    <tns:PMode name="AT_ES_EPO_DeliveryNonDeliveryToRecipient"
+               binding="AT_ES_EPO_DeliveryNonDeliveryToRecipient"/>
+    <tns:PMode name="AT_EE_EPO_DeliveryNonDeliveryToRecipient"
+               binding="AT_EE_EPO_DeliveryNonDeliveryToRecipient"/>
+    <tns:PMode name="AT_IT_EPO_DeliveryNonDeliveryToRecipient"
+               binding="AT_IT_EPO_DeliveryNonDeliveryToRecipient"/>
+    <tns:PMode name="AT_GR_EPO_DeliveryNonDeliveryToRecipient"
+               binding="AT_GR_EPO_DeliveryNonDeliveryToRecipient"/>
+    <tns:PMode name="AT_NL_EPO_DeliveryNonDeliveryToRecipient"
+               binding="AT_NL_EPO_DeliveryNonDeliveryToRecipient"/>
+    <tns:PMode name="DE_AT_EPO_RetrievalNonRetrievalToRecipient"
+               binding="DE_AT_EPO_RetrievalNonRetrievalToRecipient"/>
+    <tns:PMode name="ES_AT_EPO_RetrievalNonRetrievalToRecipient"
+               binding="ES_AT_EPO_RetrievalNonRetrievalToRecipient"/>
+    <tns:PMode name="EE_AT_EPO_RetrievalNonRetrievalToRecipient"
+               binding="EE_AT_EPO_RetrievalNonRetrievalToRecipient"/>
+    <tns:PMode name="IT_AT_EPO_RetrievalNonRetrievalToRecipient"
+               binding="IT_AT_EPO_RetrievalNonRetrievalToRecipient"/>
+    <tns:PMode name="GR_AT_EPO_RetrievalNonRetrievalToRecipient"
+               binding="GR_AT_EPO_RetrievalNonRetrievalToRecipient"/>
+    <tns:PMode name="NL_AT_EPO_RetrievalNonRetrievalToRecipient"
+               binding="NL_AT_EPO_RetrievalNonRetrievalToRecipient"/>
+    <tns:PMode name="AT_DE_EPO_RetrievalNonRetrievalToRecipient"
+               binding="AT_DE_EPO_RetrievalNonRetrievalToRecipient"/>
+    <tns:PMode name="AT_ES_EPO_RetrievalNonRetrievalToRecipient"
+               binding="AT_ES_EPO_RetrievalNonRetrievalToRecipient"/>
+    <tns:PMode name="AT_EE_EPO_RetrievalNonRetrievalToRecipient"
+               binding="AT_EE_EPO_RetrievalNonRetrievalToRecipient"/>
+    <tns:PMode name="AT_IT_EPO_RetrievalNonRetrievalToRecipient"
+               binding="AT_IT_EPO_RetrievalNonRetrievalToRecipient"/>
+    <tns:PMode name="AT_GR_EPO_RetrievalNonRetrievalToRecipient"
+               binding="AT_GR_EPO_RetrievalNonRetrievalToRecipient"/>
+    <tns:PMode name="AT_NL_EPO_RetrievalNonRetrievalToRecipient"
+               binding="AT_NL_EPO_RetrievalNonRetrievalToRecipient"/>
+    <!--
+          *************
+          This pmodes file is created by means of the PModes Toolkit 0.1
+          © 2013 Land Nordrhein-Westfalen, Deutschland
+          *************
+       -->
+</tns:PModes>

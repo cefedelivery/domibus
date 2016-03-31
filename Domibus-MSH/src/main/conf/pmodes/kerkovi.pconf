@@ -1,0 +1,272 @@
+// Employed ebMS3 profile. used for configuration validation. Supported values are: AS4, ESENS, UNDEFINED
+// NOT SUPPORTED YET
+EmployedProfile : UNDEFINED
+
+MPCs{
+	// Configuration Id
+	MPC defaultMpc {
+		// Used by default. There may only be one default MPC
+		Default : true
+		// IF enabled = false this MPC will not accept any messages
+		Enabled : true
+		// corresponding to eb:Messaging/eb:UserMessage/@mpc
+		Name : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC'
+		/** 
+		 * Message retention in minutes.
+		 * 0 = delete immediately
+		 * -1 = keep indefinitely
+		 */
+		MessageRetentionDownloaded : 0	
+		MessageRetentionUnDownloaded : 60
+	} 
+}
+
+Parties{
+	PartyIdTypes{
+		Type partyTypeEmpty : ''
+	}
+	/**
+	 * Internal name of party entity.  
+	 * Use this as the alias for the corresponding pubilc encryption key in your keystore.
+	 */
+	Party minder {
+		partyTypeEmpty : 'minder'
+		Endpoint : 'http://localhost:15001/corner4'		
+	} 
+	Party domibus_c2 {
+		partyTypeEmpty : 'domibus-c2'		
+		Endpoint : 'http://localhost:15001/as4Interceptor'
+	}
+	
+	Party domibus_c3 {
+		partyTypeEmpty : 'domibus-c3'		
+		Endpoint : 'http://localhost:15001/as4Interceptor'
+	}
+	
+}
+
+AS4{	
+	Reliability noReliability : Nonrepudiation  = false Replypattern = response
+	Reliability defaultReliability : Nonrepudiation  = true Replypattern = response
+	ReceptionAwareness receptionAwareness : retryTimeout = 5 retryCount = 5 strategy = CONSTANT duplicateDetection = true	
+	ReceptionAwareness receptionAwarenessNoRetry : retryTimeout = 0 retryCount = 0 strategy = CONSTANT duplicateDetection = true	
+}
+
+Securities{
+	Security doNothing {
+		Policy : "doNothingPolicy.xml"
+		SignatureMethod : RSA_SHA256
+	}
+	Security eSensDefault {
+		Policy : "encryptAll.xml"
+		SignatureMethod : RSA_SHA256
+	}
+	Security signOnly {
+		Policy : "signOnly.xml"
+		SignatureMethod : RSA_SHA256
+	}
+}
+
+BusinessProcessConfiguration{
+	
+	Agreements{
+		Agreement agreementEmpty : ''	
+	}
+	
+	Actions{
+		Action submitAction : 'Submit'
+		Action deliverAction : 'Deliver'
+		Action notifyAction : 'Notify'
+		Action ACT_SIMPLE_ONEWAY : 'ACT_SIMPLE_ONEWAY'
+		Action ACT_SIMPLE_TWOWAY : 'ACT_SIMPLE_TWOWAY'
+		Action ACT_ONEWAY_RETRY : 'ACT_ONEWAY_RETRY'
+		Action ACT_ONEWAY_SIGNONLY :'ACT_ONEWAY_SIGNONLY'
+		Action ACT_PING : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test'		
+	}
+	
+	Services{
+		ServiceTypes {
+			Type emtpy:""
+		}
+		Service conformanceTestService : 'http://esens.eu/as4/conformancetest' Actions { submitAction deliverAction notifyAction} 
+		Service SRV_SIMPLE_ONEWAY : 'SRV_SIMPLE_ONEWAY' Actions { ACT_SIMPLE_ONEWAY } 
+		Service SRV_SIMPLE_TWOWAY : 'SRV_SIMPLE_TWOWAY' Actions { ACT_SIMPLE_TWOWAY }
+		Service SRV_ONEWAY_RETRY : 'SRV_ONEWAY_RETRY' Actions { ACT_ONEWAY_RETRY }
+		Service SRV_ONEWAY_SIGNONLY : 'SRV_ONEWAY_SIGNONLY' Actions { ACT_ONEWAY_SIGNONLY }
+		Service SRV_PING : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service' Actions { ACT_PING }		
+	}
+	
+	ExchangePatterns{
+		Patterns{
+			MEP oneway : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay' Legs = 1	
+			MEP twoway : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay' Legs = 2		
+		}
+		Bindings{
+			Binding push : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push'	
+			Binding pushAndPush : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push'		
+		}
+	}
+	
+	Roles{
+		Role minderRole : 'http://esens.eu/as4/conformancetest/testdriver'
+		Role sutRole : 'http://esens.eu/as4/conformancetest/sut'
+	}
+	
+	Processes{	
+			
+		PropertySets{
+			Properties{
+				Property originalSenderProperty : key=originalSender type = string required= true
+				Property finalRecipientProperty : key=finalRecipient type = string required= true
+			}
+			Set ecodexPropertySet: finalRecipientProperty originalSenderProperty 
+		}		
+		
+	
+		ErrorHandlings{
+			ErrorHandling demoErrorHandling {
+				ErrorAsResponse : true
+				ProcessErrorNotifyProducer : true
+				ProcessErrorNotifyConsumer : true
+				DeliveryFailureNotifyProducer : true				
+			}	
+		}
+		
+		Legs{
+			
+			Leg simple_oneway {
+				ReceptionAwareness : receptionAwarenessNoRetry
+				Service : SRV_SIMPLE_ONEWAY
+				Action : ACT_SIMPLE_ONEWAY
+				DefaultMpc : defaultMpc
+				Security : eSensDefault
+				Reliability : defaultReliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : true
+			}
+
+			Leg simple_twoway {
+				ReceptionAwareness : receptionAwarenessNoRetry
+				Service : SRV_SIMPLE_TWOWAY
+				Action : ACT_SIMPLE_TWOWAY
+				DefaultMpc : defaultMpc
+				Security : eSensDefault
+				Reliability : defaultReliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : true
+			}
+			
+			Leg oneway_retry {
+				ReceptionAwareness : receptionAwareness
+				Service : SRV_ONEWAY_RETRY
+				Action : ACT_ONEWAY_RETRY
+				DefaultMpc : defaultMpc
+				Security : eSensDefault
+				Reliability : defaultReliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : true
+			}
+
+			Leg oneway_only_sign {
+				ReceptionAwareness : receptionAwarenessNoRetry
+				Service : SRV_ONEWAY_SIGNONLY
+				Action : ACT_ONEWAY_SIGNONLY
+				DefaultMpc : defaultMpc
+				Security : signOnly
+				Reliability : defaultReliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : true
+			}
+
+			Leg ping {
+				ReceptionAwareness : receptionAwarenessNoRetry
+				Service : SRV_PING
+				Action : ACT_PING
+				DefaultMpc : defaultMpc
+				Security : eSensDefault
+				Reliability : defaultReliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : true
+			}
+			
+			Leg submitLeg {
+				ReceptionAwareness : receptionAwareness
+				Service : conformanceTestService
+				Action : submitAction
+				DefaultMpc : defaultMpc
+				Security : doNothing
+				Reliability : noReliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : false
+			}
+
+			Leg deliveryLeg {
+				ReceptionAwareness : receptionAwareness
+				Service : conformanceTestService
+				Action : deliverAction
+				DefaultMpc : defaultMpc
+				Security : doNothing
+				Reliability : noReliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : false
+			}
+			
+			Leg notifyLeg {
+				ReceptionAwareness : receptionAwareness
+				Service : conformanceTestService
+				Action : notifyAction
+				DefaultMpc : defaultMpc
+				Security : doNothing
+				Reliability : noReliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : false
+			}
+			
+		}				
+				
+		Process push_MINDER_TO_SUT_Process {
+			Agreement : agreementEmpty
+			Mep : twoway
+			Binding : pushAndPush
+			InitiatorRole : minderRole
+			ResponderRole : sutRole
+			InitiatorParties : minder
+			ResponderParties : domibus_c2, domibus_c3
+			Legs : submitLeg
+		}
+
+		Process pushAndPush_SUT_TO_MINDER_Process {
+			Agreement : agreementEmpty
+			Mep : oneway
+			Binding : push
+			InitiatorRole : sutRole
+			ResponderRole : minderRole
+			InitiatorParties : domibus_c2, domibus_c3
+			ResponderParties : minder
+			Legs : deliveryLeg, notifyLeg
+		}
+		
+		Process pushAndPush_SUT_TO_SUT_Process {
+			Agreement : agreementEmpty
+			Mep : twoway
+			Binding : pushAndPush
+			InitiatorRole : sutRole
+			ResponderRole : sutRole
+			InitiatorParties : domibus_c2, domibus_c2
+			ResponderParties : domibus_c2, domibus_c3
+			Legs : simple_twoway
+		}
+		
+		Process push_SUT_TO_SUT_Process {
+			Agreement : agreementEmpty
+			Mep : oneway
+			Binding : push
+			InitiatorRole : sutRole
+			ResponderRole : sutRole
+			InitiatorParties : domibus_c2, domibus_c3
+			ResponderParties : domibus_c2, domibus_c3
+			Legs : simple_oneway, oneway_retry, oneway_only_sign, ping
+		}
+		
+	}
+}

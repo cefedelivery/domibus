@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xml:id="bookinfo"
+      version="5.0"
+      xml:lang="en"
+      xmlns="http://docbook.org/ns/docbook"
+      xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd">
+    <title>
+        Documentation for
+        Domibus <?eval ${project.version}?> <?dbtimestamp format="Y-m-d"?>
+    </title>
+    <authorgroup>
+        <author>
+            <personname>
+                <firstname>Christian</firstname>
+                <surname>Koch</surname>
+            </personname>
+            <affiliation>
+                <orgname>IT.NRW</orgname>
+            </affiliation>
+        </author>
+        <author>
+            <personname>
+                <firstname>Stefan</firstname>
+                <surname>Müller</surname>
+            </personname>
+            <affiliation>
+                <orgname>IT.NRW</orgname>
+            </affiliation>
+        </author>
+    </authorgroup>
+    <pubdate><?dbtimestamp format="Y-m-d"?></pubdate>
+    <copyright>
+        <year><?eval ${project.inceptionYear}?>
+        </year>
+        <holder>e-CODEX Project</holder>
+    </copyright>
+    <abstract>
+        <para>
+            This is the technical documentation of the Domibus ebMS3/AS4 gateway
+            version (v.<?eval ${project.version}?>
+            ).
+        </para>
+    </abstract>
+    <legalnotice role="status">
+        <para>
+            Please send comments on this specification to
+            <email>christian.koch@it.nrw.de</email>
+
+        </para>
+    </legalnotice>
+    <legalnotice role="notices">
+        <para>
+            Copyright © e-CODEX project® <?eval ${project.inceptionYear}?>
+            . All Rights Reserved.
+        </para>
+        <para>
+            This work is licensed under the Creative Commons
+            Attribution-NonCommercial-ShareAlike 3.0 Unported
+            License. To
+            view a copy of this license, visit
+            http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter
+            to
+            Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+        </para>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref="graphics/by-nc-sa.svg" format="SVG"/>
+            </imageobject>
+        </mediaobject>
+    </legalnotice>
+</info>

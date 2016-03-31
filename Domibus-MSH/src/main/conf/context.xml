@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+    <WatchedResource>WEB-INF/web.xml</WatchedResource>
+    <WatchedResource>${catalina.base}/conf/web.xml</WatchedResource>
+    <Resources>
+       <PostResources className="org.apache.catalina.webresources.DirResourceSet"
+                      base="${catalina.base}/conf/domibus/plugins/lib"
+                      webAppMount="/WEB-INF/lib"/>
+    </Resources>
+</Context>

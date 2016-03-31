@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<chapter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xml:id="admin_gui"
+         version="5.0"
+         xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd">
+    <title>Administration Dashboard</title>
+    <para>The Domibus gateway comes with a web based administration interface
+        with the following
+        funtionalities:
+        <blockquote>
+            <itemizedlist>
+                <listitem>
+                    <para>a fully filterable message logging view</para>
+                </listitem>
+                <listitem>
+                    <para>a fully filterable error logging view
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>deployment of processing modes (users with
+                        adminstrative privileges only)
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </blockquote>
+        The login page of the administration dashboard can be found at:
+        $domibus.local.contex/home (e.g.<uri>
+            http://localhost:8080/domibus/home</uri>)
+    </para>
+
+    <figure>
+        <title>Login page of adminstration dashboard</title>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref="graphics/login_dashboard.png" scalefit="1"
+                           width="70%" format="PNG">
+                </imagedata>
+            </imageobject>
+        </mediaobject>
+    </figure>
+    <note>
+        <para>The default password for both users (<computeroutput>user,
+            admin</computeroutput>) is<computeroutput>123456</computeroutput>.
+        </para>
+    </note>
+    <important>
+        <para>Change the password for both users before starting the
+            gateway the first time. In addition your proxy configuration should
+            already restrict access to the administration dashboard. If not see
+            <xref linkend="proxyconfig"/>
+        </para>
+    </important>
+
+    <section>
+        <title>Message Logging</title>
+        <para>The message logging page contains a table, showing all the
+            messages processed by your gateway (sending and receiving). This
+            table
+            is sortable and filterable by each column. Below you can find a
+            description of the table columns.
+        </para>
+        <figure>
+            <title>Message logging page of adminstration dashboard</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="graphics/messagelog_notempty.png"
+                               scalefit="1"
+                               width="70%" format="PNG">
+                    </imagedata>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <variablelist>
+            <varlistentry>
+                <term>MessageId</term>
+                <listitem>
+                    <para>The ebms message id</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>MessageStatus</term>
+                <listitem>
+                    <para>Status of this message. Possible values are: SENT,
+                        FAILED, IN_PROGRESS, SENT_WITH_WARNINGS, RECEIVED,
+                        RECEIVED_WITH_WARNINGS
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>NotificationStatus</term>
+                <listitem>
+                    <para>When producer/consumer have to be notified about
+                        errors the value is REQUIRED, if not the value is
+                        NOT_REQUIRED. When producer/consumer already have been
+                        notified the value is NOTIFIED
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>MshRole</term>
+                <listitem>
+                    <para>The status of this message. Possible values are:
+                        SENDING, RECEIVING
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>MessageType</term>
+                <listitem>
+                    <para>The (ebms) type of the message. Possible value are:
+                        SIGNAL_MESSAGE, USER_MESSAGE
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>Deleted</term>
+                <listitem>
+                    <para>The date when this message was deleted. In case of
+                        sending:
+                    </para>
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                An outgoing message has been sent without error
+                                eb:Error/@severity failure failure, and an AS4
+                                receipt has been received
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                An outgoing message has been sent without error
+                                eb:Error/@severity failure, and AS4 is disabled
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                An outgoing message could not be sent and the
+                                final AS4 retry has passed
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                An outgoing message could not be sent and AS4 is
+                                disabled (eb:Error/@severity failure, [CORE
+                                6.2.5])
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                    <para>In case of a received message, the message is deleted
+                        after it has been downloaded from a backend consumer.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>Received</term>
+                <listitem>
+                    <para>The date when a message was received either by the
+                        backend (sending) or another gateway (receiving).
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>SendAttempts</term>
+                <listitem>
+                    <para>The (current) number of attempts that have been made
+                        in order to send the message.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>SendAttemptsMax</term>
+                <listitem>
+                    <para>The maximum number of attempts configured (via PMode)
+                        for this message transmission.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>NextAttempt</term>
+                <listitem>
+                    <para>The date when the next attempt takes place.</para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+    </section>
+    <section>
+        <title>Error Logging</title>
+        <para>This page contains a table with ebms3 error that have been
+            received by another gateway or created by this gateway while sending
+            a message.
+        </para>
+        <variablelist>
+            <varlistentry>
+                <term>ErrorSignalMessageId</term>
+                <listitem>
+                    <para>The ebms message id of the signal message which
+                        contained the ebms3 error.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>MshRole</term>
+                <listitem>
+                    <para>The status of this message. Possible values are:
+                        SENDING, RECEIVING;
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>MessageInErrorId</term>
+                <listitem>
+                    <para>The id of the message which caused this error.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>ErrorCode</term>
+                <listitem>
+                    <para>The error code of this ebms error.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>ErrorDetail</term>
+                <listitem>
+                    <para>A short description of this error.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>Timestamp</term>
+                <listitem>
+                    <para>The date when this error was received (in case of
+                        receiving) or created (in case of sending).
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>Notified</term>
+                <listitem>
+                    <para>The date when a producer/consumer was notified about
+                        this error.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <figure>
+            <title>Error logging page of adminstration dashboard</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="graphics/errorlog_errors.png"
+                               scalefit="1"
+                               width="70%" format="PNG">
+                    </imagedata>
+                </imageobject>
+            </mediaobject>
+        </figure>
+    </section>
+    <section xml:id="pmode_upload">
+        <title>PMode Upload</title>
+        <para>This section is only accesible by administrators and provides a
+            pmode upload functionality. You can choose a pmode configuration
+            (xml) on your local machine and apply it to the gateway. The
+            currenty pmode configuration is then replaced.
+        </para>
+        <figure>
+            <title>PMode Upload</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="graphics/pmodeupload.png" scalefit="1"
+                               width="70%" format="PNG">
+                    </imagedata>
+                </imageobject>
+            </mediaobject>
+        </figure>
+    </section>
+</chapter>
