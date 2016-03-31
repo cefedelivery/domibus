@@ -1,0 +1,24 @@
+Domibus 3.1-RC1
+- Added support for clustering
+- Added support of Weblogic 12c
+- Additional unit testing
+- Introduction of the new plugin architecture
+- Improved documentation
+- Fixing bugs and issues
+Domibus 3.0-Beta 1
+ - initial release of Domibus 3
+Domibus 3.0-Beta 2
+ - bugfixes for several minor issues
+ - major documentation update
+ - PMode upload funtionalty
+Domibus 3.0-RC1
+ - bugfixes for several minor issues
+ - example implementation of JMS integration
+ - documentation update
+ - rework of submission module
+ - support for property and payload profiling
+ Domibus 3.0-RC2
+ - bugfixes
+ Domibus 3.0-RC3
+ - bugfixes
+ - experimental SMP/SML support
