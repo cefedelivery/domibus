@@ -115,6 +115,49 @@
                     <version>${activemq.version}</version>
                     <scope>provided</scope>
                 </dependency>
+                <dependency>
+                    <groupId>org.apache.activemq</groupId>
+                    <artifactId>activemq-jaas</artifactId>
+                    <version>${activemq.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.activemq</groupId>
+                    <artifactId>activemq-kahadb-store</artifactId>
+                    <version>${activemq.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <!-- Atokimos Library for distributed transactions -->
+                <dependency>
+                    <groupId>com.atomikos</groupId>
+                    <artifactId>transactions-jta</artifactId>
+                    <version>${atomikos.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.atomikos</groupId>
+                    <artifactId>transactions-jdbc</artifactId>
+                    <version>${atomikos.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.atomikos</groupId>
+                    <artifactId>transactions-jms</artifactId>
+                    <version>${atomikos.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.atomikos</groupId>
+                    <artifactId>transactions-hibernate3</artifactId>
+                    <version>${atomikos.version}</version>
+                    <scope>provided</scope>
+                    <exclusions>
+                        <exclusion>
+                            <artifactId>hibernate</artifactId>
+                            <groupId>org.hibernate</groupId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
             </dependencies>
         </profile>
         <profile>
