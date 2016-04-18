@@ -52,9 +52,19 @@
         <surefire.argLine>-Xmx1G</surefire.argLine>
     </properties>
 
+    <!-- Where to deploy binaries -->
+    <distributionManagement>
+        <repository>
+            <id>joinup-releases</id>
+            <url>https://joinup.ec.europa.eu/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>joinup-snapshots</id>
+            <url>https://joinup.ec.europa.eu/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencyManagement>
-
         <dependencies>
             <dependency>
                 <groupId>junit</groupId>
