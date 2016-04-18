@@ -75,11 +75,15 @@ public class EbmsErrorChecker {
         //TODO: piggybacking support
         for (final Error error : signalMessage.getError()) {
             if (ErrorCode.SEVERITY_FAILURE.equalsIgnoreCase(error.getSeverity())) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null, MSHRole.SENDING);
+                EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
+                e.setMshRole(MSHRole.SENDING);
+                throw e;
             }
 
             if (ErrorCode.SEVERITY_WARNING.equalsIgnoreCase(error.getSeverity())) {
-                final ErrorLogEntry errorLogEntry = new ErrorLogEntry(new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null, MSHRole.SENDING));
+                EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
+
+                final ErrorLogEntry errorLogEntry = new ErrorLogEntry(e);
                 this.errorLogDao.create(errorLogEntry);
             }
         }

@@ -33,8 +33,7 @@
         <varlistentry>
             <term>Java Runtime</term>
             <listitem>
-                <para>A Java runtime environment version 7 or higher is
-                    required.
+                <para>A Java runtime environment version 7 is required.
                 </para>
             </listitem>
         </varlistentry>

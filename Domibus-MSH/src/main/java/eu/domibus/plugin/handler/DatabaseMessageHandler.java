@@ -18,15 +18,13 @@
  */
 
 package eu.domibus.plugin.handler;
+
 /**
  * @author Christian Koch, Stefan Mueller
  * @Since 3.0
  */
 
-import eu.domibus.common.ErrorResult;
-import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.NotificationStatus;
+import eu.domibus.common.*;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
@@ -34,6 +32,7 @@ import eu.domibus.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
 import eu.domibus.common.model.MessageType;
+import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
@@ -48,6 +47,7 @@ import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.CompressionService;
 import eu.domibus.ebms3.common.DispatchMessageCreator;
 import eu.domibus.ebms3.common.MessageIdGenerator;
+import eu.domibus.messaging.DuplicateMessageException;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.messaging.PModeMismatchException;
@@ -113,6 +113,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         try {
             userMessage = this.messagingDao.findUserMessageByMessageId(messageId);
             messageLogEntry = this.messageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
+            if (messageLogEntry == null) {
+                throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
+            }
         } catch (final NoResultException nrEx) {
             DatabaseMessageHandler.LOG.debug("Message with id [" + messageId + "] was not found", nrEx);
             throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
@@ -140,7 +143,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     @Transactional
-    public String submit(final Submission messageData, final String backendName) throws PModeMismatchException, MessagingProcessingException {
+    public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
         try {
             final UserMessage m = this.transformer.transformFromSubmission(messageData);
             final MessageInfo messageInfo = m.getMessageInfo();
@@ -152,13 +155,33 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 messageId = messageIdGenerator.generateMessageId();
                 m.getMessageInfo().setMessageId(messageId);
             }
+            //check if the messageId is unique. This should only fail if the ID is set from the outside
+            if (!MessageStatus.NOT_FOUND.equals(messageLogDao.getMessageStatus(messageId))) {
+                throw new DuplicateMessageException("Message with id:" + messageId + "already exists. Message identifiers must be unique");
+            }
+
             final String pmodeKey;
             final Messaging message = this.ebMS3Of.createMessaging();
             message.setUserMessage(m);
+            try {
+                pmodeKey = this.pModeProvider.findPModeKeyForUserMesssage(m);
+            } catch (IllegalStateException e) { //if no pmodes are configured
+                LOG.debug(e);
+                throw new PModeMismatchException("PMode could not be found. Are PModes configured in the database?");
+            }
 
-            pmodeKey = this.pModeProvider.findPModeKeyForUserMesssage(m);
-
+            final Party from = pModeProvider.getSenderParty(pmodeKey);
             final Party to = pModeProvider.getReceiverParty(pmodeKey);
+            // Verifies that the initiator and responder party are not the same.
+            if (from.getName().equals(to.getName())) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name is the same as the responder party's one[" + from.getName() + "]", null, null);
+            }
+            // Verifies that the message is not for the current gateway.
+            Configuration config = pModeProvider.getConfigurationDAO().read();
+            if (config.getParty().equals(to)) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "It is forbidden to submit a message to the sender gateway[" + to.getName() + "]", null, null);
+            }
+
             final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
             final Map<Party, Mpc> mpcMap = legConfiguration.getPartyMpcMap();
             String mpc = Mpc.DEFAULT_MPC;
@@ -207,6 +230,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             return m.getMessageInfo().getMessageId();
 
         } catch (final EbMS3Exception e) {
+            LOG.error("Error submitting to backendName :" + backendName, e);
             throw MessagingExceptionFactory.transform(e);
         }
     }

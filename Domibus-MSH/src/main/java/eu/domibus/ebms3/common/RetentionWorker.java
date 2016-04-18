@@ -19,6 +19,7 @@
 
 package eu.domibus.ebms3.common;
 
+import eu.domibus.common.dao.ConfigurationDAO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
@@ -41,12 +42,16 @@ public class RetentionWorker extends QuartzJobBean {
     @Autowired
     private MessageRetentionService messageRetentionService;
 
+    @Autowired
+    private ConfigurationDAO configurationDAO;
+
     @Override
     protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
 
         RetentionWorker.LOG.debug("RetentionWorker executed");
-        messageRetentionService.deleteExpiredMessages();
-
+        if (configurationDAO.configurationExists()) {
+            messageRetentionService.deleteExpiredMessages();
+        }
     }
 
 

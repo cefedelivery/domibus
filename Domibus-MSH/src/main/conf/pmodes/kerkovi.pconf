@@ -33,12 +33,12 @@ Parties{
 		partyTypeEmpty : 'minder'
 		Endpoint : 'http://localhost:15001/corner4'		
 	} 
-	Party domibus_c2 {
+	Party domibus-c2 {
 		partyTypeEmpty : 'domibus-c2'		
 		Endpoint : 'http://localhost:15001/as4Interceptor'
 	}
 	
-	Party domibus_c3 {
+	Party domibus-c3 {
 		partyTypeEmpty : 'domibus-c3'		
 		Endpoint : 'http://localhost:15001/as4Interceptor'
 	}
@@ -231,7 +231,7 @@ BusinessProcessConfiguration{
 			InitiatorRole : minderRole
 			ResponderRole : sutRole
 			InitiatorParties : minder
-			ResponderParties : domibus_c2, domibus_c3
+			ResponderParties : domibus-c2, domibus-c3
 			Legs : submitLeg
 		}
 
@@ -241,7 +241,7 @@ BusinessProcessConfiguration{
 			Binding : push
 			InitiatorRole : sutRole
 			ResponderRole : minderRole
-			InitiatorParties : domibus_c2, domibus_c3
+			InitiatorParties : domibus-c2, domibus-c3
 			ResponderParties : minder
 			Legs : deliveryLeg, notifyLeg
 		}
@@ -252,8 +252,8 @@ BusinessProcessConfiguration{
 			Binding : pushAndPush
 			InitiatorRole : sutRole
 			ResponderRole : sutRole
-			InitiatorParties : domibus_c2, domibus_c2
-			ResponderParties : domibus_c2, domibus_c3
+			InitiatorParties : domibus-c2, domibus-c3
+			ResponderParties : domibus-c2, domibus-c3
 			Legs : simple_twoway
 		}
 		
@@ -263,8 +263,8 @@ BusinessProcessConfiguration{
 			Binding : push
 			InitiatorRole : sutRole
 			ResponderRole : sutRole
-			InitiatorParties : domibus_c2, domibus_c3
-			ResponderParties : domibus_c2, domibus_c3
+			InitiatorParties : domibus-c2, domibus-c3
+			ResponderParties : domibus-c2, domibus-c3
 			Legs : simple_oneway, oneway_retry, oneway_only_sign, ping
 		}
 		

@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<con:soapui-project id="2239a858-9e46-4c80-ae5d-b00a2b4039d0" activeEnvironment="Default" name="Domibus-3.1-RC1" resourceRoot="" soapui-version="5.2.0" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:WsdlInterface" id="63a67553-b5b1-4e76-873c-3f2829695a16" wsaVersion="NONE" name="BackendService_1_1SoapBinding" type="wsdl" bindingName="{http://org.ecodex.backend/1_1/}BackendService_1_1SoapBinding" soapVersion="1_2" anonymous="optional" definition="http://localhost:8080/domibus/services/backend?wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart="http://localhost:8080/domibus/services/backend?wsdl"><con:part><con:url>http://localhost:8080/domibus/services/backend?wsdl</con:url><con:content><![CDATA[<wsdl:definitions name="BackendService_1_1" targetNamespace="http://org.ecodex.backend/1_1/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://org.ecodex.backend/1_1/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns2="http://schemas.xmlsoap.org/soap/http" xmlns:ns1="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
+<con:soapui-project id="2239a858-9e46-4c80-ae5d-b00a2b4039d0" activeEnvironment="Default" name="Domibus-3.1" resourceRoot="" soapui-version="5.2.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings/>
+  <con:interface xsi:type="con:WsdlInterface" id="63a67553-b5b1-4e76-873c-3f2829695a16" wsaVersion="NONE" name="BackendService_1_1SoapBinding" type="wsdl" bindingName="{http://org.ecodex.backend/1_1/}BackendService_1_1SoapBinding" soapVersion="1_2" anonymous="optional" definition="http://localhost:8080/domibus/services/backend?wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <con:settings/>
+    <con:definitionCache type="TEXT" rootPart="http://localhost:8080/domibus/services/backend?wsdl">
+      <con:part>
+        <con:url>http://localhost:8080/domibus/services/backend?wsdl</con:url>
+        <con:content><![CDATA[<wsdl:definitions name="BackendService_1_1" targetNamespace="http://org.ecodex.backend/1_1/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://org.ecodex.backend/1_1/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns2="http://schemas.xmlsoap.org/soap/http" xmlns:ns1="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
   <wsdl:types>
     <xs:schema targetNamespace="http://www.w3.org/XML/1998/namespace" version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
       <xs:attribute name="lang" type="xs:string"/>
@@ -722,33 +729,141 @@
          <payload xm:contentType="application/?" payloadId="?">cid:955565572472</payload>\r
       </_1:sendRequest>\r
    </soap:Body>\r
-</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/sendMessage"/></con:call></con:operation></con:interface><con:testSuite id="274b90e3-a4c8-4fb1-97d2-2081792d0f20" name="BackendService_1_1SoapBinding TestSuite"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase id="afced12d-e8a0-41ad-ba0d-c3e9e457d2d6" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="downloadMessage TestCase" searchProperties="true"><con:settings/><con:testStep type="request" id="347b809e-de1f-490a-b117-10bd18cde3c5" name="downloadMessage"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>downloadMessage</con:operation><con:request name="downloadMessage" id="01477722-1b2d-4a5f-9176-a5463015ea85"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
+</soap:Envelope>]]></con:request>
+    <con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/sendMessage"/>
+  </con:call>
+  </con:operation>
+  </con:interface>
+  <con:testSuite id="274b90e3-a4c8-4fb1-97d2-2081792d0f20" name="BackendService_1_1SoapBinding TestSuite">
+    <con:settings/>
+    <con:runType>SEQUENTIAL</con:runType>
+    <con:testCase id="afced12d-e8a0-41ad-ba0d-c3e9e457d2d6" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="downloadMessage TestCase" searchProperties="true">
+      <con:settings/>
+      <con:testStep type="request" id="347b809e-de1f-490a-b117-10bd18cde3c5" name="downloadMessage">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>BackendService_1_1SoapBinding</con:interface>
+          <con:operation>downloadMessage</con:operation>
+          <con:request name="downloadMessage" id="01477722-1b2d-4a5f-9176-a5463015ea85">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
    <soap:Header/>\r
    <soap:Body>\r
       <_1:downloadMessageRequest>\r
          <messageID>?</messageID>\r
       </_1:downloadMessageRequest>\r
    </soap:Body>\r
-</soap:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig action="http://org.ecodex.backend/1_1/BackendInterface/downloadMessage" mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:properties/></con:testCase><con:testCase id="1f2d8993-3336-4d91-a5bc-1d87a703258b" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="getMessageErrors TestCase" searchProperties="true"><con:settings/><con:testStep type="request" id="98b3a19c-c40e-46be-9faa-c32957136a23" name="getMessageErrors"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>getMessageErrors</con:operation><con:request name="getMessageErrors" id="3b1903f4-d84c-4330-8265-90ce9d70bec1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
+</soap:Envelope>]]></con:request>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig action="http://org.ecodex.backend/1_1/BackendInterface/downloadMessage" mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+    <con:testCase id="1f2d8993-3336-4d91-a5bc-1d87a703258b" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="getMessageErrors TestCase" searchProperties="true">
+      <con:settings/>
+      <con:testStep type="request" id="98b3a19c-c40e-46be-9faa-c32957136a23" name="getMessageErrors">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>BackendService_1_1SoapBinding</con:interface>
+          <con:operation>getMessageErrors</con:operation>
+          <con:request name="getMessageErrors" id="3b1903f4-d84c-4330-8265-90ce9d70bec1">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
    <soap:Header/>\r
    <soap:Body>\r
       <_1:getErrorsRequest>\r
          <messageID>?</messageID>\r
       </_1:getErrorsRequest>\r
    </soap:Body>\r
-</soap:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:wsaConfig action="http://org.ecodex.backend/1_1/BackendInterface/getMessageErrors"/></con:request></con:config></con:testStep><con:properties/></con:testCase><con:testCase id="bd1edfd4-ff2d-436b-b26b-a337fb27c1bc" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="getMessageStatus TestCase" searchProperties="true"><con:settings/><con:testStep type="request" id="4b734627-72f3-4644-8dc5-efeb4f638805" name="getMessageStatus"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>getMessageStatus</con:operation><con:request name="getMessageStatus" id="c117c7a6-0438-472f-93c9-40d530765135"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
+</soap:Envelope>]]></con:request>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:wsaConfig action="http://org.ecodex.backend/1_1/BackendInterface/getMessageErrors"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+    <con:testCase id="bd1edfd4-ff2d-436b-b26b-a337fb27c1bc" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="getMessageStatus TestCase" searchProperties="true">
+      <con:settings/>
+      <con:testStep type="request" id="4b734627-72f3-4644-8dc5-efeb4f638805" name="getMessageStatus">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>BackendService_1_1SoapBinding</con:interface>
+          <con:operation>getMessageStatus</con:operation>
+          <con:request name="getMessageStatus" id="c117c7a6-0438-472f-93c9-40d530765135">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
    <soap:Header/>\r
    <soap:Body>\r
       <_1:getStatusRequest>\r
          <messageID>?</messageID>\r
       </_1:getStatusRequest>\r
    </soap:Body>\r
-</soap:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:wsaConfig action="http://org.ecodex.backend/1_1/BackendInterface/getMessageStatus"/></con:request></con:config></con:testStep><con:properties/></con:testCase><con:testCase id="94a4cdfc-ffe2-45c4-9125-95e64a7b8b95" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="listPendingMessages TestCase" searchProperties="true"><con:settings/><con:testStep type="request" id="b1dcde87-d33d-4c49-9745-bc0bcdda79fc" name="listPendingMessages"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>listPendingMessages</con:operation><con:request name="listPendingMessages" id="1adcac5a-5b89-4ef3-9228-f1de59545f8b"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
+</soap:Envelope>]]></con:request>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:wsaConfig action="http://org.ecodex.backend/1_1/BackendInterface/getMessageStatus"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+    <con:testCase id="94a4cdfc-ffe2-45c4-9125-95e64a7b8b95" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="listPendingMessages TestCase" searchProperties="true">
+      <con:settings/>
+      <con:testStep type="request" id="b1dcde87-d33d-4c49-9745-bc0bcdda79fc" name="listPendingMessages">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>BackendService_1_1SoapBinding</con:interface>
+          <con:operation>listPendingMessages</con:operation>
+          <con:request name="listPendingMessages" id="1adcac5a-5b89-4ef3-9228-f1de59545f8b">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
    <soap:Header/>\r
    <soap:Body>\r
       <_1:listPendingMessagesRequest>?</_1:listPendingMessagesRequest>\r
    </soap:Body>\r
-</soap:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:wsaConfig action="http://org.ecodex.backend/1_1/BackendInterface/listPendingMessages"/></con:request></con:config></con:testStep><con:properties/></con:testCase><con:testCase id="5516187b-7365-4fb5-81f3-810240fecbd4" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="sendMessage TestCase" searchProperties="true"><con:settings/><con:testStep type="request" id="e353da03-5e96-4b3c-bf5f-9042e8fcac29" name="sendMessage"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>sendMessage</con:operation><con:request name="sendMessage" id="5ded560d-56ad-4bd9-99c4-9b972f6c7d14"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"  xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+</soap:Envelope>]]></con:request>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:wsaConfig action="http://org.ecodex.backend/1_1/BackendInterface/listPendingMessages"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+    <con:testCase id="5516187b-7365-4fb5-81f3-810240fecbd4" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="sendMessage TestCase" searchProperties="true">
+      <con:settings/>
+      <con:testStep type="request" id="e353da03-5e96-4b3c-bf5f-9042e8fcac29" name="sendMessage">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>BackendService_1_1SoapBinding</con:interface>
+          <con:operation>sendMessage</con:operation>
+          <con:request name="sendMessage" id="5ded560d-56ad-4bd9-99c4-9b972f6c7d14">
+            <con:settings>
+              <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+            </con:settings>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"  xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
    <soap:Header>
       <ns:Messaging>
        <ns:UserMessage>
@@ -771,7 +886,7 @@
 					<ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
 				</ns:MessageProperties>
 				<ns:PayloadInfo>
-					<ns:PartInfo href="cid:payload">
+					<ns:PartInfo href="cid:message">
 						<ns:PartProperties>
 							<ns:Property name="MimeType">text/xml</ns:Property>
 						</ns:PartProperties>
@@ -782,7 +897,7 @@
    </soap:Header>
    <soap:Body>
       <_1:sendRequest>
-        		<payload payloadId="cid:payload">PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</payload>
+        		<payload payloadId="cid:message">PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</payload>
       </_1:sendRequest>
    </soap:Body>
 </soap:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig action="http://org.ecodex.backend/1_1/BackendInterface/sendMessage" mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:properties/></con:testCase><con:properties/></con:testSuite><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/></con:soapui-project>

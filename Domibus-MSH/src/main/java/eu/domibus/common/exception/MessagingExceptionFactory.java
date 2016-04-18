@@ -31,19 +31,23 @@ public class MessagingExceptionFactory {
 
 
     public static MessagingProcessingException transform(EbMS3Exception originalException) {
+
+
         ErrorCode errorCode = originalException.getErrorCodeObject();
         MessagingProcessingException messagingProcessingException;
 
+        String message = ErrorCode.EbMS3ErrorCode.findErrorCodeBy(originalException.getErrorCodeObject().getErrorCodeName()).getShortDescription() + "\r detail: " + originalException.getErrorDetail();
+
         switch (errorCode) {
             case EBMS_0007:
-                messagingProcessingException = new TransformationException(originalException.getMessage());
+                messagingProcessingException = new TransformationException(message, originalException);
                 break;
             case EBMS_0001:
             case EBMS_0010:
-                messagingProcessingException = new PModeMismatchException(originalException.getMessage());
+                messagingProcessingException = new PModeMismatchException(message, originalException);
                 break;
             default:
-                messagingProcessingException = new MessagingProcessingException(originalException.getMessage());
+                messagingProcessingException = new MessagingProcessingException(message, originalException);
         }
 
         messagingProcessingException.setEbms3ErrorCode(errorCode);

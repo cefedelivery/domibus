@@ -57,7 +57,7 @@ public class EbMS3MessageValidator {
             messaging = this.ebmsContext.createUnmarshaller().unmarshal((Node) message.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
         } catch (JAXBException | SOAPException e) {
             EbMS3MessageValidator.LOG.error("", e);
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, null, e, null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "unable to parse message", null, e);
         }
 
         if (messaging.getUserMessage() == null && messaging.getSignalMessage() == null) { //There is no ebms message

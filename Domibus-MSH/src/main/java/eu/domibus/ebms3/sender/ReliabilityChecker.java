@@ -72,6 +72,7 @@ public class ReliabilityChecker {
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
 
         if (legConfiguration.getReliability() != null && ReplyPattern.CALLBACK.equals(legConfiguration.getReliability().getReplyPattern())) {
+            ReliabilityChecker.LOG.debug("Reply pattern is waiting for callback, setting message status to WAITING_FOR_CALLBACK.");
             return CheckResult.WAITING_FOR_CALLBACK;
         }
 
@@ -100,18 +101,29 @@ public class ReliabilityChecker {
                         final UserMessage userMessage = this.jaxbContext.createUnmarshaller().unmarshal(new StreamSource(new ByteArrayInputStream(contentOfReceiptString.getBytes())), UserMessage.class).getValue();
 
                         final UserMessage userMessageInRequest = this.jaxbContext.createUnmarshaller().unmarshal((Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue().getUserMessage();
-                        return userMessage.equals(userMessageInRequest) ? CheckResult.OK : CheckResult.FAIL;
+                        if(!userMessage.equals(userMessageInRequest)) {
+                            ReliabilityChecker.LOG.warn("Reliability check failed, the user message in the request does not match the user message in the response.");
+                            return CheckResult.FAIL;
+                        }
+
+                        return CheckResult.OK;
                     }
 
                     final Iterator<Element> elementIterator = response.getSOAPHeader().getChildElements(new QName(WSConstants.WSSE_NS, WSConstants.WSSE_LN));
 
                     if (!elementIterator.hasNext()) {
-                        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: No security header found", null, MSHRole.SENDING);
+                        EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: No security header found", null, null);
+                        ex.setMshRole(MSHRole.SENDING);
+                        ex.setSignalMessageId(signalMessage.getMessageInfo().getMessageId());
+                        throw ex;
                     }
                     final Element securityHeaderResponse = elementIterator.next();
 
                     if (elementIterator.hasNext()) {
-                        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: Multiple security headers found", null, MSHRole.SENDING);
+                        EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: Multiple security headers found", null, null);
+                        ex.setMshRole(MSHRole.SENDING);
+                        ex.setSignalMessageId(signalMessage.getMessageInfo().getMessageId());
+                        throw ex;
                     }
 
                     final String wsuIdOfMEssagingElement = messaging.getOtherAttributes().get(new QName(WSConstants.WSU_NS, "Id"));
@@ -128,14 +140,21 @@ public class ReliabilityChecker {
                         }
                     }
                     if (!signatureFound) {
-                        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: eb:Messaging not signed", null, MSHRole.SENDING);
+                        EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: eb:Messaging not signed", null, null);
+                        ex.setMshRole(MSHRole.SENDING);
+                        ex.setSignalMessageId(signalMessage.getMessageInfo().getMessageId());
+                        throw ex;
                     }
 
                     final NodeList referencesFromSecurityHeader = nonRepudiationChecker.getNonRepudiationNodeList(request.getSOAPHeader().getElementsByTagNameNS(WSConstants.SIG_NS, WSConstants.SIG_LN).item(0));
                     final NodeList referencesFromNonRepudiationInformation = nonRepudiationChecker.getNonRepudiationNodeList(response.getSOAPHeader().getElementsByTagNameNS(NonRepudiationConstants.NS_NRR, NonRepudiationConstants.NRR_LN).item(0));
 
                     if (!nonRepudiationChecker.compareUnorderedReferenceNodeLists(referencesFromSecurityHeader, referencesFromNonRepudiationInformation)) {
-                        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: non repudiation information and request message do not match", null, MSHRole.SENDING);
+
+                        EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: non repudiation information and request message do not match", null, null);
+                        ex.setMshRole(MSHRole.SENDING);
+                        ex.setSignalMessageId(signalMessage.getMessageInfo().getMessageId());
+                        throw ex;
                     }
 
                     return CheckResult.OK;
@@ -147,10 +166,14 @@ public class ReliabilityChecker {
                 }
 
             } else {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "There is no content inside the receipt element received by the responding gateway", signalMessage.getMessageInfo().getMessageId(), signalMessage.getMessageInfo().getMessageId(), null, MSHRole.SENDING);
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "There is no content inside the receipt element received by the responding gateway", null, null);
+                ex.setMshRole(MSHRole.SENDING);
+                ex.setSignalMessageId(signalMessage.getMessageInfo().getMessageId());
+                throw ex;
             }
 
         }
+        ReliabilityChecker.LOG.warn("Reliability check failed, check your configuration.");
         return CheckResult.FAIL;
 
     }

@@ -35,7 +35,9 @@ public class NonRepudiationChecker {
         }
 
         if (nodes == null) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "No Reference Data found in either security header or nonrepudiationinformation", null, MSHRole.SENDING);
+            EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "No Reference Data found in either security header or nonrepudiationinformation", null, null);
+            e.setMshRole(MSHRole.SENDING);
+            throw e;
         }
 
         return nodes;

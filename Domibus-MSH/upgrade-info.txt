@@ -1,6 +1,7 @@
-Domibus 3.1-RC1: Replace the war file. There have been some changes to the database, please use the new script.
-
-Domibus 3.0 RC-1:   Replace the war file. There have been some changes to the database, please use the new script.
+Domibus 3.1 RC-2:   Replace the war and jar(plugins) files. There have been some changes to the MessageFilter, please use a clean database.
+---
+Domibus 3.1 RC-1:   Domibus 3.1 is a major release that has to be installed from scratch.
+                    There have been some changes to the database, please use the new script.
                     There is a new PMode generation plugin available (BETA-3), use this to regenerate your PMode files
 ---
 Domibus 3.0 BETA-2: Replace the war file.

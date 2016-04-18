@@ -57,9 +57,11 @@
                 <exclude>webapps/holodeck/**/*</exclude>
                 <exclude>conf/Catalina/**/*</exclude>
                 <exclude>conf/domibus/db/</exclude>
-                <!--<exclude>conf/domibus/keystores/</exclude>-->
-                <!--<exclude>conf/domibus/policies/</exclude>-->
+                <exclude>conf/domibus/keystores/</exclude>
+                <exclude>conf/domibus/policies/</exclude>
+                <exclude>conf/domibus/example/</exclude>
                 <exclude>conf/domibus/temp/</exclude>
+                <exclude>conf/domibus/plugins/</exclude>
             </excludes>
             <filtered>false</filtered>
         </fileSet>
@@ -73,6 +75,12 @@
             <filtered>false</filtered>
         </file>
         <file>
+            <source>${project.basedir}/Quick_Start_Guide.pdf</source>
+            <outputDirectory>/</outputDirectory>
+            <destName>Quick_Start_Guide.pdf</destName>
+            <filtered>false</filtered>
+        </file>
+        <file>
             <source>${project.basedir}/changelog.txt</source>
             <outputDirectory>/</outputDirectory>
             <filtered>false</filtered>
@@ -83,8 +91,8 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.basedir}/../Domibus-default-jms-plugin/target/domibus-default-jms-plugin-${project.version}.jar</source>
-            <outputDirectory>domibus/conf/domibus/plugins/lib</outputDirectory>
+            <source>${project.basedir}/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
+            <outputDirectory>domibus/conf/domibus/plugins/config</outputDirectory>
             <filtered>false</filtered>
         </file>
         <file>
@@ -98,12 +106,17 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.basedir}/src/main/conf/pmodes/domibus-gw-sample-pmode.xml</source>
-            <outputDirectory>domibus/conf/domibus/pmodes</outputDirectory>
+            <source>${project.basedir}/src/main/conf/domibus/policies/esensPolicy.xml</source>
+            <outputDirectory>domibus/conf/domibus/policies</outputDirectory>
             <filtered>false</filtered>
         </file>
         <file>
             <source>${project.basedir}/src/main/assembly/setenv.bat</source>
+            <outputDirectory>domibus/bin</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/src/main/assembly/setenv.sh</source>
             <outputDirectory>domibus/bin</outputDirectory>
             <filtered>false</filtered>
         </file>

@@ -49,7 +49,7 @@
         <property name="jndiName" value="jdbc/cipaeDeliveryDs"/>
     </bean>
 
-    <bean id="entityManagerFactory"
+    <bean id="entityManagerFactory" primary="true"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="packagesToScan" value="eu.domibus"/>
         <property name="dataSource" ref="domibusJDBC-XADataSource"/>

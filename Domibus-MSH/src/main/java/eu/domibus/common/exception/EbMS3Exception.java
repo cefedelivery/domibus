@@ -66,26 +66,11 @@ public class EbMS3Exception extends Exception {
      * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
      */
     //private final String description;
-    public EbMS3Exception(final ErrorCode.EbMS3ErrorCode errorCode, final String errorDetail, final String refToMessageId, final String signalMessageId, final Throwable cause, final MSHRole mshRole) {
+    public EbMS3Exception(final ErrorCode.EbMS3ErrorCode errorCode, final String errorDetail, final String refToMessageId, final Throwable cause) {
         super(cause);
         this.errorCode = errorCode;
         this.errorDetail = errorDetail;
         this.refToMessageId = refToMessageId;
-        this.mshRole = mshRole;
-        this.signalMessageId = signalMessageId;
-
-    }
-
-    public EbMS3Exception(final ErrorCode.EbMS3ErrorCode errorCode, final String errorDetail, final String refToMessageId, final Throwable cause, final MSHRole mshRole) {
-        this(errorCode, errorDetail, refToMessageId, null, cause, mshRole);
-    }
-
-    public EbMS3Exception(final ErrorCode.EbMS3ErrorCode errorCode, final String refToMessageId, final Throwable cause, final MSHRole mshRole) {
-        this(errorCode, "", refToMessageId, cause, mshRole);
-    }
-
-    public EbMS3Exception(final ErrorCode.EbMS3ErrorCode errorCode, final Throwable cause, final MSHRole mshRole) {
-        this(errorCode, "", cause, mshRole);
     }
 
     public boolean isRecoverable() {

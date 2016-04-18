@@ -116,7 +116,9 @@ public class MessageSender implements MessageListener {
             final SOAPMessage response = this.mshDispatcher.dispatch(soapMessage, pModeKey);
             errorCheckResult = this.ebmsErrorChecker.check(response);
             if (EbmsErrorChecker.CheckResult.MARSHALL_ERROR.equals(errorCheckResult)) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occured during marshalling", messageId, null, MSHRole.SENDING);
+                EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occured during marshalling", messageId, null);
+                e.setMshRole(MSHRole.SENDING);
+                throw e;
             }
             reliabilityCheckSuccessful = this.reliabilityChecker.check(soapMessage, response, pModeKey);
         } catch (final SOAPFaultException soapFEx) {

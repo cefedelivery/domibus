@@ -32,8 +32,7 @@
        http://activemq.apache.org/schema/core/activemq-core.xsd">
 
 
-<amq:queue id="notifyBackendJmsQueue"
-               physicalName="domibus.notification.jms"/>
+
 
     <bean id="backendJms" class="eu.domibus.plugin.jms.BackendJMSImpl">
         <constructor-arg value="Jms"/>
@@ -55,6 +54,8 @@
         <property name="sessionAcknowledgeMode" value="0"/>
     </bean>
 
+    <amq:queue id="notifyBackendJmsQueue"
+               physicalName="domibus.notification.jms"/>
     <amq:queue id="pluginToBackendQueue"
                physicalName="domibus.backend.jms.replyQueue"/>
     <amq:queue id="businessMessageOutQueue"

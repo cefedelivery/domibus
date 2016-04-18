@@ -49,6 +49,7 @@ public class CachingPModeProvider extends PModeProvider {
     private Configuration configuration;
 
 
+    //@Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
     protected synchronized Configuration getConfiguration() {
         if (this.configuration == null) {
             this.init();
@@ -57,10 +58,10 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
     public void init() {
         if (!this.configurationDAO.configurationExists()) {
-            CachingPModeProvider.LOG.warn("No processing modes found. To exchange messages, upload configuration file through the web gui.");
-            return;
+            throw new IllegalStateException("No processing modes found. To exchange messages, upload configuration file through the web gui.");
         }
         this.configuration = this.configurationDAO.readEager();
     }
@@ -84,14 +85,14 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
         if (candidates.isEmpty()) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null, null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
         }
         for (final LegConfiguration candidate : candidates) {
             if (candidate.getService().getName().equals(service) && candidate.getAction().getName().equals(action)) {
                 return candidate.getName();
             }
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null, null);
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
     }
 
     @Override
@@ -101,7 +102,7 @@ public class CachingPModeProvider extends PModeProvider {
                 return action1.getName();
             }
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching action found", null, null, null);
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching action found", null, null);
     }
 
     @Override
@@ -111,10 +112,11 @@ public class CachingPModeProvider extends PModeProvider {
                 return service1.getName();
             }
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No machting service found", null, null, null);
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No machting service found", null, null);
     }
 
     @Override
+    //@Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
     protected String findPartyName(final Collection<PartyId> partyId) throws EbMS3Exception {
         String partyIdType = "";
         for (final Party party : this.getConfiguration().getBusinessProcesses().getParties()) {
@@ -125,7 +127,7 @@ public class CachingPModeProvider extends PModeProvider {
                         try {
                             URI.create(partyIdType);
                         } catch (final IllegalArgumentException e) {
-                            final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, e, null);
+                            final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "no matching party found", null, e);
                             ex.setErrorDetail("PartyId " + id.getValue() + " is not a valid URI [CORE] 5.2.2.3");
                             throw ex;
                         }
@@ -141,7 +143,7 @@ public class CachingPModeProvider extends PModeProvider {
                 }
             }
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "No matching party found", null, null, null);
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "No matching party found", null, null);
     }
 
     @Override
@@ -155,7 +157,7 @@ public class CachingPModeProvider extends PModeProvider {
                 return agreement.getName();
             }
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreementRef found", null, null, null);//FIXME: Throw ValueInconsistent if CPA not recognized [5.2.2.7]
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreementRef found", null, null);
     }
 
     @Override

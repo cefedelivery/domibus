@@ -112,6 +112,9 @@ public class MessagingDao extends BasicDao<Messaging> {
         final Query payloadsQuery = em.createNamedQuery("Messaging.findPartInfosForMessage");
         payloadsQuery.setParameter("MESSAGE_ID", messageId);
 
+        if(payloadsQuery.getResultList().isEmpty())
+            return;
+
         final Query emptyQuery = em.createNamedQuery("Messaging.emptyPayloads");
         emptyQuery.setParameter("PARTINFOS", payloadsQuery.getResultList());
         emptyQuery.executeUpdate();

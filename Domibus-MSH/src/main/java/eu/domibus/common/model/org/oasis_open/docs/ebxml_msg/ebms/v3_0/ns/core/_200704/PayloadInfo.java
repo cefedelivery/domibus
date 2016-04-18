@@ -85,7 +85,8 @@ public class PayloadInfo {
 
         final PayloadInfo that = (PayloadInfo) o;
 
-        return this.partInfo.equals(that.partInfo);
+
+        return !(this.partInfo != null ? !this.partInfo.equals(that.partInfo) : that.partInfo != null);
 
     }
 

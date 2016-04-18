@@ -61,9 +61,9 @@ public class JMSMessageConstants {
     public static final String PAYLOAD_NAME_FORMAT = PAYLOAD_NAME_PREFIX + "{0}";
     private static final String PAYLOAD_DESCRIPTION_SUFFIX = "-description";
     public static final String PAYLOAD_DESCRIPTION_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_DESCRIPTION_SUFFIX;
-    private static final String PAYLOAD_MIME_TYPE_SUFFIX = "-MimeType";
+    private static final String PAYLOAD_MIME_TYPE_SUFFIX = "-mimeType";
     public static final String PAYLOAD_MIME_TYPE_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_MIME_TYPE_SUFFIX;
-    private static final String PAYLOAD_MIME_CONTENT_ID_SUFFIX = "-MimeContentId";
+    private static final String PAYLOAD_MIME_CONTENT_ID_SUFFIX = "-mimeContentId";
     public static final String PAYLOAD_MIME_CONTENT_ID_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_MIME_CONTENT_ID_SUFFIX;
 
 

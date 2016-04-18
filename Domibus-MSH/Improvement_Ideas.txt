@@ -1,5 +1,6 @@
 - Static party table referenced by message and logging.
 - Validate incomming messages from the backend
+- enable lazy loading
 - [CORE 5.1.3.2] strongly recommends schemalocation attributes for outgoing messages
 - develop secure implementation for eu.domibus.ebms3.security.KeystorePasswordCallback
 - if AS4 callback support is to be implemented the reliability checker approach has to move from memory to database

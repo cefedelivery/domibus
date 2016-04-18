@@ -26,11 +26,10 @@ import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._
 import eu.domibus.messaging.NotifyMessageCreator;
 import eu.domibus.messaging.RecieveFailedMessageCreator;
 import eu.domibus.plugin.NotificationListener;
-import eu.domibus.plugin.routing.BackendFilter;
-import eu.domibus.plugin.routing.CriteriaFactory;
-import eu.domibus.plugin.routing.IRoutingCriteria;
-import eu.domibus.plugin.routing.RoutingCriteria;
+import eu.domibus.plugin.routing.*;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -51,12 +50,17 @@ import java.util.Map;
 @Service("backendNotificationService")
 public class BackendNotificationService {
 
+    private static final Log LOG = LogFactory.getLog(BackendNotificationService.class);
+
     @Qualifier("jmsTemplateNotify")
     @Autowired
     private JmsOperations jmsOperations;
 
     @Autowired
     private BackendFilterDao backendFilterDao;
+
+    @Autowired
+    private RoutingService routingService;
 
     @Autowired
     private MessageLogDao messageLogDao;
@@ -93,7 +97,18 @@ public class BackendNotificationService {
     }
 
     public void notifyOfIncoming(final UserMessage userMessage) {
-        final List<BackendFilter> backendFilter = backendFilterDao.findAll();
+        List<BackendFilter> backendFilter = backendFilterDao.findAll();
+        if (backendFilter.isEmpty()) { // There is no saved backendfilter configuration. Most likely the backends have not been configured yet
+            backendFilter = routingService.getBackendFilters();
+            if (backendFilter.isEmpty()) {
+                LOG.error("There are no backend plugins deployed on this server");
+            }
+            if (backendFilter.size() > 1) { //There is more than one unconfigured backend available. For security reasons we cannot send the message just to the first one
+                LOG.error("There are multiple unconfigured backend plugins available. Please set up the configuration using the \"Message filter\" pannel of the administrative GUI.");
+                backendFilter.clear(); // empty the list so its handled in the desired way.
+            }
+            //If there is only one backend deployed we send it to that as this is most likely the intent
+        }
         for (final BackendFilter filter : backendFilter) {
             boolean matches = true;
             for (final RoutingCriteria routingCriteria : filter.getRoutingCriterias()) {
@@ -108,6 +123,7 @@ public class BackendNotificationService {
                 return;
             }
         }
+        LOG.error("No backend responsible for message [" + userMessage.getMessageInfo().getMessageId() + "] found. Sending notification to [" + unknownReceiverQueue + "]");
         jmsOperations.send(unknownReceiverQueue, new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED));
     }
 

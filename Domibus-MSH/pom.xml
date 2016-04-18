@@ -25,7 +25,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.1-RC1</version>
+        <version>3.1-RC2</version>
     </parent>
 
     <artifactId>domibus-MSH</artifactId>
@@ -54,26 +54,8 @@
             <id>smartbear</id>
             <url>http://smartbearsoftware.com/repository/maven2</url>
         </pluginRepository>
-        <pluginRepository>
-            <id>webgate-digit-third-party</id>
-            <url>https://webgate.ec.europa.eu/CITnet/nexus/content/repositories/thirdparty</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>webgate-digit</id>
-            <url>https://webgate.ec.europa.eu/CITnet/nexus/content/repositories/public</url>
-        </pluginRepository>
     </pluginRepositories>
     <repositories>
-        <repository>
-            <id>webgate-digit</id>
-            <url>https://webgate.ec.europa.eu/CITnet/nexus/content/repositories/thirdparty</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
         <repository>
             <id>joinup.nexus</id>
             <url>https://joinup.ec.europa.eu/nexus/content/groups/public</url>
@@ -222,6 +204,12 @@
                     <configuration>
                         <descriptors>
                             <descriptor>src/main/assembly/tomcat-full.xml
+                            </descriptor>
+                            <descriptor>src/main/assembly/default-jms-plugin.xml
+                            </descriptor>
+                            <descriptor>src/main/assembly/default-ws-plugin.xml
+                            </descriptor>
+                            <descriptor>src/main/assembly/sample-configuration-and-testing.xml
                             </descriptor>
                             <descriptor>src/main/assembly/configuration-only.xml
                             </descriptor>
@@ -387,8 +375,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <db:configuration xmlns:db="http://domibus.eu/configuration"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://domibus.eu/configuration file:/C:/development/git-repos/domibus/Domibus-MSH/domibus-configuration.xsd" party="domibus_gw">
+	xsi:schemaLocation="http://domibus.eu/configuration file:/C:/development/git-repos/domibus/Domibus-MSH/domibus-configuration.xsd" party="blue_gw">
 	<mpcs>
 		<mpc name="defaultMpc" 
 				qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
@@ -21,14 +21,14 @@
 			<partyIdTypes>
 				<partyIdType name="partyTypeEmpty" value=""/>
 			</partyIdTypes>
-						<party name="red_gw" 
-					endpoint="http://localhost:7001/domibus-weblogic/services/msh" 
+			<party name="red_gw"
+				    endpoint="http://<red_hostname>:8080/domibus/services/msh"
 					allowChunking="false"
 >
 				<identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-red" partyIdType="partyTypeEmpty"/>
 			</party>
 			<party name="blue_gw" 
-					endpoint="http://localhost:8080/domibus/services/msh" 
+					endpoint="http://<blue_hostname>:8080/domibus/services/msh"
 					allowChunking="false"
 >
 				<identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-blue" partyIdType="partyTypeEmpty"/>
@@ -56,7 +56,7 @@
 		</properties>				
 		<payloadProfiles>
 			<payload name="businessContentPayload"
-					cid="cid:payload" 
+					cid="cid:message"
 					required="true"
 					mimeType="text/xml"/>
 			<payload name="businessContentAttachment"
@@ -71,7 +71,7 @@
 		</payloadProfiles>
 		<securities>
 			<security name="eSens"
-					policy="esens_policy.xml"
+					policy="esensPolicy.xml"
 					signatureMethod="RSA_SHA256" />	
 			<security name="noSigNoEnc"
 					policy="doNothingPolicy.xml"
@@ -109,8 +109,7 @@
 					propertySet="ecodexPropertySet"
 					payloadProfile="MessageProfile"
 					errorHandling="demoErrorHandling"
-					compressPayloads="true">
-					</legConfiguration>
+					compressPayloads="true"/>
 		</legConfigurations>
 <process name="tc1Process" 
 		agreement="agreementEmpty" 

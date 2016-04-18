@@ -66,7 +66,7 @@
         <property name="password" value=""/>
     </bean>
 
-    <bean id="entityManagerFactory"
+    <bean id="entityManagerFactory" primary="true"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="persistenceXmlLocation">
             <value>persistence.xml</value>

@@ -20,7 +20,6 @@
 package eu.domibus.ebms3.common.dao;
 
 import eu.domibus.common.ErrorCode;
-import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.CachingPModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Identifier;
@@ -34,6 +33,8 @@ import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
@@ -58,6 +59,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     private Collection<eu.domibus.common.model.configuration.Process> dynamicReceiverProcesses;
 
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
     public void init() {
         super.init();
         dynamicReceiverProcesses = findDynamicReceiverProcesses();
@@ -77,13 +79,14 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     }
 
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
     public String findPModeKeyForUserMesssage(final UserMessage userMessage) throws EbMS3Exception {
 
         try {
             return super.findPModeKeyForUserMesssage(userMessage);
         } catch (final EbMS3Exception e) {
             //do dynamic things
-            LOG.error("Do dynamic: ", e);
+            LOG.debug("Do dynamic: ", e);
             doDynamicThings(userMessage);
 
         }
@@ -105,7 +108,8 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             }
         }
         if (candidates.isEmpty()) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, userMessage.getMessageInfo().getMessageId(), null, MSHRole.SENDING);
+
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no matching dynamic discovery processes found for message.", userMessage.getMessageInfo().getMessageId(), null);
         }
 
         final PartyId partyId = userMessage.getPartyInfo().getTo().getPartyId().iterator().next();

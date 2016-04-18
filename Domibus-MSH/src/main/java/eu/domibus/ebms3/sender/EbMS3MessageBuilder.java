@@ -93,7 +93,9 @@ public class EbMS3MessageBuilder {
             //TODO: locale is static
             soapMessage.getSOAPBody().addFault(SOAPConstants.SOAP_RECEIVER_FAULT, "An error occurred while processing your request. Please check the message header for more details.", Locale.ENGLISH);
         } catch (final SOAPException e) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "An error occurred while processing your request. Please check the message header for more details.", e, MSHRole.RECEIVING);
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "An error occurred while processing your request. Please check the message header for more details.", null, e);
+            ex.setMshRole(MSHRole.RECEIVING);
+            throw ex;
         }
 
         return soapMessage;
@@ -123,7 +125,9 @@ public class EbMS3MessageBuilder {
                 messageId = this.messageIdGenerator.generateMessageId();
                 msgInfo.setMessageId(messageId);
                 msgInfo.setTimestamp(new Date());
-
+                if(signalMessage.getError() != null && signalMessage.getError().iterator().hasNext()) {
+                    msgInfo.setRefToMessageId(signalMessage.getError().iterator().next().getRefToMessageInError());
+                }
 
                 signalMessage.setMessageInfo(msgInfo);
             }
@@ -132,7 +136,7 @@ public class EbMS3MessageBuilder {
             message.saveChanges();
 
         } catch (final SAXParseException e) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Payload in body must be valid XML", messageId, e, null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Payload in body must be valid XML", messageId, e);
         } catch (final JAXBException | SOAPException | ParserConfigurationException | IOException | SAXException ex) {
             throw new SendMessageException(ex);
         }
@@ -156,7 +160,14 @@ public class EbMS3MessageBuilder {
             return;
         }
         final AttachmentPart attachmentPart = message.createAttachmentPart(dataHandler);
-        attachmentPart.setContentId(partInfo.getHref().substring("cid:".length()));
+        String href = partInfo.getHref();
+        if(href.contains("cid:")) {
+            href = href.substring(href.lastIndexOf("cid:") + "cid:".length());
+        }
+        if(!href.startsWith("<")) {
+            href = "<" + href + ">";
+        }
+        attachmentPart.setContentId(href);
         attachmentPart.setContentType(partInfo.getMime());
         message.addAttachmentPart(attachmentPart);
     }

@@ -106,6 +106,7 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
         pushQueueMessage(messageId, connection, JMS_NOT_QUEUE_NAME);
         final MapMessage mapMessage = new ActiveMQMapMessage();
         backendJMSImpl.downloadMessage(messageId, mapMessage);
+        System.out.println("MapMessage: " + mapMessage);
         mapMessage.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, JMSMessageConstants.MESSAGE_TYPE_SUBMIT);
         // The downloaded MapMessage is used as input parameter for the real Test case here!
         backendJMSImpl.receiveMessage(mapMessage);

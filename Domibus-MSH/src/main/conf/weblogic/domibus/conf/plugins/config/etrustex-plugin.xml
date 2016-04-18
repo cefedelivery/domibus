@@ -19,11 +19,14 @@
   -->
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:util="http://www.springframework.org/schema/util"
        xmlns:c="http://www.springframework.org/schema/c"
        xmlns:p="http://www.springframework.org/schema/p"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd">
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd">
 	
 	<bean id="notifyBackendEtrustexQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
 		<property name="jndiName" value="jms/domibus.notification.etrustex" />
@@ -97,7 +100,6 @@
 
 
 
-
     <bean id="replyJmsTemplate"
           class="org.springframework.jms.core.JmsTemplate"
           c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
@@ -126,7 +128,19 @@
           p:sessionTransacted="true"
           p:sessionAcknowledgeMode="0"/>
 
-    <!--util:properties id="defaultValues" location="${domibus.config.location}/plugins/config/jms-business-defaults.properties"/-->
-    <!-- Example ends here -->
+	<!-- eTrustex properties -->
+	<util:properties id="eTrustexProperties">
+		<prop key="eTrustex.sender_role">http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</prop>
+		<prop key="eTrustex.receiver_role">http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</prop>
+		<prop key="eTrustex.party_ns">urn:oasis:names:tc:ebcore:partyid-type:unregistered:</prop>
+		<prop key="eTrustex.serviceName">ConnectivityService</prop>
+		<prop key="eTrustex.service_type">EU-CEG</prop>
+		<prop key="eTrustex.originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</prop>
+		<prop key="eTrustex.finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</prop>
+		<prop key="eTrustex.outbound_action">SubmitMessage</prop>
+		<prop key="eTrustex.wrapper_type">BINARY</prop>
+		<prop key="eTrustex.payload.contentId">cid:message</prop>
+	</util:properties>
+
 
 </beans>

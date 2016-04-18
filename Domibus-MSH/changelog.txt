@@ -1,3 +1,12 @@
+Domibus 3.1-RC2
+- Fixed issue on JMS plugin when no ServiceType is set
+- Fixed a MimeType issue when compression is enabled
+- Validated that payload href is always preceded by "cid:".
+- Fixed connectivity issue, 200 OK with a valid receipt rejected by Domibus
+- Fixed a bug on RefToMessageId missing from the receipt when signaling an error
+- Fixed two generic AS4 Minder test cases failing due to invalid error code returned for expected decompression issues.
+- Pass conformance tests against Minder
+- Separate packaging for sample configuration and testing
 Domibus 3.1-RC1
 - Added support for clustering
 - Added support of Weblogic 12c

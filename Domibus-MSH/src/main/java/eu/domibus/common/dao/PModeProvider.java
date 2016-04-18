@@ -73,7 +73,7 @@ public abstract class PModeProvider {
         this.configurationDAO = configurationDAO;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, noRollbackFor = IllegalStateException.class)
     public String findPModeKeyForUserMesssage(final UserMessage userMessage) throws EbMS3Exception {
         final String agreementRef;
         final String senderParty;
@@ -93,7 +93,7 @@ public abstract class PModeProvider {
 
 
             if ((action.equals(PModeProvider.EBMS3_TEST_ACTION) && (!service.equals(PModeProvider.EBMS3_TEST_SERVICE)))) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "ebMS3 Test Service: " + PModeProvider.EBMS3_TEST_SERVICE + " and ebMS3 Test Action: " + PModeProvider.EBMS3_TEST_ACTION + " can only be used together [CORE] 5.2.2.9", null, null, null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "ebMS3 Test Service: " + PModeProvider.EBMS3_TEST_SERVICE + " and ebMS3 Test Action: " + PModeProvider.EBMS3_TEST_ACTION + " can only be used together [CORE] 5.2.2.9", userMessage.getMessageInfo().getMessageId(), null);
             }
 
             return senderParty + ":" + receiverParty + ":" + service + ":" + action + ":" + agreementRef + ":" + leg;

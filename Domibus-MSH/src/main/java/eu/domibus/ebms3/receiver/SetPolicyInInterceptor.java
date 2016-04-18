@@ -139,7 +139,8 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             throw new Fault(e);
         } catch (IOException | ParserConfigurationException | SAXException | JAXBException e) {
             SetPolicyInInterceptor.LOG.error("", e); // Those errors are not expected
-            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messaging.getUserMessage().getMessageInfo().getMessageId() : "unknown", e, MSHRole.RECEIVING);
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messaging.getUserMessage().getMessageInfo().getMessageId() : "unknown", e);
+            ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ex);
         }
 

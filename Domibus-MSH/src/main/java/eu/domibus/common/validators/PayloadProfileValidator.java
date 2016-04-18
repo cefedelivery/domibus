@@ -62,7 +62,7 @@ public class PayloadProfileValidator {
                 }
             }
             if (profiled == null) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling for this exchange does not include a payload with CID: " + cid, messaging.getUserMessage().getMessageInfo().getMessageId(), null, null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling for this exchange does not include a payload with CID: " + cid, messaging.getUserMessage().getMessageInfo().getMessageId(), null);
             }
             modifiableProfileList.remove(profiled);
             final Collection<Property> partProperties = partInfo.getPartProperties().getProperties();
@@ -74,11 +74,11 @@ public class PayloadProfileValidator {
                 }
             }
             if (mime == null) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling for this exchange requires all message parts to declare a MimeType property" + partInfo.getHref(), messaging.getUserMessage().getMessageInfo().getMessageId(), null, null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling for this exchange requires all message parts to declare a MimeType property" + partInfo.getHref(), messaging.getUserMessage().getMessageInfo().getMessageId(), null);
             }
             if ((!profiled.getMimeType().equalsIgnoreCase(mime)) ||
                     (partInfo.isInBody() != profiled.isInBody()))//|| (profiled.getMaxSize() > 0 && profiled.getMaxSize() < partInfo.getBinaryData().length)) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling error: expected: " + profiled + ", got " + partInfo, messaging.getUserMessage().getMessageInfo().getMessageId(), null, null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling error: expected: " + profiled + ", got " + partInfo, messaging.getUserMessage().getMessageInfo().getMessageId(), null);
         } //FIXME: size handling not possible with datahandlers
            /* size += partInfo.getBinaryData().length;
             if (profile.getMaxSize() > 0 && size > profile.getMaxSize()) {

@@ -86,7 +86,8 @@ public class FaultInHandler extends AbstractFaultHandler {
             if (!(cause instanceof EbMS3Exception)) {
                 //do Mapping of non ebms exceptions
                 if (cause instanceof NoMatchingPModeFoundException) {
-                    ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, cause.getMessage(), ((NoMatchingPModeFoundException) cause).getMessageId(), cause, MSHRole.RECEIVING);
+                    ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, cause.getMessage(), ((NoMatchingPModeFoundException) cause).getMessageId(), cause);
+                    ebMS3Exception.setMshRole(MSHRole.RECEIVING);
                 } else {
 
                     if (cause instanceof WebServiceException) {
@@ -94,7 +95,8 @@ public class FaultInHandler extends AbstractFaultHandler {
                             ebMS3Exception = (EbMS3Exception) cause.getCause();
                         }
                     } else {
-                        ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "", cause, MSHRole.RECEIVING);
+                        ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "unknown error occurred", null, cause);
+                        ebMS3Exception.setMshRole(MSHRole.RECEIVING);
                     }
                 }
 
@@ -109,9 +111,11 @@ public class FaultInHandler extends AbstractFaultHandler {
                 //FIXME: use a consistent way of property exchange between JAXWS and CXF message model. This: PhaseInterceptorChain
                 final String messageId = (String) PhaseInterceptorChain.getCurrentMessage().getContextualProperty("ebms.messageid");
 
-                ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0103, exception.getMessage(), messageId, exception, MSHRole.RECEIVING);
+                ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0103, exception.getMessage(), messageId, exception);
+                ebMS3Exception.setMshRole(MSHRole.RECEIVING);
             } else {
-                ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "", null, MSHRole.RECEIVING);
+                ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "unknown error occurred", null, null);
+                ebMS3Exception.setMshRole(MSHRole.RECEIVING);
             }
 
             this.processEbMSError(context, ebMS3Exception);

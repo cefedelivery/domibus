@@ -33,6 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataHandler;
+import javax.mail.util.ByteArrayDataSource;
+import java.io.IOException;
 
 /**
  * This class is responsible for compression handling of incoming and outgoing ebMS3 messages.
@@ -77,8 +79,9 @@ public class CompressionService {
             }
 
             if (mimeType == null || mimeType.isEmpty()) {
-                //TODO: throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0007, "No mime type found for payload with cid:" + partInfo.getHref(), null, MSHRole.SENDING);
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), null, MSHRole.SENDING);
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), null, null);
+                ex.setMshRole(MSHRole.SENDING);
+                throw ex;
             }
 
             //if mimetype of payload is not considered to be compressed, skip
@@ -90,6 +93,14 @@ public class CompressionService {
             compressionProperty.setName(CompressionService.COMPRESSION_PROPERTY_KEY);
             compressionProperty.setValue(CompressionService.COMPRESSION_PROPERTY_VALUE);
             partInfo.getPartProperties().getProperties().add(compressionProperty);
+
+            try {
+                DataHandler gZipDataHandler = new DataHandler(new ByteArrayDataSource(partInfo.getPayloadDatahandler().getInputStream(), COMPRESSION_PROPERTY_VALUE));
+                partInfo.setPayloadDatahandler(gZipDataHandler);
+            } catch (IOException e) {
+                LOG.error("Error while setting the gzip data handler", e);
+            }
+
             CompressionService.LOG.debug("Payload with cid: " + partInfo.getHref() + " and mime type: " + mimeType + " will be compressed");
         }
 
@@ -136,8 +147,9 @@ public class CompressionService {
             partInfo.getPartProperties().getProperties().remove(compressionProperty);
 
             if (mimeType == null) {
-                //TODO: throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0007, "No mime type found for payload with cid:" + partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId(), null, MSHRole.RECEIVING);
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId(), null, MSHRole.RECEIVING);
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId(), null);
+                ex.setMshRole(MSHRole.RECEIVING);
+                throw ex;
             }
             partInfo.setPayloadDatahandler(new DataHandler(new DecompressionDataSource(partInfo.getPayloadDatahandler().getDataSource(), mimeType)));
             CompressionService.LOG.debug("Payload with cid: " + partInfo.getHref() + " and mime type: " + mimeType + " will be decompressed");

@@ -71,6 +71,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.zip.ZipException;
 
 /**
  * This method is responsible for the receiving of ebMS3 messages and the sending of signal messages like receipts or ebMS3 errors in return
@@ -199,7 +200,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             for (final Property property : partInfo.getPartProperties().getProperties()) {
                 if (Property.CHARSET.equals(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, property.getValue() + " is not a valid Charset", messaging.getUserMessage().getMessageInfo().getMessageId(), null, MSHRole.RECEIVING);
+                    EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, property.getValue() + " is not a valid Charset", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
+                    ex.setMshRole(MSHRole.RECEIVING);
+                    throw ex;
                 }
             }
         }
@@ -260,7 +263,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 assert false;
                 throw new RuntimeException(e);
             } catch (final TransformerException e) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0201, "Could not generate Receipt. Check security header and non-repudiation settings", null, e, MSHRole.RECEIVING);
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0201, "Could not generate Receipt. Check security header and non-repudiation settings", null, e);
+                ex.setMshRole(MSHRole.RECEIVING);
+                throw ex;
             }
         }
 
@@ -289,7 +294,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             boolean payloadFound = false;
             if (cid == null || cid.isEmpty() || cid.startsWith("#")) {
                 if (bodyloadFound) {
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "More than one Partinfo referencing the soap body found", messaging.getUserMessage().getMessageInfo().getMessageId(), null, MSHRole.RECEIVING);
+                    EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "More than one Partinfo referencing the soap body found", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
+                    ex.setMshRole(MSHRole.RECEIVING);
+                    throw ex;
                 }
                 bodyloadFound = true;
                 payloadFound = true;
@@ -318,13 +325,20 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 }
             }
             if (!payloadFound) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0011, "No Attachment found for cid: " + cid + " of message: " + messaging.getUserMessage().getMessageInfo().getMessageId(), messaging.getUserMessage().getMessageInfo().getMessageId(), null, MSHRole.RECEIVING);
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0011, "No Attachment found for cid: " + cid + " of message: " + messaging.getUserMessage().getMessageInfo().getMessageId(), messaging.getUserMessage().getMessageInfo().getMessageId(), null);
+                ex.setMshRole(MSHRole.RECEIVING);
+                throw ex;
             }
         }
 
         final boolean compressed = this.compressionService.handleDecompression(messaging.getUserMessage(), legConfiguration);
-        this.payloadProfileValidator.validate(messaging, pmodeKey);
-        this.propertyProfileValidator.validate(messaging, pmodeKey);
+        try {
+            this.payloadProfileValidator.validate(messaging, pmodeKey);
+            this.propertyProfileValidator.validate(messaging, pmodeKey);
+        } catch (EbMS3Exception e) {
+            e.setMshRole(MSHRole.RECEIVING);
+            throw e;
+        }
         MSHWebservice.LOG.debug("Compression for message with id: " + messaging.getUserMessage().getMessageInfo().getMessageId() + " applied: " + compressed);
         final MessageLogEntry messageLogEntry = new MessageLogEntry();
         messageLogEntry.setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId());
@@ -335,7 +349,21 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         messageLogEntry.setMpc((mpc == null || mpc.isEmpty()) ? Mpc.DEFAULT_MPC : mpc);
         messageLogEntry.setMessageStatus(MessageStatus.RECEIVED);
         this.messageLogDao.create(messageLogEntry);
-        this.messagingDao.create(messaging);
+        try {
+            this.messagingDao.create(messaging);
+        } catch (Exception exc) {
+            LOG.error("Could not persist message " + exc.getMessage());
+            if(exc instanceof ZipException ||
+                    (exc.getCause() != null && exc.getCause() instanceof ZipException)) {
+                LOG.debug("InstanceOf ZipException");
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), messaging.getUserMessage().getMessageInfo().getMessageId(), exc);
+                ex.setMshRole(MSHRole.RECEIVING);
+                throw ex;
+
+            }
+            throw exc;
+        }
+
         return messageLogEntry.getMessageId();
     }
 

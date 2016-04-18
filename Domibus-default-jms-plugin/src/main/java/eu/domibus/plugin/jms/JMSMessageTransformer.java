@@ -218,17 +218,17 @@ public class JMSMessageTransformer
 
             target.setAction(messageIn.getStringProperty(ACTION));
             if (!hasLength(target.getAction())) {
-                target.setFromRole(properties.getProperty(ACTION));
+                target.setAction(properties.getProperty(ACTION));
             }
 
             target.setService(messageIn.getStringProperty(SERVICE));
             if (!hasLength(target.getService())) {
-                target.setFromRole(properties.getProperty(SERVICE));
+                target.setService(properties.getProperty(SERVICE));
             }
 
             target.setServiceType(messageIn.getStringProperty(SERVICE_TYPE));
             if (!hasLength(target.getServiceType())) {
-                target.setFromRole(properties.getProperty(SERVICE_TYPE));
+                target.setServiceType(properties.getProperty(SERVICE_TYPE));
             }
 
             target.setAgreementRef(messageIn.getStringProperty(AGREEMENT_REF));

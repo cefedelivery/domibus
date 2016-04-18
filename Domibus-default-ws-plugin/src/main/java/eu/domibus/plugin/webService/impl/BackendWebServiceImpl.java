@@ -97,7 +97,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                 }
             }
             if (!foundPayload) {
-                if(bodyload == null) {
+                if (bodyload == null) {
                     // in this case the payload referenced in the partInfo was neither an external payload nor a bodyload
                     throw new SendMessageFault("no Payload or Bodyload found for PartInfo with href " + partInfo.getHref());
                 }
@@ -121,8 +121,10 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         try {
             messageId = this.submit(ebMSHeaderInfo);
         } catch (final MessagingProcessingException mpEx) {
+
+
             BackendWebServiceImpl.LOG.error("Message submission failed", mpEx);
-            throw new SendMessageFault("Message submission failed", mpEx);
+            throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
         }
         BackendWebServiceImpl.LOG.debug("Received message from backend to send, assigning messageID" + messageId);
         final SendResponse response = BackendWebServiceImpl.WEBSERVICE_OF.createSendResponse();
@@ -130,6 +132,12 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         return response;
     }
 
+    private FaultDetail generateFaultDetail(MessagingProcessingException mpEx) {
+        FaultDetail fd = WEBSERVICE_OF.createFaultDetail();
+        fd.setCode(mpEx.getEbms3ErrorCode().getErrorCodeName());
+        fd.setMessage(mpEx.getMessage());
+        return fd;
+    }
 
 
     private void copyPartProperties(final PayloadType payload, final PartInfo partInfo) {
@@ -217,7 +225,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     @Override
     public Collection<ErrorResultImpl> getMessageErrors(final MessageErrorsRequest messageErrorsRequest) {
-        Collection<? extends ErrorResult> res =  this.messageRetriever.getErrorsForMessage(messageErrorsRequest.getMessageID());
+        Collection<? extends ErrorResult> res = this.messageRetriever.getErrorsForMessage(messageErrorsRequest.getMessageID());
         Collection<ErrorResultImpl> result = new ArrayList<>();
         for (ErrorResult errorResult : res) {
             result.add(new ErrorResultImpl(errorResult));

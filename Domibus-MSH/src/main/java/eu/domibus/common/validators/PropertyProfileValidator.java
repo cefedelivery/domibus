@@ -69,7 +69,7 @@ public class PropertyProfileValidator {
             }
             modifiablePropertyList.remove(profiled);
             if (profiled == null) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Property profiling for this exchange does not include a property named: " + property.getName(), null, null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Property profiling for this exchange does not include a property named [" + property.getName() + "]", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
             }
 
             switch (profiled.getDatatype().toLowerCase()) {
@@ -95,8 +95,7 @@ public class PropertyProfileValidator {
         }
         for (final Property property : modifiablePropertyList) {
             if (property.isRequired()) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Required property missing: " + property, null, null);
-
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Required property missing [" + property.getName() + "]", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
             }
         }
 

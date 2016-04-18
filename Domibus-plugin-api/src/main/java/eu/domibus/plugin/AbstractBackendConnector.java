@@ -23,6 +23,7 @@ import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.messaging.PModeMismatchException;
 import eu.domibus.plugin.exception.TransformationException;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
@@ -63,11 +64,14 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     public abstract MessageRetrievalTransformer<T> getMessageRetrievalTransformer();
 
     @Override
+    @Transactional(noRollbackFor = {IllegalArgumentException.class, IllegalStateException.class})
     public final String submit(final U message) throws MessagingProcessingException {
         try {
             return this.messageSubmitter.submit(this.getMessageSubmissionTransformer().transformToSubmission(message), this.getName());
         } catch (IllegalArgumentException iaEx) {
             throw new TransformationException(iaEx);
+        } catch (IllegalStateException ise) {
+            throw new PModeMismatchException(ise);
         }
     }
 

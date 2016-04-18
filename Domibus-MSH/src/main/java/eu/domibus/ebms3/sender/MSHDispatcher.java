@@ -54,7 +54,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPBinding;
-import java.net.Authenticator;
 import java.util.Properties;
 
 
@@ -92,7 +91,10 @@ public class MSHDispatcher {
         try {
             policy = policyFactory.parsePolicy("policies/" + pModeProvider.getLegConfiguration(pModeKey).getSecurity().getPolicy());
         } catch (final ConfigurationException e) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e, MSHRole.SENDING);
+
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
+            ex.setMshRole(MSHRole.SENDING);
+            throw ex;
         }
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
         dispatch.getRequestContext().put(PolicyConstants.POLICY_OVERRIDE, policy);
@@ -123,7 +125,9 @@ public class MSHDispatcher {
         try {
             result = dispatch.invoke(soapMessage);
         } catch (final WebServiceException e) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0005, null, "error dispatching message to " + endpoint, e, MSHRole.SENDING);
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0005, "error dispatching message to " + endpoint, null, e);
+            ex.setMshRole(MSHRole.SENDING);
+            throw ex;
         }
         return result;
     }

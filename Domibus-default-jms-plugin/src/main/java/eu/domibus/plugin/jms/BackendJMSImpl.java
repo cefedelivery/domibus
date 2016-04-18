@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -94,6 +95,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
      * @param map The incoming JMS Message
      */
     @JmsListener(destination = "${domibus.backend.jmsInQueue}", containerFactory = "backendJmsListenerContainerFactory")
+    @Transactional
     public void receiveMessage(final MapMessage map) {
         try {
             String errorMessage = null;

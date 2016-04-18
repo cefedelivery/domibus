@@ -100,7 +100,7 @@ public class PModeDao extends PModeProvider {
         candidatesQuery.setParameter("RECEIVER_PARTY", receiverParty);
         final List<LegConfiguration> candidates = candidatesQuery.getResultList();
         if (candidates == null || candidates.isEmpty()) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null, null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
         }
         final TypedQuery<String> query = this.entityManager.createNamedQuery("LegConfiguration.findForPMode", String.class);
         query.setParameter("SERVICE", service);
@@ -115,7 +115,7 @@ public class PModeDao extends PModeProvider {
         } catch (final NoResultException e) {
             PModeDao.LOG.info("", e);
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null, null);
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
     }
 
     protected String findAgreementRef(final AgreementRef agreementRef) throws EbMS3Exception {
@@ -133,12 +133,12 @@ public class PModeDao extends PModeProvider {
         } catch (final NoResultException e) {
             PModeDao.LOG.info("No matching agreementRef found", e);
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreementRef found", null, null, null);//FIXME: Throw ValueInconsistent if CPA not recognized [5.2.2.7]
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreementRef found", null, null);//FIXME: Throw ValueInconsistent if CPA not recognized [5.2.2.7]
     }
 
     protected String findActionName(final String action) throws EbMS3Exception {
         if (action == null || action.isEmpty()) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Action parameter must not be null or empty", null, null, null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Action parameter must not be null or empty", null, null);
         }
 
         final TypedQuery<String> query = this.entityManager.createNamedQuery("Action.findByAction", String.class);
@@ -148,7 +148,7 @@ public class PModeDao extends PModeProvider {
             return actionName;
         } catch (final NoResultException e) {
             PModeDao.LOG.info("No matching action found", e);
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching action found", null, null, null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching action found", null, null);
         }
     }
 
@@ -162,8 +162,7 @@ public class PModeDao extends PModeProvider {
                 query = entityManager.createNamedQuery("Service.findWithoutType", String.class);
                 query.setParameter("SERVICE", value);
             } catch (final IllegalArgumentException e) {
-                final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, e, null);
-                ex.setErrorDetail("Service " + value + " is not a valid URI [CORE] 5.2.2.8");
+                final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Service " + value + " is not a valid URI [CORE] 5.2.2.8", null, e);
                 throw ex;
             }
         } else {
@@ -175,7 +174,7 @@ public class PModeDao extends PModeProvider {
             return query.getSingleResult();
         } catch (final NoResultException e) {
             PModeDao.LOG.info("No machting service found", e);
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No machting service found", null, null, null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No machting service found", null, null);
         }
     }
 
@@ -190,8 +189,7 @@ public class PModeDao extends PModeProvider {
                         URI.create(partyId.getValue()); //if not an URI an IllegalArgumentException will be thrown
                         type = "";
                     } catch (final IllegalArgumentException e) {
-                        final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, e, null);
-                        ex.setErrorDetail("PartyId " + partyId.getValue() + " is not a valid URI [CORE] 5.2.2.3");
+                        final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "PartyId " + partyId.getValue() + " is not a valid URI [CORE] 5.2.2.3", null, e);
                         throw ex;
                     }
                 }
@@ -207,7 +205,7 @@ public class PModeDao extends PModeProvider {
                 PModeDao.LOG.debug("", e); // Its ok to not know all identifiers, we just have to know one
             }
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "No matching party found", null, null, null);
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "No matching party found", null, null);
     }
 
     @Override

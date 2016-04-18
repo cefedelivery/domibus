@@ -72,8 +72,8 @@
             <props>
                 <prop key="serverName">localhost</prop>
                 <prop key="port">3306</prop>
-                <prop key="user">domibus</prop>
-                <prop key="password">changeit</prop>
+                <prop key="user">edelivery</prop>
+                <prop key="password">edelivery</prop>
                 <prop key="url">
                     jdbc:mysql://localhost:3306/domibus?pinGlobalTxToPhysicalConnection=true
                 </prop>
@@ -90,7 +90,7 @@
         </property>
     </bean>
 
-    <bean id="entityManagerFactory"
+    <bean id="entityManagerFactory" primary="true"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="persistenceXmlLocation">
             <value>file:///${domibus.config.location}/persistence.xml</value>

@@ -412,10 +412,10 @@ public class Submission {
      * might be rejected by ebMS3 gateways that do not support said errata.
      *
      * @param name  a string representing the name of the message property
-     * @param type  a string representing the type of the message property
      * @param value a string representing the value of the message property
+     * @param type  a string representing the type of the message property
      */
-    public void addMessageProperty(final String name, final String type, final String value) {
+    public void addMessageProperty(final String name, final String value, final String type) {
         this.messageProperties.add(new TypedProperty(name, value, type));
     }
 
@@ -637,7 +637,7 @@ public class Submission {
         private final Collection<TypedProperty> payloadProperties;
         private final boolean inBody;
 
-        Payload(final String contentId, final DataHandler payloadDatahandler, final Collection<TypedProperty> payloadProperties, final boolean inBody, final Description description, String schemaLocation) {
+        public Payload(final String contentId, final DataHandler payloadDatahandler, final Collection<TypedProperty> payloadProperties, final boolean inBody, final Description description, String schemaLocation) {
             if(payloadDatahandler == null) {
                 throw new IllegalArgumentException("payload data must not be null");
             }

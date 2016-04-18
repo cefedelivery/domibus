@@ -31,6 +31,7 @@
                 <prop key="com.atomikos.icatch.output_dir">target/temp/transactions</prop>
                 <prop key="com.atomikos.icatch.log_base_dir">target/temp/transactions/</prop>
                 <prop key="com.atomikos.icatch.force_shutdown_on_vm_exit">true</prop>
+                <prop key="com.atomikos.icatch.default_jta_timeout">60000</prop>
             </props>
         </constructor-arg>
     </bean>

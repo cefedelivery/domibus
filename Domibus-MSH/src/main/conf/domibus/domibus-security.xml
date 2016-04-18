@@ -41,7 +41,7 @@
              retrieve the private key password for a given alias -->
         <property name="passwordStore">
             <util:map>
-                <entry key="blue_gw_sigkey" value="test123"/>
+                <entry key="blue_gw" value="test123"/>
             </util:map>
         </property>
     </bean>
@@ -61,11 +61,11 @@
         </prop>
         <!-- The keystore alias to use for decryption and signing. -->
         <prop key="org.apache.ws.security.crypto.merlin.keystore.alias">
-            blue_gw_sigkey
+            blue_gw
         </prop>
         <!-- The location of the keystore -->
         <prop key="org.apache.ws.security.crypto.merlin.file">
-            ${domibus.config.location}/keystores/gateway_keystore_blue.jks
+            ${domibus.config.location}/keystores/gateway_keystore.jks
         </prop>
     </util:properties>
 
@@ -91,7 +91,7 @@
         </prop>
         <!-- The location of the keystore -->
         <prop key="org.apache.ws.security.crypto.merlin.truststore.file">
-            ${domibus.config.location}/keystores/gateway_truststore_blue.jks
+            ${domibus.config.location}/keystores/gateway_truststore.jks
         </prop>
     </util:properties>
 

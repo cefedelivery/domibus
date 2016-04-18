@@ -204,7 +204,7 @@ public class SubmissionAS4Transformer {
 
         if (messaging.getMessageProperties() != null) {
             for (final Property property : messaging.getMessageProperties().getProperty()) {
-                result.addMessageProperty(property.getName(), property.getType(), property.getValue());
+                result.addMessageProperty(property.getName(), property.getValue(), property.getType());
             }
         }
         return result;
