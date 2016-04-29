@@ -55,12 +55,12 @@
     <!-- Where to deploy binaries -->
     <distributionManagement>
         <repository>
-            <id>joinup-releases</id>
-            <url>https://joinup.ec.europa.eu/nexus/content/repositories/releases/</url>
+            <id>cefdigital-releases</id>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery</url>
         </repository>
         <snapshotRepository>
-            <id>joinup-snapshots</id>
-            <url>https://joinup.ec.europa.eu/nexus/content/repositories/snapshots/</url>
+            <id>cefdigital-snapshots</id>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/edelivery-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
