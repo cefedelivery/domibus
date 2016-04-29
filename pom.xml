@@ -60,7 +60,7 @@
         </repository>
         <snapshotRepository>
             <id>cefdigital-snapshots</id>
-            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/edelivery-snapshots</url>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
