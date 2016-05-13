@@ -45,7 +45,8 @@
     </para>
     <important>
         <para>
-            If the Domibus gateway is to deployed as a solution the use of a dedicated database server is required.
+            If the Domibus gateway is to deployed as a clustered solution the use of a dedicated database server is
+            required.
         </para>
     </important>
 </section>

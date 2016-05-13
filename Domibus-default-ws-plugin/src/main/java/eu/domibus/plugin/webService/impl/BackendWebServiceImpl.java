@@ -78,7 +78,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public SendResponse sendMessage(final SendRequest sendRequest, final Messaging ebMSHeaderInfo) throws SendMessageFault {
-        BackendWebServiceImpl.LOG.debug("Transforming incomming message");
+
+        BackendWebServiceImpl.LOG.debug("Transforming incoming message");
 
         final PayloadType bodyload = sendRequest.getBodyload();
         for (final PartInfo partInfo : ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo()) {
@@ -121,8 +122,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         try {
             messageId = this.submit(ebMSHeaderInfo);
         } catch (final MessagingProcessingException mpEx) {
-
-
             BackendWebServiceImpl.LOG.error("Message submission failed", mpEx);
             throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
         }

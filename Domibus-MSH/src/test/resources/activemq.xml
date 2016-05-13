@@ -26,7 +26,7 @@
   http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
     <broker useJmx="true"  persistent="true" schedulerSupport="true" dataDirectory="target/temp">
         <managementContext>
-            <managementContext createConnector="true" connectorPort="1199"/>
+            <managementContext createConnector="true" connectorPort="2000"/>
         </managementContext>
         <transportConnectors>
             <transportConnector uri="vm://localhost?broker.persistent=false" disableAsyncDispatch="true"/>
@@ -125,19 +125,19 @@
                 </redeliveryPolicyMap>
             </redeliveryPlugin>
            <!--<loggingBrokerPlugin logAll="true" logConnectionEvents="false" logSessionEvents="false" perDestinationLogger="true"/>-->
-            <spring:bean id="throughputLimiterPlugin" class="eu.domibus.messaging.amq.plugins.ThroughputLimiterPlugin">
-                <spring:constructor-arg name="filter" ref="testFilter" />
-                <spring:constructor-arg name="resendDelay" value="10000" />
-            </spring:bean>
+            <!-- <spring:bean id="throughputLimiterPlugin" class="eu.domibus.messaging.amq.plugins.ThroughputLimiterPlugin">
+                 <spring:constructor-arg name="filter" ref="testFilter" />
+                 <spring:constructor-arg name="resendDelay" value="10000" />
+             </spring:bean>-->
         </plugins>
     </broker>
 
-    <spring:bean id="testFilter" class="eu.domibus.messaging.amq.plugins.ThroughputFilter">
-        <spring:property name="maxParallel" value="3" />
-        <spring:property name="name" value="testFilter" />
-        <spring:property name="queue" value="domibus.internal.dispatch.queue" />
-        <spring:property name="propertyKey" value="#{T(eu.domibus.messaging.MessageConstants).ENDPOINT}" />
-    </spring:bean>
+    <!--    <spring:bean id="testFilter" class="eu.domibus.messaging.amq.plugins.ThroughputFilter">
+            <spring:property name="maxParallel" value="3" />
+            <spring:property name="name" value="testFilter" />
+            <spring:property name="queue" value="domibus.internal.dispatch.queue" />
+            <spring:property name="propertyKey" value="#{T(eu.domibus.messaging.MessageConstants).ENDPOINT}" />
+        </spring:bean>-->
 
 
 

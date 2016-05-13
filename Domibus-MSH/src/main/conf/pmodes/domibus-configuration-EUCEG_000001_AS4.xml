@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<db:configuration xmlns:db="http://domibus.eu/configuration"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  party="EUCEG_000001_AS4">
+    <mpcs>
+        <mpc name="defaultMpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+             enabled="true"
+             default="true"
+             retention_downloaded="0"
+             retention_undownloaded="14400"/>
+    </mpcs>
+    <businessProcesses>
+        <roles>
+            <role name="defaultInitiatorRole"
+                  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
+            <role name="defaultResponderRole"
+                  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
+        </roles>
+        <parties>
+            <partyIdTypes>
+                <partyIdType name="unregisteredParty"
+                             value="urn:oasis:names:tc:ebcore:partyid-type:unregistered:EUCEG"/>
+            </partyIdTypes>
+            <party name="EUCEG_EC"
+                   endpoint="http://localhost:8080/domibus/services/msh"
+                   allowChunking="false"
+            >
+                <identifier partyId="EUCEG_EC" partyIdType="unregisteredParty"/>
+            </party>
+            <party name="EUCEG_000001_AS4"
+                   endpoint="http://localhost:8180/domibus/services/msh"
+                   allowChunking="false"
+            >
+                <identifier partyId="EUCEG_000001_AS4" partyIdType="unregisteredParty"/>
+            </party>
+        </parties>
+        <meps>
+            <mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
+            <binding name="pushAndPush"
+                     value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
+        </meps>
+        <properties>
+            <property name="originalSenderProperty"
+                      key="originalSender"
+                      datatype="string"
+                      required="true"/>
+            <property name="finalRecipientProperty"
+                      key="finalRecipient"
+                      datatype="string"
+                      required="true"/>
+            <property name="trackingIdentifierProperty"
+                      key="trackingIdentifier"
+                      datatype="string"
+                      required="false"/>
+            <propertySet name="euCegPropertySet">
+                <propertyRef property="finalRecipientProperty"/>
+                <propertyRef property="originalSenderProperty"/>
+            </propertySet>
+        </properties>
+        <payloadProfiles>
+            <payload name="euCegPayload"
+                     cid="cid:message"
+                     required="true"
+                     mimeType="application/xml"/>
+            <payloadProfile name="euCegProfile"
+                            maxSize="0">
+                <attachment name="euCegPayload"/>
+            </payloadProfile>
+        </payloadProfiles>
+        <securities>
+            <security name="eSens"
+                      policy="esensPolicy.xml"
+                      signatureMethod="RSA_SHA256"/>
+        </securities>
+        <errorHandlings>
+            <errorHandling name="defaultErrorHandling"
+                           errorAsResponse="true"
+                           businessErrorNotifyProducer="false"
+                           businessErrorNotifyConsumer="false"
+                           deliveryFailureNotifyProducer="false"/>
+        </errorHandlings>
+        <agreements>
+            <agreement name="agreementEmpty" value="" type=""/>
+        </agreements>
+        <services>
+            <service name="euCegESens" value="http://ec.europa.eu/e-delivery/services/tobacco-ecig-reporting"
+                     type="e-delivery"/>
+        </services>
+        <actions>
+            <action name="submitRequest" value="SubmitRequest"/>
+            <action name="submitResponse" value="SubmitResponse"/>
+        </actions>
+        <as4>
+            <receptionAwareness name="receptionAwareness" retry="5;5;CONSTANT" duplicateDetection="true"/>
+            <reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
+            <reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
+        </as4>
+        <legConfigurations>
+            <legConfiguration name="euCegESenssubmitRequest"
+                              service="euCegESens"
+                              action="submitRequest"
+                              defaultMpc="defaultMpc"
+                              reliability="AS4Reliability"
+                              security="eSens"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="euCegPropertySet"
+                              errorHandling="defaultErrorHandling"
+                              compressPayloads="true"/>
+
+            <legConfiguration name="euCegESenssubmitResponse"
+                              service="euCegESens"
+                              action="submitResponse"
+                              defaultMpc="defaultMpc"
+                              reliability="AS4Reliability"
+                              security="eSens"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="euCegPropertySet"
+                              errorHandling="defaultErrorHandling"
+                              compressPayloads="true"/>
+
+        </legConfigurations>
+        <process name="euCegProcess"
+                 agreement="agreementEmpty"
+                 mep="oneway"
+                 binding="pushAndPush"
+                 initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="EUCEG_EC"/>
+                <initiatorParty name="EUCEG_000001_AS4"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="EUCEG_000001_AS4"/>
+                <responderParty name="EUCEG_EC"/>
+            </responderParties>
+            <legs>
+                <leg name="euCegESenssubmitRequest"/>
+                <leg name="euCegESenssubmitResponse"/>
+            </legs>
+        </process>
+    </businessProcesses>
+</db:configuration>

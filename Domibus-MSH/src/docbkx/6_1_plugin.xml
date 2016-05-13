@@ -30,7 +30,7 @@
     <section>
         <title>Setting up the environment</title>
         <para>Domibus provides a plugin for the Eclipse IDE which can be used to
-            genetate configuration XML files. Eclipse can be obtained for free
+            generate PMode configuration XML files. Eclipse can be obtained for free
             <link xl:href="http://www.eclipse.org/">here</link>. The plugin has been tested with
             Eclipse 4.4, but should work for all recent versions.
         </para>
@@ -93,10 +93,10 @@
     <section>
         <title>Installing the configuration</title>
         <para>
-            As of Domibus 3.0 Beta 2 it is possible to upload pmodes
-            configuration files via the administration dashboard. Please refer
-            to
-            <xref linkend="pmode_upload"/>
+            As of Domibus 3.0 Beta 2 it is possible to upload PMode
+            configuration files via the administration dashboard.
+            As of Domibus 3.1.0 the upload of PMode will also reload the TrustStore's content.
+            Please refer to<xref linkend="pmode_upload"/>.
         </para>
     </section>
 </section>

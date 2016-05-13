@@ -88,7 +88,7 @@ public class PayloadProfileValidator {
     }*/
         for (final Payload payload : modifiableProfileList) {
             if (payload.isRequired()) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling error, missing payload:" + payload, null, null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling error, missing payload:" + payload, messaging.getUserMessage().getMessageInfo().getMessageId(), null);
 
             }
         }

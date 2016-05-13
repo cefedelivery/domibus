@@ -26,15 +26,12 @@
     http://www.springframework.org/schema/util
     http://www.springframework.org/schema/util/spring-util.xsd">
 
-
     <import resource="domibus-security.xml"/>
-
-
 
     <!-- Internal configuration provider. Do not change unless you have special requirements (i.e. dynamic
     discovery injection of PModes)-->
     <bean id="pModeProvider"
-          class="eu.domibus.ebms3.common.dao.DynamicDiscoveryPModeProvider"/>
+          class="eu.domibus.common.dao.CachingPModeProvider"/>
 
     <bean id="pModeDao"
           class="eu.domibus.common.dao.PModeDao"/>

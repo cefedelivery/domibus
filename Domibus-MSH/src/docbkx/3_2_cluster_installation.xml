@@ -74,7 +74,9 @@
                             <para>Configure the following queues on your JMS broker:</para>
                             <important>
                                 <para>In case the JMS broker is clustered, please note that all destinations mentioned in the following tables have to be distributed between all JMS broker nodes.</para>
-                                <para>In addition please make sure that the access to the all destinations is restricted in some way (e.g. username/password).</para>
+                                <para>In addition please make sure that the access to all destinations is restricted in
+                                    some way (e.g. username/password).
+                                </para>
                             </important>
                             <table xml:id="internal_queue_description" width="100%">
                                 <title>Mandatory JMS queues</title>
@@ -103,7 +105,8 @@
                                             <entry>queue</entry>
                                             <entry>domibus.internal.
                                                 notification.unknown</entry>
-                                            <entry>no specific rules. default for activemq: maximum of 6 redeliveries</entry>
+                                            <entry>no specific rules. default for activemq: maximum of 6 re-deliveries
+                                            </entry>
                                             <entry>Notifications about received messages (by the MSH) that do not match any backend rounting criteria will be sent to this queue.
                                             In production environment this queue should be monitored in order to handle those messages manually.</entry>
                                         </row>
@@ -111,7 +114,9 @@
                                             <entry>queue</entry>
                                             <entry>domibus.notification.*</entry>
                                             <entry>infinite number of redeliveries with a delay of 10000ms</entry>
-                                            <entry>Queues that match the abovementioned pattern are used for sending notifications (e.g. message was sent successfully, message received by MSH) to the configured plugins. You will need a separate queue
+                                            <entry>Queues that match the above mentioned pattern are used for sending
+                                                notifications (e.g. message was sent successfully, message received by
+                                                MSH) to the configured plugins. You will need a separate queue
                                             for each of your plugins.</entry>
                                         </row>
                                         <row>
@@ -119,7 +124,10 @@
                                             <entry>domibus.internal.
                                                 command</entry>
                                             <entry>/</entry>
-                                            <entry>This topic is used for sending commands to all nodes in a cluster. For example, it is used after a pmode was uploaded in order to notify all nodes to update their pmode cache (in case caching is enabled).</entry>
+                                            <entry>This topic is used for sending commands to all nodes in a cluster.
+                                                For example, it is used after a PMode was uploaded in order to notify
+                                                all nodes to update their PMode cache (in case caching is enabled).
+                                            </entry>
                                         </row>
                                     </tbody>
                                 </tgroup>

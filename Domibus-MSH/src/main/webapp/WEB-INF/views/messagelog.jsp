@@ -139,7 +139,7 @@
         <th>Received <a href="<c:url value="${received}"><c:param name="asc" value = "true"/></c:url>">&#9650;</a> \ <a
                 href="<c:url value="${received}"><c:param name="asc" value = "false"/></c:url>">&#9660;</a></th>
         <c:url value="${order}" var="sendAttempts"><c:param name="orderby" value="sendAttempts"/></c:url>
-        <th>SendAttempts <a href="<c:url value="${sendAttempts}"><c:param name="asc" value = "true"/></c:url>">
+        <th>FailedSendAttempts <a href="<c:url value="${sendAttempts}"><c:param name="asc" value = "true"/></c:url>">
             &#9650;</a> \ <a href="<c:url value="${sendAttempts}"><c:param name="asc" value = "false"/></c:url>">
             &#9660;</a></th>
         <c:url value="${order}" var="sendAttemptsMax"><c:param name="orderby" value="sendAttemptsMax"/></c:url>

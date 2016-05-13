@@ -36,8 +36,10 @@ import java.math.BigInteger;
 @Entity
 @Table(name = "TB_MPC")
 @NamedQueries({@NamedQuery(name = "Mpc.countForQualifiedName", query = "select count(mpc) from Mpc mpc where mpc.qualifiedName=:QUALIFIED_NAME"),
+        @NamedQuery(name = "Mpc.findByName", query = "select mpc from Mpc mpc where mpc.name=:NAME"),
         @NamedQuery(name = "Mpc.findByQualifiedName", query = "select mpc from Mpc mpc where mpc.qualifiedName=:QUALIFIED_NAME"),
-        @NamedQuery(name = "Mpc.getAllNames", query = "select mpc.qualifiedName from Mpc mpc")})
+        @NamedQuery(name = "Mpc.getAllNames", query = "select mpc.name from Mpc mpc"),
+        @NamedQuery(name = "Mpc.getAllURIs", query = "select mpc.qualifiedName from Mpc mpc")})
 
 
 public class Mpc extends AbstractBaseEntity {

@@ -8,7 +8,7 @@
 				enabled="true" 
 				default="true" 
 				retention_downloaded="0" 
-				retention_undownloaded="60"/>
+				retention_undownloaded="14400"/>
 	</mpcs>
 	<businessProcesses>
 		<roles>
@@ -19,19 +19,19 @@
 		</roles>
 		<parties>
 			<partyIdTypes>
-				<partyIdType name="partyTypeEmpty" value=""/>
+				<partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
 			</partyIdTypes>
 						<party name="red_gw"
 							   endpoint="http://<red_hostname>:8080/domibus/services/msh"
 					allowChunking="false"
 >
-				<identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-red" partyIdType="partyTypeEmpty"/>
+				<identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
 			</party>
 			<party name="blue_gw" 
 					endpoint="http://<blue_hostname>:8080/domibus/services/msh"
 					allowChunking="false"
 >
-				<identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-blue" partyIdType="partyTypeEmpty"/>
+				<identifier partyId="domibus-blue" partyIdType="partyTypeUrn"/>
 			</party>
 		</parties>
 		<meps>
@@ -70,8 +70,8 @@
 			</payloadProfile>
 		</payloadProfiles>
 		<securities>
-			<security name="eSens"
-					policy="esensPolicy.xml"
+			<security name="eDeliveryPolicy"
+					policy="eDeliveryPolicy.xml"
 					signatureMethod="RSA_SHA256" />	
 			<security name="noSigNoEnc"
 					policy="doNothingPolicy.xml"
@@ -94,7 +94,7 @@
 			<action name="tc1Action" value="TC1Leg1"/>
 		</actions>
 		<as4>
-			<receptionAwareness name="receptionAwareness" retry="5;4;CONSTANT" duplicateDetection="true"/>
+			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
 			<reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
 			<reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
 		</as4>
@@ -104,7 +104,7 @@
 					action="tc1Action" 
 					defaultMpc="defaultMpc" 
 					reliability="AS4Reliability" 
-					security="eSens" 
+					security="eDeliveryPolicy"
 					receptionAwareness="receptionAwareness" 
 					propertySet="ecodexPropertySet"
 					payloadProfile="MessageProfile"

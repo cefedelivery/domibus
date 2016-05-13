@@ -74,23 +74,23 @@
     </util:properties>
 
     <!-- Properties for truststore with public keys for the partners -->
-    <util:properties id="truststoreProperties">
+    <util:properties id="trustStoreProperties">
         <!-- The crypto provider to be used -->
         <prop key="org.apache.ws.security.crypto.provider">
             eu.domibus.wss4j.common.crypto.Merlin
         </prop>
         <!-- Type of the used keystore -->
-        <prop key="org.apache.ws.security.crypto.merlin.truststore.type">jks
+        <prop key="org.apache.ws.security.crypto.merlin.trustStore.type">jks
         </prop>
         <!-- The password used to load the keystore -->
-        <prop key="org.apache.ws.security.crypto.merlin.truststore.password">
+        <prop key="org.apache.ws.security.crypto.merlin.trustStore.password">
             test123
         </prop>
         <prop key="org.apache.ws.security.crypto.merlin.load.cacerts">
             false
         </prop>
         <!-- The location of the keystore -->
-        <prop key="org.apache.ws.security.crypto.merlin.truststore.file">
+        <prop key="org.apache.ws.security.crypto.merlin.trustStore.file">
             ${domibus.config.location}/keystores/gateway_truststore_blue.jks
         </prop>
     </util:properties>

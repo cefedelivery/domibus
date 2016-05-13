@@ -24,7 +24,7 @@ import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
 import eu.domibus.messaging.NotifyMessageCreator;
-import eu.domibus.messaging.RecieveFailedMessageCreator;
+import eu.domibus.messaging.ReceiveFailedMessageCreator;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.*;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
@@ -96,7 +96,7 @@ public class BackendNotificationService {
         }
     }
 
-    public void notifyOfIncoming(final UserMessage userMessage) {
+    public void notifyOfIncoming(final UserMessage userMessage, NotificationType notificationType) {
         List<BackendFilter> backendFilter = backendFilterDao.findAll();
         if (backendFilter.isEmpty()) { // There is no saved backendfilter configuration. Most likely the backends have not been configured yet
             backendFilter = routingService.getBackendFilters();
@@ -119,7 +119,8 @@ public class BackendNotificationService {
                 }
             }
             if (matches) {
-                notify(userMessage.getMessageInfo().getMessageId(), filter.getBackendName(), NotificationType.MESSAGE_RECEIVED);
+                LOG.info("Notify backend " + filter.getBackendName() + " of messageId " + userMessage.getMessageInfo().getMessageId());
+                notify(userMessage.getMessageInfo().getMessageId(), filter.getBackendName(), notificationType);
                 return;
             }
         }
@@ -150,7 +151,7 @@ public class BackendNotificationService {
         final String backendName = messageLogDao.findBackendForMessageId(messageId);
         for (final NotificationListener notificationListenerService : notificationListenerServices) {
             if (notificationListenerService.getBackendName().equals(backendName)) {
-                jmsOperations.send(notificationListenerService.getBackendNotificationQueue(), new RecieveFailedMessageCreator(messageId, endpoint));
+                jmsOperations.send(notificationListenerService.getBackendNotificationQueue(), new ReceiveFailedMessageCreator(messageId, endpoint));
             }
         }
     }

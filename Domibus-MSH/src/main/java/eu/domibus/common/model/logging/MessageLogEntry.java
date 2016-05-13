@@ -55,6 +55,7 @@ import java.util.Date;
         @NamedQuery(name = "MessageLogEntry.findUndownloadedUserMessagesOlderThan", query = "select mle.messageId from MessageLogEntry mle where (mle.messageStatus = eu.domibus.common.MessageStatus.RECEIVED or mle.messageStatus = eu.domibus.common.MessageStatus.RECEIVED_WITH_WARNINGS) and mle.deleted is null and mle.mpc = :MPC and mle.received < :DATE"),
         @NamedQuery(name = "MessageLogEntry.findDownloadedUserMessagesOlderThan", query = "select mle.messageId from MessageLogEntry mle where (mle.messageStatus = eu.domibus.common.MessageStatus.RECEIVED or mle.messageStatus = eu.domibus.common.MessageStatus.RECEIVED_WITH_WARNINGS) and mle.mpc = :MPC and mle.deleted is not null and mle.deleted < :DATE"),
         @NamedQuery(name = "MessageLogEntry.findEndpointForId", query = "select mle.endpoint from MessageLogEntry mle where mle.messageId =:MESSAGE_ID"),
+        @NamedQuery(name = "MessageLogEntry.setNotificationStatus", query = "update MessageLogEntry mle set mle.notificationStatus=:NOTIFICATION_STATUS where mle.messageId=:MESSAGE_ID"),
         @NamedQuery(name = "MessageLogEntry.countEntries", query = "select count(mle.messageId) from MessageLogEntry mle")})
 public class MessageLogEntry extends AbstractBaseEntity {
 

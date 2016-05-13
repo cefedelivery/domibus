@@ -50,5 +50,13 @@
             </author>
             <revremark>Update for the 3.1 RC release</revremark>
         </revision>
+        <revision>
+            <revnumber>0.4</revnumber>
+            <date>12.05.2016</date>
+            <author>
+                <personname>Christian Koch</personname>
+            </author>
+            <revremark>Updates for the 3.1.0 release</revremark>
+        </revision>
     </revhistory>
 </appendix>

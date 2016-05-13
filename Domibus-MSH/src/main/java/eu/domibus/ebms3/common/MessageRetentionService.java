@@ -65,14 +65,14 @@ public class MessageRetentionService {
 
     @Transactional
     public void deleteExpiredMessages() {
-        final List<String> mpcs = pModeProvider.getMpcList();
+        final List<String> mpcs = pModeProvider.getMpcURIList();
         for (final String mpc : mpcs) {
-            final int messageRetentionDownladed = pModeProvider.getRetentionDownloadedByMpcName(mpc);
-            if (messageRetentionDownladed > 0) { // if -1 the messages will be kept indefinetely and if 0 it already has been deleted
-                final List<String> messageIds = messageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownladed * -1), mpc);
+            final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
+            if (messageRetentionDownloaded > 0) { // if -1 the messages will be kept indefinetely and if 0 it already has been deleted
+                final List<String> messageIds = messageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);
                 delete(messageIds);
             }
-            final int messageRetentionUndownladed = pModeProvider.getRetentionUndownloadedByMpcName(mpc);
+            final int messageRetentionUndownladed = pModeProvider.getRetentionUndownloadedByMpcURI(mpc);
             if (messageRetentionUndownladed > -1) { // if -1 the messages will be kept indefinetely and if 0, although it makes no sense, is legal
                 final List<String> messageIds = messageLogDao.getUndownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionUndownladed * -1), mpc);
                 delete(messageIds);

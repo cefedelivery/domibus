@@ -32,18 +32,19 @@
 
     <title>Software Packages</title>
     <para>
-        There are different release packagings available for the e-CODEX
-        gateway:
+        There are different release packages available for the Domibus gateway:
     </para>
     <table xml:id="artifact_table" width="100%">
         <title>Software packages</title>
-        <tgroup cols="5">
+        <tgroup cols="8">
             <colspec colname="Filename: domibus-distribution"/>
             <colspec colname="Gateway WAR-file"/>
             <colspec colname="Fully configured Tomcat 8 Server"/>
             <colspec colname="Configuration files"/>
-            <colspec
-                    colname="SQL-scripts for initial database generation and updates"/>
+            <colspec colname="SQL-scripts for initial database generation and updates"/>
+            <colspec colname="Domibus default WS plugin"/>
+            <colspec colname="Domibus default JMS plugin"/>
+            <colspec colname="PModes, keystores and SoapUI project"/>
             <thead>
                 <row>
                     <entry>Filename: domibus-<?eval ${project.version}?></entry>
@@ -51,12 +52,18 @@
                     <entry>Fully configured Tomcat 8 Server</entry>
                     <entry>Configuration files</entry>
                     <entry>SQL-scripts for database generation / updates</entry>
+                    <entry>Domibus default WS plugin</entry>
+                    <entry>Domibus default JMS plugin</entry>
+                    <entry>PModes, keystores and SoapUI project</entry>
                 </row>
             </thead>
             <tbody>
                 <row>
                     <entry>.war</entry>
                     <entry>&check;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
                     <entry>&cross;</entry>
                     <entry>&cross;</entry>
                     <entry>&cross;</entry>
@@ -67,6 +74,9 @@
                     <entry>&cross;</entry>
                     <entry>&check;</entry>
                     <entry>&check;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
                 </row>
                 <row>
                     <entry>-tomcat-full.zip</entry>
@@ -74,6 +84,9 @@
                     <entry>&check;</entry>
                     <entry>&check;</entry>
                     <entry>&check;</entry>
+                    <entry>&check;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
                 </row>
                 <row>
                     <entry>-sql-scripts.zip</entry>
@@ -81,6 +94,9 @@
                     <entry>&cross;</entry>
                     <entry>&cross;</entry>
                     <entry>&check;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
                 </row>
                 <row>
                     <entry>-configuration.zip</entry>
@@ -88,23 +104,54 @@
                     <entry>&cross;</entry>
                     <entry>&check;</entry>
                     <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                </row>
+                <row>
+                    <entry>-default-ws-plugin.zip</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&check;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                </row>
+                <row>
+                    <entry>-default-jms-plugin.zip</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&check;</entry>
+                    <entry>&cross;</entry>
+                </row>
+                <row>
+                    <entry>-sample-configuration-and-testing.zip</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&cross;</entry>
+                    <entry>&check;</entry>
                 </row>
             </tbody>
         </tgroup>
     </table>
     <para>
         <important>
-            <para>While the download packages
-                contain database scripts for Apache Derby use of this database engine is only recommended for testing
-                purposes and not for productive use.
+            <para>While the download packages contain database scripts for Apache Derby, the use of this database engine
+                is only recommended for testing purposes and not for productive use.
             </para>
         </important>
     </para>
     <section>
         <title>domibus-<?eval ${project.version}?>.war</title>
-        <para>This package contains only the web application. The usage of this
-            package is only recommended for
-            development and testing purposes
+        <para>This package contains only the web application. The usage of this package is only recommended for
+            development and testing purposes.
         </para>
     </section>
     <section>
@@ -119,7 +166,7 @@
     </section>
     <section>
         <title>domibus-<?eval ${project.version}?>-tomcat-full.zip</title>
-        <para>This package contains a Tomcat 8 server with a preinstalled
+        <para>This package contains a Tomcat 8 server with a pre-installed
             Domibus gateway. This package is the easiest way to
             deploy the Domibus gateway into a testing or production environment.
             Usage of this package is recommended, and this manual
@@ -129,14 +176,24 @@
     <section>
         <title>domibus-<?eval ${project.version}?>-tomcat-configuration.zip
         </title>
-        <para>This package only contains the configuration files for the
-            application.
-        </para>
+        <para>This package only contains the configuration files for the application.</para>
     </section>
     <section>
         <title>domibus-<?eval ${project.version}?>-sql-scripts.zip</title>
-        <para>This package only contains initial and delta SQL scripts for MySQL
-            and Oracle database engines.
+        <para>This package only contains initial and delta SQL scripts for MySQL and Oracle database engines.</para>
+    </section>
+    <section>
+        <title>domibus-<?eval ${project.version}?>-default-ws-plugin.zip</title>
+        <para>This package contains the configuration and the library of the default WS plugin.</para>
+    </section>
+    <section>
+        <title>domibus-<?eval ${project.version}?>-default-jms-plugin.zip</title>
+        <para>This package contains the configuration and the library of the default JMS plugin.</para>
+    </section>
+    <section>
+        <title>domibus-<?eval ${project.version}?>-sample-configuration-and-testing</title>
+        <para>This package has all it is needed for testing.It contains the sample PMode files and keystores plus the
+            AS4 test SOAPUI project.
         </para>
     </section>
 </section>

@@ -1,5 +1,8 @@
 package eu.domibus;
 
+import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.google.common.util.concurrent.TimeLimiter;
+import com.google.common.util.concurrent.UncheckedTimeoutException;
 import eu.domibus.common.NotificationType;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
@@ -29,6 +32,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 
 /**
  * Created by feriaad on 02/02/2016.
@@ -43,6 +50,19 @@ public abstract class AbstractIT {
 
     protected static final String JMS_NOT_QUEUE_NAME = "domibus.notification.jms";
 
+    protected static final String JMS_BACKEND_IN_QUEUE_NAME = "domibus.backend.jms.inQueue";
+
+    protected static final String JMS_BACKEND_OUT_QUEUE_NAME = "domibus.backend.jms.outQueue";
+
+    protected static final String JMS_BACKEND_REPLY_QUEUE_NAME = "domibus.backend.jms.replyQueue";
+
+    protected static final String JMS_DISPATCH_QUEUE_NAME = "domibus.internal.dispatch.queue";
+
+    private Message message;
+
+    private javax.jms.Connection connection;
+
+    private String queueName;
 
     private static boolean initialized;
 
@@ -128,43 +148,109 @@ public abstract class AbstractIT {
         }
     }
 
-    protected void pushQueueMessage(String messageId, javax.jms.Connection connection, String queueName) {
+    /**
+     * The connection must be started and stopped before and after the method call.
+     *
+     * @param connection
+     * @param queueName
+     * @return
+     * @throws Exception
+     */
+    protected void pushQueueMessage(String messageId, javax.jms.Connection connection, String queueName) throws Exception {
 
-        try {
-            connection.start();
-            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            Destination destination = session.createQueue(queueName);
-            MessageProducer producer = session.createProducer(destination);
-            // Creates the Message using Spring MessageCreator
-            NotifyMessageCreator messageCreator = new NotifyMessageCreator(messageId, NotificationType.MESSAGE_RECEIVED);
-            Message msg = messageCreator.createMessage(session);
-            msg.setStringProperty(MessageConstants.ENDPOINT, "backendInterfaceEndpoint");
-            producer.send(msg);
-            System.out.println("Message with ID [:" + messageId + "] sent in queue!");
-            producer.close();
-            session.close();
-            connection.close();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Destination destination = session.createQueue(queueName);
+        MessageProducer producer = session.createProducer(destination);
+        // Creates the Message using Spring MessageCreator
+        NotifyMessageCreator messageCreator = new NotifyMessageCreator(messageId, NotificationType.MESSAGE_RECEIVED);
+        Message msg = messageCreator.createMessage(session);
+        msg.setStringProperty(MessageConstants.ENDPOINT, "backendInterfaceEndpoint");
+        producer.send(msg);
+        System.out.println("Message with ID [:" + messageId + "] sent in queue!");
+        producer.close();
+        session.close();
+
     }
 
-    protected Message popQueueMessage(javax.jms.Connection connection, String queueName) {
 
+    /**
+     * The connection must be started and stopped before and after the method call.
+     *
+     * @param connection
+     * @param queueName
+     * @return
+     * @throws Exception
+     * @deprecated use popQueueMessageWithTimeout
+     */
+    protected Message popQueueMessage(javax.jms.Connection connection, String queueName) throws Exception {
+
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Destination destination = session.createQueue(queueName);
+        MessageConsumer consumer = session.createConsumer(destination);
+        // This call blocks indefinitely until a message is produced or until this message consumer is closed
+        Message message = consumer.receive();
+        System.out.println("Message with ID [:" + message.getStringProperty(MESSAGE_ID) + "] consumed from queue [" + message.getJMSDestination() + "]");
+        consumer.close();
+        session.close();
+        return message;
+    }
+
+    /**
+     * Please notice that the connection must be started and stopped before and after the method call.
+     *
+     * @param connection
+     * @param queueName
+     * @param mSecs
+     * @return
+     * @throws Exception
+     */
+    protected Message popQueueMessageWithTimeout(javax.jms.Connection connection, String queueName, long mSecs) throws Exception {
+
+        this.connection = connection;
+        this.queueName = queueName;
+
+        TimeLimiter service = new SimpleTimeLimiter();
         try {
-            connection.start();
-            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            Destination destination = session.createQueue(queueName);
-            MessageConsumer consumer = session.createConsumer(destination);
-            Message message = consumer.receive();
-            System.out.println("Message with ID [:" + message.getStringProperty("MESSAGE_ID") + "] consumed from queue [" + message.getJMSDestination() + "]");
-            consumer.close();
-            session.close();
-            connection.close();
-            return message;
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            String result = service.callWithTimeout(
+                    new Callable<String>() {
+                        @Override
+                        public String call() throws InterruptedException {
+                            return consumeMessage();
+                        }
+                    }, mSecs, TimeUnit.MILLISECONDS, true);
+
+            if (result.equals("Ok")) {
+                System.out.println("Message with ID [:" + message.getStringProperty(MESSAGE_ID) + "] consumed from queue [" + message.getJMSDestination() + "]");
+                return message;
+            } else System.out.println("Message not found in queue [" + queueName + "]");
+        } catch (UncheckedTimeoutException timeoutEx) {
+            System.out.println("Reading from queue [" + queueName + "] failed because time expired");
         }
         return null;
     }
+
+    private String consumeMessage() {
+
+        MessageConsumer consumer = null;
+        Session session = null;
+        try {
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination destination = session.createQueue(queueName);
+            consumer = session.createConsumer(destination);
+            // This call blocks indefinitely until a message is produced or until this message consumer is closed.
+            message = consumer.receive();
+            consumer.close();
+            session.close();
+            return "Ok";
+        } catch (Exception ex) {
+            try {
+                consumer.close();
+                session.close();
+            } catch (JMSException e) {
+                e.printStackTrace();
+            }
+        }
+        return "NOk";
+    }
+
 }

@@ -123,7 +123,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
         messageLogEntry.setDeleted(new Date());
         this.messageLogDao.update(messageLogEntry);
-        if (0 == pModeProvider.getRetentionDownloadedByMpcName(messageLogEntry.getMpc())) {
+        if (0 == pModeProvider.getRetentionDownloadedByMpcURI(messageLogEntry.getMpc())) {
             messagingDao.delete(messageId);
         }
         return this.transformer.transformFromMessaging(userMessage);
@@ -154,6 +154,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             if (messageId == null || m.getMessageInfo().getMessageId().trim().isEmpty()) {
                 messageId = messageIdGenerator.generateMessageId();
                 m.getMessageInfo().setMessageId(messageId);
+            } else if (messageId.length() > 255) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "MessageId value is too long (over 255 characters)", null, null);
+            }
+            String refToMessageId = m.getMessageInfo().getRefToMessageId();
+            if (refToMessageId != null && refToMessageId.length() > 255) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "RefToMessageId value is too long (over 255 characters)", refToMessageId, null);
             }
             //check if the messageId is unique. This should only fail if the ID is set from the outside
             if (!MessageStatus.NOT_FOUND.equals(messageLogDao.getMessageStatus(messageId))) {
@@ -164,7 +170,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             final Messaging message = this.ebMS3Of.createMessaging();
             message.setUserMessage(m);
             try {
-                pmodeKey = this.pModeProvider.findPModeKeyForUserMesssage(m);
+                pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(m);
             } catch (IllegalStateException e) { //if no pmodes are configured
                 LOG.debug(e);
                 throw new PModeMismatchException("PMode could not be found. Are PModes configured in the database?");

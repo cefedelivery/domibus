@@ -1,10 +1,15 @@
+Domibus 3.1.0:      Re-install the domibus-security.xml and re-configure the properties according with the installed Truststore and Keystore.
+                    For Tomcat installations only, the activemq.xml has to be re-installed and re-configured and the domibus-ActiveMQ-ThroughputLimiter jar can be deleted.
+                    There have been some changes to the database, please use the new scripts.
+                    Run the migration script if you are upgrading from 3.0 to 3.1
+-------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.1 RC-2:   Replace the war and jar(plugins) files. There have been some changes to the MessageFilter, please use a clean database.
----
+-------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.1 RC-1:   Domibus 3.1 is a major release that has to be installed from scratch.
                     There have been some changes to the database, please use the new script.
                     There is a new PMode generation plugin available (BETA-3), use this to regenerate your PMode files
----
+-------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.0 BETA-2: Replace the war file.
----
+-------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.0 BETA-1: Domibus 3.0 is a major release that has to be installed from scratch. There is no available upgrade path.
----
+-------------------------------------------------------------------------------------------------------------------------------------------

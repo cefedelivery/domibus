@@ -33,7 +33,7 @@
     </para>
 
 
-    <programlisting language="xml" xml:id="domibus-configuration-source"><?db-font-size 75% ?>
+    <programlisting language="xml" xml:id="domibus-configuration-source"><?db-font-size 60% ?>
         <info>
             <title>domibus-configuration.xml</title>
         </info>

@@ -30,8 +30,18 @@
     <files>
         <!-- testing -->
         <file>
-            <source>${project.basedir}/src/test/resources/soapUI/Domibus-MSH-soapui-project.xml</source>
+            <source>${project.basedir}/src/test/resources/soapUI/AS4-test-guide-soapui-project.xml</source>
             <outputDirectory>test/soapui/</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/src/main/conf/pmodes/domibus-gw-sample-pmode-blue.xml</source>
+            <outputDirectory>conf/pmodes/</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/src/main/conf/pmodes/domibus-gw-sample-pmode-red.xml</source>
+            <outputDirectory>conf/pmodes/</outputDirectory>
             <filtered>false</filtered>
         </file>
     </files>
@@ -45,20 +55,6 @@
             <directoryMode>0555</directoryMode>
             <!-- directory/-->
             <!--lineEnding>unix</lineEnding-->
-            <filtered>false</filtered>
-        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/main/conf/pmodes/</directory>
-            <useDefaultExcludes>false</useDefaultExcludes>
-            <outputDirectory>conf/pmodes</outputDirectory>
-            <!-- excludes/-->
-            <fileMode>0444</fileMode>
-            <directoryMode>0555</directoryMode>
-            <!-- directory/-->
-            <lineEnding>unix</lineEnding>
-            <excludes>
-                <exclude>kerkovi.pconf</exclude>
-            </excludes>
             <filtered>false</filtered>
         </fileSet>
     </fileSets>

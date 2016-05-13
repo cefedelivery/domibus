@@ -75,12 +75,6 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.basedir}/Quick_Start_Guide.pdf</source>
-            <outputDirectory>/</outputDirectory>
-            <destName>Quick_Start_Guide.pdf</destName>
-            <filtered>false</filtered>
-        </file>
-        <file>
             <source>${project.basedir}/changelog.txt</source>
             <outputDirectory>/</outputDirectory>
             <filtered>false</filtered>
@@ -100,13 +94,13 @@
             <outputDirectory>domibus/conf/domibus/plugins/lib</outputDirectory>
             <filtered>false</filtered>
         </file>
+        <!--<file>-->
+            <!--<source>${project.basedir}/../Domibus-ActiveMQ-ThroughputLimiter/target/domibus-ActiveMQ-ThroughputLimiter-${project.version}.jar</source>-->
+            <!--<outputDirectory>domibus/conf/domibus/plugins/lib</outputDirectory>-->
+            <!--<filtered>false</filtered>-->
+        <!--</file>-->
         <file>
-            <source>${project.basedir}/../Domibus-ActiveMQ-ThroughputLimiter/target/domibus-ActiveMQ-ThroughputLimiter-${project.version}.jar</source>
-            <outputDirectory>domibus/conf/domibus/plugins/lib</outputDirectory>
-            <filtered>false</filtered>
-        </file>
-        <file>
-            <source>${project.basedir}/src/main/conf/domibus/policies/esensPolicy.xml</source>
+            <source>${project.basedir}/src/main/conf/domibus/policies/eDeliveryPolicy.xml</source>
             <outputDirectory>domibus/conf/domibus/policies</outputDirectory>
             <filtered>false</filtered>
         </file>

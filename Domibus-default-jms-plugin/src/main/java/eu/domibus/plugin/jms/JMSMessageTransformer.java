@@ -84,6 +84,7 @@ public class JMSMessageTransformer
             messageOut.setStringProperty(SERVICE, submission.getService());
             messageOut.setStringProperty(SERVICE_TYPE, submission.getServiceType());
             messageOut.setStringProperty(CONVERSATION_ID, submission.getConversationId());
+            messageOut.setStringProperty(MESSAGE_ID, submission.getMessageId());
 
             for (final Submission.Party fromParty : submission.getFromParties()) {
                 messageOut.setStringProperty(FROM_PARTY_ID, fromParty.getPartyId());

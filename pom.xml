@@ -25,14 +25,14 @@
 
     <groupId>eu.domibus</groupId>
     <artifactId>domibus</artifactId>
-    <version>3.1-RC2</version>
+    <version>3.1.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>Domibus-MSH</module>
         <module>Domibus-plugin-api</module>
         <module>Domibus-default-ws-plugin</module>
         <module>Domibus-default-jms-plugin</module>
-        <module>Domibus-ActiveMQ-ThroughputLimiter</module>
+        <!--<module>Domibus-ActiveMQ-ThroughputLimiter</module>-->
     </modules>
     <properties>
         <spring.version>4.2.2.RELEASE</spring.version>
@@ -52,7 +52,6 @@
         <surefire.argLine>-Xmx1G</surefire.argLine>
     </properties>
 
-    <!-- Where to deploy binaries -->
     <distributionManagement>
         <repository>
             <id>cefdigital-releases</id>
@@ -65,6 +64,7 @@
     </distributionManagement>
 
     <dependencyManagement>
+
         <dependencies>
             <dependency>
                 <groupId>junit</groupId>

@@ -1,11 +1,10 @@
-package eu.domibus.plugin.ws;
+package eu.domibus;
 
-import eu.domibus.AbstractIT;
 import eu.domibus.common.dao.PModeProvider;
 import eu.domibus.common.model.configuration.*;
+import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.controller.AdminGUIController;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,8 +32,10 @@ import java.util.*;
 @Transactional
 public class UploadPModeIT extends AbstractIT {
 
-    public static final String MPC_URL = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/";
     private static final String BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY = "blue_gw:red_gw:testService1:tc1Action:agreementEmpty:pushTestcase1tc1Action";
+
+    private static final String PREFIX_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/";
+
     private static boolean initialized;
     @Autowired
     AdminGUIController adminGui;
@@ -56,10 +57,10 @@ public class UploadPModeIT extends AbstractIT {
      * Tests that the PMODE is correctly saved in the DB.
      *
      * @throws IOException
-     * @throws JAXBException
+     * @throws XmlProcessingException
      */
     @Test
-    public void testSavePModeOk() throws IOException, JAXBException {
+    public void testSavePModeOk() throws IOException, XmlProcessingException {
 
         try {
             File pModeFile = new File("src/test/resources/SamplePModes/domibus-configuration-blue_gw.xml");
@@ -69,11 +70,11 @@ public class UploadPModeIT extends AbstractIT {
             pModeDao.updatePModes(IOUtils.toByteArray(fis));
             //Assert.assertEquals("You successfully uploaded the PMode file.", response);
         } catch (IOException ioEx) {
-            System.out.println("Error: " + ioEx.getMessage());
+            System.out.println("File reading error: " + ioEx.getMessage());
             throw ioEx;
-        } catch (JAXBException jEx) {
-            System.out.println("Error: " + jEx.getMessage());
-            throw jEx;
+        } catch (XmlProcessingException xpEx) {
+            System.out.println("XML error: " + xpEx.getMessage());
+            throw xpEx;
         }
     }
 
@@ -89,7 +90,7 @@ public class UploadPModeIT extends AbstractIT {
             FileInputStream fis = new FileInputStream(wrongPmode);
             MultipartFile pModeContent = new MockMultipartFile("wrong-domibus-configuration", wrongPmode.getName(), "text/xml", IOUtils.toByteArray(fis));
             String response = adminGui.uploadFileHandler(pModeContent);
-            Assert.assertTrue(response.contains("You failed to upload the PMode file"));
+            Assert.assertTrue(response.contains("Failed to upload the PMode file due to"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());
             throw ioEx;
@@ -174,26 +175,26 @@ public class UploadPModeIT extends AbstractIT {
             }
             Assert.assertTrue(agreementFound);
 
-            // The getMcsList name should be more appropriate since it returns a list of qualified name of MPC
-            List<String> mpcQualifiedNames = pModeDao.getMpcList();
-            Map<String, Mpc> savedMpcs = new HashMap<String, Mpc>();
-            for (String mpcQualName : mpcQualifiedNames) {
+            List<String> mpcNames = pModeDao.getMpcList();
+            Map<String, Mpc> savedMpcs = new HashMap<>();
+            for (String mpcName : mpcNames) {
                 Mpc mpc = new Mpc();
-                mpc.setName(StringUtils.substringAfterLast(mpcQualName, "/"));
-                mpc.setQualifiedName(mpcQualName);
+                mpc.setName(mpcName);
+                mpc.setQualifiedName(PREFIX_MPC_URI + mpcName);
                 mpc.setDefault(true);
                 mpc.setEnabled(true);
-                mpc.setRetentionDownloaded(pModeDao.getRetentionDownloadedByMpcName(mpc.getQualifiedName()));
-                mpc.setRetentionUndownloaded(pModeDao.getRetentionUndownloadedByMpcName(mpc.getQualifiedName()));
-                savedMpcs.put(mpcQualName, mpc);
+                mpc.setRetentionDownloaded(pModeDao.getRetentionDownloadedByMpcURI(mpc.getQualifiedName()));
+                mpc.setRetentionUndownloaded(pModeDao.getRetentionUndownloadedByMpcURI(mpc.getQualifiedName()));
+                savedMpcs.put(mpcName, mpc);
             }
 
             for (Mpc mpc : configuration.getMpcs()) {
-                Mpc savedMpc = savedMpcs.get(mpc.getQualifiedName());
+                Mpc savedMpc = savedMpcs.get(mpc.getName());
                 Assert.assertNotNull(savedMpc);
                 // Assert.assertEquals(mpc, savedMpc); This strangely seeems to work only with Strings!
                 //Assert.assertTrue(mpc.equals(savedMpc)); equals and hashcode are based on hibernate Ids !
                 Assert.assertEquals(mpc.getName(), savedMpc.getName());
+                Assert.assertEquals(mpc.getQualifiedName(), savedMpc.getQualifiedName());
                 Assert.assertEquals(mpc.getRetentionDownloaded(), savedMpc.getRetentionDownloaded());
                 Assert.assertEquals(mpc.getRetentionUndownloaded(), savedMpc.getRetentionUndownloaded());
             }

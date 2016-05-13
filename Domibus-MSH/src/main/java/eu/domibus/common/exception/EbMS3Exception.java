@@ -23,6 +23,7 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Description;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Error;
+import org.apache.commons.lang.StringUtils;
 
 import javax.xml.ws.WebFault;
 import java.util.Locale;
@@ -98,7 +99,7 @@ public class EbMS3Exception extends Exception {
     }
 
     public String getErrorDetail() {
-        return this.errorDetail;
+        return StringUtils.abbreviate(this.errorDetail, 255);
     }
 
     public void setErrorDetail(final String errorDetail) {
@@ -136,7 +137,7 @@ public class EbMS3Exception extends Exception {
         ebMS3Error.setOrigin(this.errorCode.getCode().getOrigin());
         ebMS3Error.setErrorCode(this.errorCode.getCode().getErrorCode().getErrorCodeName());
         ebMS3Error.setSeverity(this.errorCode.getSeverity());
-        ebMS3Error.setErrorDetail((this.errorDetail != null ? this.errorDetail : ""));
+        ebMS3Error.setErrorDetail((this.errorDetail != null ? getErrorDetail() : ""));
         ebMS3Error.setCategory(this.errorCode.getCategory().name());
         ebMS3Error.setRefToMessageInError(this.refToMessageId);
         ebMS3Error.setShortDescription(this.getShortDescription());

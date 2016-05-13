@@ -84,8 +84,8 @@
     <bean id="clientWrapperFactory" class="org.apache.cxf.jaxws.JaxWsProxyFactoryBean">
 	    <!--<property name="wsdlURL" value="file://C:/wls12130/user_projects/domains/mydomain/conf/domibus/wsdl/wsdl/DocumentWrapper-2.0.wsdl"/>-->
         <property name="serviceClass" value="ec.services.wsdl.documentwrapper_2.DocumentWrapperPortType"/>
-        <property name="address" value="http://wltdig07.cc.cec.eu.int:1043/etrustex/services"/>
-		<property name="username" value="euceg_gw_user"/>
+        <property name="address" value="http://158.167.243.11:1043/etrustex/services"/>
+		<property name="username" value="domibusUser"/>
 		<property name="password" value="etrustex"/>
     </bean>
 	<!-- Document Bundle Service -->
@@ -93,8 +93,8 @@
     <bean id="clientBundleFactory" class="org.apache.cxf.jaxws.JaxWsProxyFactoryBean">
         <!--<property name="wsdlURL" value="file://C:/wls12130/user_projects/domains/mydomain/conf/domibus/wsdl/wsdl/DocumentBundle-2.0.wsdl"/>-->
 		<property name="serviceClass" value="ec.services.wsdl.documentbundle_2.DocumentBundlePortType"/>
-        <property name="address" value="http://wltdig07.cc.cec.eu.int:1043/etrustex/services"/>
-		<property name="username" value="euceg_gw_user"/>
+        <property name="address" value="http://158.167.243.11:1043/etrustex/services"/>
+		<property name="username" value="domibusUser"/>
 		<property name="password" value="etrustex"/>
     </bean>
 
@@ -132,14 +132,16 @@
 	<util:properties id="eTrustexProperties">
 		<prop key="eTrustex.sender_role">http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</prop>
 		<prop key="eTrustex.receiver_role">http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</prop>
-		<prop key="eTrustex.party_ns">urn:oasis:names:tc:ebcore:partyid-type:unregistered:</prop>
-		<prop key="eTrustex.serviceName">ConnectivityService</prop>
-		<prop key="eTrustex.service_type">EU-CEG</prop>
+		<prop key="eTrustex.party_type">urn:oasis:names:tc:ebcore:partyid-type:unregistered:EUCEG</prop>
+		<prop key="eTrustex.serviceName">http://ec.europa.eu/e-delivery/services/tobacco-ecig-reporting</prop>
+		<prop key="eTrustex.service_type">e-delivery</prop>
 		<prop key="eTrustex.originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</prop>
 		<prop key="eTrustex.finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</prop>
-		<prop key="eTrustex.outbound_action">SubmitMessage</prop>
+		<prop key="eTrustex.outbound_action">SubmitResponse</prop>
 		<prop key="eTrustex.wrapper_type">BINARY</prop>
-		<prop key="eTrustex.payload.contentId">cid:message</prop>
+		<prop key="eTrustex.payload.defaultContentId">cid:message</prop>
+		<prop key="eTrustex.payload.overwriteMimeType">false</prop>
+		<prop key="eTrustex.payload.mimeType">application/xml</prop>
 	</util:properties>
 
 

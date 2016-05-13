@@ -267,13 +267,12 @@ public class AdminGUIController {
             try {
                 final byte[] bytes = file.getBytes();
                 pModeProvider.updatePModes(bytes);
-                return "You successfully uploaded the PMode file.";
+                return "PMode file has been successfully uploaded. TrustStore has been successfully reloaded.";
             } catch (final Exception e) {
-                LOG.error("", e);
-                return "You failed to upload the PMode file. => " + e.getMessage();
+                return "Failed to upload the PMode file due to => " + e.getMessage();
             }
         } else {
-            return "You failed to upload the PMode file. The file was empty.";
+            return "Failed to upload the PMode file since it was empty.";
         }
     }
 }

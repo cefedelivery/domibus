@@ -144,8 +144,7 @@ public class PModeDao extends PModeProvider {
         final TypedQuery<String> query = this.entityManager.createNamedQuery("Action.findByAction", String.class);
         query.setParameter("ACTION", action);
         try {
-            final String actionName = query.getSingleResult();
-            return actionName;
+            return query.getSingleResult();
         } catch (final NoResultException e) {
             PModeDao.LOG.info("No matching action found", e);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching action found", null, null);
@@ -173,8 +172,8 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            PModeDao.LOG.info("No machting service found", e);
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No machting service found", null, null);
+            PModeDao.LOG.info("No matching service found", e);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching service found", null, null);
         }
     }
 
@@ -216,13 +215,30 @@ public class PModeDao extends PModeProvider {
 
     @Override
     public int getRetentionDownloadedByMpcName(final String mpcName) {
-        final TypedQuery<Mpc> query = entityManager.createNamedQuery("Mpc.findByQualifiedName", Mpc.class);
-        query.setParameter("QUALIFIED_NAME", mpcName);
+
+        final TypedQuery<Mpc> query = entityManager.createNamedQuery("Mpc.findByName", Mpc.class);
+        query.setParameter("NAME", mpcName);
 
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            PModeDao.LOG.error("No mpc with name: " + mpcName + " found. Assuming message retention of 0 for downloaded messages.");
+            PModeDao.LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of 0 for downloaded messages.");
+            return 0;
+        }
+
+        return result.getRetentionDownloaded();
+    }
+
+    @Override
+    public int getRetentionDownloadedByMpcURI(final String mpcURI) {
+
+        final TypedQuery<Mpc> query = entityManager.createNamedQuery("Mpc.findByQualifiedName", Mpc.class);
+        query.setParameter("QUALIFIED_NAME", mpcURI);
+
+        final Mpc result = query.getSingleResult();
+
+        if (result == null) {
+            PModeDao.LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of 0 for downloaded messages.");
             return 0;
         }
 
@@ -231,12 +247,30 @@ public class PModeDao extends PModeProvider {
 
     @Override
     public int getRetentionUndownloadedByMpcName(final String mpcName) {
-        final TypedQuery<Mpc> query = this.entityManager.createNamedQuery("Mpc.findByQualifiedName", Mpc.class);
-        query.setParameter("QUALIFIED_NAME", mpcName);
+
+        final TypedQuery<Mpc> query = this.entityManager.createNamedQuery("Mpc.findByName", Mpc.class);
+        query.setParameter("NAME", mpcName);
+
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            PModeDao.LOG.error("No mpc with name: " + mpcName + " found. Assuming message retention of -1 for undownloaded messages.");
+            PModeDao.LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of -1 for undownloaded messages.");
+            return 0;
+        }
+
+        return result.getRetentionUndownloaded();
+    }
+
+    @Override
+    public int getRetentionUndownloadedByMpcURI(final String mpcURI) {
+
+        final TypedQuery<Mpc> query = entityManager.createNamedQuery("Mpc.findByQualifiedName", Mpc.class);
+        query.setParameter("QUALIFIED_NAME", mpcURI);
+
+        final Mpc result = query.getSingleResult();
+
+        if (result == null) {
+            PModeDao.LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of -1 for undownloaded messages.");
             return 0;
         }
 
@@ -246,6 +280,12 @@ public class PModeDao extends PModeProvider {
     @Override
     public List<String> getMpcList() {
         final TypedQuery<String> query = entityManager.createNamedQuery("Mpc.getAllNames", String.class);
+        return query.getResultList();
+    }
+
+    @Override
+    public List<String> getMpcURIList() {
+        final TypedQuery<String> query = entityManager.createNamedQuery("Mpc.getAllURIs", String.class);
         return query.getResultList();
     }
 

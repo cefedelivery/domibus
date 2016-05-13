@@ -106,9 +106,8 @@
 
                     </row>
                     <row>
-                        <entry>truststoreProperties</entry>
-                        <entry>org.apache.ws.security.crypto. merlin.truststore.file
-                        </entry>
+                        <entry>trustStoreProperties</entry>
+                        <entry>org.apache.ws.security.crypto.merlin.truststore.file</entry>
                         <entry>Filename of the keystore containing the public
                             keys for signature verification /
                             encryption of
@@ -116,10 +115,8 @@
                         </entry>
                     </row>
                     <row>
-                        <entry>truststoreProperties</entry>
-                        <entry>org.apache.ws.security.crypto.
-                            merlin.truststore.password
-                        </entry>
+                        <entry>trustStoreProperties</entry>
+                        <entry>org.apache.ws.security.crypto.merlin.truststore.password</entry>
                         <entry>Password for the keystore containing the public
                             keys for signature verification /
                             encryption of

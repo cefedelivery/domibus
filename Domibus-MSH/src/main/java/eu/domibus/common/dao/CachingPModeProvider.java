@@ -26,16 +26,18 @@ import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.AgreementRef;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartyId;
+import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.JAXBException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static org.springframework.util.StringUtils.hasLength;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -44,12 +46,9 @@ public class CachingPModeProvider extends PModeProvider {
 
     private static final Log LOG = LogFactory.getLog(CachingPModeProvider.class);
 
-
     //Dont access directly, use getter instead
     private Configuration configuration;
 
-
-    //@Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
     protected synchronized Configuration getConfiguration() {
         if (this.configuration == null) {
             this.init();
@@ -108,11 +107,12 @@ public class CachingPModeProvider extends PModeProvider {
     @Override
     protected String findServiceName(final eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Service service) throws EbMS3Exception {
         for (final Service service1 : this.getConfiguration().getBusinessProcesses().getServices()) {
-            if (service1.getServiceType().equals(service.getType()) && service1.getValue().equals(service.getValue())) {
-                return service1.getName();
-            }
+            if ((service1.getServiceType().equals(service.getType()) || (!hasLength(service1.getServiceType()) && !hasLength(service.getType()))))
+                if (service1.getValue().equals(service.getValue())) {
+                    return service1.getName();
+                }
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No machting service found", null, null);
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching service found", null, null);
     }
 
     @Override
@@ -244,7 +244,20 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No mpc with name: " + mpcName + " found. Assuming message retention of 0 for downloaded messages.");
+        CachingPModeProvider.LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of 0 for downloaded messages.");
+
+        return 0;
+    }
+
+    @Override
+    public int getRetentionDownloadedByMpcURI(final String mpcURI) {
+        for (final Mpc mpc1 : this.getConfiguration().getMpcs()) {
+            if (mpc1.getQualifiedName().equals(mpcURI)) {
+                return mpc1.getRetentionDownloaded();
+            }
+        }
+
+        CachingPModeProvider.LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of 0 for downloaded messages.");
 
         return 0;
     }
@@ -257,16 +270,38 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No mpc with name: " + mpcName + " found. Assuming message retention of -1 for undownloaded messages.");
+        CachingPModeProvider.LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of -1 for undownloaded messages.");
+
+        return -1;
+    }
+
+    @Override
+    public int getRetentionUndownloadedByMpcURI(final String mpcURI) {
+        for (final Mpc mpc1 : this.getConfiguration().getMpcs()) {
+            if (mpc1.getQualifiedName().equals(mpcURI)) {
+                return mpc1.getRetentionUndownloaded();
+            }
+        }
+
+        CachingPModeProvider.LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of -1 for undownloaded messages.");
 
         return -1;
     }
 
     @Override
     public List<String> getMpcList() {
-        final List<String> result = new ArrayList();
+        final List<String> result = new ArrayList<>();
         for (final Mpc mpc : this.getConfiguration().getMpcs()) {
             result.add(mpc.getName());
+        }
+        return result;
+    }
+
+    @Override
+    public List<String> getMpcURIList() {
+        final List<String> result = new ArrayList<>();
+        for (final Mpc mpc : this.getConfiguration().getMpcs()) {
+            result.add(mpc.getQualifiedName());
         }
         return result;
     }
@@ -279,7 +314,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void updatePModes(final byte[] bytes) throws JAXBException {
+    public void updatePModes(final byte[] bytes) throws XmlProcessingException {
         super.updatePModes(bytes);
         this.configuration = null;
     }

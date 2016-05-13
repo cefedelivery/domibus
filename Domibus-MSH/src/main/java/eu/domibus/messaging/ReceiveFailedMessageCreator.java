@@ -10,13 +10,13 @@ import javax.jms.Session;
 /**
  * Created by kochc01 on 11.03.2016.
  */
-public class RecieveFailedMessageCreator implements MessageCreator {
+public class ReceiveFailedMessageCreator implements MessageCreator {
 
     private final String messageId;
     private final String endpoint;
 
 
-    public RecieveFailedMessageCreator(final String messageId, final String endpoint) {
+    public ReceiveFailedMessageCreator(final String messageId, final String endpoint) {
         this.messageId = messageId;
 
         this.endpoint = endpoint;

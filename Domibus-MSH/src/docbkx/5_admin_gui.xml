@@ -263,7 +263,7 @@
             </varlistentry>
         </variablelist>
         <figure>
-            <title>Error logging page of adminstration dashboard</title>
+            <title>Error logging page of administration dashboard</title>
             <mediaobject>
                 <imageobject>
                     <imagedata fileref="graphics/errorlog_errors.png"
@@ -276,10 +276,10 @@
     </section>
     <section xml:id="pmode_upload">
         <title>PMode Upload</title>
-        <para>This section is only accesible by administrators and provides a
-            pmode upload functionality. You can choose a pmode configuration
+        <para>This section is only accessible by administrators and provides a
+            PMode upload functionality. You can choose a PMode configuration
             (xml) on your local machine and apply it to the gateway. The
-            currenty pmode configuration is then replaced.
+            currenty PMode configuration is then replaced. This action will also reload the Trustore's content.
         </para>
         <figure>
             <title>PMode Upload</title>

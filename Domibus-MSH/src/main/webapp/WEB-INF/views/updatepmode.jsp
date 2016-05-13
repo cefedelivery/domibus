@@ -27,7 +27,7 @@
 <form method="POST" action="updatepmode" enctype="multipart/form-data">
   PMode File to upload: <input type="file" name="file"><br/>
   <br/>
-  <input type="submit" value="Upload"> Press here to upload the PMode file!
+  <input type="submit" value="Upload"> Press here to upload the PMode file. Please notice that the TrustStore will be re-loaded.
 </form>
 </body>
 </html>

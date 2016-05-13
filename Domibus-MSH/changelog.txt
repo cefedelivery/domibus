@@ -1,3 +1,18 @@
+Domibus 3.1.0
+- Fixed issue when sending a message with an ID that is over 255 characters long.
+- Fixed issue when sending a message with an ID that was already used.
+- Fixed issue when trying to download a message from the sender gateway.
+- Fixed retention check (MPC) during download Message.
+- Fixed a backend notification error "could not notify backend of rejected message".
+- Fixed Data truncation: Data too long for column 'ERROR_DETAIL'.
+- Fixed transaction management for Weblogic.
+- Added support for WildFly 9.0.2.
+- Improved the error codes and messages when submission fails.
+- Atomikos warnings are not shown anymore in the logs.
+- The ThroughPutLimiter has been removed.
+- The Truststore is now reloaded during the PMode upload.
+- The domibus-security.xml is not compatible with the one of previous releases.
+- Logging is now using DailyRollingFileAppender.
 Domibus 3.1-RC2
 - Fixed issue on JMS plugin when no ServiceType is set
 - Fixed a MimeType issue when compression is enabled

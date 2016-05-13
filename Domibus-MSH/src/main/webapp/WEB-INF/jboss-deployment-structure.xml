@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.2">
+    <deployment>
+        <exclude-subsystems>
+            <subsystem name="webservices" />
+            <subsystem name="jaxrs" />
+            <subsystem name="resteasy" />
+        </exclude-subsystems>
+
+        <dependencies>
+            <!--<module name="eu.domibus.domibus-default-ws-plugin" export="true">-->
+                <!--<imports>-->
+                    <!--<exclude path="eu/domibus/common/model/org/**"/>-->
+                <!--</imports>-->
+            <!--</module>-->
+            <module name="javax.xml.ws.api"/>
+            <module name="javax.jms.api"/>
+            <module name="com.sun.xml.messaging.saaj"/>
+
+            <!-- necessary for processing WS annoations -->
+            <!--<module name="javax.api"/>-->
+            <!--<module name="javax.jws.api"/>-->
+            <!--<module name="javax.wsdl4j.api"/>-->
+            <!--<module name="javax.xml.bind.api"/>-->
+            <!--<module name="com.sun.xml.bind"/>-->
+
+
+        </dependencies>
+
+        <resources>
+            <resource-root path="WEB-INF/lib/bcprov-jdk15on-1.51.jar" use-physical-code-source="true"/>
+        </resources>
+
+        <exclusions>
+            <module name="org.bouncycastle" />
+            <module name="org.apache.cxf" />
+            <module name="org.apache.cxf.impl" />
+
+
+            <!--<module name="javax.wsdl4j.api" />-->
+            <!--<module name="org.hibernate" />-->
+            <!--<module name="javax.jws.api" />-->
+            <!--<module name="javax.validation.api" />-->
+            <!--<module name="javax.xml.ws.api" />-->
+            <!--<module name="javax.xml.bind.api" />-->
+
+        </exclusions>
+
+
+    </deployment>
+</jboss-deployment-structure>

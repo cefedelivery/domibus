@@ -24,25 +24,28 @@ public class SendMessageOnTomcat {
             // Declare message as submit
             messageMap.setStringProperty("messageType", "submitMessage");
             messageMap.setStringProperty("messageId", UUID.randomUUID().toString());
+            // Uncomment to test refToMessageId that is too long, i.e. > 255
+            // messageMap.setStringProperty("refToMessageId", "0079a47e-ae1a-4c1b-ad62-2b18ee57e39e@domibus.eu0079a47e-ae1a-4c1b-ad62-2b18ee57e39e@domibus.eu0079a47e-ae1a-4c1b-ad62-2b18ee57e39e@domibus.eu0079a47e-ae1a-4c1b-ad62-2b18ee57e39e@domibus.eu0079a47e-ae1a-4c1b-ad62-2b18ee57e39e@domibus.eu0079a47e-0079a47e-aesasa");
+
             // Set up the Communication properties for the message
             messageMap.setStringProperty("service", "http://ec.europa.eu/e-delivery/services/tobacco-ecig-reporting");
             //messageMap.setStringProperty("serviceType", "noSecurity");
             //messageMap.setStringProperty("serviceType", "signOnly");
-            messageMap.setStringProperty("serviceType", "encryptAll");
+            messageMap.setStringProperty("serviceType", "eDelivery");
 
             messageMap.setStringProperty("action", "SubmitRequest");
             messageMap.setStringProperty("conversationId", "123");
             //messageMap.setStringProperty("fromPartyId", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-blue");
             //messageMap.setStringProperty("fromPartyType", ""); // Mandatory but empty here because it is in the value of the party ID
-            messageMap.setStringProperty("fromPartyId", "EUCEG:EUCEG_EC");
-            messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:iso6523"); // Mandatory
+            messageMap.setStringProperty("fromPartyId", "EUCEG_EC");
+            messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:EUCEG"); // Mandatory
 
             messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
 
             //messageMap.setStringProperty("toPartyId", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-red");
             //messageMap.setStringProperty("toPartyType", ""); // Mandatory but empty here because it is in the value of the party ID
-            messageMap.setStringProperty("toPartyId", "EUCEG:EUCEG_000001");
-            messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered"); // Mandatory
+            messageMap.setStringProperty("toPartyId", "EUCEG_000001_AS4");
+            messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:EUCEG"); // Mandatory
 
             messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
 

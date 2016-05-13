@@ -869,11 +869,11 @@
        <ns:UserMessage>
 				<ns:PartyInfo>
 					<ns:From>
-						<ns:PartyId>urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-blue</ns:PartyId>
+						<ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
 						<ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
 					</ns:From>
 					<ns:To>
-						<ns:PartyId>urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-red</ns:PartyId>
+						<ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
 						<ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
 					</ns:To>
 				</ns:PartyInfo>

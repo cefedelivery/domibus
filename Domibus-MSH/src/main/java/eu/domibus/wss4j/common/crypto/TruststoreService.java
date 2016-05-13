@@ -19,13 +19,23 @@
 
 package eu.domibus.wss4j.common.crypto;
 
+import eu.domibus.clustering.Command;
 import eu.domibus.common.exception.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
+import org.springframework.jms.core.JmsOperations;
+import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
@@ -36,32 +46,38 @@ import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 /**
- * @author Christian Koch, Stefan Mueller
+ * @author Christian Koch, Stefan Mueller, Federico Martini
  */
-@Service(value = "truststoreService")
+@Service(value = "trustStoreService")
 @Scope(value = "singleton")
-public class TruststoreService {
+public class TrustStoreService {
 
-    private static final Log LOG = LogFactory.getLog(TruststoreService.class);
+    private static final Log LOG = LogFactory.getLog(TrustStoreService.class);
 
-    @Resource(name = "truststoreProperties")
-    private Properties truststoreProperties;
+    @Resource(name = "trustStoreProperties")
+    private Properties trustStoreProperties;
 
-    private KeyStore truststore;
+    private KeyStore trustStore;
 
-    public synchronized KeyStore getTruststore() {
-        if (truststore == null) {
+    @Qualifier("jmsTemplateCommand")
+    @Autowired
+    private JmsOperations jmsOperations;
+
+    private Merlin crypto;
+
+    public synchronized KeyStore getTrustStore() {
+        if (trustStore == null) {
             try {
-                initTruststore();
+                initTrustStore();
             } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-                LOG.error("Error while initializing truststore", e);
+                LOG.error("Error while initializing trustStore", e);
             }
         }
-        return truststore;
+        return trustStore;
     }
 
     /**
-     * Adds the certificate to the truststore
+     * Adds the certificate to the trustStore
      *
      * @param certificate the certificate to add
      * @param alias       the certifictae alias
@@ -71,7 +87,7 @@ public class TruststoreService {
     public boolean addCertificate(final X509Certificate certificate, final String alias, final boolean overwrite) {
         boolean containsAlias = false;
         try {
-            containsAlias = getTruststore().containsAlias(alias);
+            containsAlias = getTrustStore().containsAlias(alias);
         } catch (final KeyStoreException e) {
             throw new RuntimeException("This should never happen", e);
         }
@@ -80,9 +96,9 @@ public class TruststoreService {
         }
         try {
             if (containsAlias) {
-                getTruststore().deleteEntry(alias);
+                getTrustStore().deleteEntry(alias);
             }
-            getTruststore().setCertificateEntry(alias, certificate);
+            getTrustStore().setCertificateEntry(alias, certificate);
 
             return true;
         } catch (final KeyStoreException e) {
@@ -90,11 +106,50 @@ public class TruststoreService {
         }
     }
 
-    private void initTruststore() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
-        final KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+    private void initTrustStore() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
 
-        ks.load(new FileInputStream(truststoreProperties.getProperty("org.apache.ws.security.crypto.merlin.truststore.file")), truststoreProperties.getProperty("org.apache.ws.security.crypto.merlin.truststore.password").toCharArray());
-        truststore = ks;
+        final KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        String trustStoreFilename = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
+        String trustStorePassword = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password");
+        ks.load(new FileInputStream(trustStoreFilename), trustStorePassword.toCharArray());
+        trustStore = ks;
+        LOG.info("TrustStore successfully loaded");
+    }
+
+    public void refreshTrustStore() {
+        try {
+            initTrustStore();
+            // After startup and before the first message is sent the crypto is not initialized yet, so there is no need to refresh the trustStore in it!
+            if (crypto != null) {
+                crypto.setTrustStore(trustStore);
+            }
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException ex) {
+            if (LOG.isDebugEnabled()) {
+                LOG.warn("Failed to reload certificates due to: " + ex);
+            } else {
+                LOG.warn("Failed to reload certificates due to: " + ex.getCause());
+            }
+        }
+    }
+
+    // Saves the reference to the Merlin object in order to be able to refresh it afterwards whenever is needed!
+    void setCrypto(Merlin crypto) {
+        this.crypto = crypto;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateTrustStore() {
+        // Sends a message into the topic queue in order to refresh all the singleton instances of the TrustStoreService.
+        jmsOperations.send(new ReloadTrustStoreMessageCreator());
+    }
+
+    class ReloadTrustStoreMessageCreator implements MessageCreator {
+        @Override
+        public Message createMessage(Session session) throws JMSException {
+            Message m = session.createMessage();
+            m.setStringProperty(Command.COMMAND, Command.RELOAD_TRUSTSTORE);
+            return m;
+        }
     }
 
 

@@ -21,8 +21,6 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
@@ -30,7 +28,6 @@ import eu.domibus.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.logging.MessageLogEntry;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
 import eu.domibus.ebms3.common.DelayedDispatchMessageCreator;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -97,6 +94,9 @@ public class MessageSender implements MessageListener {
     @Autowired
     private BackendNotificationService backendNotificationService;
 
+    @Autowired
+    private UpdateRetryLoggingService updateRetryLoggingService;
+
 
     private void sendUserMessage(final String messageId) {
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
@@ -108,7 +108,7 @@ public class MessageSender implements MessageListener {
 
         final UserMessage userMessage = this.messagingDao.findUserMessageByMessageId(messageId);
         try {
-            pModeKey = this.pModeProvider.findPModeKeyForUserMesssage(userMessage);
+            pModeKey = this.pModeProvider.findPModeKeyForUserMessage(userMessage);
             legConfiguration = this.pModeProvider.getLegConfiguration(pModeKey);
 
             MessageSender.LOG.debug("PMode found : " + pModeKey);
@@ -142,12 +142,14 @@ public class MessageSender implements MessageListener {
                             assert false;
                     }
                     backendNotificationService.notifyOfSendSuccess(messageId);
+                    messageLogDao.setAsNotified(messageId);
+                    messagingDao.clearPayloadData(messageId);
                     break;
                 case WAITING_FOR_CALLBACK:
                     this.messageLogDao.setMessageAsWaitingForReceipt(messageId);
                     break;
                 case FAIL:
-                    this.updateRetryLogging(messageId, legConfiguration);
+                    updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
             }
         }
     }
@@ -171,34 +173,7 @@ public class MessageSender implements MessageListener {
     }
 
 
-    /**
-     * This method is responsible for the handling of retries for a given message
-     *
-     * @param messageId        id of the message that needs to be retried
-     * @param legConfiguration processing information for the message
-     */
-    private void updateRetryLogging(final String messageId, final LegConfiguration legConfiguration) {
-        final MessageLogEntry messageLogEntry = this.messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
-        messageLogEntry.setMessageStatus(MessageStatus.SEND_ATTEMPT_FAILED); //This is not stored in the database
-        messageLogEntry.setMessageStatus(MessageStatus.WAITING_FOR_RETRY);
-        if (messageLogEntry.getSendAttempts() < messageLogEntry.getSendAttemptsMax() && messageLogEntry.getNextAttempt().getTime() < System.currentTimeMillis()) {
-            messageLogEntry.setSendAttempts(messageLogEntry.getSendAttempts() + 1);
-            if (legConfiguration.getReceptionAwareness() != null) {
-                messageLogEntry.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(messageLogEntry.getNextAttempt(), messageLogEntry.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
-            }
 
-        } else { // mark message as ultimately failed if max retries reached
-            messageLogEntry.setMessageStatus(MessageStatus.SEND_FAILURE);
-            if (NotificationStatus.REQUIRED.equals(messageLogEntry.getNotificationStatus())) {
-                backendNotificationService.notifyOfSendFailure(messageId);
-                messagingDao.delete(messageId, MessageStatus.SEND_FAILURE, NotificationStatus.NOTIFIED);
-            } else {
-                messagingDao.delete(messageId, MessageStatus.SEND_FAILURE);
-            }
-
-        }
-        this.messageLogDao.update(messageLogEntry);
-    }
 
 
     @Transactional(propagation = Propagation.REQUIRED)

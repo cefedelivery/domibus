@@ -5,7 +5,6 @@ import eu.domibus.AbstractIT;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.ListPendingMessagesFault;
 import eu.domibus.plugin.webService.generated.ListPendingMessagesResponse;
-import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
@@ -15,7 +14,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
 import java.io.File;
 import java.io.IOException;
 
@@ -43,13 +41,14 @@ public class PendingMessagesListIT extends AbstractIT {
     }
 
     @Test
-    public void testListPendingMessagesOk() throws ListPendingMessagesFault, IOException, JMSException {
+    public void testListPendingMessagesOk() throws Exception {
 
-        ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
-
+        javax.jms.Connection connection = connectionFactory.createConnection("domibus", "changeit");
+        connection.start();
         pushQueueMessage("2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu", connection, WS_NOT_QUEUE);
         pushQueueMessage("78a1d578-0cc7-41fb-9f35-86a5b2769a14@domibus.eu", connection, WS_NOT_QUEUE);
         pushQueueMessage("2bbc05d8-b603-4742-a118-137898a81de3@domibus.eu", connection, WS_NOT_QUEUE);
+        connection.close();
 
         String request = new String("<listPendingMessagesRequest></listPendingMessagesRequest>");
         ListPendingMessagesResponse response = backendWebService.listPendingMessages(request);

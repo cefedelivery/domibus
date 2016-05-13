@@ -22,6 +22,7 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.PModeProvider;
@@ -143,7 +144,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
 
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
-        final String messageId = "";
+        Messaging messaging = null;
         try (StringWriter sw = new StringWriter()) {
             if (MSHWebservice.LOG.isDebugEnabled()) {
 
@@ -158,7 +159,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     MSHWebservice.LOG.debug(i.next());
                 }
             }
-            final Messaging messaging = this.getMessaging(request);
+            messaging = this.getMessaging(request);
+
             checkCharset(messaging);
 
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
@@ -170,15 +172,15 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
 
             if (!messageExists) {
-                backendNotificationService.notifyOfIncoming(messaging.getUserMessage());
+                backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
             }
 
         } catch (TransformerException | SOAPException | JAXBException | IOException e) {
             throw new RuntimeException(e);
         } catch (final EbMS3Exception e) {
             try {
-                if (legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()) {
-                    backendNotificationService.notifyOfReceiveFailure(messageId, pModeProvider.getSenderParty(pmodeKey).getEndpoint());
+                if (legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
+                    backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED_FAILURE);
                 }
             } catch (Exception ex) {
                 LOG.warn("could not notify backend of rejected message ", ex);

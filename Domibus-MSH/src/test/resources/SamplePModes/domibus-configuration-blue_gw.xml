@@ -9,13 +9,13 @@
              enabled="true"
              default="true"
              retention_downloaded="0"
-             retention_undownloaded="60"/>
+             retention_undownloaded="0"/>
         <mpc name="anotherMpc"
              qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/anotherMpc"
              enabled="true"
              default="true"
-             retention_downloaded="44"
-             retention_undownloaded="23"/>
+             retention_downloaded="3"
+             retention_undownloaded="5"/>
     </mpcs>
     <businessProcesses>
         <roles>
@@ -157,8 +157,8 @@
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               errorHandling="demoErrorHandling"
-                              compressPayloads="false">
-            </legConfiguration>
+                              compressPayloads="false"/>
+
             <legConfiguration name="pushTestcase2tc2Action"
                               service="testService2"
                               action="tc2Action"
@@ -168,8 +168,8 @@
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               errorHandling="demoErrorHandling"
-                              compressPayloads="false">
-            </legConfiguration>
+                              compressPayloads="false"/>
+
             <legConfiguration name="pushTestcase3Leg1tc3ActionLeg1"
                               service="testService3"
                               action="tc3ActionLeg1"
@@ -179,8 +179,8 @@
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               errorHandling="demoErrorHandling"
-                              compressPayloads="false">
-            </legConfiguration>
+                              compressPayloads="false"/>
+
             <legConfiguration name="pushTestcase3Leg2tc3ActionLeg2"
                               service="testService3"
                               action="tc3ActionLeg2"
@@ -190,8 +190,8 @@
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               errorHandling="demoErrorHandling"
-                              compressPayloads="false">
-            </legConfiguration>
+                              compressPayloads="false"/>
+
             <legConfiguration name="pushNoSecnoSecAction"
                               service="noSecService"
                               action="noSecAction"
@@ -201,8 +201,7 @@
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               errorHandling="demoErrorHandling"
-                              compressPayloads="false">
-            </legConfiguration>
+                              compressPayloads="false"/>
         </legConfigurations>
         <process name="tc1Process"
                  agreement="agreementEmpty"

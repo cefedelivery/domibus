@@ -56,7 +56,7 @@ public class ErrorLogEntry extends AbstractBaseEntity implements ErrorResult {
     @Column(name = "ERROR_DETAIL")
     private String errorDetail;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "TIMESTAMP")
+    @Column(name = "TIME_STAMP")
     private Date timestamp;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "NOTIFIED")

@@ -22,6 +22,7 @@ package eu.domibus.common.dao;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartInfo;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.SignalMessage;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
 import org.springframework.dao.support.DataAccessUtils;
@@ -31,7 +32,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import static org.springframework.util.StringUtils.hasLength;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -108,16 +114,28 @@ public class MessagingDao extends BasicDao<Messaging> {
         messageStatusQuery.executeUpdate();
     }
 
-    private void clearPayloadData(final String messageId) {
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void clearPayloadData(final String messageId) {
         final Query payloadsQuery = em.createNamedQuery("Messaging.findPartInfosForMessage");
         payloadsQuery.setParameter("MESSAGE_ID", messageId);
-
-        if(payloadsQuery.getResultList().isEmpty())
+        List<PartInfo> results = payloadsQuery.getResultList();
+        if (results.isEmpty()) {
             return;
+        }
+        List<PartInfo> databasePayloads = new ArrayList<>();
 
-        final Query emptyQuery = em.createNamedQuery("Messaging.emptyPayloads");
-        emptyQuery.setParameter("PARTINFOS", payloadsQuery.getResultList());
-        emptyQuery.executeUpdate();
+        for (PartInfo result : results) {
+            if (hasLength(result.getFileName())) {
+                new File(result.getFileName()).delete();
+            } else {
+                databasePayloads.add(result);
+            }
+        }
+        if (!databasePayloads.isEmpty()) {
+            final Query emptyQuery = em.createNamedQuery("Messaging.emptyPayloads");
+            emptyQuery.setParameter("PARTINFOS", databasePayloads);
+            emptyQuery.executeUpdate();
+        }
     }
 
 }

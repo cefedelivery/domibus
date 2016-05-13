@@ -21,6 +21,7 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.MessageLogEntry;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -198,5 +199,12 @@ public class MessageLogDao extends BasicDao<MessageLogEntry> {
         final TypedQuery<String> query = em.createNamedQuery("MessageLogEntry.findBackendForMessage", String.class);
         query.setParameter("MESSAGE_ID", messageId);
         return query.getSingleResult();
+    }
+
+    public void setAsNotified(String messageId) {
+        final Query query = em.createNamedQuery("MessageLogEntry.setNotificationStatus");
+        query.setParameter("MESSAGE_ID", messageId);
+        query.setParameter("NOTIFICATION_STATUS", NotificationStatus.NOTIFIED);
+        query.executeUpdate();
     }
 }

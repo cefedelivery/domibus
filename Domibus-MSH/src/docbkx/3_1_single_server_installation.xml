@@ -131,7 +131,7 @@
                 <step>
                     <title>Set up the environment variables</title>
                     <para>Domibus expects a single JVM-parameter<computeroutput>
-                        $domibus.config.location</computeroutput>, pointing towards the
+                        domibus.config.location</computeroutput>, pointing towards the
                         <computeroutput>conf/domibus/</computeroutput>
                         folder copied in the previous step. If using the Tomcat distribution
                         of Domibus documentation on how to do this can be found
@@ -144,7 +144,9 @@
                         <computeroutput>domibus/bin/setenv.bat</computeroutput> and adapt CATALINA_HOME value
                         to the absolute path of the installation.</para>
                     <para>For domibus to run correctly you need to setup the maximum heap size and maximum permanent generation size to: </para>
-                    <computeroutput>-Xmx768m -XX:MaxPermSize=256m</computeroutput>
+                    <computeroutput>-Xmx768m -XX:MaxPermSize=256m</computeroutput>. The heap size is sufficient for
+                    normal workloads. A setting of at least ten times the maximum expected attachment size is
+                    recommended.
                 </step>
                 <step>
                     <substeps>
@@ -198,7 +200,7 @@
             </procedure>
             <taskrelated>
                 <para>You now should have a working Domibus deployment. Before you can start exchanging messages you
-                    have to provide buisness case specific processing modes (PModes) to the gateway. As those are
+                    have to provide business case specific processing modes (PModes) to the gateway. As those are
                     deployment dependant those PModes are not a part of the Domibus distribution. See
                     <xref linkend="config_pmodes"/>
                     on how to generate your own PMode set.

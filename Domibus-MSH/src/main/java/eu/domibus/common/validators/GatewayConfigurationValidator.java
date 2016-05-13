@@ -28,12 +28,10 @@ public class GatewayConfigurationValidator {
     private static final String MD5_DOMIBUS_DATASOURCE_XML = "3aecbfa79b63d039a2fc05b26311c5ac";
     private static final String MD5_DOMIBUS_SECURITY_XML = "6c999533a80fdcbb3755fb1c715644de";
 
-
     final String domibusConfigLocation = System.getProperty("domibus.config.location");
 
-
-    @Resource(name = "truststoreProperties")
-    private Properties truststoreProperties;
+    @Resource(name = "trustStoreProperties")
+    private Properties trustStoreProperties;
 
     @PostConstruct
     public void validateConfiguration() throws Exception {
@@ -54,7 +52,7 @@ public class GatewayConfigurationValidator {
         }
 
         try {
-            ks.load(new FileInputStream(truststoreProperties.getProperty("org.apache.ws.security.crypto.merlin.truststore.file")), truststoreProperties.getProperty("org.apache.ws.security.crypto.merlin.truststore.password").toCharArray());
+            ks.load(new FileInputStream(trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file")), trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
         } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
             LOG.warn("Failed to load certificates! " + e.getMessage());
             LOG.debug(e);

@@ -95,7 +95,9 @@ public class FaultInHandler extends AbstractFaultHandler {
                             ebMS3Exception = (EbMS3Exception) cause.getCause();
                         }
                     } else {
-                        ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "unknown error occurred", null, cause);
+                        //FIXME: use a consistent way of property exchange between JAXWS and CXF message model. This: PhaseInterceptorChain
+                        final String messageId = (String) PhaseInterceptorChain.getCurrentMessage().getContextualProperty("ebms.messageid");
+                        ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "unknown error occurred", messageId, cause);
                         ebMS3Exception.setMshRole(MSHRole.RECEIVING);
                     }
                 }

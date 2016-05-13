@@ -85,7 +85,7 @@
         <jaxws:properties>
             <entry key="ws-security.cache.config.file" value="/cxf-ehcache.xml"/>
             <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
-            <entry key="ws-security.encryption.properties" value-ref="truststoreProperties"/>
+            <entry key="ws-security.encryption.properties" value-ref="trustStoreProperties"/>
             <entry key="ws-security.signature.properties" value-ref="keystoreProperties"/>
             <!--use the alias from the request-->
             <entry key="ws-security.encryption.username" value="useReqSigCert"/>
@@ -121,7 +121,7 @@
         <jaxws:properties>
             <entry key="ws-security.signature.properties" value-ref="keystoreProperties"/>
             <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
-            <entry key="ws-security.encryption.properties" value-ref="truststoreProperties"/>
+            <entry key="ws-security.encryption.properties" value-ref="trustStoreProperties"/>
             <entry key="faultStackTraceEnabled" value="false"/>
             <entry key="exceptionMessageCauseEnabled" value="false"/>
         </jaxws:properties>

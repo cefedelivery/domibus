@@ -26,6 +26,9 @@ import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.AgreementRef;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartyId;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
+import eu.domibus.messaging.XmlProcessingException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
@@ -40,6 +43,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
 import java.util.List;
@@ -48,12 +52,20 @@ import java.util.List;
  * @author Christian Koch, Stefan Mueller
  */
 public abstract class PModeProvider {
+
+    private static final Log LOG = LogFactory.getLog(PModeProvider.class);
+
     private static final String EBMS3_TEST_ACTION = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test";
-    private static final String EBMS3_TEST_SERVICE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service"; //TODO: move to appropiate classes
+    private static final String EBMS3_TEST_SERVICE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service"; //TODO: move to appropriate classes
+
+    public static final String SCHEMAS_DIR = "/schemas/";
+
     @Autowired
     protected ConfigurationDAO configurationDAO;
+
     @PersistenceContext
     protected EntityManager entityManager;
+
     @Autowired()
     @Qualifier("jaxbContextConfig")
     private JAXBContext jaxbContext;
@@ -62,19 +74,40 @@ public abstract class PModeProvider {
     @Autowired
     private JmsOperations jmsOperations;
 
-
     public abstract void init();
 
-    public ConfigurationDAO getConfigurationDAO() {
-        return configurationDAO;
+    public abstract void refresh();
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updatePModes(final byte[] bytes) throws XmlProcessingException {
+        try {
+            /*SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            String filePath = System.getProperty("domibus.config.location") + SCHEMAS_DIR;
+            Schema schema = sf.newSchema(new File(filePath + "domibus-pmode.xsd"));*/
+            Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
+            /*unmarshaller.setSchema(schema); see JIRA 807
+            unmarshaller.setEventHandler(new XmlValidationEventHandler());*/
+            final Configuration configuration = (Configuration) unmarshaller.unmarshal(new ByteArrayInputStream(bytes));
+            if (configuration != null) {
+                this.configurationDAO.updateConfiguration(configuration);
+                LOG.info("Configuration successfully updated");
+            }
+            //} catch (JAXBException | SAXException xmlEx) {
+        } catch (JAXBException xmlEx) {
+            if (LOG.isDebugEnabled()) {
+                LOG.error("Xml not correctly processed: ", xmlEx);
+            } else {
+                LOG.error("Xml not correctly processed: ", xmlEx.getCause());
+            }
+            throw new XmlProcessingException(xmlEx.getCause().getMessage());
+        }
+        // Sends a message into the topic queue in order to refresh all the singleton instances of the PModeProvider.
+        jmsOperations.send(new ReloadPmodeMessageCreator());
     }
 
-    public void setConfigurationDAO(final ConfigurationDAO configurationDAO) {
-        this.configurationDAO = configurationDAO;
-    }
 
     @Transactional(propagation = Propagation.REQUIRED, noRollbackFor = IllegalStateException.class)
-    public String findPModeKeyForUserMesssage(final UserMessage userMessage) throws EbMS3Exception {
+    public String findPModeKeyForUserMessage(final UserMessage userMessage) throws EbMS3Exception {
         final String agreementRef;
         final String senderParty;
         final String receiverParty;
@@ -103,6 +136,20 @@ public abstract class PModeProvider {
         }
     }
 
+
+    class ReloadPmodeMessageCreator implements MessageCreator {
+        @Override
+        public Message createMessage(Session session) throws JMSException {
+            Message m = session.createMessage();
+            m.setStringProperty(Command.COMMAND, Command.RELOAD_PMODE);
+            return m;
+        }
+    }
+
+    public abstract List<String> getMpcList();
+
+    public abstract List<String> getMpcURIList();
+
     protected abstract String findLegName(String agreementRef, String senderParty, String receiverParty, String service, String action) throws EbMS3Exception;
 
     protected abstract String findActionName(String action) throws EbMS3Exception;
@@ -129,7 +176,19 @@ public abstract class PModeProvider {
 
     public abstract int getRetentionDownloadedByMpcName(String mpcName);
 
+    public abstract int getRetentionDownloadedByMpcURI(final String mpcURI);
+
     public abstract int getRetentionUndownloadedByMpcName(String mpcName);
+
+    public abstract int getRetentionUndownloadedByMpcURI(final String mpcURI);
+
+    public ConfigurationDAO getConfigurationDAO() {
+        return configurationDAO;
+    }
+
+    public void setConfigurationDAO(final ConfigurationDAO configurationDAO) {
+        this.configurationDAO = configurationDAO;
+    }
 
     protected String getSenderPartyNameFromPModeKey(final String pModeKey) {
         return pModeKey.split(":")[0];
@@ -155,25 +214,4 @@ public abstract class PModeProvider {
         return pModeKey.split(":")[5];
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void updatePModes(final byte[] bytes) throws JAXBException {
-        final Configuration configuration = (Configuration) this.jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(bytes));
-        this.configurationDAO.updateConfiguration(configuration);
-        jmsOperations.send(new ReloadPmodeMessageCreator());
-
-    }
-
-
-    public abstract List<String> getMpcList();
-
-    public abstract void refresh();
-
-    class ReloadPmodeMessageCreator implements MessageCreator {
-        @Override
-        public Message createMessage(Session session) throws JMSException {
-            Message m = session.createMessage();
-            m.setStringProperty(Command.COMMAND, Command.RELOAD_PMODE);
-            return m;
-        }
-    }
 }

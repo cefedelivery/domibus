@@ -18,9 +18,6 @@
  */
 
 package eu.domibus.ebms3.common;
-
-import org.apache.activemq.ScheduledMessage;
-
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
@@ -41,7 +38,7 @@ public class DelayedDispatchMessageCreator extends DispatchMessageCreator {
     @Override
     public Message createMessage(final Session session) throws JMSException {
         final Message m = super.createMessage(session);
-        m.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay);
+        m.setLongProperty("AMQ_SCHEDULED_DELAY", delay);
         return m;
     }
 }

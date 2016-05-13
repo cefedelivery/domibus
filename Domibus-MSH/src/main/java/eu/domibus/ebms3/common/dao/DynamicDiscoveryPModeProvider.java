@@ -28,7 +28,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartyId;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
-import eu.domibus.wss4j.common.crypto.TruststoreService;
+import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,7 +53,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
     private static final Log LOG = LogFactory.getLog(DynamicDiscoveryPModeProvider.class);
     @Autowired
-    protected TruststoreService truststoreService;
+    protected TrustStoreService trustStoreService;
     @Autowired
     private DynamicDiscoveryService dynamicDiscoveryService;
     private Collection<eu.domibus.common.model.configuration.Process> dynamicReceiverProcesses;
@@ -80,10 +80,10 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
-    public String findPModeKeyForUserMesssage(final UserMessage userMessage) throws EbMS3Exception {
+    public String findPModeKeyForUserMessage(final UserMessage userMessage) throws EbMS3Exception {
 
         try {
-            return super.findPModeKeyForUserMesssage(userMessage);
+            return super.findPModeKeyForUserMessage(userMessage);
         } catch (final EbMS3Exception e) {
             //do dynamic things
             LOG.debug("Do dynamic: ", e);
@@ -92,7 +92,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         }
 
 
-        return super.findPModeKeyForUserMesssage(userMessage);
+        return super.findPModeKeyForUserMessage(userMessage);
     }
 
     private void doDynamicThings(final UserMessage userMessage) throws EbMS3Exception {
@@ -137,7 +137,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         userMessage.getPartyInfo().getTo().getPartyId().add(receiverParty);
 
         //add certificate to Truststore
-        truststoreService.addCertificate(endpoint.getCertificate(), cn, true);
+        trustStoreService.addCertificate(endpoint.getCertificate(), cn, true);
 
         //check if party is available in cache
         Party configurationToParty = null;

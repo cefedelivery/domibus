@@ -73,13 +73,13 @@ public class DownloadMessageIT extends AbstractIT {
      * @throws JMSException
      */
     @Test
-    public void testDownloadMessageOk() throws DownloadMessageFault, JMSException {
+    public void testDownloadMessageOk() throws Exception {
 
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
 
         String messageId = "2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu";
 
-        pushQueueMessage(messageId, connection, WS_NOT_QUEUE);
+        pushMessage(connection, messageId);
 
         DownloadMessageRequest downloadMessageRequest = createDownloadMessageRequest(messageId);
         Holder<DownloadMessageResponse> downloadMessageResponse = new Holder<>();
@@ -107,13 +107,13 @@ public class DownloadMessageIT extends AbstractIT {
      * @throws JMSException
      */
     @Test
-    public void testDownloadMessageOkPayloadNok() throws DownloadMessageFault, JMSException {
+    public void testDownloadMessageOkPayloadNok() throws Exception {
 
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
 
         String messageId = "78a1d578-0cc7-41fb-9f35-86a5b2769a14@domibus.eu";
 
-        pushQueueMessage(messageId, connection, WS_NOT_QUEUE);
+        pushMessage(connection, messageId);
 
         DownloadMessageRequest downloadMessageRequest = createDownloadMessageRequest(messageId);
         Holder<DownloadMessageResponse> downloadMessageResponse = new Holder<>();
@@ -140,13 +140,13 @@ public class DownloadMessageIT extends AbstractIT {
      * @throws JMSException
      */
     @Test
-    public void testDownloadMessageBodyLoad() throws DownloadMessageFault, JMSException {
+    public void testDownloadMessageBodyLoad() throws Exception {
 
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
 
         String messageId = "2bbc05d8-b603-4742-a118-137898a81de3@domibus.eu";
 
-        pushQueueMessage(messageId, connection, WS_NOT_QUEUE);
+        pushMessage(connection, messageId);
 
         DownloadMessageRequest downloadMessageRequest = createDownloadMessageRequest(messageId);
         Holder<DownloadMessageResponse> downloadMessageResponse = new Holder<>();
@@ -164,6 +164,12 @@ public class DownloadMessageIT extends AbstractIT {
         String payload = new String(payloadType.getValue());
         System.out.println("Payload returned [" + payload + "]");
         Assert.assertEquals(payload, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>");
+    }
+
+    private void pushMessage(ActiveMQConnection connection, String messageId) throws Exception {
+        connection.start();
+        pushQueueMessage(messageId, connection, WS_NOT_QUEUE);
+        connection.close();
     }
 
     private DownloadMessageRequest createDownloadMessageRequest(String messageId) {

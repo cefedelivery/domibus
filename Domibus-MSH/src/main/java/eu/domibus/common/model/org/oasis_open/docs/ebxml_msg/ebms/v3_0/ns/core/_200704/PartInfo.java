@@ -20,6 +20,7 @@
 package eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704;
 
 import eu.domibus.common.model.AbstractBaseEntity;
+import eu.domibus.configuration.Storage;
 import eu.domibus.ebms3.common.CompressionService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -57,23 +58,7 @@ import java.util.zip.GZIPOutputStream;
 @Table(name = "TB_PART_INFO")
 public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo> {
 
-    private static final String ATTACHMENT_STORAGE_LOCATION = "domibus.attachment.storage.location";
     private static final Log LOG = LogFactory.getLog(PartInfo.class);
-    private static File storageDirectory;
-
-    static {
-        final String location = System.getProperty(ATTACHMENT_STORAGE_LOCATION);
-        if (location != null) {
-            storageDirectory = new File(location);
-            if (!storageDirectory.exists()) {
-                throw new IllegalArgumentException("The configured storage location " + storageDirectory.getAbsolutePath() + " does not exist");
-            }
-
-        } else {
-            LOG.warn("No file system storage defined. This is fine for small attachments but might lead to database issues when processing large payloads");
-            storageDirectory = null;
-        }
-    }
 
     @XmlElement(name = "Schema")
     @Embedded
@@ -95,6 +80,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
     @Column(name = "BINARY_DATA")
     @Basic(fetch = FetchType.EAGER)
     protected byte[] binaryData;
+
 
     @XmlTransient
     @Column(name = "FILENAME")
@@ -135,6 +121,9 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
         this.inBody = inBody;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
 
     @PrePersist
     private void storeBinary() {
@@ -143,7 +132,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
             mime = "application/unknown";
         }
         try {
-            if (storageDirectory == null) {
+            if (Storage.storageDirectory == null) {
 
                 binaryData = IOUtils.toByteArray(payloadDatahandler.getInputStream());
 
@@ -170,7 +159,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
                 fileName = null;
 
             } else {
-                final File attachmentStore = new File(storageDirectory, UUID.randomUUID().toString() + ".payload");
+                final File attachmentStore = new File(Storage.storageDirectory, UUID.randomUUID().toString() + ".payload");
                 fileName = attachmentStore.getAbsolutePath();
                 OutputStream fileOutputStream = new FileOutputStream(attachmentStore);
 

@@ -84,18 +84,45 @@ public class DownloadMessageJMSIT extends AbstractIT {
      */
     @Test
     @Transactional(propagation = Propagation.REQUIRED)
-    public void testDownloadMessageOk() throws JMSException, RuntimeException {
-
-        javax.jms.Connection connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
+    public void testDownloadMessageOk() throws Exception {
 
         String messageId = "2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu";
 
+        javax.jms.Connection connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
+        connection.start();
         pushQueueMessage(messageId, connection, JMS_NOT_QUEUE_NAME);
 
         backendJms.deliverMessage(messageId);
 
-        connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
-        Message message = popQueueMessage(connection, "domibus.backend.jms.outQueue");
+        Message message = popQueueMessage(connection, JMS_BACKEND_OUT_QUEUE_NAME);
+
+        connection.close();
+
+        Assert.assertNotNull(message);
+    }
+
+    /**
+     * Tests that a message is found in the JMS queue and pushed to the business queue.
+     *
+     * @throws RuntimeException
+     * @throws JMSException
+     */
+    @Test
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void testDownloadMessageOkWithTimeout() throws Exception {
+
+        String messageId = "2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu";
+
+        javax.jms.Connection connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
+        connection.start();
+        pushQueueMessage(messageId, connection, JMS_NOT_QUEUE_NAME);
+
+        backendJms.deliverMessage(messageId);
+
+        Message message = popQueueMessageWithTimeout(connection, JMS_BACKEND_OUT_QUEUE_NAME, 2000);
+
+        connection.close();
+
         Assert.assertNotNull(message);
     }
 

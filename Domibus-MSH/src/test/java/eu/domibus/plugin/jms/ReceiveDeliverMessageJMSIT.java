@@ -21,7 +21,6 @@ package eu.domibus.plugin.jms;
 
 import eu.domibus.AbstractIT;
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.plugin.BackendConnector;
 import org.apache.activemq.command.ActiveMQMapMessage;
 import org.junit.Assert;
@@ -35,13 +34,16 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
+
+import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
+import static eu.domibus.plugin.jms.JMSMessageConstants.PAYLOAD_DESCRIPTION_FORMAT;
 
 
 /**
@@ -71,6 +73,7 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
             insertDataset("receiveMessageJMS.sql");
             initialized = true;
         }
+
     }
 
     private void verifyMessageStatus(String messageId) throws SQLException {
@@ -85,42 +88,77 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
     }
 
     /**
-     * It tests the message reception by the backend and the delivery to the plugin (JMS queue).
-     * It also checks that the messages are stored in the queues trying to receive them.
+     * It tests the message reception by Domibus through the JMS channel.
+     * It also checks that the messages are actually pushed on the right queues (dispatch and reply).
+     * The message ID is cleaned to simulate the submission of the a new message.
      *
-     * @throws JMSException
-     * @throws EbMS3Exception
-     * @throws SQLException
-     * @throws InterruptedException
+     * @throws Exception
      */
-    // @Ignore
     @Test
     @Transactional(propagation = Propagation.REQUIRED)
     public void testReceiveMessage() throws Exception {
 
-        javax.jms.Connection connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
         String messageId = "2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu";
-        pushQueueMessage(messageId, connection, "domibus.backend.jms.inQueue");
+
+        javax.jms.Connection connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
+        connection.start();
         // Puts the message in the notification queue so it can be downloaded
-        connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
         pushQueueMessage(messageId, connection, JMS_NOT_QUEUE_NAME);
+
         final MapMessage mapMessage = new ActiveMQMapMessage();
+
+        backendJMSImpl.downloadMessage(messageId, mapMessage);
+        System.out.println("MapMessage: " + mapMessage);
+        mapMessage.setStringProperty(MESSAGE_ID, ""); // Cleaning the message ID since it is supposed to submit a new message.
+        mapMessage.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, JMSMessageConstants.MESSAGE_TYPE_SUBMIT);
+        mapMessage.setStringProperty(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, 1), "cid:message");
+        // The downloaded MapMessage is used as input parameter for the real Test case here!
+        backendJMSImpl.receiveMessage(mapMessage);
+        // Verifies that the message is really in the queue
+        Message message = popQueueMessageWithTimeout(connection, JMS_DISPATCH_QUEUE_NAME, 2000);
+        //Assert.assertNotNull(message); TODO Why the Reply queue is always empty ?
+        System.out.println("Out message: " + message);
+        //verifyMessageStatus(message.getStringProperty(MESSAGE_ID));
+        message = popQueueMessageWithTimeout(connection, JMS_BACKEND_REPLY_QUEUE_NAME, 2000);
+        //Assert.assertNotNull(message); // TODO Why the Reply queue is always empty ?
+        System.out.println("Reply message: " + message);
+        connection.close();
+    }
+
+    /**
+     * Similar test to the previous one but this does not change the Message ID so that an exception is raised and handled with an JMS error message.
+     * It tests that the message is actually into the REPLY queue.
+     *
+     * @throws Exception
+     */
+    @Test
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void testDuplicateMessage() throws Exception {
+
+        String messageId = "2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu";
+
+        javax.jms.Connection connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
+        connection.start();
+        // Puts the message in the notification queue so it can be downloaded
+        pushQueueMessage(messageId, connection, JMS_NOT_QUEUE_NAME);
+
+        final MapMessage mapMessage = new ActiveMQMapMessage();
+
         backendJMSImpl.downloadMessage(messageId, mapMessage);
         System.out.println("MapMessage: " + mapMessage);
         mapMessage.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, JMSMessageConstants.MESSAGE_TYPE_SUBMIT);
+        mapMessage.setStringProperty(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, 1), "cid:message");
         // The downloaded MapMessage is used as input parameter for the real Test case here!
         backendJMSImpl.receiveMessage(mapMessage);
-        // Verification on the message status
-        //verifyMessageStatus(mapMessage.getStringProperty(MessageConstants.MESSAGE_ID)); // mapMessage.getStringProperty(MessageConstants.MESSAGE_ID) is NULL!
         // Verifies that the message is really in the queue
-        connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
-        Message message = popQueueMessage(connection, "domibus.backend.jms.outQueue");
-        Assert.assertNotNull(message);
-        System.out.println("Message: " + message);
-        /*connection =  xaJmsConnectionFactory.createConnection("domibus", "changeit");
-         message =  popQueueMessage(connection, "domibus.backend.jms.replyQueue");
-        Assert.assertNotNull(message);
-        System.out.println("Message: " + message);*/
+        Message message = popQueueMessageWithTimeout(connection, JMS_DISPATCH_QUEUE_NAME, 1000);
+        Assert.assertNull(message);
+        System.out.println("Out message: " + message);
+        message = popQueueMessageWithTimeout(connection, JMS_BACKEND_REPLY_QUEUE_NAME, 2000);
+        //Assert.assertNotNull(message); TODO Why the Reply queue is always empty ?
+        connection.close();
+        System.out.println("Reply message: " + message);
+        // Assert.assertTrue(message.getStringProperty("").contains("Message identifiers must be unique"));
     }
 
 

@@ -88,9 +88,9 @@
                     and higher as well as
                     <indexterm>
                         <primary>MySQL</primary>
-                        <secondary>5.5</secondary>
+                        <secondary>5.6</secondary>
                     </indexterm>
-                    MySQL 5.5
+                    MySQL 5.6
                     and higher.
                 </para>
             </listitem>
@@ -120,9 +120,7 @@
             </term>
             <listitem>
                 <para>The required hardware depends on your expected message
-                    load. See
-                    <xref linkend="loadtest"/>
-                    for details.
+                    load.
                 </para>
             </listitem>
         </varlistentry>

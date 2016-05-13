@@ -33,8 +33,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataHandler;
-import javax.mail.util.ByteArrayDataSource;
+import javax.activation.DataSource;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * This class is responsible for compression handling of incoming and outgoing ebMS3 messages.
@@ -79,7 +81,7 @@ public class CompressionService {
             }
 
             if (mimeType == null || mimeType.isEmpty()) {
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), null, null);
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId(), null);
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
             }
@@ -93,14 +95,8 @@ public class CompressionService {
             compressionProperty.setName(CompressionService.COMPRESSION_PROPERTY_KEY);
             compressionProperty.setValue(CompressionService.COMPRESSION_PROPERTY_VALUE);
             partInfo.getPartProperties().getProperties().add(compressionProperty);
-
-            try {
-                DataHandler gZipDataHandler = new DataHandler(new ByteArrayDataSource(partInfo.getPayloadDatahandler().getInputStream(), COMPRESSION_PROPERTY_VALUE));
-                partInfo.setPayloadDatahandler(gZipDataHandler);
-            } catch (IOException e) {
-                LOG.error("Error while setting the gzip data handler", e);
-            }
-
+            DataHandler gZipDataHandler = new DataHandler(new CompressedDataSource(partInfo.getPayloadDatahandler().getDataSource()));
+            partInfo.setPayloadDatahandler(gZipDataHandler);
             CompressionService.LOG.debug("Payload with cid: " + partInfo.getHref() + " and mime type: " + mimeType + " will be compressed");
         }
 
@@ -155,5 +151,33 @@ public class CompressionService {
             CompressionService.LOG.debug("Payload with cid: " + partInfo.getHref() + " and mime type: " + mimeType + " will be decompressed");
         }
         return true;
+    }
+
+    private class CompressedDataSource implements DataSource {
+        private DataSource ds;
+
+        private CompressedDataSource(DataSource ds) {
+            this.ds = ds;
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            return ds.getInputStream();
+        }
+
+        @Override
+        public OutputStream getOutputStream() throws IOException {
+            return ds.getOutputStream();
+        }
+
+        @Override
+        public String getContentType() {
+            return CompressionService.COMPRESSION_PROPERTY_VALUE;
+        }
+
+        @Override
+        public String getName() {
+            return "compressed-" + ds.getName();
+        }
     }
 }

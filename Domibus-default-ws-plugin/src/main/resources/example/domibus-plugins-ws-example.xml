@@ -48,4 +48,6 @@
 
     <jaxws:endpoint id="backendInterfaceEndpoint"
                     implementor="#backendWebservice" address="/backend"/>
+
+
 </beans>
