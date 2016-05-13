@@ -143,8 +143,7 @@
                                     <replacements>
                                         <replacement>
                                             <token>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M"</token>
-                                            <value>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M
-                                                -Ddomibus.config.location=%JBOSS_HOME%/conf/domibus"
+                                            <value>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M -Ddomibus.config.location=%JBOSS_HOME%/conf/domibus"
                                             </value>
                                         </replacement>
                                     </replacements>

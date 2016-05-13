@@ -108,5 +108,10 @@
             <outputDirectory>/</outputDirectory>
             <filtered>false</filtered>
         </file>
+        <file>
+            <source>${project.basedir}/src/main/conf/wildfly/Wildfly_installation.pdf</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>false</filtered>
+        </file>
     </files>
 </assembly>
