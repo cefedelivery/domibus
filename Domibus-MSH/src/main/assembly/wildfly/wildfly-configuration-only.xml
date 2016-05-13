@@ -33,9 +33,6 @@
             <directory>${project.basedir}/src/main/conf/wildfly/domibus/conf</directory>
             <outputDirectory>/</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
-            <excludes>
-                <exclude>plugins/**</exclude>
-            </excludes>
             <filtered>false</filtered>
         </fileSet>
     </fileSets>
