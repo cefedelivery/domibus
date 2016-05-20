@@ -185,7 +185,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             // Verifies that the message is not for the current gateway.
             Configuration config = pModeProvider.getConfigurationDAO().read();
             if (config.getParty().equals(to)) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "It is forbidden to submit a message to the sender gateway[" + to.getName() + "]", null, null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "It is forbidden to submit a message to the sending access point[" + to.getName() + "]", null, null);
             }
 
             final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);

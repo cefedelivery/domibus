@@ -50,7 +50,11 @@
           p:backendConnector-ref="backendWebservice"/>
 
     <jaxws:endpoint id="backendInterfaceEndpoint"
-                    implementor="#backendWebservice" address="/backend"/>
+                    implementor="#backendWebservice" address="/backend">
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="true"/>
+        </jaxws:properties>
+    </jaxws:endpoint>
     <!-- Example ends here -->
 
 

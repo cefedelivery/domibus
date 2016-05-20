@@ -196,6 +196,7 @@
                                                 <xs:attribute name="cid" type="xs:string"
                                                               use="required"/>
                                                 <xs:attribute name="mimeType" type="xs:string"/>
+                                                <xs:attribute name="inBody" type="xs:string"/>
                                                 <xs:attribute name="schemaFile" form="unqualified"
                                                               type="xs:anyURI"/>
                                                 <xs:attribute name="maxSize" type="xs:integer"/>
