@@ -1,3 +1,5 @@
+Domibus 3.1.1:      This hotfix release updated the type of some of the columns in the db. Please use the new sql scripts.
+-------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.1.0:      Re-install the domibus-security.xml and re-configure the properties according with the installed Truststore and Keystore.
                     For Tomcat installations only, the activemq.xml has to be re-installed and re-configured and the domibus-ActiveMQ-ThroughputLimiter jar can be deleted.
                     There have been some changes to the database, please use the new scripts.
