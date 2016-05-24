@@ -453,7 +453,7 @@
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="BINARY_DATA" type="BLOB"/>
+            <column name="BINARY_DATA" type="LONGBLOB"/>
             <column name="DESCRIPTION_LANG" type="VARCHAR(255)"/>
             <column name="DESCRIPTION_VALUE" type="VARCHAR(255)"/>
             <column name="HREF" type="VARCHAR(255)"/>
