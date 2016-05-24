@@ -918,7 +918,7 @@
                                 src/main/resources/db/changelog-3.0.xml
                             </changeLogFile>
                             <url>
-                                offline:oracle?changeLogFile=${project.build.directory}/liquibase/changelog-3.0.oracle
+                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.0.oracle
                             </url>
                             <migrationSqlOutputFile>
                                 ${project.build.directory}/sql-scripts/oracle10g-3.0.ddl
@@ -955,7 +955,7 @@
                                 src/main/resources/db/changelog-3.1-delta.xml
                             </changeLogFile>
                             <url>
-                                offline:oracle?changeLogFile=${project.build.directory}/liquibase/changelog-3.1-delta.oracle
+                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.1-delta.oracle
                             </url>
                             <migrationSqlOutputFile>
                                 ${project.build.directory}/sql-scripts/oracle10g-3.0-to-3.1-migration.ddl
@@ -992,7 +992,7 @@
                                 src/main/resources/db/changelog-3.1.xml
                             </changeLogFile>
                             <url>
-                                offline:oracle?changeLogFile=${project.build.directory}/liquibase/changelog-3.1.oracle
+                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.1.oracle
                             </url>
                             <migrationSqlOutputFile>
                                 ${project.build.directory}/sql-scripts/oracle10g-3.1.ddl
