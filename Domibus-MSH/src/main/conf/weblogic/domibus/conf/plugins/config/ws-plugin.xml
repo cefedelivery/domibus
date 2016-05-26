@@ -45,13 +45,16 @@
           p:backendConnector-ref="backendWebservice">
         <property name="queueJndi" value="jms/domibus.notification.webservice"/>
     </bean>
-		  
 
-    <jaxws:endpoint id="backendInterfaceEndpoint"
-                    implementor="#backendWebservice" address="/backend">
+    <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
         <jaxws:properties>
             <entry key="schema-validation-enabled" value="true"/>
         </jaxws:properties>
+
+        <jaxws:schemaLocations>
+            <jaxws:schemaLocation>file:///${domibus.config.location}/schemas/domibus-submission.xsd</jaxws:schemaLocation>
+        </jaxws:schemaLocations>
+
     </jaxws:endpoint>
     <!-- Example ends here -->
 
