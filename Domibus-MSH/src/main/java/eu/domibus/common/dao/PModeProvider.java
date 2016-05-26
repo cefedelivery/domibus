@@ -60,6 +60,8 @@ public abstract class PModeProvider {
 
     public static final String SCHEMAS_DIR = "/schemas/";
 
+    protected static final String OPTIONAL_AND_EMPTY = "OAE";
+
     @Autowired
     protected ConfigurationDAO configurationDAO;
 
@@ -108,28 +110,28 @@ public abstract class PModeProvider {
 
     @Transactional(propagation = Propagation.REQUIRED, noRollbackFor = IllegalStateException.class)
     public String findPModeKeyForUserMessage(final UserMessage userMessage) throws EbMS3Exception {
-        final String agreementRef;
+
+        final String agreementName;
         final String senderParty;
         final String receiverParty;
         final String service;
         final String action;
         final String leg;
 
-
         try {
-            agreementRef = this.findAgreementRef(userMessage.getCollaborationInfo().getAgreementRef());
+            agreementName = this.findAgreement(userMessage.getCollaborationInfo().getAgreementRef());
             senderParty = this.findPartyName(userMessage.getPartyInfo().getFrom().getPartyId());
             receiverParty = this.findPartyName(userMessage.getPartyInfo().getTo().getPartyId());
             service = this.findServiceName(userMessage.getCollaborationInfo().getService());
             action = this.findActionName(userMessage.getCollaborationInfo().getAction());
-            leg = this.findLegName(agreementRef, senderParty, receiverParty, service, action);
-
+            leg = this.findLegName(agreementName, senderParty, receiverParty, service, action);
 
             if ((action.equals(PModeProvider.EBMS3_TEST_ACTION) && (!service.equals(PModeProvider.EBMS3_TEST_SERVICE)))) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "ebMS3 Test Service: " + PModeProvider.EBMS3_TEST_SERVICE + " and ebMS3 Test Action: " + PModeProvider.EBMS3_TEST_ACTION + " can only be used together [CORE] 5.2.2.9", userMessage.getMessageInfo().getMessageId(), null);
             }
 
-            return senderParty + ":" + receiverParty + ":" + service + ":" + action + ":" + agreementRef + ":" + leg;
+            return senderParty + ":" + receiverParty + ":" + service + ":" + action + ":" + agreementName + ":" + leg;
+
         } catch (final EbMS3Exception e) {
             e.setRefToMessageId(userMessage.getMessageInfo().getMessageId());
             throw e;
@@ -158,7 +160,7 @@ public abstract class PModeProvider {
 
     protected abstract String findPartyName(Collection<PartyId> partyId) throws EbMS3Exception;
 
-    protected abstract String findAgreementRef(AgreementRef agreementRef) throws EbMS3Exception;
+    protected abstract String findAgreement(AgreementRef agreementRef) throws EbMS3Exception;
 
     public abstract Party getSenderParty(String pModeKey);
 
