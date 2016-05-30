@@ -76,7 +76,7 @@ public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
 
         String payloadHref = "payload";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessage(payloadHref);
+        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
 

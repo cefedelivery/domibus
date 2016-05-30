@@ -157,7 +157,8 @@ public class CachingPModeProvider extends PModeProvider {
         }
 
         for (final Agreement agreement : this.getConfiguration().getBusinessProcesses().getAgreements()) {
-            if (((agreementRef.getType() == null && "".equals(agreement.getType())) || agreement.getType().equals(agreementRef.getType())) && agreementRef.getValue().equals(agreement.getValue())) {
+            if (((agreementRef.getType() == null && "".equals(agreement.getType())) || agreement.getType().equals(agreementRef.getType()))
+                    && agreementRef.getValue().equals(agreement.getValue())) {
                 return agreement.getName();
             }
         }
