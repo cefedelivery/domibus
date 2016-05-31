@@ -1,5 +1,7 @@
 Domibus 3.1.1
 - Fixed retry logic issue
+- Set BINARY_DATA type to LONGBLOB on mysql (migration scripts created)
+- Fixed the issue with the missing "value" in the <env:Code> when an error response is returned
 Domibus 3.1.0
 - Fixed issue when sending a message with an ID that is over 255 characters long.
 - Fixed issue when sending a message with an ID that was already used.
