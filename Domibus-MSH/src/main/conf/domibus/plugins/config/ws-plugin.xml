@@ -55,6 +55,8 @@
 
         <jaxws:schemaLocations>
             <jaxws:schemaLocation>file:///${domibus.config.location}/schemas/domibus-submission.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>file:///${domibus.config.location}/schemas/domibus-backend.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>file:///${domibus.config.location}/schemas/xmlmime.xsd</jaxws:schemaLocation>
         </jaxws:schemaLocations>
 
     </jaxws:endpoint>

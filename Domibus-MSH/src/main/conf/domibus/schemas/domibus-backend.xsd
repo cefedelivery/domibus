@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://org.ecodex.backend/1_1/"
+           xmlns:ns1="http://www.w3.org/2005/05/xmlmime"
+           attributeFormDefault="unqualified" elementFormDefault="unqualified"
+           targetNamespace="http://org.ecodex.backend/1_1/">
+
+    <xs:import namespace="http://www.w3.org/2005/05/xmlmime"/>
+
+    <xs:element name="FaultDetail">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="code" type="xs:string"/>
+                <xs:element name="message" nillable="true" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="downloadMessageRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="messageID" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="downloadMessageResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" name="bodyload" type="tns:PayloadType"/>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:PayloadType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="listPendingMessagesRequest" type="xs:anyType"/>
+    <xs:element name="listPendingMessagesResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="messageID" nillable="true" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="messageErrorsRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="messageID" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="messageStatusRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="messageID" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="sendRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" name="bodyload" type="tns:PayloadType"/>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:PayloadType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="sendRequestURL">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" name="bodyload" type="tns:PayloadURLType"/>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true"
+                            type="tns:PayloadURLType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="sendResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="messageID" nillable="true" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="PayloadType">
+        <xs:simpleContent>
+            <xs:extension base="ns1:base64Binary">
+                <xs:attribute name="payloadId" type="xs:token" use="required"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="errorResultImpl">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="errorCode" type="tns:errorCode"/>
+            <xs:element minOccurs="0" name="errorDetail" type="xs:string"/>
+            <xs:element minOccurs="0" name="messageInErrorId" type="xs:string"/>
+            <xs:element minOccurs="0" name="mshRole" type="tns:mshRole"/>
+            <xs:element minOccurs="0" name="notified" type="xs:dateTime"/>
+            <xs:element minOccurs="0" name="timestamp" type="xs:dateTime"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PayloadURLType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="payloadId" type="xs:token" use="required"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:simpleType name="messageStatus">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="READY_TO_SEND"/>
+            <xs:enumeration value="SEND_ENQUEUED"/>
+            <xs:enumeration value="SEND_IN_PROGRESS"/>
+            <xs:enumeration value="WAITING_FOR_RECEIPT"/>
+            <xs:enumeration value="ACKNOWLEDGED"/>
+            <xs:enumeration value="ACKNOWLEDGED_WITH_WARNING"/>
+            <xs:enumeration value="SEND_ATTEMPT_FAILED"/>
+            <xs:enumeration value="SEND_FAILURE"/>
+            <xs:enumeration value="NOT_FOUND"/>
+            <xs:enumeration value="WAITING_FOR_RETRY"/>
+            <xs:enumeration value="RECEIVED"/>
+            <xs:enumeration value="RECEIVED_WITH_WARNINGS"/>
+            <xs:enumeration value="DELETED"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="errorCode">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="EBMS_0001"/>
+            <xs:enumeration value="EBMS_0002"/>
+            <xs:enumeration value="EBMS_0003"/>
+            <xs:enumeration value="EBMS_0004"/>
+            <xs:enumeration value="EBMS_0005"/>
+            <xs:enumeration value="EBMS_0006"/>
+            <xs:enumeration value="EBMS_0007"/>
+            <xs:enumeration value="EBMS_0008"/>
+            <xs:enumeration value="EBMS_0009"/>
+            <xs:enumeration value="EBMS_0010"/>
+            <xs:enumeration value="EBMS_0011"/>
+            <xs:enumeration value="EBMS_0101"/>
+            <xs:enumeration value="EBMS_0102"/>
+            <xs:enumeration value="EBMS_0103"/>
+            <xs:enumeration value="EBMS_0201"/>
+            <xs:enumeration value="EBMS_0202"/>
+            <xs:enumeration value="EBMS_0301"/>
+            <xs:enumeration value="EBMS_0302"/>
+            <xs:enumeration value="EBMS_0303"/>
+            <xs:enumeration value="EBMS_0020"/>
+            <xs:enumeration value="EBMS_0021"/>
+            <xs:enumeration value="EBMS_0022"/>
+            <xs:enumeration value="EBMS_0023"/>
+            <xs:enumeration value="EBMS_0030"/>
+            <xs:enumeration value="EBMS_0031"/>
+            <xs:enumeration value="EBMS_0040"/>
+            <xs:enumeration value="EBMS_0041"/>
+            <xs:enumeration value="EBMS_0042"/>
+            <xs:enumeration value="EBMS_0043"/>
+            <xs:enumeration value="EBMS_0044"/>
+            <xs:enumeration value="EBMS_0045"/>
+            <xs:enumeration value="EBMS_0046"/>
+            <xs:enumeration value="EBMS_0047"/>
+            <xs:enumeration value="EBMS_0048"/>
+            <xs:enumeration value="EBMS_0049"/>
+            <xs:enumeration value="EBMS_0050"/>
+            <xs:enumeration value="EBMS_0051"/>
+            <xs:enumeration value="EBMS_0052"/>
+            <xs:enumeration value="EBMS_0053"/>
+            <xs:enumeration value="EBMS_0054"/>
+            <xs:enumeration value="EBMS_0055"/>
+            <xs:enumeration value="EBMS_0060"/>
+            <xs:enumeration value="EBMS_0065"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="mshRole">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="SENDING"/>
+            <xs:enumeration value="RECEIVING"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType final="#all" name="errorResultImplArray">
+        <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="item" nillable="true" type="tns:errorResultImpl"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="getStatusRequest" nillable="true">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="messageID" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="getMessageStatusResponse" nillable="true" type="tns:messageStatus"/>
+    <xs:element name="getErrorsRequest" nillable="true">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="messageID" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="getMessageErrorsResponse" nillable="true" type="tns:errorResultImplArray"/>
+</xs:schema>
