@@ -13,6 +13,8 @@
 ## Maven output folder ##
 target/
 
+out/
+
 ## Compiled java classes ##
 *.class
 *.jar # There are still some required jars bundled with the holodeck sources. Until this is resolved they have to stay in the repo.
