@@ -30,17 +30,14 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.MessageType;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
-import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.MessageLogEntry;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartInfo;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Property;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.CompressionService;
-import eu.domibus.ebms3.common.MessageIdGenerator;
-import eu.domibus.ebms3.common.TimestampDateFormatter;
+import eu.domibus.ebms3.common.SOAPMessageConverterService;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,24 +48,17 @@ import org.w3c.dom.Node;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.*;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.Iterator;
@@ -86,7 +76,7 @@ import java.util.zip.ZipException;
 @BindingType(SOAPBinding.SOAP12HTTP_BINDING)
 public class MSHWebservice implements Provider<SOAPMessage> {
 
-    public static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
+
     private static final Log LOG = LogFactory.getLog(MSHWebservice.class);
     @Autowired
     private BackendNotificationService backendNotificationService;
@@ -95,12 +85,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private MessagingDao messagingDao;
 
     @Autowired
-    private MessageFactory messageFactory;
-
-    @Autowired
     private MessageLogDao messageLogDao;
-
-    private JAXBContext jaxbContext;
 
     @Autowired
     private TransformerFactory transformerFactory;
@@ -109,13 +94,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private PModeProvider pModeProvider;
 
     @Autowired
-    private TimestampDateFormatter timestampDateFormatter;
-
-    @Autowired
     private CompressionService compressionService;
-
-    @Autowired
-    private MessageIdGenerator messageIdGenerator;
 
     @Autowired
     private PayloadProfileValidator payloadProfileValidator;
@@ -123,9 +102,12 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Autowired
     private PropertyProfileValidator propertyProfileValidator;
 
-    public void setJaxbContext(final JAXBContext jaxbContext) {
-        this.jaxbContext = jaxbContext;
-    }
+    @Autowired
+    private ReceiptService receiptService;
+
+    @Autowired
+    private SOAPMessageConverterService soapMessageConverterService;
+
 
     @Override
     @Transactional
@@ -159,17 +141,18 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     MSHWebservice.LOG.debug(i.next());
                 }
             }
-            messaging = this.getMessaging(request);
+            messaging = soapMessageConverterService.getMessaging(request);
 
             checkCharset(messaging);
 
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
+
             if (!messageExists && !(eu.domibus.common.model.configuration.Service.PING_SERVICE.equals(legConfiguration.getService().getValue())
                     && eu.domibus.common.model.configuration.Action.PING_ACTION.equals(legConfiguration.getAction().getValue()))) { // ping messages are not stored/delivered
                 this.persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
             }
-            responseMessage = this.generateReceipt(request, legConfiguration, messageExists);
 
+            responseMessage = receiptService.handleReceipt(request, legConfiguration, messageExists);
 
             if (!messageExists) {
                 backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
@@ -224,55 +207,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     }
 
 
-    /**
-     * Handles Receipt generation for a incoming message
-     *
-     * @param request          the incoming message
-     * @param legConfiguration processing information of the message
-     * @param duplicate        indicates whether or not the message is a duplicate
-     * @return the response message to the incoming request message
-     * @throws EbMS3Exception if generation of receipt was not successful
-     */
-    private SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate) throws EbMS3Exception {
-        SOAPMessage responseMessage = null;
 
-        assert legConfiguration != null;
-
-        if (legConfiguration.getReliability() == null) {
-            return responseMessage;
-        }
-
-        if (ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())) {
-            MSHWebservice.LOG.debug("Checking reliability for incoming message");
-            try {
-                responseMessage = this.messageFactory.createMessage();
-                InputStream generateAS4ReceiptStream = this.getClass().getClassLoader().getResourceAsStream(XSLT_GENERATE_AS4_RECEIPT_XSL);
-                Source messageToReceiptTransform = new StreamSource(generateAS4ReceiptStream);
-                final Transformer transformer = this.transformerFactory.newTransformer(messageToReceiptTransform);
-                final Source requestMessage = request.getSOAPPart().getContent();
-                transformer.setParameter("messageid", this.messageIdGenerator.generateMessageId());
-                transformer.setParameter("timestamp", this.timestampDateFormatter.generateTimestamp());
-                transformer.setParameter("nonRepudiation", Boolean.toString(legConfiguration.getReliability().isNonRepudiation()));
-
-                final DOMResult domResult = new DOMResult();
-
-                transformer.transform(requestMessage, domResult);
-                responseMessage.getSOAPPart().setContent(new DOMSource(domResult.getNode()));
-
-//                transformer.transform(requestMessage, new DOMResult(responseMessage.getSOAPPart().getEnvelope()));
-            } catch (TransformerConfigurationException | SOAPException e) {
-                // this cannot happen
-                assert false;
-                throw new RuntimeException(e);
-            } catch (final TransformerException e) {
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0201, "Could not generate Receipt. Check security header and non-repudiation settings", null, e);
-                ex.setMshRole(MSHRole.RECEIVING);
-                throw ex;
-            }
-        }
-
-        return responseMessage;
-    }
 
     /**
      * This method persists incoming messages into the database (and handles decompression before)
@@ -369,10 +304,5 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return messageLogEntry.getMessageId();
     }
 
-    private Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
-        final Node messagingXml = (Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
-        final Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
-        @SuppressWarnings("unchecked") final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);
-        return root.getValue();
-    }
+
 }
