@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<db:configuration xmlns:db="http://domibus.eu/configuration"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  party="EUCEG_000001_AS4">
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="EUCEG_000001_AS4">
+
     <mpcs>
         <mpc name="defaultMpc"
              qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
              enabled="true"
              default="true"
-             retention_downloaded="0"
-             retention_undownloaded="14400"/>
+             retention_downloaded="10080"
+             retention_undownloaded="10080"/>
     </mpcs>
     <businessProcesses>
         <roles>
