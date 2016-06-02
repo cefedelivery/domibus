@@ -139,12 +139,18 @@
                                         <include>
                                             ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}/bin/standalone.conf.bat
                                         </include>
+                                        <include>
+                                            ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}/bin/standalone.conf
+                                        </include>
                                     </includes>
                                     <replacements>
                                         <replacement>
                                             <token>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M"</token>
-                                            <value>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M -Ddomibus.config.location=%JBOSS_HOME%/conf/domibus"
-                                            </value>
+                                            <value>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M -Ddomibus.config.location=%JBOSS_HOME%/conf/domibus"</value>
+                                        </replacement>
+                                        <replacement>
+                                            <token>JAVA_OPTS="-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true"</token>
+                                            <value>JAVA_OPTS="-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Ddomibus.config.location=\$JBOSS_HOME/conf/domibus"</value>
                                         </replacement>
                                     </replacements>
                                 </configuration>
