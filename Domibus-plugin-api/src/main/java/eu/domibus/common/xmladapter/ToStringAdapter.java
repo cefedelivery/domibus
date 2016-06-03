@@ -98,7 +98,7 @@ public class ToStringAdapter extends XmlAdapter<Node, List<String>> {
             final Document doc = this.documentBuilderFactory.newDocumentBuilder().parse(new InputSource(new StringReader(content)));
 
             if (doc.getChildNodes().getLength() == 1) {
-                return doc.getChildNodes().item(1);
+                return doc.getChildNodes().item(0);
             }
 
         } catch (SAXException | IOException | ParserConfigurationException e) {
