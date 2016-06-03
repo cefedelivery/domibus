@@ -48,8 +48,12 @@ import java.util.Properties;
  */
 @Service
 public class RetryService {
-    public static final String TIMEOUT_TOLERANCE = "domibus.msh.retry.tolerance";
+
     private static final Log LOG = LogFactory.getLog(RetryService.class);
+
+    public static final String TIMEOUT_TOLERANCE = "domibus.msh.retry.tolerance";
+    public static final String UNRECOVERABLE_ERROR_RETRY = "domibus.dispatch.ebms.error.unrecoverable.retry";
+
     @Autowired
     private BackendNotificationService backendNotificationService;
 

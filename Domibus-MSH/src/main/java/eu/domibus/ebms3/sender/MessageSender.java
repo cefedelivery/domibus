@@ -61,8 +61,6 @@ import javax.xml.ws.soap.SOAPFaultException;
 public class MessageSender implements MessageListener {
     private static final Log LOG = LogFactory.getLog(MessageSender.class);
 
-    private final String UNRECOVERABLE_ERROR_RETRY = "domibus.dispatch.ebms.error.unrecoverable.retry";
-
     @Autowired
     @Qualifier("jmsTemplateDispatch")
     private JmsOperations jmsOperationsDispatch;
@@ -162,7 +160,7 @@ public class MessageSender implements MessageListener {
      */
     private void handleEbms3Exception(final EbMS3Exception exceptionToHandle, final String messageId) {
         exceptionToHandle.setRefToMessageId(messageId);
-        if (!exceptionToHandle.isRecoverable() && !Boolean.parseBoolean(System.getProperty(UNRECOVERABLE_ERROR_RETRY))) {
+        if (!exceptionToHandle.isRecoverable() && !Boolean.parseBoolean(System.getProperty(RetryService.UNRECOVERABLE_ERROR_RETRY))) {
             messageLogDao.setMessageAsAck(messageId);
         }
 
@@ -171,9 +169,6 @@ public class MessageSender implements MessageListener {
         this.errorLogDao.create(new ErrorLogEntry(exceptionToHandle));
         //TODO: notify backends of error
     }
-
-
-
 
 
     @Transactional(propagation = Propagation.REQUIRED)

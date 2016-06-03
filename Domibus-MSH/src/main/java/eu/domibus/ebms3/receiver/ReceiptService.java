@@ -27,17 +27,22 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
+import eu.domibus.ebms3.common.DispatchMessageCreator;
 import eu.domibus.ebms3.common.MessageIdGenerator;
 import eu.domibus.ebms3.common.SOAPMessageConverterService;
 import eu.domibus.ebms3.common.TimestampDateFormatter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Node;
 
+import javax.annotation.Resource;
+import javax.jms.Queue;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -79,6 +84,13 @@ public class ReceiptService {
 
     @Autowired
     SOAPMessageConverterService soapMessageConverterService;
+
+    @Resource(name = "jmsTemplateDispatchSignalMessage")
+    private JmsOperations jmsOperations;
+
+    @Autowired
+    @Qualifier("sendSignalMessageQueue")
+    private Queue sendSignalMessageQueue;
 
     /**
      * Generates AS4 receipt an incoming message
@@ -145,12 +157,15 @@ public class ReceiptService {
 
         DOMSource receiptHeader = this.generateReceipt(request, legConfiguration);
 
+        String messageId = null;
         try {
             Messaging signalMessage = null;
             receiptMessage = this.messageFactory.createMessage();
             receiptMessage.getSOAPPart().setContent(receiptHeader);
 
             signalMessage = soapMessageConverterService.getMessaging(receiptMessage);
+
+            messageId = signalMessage.getSignalMessage().getMessageInfo().getMessageId();
 
             messagingDao.create(signalMessage);
         } catch (SOAPException | JAXBException e) {
@@ -165,6 +180,7 @@ public class ReceiptService {
 
         if (ReplyPattern.CALLBACK.equals(legConfiguration.getReliability().getReplyPattern())) {
             // response should be empty in this case
+            this.jmsOperations.send(sendSignalMessageQueue, new DispatchMessageCreator(messageId, null));
         }
 
 

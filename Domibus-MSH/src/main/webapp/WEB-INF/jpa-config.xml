@@ -31,6 +31,16 @@
 
     <import resource="file:///${domibus.config.location}/domibus-datasources.xml"/>
 
+    <bean id="dispatchSignalMessageContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
+        <property name="destination" ref="sendSignalMessageQueue"/>
+        <property name="messageListener" ref="signalMessageSenderService" />
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="concurrency" value="3-3"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="sessionAcknowledgeMode" value="0"/>
+    </bean>
+
     <bean id="dispatchContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
         <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
         <property name="destination" ref="sendMessageQueue"/>
@@ -52,6 +62,13 @@
         <property name="pubSubDomain" value="true"/>
         <property name="subscriptionDurable" value="false"/>
     </bean>
+
+    <bean id="jmsTemplateDispatchSignalMessage"
+          class="org.springframework.jms.core.JmsTemplate"
+          c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
+          p:defaultDestination-ref="sendSignalMessageQueue"
+          p:sessionTransacted="true"
+          p:sessionAcknowledgeMode="0"/>
 
     <bean id="jmsTemplateDispatch"
           class="org.springframework.jms.core.JmsTemplate"

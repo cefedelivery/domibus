@@ -49,6 +49,8 @@
                   value="file:///${domibus.config.location}/internal/activemq.xml"/>
     </bean>
 
+    <amq:queue id="sendSignalMessageQueue"
+               physicalName="domibus.internal.dispatch.signalmessage"/>
     <amq:queue id="sendMessageQueue"
                physicalName="domibus.internal.dispatch.queue"/>
     <amq:queue id="notifyBackendQueue"

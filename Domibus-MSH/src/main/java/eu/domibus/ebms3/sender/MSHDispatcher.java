@@ -80,6 +80,11 @@ public class MSHDispatcher {
 
     @Transactional(propagation = Propagation.MANDATORY)
     public SOAPMessage dispatch(final SOAPMessage soapMessage, final String pModeKey) throws EbMS3Exception {
+        return dispatch(soapMessage, pModeKey, false);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public SOAPMessage dispatch(final SOAPMessage soapMessage, final String pModeKey, boolean isOneWay) throws EbMS3Exception {
 
         final QName serviceName = new QName("http://domibus.eu", "msh-dispatch-service");
         final QName portName = new QName("http://domibus.eu", "msh-dispatch");
@@ -123,7 +128,13 @@ public class MSHDispatcher {
         }
 
         try {
-            result = dispatch.invoke(soapMessage);
+
+            if(isOneWay) {
+                dispatch.invokeOneWay(soapMessage);
+                result = null;
+            } else {
+                result = dispatch.invoke(soapMessage);
+            }
         } catch (final WebServiceException e) {
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0005, "error dispatching message to " + endpoint, null, e);
             ex.setMshRole(MSHRole.SENDING);
