@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<db:configuration xmlns:db="http://domibus.eu/configuration"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  party="EUCEG_EC">
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="EUCEG_EC">
     <mpcs>
         <mpc name="defaultMpc"
              qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
              enabled="true"
              default="true"
-             retention_downloaded="0"
-             retention_undownloaded="14400"/>
+             retention_downloaded="10080"
+             retention_undownloaded="10080"/>
     </mpcs>
     <businessProcesses>
         <roles>
@@ -62,7 +60,8 @@
             <payload name="euCegPayload"
                      cid="cid:message"
                      required="true"
-                     mimeType="application/xml"/>
+                     mimeType="application/xml"
+                     inBody="false"/>
             <payloadProfile name="euCegProfile"
                             maxSize="0">
                 <attachment name="euCegPayload"/>
@@ -82,6 +81,7 @@
         </errorHandlings>
         <agreements>
             <agreement name="agreementEmpty" value="" type=""/>
+            <agreement name="agreement1110" value="EDELIVERY-1110" type=""/>
         </agreements>
         <services>
             <service name="euCegESens" value="http://ec.europa.eu/e-delivery/services/tobacco-ecig-reporting"
@@ -107,6 +107,7 @@
                               propertySet="euCegPropertySet"
                               errorHandling="defaultErrorHandling"
                               compressPayloads="true"/>
+
             <legConfiguration name="euCegESenssubmitResponse"
                               service="euCegESens"
                               action="submitResponse"
@@ -117,6 +118,28 @@
                               propertySet="euCegPropertySet"
                               errorHandling="defaultErrorHandling"
                               compressPayloads="true"/>
+
+            <legConfiguration name="euCegESenssubmitRequestBis"
+                              service="euCegESens"
+                              action="submitRequest"
+                              defaultMpc="defaultMpc"
+                              reliability="AS4Reliability"
+                              security="eSens"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="euCegPropertySet"
+                              errorHandling="defaultErrorHandling"
+                              compressPayloads="false"/>
+
+            <legConfiguration name="euCegESenssubmitResponseBis"
+                              service="euCegESens"
+                              action="submitResponse"
+                              defaultMpc="defaultMpc"
+                              reliability="AS4Reliability"
+                              security="eSens"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="euCegPropertySet"
+                              errorHandling="defaultErrorHandling"
+                              compressPayloads="false"/>
         </legConfigurations>
         <process name="euCegProcess"
                  agreement="agreementEmpty"
@@ -135,6 +158,27 @@
             <legs>
                 <leg name="euCegESenssubmitRequest"/>
                 <leg name="euCegESenssubmitResponse"/>
+            </legs>
+        </process>
+        <process name="euCegProcessBis"
+                 agreement="agreement1110"
+                 mep="oneway"
+                 binding="pushAndPush"
+                 initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="EUCEG_EC"/>
+                <initiatorParty name="EUCEG_000001_AS4"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="EUCEG_000001_AS4"/>
+                <responderParty name="EUCEG_EC"/>
+            </responderParties>
+            <legs>
+                <leg name="euCegESenssubmitRequest"/>
+                <leg name="euCegESenssubmitResponse"/>
+                <leg name="euCegESenssubmitRequestBis"/>
+                <leg name="euCegESenssubmitResponseBis"/>
             </legs>
         </process>
     </businessProcesses>
