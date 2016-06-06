@@ -46,8 +46,6 @@ public class SignalMessageSender implements MessageListener {
     @Autowired
     private EbMS3MessageBuilder messageBuilder;
 
-    static int z = 0;
-
     @Transactional(propagation = Propagation.REQUIRED)
     public void onMessage(final Message message) {
 
@@ -59,9 +57,7 @@ public class SignalMessageSender implements MessageListener {
         } catch (JMSException e) {
             LOG.error("", e);
         } catch (EbMS3Exception e) {
-            LOG.info("Blub: " + z++);
             if (message != null) {
-
                 e.setRefToMessageId(messageId);
                 if (!e.isRecoverable() && !Boolean.parseBoolean(System.getProperty(RetryService.UNRECOVERABLE_ERROR_RETRY))) {
                     LOG.error("Non recoverable error for SignalMessage with messageId " + messageId);

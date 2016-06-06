@@ -132,8 +132,11 @@
                             <redeliveryPolicy  queue="domibus.notification.>" maximumRedeliveries="-1"
                                                   redeliveryDelay="10000"/>
                             <redeliveryPolicy queue="domibus.internal.dispatch.signalmessage"
-                                              maximumRedeliveries="-1"
-                                              />
+                                              initialRedeliveryDelay="2000"
+                                              useExponentialBackOff="true"
+                                              backOffMultiplier="2"
+                                              maximumRedeliveries="5"
+                                    />
                         </redeliveryPolicyEntries>
                     </redeliveryPolicyMap>
                 </redeliveryPolicyMap>
