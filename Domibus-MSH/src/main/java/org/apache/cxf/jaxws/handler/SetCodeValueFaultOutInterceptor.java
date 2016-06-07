@@ -15,12 +15,11 @@ import java.util.Iterator;
 
 /**
  * Created by idragusa on 5/26/16.
- *
+ * <p/>
  * [EDELIVERY-1117]
  * The scope of this interceptor is to replace the existing CXF SOAPHandlerFaultOutInterceptor with our
  * own DomibusSOAPHandlerFaultOutInterceptor that sets the code value to Receiver instead of HandleFault
  * which is non-standard and causes an exception.
- *
  */
 public class SetCodeValueFaultOutInterceptor extends AbstractSoapInterceptor {
 
@@ -33,15 +32,15 @@ public class SetCodeValueFaultOutInterceptor extends AbstractSoapInterceptor {
 
     @Override
     public void handleMessage(SoapMessage message) {
-        if(message == null ||
+        if (message == null ||
                 message.getInterceptorChain() == null ||
                 message.getInterceptorChain().iterator() == null)
             return;
 
         Iterator<Interceptor<? extends Message>> it = message.getInterceptorChain().iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             Interceptor interceptor = it.next();
-            if(interceptor instanceof SOAPHandlerFaultOutInterceptor) {
+            if (interceptor instanceof SOAPHandlerFaultOutInterceptor) {
                 message.getInterceptorChain().add(new DomibusSOAPHandlerFaultOutInterceptor(((SOAPHandlerFaultOutInterceptor) interceptor).getBinding()));
                 message.getInterceptorChain().remove(interceptor);
             }

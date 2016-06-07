@@ -1,19 +1,5 @@
 package org.apache.cxf.jaxws.handler.soap;
 
-import java.net.URI;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
-import javax.xml.soap.*;
-import javax.xml.ws.Binding;
-import javax.xml.ws.handler.Handler;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.soap.SOAPHandler;
-import javax.xml.ws.soap.SOAPFaultException;
-
-import org.w3c.dom.Node;
-
 import org.apache.cxf.binding.soap.HeaderUtil;
 import org.apache.cxf.binding.soap.SoapFault;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -26,6 +12,18 @@ import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.jaxws.handler.AbstractProtocolHandlerInterceptor;
 import org.apache.cxf.jaxws.handler.HandlerChainInvoker;
 import org.apache.cxf.phase.Phase;
+import org.w3c.dom.Node;
+
+import javax.xml.namespace.QName;
+import javax.xml.soap.*;
+import javax.xml.ws.Binding;
+import javax.xml.ws.handler.Handler;
+import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.handler.soap.SOAPHandler;
+import javax.xml.ws.soap.SOAPFaultException;
+import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /*[EDELIVERY-1117] This interceptor replaces the CXF interceptor SOAPHandlerFaultOutInterceptor.
@@ -128,7 +126,7 @@ public class DomibusSOAPHandlerFaultOutInterceptor extends
                 SOAPFault soapFault = body.addFault();
 
                 if (exception instanceof SOAPFaultException) {
-                    SOAPFaultException sf = (SOAPFaultException)exception;
+                    SOAPFaultException sf = (SOAPFaultException) exception;
                     soapFault.setFaultString(sf.getFault().getFaultString());
                     SAAJUtils.setFaultCode(soapFault, sf.getFault().getFaultCodeAsQName());
                     soapFault.setFaultActor(sf.getFault().getFaultActor());
@@ -139,7 +137,7 @@ public class DomibusSOAPHandlerFaultOutInterceptor extends
                         soapFault.addDetail().appendChild(nd);
                     }
                 } else if (exception instanceof Fault) {
-                    SoapFault sf = SoapFault.createFault((Fault)exception, message
+                    SoapFault sf = SoapFault.createFault((Fault) exception, message
                             .getVersion());
                     soapFault.setFaultString(sf.getReason());
                     SAAJUtils.setFaultCode(soapFault, sf.getFaultCode());
