@@ -40,7 +40,7 @@ public class SendMessageIT extends AbstractSendMessageIT {
     public void testSendMessageOK() throws SendMessageFault, InterruptedException, SQLException {
         String payloadHref = "sbdh-order";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessage(payloadHref);
+        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);

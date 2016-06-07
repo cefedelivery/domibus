@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<db:configuration xmlns:db="http://domibus.eu/configuration"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://domibus.eu/configuration file:/C:/development/git-repos/domibus/Domibus-MSH/domibus-configuration.xsd" party="red_gw">
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="red_gw">
+
 	<mpcs>
-		<mpc name="defaultMpc" 
-				qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
-				enabled="true" 
-				default="true" 
-				retention_downloaded="0" 
-				retention_undownloaded="14400"/>
+		<mpc name="defaultMpc"
+			 qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+			 enabled="true"
+			 default="true"
+			 retention_downloaded="0"
+			 retention_undownloaded="0"/>
 	</mpcs>
 	<businessProcesses>
 		<roles>

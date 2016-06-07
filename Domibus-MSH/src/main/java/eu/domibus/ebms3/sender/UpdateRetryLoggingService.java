@@ -52,7 +52,7 @@ public class UpdateRetryLoggingService {
         final MessageLogEntry messageLogEntry = this.messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
         //messageLogEntry.setMessageStatus(MessageStatus.SEND_ATTEMPT_FAILED); //This is not stored in the database
         if (messageLogEntry.getSendAttempts() < messageLogEntry.getSendAttemptsMax() //check that there are attempts left
-                && (messageLogEntry.getReceived().getTime() + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) < System.currentTimeMillis()) {// chek that there is time left
+                && (messageLogEntry.getReceived().getTime() + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis()) {// chek that there is time left
             messageLogEntry.setSendAttempts(messageLogEntry.getSendAttempts() + 1);
             if (legConfiguration.getReceptionAwareness() != null) {
                 messageLogEntry.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(messageLogEntry.getNextAttempt(), messageLogEntry.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));

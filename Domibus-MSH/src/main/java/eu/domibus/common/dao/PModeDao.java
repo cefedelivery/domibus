@@ -93,9 +93,9 @@ public class PModeDao extends PModeProvider {
 
     }
 
-    protected String findLegName(final String agreementRef, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
+    protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
         final Query candidatesQuery = this.entityManager.createNamedQuery("LegConfiguration.findForPartiesAndAgreements");
-        candidatesQuery.setParameter("AGREEMENT", agreementRef);
+        candidatesQuery.setParameter("AGREEMENT", agreementName);
         candidatesQuery.setParameter("SENDER_PARTY", senderParty);
         candidatesQuery.setParameter("RECEIVER_PARTY", receiverParty);
         final List<LegConfiguration> candidates = candidatesQuery.getResultList();
@@ -118,12 +118,11 @@ public class PModeDao extends PModeProvider {
         throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
     }
 
-    protected String findAgreementRef(final AgreementRef agreementRef) throws EbMS3Exception {
+    protected String findAgreement(final AgreementRef agreementRef) throws EbMS3Exception {
         if (agreementRef == null || agreementRef.getValue() == null || agreementRef.getValue().isEmpty()) {
             return ""; //AgreementRef is optional
         }
         final String value = agreementRef.getValue();
-        final String pmode = agreementRef.getPmode(); //FIXME? This value is ignored!
         final String type = agreementRef.getType();
         final TypedQuery<String> query = this.entityManager.createNamedQuery("Agreement.findByValueAndType", String.class);
         query.setParameter("VALUE", value);
@@ -131,9 +130,9 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            PModeDao.LOG.info("No matching agreementRef found", e);
+            PModeDao.LOG.info("No matching agreement found", e);
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreementRef found", null, null);//FIXME: Throw ValueInconsistent if CPA not recognized [5.2.2.7]
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreement found", null, null);
     }
 
     protected String findActionName(final String action) throws EbMS3Exception {

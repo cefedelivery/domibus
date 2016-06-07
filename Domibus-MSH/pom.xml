@@ -139,12 +139,26 @@
                                         <include>
                                             ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}/bin/standalone.conf.bat
                                         </include>
+                                        <include>
+                                            ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}/bin/standalone.conf
+                                        </include>
                                     </includes>
                                     <replacements>
                                         <replacement>
                                             <token>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M"</token>
-                                            <value>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M -Ddomibus.config.location=%JBOSS_HOME%/conf/domibus"
+                                            <value>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M
+                                                -Ddomibus.config.location=%JBOSS_HOME%/conf/domibus"
                                             </value>
+                                        </replacement>
+                                        <replacement>
+                                            <token>JAVA_OPTS="-Xms64m -Xmx512m -XX:MaxPermSize=256m
+                                                -Djava.net.preferIPv4Stack=true"
+                                            </token>
+                                            <value>JAVA_OPTS="-Xms64m -Xmx512m -XX:MaxPermSize=256m
+                                                -Djava.net.preferIPv4Stack=true
+                                                -Ddomibus.config.location=\$JBOSS_HOME/conf/domibus"
+                                            </value>
+
                                         </replacement>
                                     </replacements>
                                 </configuration>
@@ -918,7 +932,7 @@
                                 src/main/resources/db/changelog-3.0.xml
                             </changeLogFile>
                             <url>
-                                offline:oracle?changeLogFile=${project.build.directory}/liquibase/changelog-3.0.oracle
+                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.0.oracle
                             </url>
                             <migrationSqlOutputFile>
                                 ${project.build.directory}/sql-scripts/oracle10g-3.0.ddl

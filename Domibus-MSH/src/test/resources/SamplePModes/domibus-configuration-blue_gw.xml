@@ -124,7 +124,7 @@
                            deliveryFailureNotifyProducer="false"/>
         </errorHandlings>
         <agreements>
-            <agreement name="agreementEmpty" value="" type=""/>
+            <agreement name="agreement1110" value="EDELIVERY-1110" type=""/>
         </agreements>
         <services>
             <service name="testService1" value="bdx:noprocess" type="tc1"/>
@@ -229,7 +229,7 @@
             </legs>
         </process>
         <process name="tc2Process"
-                 agreement="agreementEmpty"
+                 agreement=""
                  mep="oneway"
                  binding="push"
                  initiatorRole="defaultInitiatorRole"
@@ -257,7 +257,6 @@
             </legs>
         </process>
         <process name="tc3Process"
-                 agreement="agreementEmpty"
                  mep="twoway"
                  binding="pushAndPush"
                  initiatorRole="defaultInitiatorRole"
@@ -286,7 +285,7 @@
             </legs>
         </process>
         <process name="noSecProcess"
-                 agreement="agreementEmpty"
+                 agreement="agreement1110"
                  mep="oneway"
                  binding="push"
                  initiatorRole="defaultInitiatorRole"
