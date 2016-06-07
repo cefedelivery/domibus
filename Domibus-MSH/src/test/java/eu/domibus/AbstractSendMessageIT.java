@@ -87,15 +87,18 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
         pstmt.close();
     }
 
-    protected Messaging createMessage(String payloadHref) {
-        return createMessage(payloadHref, "text/xml");
+    protected Messaging createMessageHeader(String payloadHref) {
+        return createMessageHeader(payloadHref, "text/xml");
     }
 
-    protected Messaging createMessage(String payloadHref, String mimeType) {
+    protected Messaging createMessageHeader(String payloadHref, String mimeType) {
         Messaging ebMSHeaderInfo = new Messaging();
         UserMessage userMessage = new UserMessage();
         CollaborationInfo collaborationInfo = new CollaborationInfo();
         collaborationInfo.setAction("TC1Leg1");
+        AgreementRef agreementRef = new AgreementRef();
+        agreementRef.setValue("EDELIVERY-1110");
+        collaborationInfo.setAgreementRef(agreementRef);
         Service service = new Service();
         service.setValue("bdx:noprocess");
         service.setType("tc1");

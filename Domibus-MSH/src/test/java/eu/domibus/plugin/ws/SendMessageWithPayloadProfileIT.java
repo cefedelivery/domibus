@@ -44,7 +44,7 @@ public class SendMessageWithPayloadProfileIT extends AbstractSendMessageIT {
         //TODO Prepare the request to the backend
         String payloadHref = "payload";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessage(payloadHref);
+        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
@@ -62,7 +62,7 @@ public class SendMessageWithPayloadProfileIT extends AbstractSendMessageIT {
         //TODO Prepare the request to the backend
         String payloadHref = "payload";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessage(payloadHref, null);
+        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
 
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
@@ -79,7 +79,7 @@ public class SendMessageWithPayloadProfileIT extends AbstractSendMessageIT {
 
         String payloadHref = "payload_invalid";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessage(payloadHref);
+        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
         try {
             backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
@@ -102,7 +102,7 @@ public class SendMessageWithPayloadProfileIT extends AbstractSendMessageIT {
 
         String payloadHref = "payload";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessage(payloadHref + "000");
+        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref + "000");
 
         try {
             backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);

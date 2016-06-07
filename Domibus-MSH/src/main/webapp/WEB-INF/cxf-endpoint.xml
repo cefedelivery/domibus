@@ -102,8 +102,11 @@
             <bean class="eu.domibus.ebms3.receiver.FaultInHandler"/>
         </jaxws:handlers>
 
-    </jaxws:endpoint>
+        <jaxws:outInterceptors>
+            <bean class="org.apache.cxf.jaxws.handler.SetCodeValueFaultOutInterceptor"/>
+        </jaxws:outInterceptors>
 
+    </jaxws:endpoint>
 
     <!--MSH Webservice client-->
     <jaxws:client id="{http://domibus.eu}msh-dispatch" name="{http://domibus.eu}msh-dispatch" createdFromAPI="true">
