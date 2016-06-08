@@ -1,5 +1,7 @@
 package org.apache.cxf.jaxws.handler.soap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.binding.soap.HeaderUtil;
 import org.apache.cxf.binding.soap.SoapFault;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -36,6 +38,8 @@ import java.util.Set;
 public class DomibusSOAPHandlerFaultOutInterceptor extends
         AbstractProtocolHandlerInterceptor<SoapMessage> implements
         SoapInterceptor {
+
+    private static final Log LOG = LogFactory.getLog(DomibusSOAPHandlerFaultOutInterceptor.class);
 
     private static final SAAJOutInterceptor SAAJ_OUT = new SAAJOutInterceptor();
     private static final String ENDING_ID = DomibusSOAPHandlerFaultOutInterceptor.class.getName() + ".ENDING";
@@ -158,7 +162,7 @@ public class DomibusSOAPHandlerFaultOutInterceptor extends
                 }
             } catch (SOAPException e) {
                 // do nothing
-                e.printStackTrace();
+                LOG.error("Could not set the FaultCode value!", e);
             }
         }
 
