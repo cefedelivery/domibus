@@ -127,6 +127,8 @@ public class EbMS3MessageBuilder {
                 msgInfo.setTimestamp(new Date());
                 if(signalMessage.getError() != null && signalMessage.getError().iterator().hasNext()) {
                     msgInfo.setRefToMessageId(signalMessage.getError().iterator().next().getRefToMessageInError());
+                } else if(signalMessage.getMessageInfo().getRefToMessageId() != null) {
+                    msgInfo.setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId());
                 }
 
                 signalMessage.setMessageInfo(msgInfo);

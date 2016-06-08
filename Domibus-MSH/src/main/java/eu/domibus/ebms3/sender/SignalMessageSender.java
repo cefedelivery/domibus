@@ -104,8 +104,9 @@ public class SignalMessageSender implements MessageListener {
         String pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(referencedMessage);
 
         LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
+        String endpoint = this.pModeProvider.getSenderParty(pmodeKey).getEndpoint();
         final SOAPMessage soapMessage = this.messageBuilder.buildSOAPMessage(signalMessage, legConfiguration);
-        final SOAPMessage response = this.mshDispatcher.dispatch(soapMessage, pmodeKey, true);
+        this.mshDispatcher.dispatch(soapMessage, pmodeKey, endpoint, true);
 
 
     }

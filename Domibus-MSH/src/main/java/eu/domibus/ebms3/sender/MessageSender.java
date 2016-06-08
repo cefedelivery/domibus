@@ -27,6 +27,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
 import eu.domibus.ebms3.common.DelayedDispatchMessageCreator;
@@ -117,8 +118,16 @@ public class MessageSender implements MessageListener {
                 EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occured during marshalling", messageId, null);
                 e.setMshRole(MSHRole.SENDING);
                 throw e;
+            } else if(EbmsErrorChecker.CheckResult.NO_RESPONSE.equals(errorCheckResult)) {
+                //response is empty, if callback was NOT enabled for this message throw exception
+                if(!ReplyPattern.CALLBACK.equals(legConfiguration.getReliability().getReplyPattern())) {
+                    EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "No response message found for message with ReplyPattern RESPONSE", messageId, null);
+                    e.setMshRole(MSHRole.SENDING);
+                    throw e;
+                }
+            } else {
+                reliabilityCheckSuccessful = this.reliabilityChecker.check(soapMessage, response, pModeKey);
             }
-            reliabilityCheckSuccessful = this.reliabilityChecker.check(soapMessage, response, pModeKey);
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 this.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);

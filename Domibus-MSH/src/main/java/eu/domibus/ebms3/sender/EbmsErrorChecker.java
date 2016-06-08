@@ -60,6 +60,10 @@ public class EbmsErrorChecker {
 
         final Messaging messaging;
 
+        if(response == null) {
+            return CheckResult.NO_RESPONSE;
+        }
+
         try {
             messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) response.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
         } catch (JAXBException | SOAPException e) {
@@ -92,6 +96,6 @@ public class EbmsErrorChecker {
     }
 
     public enum CheckResult {
-        OK, WARNING, MARSHALL_ERROR
+        OK, WARNING, MARSHALL_ERROR, NO_RESPONSE
     }
 }

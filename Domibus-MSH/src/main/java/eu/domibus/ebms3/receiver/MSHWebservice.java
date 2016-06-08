@@ -113,7 +113,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Transactional
     public SOAPMessage invoke(final SOAPMessage request) {
 
-        final SOAPMessage responseMessage;
+        SOAPMessage responseMessage = null;
 
         String pmodeKey = null;
         try {
@@ -152,9 +152,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 this.persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
             }
 
-            responseMessage = receiptService.handleReceipt(request, legConfiguration, messageExists);
-
-            if (!messageExists) {
+            if(messaging.getSignalMessage() == null) {
+                responseMessage = receiptService.handleReceipt(request, legConfiguration, messageExists);
+            }
+            if (!messageExists && messaging.getUserMessage() != null) {
                 backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
             }
 
@@ -182,6 +183,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @throws EbMS3Exception
      */
     private void checkCharset(final Messaging messaging) throws EbMS3Exception {
+        if (messaging.getUserMessage() == null) {
+            return;
+        }
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             for (final Property property : partInfo.getPartProperties().getProperties()) {
                 if (Property.CHARSET.equals(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
@@ -201,12 +205,16 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      */
     private Boolean checkDuplicate(final Messaging messaging) {
 
-        return messageLogDao.findByMessageId(messaging.getUserMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
+        if (messaging.getUserMessage() != null && messaging.getSignalMessage() == null) {
+            return messageLogDao.findByMessageId(messaging.getUserMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
+        }
 
+        if (messaging.getSignalMessage() != null && messaging.getUserMessage() != null) {
+            return messageLogDao.findByMessageId(messaging.getSignalMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
+        }
 
+        return false;
     }
-
-
 
 
     /**
@@ -223,74 +231,90 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     //TODO: improve error handling
     private String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging) throws SOAPException, JAXBException, TransformerException, EbMS3Exception {
 
+        MessageLogEntry messageLogEntry = null;
 
-        boolean bodyloadFound = false;
-        for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
-            final String cid = partInfo.getHref();
-            MSHWebservice.LOG.debug("looking for attachment with cid: " + cid);
-            boolean payloadFound = false;
-            if (cid == null || cid.isEmpty() || cid.startsWith("#")) {
-                if (bodyloadFound) {
-                    EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "More than one Partinfo referencing the soap body found", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
+        if (messaging.getUserMessage() == null && messaging.getSignalMessage() != null) {
+            messageLogEntry = new MessageLogEntry();
+            messageLogEntry.setMessageId(messaging.getSignalMessage().getMessageInfo().getMessageId());
+            messageLogEntry.setMessageType(MessageType.SIGNAL_MESSAGE);
+            messageLogEntry.setMshRole(MSHRole.RECEIVING);
+            messageLogEntry.setReceived(new Date());
+            messageLogEntry.setMessageStatus(MessageStatus.RECEIVED);
+            this.messageLogDao.create(messageLogEntry);
+        } else if (messaging.getSignalMessage() == null && messaging.getUserMessage() != null) {
+
+            boolean bodyloadFound = false;
+            for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
+                final String cid = partInfo.getHref();
+                MSHWebservice.LOG.debug("looking for attachment with cid: " + cid);
+                boolean payloadFound = false;
+                if (cid == null || cid.isEmpty() || cid.startsWith("#")) {
+                    if (bodyloadFound) {
+                        EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "More than one Partinfo referencing the soap body found", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
+                        ex.setMshRole(MSHRole.RECEIVING);
+                        throw ex;
+                    }
+                    bodyloadFound = true;
+                    payloadFound = true;
+                    partInfo.setInBody(true);
+                    final Node bodyContent = (((Node) request.getSOAPBody().getChildElements().next()));
+                    final Source source = new DOMSource(bodyContent);
+                    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    final Result result = new StreamResult(out);
+                    final Transformer transformer = this.transformerFactory.newTransformer();
+                    transformer.transform(source, result);
+                    partInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(out.toByteArray(), "text/xml")));
+                }
+                @SuppressWarnings("unchecked") final
+                Iterator<AttachmentPart> attachmentIterator = request.getAttachments();
+                AttachmentPart attachmentPart;
+                while (attachmentIterator.hasNext() && !payloadFound) {
+
+                    attachmentPart = attachmentIterator.next();
+                    //remove square brackets from cid for further processing
+                    attachmentPart.setContentId(AttachmentUtil.cleanContentId(attachmentPart.getContentId()));
+                    MSHWebservice.LOG.debug("comparing with: " + attachmentPart.getContentId());
+                    if (attachmentPart.getContentId().equals(AttachmentUtil.cleanContentId(cid))) {
+                        partInfo.setPayloadDatahandler(attachmentPart.getDataHandler());
+                        partInfo.setInBody(false);
+                        payloadFound = true;
+                    }
+                }
+                if (!payloadFound) {
+                    EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0011, "No Attachment found for cid: " + cid + " of message: " + messaging.getUserMessage().getMessageInfo().getMessageId(), messaging.getUserMessage().getMessageInfo().getMessageId(), null);
                     ex.setMshRole(MSHRole.RECEIVING);
                     throw ex;
                 }
-                bodyloadFound = true;
-                payloadFound = true;
-                partInfo.setInBody(true);
-                final Node bodyContent = (((Node) request.getSOAPBody().getChildElements().next()));
-                final Source source = new DOMSource(bodyContent);
-                final ByteArrayOutputStream out = new ByteArrayOutputStream();
-                final Result result = new StreamResult(out);
-                final Transformer transformer = this.transformerFactory.newTransformer();
-                transformer.transform(source, result);
-                partInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(out.toByteArray(), "text/xml")));
             }
-            @SuppressWarnings("unchecked") final
-            Iterator<AttachmentPart> attachmentIterator = request.getAttachments();
-            AttachmentPart attachmentPart;
-            while (attachmentIterator.hasNext() && !payloadFound) {
 
-                attachmentPart = attachmentIterator.next();
-                //remove square brackets from cid for further processing
-                attachmentPart.setContentId(AttachmentUtil.cleanContentId(attachmentPart.getContentId()));
-                MSHWebservice.LOG.debug("comparing with: " + attachmentPart.getContentId());
-                if (attachmentPart.getContentId().equals(AttachmentUtil.cleanContentId(cid))) {
-                    partInfo.setPayloadDatahandler(attachmentPart.getDataHandler());
-                    partInfo.setInBody(false);
-                    payloadFound = true;
-                }
+
+            final boolean compressed = this.compressionService.handleDecompression(messaging.getUserMessage(), legConfiguration);
+            try {
+                this.payloadProfileValidator.validate(messaging, pmodeKey);
+                this.propertyProfileValidator.validate(messaging, pmodeKey);
+            } catch (EbMS3Exception e) {
+                e.setMshRole(MSHRole.RECEIVING);
+                throw e;
             }
-            if (!payloadFound) {
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0011, "No Attachment found for cid: " + cid + " of message: " + messaging.getUserMessage().getMessageInfo().getMessageId(), messaging.getUserMessage().getMessageInfo().getMessageId(), null);
-                ex.setMshRole(MSHRole.RECEIVING);
-                throw ex;
-            }
+
+            MSHWebservice.LOG.debug("Compression for message with id: " + messaging.getUserMessage().getMessageInfo().getMessageId() + " applied: " + compressed);
+            messageLogEntry = new MessageLogEntry();
+            messageLogEntry.setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId());
+            messageLogEntry.setMessageType(MessageType.USER_MESSAGE);
+            messageLogEntry.setMshRole(MSHRole.RECEIVING);
+            messageLogEntry.setReceived(new Date());
+            final String mpc = messaging.getUserMessage().getMpc();
+            messageLogEntry.setMpc((mpc == null || mpc.isEmpty()) ? Mpc.DEFAULT_MPC : mpc);
+            messageLogEntry.setMessageStatus(MessageStatus.RECEIVED);
+            this.messageLogDao.create(messageLogEntry);
         }
 
-        final boolean compressed = this.compressionService.handleDecompression(messaging.getUserMessage(), legConfiguration);
-        try {
-            this.payloadProfileValidator.validate(messaging, pmodeKey);
-            this.propertyProfileValidator.validate(messaging, pmodeKey);
-        } catch (EbMS3Exception e) {
-            e.setMshRole(MSHRole.RECEIVING);
-            throw e;
-        }
-        MSHWebservice.LOG.debug("Compression for message with id: " + messaging.getUserMessage().getMessageInfo().getMessageId() + " applied: " + compressed);
-        final MessageLogEntry messageLogEntry = new MessageLogEntry();
-        messageLogEntry.setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId());
-        messageLogEntry.setMessageType(MessageType.USER_MESSAGE);
-        messageLogEntry.setMshRole(MSHRole.RECEIVING);
-        messageLogEntry.setReceived(new Date());
-        final String mpc = messaging.getUserMessage().getMpc();
-        messageLogEntry.setMpc((mpc == null || mpc.isEmpty()) ? Mpc.DEFAULT_MPC : mpc);
-        messageLogEntry.setMessageStatus(MessageStatus.RECEIVED);
-        this.messageLogDao.create(messageLogEntry);
+
         try {
             this.messagingDao.create(messaging);
         } catch (Exception exc) {
             LOG.error("Could not persist message " + exc.getMessage());
-            if(exc instanceof ZipException ||
+            if (exc instanceof ZipException ||
                     (exc.getCause() != null && exc.getCause() instanceof ZipException)) {
                 LOG.debug("InstanceOf ZipException");
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), messaging.getUserMessage().getMessageInfo().getMessageId(), exc);
@@ -300,6 +324,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             }
             throw exc;
         }
+
 
         return messageLogEntry.getMessageId();
     }

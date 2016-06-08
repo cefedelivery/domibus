@@ -80,16 +80,20 @@ public class MSHDispatcher {
 
     @Transactional(propagation = Propagation.MANDATORY)
     public SOAPMessage dispatch(final SOAPMessage soapMessage, final String pModeKey) throws EbMS3Exception {
-        return dispatch(soapMessage, pModeKey, false);
+        return dispatch(soapMessage, pModeKey, null, false);
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
-    public SOAPMessage dispatch(final SOAPMessage soapMessage, final String pModeKey, boolean isOneWay) throws EbMS3Exception {
+    public SOAPMessage dispatch(final SOAPMessage soapMessage, final String pModeKey, String endpoint, boolean isOneWay) throws EbMS3Exception {
 
         final QName serviceName = new QName("http://domibus.eu", "msh-dispatch-service");
         final QName portName = new QName("http://domibus.eu", "msh-dispatch");
         final javax.xml.ws.Service service = javax.xml.ws.Service.create(serviceName);
-        final String endpoint = pModeProvider.getReceiverParty(pModeKey).getEndpoint();
+
+        if(endpoint == null) {
+            endpoint = pModeProvider.getReceiverParty(pModeKey).getEndpoint();
+        }
+
         service.addPort(portName, SOAPBinding.SOAP12HTTP_BINDING, endpoint);
         final Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
         Policy policy = null;
