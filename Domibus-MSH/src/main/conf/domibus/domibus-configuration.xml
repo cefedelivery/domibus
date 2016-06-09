@@ -36,7 +36,7 @@
     <!-- Internal configuration provider. Do not change unless you have special requirements (i.e. dynamic
     discovery injection of PModes)-->
     <bean id="pModeProvider"
-          class="eu.domibus.common.dao.CachingPModeProvider"/>
+          class="eu.domibus.common.dao.PModeDao"/>
 
     <!-- General domibus properties -->
     <util:properties id="domibusProperties">

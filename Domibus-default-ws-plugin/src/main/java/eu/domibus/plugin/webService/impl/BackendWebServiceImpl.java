@@ -35,6 +35,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,8 +66,10 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     private static final eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory EBMS_OBJECT_FACTORY = new eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory();
 
     @Autowired
+    @Qualifier("wsMessageTransformer")
     private MessageRetrievalTransformer<UserMessage> messageRetrievalTransformer;
     @Autowired
+    @Qualifier("wsMessageTransformer")
     private MessageSubmissionTransformer<Messaging> messageSubmissionTransformer;
 
     public BackendWebServiceImpl(final String name) {

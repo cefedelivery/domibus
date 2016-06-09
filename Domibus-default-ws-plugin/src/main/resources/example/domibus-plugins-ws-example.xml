@@ -31,9 +31,10 @@
        http://activemq.apache.org/schema/core/activemq-core.xsd">
 
 
-<amq:queue id="notifyBackendWebServiceQueue"
+    <amq:queue id="notifyBackendWebServiceQueue"
                physicalName="domibus.notification.webservice"/>
 
+    <bean id="wsMessageTransformer" class="eu.domibus.plugin.webService.WSMessageTransformer" />
 
     <bean id="backendWebservice"
           class="eu.domibus.plugin.webService.impl.BackendWebServiceImpl">
