@@ -43,7 +43,7 @@
     <xi:include href="6_config_pmodes.xml"/>
     <!-- appendices -->
     <xi:include href="a1_revisionHistory.xml"/>
-    <!--xi:include href="a2_feature_list.xml"/-->
+    <xi:include href="a2_feature_list.xml"/>
     <xi:include href="a3_developer_resources.xml"/>
     <!--xi:include href="a4_loadtest.xml"/-->
     <xi:include href="a5_pmode_mapping.xml"/>

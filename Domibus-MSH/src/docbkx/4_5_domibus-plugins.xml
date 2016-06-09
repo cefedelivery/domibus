@@ -30,7 +30,7 @@
         file located in
         <computeroutput>$domibus.config.location</computeroutput>
         is the starting point for the backend plugin configuration in the Domibus gateway.
-        Further details on how to write custome plugins can be found: //TODO:link
+        Further details on how to write custom plugins can be found: <xref linkend="a4_backend_integration"/>
     </para>
 
 

@@ -222,7 +222,7 @@
             <varlistentry>
                 <term>MshRole</term>
                 <listitem>
-                    <para>The status of this message. Possible values are:
+                    <para>The role of the MSH for this message transmission. Possible values are:
                         SENDING, RECEIVING;
                     </para>
                 </listitem>
