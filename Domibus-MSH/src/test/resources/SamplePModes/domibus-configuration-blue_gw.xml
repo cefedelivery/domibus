@@ -257,6 +257,7 @@
             </legs>
         </process>
         <process name="tc3Process"
+                 agreement="agreement1110"
                  mep="twoway"
                  binding="pushAndPush"
                  initiatorRole="defaultInitiatorRole"

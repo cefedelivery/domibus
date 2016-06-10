@@ -2,7 +2,7 @@
 <!--
   ~ Copyright 2015 e-CODEX Project
   ~
-  ~ Licensed under the EUPL, Version 1.1 or â€“ as soon they
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
   ~ will be approved by the European Commission - subsequent
   ~ versions of the EUPL (the "Licence");
   ~ You may not use this work except in compliance with the
@@ -26,7 +26,12 @@
     http://www.springframework.org/schema/util
     http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <import resource="domibus-security.xml"/>
+
+    <import resource="file:///${domibus.config.location}/domibus-security.xml"/>
+
+    <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/>
+
+    <bean id="gatewayConfigurationValidator" class="eu.domibus.common.validators.GatewayConfigurationValidator"/>
 
     <!-- Internal configuration provider. Do not change unless you have special requirements (i.e. dynamic
     discovery injection of PModes)-->
@@ -49,6 +54,17 @@
         <prop key="domibus.dispatch.ebms.error.unrecoverable.retry">true</prop>
         <prop key="domibus.smlzone">acc.edelivery.tech.ec.europa.eu</prop>
         <prop key="domibus.backend.jmsInQueue">domibus.backend.jms.inQueue</prop>
+        <prop key="domibus.deployment.clustered">false</prop>
+        <prop key="messageFactoryClass">com.sun.xml.internal.messaging.saaj.soap.ver1_2.SOAPMessageFactory1_2Impl</prop>
+
+        <!-- Enable the proxy settings only if you use a proxy -->
+
+        <prop key="domibus.proxy.enabled">false</prop>
+        <prop key="domibus.proxy.http.host"></prop>
+        <prop key="domibus.proxy.http.port"></prop>
+        <prop key="domibus.proxy.user"></prop>
+        <prop key="domibus.proxy.password"></prop>
+        <prop key="domibus.proxy.nonProxyHosts"></prop>
     </util:properties>
 
     <!-- Mimetypes listed in this map will not be compressed (in outgoing messages)
@@ -59,7 +75,7 @@
     </util:list>
 
     <!-- message sender that is being executed by the senderworker -->
-<!--    <bean id="messageSender" class="eu.domibus.ebms3.sender.MessageSender"/>-->
+    <!--    <bean id="messageSender" class="eu.domibus.ebms3.sender.MessageSender"/>-->
 
     <!-- quartz job for the  -->
     <bean id="retryWorkerJob"
@@ -83,8 +99,6 @@
             </list>
         </property>
     </bean>
-
-
 
 
 </beans>

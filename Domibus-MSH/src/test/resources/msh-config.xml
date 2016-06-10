@@ -83,7 +83,7 @@
                     org.quartz.impl.jdbcjobstore.StdJDBCDelegate
                 </prop>
 
-                <prop key="org.quartz.jobStore.isClustered">false</prop>
+                <prop key="org.quartz.jobStore.isClustered">${domibus.deployment.clustered}</prop>
                 <prop key="org.quartz.jobStore.clusterCheckinInterval">20000
                 </prop>
 
