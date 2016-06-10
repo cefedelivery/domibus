@@ -75,10 +75,7 @@ public class CachingPModeProvider extends PModeProvider {
                     for (final Party responder : process.getResponderParties()) {
                         if (responder.getName().equals(receiverParty)) {
                             if (process.getAgreement() != null && process.getAgreement().getName().equals(agreementName)
-                                    || (agreementName.equals(OPTIONAL_AND_EMPTY) && (process.getAgreement() == null || process.getAgreement().getName().equals("")))
-                                    // Please notice that this is only for backward compatibility and must be removed in 3.2!!!
-                                    || (agreementName.equals(OPTIONAL_AND_EMPTY) && process.getAgreement() != null && process.getAgreement().getValue().equals(""))
-                                    ) {
+                                    || (agreementName.equals(OPTIONAL_AND_EMPTY) && (process.getAgreement() == null || process.getAgreement().getName().equals("")))) {
                                 /**
                                  * The Process is a candidate because either has an Agreement and its name matches the Agreement name found previously
                                  * or it has no Agreement configured and the Agreement name was not indicated in the submitted message.
