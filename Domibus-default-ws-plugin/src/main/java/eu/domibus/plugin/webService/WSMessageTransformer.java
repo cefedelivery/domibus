@@ -185,7 +185,12 @@ public class WSMessageTransformer implements MessageSubmissionTransformer<Messag
                 }
                 Submission.Description description = null;
                 if (partInfo.getDescription() != null) {
-                    description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), partInfo.getDescription().getValue());
+
+                    Locale lang = null;
+                    if(partInfo.getDescription().getLang() != null && !partInfo.getDescription().getLang().isEmpty()) {
+                        lang = new Locale(partInfo.getDescription().getLang());
+                    }
+                    description = new Submission.Description(lang, partInfo.getDescription().getValue());
                 }
                 result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), description, (partInfo.getSchema() != null) ? partInfo.getSchema().getLocation() : null);
             }
