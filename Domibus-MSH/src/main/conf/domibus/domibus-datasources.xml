@@ -40,7 +40,13 @@
 
     <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
     <amq:xaConnectionFactory id="xaJmsConnectionFactory"
-                             brokerURL="tcp://localhost:61616" userName="domibus" password="changeit"/>
+                             brokerURL="tcp://localhost:61616"
+                             userName="domibus" password="changeit">
+        <!-- do not remove this! otherwise the redeliveryPolicy configured in activemq.xml will be ignored -->
+        <amq:redeliveryPolicy>
+            <amq:redeliveryPolicy />
+        </amq:redeliveryPolicy>
+    </amq:xaConnectionFactory>
 
     <!--  lets create an ActiveMQ Broker -->
     <bean id="broker"

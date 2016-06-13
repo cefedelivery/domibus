@@ -43,7 +43,10 @@ import static org.junit.Assert.assertEquals;
 @RunWith(JMockit.class)
 public class UpdateRetryLoggingServiceTest {
 
-    private static final long SYSTEM_DATE_IN_MILLIS_FIRST_OF_JANUARY_2016 = 1451602800000L;
+    private static final int RETRY_TIMEOUT_IN_MINUTES = 10;
+    private static final long SYSTEM_DATE_IN_MILLIS_FIRST_OF_JANUARY_2016 = 1451602800000L; //This is the reference time returned by System.correntTImeMillis() mock
+    private static final long FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016 = SYSTEM_DATE_IN_MILLIS_FIRST_OF_JANUARY_2016 - (60 * 5 * 1000);
+    private static final long ONE_HOUR_BEFORE_FIRST_OF_JANUARY_2016 = SYSTEM_DATE_IN_MILLIS_FIRST_OF_JANUARY_2016 - (60 * 60 * 1000);
 
     @Tested
     private UpdateRetryLoggingService updateRetryLoggingService;
@@ -67,7 +70,7 @@ public class UpdateRetryLoggingServiceTest {
             legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm();
             result = RetryStrategy.CONSTANT.getAlgorithm();
             legConfiguration.getReceptionAwareness().getRetryTimeout();
-            result = 5;
+            result = RETRY_TIMEOUT_IN_MINUTES;
         }};
     }
 
@@ -82,10 +85,10 @@ public class UpdateRetryLoggingServiceTest {
      */
     @Test
     public void testUpdateRetryLogging_maxRetriesReachedNotificationEnabled_ExpectedMessageStatus() throws Exception {
-        new SystemMockFirstOfJanuary2016();
+        new SystemMockFirstOfJanuary2016(); //current timestamp
 
         final String messageId = UUID.randomUUID().toString();
-        final long receivedTime = 1451599200000L;
+        final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
         final MessageLogEntry messageLogEntry = new MessageLogEntry();
         messageLogEntry.setSendAttempts(3);
@@ -122,7 +125,7 @@ public class UpdateRetryLoggingServiceTest {
         new SystemMockFirstOfJanuary2016();
 
         final String messageId = UUID.randomUUID().toString();
-        final long receivedTime = 1451599200000L;
+        final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
         final MessageLogEntry messageLogEntry = new MessageLogEntry();
         messageLogEntry.setSendAttempts(3);
@@ -158,7 +161,7 @@ public class UpdateRetryLoggingServiceTest {
         new SystemMockFirstOfJanuary2016();
 
         final String messageId = UUID.randomUUID().toString();
-        final long received = 1451602800000L;
+        final long received = ONE_HOUR_BEFORE_FIRST_OF_JANUARY_2016; // received one hour ago
 
         final MessageLogEntry messageLogEntry = new MessageLogEntry();
         messageLogEntry.setSendAttempts(0);
@@ -195,7 +198,7 @@ public class UpdateRetryLoggingServiceTest {
         new SystemMockFirstOfJanuary2016();
 
         final String messageId = UUID.randomUUID().toString();
-        final long received = 1451602800000L;
+        final long received = ONE_HOUR_BEFORE_FIRST_OF_JANUARY_2016; // received one hour ago
 
         final MessageLogEntry messageLogEntry = new MessageLogEntry();
         messageLogEntry.setSendAttempts(0);
@@ -232,7 +235,7 @@ public class UpdateRetryLoggingServiceTest {
         new SystemMockFirstOfJanuary2016();
 
         final String messageId = UUID.randomUUID().toString();
-        final long received = 1451599200000L;
+        final long received = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016;
 
 
         final MessageLogEntry messageLogEntry = new MessageLogEntry();

@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<db:configuration xmlns:db="http://domibus.eu/configuration"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  xsi:schemaLocation="http://domibus.eu/configuration file:/C:/development/git-repos/domibus/Domibus-MSH/domibus-configuration.xsd"
-                  party="blue_gw">
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="blue_gw">
     <mpcs>
         <mpc name="defaultMpc"
              qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
@@ -11,8 +8,8 @@
              retention_downloaded="0"
              retention_undownloaded="60"/>
     </mpcs>
-    <businessProcesses/>
+    <businessProcesses>
 
-</businessProcesses>
-        </db:configuration>
+    </businessProcesses>
+</db:configuration>
 

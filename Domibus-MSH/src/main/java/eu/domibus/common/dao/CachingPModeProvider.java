@@ -67,15 +67,22 @@ public class CachingPModeProvider extends PModeProvider {
 
 
     @Override
-    //FIXME: only works for the first leg, as sender=initiator
-    protected String findLegName(final String agreementRef, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
+    protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
         final List<LegConfiguration> candidates = new ArrayList<>();
         for (final Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
             for (final Party party : process.getInitiatorParties()) {
                 if (party.getName().equals(senderParty)) {
                     for (final Party responder : process.getResponderParties()) {
                         if (responder.getName().equals(receiverParty)) {
-                            if (process.getAgreement().getValue().equals(agreementRef)) {
+                            if (process.getAgreement() != null && process.getAgreement().getName().equals(agreementName)
+                                    || (agreementName.equals(OPTIONAL_AND_EMPTY) && (process.getAgreement() == null || process.getAgreement().getName().equals("")))
+                                    // Please notice that this is only for backward compatibility and must be removed in 3.2!!!
+                                    || (agreementName.equals(OPTIONAL_AND_EMPTY) && process.getAgreement() != null && process.getAgreement().getValue().equals(""))
+                                    ) {
+                                /**
+                                 * The Process is a candidate because either has an Agreement and its name matches the Agreement name found previously
+                                 * or it has no Agreement configured and the Agreement name was not indicated in the submitted message.
+                                 **/
                                 candidates.addAll(process.getLegs());
                             }
                         }
@@ -147,17 +154,18 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
-    protected String findAgreementRef(final AgreementRef agreementRef) throws EbMS3Exception {
+    protected String findAgreement(final AgreementRef agreementRef) throws EbMS3Exception {
         if (agreementRef == null || agreementRef.getValue() == null || agreementRef.getValue().isEmpty()) {
-            return ""; //AgreementRef is optional
+            return OPTIONAL_AND_EMPTY; // AgreementRef is optional
         }
 
         for (final Agreement agreement : this.getConfiguration().getBusinessProcesses().getAgreements()) {
-            if (( ( agreementRef.getType() == null && "".equals(agreement.getType()) ) || agreement.getType().equals(agreementRef.getType())) && agreementRef.getValue().equals(agreement.getValue())) {
+            if (((agreementRef.getType() == null && "".equals(agreement.getType())) || agreement.getType().equals(agreementRef.getType()))
+                    && agreementRef.getValue().equals(agreement.getValue())) {
                 return agreement.getName();
             }
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreementRef found", null, null);
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreement found", null, null);
     }
 
     @Override
