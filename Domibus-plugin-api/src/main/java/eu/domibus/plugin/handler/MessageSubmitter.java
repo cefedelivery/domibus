@@ -26,12 +26,12 @@ import eu.domibus.messaging.MessagingProcessingException;
  * Implementations of this interface handle the plugin of messages from the
  * backend to holodeck.
  *
- * @param <T> Data transfer object
+ * @param <Submission> Data transfer object
  *            (http://en.wikipedia.org/wiki/Data_transfer_object) transported between the
  *            backend and Domibus
  * @author Christian Koch, Stefan Mueller
  */
-public interface MessageSubmitter<T> {
+public interface MessageSubmitter<Submission> {
 
     /**
      * Submits a message to Domibus to be processed.
@@ -40,5 +40,5 @@ public interface MessageSubmitter<T> {
      * @return the messageId of the submitted message
 
      */
-    public String submit(T messageData, String submitterName) throws MessagingProcessingException;
+    public String submit(Submission messageData, String submitterName) throws MessagingProcessingException;
 }

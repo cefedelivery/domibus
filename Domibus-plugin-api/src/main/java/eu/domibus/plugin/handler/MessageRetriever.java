@@ -29,13 +29,13 @@ import java.util.List;
  * Implementations of this interface handle the retrieval of messages from
  * Domibus to the backend.
  *
- * @param <T> Data transfer object
+ * @param <Submission> Data transfer object
  *            (http://en.wikipedia.org/wiki/Data_transfer_object) transported between the
  *            backend and Domibus
  * @author Christian Koch, Stefan Mueller
  * @since 3.0
  */
-public interface MessageRetriever<T> {
+public interface MessageRetriever<Submission> {
 
     /**
      * provides the message with the corresponding messageId
@@ -43,7 +43,7 @@ public interface MessageRetriever<T> {
      * @param messageId the messageId of the message to retrieve
      * @return the message object with the given messageId
      */
-    T downloadMessage(String messageId) throws MessageNotFoundException;
+    Submission downloadMessage(String messageId) throws MessageNotFoundException;
 
     /**
      * Returns message status {@link eu.domibus.common.MessageStatus} for message with messageid
