@@ -38,6 +38,12 @@
             </excludes>
             <filtered>false</filtered>
         </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/main/conf/weblogic/scripts</directory>
+            <outputDirectory>/scripts</outputDirectory>
+            <useDefaultExcludes>true</useDefaultExcludes>
+            <filtered>false</filtered>
+        </fileSet>
     </fileSets>
 
     <files>
