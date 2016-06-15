@@ -30,6 +30,7 @@
     <modules>
         <module>Domibus-MSH</module>
         <module>Domibus-plugin-api</module>
+        <module>Domibus-ws-stubs</module>
         <module>Domibus-default-ws-plugin</module>
         <module>Domibus-default-jms-plugin</module>
         <!--<module>Domibus-ActiveMQ-ThroughputLimiter</module>-->
@@ -126,6 +127,11 @@
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-codegen-plugin</artifactId>
+                <version>3.1.6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
