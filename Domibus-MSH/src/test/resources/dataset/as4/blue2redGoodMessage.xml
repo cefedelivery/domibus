@@ -4,22 +4,18 @@
     <soap:Header>
         <ns:Messaging>
             <ns:UserMessage>
-
                 <ns:PartyInfo>
                     <ns:From>
-                        <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered:EUCEG">EUCEG_EC
-                        </ns:PartyId>
+                        <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
                         <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
                     </ns:From>
                     <ns:To>
-                        <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered:EUCEG">EUCEG_000001_AS4
-                        </ns:PartyId>
+                        <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
                         <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
                     </ns:To>
                 </ns:PartyInfo>
                 <ns:CollaborationInfo>
-                    <ns:Service type="e-delivery">http://ec.europa.eu/e-delivery/services/tobacco-ecig-reporting
-                    </ns:Service>
+                    <ns:Service type="e-delivery">http://ec.europa.eu/e-delivery/services/test</ns:Service>
                     <ns:Action>SubmitRequest</ns:Action>
                 </ns:CollaborationInfo>
                 <ns:MessageProperties>
@@ -31,8 +27,8 @@
                     </ns:Property>
                 </ns:MessageProperties>
                 <ns:PayloadInfo>
-                    <ns:PartInfo href="euCegPayload">
-                        <!--<ns:Description xml:lang="en-US">e-sens-sbdh-order</ns:Description> -->
+                    <ns:PartInfo href="testPayload">
+                        <ns:Description xml:lang="en-US">e-sens-sbdh-order</ns:Description>
                         <ns:PartProperties>
                             <ns:Property name="MimeType" type="int">application/xml</ns:Property>
                         </ns:PartProperties>
@@ -43,7 +39,7 @@
     </soap:Header>
     <soap:Body>
         <_1:sendRequest>
-            <payload payloadId="euCegPayload">
+            <payload payloadId="testPayload">
                 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=
             </payload>
         </_1:sendRequest>
