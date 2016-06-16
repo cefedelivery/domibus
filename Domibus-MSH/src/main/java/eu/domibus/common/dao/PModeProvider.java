@@ -66,8 +66,8 @@ public abstract class PModeProvider {
     private static final String EBMS3_TEST_ACTION = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test";
     private static final String EBMS3_TEST_SERVICE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service"; //TODO: move to appropriate classes
 
-    public static final String SCHEMAS_DIR = "/schemas/";
-    public static final String DOMIBUS_PMODE_XSD = "schemas/domibus-pmode.xsd";
+    public static final String SCHEMAS_DIR = "schemas/";
+    public static final String DOMIBUS_PMODE_XSD = "domibus-pmode.xsd";
     public static final String DOMIBUS_CONFIG_LOCATION = "domibus.config.location";
 
     protected static final String OPTIONAL_AND_EMPTY = "OAE";
@@ -95,11 +95,11 @@ public abstract class PModeProvider {
         try {
             Schema schema;
             SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            final InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(DOMIBUS_PMODE_XSD);
+            final InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(SCHEMAS_DIR + DOMIBUS_PMODE_XSD);
             if (xsdStream != null) {
                 schema = sf.newSchema(new StreamSource(xsdStream));
             } else {
-                String filePath = System.getProperty(DOMIBUS_CONFIG_LOCATION) + SCHEMAS_DIR;
+                String filePath = System.getProperty(DOMIBUS_CONFIG_LOCATION) + "/" + SCHEMAS_DIR;
                 schema = sf.newSchema(new File(filePath + DOMIBUS_PMODE_XSD));
             }
             Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
