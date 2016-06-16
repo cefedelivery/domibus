@@ -1,3 +1,5 @@
+Domibus 3.2
+- Improve the plugin registration on WildFly
 Domibus 3.1.1
 - Fixed retry logic issue
 - Set BINARY_DATA type to LONGBLOB on mysql (migration scripts created)
