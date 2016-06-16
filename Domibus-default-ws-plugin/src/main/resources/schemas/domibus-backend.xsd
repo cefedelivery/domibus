@@ -7,6 +7,13 @@
 
     <xs:import namespace="http://www.w3.org/2005/05/xmlmime"/>
 
+    <xs:simpleType name="max255-non-empty-string">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:maxLength value="255"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:element name="FaultDetail">
         <xs:complexType>
             <xs:sequence>
@@ -18,7 +25,7 @@
     <xs:element name="downloadMessageRequest">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="messageID" type="xs:string"/>
+                <xs:element name="messageID" type="tns:max255-non-empty-string"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -41,14 +48,14 @@
     <xs:element name="messageErrorsRequest">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="messageID" type="xs:string"/>
+                <xs:element name="messageID" type="tns:max255-non-empty-string"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
     <xs:element name="messageStatusRequest">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="messageID" type="xs:string"/>
+                <xs:element name="messageID" type="tns:max255-non-empty-string"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -178,7 +185,7 @@
     <xs:element name="getStatusRequest" nillable="true">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="messageID" type="xs:string"/>
+                <xs:element name="messageID" type="tns:max255-non-empty-string"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -186,7 +193,7 @@
     <xs:element name="getErrorsRequest" nillable="true">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="messageID" type="xs:string"/>
+                <xs:element name="messageID" type="tns:max255-non-empty-string"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
