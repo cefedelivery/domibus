@@ -39,8 +39,8 @@
     <xsd:complexType name="MessageInfo">
         <xsd:all>
             <xsd:element name="Timestamp" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
-            <xsd:element name="MessageId" type="tns:non-empty-string" minOccurs="0" maxOccurs="1"/>
-            <xsd:element name="RefToMessageId" type="tns:non-empty-string" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="MessageId" type="tns:max255-non-empty-string" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="RefToMessageId" type="tns:max255-non-empty-string" minOccurs="0" maxOccurs="1"/>
         </xsd:all>
     </xsd:complexType>
 
@@ -53,8 +53,8 @@
 
     <xsd:complexType name="PartyId">
         <xsd:simpleContent>
-            <xsd:extension base="tns:non-empty-string">
-                <xsd:attribute name="type" type="tns:non-empty-string" use="required"/>
+            <xsd:extension base="tns:max255-non-empty-string">
+                <xsd:attribute name="type" type="tns:max255-non-empty-string" use="required"/>
             </xsd:extension>
         </xsd:simpleContent>
     </xsd:complexType>
@@ -62,14 +62,14 @@
     <xsd:complexType name="From">
         <xsd:all>
             <xsd:element name="PartyId" type="tns:PartyId" minOccurs="1" maxOccurs="1"/>
-            <xsd:element name="Role" type="tns:non-empty-string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="Role" type="tns:max255-non-empty-string" minOccurs="1" maxOccurs="1"/>
         </xsd:all>
     </xsd:complexType>
 
     <xsd:complexType name="To">
         <xsd:all>
             <xsd:element name="PartyId" type="tns:PartyId" minOccurs="1" maxOccurs="1"/>
-            <xsd:element name="Role" type="tns:non-empty-string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="Role" type="tns:max255-non-empty-string" minOccurs="1" maxOccurs="1"/>
         </xsd:all>
     </xsd:complexType>
 
@@ -84,17 +84,17 @@
 
     <xsd:complexType name="Service">
         <xsd:simpleContent>
-            <xsd:extension base="tns:non-empty-string">
-                <xsd:attribute name="type" type="tns:non-empty-string" use="required"/>
+            <xsd:extension base="tns:max255-non-empty-string">
+                <xsd:attribute name="type" type="tns:max255-non-empty-string" use="required"/>
             </xsd:extension>
         </xsd:simpleContent>
     </xsd:complexType>
 
     <xsd:complexType name="AgreementRef">
         <xsd:simpleContent>
-            <xsd:extension base="tns:non-empty-string">
-                <xsd:attribute name="type" type="tns:non-empty-string" use="optional"/>
-                <xsd:attribute name="pmode" type="tns:non-empty-string" use="optional"/>
+            <xsd:extension base="tns:max255-non-empty-string">
+                <xsd:attribute name="type" type="tns:max255-non-empty-string" use="optional"/>
+                <xsd:attribute name="pmode" type="tns:max255-non-empty-string" use="optional"/>
             </xsd:extension>
         </xsd:simpleContent>
     </xsd:complexType>
@@ -115,9 +115,9 @@
 
     <xsd:complexType name="Property">
         <xsd:simpleContent>
-            <xsd:extension base="tns:non-empty-string">
-                <xsd:attribute name="name" type="tns:non-empty-string" use="required"/>
-                <xsd:attribute name="type" type="tns:non-empty-string" use="optional"/>
+            <xsd:extension base="tns:max255-non-empty-string">
+                <xsd:attribute name="name" type="tns:max255-non-empty-string" use="required"/>
+                <xsd:attribute name="type" type="tns:max255-non-empty-string" use="optional"/>
             </xsd:extension>
         </xsd:simpleContent>
     </xsd:complexType>
@@ -136,15 +136,16 @@
 
     <xsd:complexType name="Description">
         <xsd:simpleContent>
-            <xsd:extension base="tns:non-empty-string">
+            <xsd:extension base="tns:max255-non-empty-string">
                 <xsd:attribute ref="xml:lang" use="required"/>
             </xsd:extension>
         </xsd:simpleContent>
     </xsd:complexType>
 
-    <xsd:simpleType name="non-empty-string">
+    <xsd:simpleType name="max255-non-empty-string">
         <xsd:restriction base="xsd:string">
             <xsd:minLength value="1"/>
+            <xsd:maxLength value="255"/>
         </xsd:restriction>
     </xsd:simpleType>
 
