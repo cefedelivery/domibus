@@ -47,10 +47,12 @@ import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
@@ -65,7 +67,7 @@ public abstract class PModeProvider {
     private static final String EBMS3_TEST_SERVICE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service"; //TODO: move to appropriate classes
 
     public static final String SCHEMAS_DIR = "/schemas/";
-    public static final String DOMIBUS_PMODE_XSD = "domibus-pmode.xsd";
+    public static final String DOMIBUS_PMODE_XSD = "schemas/domibus-pmode.xsd";
     public static final String DOMIBUS_CONFIG_LOCATION = "domibus.config.location";
 
     protected static final String OPTIONAL_AND_EMPTY = "OAE";
@@ -91,9 +93,15 @@ public abstract class PModeProvider {
     @Transactional(propagation = Propagation.REQUIRED)
     public void updatePModes(final byte[] bytes) throws XmlProcessingException {
         try {
+            Schema schema;
             SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            String filePath = System.getProperty(DOMIBUS_CONFIG_LOCATION) + SCHEMAS_DIR;
-            Schema schema = sf.newSchema(new File(filePath + DOMIBUS_PMODE_XSD));
+            final InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(DOMIBUS_PMODE_XSD);
+            if (xsdStream != null) {
+                schema = sf.newSchema(new StreamSource(xsdStream));
+            } else {
+                String filePath = System.getProperty(DOMIBUS_CONFIG_LOCATION) + SCHEMAS_DIR;
+                schema = sf.newSchema(new File(filePath + DOMIBUS_PMODE_XSD));
+            }
             Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
             unmarshaller.setSchema(schema);
             unmarshaller.setEventHandler(new XmlValidationEventHandler());
