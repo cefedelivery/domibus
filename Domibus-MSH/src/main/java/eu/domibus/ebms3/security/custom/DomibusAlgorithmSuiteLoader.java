@@ -39,6 +39,7 @@ import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
  * This class implements a custom {@link org.apache.cxf.ws.security.policy.custom.AlgorithmSuiteLoader} in order to enable the domibus gateway to support:
  * <ol>
@@ -91,7 +92,7 @@ public class DomibusAlgorithmSuiteLoader implements AlgorithmSuiteLoader {
     public static class DomibusAlgorithmSuite extends AlgorithmSuite {
 
         static {
-            algorithmSuiteTypes.put(
+            ALGORITHM_SUITE_TYPES.put(
                     BASIC_128_GCM_SHA_256,
                     new AlgorithmSuiteType(
                             BASIC_128_GCM_SHA_256,
@@ -105,20 +106,20 @@ public class DomibusAlgorithmSuiteLoader implements AlgorithmSuiteLoader {
                     )
             );
 
-            algorithmSuiteTypes.put(
+            ALGORITHM_SUITE_TYPES.put(
                     BASIC_128_GCM_SHA_256_MGF_SHA_256,
                     new AlgorithmSuiteType(
                             BASIC_128_GCM_SHA_256_MGF_SHA_256,
                             SPConstants.SHA256,
                             DomibusAlgorithmSuiteLoader.AES128_GCM_ALGORITHM,
                             SPConstants.KW_AES128,
-                            WSS4JConstants.KEYTRANSPORT_RSAOEP_XENC11,
+                            WSS4JConstants.KEYTRANSPORT_RSAOAEP_XENC11,
                             SPConstants.P_SHA1_L128,
                             SPConstants.P_SHA1_L128,
                             128, 128, 128, 256, 1024, 4096
                     )
             );
-            algorithmSuiteTypes.get(BASIC_128_GCM_SHA_256_MGF_SHA_256).setMGFAlgo(WSConstants.MGF_SHA256);
+            ALGORITHM_SUITE_TYPES.get(BASIC_128_GCM_SHA_256_MGF_SHA_256).setMGFAlgo(WSConstants.MGF_SHA256);
         }
 
         DomibusAlgorithmSuite(final SPConstants.SPVersion version, final Policy nestedPolicy) {
@@ -139,10 +140,10 @@ public class DomibusAlgorithmSuiteLoader implements AlgorithmSuiteLoader {
             }
 
             if (BASIC_128_GCM_SHA_256.equals(assertionName)) {
-                setAlgorithmSuiteType(algorithmSuiteTypes.get(BASIC_128_GCM_SHA_256));
+                setAlgorithmSuiteType(ALGORITHM_SUITE_TYPES.get(BASIC_128_GCM_SHA_256));
                 getAlgorithmSuiteType().setNamespace(assertionNamespace);
             } else if (BASIC_128_GCM_SHA_256_MGF_SHA_256.equals(assertionName)) {
-                setAlgorithmSuiteType(algorithmSuiteTypes.get(BASIC_128_GCM_SHA_256_MGF_SHA_256));
+                setAlgorithmSuiteType(ALGORITHM_SUITE_TYPES.get(BASIC_128_GCM_SHA_256_MGF_SHA_256));
                 getAlgorithmSuiteType().setNamespace(assertionNamespace);
             }
         }

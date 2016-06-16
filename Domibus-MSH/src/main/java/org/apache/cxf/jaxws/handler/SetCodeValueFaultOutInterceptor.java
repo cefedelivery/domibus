@@ -1,7 +1,5 @@
 package org.apache.cxf.jaxws.handler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.interceptor.Interceptor;
@@ -22,9 +20,6 @@ import java.util.Iterator;
  * which is non-standard and causes an exception.
  */
 public class SetCodeValueFaultOutInterceptor extends AbstractSoapInterceptor {
-
-    private static final Log LOG = LogFactory.getLog(SetCodeValueFaultOutInterceptor.class);
-
     public SetCodeValueFaultOutInterceptor() {
         super(Phase.PRE_PROTOCOL_FRONTEND);
         getBefore().add(SOAPHandlerFaultOutInterceptor.class.getName());
