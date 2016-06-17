@@ -198,7 +198,7 @@
                                     <include>**/IT*.java</include>
                                     <include>**/*ITCase.java</include>
                                     <include>**/Test*.java</include>
-                                    <include>**/*Test.jav</include>
+                                    <include>**/*Test.java</include>
                                     <include>**/*TestCase.java</include>
                                 </includes>
                             </configuration>
