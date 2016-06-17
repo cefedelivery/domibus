@@ -24,82 +24,59 @@
     <build>
         <plugins>
 
-            <!--  <plugin>
-                   <groupId>org.jvnet.jax-ws-commons</groupId>
-                   <artifactId>jaxws-maven-plugin</artifactId>
-                   <version>2.3</version>
-                   <executions>
-                       <execution>
-                           <id>generate-stubs-backend</id>
-                           <phase>initialize</phase>
-                           <goals>
-                               <goal>wsimport</goal>
-                           </goals>
-                           <configuration>
-                               &lt;!&ndash;<packageName>eu.domibus.ws.stubs.backend</packageName>&ndash;&gt;
-                               <sourceDestDir>src/main/java</sourceDestDir>
-                               <wsdlDirectory>src/main/resources</wsdlDirectory>
-                               <wsdlFiles>
-                                   <wsdlFile>${project.basedir}/src/main/resources/BackendService_1_1.wsdl</wsdlFile>
-                               </wsdlFiles>
-                              &lt;!&ndash; <wsdlLocation>http://localhost:8080/test</wsdlLocation>&ndash;&gt;
-                               <wsdlLocation>${project.basedir}/src/main/resources</wsdlLocation>
-                              &lt;!&ndash; <bindingFiles>
-                                   <bindingFile>${project.basedir}/src/main/resources/backend_binding.xml</bindingFile>
-                               </bindingFiles>&ndash;&gt;
-                           </configuration>
-                       </execution>
-                   </executions>
-                   <dependencies>
-                       <dependency>
-                           <groupId>javax</groupId>
-                           <artifactId>javaee-api</artifactId>
-                           <version>6.0</version>
-                       </dependency>
-                     <dependency>
-                       <groupId>com.sun.xml.ws</groupId>
-                       <artifactId>jaxws-rt</artifactId>
-                       <version>2.2.8</version>
-                   </dependency>
-                       <dependency>
-                           <groupId>org.jvnet.jaxb2_commons</groupId>
-                           <artifactId>jaxb2-basics</artifactId>
-                           <version>0.6.4</version>
-                       </dependency>
+            <plugin>
+                <groupId>org.jvnet.jax-ws-commons</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <id>generate-stubs-backend</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                        <configuration>
+                            <keep>true</keep>
+                            <extension>true</extension>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>javax</groupId>
+                        <artifactId>javaee-api</artifactId>
+                        <version>7.0</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
 
-                   </dependencies>
-               </plugin>
-   -->
+
             <!--  <plugin>
-                   <groupId>org.apache.cxf</groupId>
-                   <artifactId>cxf-codegen-plugin</artifactId>
-                   <executions>
-                       <execution>
-                           <id>generate-sources</id>
-                           <phase>generate-sources</phase>
-                           <configuration>
-                               <wsdlRoot>${project.basedir}/src/main/resources</wsdlRoot>
-                               <sourceRoot>src/main/java</sourceRoot>
-                               <wsdlOptions>
-                                   <wsdlOption>
-                                       <wsdl>${project.basedir}/src/main/resources/BackendService_1_1.wsdl</wsdl>
-                                       <extraargs>
-                                           &lt;!&ndash;<extraarg>-p backend</extraarg>&ndash;&gt;
-                                           <extraarg>-verbose</extraarg>
-                                       </extraargs>
-                                   </wsdlOption>
-                                   &lt;!&ndash;<bindingFiles>
-                                       <bindingFile>${project.basedir}/src/main/resources/backend_binding.xml</bindingFile>
-                                   </bindingFiles>&ndash;&gt;
-                               </wsdlOptions>
-                           </configuration>
-                           <goals>
-                               <goal>wsdl2java</goal>
-                           </goals>
-                       </execution>
-                   </executions>
-               </plugin>
-   -->
+                     <groupId>org.apache.cxf</groupId>
+                     <artifactId>cxf-codegen-plugin</artifactId>
+                     <executions>
+                         <execution>
+                             <id>generate-sources</id>
+                             <phase>generate-sources</phase>
+                             <configuration>
+                                 <sourceRoot>${basedir}/target/generated/src/main/java</sourceRoot>
+                                 <wsdlOptions>
+                                     <wsdlOption>
+                                         <wsdl>${basedir}/src/wsdl/BackendService_1_1.wsdl</wsdl>
+                                         <bindingFiles>
+                                             <bindingFile>
+                                                 ${basedir}/src/jaxws/backend_binding.xml
+                                              </bindingFile>
+                                         </bindingFiles>
+                                     </wsdlOption>
+                                 </wsdlOptions>
+                             </configuration>
+                             <goals>
+                                 <goal>wsdl2java</goal>
+                             </goals>
+                         </execution>
+                     </executions>
+                 </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -132,6 +109,7 @@
             </plugin>
 
         </plugins>
+
     </build>
 
 </project>

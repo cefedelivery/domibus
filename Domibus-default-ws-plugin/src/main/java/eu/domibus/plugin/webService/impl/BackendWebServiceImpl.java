@@ -19,17 +19,19 @@
 
 package eu.domibus.plugin.webService.impl;
 
+import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.ErrorResultImpl;
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartProperties;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Property;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
-import eu.domibus.plugin.webService.MessageErrorsRequest;
-import eu.domibus.plugin.webService.MessageStatusRequest;
 import eu.domibus.plugin.webService.generated.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -44,13 +46,11 @@ import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
-/**
- * @author The spanish e-CODEX Team, Christian Koch, Stefan Mueller
- */
+
 @SuppressWarnings("ValidExternallyBoundObject")
 @javax.jws.WebService(
         serviceName = "BackendService_1_1",
@@ -82,17 +82,24 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         BackendWebServiceImpl.LOG.debug("Transforming incoming message");
 
         final PayloadType bodyload = sendRequest.getBodyload();
-        for (final PartInfo partInfo : ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo()) {
+
+        List<eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
+
+        for (Iterator<eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartInfo> i = partInfoList.iterator(); i.hasNext(); ) {
+
+            PartInfo extendedPartInfo = new PartInfo(i.next());
+            i.remove();
+
             boolean foundPayload = false;
-            final String href = partInfo.getHref();
+            final String href = extendedPartInfo.getHref();
             BackendWebServiceImpl.LOG.debug("Looking for payload: " + href);
             for (final PayloadType payload : sendRequest.getPayload()) {
                 BackendWebServiceImpl.LOG.debug("comparing with payload id: " + payload.getPayloadId());
                 if (payload.getPayloadId().equals(href)) {
 
-                    this.copyPartProperties(payload, partInfo);
-                    partInfo.setInBody(false);
-                    partInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(payload.getValue(), null)));
+                    this.copyPartProperties(payload, extendedPartInfo);
+                    extendedPartInfo.setInBody(false);
+                    extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(payload.getValue(), null)));
                     foundPayload = true;
                     break;
                 }
@@ -100,24 +107,31 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             if (!foundPayload) {
                 if (bodyload == null) {
                     // in this case the payload referenced in the partInfo was neither an external payload nor a bodyload
-                    throw new SendMessageFault("no Payload or Bodyload found for PartInfo with href " + partInfo.getHref());
+                    FaultDetail detail = new FaultDetail();
+                    detail.setCode("TODO");
+                    detail.setMessage(extendedPartInfo.getHref());
+                    throw new SendMessageFault("No Payload or Bodyload found for PartInfo with href: ", detail);
                 }
 
                 //can only be in bodyload, href MAY be null!
                 if (href == null && bodyload.getPayloadId() == null ||
                         href != null && href.equals(bodyload.getPayloadId())) {
 
-                    this.copyPartProperties(bodyload, partInfo);
-                    partInfo.setInBody(true);
-                    partInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(bodyload.getValue(), "text/xml")));
+                    this.copyPartProperties(bodyload, extendedPartInfo);
+                    extendedPartInfo.setInBody(true);
+                    extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(bodyload.getValue(), "text/xml")));
                 } else {
-                    throw new SendMessageFault("no payload found for PartInfo with href " + partInfo.getHref());
+                    FaultDetail detail = new FaultDetail();
+                    detail.setCode("TODO");
+                    detail.setMessage(extendedPartInfo.getHref());
+                    throw new SendMessageFault("No payload found for PartInfo with href: ", detail);
                 }
             }
 
 
         }
-        ebMSHeaderInfo.getUserMessage().getMessageInfo().setTimestamp(new Date());
+
+        ebMSHeaderInfo.getUserMessage().getMessageInfo().setTimestamp(new XMLGregorianCalendarImpl());
         final String messageId;
         try {
             messageId = this.submit(ebMSHeaderInfo);
@@ -223,11 +237,12 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     }
 
     @Override
-    public Collection<ErrorResultImpl> getMessageErrors(final MessageErrorsRequest messageErrorsRequest) {
-        Collection<? extends ErrorResult> res = this.messageRetriever.getErrorsForMessage(messageErrorsRequest.getMessageID());
-        Collection<ErrorResultImpl> result = new ArrayList<>();
+    public ErrorResultImplArray getMessageErrors(final GetErrorsRequest messageErrorsRequest) {
+        List<? extends ErrorResult> res = this.messageRetriever.getErrorsForMessage(messageErrorsRequest.getMessageID());
+        ErrorResultImplArray result = new ErrorResultImplArray();
         for (ErrorResult errorResult : res) {
-            result.add(new ErrorResultImpl(errorResult));
+            ErrorResultImpl errorResultImpl = new ErrorResultImpl();
+            result.getItem().add(new ErrorResultImpl(errorResult));
         }
         return result;
 
