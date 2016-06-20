@@ -31,17 +31,13 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
-import eu.domibus.common.model.MessageType;
+import eu.domibus.common.model.*;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.MessageLogEntry;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.MessageInfo;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.CompressionService;
@@ -76,7 +72,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     private final ObjectFactory objectFactory = new ObjectFactory();
 
-    private final eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory ebMS3Of = new eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory();
+    private final ObjectFactory ebMS3Of = new ObjectFactory();
 
     @Resource(name = "jmsTemplateDispatch")
     private JmsOperations jmsOperations;

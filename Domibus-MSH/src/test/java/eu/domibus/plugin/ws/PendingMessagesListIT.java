@@ -3,7 +3,6 @@ package eu.domibus.plugin.ws;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.AbstractIT;
 import eu.domibus.plugin.webService.generated.BackendInterface;
-import eu.domibus.plugin.webService.generated.ListPendingMessagesFault;
 import eu.domibus.plugin.webService.generated.ListPendingMessagesResponse;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.commons.io.FileUtils;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.jms.ConnectionFactory;
 import java.io.File;
-import java.io.IOException;
 
 /**
  * This JUNIT implements the Test cases List Pending Messages-01 and List Pending Messages-02.
@@ -66,7 +64,7 @@ public class PendingMessagesListIT extends AbstractIT {
     }
 
     @Test
-    public void testListPendingMessagesNOk() throws ListPendingMessagesFault, IOException {
+    public void testListPendingMessagesNOk() throws Exception {
 
         String request = new String("<listPendingMessagesRequest>1</listPendingMessagesRequest>");
         ListPendingMessagesResponse response = backendWebService.listPendingMessages(request);

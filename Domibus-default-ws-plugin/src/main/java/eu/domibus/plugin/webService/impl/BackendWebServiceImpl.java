@@ -20,13 +20,8 @@
 package eu.domibus.plugin.webService.impl;
 
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
-import eu.domibus.common.ErrorResult;
-import eu.domibus.common.ErrorResultImpl;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartProperties;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Property;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.AbstractBackendConnector;
@@ -42,13 +37,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 
 @SuppressWarnings("ValidExternallyBoundObject")
@@ -62,16 +56,21 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     private static final Log LOG = LogFactory.getLog(BackendWebServiceImpl.class);
     private static final eu.domibus.plugin.webService.generated.ObjectFactory WEBSERVICE_OF = new eu.domibus.plugin.webService.generated.ObjectFactory();
-    private static final eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory EBMS_OBJECT_FACTORY = new eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory();
+    private static final ObjectFactory EBMS_OBJECT_FACTORY = new ObjectFactory();
+
+    private static final String MIME_TYPE = "MimeType";
 
     @Autowired
-    private MessageRetrievalTransformer<UserMessage> messageRetrievalTransformer;
+    private StubDtoTransformer messageRetrievalTransformer;
+
     @Autowired
-    private MessageSubmissionTransformer<Messaging> messageSubmissionTransformer;
+    private StubDtoTransformer messageSubmissionTransformer;
+
+    @Autowired
+    private StubDtoTransformer defaultTransformer;
 
     public BackendWebServiceImpl(final String name) {
         super(name);
-
     }
 
     @SuppressWarnings("ValidExternallyBoundObject")
@@ -83,11 +82,14 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
         final PayloadType bodyload = sendRequest.getBodyload();
 
-        List<eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
+        List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
 
-        for (Iterator<eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartInfo> i = partInfoList.iterator(); i.hasNext(); ) {
+        List<ExtendedPartInfo> partInfosToAdd = new ArrayList<>();
 
-            PartInfo extendedPartInfo = new PartInfo(i.next());
+        for (Iterator<PartInfo> i = partInfoList.iterator(); i.hasNext(); ) {
+
+            ExtendedPartInfo extendedPartInfo = new ExtendedPartInfo(i.next());
+            partInfosToAdd.add(extendedPartInfo);
             i.remove();
 
             boolean foundPayload = false;
@@ -96,7 +98,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             for (final PayloadType payload : sendRequest.getPayload()) {
                 BackendWebServiceImpl.LOG.debug("comparing with payload id: " + payload.getPayloadId());
                 if (payload.getPayloadId().equals(href)) {
-
                     this.copyPartProperties(payload, extendedPartInfo);
                     extendedPartInfo.setInBody(false);
                     extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(payload.getValue(), null)));
@@ -107,31 +108,24 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             if (!foundPayload) {
                 if (bodyload == null) {
                     // in this case the payload referenced in the partInfo was neither an external payload nor a bodyload
-                    FaultDetail detail = new FaultDetail();
-                    detail.setCode("TODO");
-                    detail.setMessage(extendedPartInfo.getHref());
-                    throw new SendMessageFault("No Payload or Bodyload found for PartInfo with href: ", detail);
+                    throw new SendMessageFault("No Payload or Bodyload found for PartInfo with href: ", generateDefaultFaultDetail(extendedPartInfo.getHref()));
                 }
-
-                //can only be in bodyload, href MAY be null!
-                if (href == null && bodyload.getPayloadId() == null ||
-                        href != null && href.equals(bodyload.getPayloadId())) {
-
+                // It can only be in body load, href MAY be null!
+                if (href == null && bodyload.getPayloadId() == null || href != null && href.equals(bodyload.getPayloadId())) {
                     this.copyPartProperties(bodyload, extendedPartInfo);
                     extendedPartInfo.setInBody(true);
                     extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(bodyload.getValue(), "text/xml")));
                 } else {
-                    FaultDetail detail = new FaultDetail();
-                    detail.setCode("TODO");
-                    detail.setMessage(extendedPartInfo.getHref());
-                    throw new SendMessageFault("No payload found for PartInfo with href: ", detail);
+                    throw new SendMessageFault("No payload found for PartInfo with href: ", generateDefaultFaultDetail(extendedPartInfo.getHref()));
                 }
             }
-
-
         }
-
-        ebMSHeaderInfo.getUserMessage().getMessageInfo().setTimestamp(new XMLGregorianCalendarImpl());
+        partInfoList.addAll(partInfosToAdd);
+        if (ebMSHeaderInfo.getUserMessage().getMessageInfo() == null) {
+            MessageInfo messageInfo = new MessageInfo();
+            messageInfo.setTimestamp(getXMLTimeStamp());
+            ebMSHeaderInfo.getUserMessage().setMessageInfo(messageInfo);
+        }
         final String messageId;
         try {
             messageId = this.submit(ebMSHeaderInfo);
@@ -145,6 +139,11 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         return response;
     }
 
+    protected XMLGregorianCalendar getXMLTimeStamp() {
+        GregorianCalendar gc = new GregorianCalendar();
+        return new XMLGregorianCalendarImpl(gc);
+    }
+
     private FaultDetail generateFaultDetail(MessagingProcessingException mpEx) {
         FaultDetail fd = WEBSERVICE_OF.createFaultDetail();
         fd.setCode(mpEx.getEbms3ErrorCode().getErrorCodeName());
@@ -152,25 +151,31 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         return fd;
     }
 
+    private FaultDetail generateDefaultFaultDetail(String message) {
+        FaultDetail fd = WEBSERVICE_OF.createFaultDetail();
+        fd.setCode(ErrorCode.EBMS_0001.name()); // TODO Is it Ok the default value ?
+        fd.setMessage(message);
+        return fd;
+    }
 
-    private void copyPartProperties(final PayloadType payload, final PartInfo partInfo) {
+    private void copyPartProperties(final PayloadType payload, final ExtendedPartInfo partInfo) {
         final PartProperties partProperties = new PartProperties();
         Property prop;
 
         // add all partproperties WEBSERVICE_OF the backend message
         if (partInfo.getPartProperties() != null) {
-            for (final Property property : partInfo.getPartProperties().getProperties()) {
+            for (final Property property : partInfo.getPartProperties().getProperty()) {
                 prop = new Property();
 
                 prop.setName(property.getName());
                 prop.setValue(property.getValue());
-                partProperties.getProperties().add(prop);
+                partProperties.getProperty().add(prop);
             }
         }
 
         boolean mimeTypePropFound = false;
-        for (final Property property : partProperties.getProperties()) {
-            if (Property.MIME_TYPE.equals(property.getName())) {
+        for (final Property property : partProperties.getProperty()) {
+            if (MIME_TYPE.equals(property.getName())) {
                 mimeTypePropFound = true;
                 break;
             }
@@ -178,11 +183,10 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         // in case there was no property with name {@value Property.MIME_TYPE} and xmime:contentType attribute was set noinspection SuspiciousMethodCalls
         if (!mimeTypePropFound && payload.getContentType() != null) {
             prop = new Property();
-            prop.setName(Property.MIME_TYPE);
+            prop.setName(MIME_TYPE);
             prop.setValue(payload.getContentType());
-            partProperties.getProperties().add(prop);
+            partProperties.getProperty().add(prop);
         }
-
         partInfo.setPartProperties(partProperties);
     }
 
@@ -201,11 +205,11 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         UserMessage userMessage = null;
         try {
             if (downloadMessageRequest.getMessageID() != null && !downloadMessageRequest.getMessageID().isEmpty()) {
-                userMessage = this.downloadMessage(downloadMessageRequest.getMessageID(), null);
+                userMessage = downloadMessage(downloadMessageRequest.getMessageID(), null);
             }
-        } catch (final MessageNotFoundException e) {
-            BackendWebServiceImpl.LOG.error("Downloading message failed", e);
-            throw new DownloadMessageFault("Downloading message failed, reason: " + e.getMessage());
+        } catch (final MessageNotFoundException mnfEx) {
+            LOG.error("Downloading message failed", mnfEx);
+            throw new DownloadMessageFault("Downloading message failed, reason: ", createDownloadMessageFault(mnfEx));
         }
         final Messaging result = BackendWebServiceImpl.EBMS_OBJECT_FACTORY.createMessaging();
         result.setUserMessage(userMessage);
@@ -213,15 +217,16 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         downloadMessageResponse.value = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponse();
 
         for (final PartInfo partInfo : result.getUserMessage().getPayloadInfo().getPartInfo()) {
+            ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
             final PayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createPayloadType();
             try {
-                payloadType.setValue(IOUtils.toByteArray(partInfo.getPayloadDatahandler().getInputStream()));
-            } catch (final IOException e) {
-                LOG.error("", e);
-                throw new DownloadMessageFault(e.getMessage());
+                payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
+            } catch (final IOException ioEx) {
+                LOG.error("", ioEx);
+                throw new DownloadMessageFault("", createDownloadMessageFault(ioEx));
             }
-            if (partInfo.isInBody()) {
-                partInfo.setHref("#bodyload");
+            if (extPartInfo.isInBody()) {
+                extPartInfo.setHref("#bodyload");
                 payloadType.setPayloadId("#bodyload");
                 downloadMessageResponse.value.setBodyload(payloadType);
                 continue;
@@ -231,21 +236,26 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         }
     }
 
+    private FaultDetail createDownloadMessageFault(Exception ex) {
+        FaultDetail detail = WEBSERVICE_OF.createFaultDetail();
+        detail.setCode(eu.domibus.common.ErrorCode.EBMS_0004.getErrorCodeName());
+        if (ex instanceof MessagingProcessingException) {
+            MessagingProcessingException mpEx = (MessagingProcessingException) ex;
+            detail.setCode(mpEx.getEbms3ErrorCode().getErrorCodeName());
+            detail.setMessage(mpEx.getMessage());
+        } else detail.setMessage(ex.getMessage());
+        return detail;
+    }
+
+
     @Override
-    public MessageStatus getMessageStatus(final MessageStatusRequest messageStatusRequest) {
-        return this.messageRetriever.getMessageStatus(messageStatusRequest.getMessageID());
+    public MessageStatus getMessageStatus(final GetStatusRequest messageStatusRequest) {
+        return defaultTransformer.transformFromMessageStatus(messageRetriever.getMessageStatus(messageStatusRequest.getMessageID()));
     }
 
     @Override
     public ErrorResultImplArray getMessageErrors(final GetErrorsRequest messageErrorsRequest) {
-        List<? extends ErrorResult> res = this.messageRetriever.getErrorsForMessage(messageErrorsRequest.getMessageID());
-        ErrorResultImplArray result = new ErrorResultImplArray();
-        for (ErrorResult errorResult : res) {
-            ErrorResultImpl errorResultImpl = new ErrorResultImpl();
-            result.getItem().add(new ErrorResultImpl(errorResult));
-        }
-        return result;
-
+        return defaultTransformer.transformFromErrorResults(messageRetriever.getErrorsForMessage(messageErrorsRequest.getMessageID()));
     }
 
     @Override

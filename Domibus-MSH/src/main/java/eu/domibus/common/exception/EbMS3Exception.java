@@ -21,8 +21,8 @@ package eu.domibus.common.exception;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Description;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Error;
+import eu.domibus.common.model.Description;
+import eu.domibus.common.model.Error;
 import org.apache.commons.lang.StringUtils;
 
 import javax.xml.ws.WebFault;

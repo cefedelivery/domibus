@@ -19,7 +19,7 @@
 
 package eu.domibus.plugin.routing;
 
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
+import eu.domibus.common.model.UserMessage;
 
 /**
  * @author Christian Walczac

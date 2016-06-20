@@ -20,6 +20,7 @@
 
 package eu.domibus.common.dao;
 
+import eu.domibus.common.model.PartInfo;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -27,7 +28,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 /**
- * DAO to access binary payload data of a {@link eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartInfo} object
+ * DAO to access binary payload data of a {@link PartInfo} object
  *
  * @author Christian Koch, Stefan Mueller
  * @since 3.0

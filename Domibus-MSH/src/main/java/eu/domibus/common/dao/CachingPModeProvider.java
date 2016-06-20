@@ -22,10 +22,10 @@ package eu.domibus.common.dao;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.AgreementRef;
+import eu.domibus.common.model.PartyId;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.AgreementRef;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartyId;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -109,7 +109,7 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
-    protected String findServiceName(final eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Service service) throws EbMS3Exception {
+    protected String findServiceName(final eu.domibus.common.model.Service service) throws EbMS3Exception {
         for (final Service service1 : this.getConfiguration().getBusinessProcesses().getServices()) {
             if ((service1.getServiceType().equals(service.getType()) || (!hasLength(service1.getServiceType()) && !hasLength(service.getType()))))
                 if (service1.getValue().equals(service.getValue())) {

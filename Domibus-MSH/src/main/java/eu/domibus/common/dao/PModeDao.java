@@ -21,9 +21,9 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.AgreementRef;
+import eu.domibus.common.model.PartyId;
 import eu.domibus.common.model.configuration.*;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.AgreementRef;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartyId;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -150,7 +150,7 @@ public class PModeDao extends PModeProvider {
         }
     }
 
-    protected String findServiceName(final eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Service service) throws EbMS3Exception {
+    protected String findServiceName(final eu.domibus.common.model.Service service) throws EbMS3Exception {
         final String type = service.getType();
         final String value = service.getValue();
         final TypedQuery<String> query;

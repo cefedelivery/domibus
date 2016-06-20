@@ -46,13 +46,14 @@
 
     <bean id="jaxbContextMessagingOnly" class="javax.xml.bind.JAXBContext" factory-method="newInstance">
         <constructor-arg type="java.lang.String"
-                         value="eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704"/>
+                         value="eu.domibus.common.model"/>
     </bean>
 
     <!-- JAXB Context for mapping of ebMS3 schema -->
     <bean id="jaxbContextEBMS" class="javax.xml.bind.JAXBContext" factory-method="newInstance">
         <constructor-arg type="java.lang.String"
-                         value="eu.domibus.common.model.org.oasis_open.docs.ebxml_bp.ebbp_signals_2_0:eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704:eu.domibus.common.model.org.w3._2003._05.soap_envelope:eu.domibus.common.model.org.w3._2005._05.xmlmime:eu.domibus.common.model.org.xmlsoap.schemas.soap.envelope"/>
+                         value="eu.domibus.common.model.org.w3._2005._05.xmlmime:eu.domibus.common.model"/>
+        <!--value="eu.domibus.common.model.org.oasis_open.docs.ebxml_bp.ebbp_signals_2_0:eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704:eu.domibus.common.model.org.w3._2003._05.soap_envelope:eu.domibus.common.model.org.w3._2005._05.xmlmime:eu.domibus.common.model.org.xmlsoap.schemas.soap.envelope"/>-->
     </bean>
 
     <!-- JAXB context for mapping of pMode XML configuration -->
@@ -65,6 +66,8 @@
           scope="prototype"/>
 
     <bean id="transformerFactory" class="javax.xml.transform.TransformerFactory" factory-method="newInstance"/>
+
+    <bean id="defaultTransformer" class="eu.domibus.plugin.webService.impl.StubDtoTransformer"/>
 
     <!-- Factory for creating requests and responses-->
     <bean id="messageFactory" class="${messageFactoryClass}"/>

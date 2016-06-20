@@ -113,13 +113,13 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
         from.setRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
         PartyId sender = new PartyId();
         sender.setValue("urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-blue");
-        from.getPartyId().add(sender);
+        from.setPartyId(sender);
         partyInfo.setFrom(from);
         To to = new To();
         to.setRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
         PartyId receiver = new PartyId();
         receiver.setValue("urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-red");
-        to.getPartyId().add(receiver);
+        to.setPartyId(receiver);
         partyInfo.setTo(to);
         userMessage.setPartyInfo(partyInfo);
         PayloadInfo payloadInfo = new PayloadInfo();
@@ -130,7 +130,7 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
         partInfo.setHref(payloadHref);
         if(mimeType != null) {
             PartProperties partProperties = new PartProperties();
-            partProperties.getProperties().add(createProperty(mimeType, "MimeType", STRING_TYPE));
+            partProperties.getProperty().add(createProperty(mimeType, "MimeType", STRING_TYPE));
             partInfo.setPartProperties(partProperties);
         }
         partInfo.setDescription(description);

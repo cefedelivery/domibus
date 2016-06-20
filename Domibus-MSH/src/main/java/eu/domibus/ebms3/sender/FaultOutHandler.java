@@ -21,8 +21,8 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
+import eu.domibus.common.model.Messaging;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.ebms3.common.handler.AbstractFaultHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

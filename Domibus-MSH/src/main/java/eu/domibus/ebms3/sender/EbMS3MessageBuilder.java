@@ -23,9 +23,9 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.AttachmentDAO;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.Error;
+import eu.domibus.common.model.*;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Error;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.ebms3.common.MessageIdGenerator;
 import eu.domibus.ebms3.sender.exception.SendMessageException;
 import org.apache.commons.logging.Log;
@@ -53,9 +53,8 @@ import java.util.Locale;
 @Service
 public class EbMS3MessageBuilder {
 
-
     private static final Log LOG = LogFactory.getLog(EbMS3MessageBuilder.class);
-    private final eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory ebMS3Of = new eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory();
+    private final ObjectFactory ebMS3Of = new ObjectFactory();
     @Autowired
     private MessageFactory messageFactory;
     @Autowired

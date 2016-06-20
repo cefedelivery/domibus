@@ -20,7 +20,7 @@
         <jaxws:package name="eu.domibus.plugin.webService.generated"/>
     </jaxws:bindings>
 
-    <!-- XSD types customization within WSDL -->
+    <!-- XSD types customization within the WSDL -->
     <jaxb:bindings schemaLocation="BackendService_1_1.wsdl"
                    node="wsdl:definitions/wsdl:types/xs:schema[@targetNamespace='http://org.ecodex.backend/1_1/']">
         <jaxb:schemaBindings>
@@ -36,25 +36,26 @@
     </jaxb:bindings>
 
     <jaxb:bindings schemaLocation="BackendService_1_1.wsdl"
-                   node="wsdl:definitions/wsdl:types/xs:schema[@targetNamespace='http://www.w3.org/2003/05/soap-envelope']">
-        <jaxb:schemaBindings>
-            <jaxb:package name="eu.domibus.common.model.org.w3._2003._05.soap_envelope"/>
-        </jaxb:schemaBindings>
-    </jaxb:bindings>
-
-    <jaxb:bindings schemaLocation="BackendService_1_1.wsdl"
                    node="wsdl:definitions/wsdl:types/xs:schema[@targetNamespace='http://www.w3.org/2005/05/xmlmime']">
         <jaxb:schemaBindings>
             <jaxb:package name="eu.domibus.common.model.org.w3._2005._05.xmlmime"/>
         </jaxb:schemaBindings>
     </jaxb:bindings>
 
-    <jaxb:bindings schemaLocation="BackendService_1_1.wsdl"
-                   node="wsdl:definitions/wsdl:types/xs:schema[@targetNamespace='http://schemas.xmlsoap.org/soap/envelope/']">
-        <jaxb:schemaBindings>
-            <jaxb:package name="eu.domibus.common.model.org.xmlsoap.schemas.soap.envelope"/>
-        </jaxb:schemaBindings>
-    </jaxb:bindings>
+    <!-- Not used anymore in the new WSDL
+     <jaxb:bindings schemaLocation="BackendService_1_1.wsdl"
+                       node="wsdl:definitions/wsdl:types/xs:schema[@targetNamespace='http://schemas.xmlsoap.org/soap/envelope/']">
+            <jaxb:schemaBindings>
+                <jaxb:package name="eu.domibus.common.model.org.xmlsoap.schemas.soap.envelope"/>
+            </jaxb:schemaBindings>
+        </jaxb:bindings>-->
 
+    <!-- Not used anymore in the new WSDL
+    <jaxb:bindings schemaLocation="BackendService_1_1.wsdl"
+                   node="wsdl:definitions/wsdl:types/xs:schema[@targetNamespace='http://www.w3.org/2003/05/soap-envelope']">
+        <jaxb:schemaBindings>
+            <jaxb:package name="eu.domibus.common.model.org.w3._2003._05.soap_envelope"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings> -->
 
 </jaxws:bindings>

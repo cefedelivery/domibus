@@ -718,12 +718,6 @@
         </dependency>
         <dependency>
             <groupId>eu.domibus</groupId>
-            <artifactId>domibus-ws-stubs</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>eu.domibus</groupId>
             <artifactId>domibus-default-ws-plugin</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

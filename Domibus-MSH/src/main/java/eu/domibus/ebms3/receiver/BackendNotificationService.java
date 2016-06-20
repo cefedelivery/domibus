@@ -22,7 +22,7 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
+import eu.domibus.common.model.UserMessage;
 import eu.domibus.messaging.NotifyMessageCreator;
 import eu.domibus.messaging.ReceiveFailedMessageCreator;
 import eu.domibus.plugin.NotificationListener;

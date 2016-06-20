@@ -23,10 +23,10 @@ import eu.domibus.common.DecompressionDataSource;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.PartInfo;
+import eu.domibus.common.model.Property;
+import eu.domibus.common.model.UserMessage;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartInfo;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Property;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ public class CompressionService {
     /**
      * This method is responsible for compression of payloads in a ebMS3 AS4 comformant way in case of {@link eu.domibus.common.MSHRole#SENDING}
      *
-     * @param ebmsMessage         the sending {@link eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage} with all payloads
+     * @param ebmsMessage         the sending {@link UserMessage} with all payloads
      * @param legConfigForMessage legconfiguration for this message
      * @return {@code true} if compression was applied properly and {@code false} if compression was not enabled in the corresponding pmode
      * @throws EbMS3Exception if an problem occurs during the compression or the mimetype was missing
@@ -106,7 +106,7 @@ public class CompressionService {
     /**
      * This method handles decompression of payloads for messages in case of {@link eu.domibus.common.MSHRole#RECEIVING}
      *
-     * @param ebmsMessage the receving {@link eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage} with all payloads
+     * @param ebmsMessage the receving {@link UserMessage} with all payloads
      * @return {@code true} if everything was decompressed without problems, {@code false} in case of disabled compression via pmode
      * @throws EbMS3Exception if an problem occurs during the de compression or the mimetype of a compressed payload was missing
      */
