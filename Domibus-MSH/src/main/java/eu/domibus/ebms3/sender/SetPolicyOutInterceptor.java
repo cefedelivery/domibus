@@ -19,14 +19,12 @@
 
 package eu.domibus.ebms3.sender;
 
-//import eu.domibus.ebms3.pmode.model.PMode;
-
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.PModeProvider;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.ebms3.common.PolicyFactory;
+import eu.domibus.ebms3.common.model.PolicyFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.attachment.AttachmentImpl;

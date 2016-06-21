@@ -108,7 +108,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             if (!foundPayload) {
                 if (bodyload == null) {
                     // in this case the payload referenced in the partInfo was neither an external payload nor a bodyload
-                    throw new SendMessageFault("No Payload or Bodyload found for PartInfo with href: ", generateDefaultFaultDetail(extendedPartInfo.getHref()));
+                    throw new SendMessageFault("No Payload or Bodyload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
                 }
                 // It can only be in body load, href MAY be null!
                 if (href == null && bodyload.getPayloadId() == null || href != null && href.equals(bodyload.getPayloadId())) {
@@ -116,7 +116,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                     extendedPartInfo.setInBody(true);
                     extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(bodyload.getValue(), "text/xml")));
                 } else {
-                    throw new SendMessageFault("No payload found for PartInfo with href: ", generateDefaultFaultDetail(extendedPartInfo.getHref()));
+                    throw new SendMessageFault("No payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
                 }
             }
         }
@@ -153,7 +153,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     private FaultDetail generateDefaultFaultDetail(String message) {
         FaultDetail fd = WEBSERVICE_OF.createFaultDetail();
-        fd.setCode(ErrorCode.EBMS_0001.name()); // TODO Is it Ok the default value ?
+        fd.setCode(ErrorCode.EBMS_0004.name());
         fd.setMessage(message);
         return fd;
     }
@@ -209,7 +209,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             }
         } catch (final MessageNotFoundException mnfEx) {
             LOG.error("Downloading message failed", mnfEx);
-            throw new DownloadMessageFault("Downloading message failed, reason: ", createDownloadMessageFault(mnfEx));
+            throw new DownloadMessageFault("Downloading message failed", createDownloadMessageFault(mnfEx));
         }
         final Messaging result = BackendWebServiceImpl.EBMS_OBJECT_FACTORY.createMessaging();
         result.setUserMessage(userMessage);

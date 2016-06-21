@@ -21,9 +21,9 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
-import eu.domibus.common.model.Messaging;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.handler.AbstractFaultHandler;
+import eu.domibus.ebms3.common.model.Messaging;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;

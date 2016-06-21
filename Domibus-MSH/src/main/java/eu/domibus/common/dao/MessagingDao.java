@@ -21,10 +21,10 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.model.Messaging;
-import eu.domibus.common.model.PartInfo;
-import eu.domibus.common.model.SignalMessage;
-import eu.domibus.common.model.UserMessage;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.PartInfo;
+import eu.domibus.ebms3.common.model.SignalMessage;
+import eu.domibus.ebms3.common.model.UserMessage;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;

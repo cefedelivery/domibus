@@ -19,8 +19,8 @@
 
 package eu.domibus.plugin.routing;
 
-import eu.domibus.common.model.PartyId;
-import eu.domibus.common.model.UserMessage;
+import eu.domibus.ebms3.common.model.PartyId;
+import eu.domibus.ebms3.common.model.UserMessage;
 
 /**
  * From criteria for user messages

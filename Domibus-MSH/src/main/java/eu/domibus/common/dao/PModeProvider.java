@@ -22,11 +22,11 @@ package eu.domibus.common.dao;
 import eu.domibus.clustering.Command;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.AgreementRef;
-import eu.domibus.common.model.PartyId;
-import eu.domibus.common.model.UserMessage;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.validators.XmlValidationEventHandler;
+import eu.domibus.ebms3.common.model.AgreementRef;
+import eu.domibus.ebms3.common.model.PartyId;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -171,7 +171,7 @@ public abstract class PModeProvider {
 
     protected abstract String findActionName(String action) throws EbMS3Exception;
 
-    protected abstract String findServiceName(eu.domibus.common.model.Service service) throws EbMS3Exception;
+    protected abstract String findServiceName(eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception;
 
     protected abstract String findPartyName(Collection<PartyId> partyId) throws EbMS3Exception;
 

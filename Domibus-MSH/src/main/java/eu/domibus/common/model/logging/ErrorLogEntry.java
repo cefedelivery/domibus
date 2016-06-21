@@ -23,9 +23,9 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.AbstractBaseEntity;
-import eu.domibus.common.model.Error;
-import eu.domibus.common.model.Messaging;
+import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import eu.domibus.ebms3.common.model.Error;
+import eu.domibus.ebms3.common.model.Messaging;
 
 import javax.persistence.*;
 import java.util.Date;

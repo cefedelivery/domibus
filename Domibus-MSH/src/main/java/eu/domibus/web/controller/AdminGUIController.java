@@ -26,7 +26,7 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.PModeProvider;
-import eu.domibus.common.model.MessageType;
+import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.*;
 import org.apache.commons.logging.Log;

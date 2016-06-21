@@ -25,7 +25,7 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.model.logging.MessageLogEntry;
-import eu.domibus.ebms3.common.DispatchMessageCreator;
+import eu.domibus.ebms3.common.model.DispatchMessageCreator;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.messaging.MessageConstants;
 import org.apache.commons.logging.Log;

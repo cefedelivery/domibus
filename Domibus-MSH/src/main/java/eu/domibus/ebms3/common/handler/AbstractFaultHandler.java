@@ -19,8 +19,8 @@
 
 package eu.domibus.ebms3.common.handler;
 
-import eu.domibus.common.model.Messaging;
-import eu.domibus.common.model.ObjectFactory;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.ObjectFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;

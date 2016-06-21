@@ -1,3 +1,4 @@
+Domibus 3.2 RC-1:   Replace the war and the WS plugin. This release has changes for the DB tables; please run the migration script.
 Domibus 3.1.1:      Replace the war. This release updated the type of one column for the MySQL db. Please run the migration script.
 -------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.1.0:      Re-install the domibus-security.xml and re-configure the properties according with the installed Truststore and Keystore.

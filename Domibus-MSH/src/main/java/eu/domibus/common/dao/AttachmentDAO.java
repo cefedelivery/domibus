@@ -20,7 +20,7 @@
 
 package eu.domibus.common.dao;
 
-import eu.domibus.common.model.PartInfo;
+import eu.domibus.ebms3.common.model.PartInfo;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;

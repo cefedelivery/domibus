@@ -7,6 +7,8 @@ import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.webService.generated.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
@@ -16,6 +18,9 @@ import java.util.*;
  * @author Federico Martini
  */
 public final class StubDtoTransformer implements MessageSubmissionTransformer<Messaging>, MessageRetrievalTransformer<UserMessage> {
+
+
+    private static final Log LOGGER = LogFactory.getLog(StubDtoTransformer.class);
 
     @Override
     public UserMessage transformFromSubmission(final Submission submission, final UserMessage target) {
@@ -44,7 +49,6 @@ public final class StubDtoTransformer implements MessageSubmissionTransformer<Me
     private void generateMessageProperties(final Submission submission, final UserMessage result) {
 
         final MessageProperties messageProperties = new MessageProperties();
-
 
         for (Submission.TypedProperty propertyEntry : submission.getMessageProperties()) {
             final Property prop = new Property();
@@ -77,9 +81,12 @@ public final class StubDtoTransformer implements MessageSubmissionTransformer<Me
     private void generateMessageInfo(final Submission submission, final UserMessage result) {
         final MessageInfo messageInfo = new MessageInfo();
         messageInfo.setMessageId(submission.getMessageId());
+        LOGGER.debug("MESSAGE ID " + messageInfo.getMessageId());
               /*  (submission.getMessageId() != null && submission.getMessageId().trim().length() > 0)
                         ? submission.getMessageId() : this.messageIdGenerator.generateMessageId());*/
-        messageInfo.setTimestamp(new XMLGregorianCalendarImpl());
+        GregorianCalendar gc = new GregorianCalendar();
+        messageInfo.setTimestamp(new XMLGregorianCalendarImpl(gc));
+        LOGGER.debug("TIMESTAMP " + messageInfo.getTimestamp());
         messageInfo.setRefToMessageId(submission.getRefToMessageId());
         result.setMessageInfo(messageInfo);
     }

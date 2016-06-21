@@ -23,10 +23,9 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.AttachmentDAO;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.Error;
-import eu.domibus.common.model.*;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.ebms3.common.MessageIdGenerator;
+import eu.domibus.ebms3.common.model.Error;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.exception.SendMessageException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,7 +59,7 @@ public class EbMS3MessageBuilder {
     @Autowired
     private AttachmentDAO attachmentDAO;
     @Autowired
-    @Qualifier(value = "jaxbContextMessagingOnly")
+    @Qualifier(value = "jaxbContextEBMS")
     private JAXBContext jaxbContext;
     @Autowired
     private DocumentBuilderFactory documentBuilderFactory;
