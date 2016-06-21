@@ -107,7 +107,7 @@ public class SendMessageWithPayloadProfileIT extends AbstractSendMessageIT {
         try {
             backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         } catch (SendMessageFault re) {
-            String message = "No payload found for PartInfo with href: ";
+            String message = "No payload found for PartInfo with href: payload000";
             String faultMsg = payloadHref + "000";
             Assert.assertEquals(message, re.getMessage());
             Assert.assertEquals(faultMsg, re.getFaultInfo().getMessage());

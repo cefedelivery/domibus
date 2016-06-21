@@ -154,9 +154,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             if (refToMessageId != null && refToMessageId.length() > 255) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "RefToMessageId value is too long (over 255 characters)", refToMessageId, null);
             }
-            //check if the messageId is unique. This should only fail if the ID is set from the outside
+            // check if the messageId is unique. This should only fail if the ID is set from the outside
             if (!MessageStatus.NOT_FOUND.equals(messageLogDao.getMessageStatus(messageId))) {
-                throw new DuplicateMessageException("Message with id:" + messageId + "already exists. Message identifiers must be unique");
+                throw new DuplicateMessageException("Message with id [" + messageId + "] already exists. Message identifiers must be unique");
             }
 
             final String pmodeKey;
