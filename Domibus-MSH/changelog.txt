@@ -2,6 +2,7 @@ Domibus 3.2-RC1
 - Added XSD validation of the PMODE while it is uploaded by the user
 - Added XSD validation for the operations exposed by the backend WS
 - Improved the plugin registration on WildFly
+- Enabled MTOM for backend WS.
 Domibus 3.1.1
 - Fixed retry logic issue
 - Set BINARY_DATA type to LONGBLOB on mysql (migration scripts created)
