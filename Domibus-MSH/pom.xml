@@ -35,12 +35,9 @@
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <hibernate.version>4.1.9.Final</hibernate.version>
-        <cxf.version>3.1.6</cxf.version>
         <log4j.version>1.2.17</log4j.version>
         <spring.security.version>3.2.0.RELEASE</spring.security.version>
         <jstl.version>1.2</jstl.version>
-        <atomikos.version>3.9.3</atomikos.version>
         <webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
         <domibus.name>domibus</domibus.name>
     </properties>
@@ -718,7 +715,7 @@
         </dependency>
         <dependency>
             <groupId>eu.domibus</groupId>
-            <artifactId>domibus-default-ws-plugin</artifactId>
+            <artifactId>domibus-ws-stubs</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

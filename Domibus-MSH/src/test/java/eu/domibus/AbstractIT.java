@@ -35,7 +35,6 @@ import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 
 /**
  * Created by feriaad on 02/02/2016.
@@ -45,6 +44,8 @@ import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 @DirtiesContext
 @Rollback
 public abstract class AbstractIT {
+
+    public static final String MESSAGE_ID = "messageId";
 
     protected static final String WS_NOT_QUEUE = "domibus.notification.webservice";
 

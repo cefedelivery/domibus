@@ -31,7 +31,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 /**
  * Created by draguio on 18/02/2016.
  */
-public abstract class AbstractSendMessageIT extends AbstractIT{
+public abstract class AbstractSendMessageIT extends AbstractIT {
 
     public static final String STRING_TYPE = "string";
     public static final String INT_TYPE = "int";
@@ -66,7 +66,7 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
                         .withBody(body)));
     }
 
-    protected void verifySendMessageAck(SendResponse response) throws InterruptedException, SQLException{
+    protected void verifySendMessageAck(SendResponse response) throws InterruptedException, SQLException {
         // Required in order to let time to the message to be consumed
         TimeUnit.SECONDS.sleep(4);
 
@@ -128,7 +128,7 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
         description.setValue("e-sens-sbdh-order");
         description.setLang("en-US");
         partInfo.setHref(payloadHref);
-        if(mimeType != null) {
+        if (mimeType != null) {
             PartProperties partProperties = new PartProperties();
             partProperties.getProperty().add(createProperty(mimeType, "MimeType", STRING_TYPE));
             partInfo.setPartProperties(partProperties);

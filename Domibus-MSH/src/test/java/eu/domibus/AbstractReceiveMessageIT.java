@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,7 +26,7 @@ public abstract class AbstractReceiveMessageIT extends AbstractIT {
     @Autowired
     ApplicationContext applicationContext;
 
-    protected SOAPMessage createSOAPMessage(String dataset) throws SOAPException, IOException {
+    protected SoapMessage createSOAPMessage(String dataset) throws SOAPException, IOException {
         InputStream is = new FileInputStream(new File("target/test-classes/dataset/as4/" + dataset).getAbsolutePath());
 
         SoapMessage sm = new SoapMessage(new MessageImpl());
@@ -40,7 +39,7 @@ public abstract class AbstractReceiveMessageIT extends AbstractIT {
         System.out.println("Passed setPolicyIn!!!!!!!!!!!!!!!!!!!!!!!!");
         System.out.println(sm.getId());
 
-        return sm.getContent(SOAPMessage.class);
+        return sm.getContent(SoapMessage.class);
     }
 
 }

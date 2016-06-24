@@ -106,7 +106,7 @@ public class UploadPModeIT extends AbstractIT {
 
     /**
      * Tests that a subset of the PMODE file content (given a fixed pModeKey) is correctly stored in the DB.
-     *
+     * <p/>
      * PMODE Key  = Initiator Party: Responder Party: Service name: Action name: Agreement: Test case name
      */
     @Test

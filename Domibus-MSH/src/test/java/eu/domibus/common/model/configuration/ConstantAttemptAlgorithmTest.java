@@ -55,7 +55,7 @@ public class ConstantAttemptAlgorithmTest {
     }
 
     @Test
-    public void compute_MaxAttemptsIntegerMAXVALUE_ValidResult()  {
+    public void compute_MaxAttemptsIntegerMAXVALUE_ValidResult() {
         new SystemMockFirstOfJanuary2016();
 
 
@@ -65,7 +65,7 @@ public class ConstantAttemptAlgorithmTest {
     }
 
     @Test
-    public void compute_TimeInMinutesTill_31_12_3999_ExpectedResult()  {
+    public void compute_TimeInMinutesTill_31_12_3999_ExpectedResult() {
         new SystemMockFirstOfJanuary2016();
 
         Date nextAttempt = retryStrategy.getAlgorithm().compute(new Date(SYSTEM_DATE_IN_MILLIS_FIRST_OF_JANUARY_2016), 1, MINUTES_FROM_01_01_2016_TO_31_12_3999);

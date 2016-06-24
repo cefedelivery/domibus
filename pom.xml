@@ -36,6 +36,9 @@
         <!--<module>Domibus-ActiveMQ-ThroughputLimiter</module>-->
     </modules>
     <properties>
+        <cxf.version>3.1.6</cxf.version>
+        <atomikos.version>3.9.3</atomikos.version>
+        <hibernate.version>4.1.9.Final</hibernate.version>
         <spring.version>4.2.2.RELEASE</spring.version>
         <activemq.version>5.12.1</activemq.version>
         <sonar.binaries>target/classes</sonar.binaries>

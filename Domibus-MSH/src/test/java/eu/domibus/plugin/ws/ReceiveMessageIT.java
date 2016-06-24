@@ -81,7 +81,7 @@ public class ReceiveMessageIT extends AbstractIT {
      * The test hooks after the SetPolicyInInterceptor, therefore PMODE_KEY_CONTEXT_PROPERTY needs to be set manually
      *
      * @throws SOAPException, IOException, SQLException, ParserConfigurationException, SAXException
-     *                        <p>
+     *                        <p/>
      *                        ref: Receive Message-01
      */
     @Test

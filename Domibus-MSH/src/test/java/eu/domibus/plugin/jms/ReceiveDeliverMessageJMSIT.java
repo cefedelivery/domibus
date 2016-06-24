@@ -42,7 +42,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 
-import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 import static eu.domibus.plugin.jms.JMSMessageConstants.PAYLOAD_DESCRIPTION_FORMAT;
 
 
