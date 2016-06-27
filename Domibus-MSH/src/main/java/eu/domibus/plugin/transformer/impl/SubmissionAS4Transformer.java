@@ -187,7 +187,7 @@ public class SubmissionAS4Transformer {
                 if(partInfo.getDescription() != null){
                     description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), partInfo.getDescription().getValue());
                 }
-                result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), description, /*(partInfo.getSchema() != null) ? partInfo.getSchema().getLocation() :*/ null);
+                result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), description, (partInfo.getSchema() != null ? partInfo.getSchema().getLocation() : null));
             }
         }
         result.setFromRole(messaging.getPartyInfo().getFrom().getRole());

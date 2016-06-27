@@ -19,12 +19,12 @@
 
 package eu.domibus.ebms3.common.model;
 
+import eu.domibus.common.model.Schema;
 import eu.domibus.configuration.Storage;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -54,7 +54,7 @@ import java.util.zip.GZIPOutputStream;
  * @since 3.0
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "PartInfo", propOrder = {"description", "partProperties"})
+@XmlType(name = "PartInfo", propOrder = {"schema", "description", "partProperties"})
 @NamedQueries(@NamedQuery(name = "PartInfo.loadBinaryData", query = "select pi.binaryData from PartInfo pi where pi.entityId=:ENTITY_ID"))
 @Entity
 @Table(name = "TB_PART_INFO")
@@ -62,12 +62,18 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
 
     private static final Log LOG = LogFactory.getLog(PartInfo.class);
 
+    @XmlElement(name = "Schema")
+    @Embedded
+    protected Schema schema;
+
     @XmlElement(name = "Description")
     @Embedded
     protected Description description;
+
     @XmlElement(name = "PartProperties")
     @Embedded
     protected PartProperties partProperties;
+
     @XmlAttribute(name = "href")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -80,11 +86,9 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
     @Basic(fetch = FetchType.EAGER)
     protected byte[] binaryData;
 
-
     @XmlTransient
     @Column(name = "FILENAME")
     protected String fileName;
-
 
     @XmlTransient
     @Column(name = "IN_BODY")
@@ -193,6 +197,43 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
         return false;
     }
 
+
+    /**
+     * This element occurs zero or more times. It refers to schema(s) that define the instance document
+     * identified in the parent PartInfo element. If the item being referenced has schema(s) of some kind
+     * that describe it (e.g. an XML Schema, DTD and/or a database schema), then the Schema
+     * element SHOULD be present as a child of the PartInfo element. It provides a means of identifying
+     * the schema and its version defining the payload object identified by the parent PartInfo element.
+     * This metadata MAY be used to validate the Payload Part to which it refers, but the MSH is NOT
+     * REQUIRED to do so. The Schema element contains the following attributes:
+     * · (a) namespace - the OPTIONAL target namespace of the schema
+     * · (b) location – the REQUIRED URI of the schema
+     * · (c) version – an OPTIONAL version identifier of the schema.
+     *
+     * @return possible object is {@link Schema }
+     */
+    public Schema getSchema() {
+        return this.schema;
+    }
+
+    /**
+     * This element occurs zero or more times. It refers to schema(s) that define the instance document
+     * identified in the parent PartInfo element. If the item being referenced has schema(s) of some kind
+     * that describe it (e.g. an XML Schema, DTD and/or a database schema), then the Schema
+     * element SHOULD be present as a child of the PartInfo element. It provides a means of identifying
+     * the schema and its version defining the payload object identified by the parent PartInfo element.
+     * This metadata MAY be used to validate the Payload Part to which it refers, but the MSH is NOT
+     * REQUIRED to do so. The Schema element contains the following attributes:
+     * · (a) namespace - the OPTIONAL target namespace of the schema
+     * · (b) location – the REQUIRED URI of the schema
+     * · (c) version – an OPTIONAL version identifier of the schema.
+     *
+     * @param value allowed object is {@link Schema }
+     */
+    public void setSchema(final Schema value) {
+        this.schema = value;
+    }
+
     /**
      * Gets the value of the description property.
      *
@@ -281,14 +322,17 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
 
     @Override
     public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-        builder.append("Description", description);
-        builder.append("HRef", href);
-        builder.append("PartProperties", partProperties.getProperties());
-        builder.append("InBody", inBody);
-        builder.append("PayloadDatahandler", payloadDatahandler);
-        builder.append("BinaryData", binaryData);
-        return builder.toString();
+        return new ToStringBuilder(this)
+                .append("schema", schema)
+                .append("description", description)
+                .append("partProperties", partProperties)
+                .append("href", href)
+                .append("binaryData", binaryData)
+                .append("fileName", fileName)
+                .append("inBody", inBody)
+                .append("payloadDatahandler", payloadDatahandler)
+                .append("mime", mime)
+                .toString();
     }
 
     @Override
@@ -301,12 +345,10 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
 
         return new EqualsBuilder()
                 .appendSuper(super.equals(o))
-                .append(inBody, partInfo.inBody)
+                .append(schema, partInfo.schema)
                 .append(description, partInfo.description)
-                .append(href, partInfo.href)
-                .append(fileName, partInfo.fileName)
-                .append(mime, partInfo.mime)
                 .append(partProperties, partInfo.partProperties)
+                .append(href, partInfo.href)
                 .isEquals();
     }
 
@@ -314,12 +356,10 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .appendSuper(super.hashCode())
+                .append(schema)
                 .append(description)
-                .append(href)
-                .append(fileName)
-                .append(inBody)
-                .append(mime)
                 .append(partProperties)
+                .append(href)
                 .toHashCode();
     }
 

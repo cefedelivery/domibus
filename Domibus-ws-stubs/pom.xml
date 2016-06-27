@@ -12,15 +12,6 @@
 
     <artifactId>domibus-ws-stubs</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>eu.domibus</groupId>
-            <artifactId>domibus-plugin-api</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
-
     <build>
         <plugins>
 
@@ -36,7 +27,6 @@
                             <goal>wsimport</goal>
                         </goals>
                         <configuration>
-                            <keep>true</keep>
                             <extension>true</extension>
                         </configuration>
                     </execution>
@@ -50,62 +40,14 @@
                 </dependencies>
             </plugin>
 
-
-            <!--  <plugin>
-                     <groupId>org.apache.cxf</groupId>
-                     <artifactId>cxf-codegen-plugin</artifactId>
-                     <executions>
-                         <execution>
-                             <id>generate-sources</id>
-                             <phase>generate-sources</phase>
-                             <configuration>
-                                 <sourceRoot>${basedir}/target/generated/src/main/java</sourceRoot>
-                                 <wsdlOptions>
-                                     <wsdlOption>
-                                         <wsdl>${basedir}/src/wsdl/BackendService_1_1.wsdl</wsdl>
-                                         <bindingFiles>
-                                             <bindingFile>
-                                                 ${basedir}/src/jaxws/backend_binding.xml
-                                              </bindingFile>
-                                         </bindingFiles>
-                                     </wsdlOption>
-                                 </wsdlOptions>
-                             </configuration>
-                             <goals>
-                                 <goal>wsdl2java</goal>
-                             </goals>
-                         </execution>
-                     </executions>
-                 </plugin>-->
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.6</version>
-                <configuration>
-                    <archive>
-                        <index>false</index>
-                        <manifest>
-                            <addClasspath>false</addClasspath>
-                        </manifest>
-                        <manifestEntries>
-                            <Extension-Name>${project.artifactId}</Extension-Name>
-                            <Specification-Version>3.1</Specification-Version>
-                            <Implementation-Version>3.1</Implementation-Version>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
             </plugin>
 
         </plugins>
