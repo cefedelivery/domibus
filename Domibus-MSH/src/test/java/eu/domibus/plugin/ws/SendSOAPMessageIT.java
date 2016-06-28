@@ -5,6 +5,7 @@ import eu.domibus.AbstractIT;
 import eu.domibus.common.validators.XmlValidationEventHandler;
 import org.junit.Assert;
 import org.junit.Rule;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
@@ -32,7 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
  * validating a submitted message request with the same schema and then mocking the response of the WS.
  *
  */
-public class SendSOAPMessageTODO extends AbstractIT {
+public class SendSOAPMessageIT extends AbstractIT {
 
     protected static final URL WSDL_LOCATION;
 
@@ -47,12 +48,12 @@ public class SendSOAPMessageTODO extends AbstractIT {
     private MessageFactory messageFactory; // defined in the spring-context.xml
 
     static {
-        URL url = SendSOAPMessageTODO.class.getResource("BackendService_1_1.wsdl");
+        URL url = SendSOAPMessageIT.class.getResource("BackendService_1_1.wsdl");
         if (url == null) {
-            url = SendSOAPMessageTODO.class.getClassLoader().getResource("schemas/BackendService_1_1_old.wsdl");
+            url = SendSOAPMessageIT.class.getClassLoader().getResource("schemas/BackendService_1_1.wsdl");
         }
         if (url == null) {
-            Logger.getLogger(SendSOAPMessageTODO.class.getName()).log(java.util.logging.Level.INFO, "Can not initialize the default wsdl from {0}", "BackendService_1_1_old.wsdl");
+            Logger.getLogger(SendSOAPMessageIT.class.getName()).log(java.util.logging.Level.INFO, "Can not initialize the default wsdl from {0}", "BackendService_1_1.wsdl");
         }
         WSDL_LOCATION = url;
     }
@@ -93,7 +94,7 @@ public class SendSOAPMessageTODO extends AbstractIT {
         }
     }*/
 
-    //@Test
+    @Test
     public void testSendValidMessage() throws Exception {
 
         String body = getAS4Response("blue2redMessageResponse.xml");
@@ -116,7 +117,7 @@ public class SendSOAPMessageTODO extends AbstractIT {
         Assert.assertTrue(soapResponse.getSOAPBody().getTextContent().contains("6f6aeccb-04af-404b-b224-0249acf7b562@domibus.eu"));
     }
 
-    //@Test
+    @Test
     public void testSendInvalidMessage() throws Exception {
 
         try {

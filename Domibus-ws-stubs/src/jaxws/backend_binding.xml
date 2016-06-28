@@ -42,6 +42,14 @@
         </jaxb:schemaBindings>
     </jaxb:bindings>
 
+    <!-- Used for the test SendSOAPMessageIT -->
+    <jaxb:bindings schemaLocation="BackendService_1_1.wsdl"
+                   node="wsdl:definitions/wsdl:types/xs:schema[@targetNamespace='http://www.w3.org/2003/05/soap-envelope']">
+        <jaxb:schemaBindings>
+            <jaxb:package name="eu.domibus.common.model.org.w3._2003._05.soap_envelope"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+
     <!-- Not used anymore in the new WSDL
      <jaxb:bindings schemaLocation="BackendService_1_1.wsdl"
                        node="wsdl:definitions/wsdl:types/xs:schema[@targetNamespace='http://schemas.xmlsoap.org/soap/envelope/']">
@@ -50,12 +58,5 @@
             </jaxb:schemaBindings>
         </jaxb:bindings>-->
 
-    <!-- Not used anymore in the new WSDL
-    <jaxb:bindings schemaLocation="BackendService_1_1.wsdl"
-                   node="wsdl:definitions/wsdl:types/xs:schema[@targetNamespace='http://www.w3.org/2003/05/soap-envelope']">
-        <jaxb:schemaBindings>
-            <jaxb:package name="eu.domibus.common.model.org.w3._2003._05.soap_envelope"/>
-        </jaxb:schemaBindings>
-    </jaxb:bindings> -->
 
 </jaxws:bindings>
