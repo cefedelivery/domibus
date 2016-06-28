@@ -51,7 +51,7 @@ public class ConstantAttemptAlgorithmTest {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(nextAttempt);
-        Assert.assertEquals("transition to year does not work correctly", 2016, calendar.getWeekYear());
+        Assert.assertEquals("transition to year does not work correctly", 2016, calendar.get(Calendar.YEAR));
     }
 
     @Test
