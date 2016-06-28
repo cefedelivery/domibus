@@ -40,13 +40,11 @@ public class PropertyResolver {
 
         startVarDelimit = "$" + startVarDelimit;
         String value = propertyName;
-        int startIndex = 0;
-        int endIndex = 0;
 
-        startIndex = value.indexOf(startVarDelimit);
+        int startIndex = value.indexOf(startVarDelimit);
 
         while (startIndex != -1) {
-            endIndex = value.indexOf(endVarDelimit, startIndex);
+            int endIndex = value.indexOf(endVarDelimit, startIndex);
 
             if (endIndex == -1) {
                 // Restore value in case the variable reference is not valid
