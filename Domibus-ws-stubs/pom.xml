@@ -18,7 +18,7 @@
             <plugin>
                 <groupId>org.jvnet.jax-ws-commons</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
-                <version>2.3</version>
+                <version>2.1</version>
                 <executions>
                     <execution>
                         <id>generate-stubs-backend</id>
@@ -31,13 +31,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>javax</groupId>
-                        <artifactId>javaee-api</artifactId>
-                        <version>7.0</version>
-                    </dependency>
-                </dependencies>
             </plugin>
 
             <plugin>
