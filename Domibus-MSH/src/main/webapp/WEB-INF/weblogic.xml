@@ -39,16 +39,4 @@
         </prefer-application-packages>
         <allow-all-roles>true</allow-all-roles>
     </container-descriptor>
-    <!--<library-ref>-->
-        <!--<library-name>domibus-default-jms-plugin</library-name>-->
-        <!--<specification-version>3.1</specification-version>-->
-        <!--<implementation-version>3.1</implementation-version>-->
-        <!--<exact-match>false</exact-match>-->
-    <!--</library-ref>-->
-    <library-ref>
-        <library-name>domibus-default-ws-plugin</library-name>
-        <specification-version>3.1</specification-version>
-        <implementation-version>3.1</implementation-version>
-        <exact-match>false</exact-match>
-    </library-ref>
 </weblogic-web-app>
