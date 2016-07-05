@@ -431,11 +431,6 @@
                                                 </file>
                                                 <todir>conf/domibus</todir>
                                             </file>
-                                            <file>
-                                                <file>${project.basedir}/src/main/conf/context.xml
-                                                </file>
-                                                <todir>conf</todir>
-                                            </file>
                                         </files>
                                     </configuration>
                                 </configuration>
