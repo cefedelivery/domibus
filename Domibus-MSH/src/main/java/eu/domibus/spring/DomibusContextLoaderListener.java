@@ -1,8 +1,11 @@
-package eu.domibus;
+package eu.domibus.spring;
 
-import eu.domibus.classloader.PluginClassLoader;
+import eu.domibus.plugin.classloader.PluginClassLoader;
 import eu.domibus.property.PropertyResolver;
+import eu.domibus.property.PropertyResolverBuilder;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.web.context.ContextLoaderListener;
 
 import javax.servlet.ServletContext;
@@ -15,6 +18,8 @@ import java.net.MalformedURLException;
  */
 public class DomibusContextLoaderListener extends ContextLoaderListener {
 
+    private static final Log LOG = LogFactory.getLog(DomibusContextLoaderListener.class);
+
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
@@ -22,7 +27,8 @@ public class DomibusContextLoaderListener extends ContextLoaderListener {
         if (StringUtils.isEmpty(pluginsLocation)) {
             throw new RuntimeException("pluginsLocation context param should not be empty");
         }
-        String resolvedPluginsLocation = PropertyResolver.create().getResolvedProperty(pluginsLocation);
+        String resolvedPluginsLocation = PropertyResolverBuilder.create().build().getResolvedProperty(pluginsLocation);
+        LOG.info("Resolved plugins location [" + pluginsLocation + "] to [" + resolvedPluginsLocation + "]");
 
         ClassLoader pluginClassLoader = null;
         try {

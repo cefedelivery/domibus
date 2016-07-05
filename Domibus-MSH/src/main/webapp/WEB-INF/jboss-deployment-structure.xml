@@ -11,6 +11,12 @@
             <module name="javax.xml.ws.api"/>
             <module name="javax.jms.api"/>
             <module name="com.sun.xml.messaging.saaj"/>
+
+            <system export="true">
+                <paths>
+                    <path name="com/sun/org/apache/xerces/internal/jaxp/datatype"/>
+                </paths>
+            </system>
         </dependencies>
 
         <resources>

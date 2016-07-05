@@ -64,7 +64,7 @@
     </filter-mapping>
 
     <listener>
-        <listener-class>eu.domibus.DomibusContextLoaderListener</listener-class>
+        <listener-class>eu.domibus.spring.DomibusContextLoaderListener</listener-class>
     </listener>
 
     <listener>
