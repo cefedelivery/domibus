@@ -5,6 +5,7 @@ INSERT INTO "TB_ACTION" VALUES (2,'tc2Action','TC2Leg1',1);
 INSERT INTO "TB_ACTION" VALUES (3,'tc1Action','TC1Leg1',1);
 INSERT INTO "TB_ACTION" VALUES (4,'tc3ActionLeg1','TC3Leg1',1);
 INSERT INTO "TB_ACTION" VALUES (5,'tc3ActionLeg2','TC3Leg2',1);
+INSERT INTO "TB_ACTION" VALUES (6,'pingAction','http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test',1);
 
 INSERT INTO "TB_AGREEMENT" VALUES (1,'agreement1110','','EDELIVERY-1110',1);
 
@@ -80,18 +81,21 @@ INSERT INTO "TB_SERVICE" VALUES (1,'testService1','tc1','bdx:noprocess',1);
 INSERT INTO "TB_SERVICE" VALUES (2,'testService2','tc2','bdx:noprocess',1);
 INSERT INTO "TB_SERVICE" VALUES (3,'noSecService','','InternalTesting',1);
 INSERT INTO "TB_SERVICE" VALUES (4,'testService3','tc3','bdx:noprocess',1);
+INSERT INTO "TB_SERVICE" VALUES (5,'pingService','','http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service',1);
 
 INSERT INTO "TB_LEG" VALUES (1,0x01,'pushTestcase3Leg2tc3ActionLeg2',5,1,1,NULL,1,1,2,1,4,1);
 INSERT INTO "TB_LEG" VALUES (2,0x01,'pushTestcase3Leg1tc3ActionLeg1',4,1,1,NULL,1,1,2,1,4,1);
 INSERT INTO "TB_LEG" VALUES (3,0x01,'pushTestcase2tc2Action',2,1,1,NULL,1,1,2,1,2,1);
 INSERT INTO "TB_LEG" VALUES (4,0x00,'pushNoSecnoSecAction',1,1,1,NULL,1,1,2,1,3,1);
 INSERT INTO "TB_LEG" VALUES (5,0x01,'pushTestcase1tc1Action',3,1,1,NULL,1,1,2,1,1,1);
+INSERT INTO "TB_LEG" VALUES (6,0x01,'ping',6,1,1,NULL,1,1,2,1,5,1);
 
 INSERT INTO "TB_JOIN_PROCESS_LEG" VALUES (2,1);
 INSERT INTO "TB_JOIN_PROCESS_LEG" VALUES (2,2);
 INSERT INTO "TB_JOIN_PROCESS_LEG" VALUES (1,3);
 INSERT INTO "TB_JOIN_PROCESS_LEG" VALUES (3,4);
 INSERT INTO "TB_JOIN_PROCESS_LEG" VALUES (4,5);
+INSERT INTO "TB_JOIN_PROCESS_LEG" VALUES (4,6);
 
 
 
