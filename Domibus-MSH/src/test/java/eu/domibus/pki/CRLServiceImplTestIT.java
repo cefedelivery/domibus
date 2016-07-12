@@ -37,7 +37,7 @@ public class CRLServiceImplTestIT {
     @EnableCaching
     static class Config {
 
-        // Simulating your caching configuration
+        // Simulating the caching configuration
         @Bean
         SimpleCacheManager cacheManager() {
             SimpleCacheManager cacheManager = new SimpleCacheManager();
@@ -89,7 +89,7 @@ public class CRLServiceImplTestIT {
     CRLService crlService;
 
     @Autowired
-    CacheManager manager;
+    CacheManager cacheManager;
 
     @Test
     public void testIsCertificateRevoked() throws Exception {
@@ -128,5 +128,12 @@ public class CRLServiceImplTestIT {
         //returns true when the certificate revoked status is cached
         certificateRevoked = crlService.isCertificateRevoked(serialNumber, crlUrl);
         assertTrue(certificateRevoked);
+    }
+
+    @Test
+    public void testChangeCacheExpirationTime() throws Exception {
+        Object crlByCert = cacheManager.getCache("crlByCert").getNativeCache();
+        System.out.println(crlByCert);
+
     }
 }

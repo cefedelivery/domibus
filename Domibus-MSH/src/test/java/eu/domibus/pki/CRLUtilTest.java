@@ -4,6 +4,19 @@ import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthState;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -105,5 +118,39 @@ public class CRLUtilTest {
         assertNotNull(crlDistributionPoints);
         assertEquals(crlUrlList, crlDistributionPoints);
         System.out.println(crlDistributionPoints);
+    }
+
+    @Test
+    public void testDownloadCRLViaProxy() throws Exception {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        try {
+//            HttpHost target = new HttpHost("httpbin.org", 443, "https");
+            HttpHost proxy = new HttpHost("158.169.9.13", 8012, "http");
+            HttpContext httpContext = new BasicHttpContext();
+            AuthState authState = new AuthState();
+            authState.update(new BasicScheme(), new UsernamePasswordCredentials("baciuco", "Trutica2"));
+            httpContext.setAttribute(HttpClientContext.PROXY_AUTH_STATE, authState);
+
+            RequestConfig config = RequestConfig.custom()
+                    .setProxy(proxy)
+                    .build();
+            HttpGet request = new HttpGet("http://onsitecrl.verisign.com/offlineca/NATIONALITANDTELECOMAGENCYPEPPOLRootCA.crl");
+            request.setConfig(config);
+
+            System.out.println("Executing request " + request.getRequestLine() + " via " + proxy);
+
+//            CloseableHttpResponse response = httpclient.execute(target, request);
+            CloseableHttpResponse response = httpclient.execute(request, httpContext);
+            try {
+                System.out.println("----------------------------------------");
+                System.out.println(response.getStatusLine());
+                System.out.println(EntityUtils.toString(response.getEntity()));
+            } finally {
+                response.close();
+            }
+        } finally {
+            httpclient.close();
+        }
+
     }
 }

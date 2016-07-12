@@ -33,7 +33,7 @@ public class CRLServiceImpl implements CRLService {
         return false;
     }
 
-    protected boolean isCertificateRevoked(X509Certificate cert, String crlDistributionPointURL) {
+    protected boolean isCertificateRevoked(X509Certificate cert, String crlDistributionPointURL)  {
         X509CRL crl = crlUtil.downloadCRL(crlDistributionPointURL);
         if (crl.isRevoked(cert)) {
             LOG.debug("The pki is revoked by CRL: " + crlDistributionPointURL);
@@ -44,7 +44,7 @@ public class CRLServiceImpl implements CRLService {
 
     @Cacheable(value = "crlByUrl", key = "#serialString.concat('-').concat(#crlDistributionPointURL)")
     @Override
-    public boolean isCertificateRevoked(String serialString, String crlDistributionPointURL) {
+    public boolean isCertificateRevoked(String serialString, String crlDistributionPointURL) throws DomibusCRLException {
         X509CRL crl = crlUtil.downloadCRL(crlDistributionPointURL);
 
         if (crl.getRevokedCertificates() == null) {
@@ -61,13 +61,5 @@ public class CRLServiceImpl implements CRLService {
         }
         return false;
     }
-
-
-
-
-
-
-
-
 
 }
