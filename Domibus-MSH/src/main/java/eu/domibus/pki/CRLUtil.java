@@ -1,5 +1,6 @@
 package eu.domibus.pki;
 
+import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERIA5String;
@@ -49,13 +50,7 @@ public class CRLUtil {
         } catch (final Exception exc) {
             throw new DomibusCRLException("Can not download CRL from pki distribution point: " + crlURL, exc);
         } finally {
-            if (crlStream != null) {
-                try {
-                    crlStream.close();
-                } catch (IOException e) {
-                    throw new DomibusCRLException("Can not download CRL from pki distribution point: " + crlURL, e);
-                }
-            }
+            IOUtils.closeQuietly(crlStream);
         }
     }
 

@@ -1,17 +1,22 @@
 package eu.domibus.pki;
 
+import eu.domibus.util.HttpUtil;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthState;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.BasicHttpContext;
@@ -25,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.net.URL;
 import java.security.Security;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -120,7 +126,7 @@ public class CRLUtilTest {
         System.out.println(crlDistributionPoints);
     }
 
-    @Test
+//    @Test
     public void testDownloadCRLViaProxy() throws Exception {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
@@ -128,7 +134,7 @@ public class CRLUtilTest {
             HttpHost proxy = new HttpHost("158.169.9.13", 8012, "http");
             HttpContext httpContext = new BasicHttpContext();
             AuthState authState = new AuthState();
-            authState.update(new BasicScheme(), new UsernamePasswordCredentials("baciuco", "Trutica2"));
+            authState.update(new BasicScheme(), new UsernamePasswordCredentials("baciuco", "password"));
             httpContext.setAttribute(HttpClientContext.PROXY_AUTH_STATE, authState);
 
             RequestConfig config = RequestConfig.custom()

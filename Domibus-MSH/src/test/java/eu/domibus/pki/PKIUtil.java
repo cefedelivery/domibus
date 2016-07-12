@@ -48,9 +48,7 @@ public class PKIUtil {
         return keyGen.generateKeyPair();
     }
 
-    public X509Certificate createCertificate(BigInteger serial, List<String> crlUrls) throws SignatureException, NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException, CertificateEncodingException {
-        Date startDate = new Date();
-        Date expiryDate = new Date();
+    public X509Certificate createCertificate(BigInteger serial, Date startDate, Date expiryDate, List<String> crlUrls) throws SignatureException, NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException, CertificateEncodingException {
         KeyPair key = generateKeyPair();
 
         X509V3CertificateGenerator generator = new X509V3CertificateGenerator();
@@ -70,6 +68,10 @@ public class PKIUtil {
 
         X509Certificate x509Certificate = generator.generate(key.getPrivate(), "BC");
         return x509Certificate;
+    }
+
+    public X509Certificate createCertificate(BigInteger serial, List<String> crlUrls) throws SignatureException, NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException, CertificateEncodingException {
+        return createCertificate(serial, new Date(), new Date(), crlUrls);
     }
 
     public DistributionPoint[] createDistributionPoints(List<String> crlUrls) {
