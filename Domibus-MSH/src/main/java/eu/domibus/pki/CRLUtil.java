@@ -1,11 +1,13 @@
 package eu.domibus.pki;
 
+import eu.domibus.util.HttpUtil;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -26,9 +28,11 @@ import java.util.List;
 @Service
 public class CRLUtil {
 
+    @Autowired
+    HttpUtil httpUtil;
+
     /**
      * Downloads CRL from the given URL. Supports loading the crl using http, https, ftp based,  classpath
-     *
      */
     public X509CRL downloadCRL(String crlURL) throws DomibusCRLException {
         URL url;
@@ -44,7 +48,7 @@ public class CRLUtil {
 
         InputStream crlStream = null;
         try {
-            crlStream = url.openStream();
+            crlStream = getCrlInputStream(url);
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             return (X509CRL) cf.generateCRL(crlStream);
         } catch (final Exception exc) {
@@ -56,6 +60,16 @@ public class CRLUtil {
 
     public BigInteger parseCertificateSerial(String serial) {
         return new BigInteger(serial.trim().replaceAll("\\s", ""), 16);
+    }
+
+    protected InputStream getCrlInputStream(URL crlURL) throws IOException {
+        InputStream result = null;
+        if (crlURL.toString().startsWith("http://") || crlURL.toString().startsWith("https://")) {
+            result = httpUtil.downloadURL(crlURL.toString());
+        } else {
+            result = crlURL.openStream();
+        }
+        return result;
     }
 
     public URL getCrlURL(String crlURL) throws MalformedURLException {

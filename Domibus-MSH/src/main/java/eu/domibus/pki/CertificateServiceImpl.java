@@ -35,7 +35,7 @@ public class CertificateServiceImpl implements CertificateService {
 
         X509Certificate[] certificateChain = null;
         try {
-            certificateChain = (X509Certificate[]) trustStore.getCertificateChain(alias);
+            certificateChain = getCertificateChain(trustStore, alias);
         } catch (KeyStoreException e) {
             throw new DomibusCertificateException("Error getting the certificate chain from the truststore for [" + alias + "]", e);
         }
@@ -53,6 +53,16 @@ public class CertificateServiceImpl implements CertificateService {
         return true;
     }
 
+    protected X509Certificate[] getCertificateChain(KeyStore trustStore, String alias) throws KeyStoreException {
+        //TODO get the certificate chain manually based on the issued by info from the original certificate
+        X509Certificate[] certificateChain = (X509Certificate[]) trustStore.getCertificateChain(alias);
+        if (certificateChain == null) {
+            X509Certificate certificate = (X509Certificate) trustStore.getCertificate(alias);
+            certificateChain = new X509Certificate[]{certificate};
+        }
+        return certificateChain;
+    }
+
     @Override
     public boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException {
         boolean isValid = checkValidity(cert);
@@ -60,7 +70,7 @@ public class CertificateServiceImpl implements CertificateService {
             return false;
         }
         try {
-            return crlService.isCertificateRevoked(cert);
+            return !crlService.isCertificateRevoked(cert);
         } catch (Exception e) {
             throw new DomibusCertificateException(e);
         }

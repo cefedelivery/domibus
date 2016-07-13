@@ -1,10 +1,7 @@
 package eu.domibus.pki;
 
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -107,18 +104,42 @@ public class CertificateServiceImplTest {
     }
 
     @Test
-    public void testIsCertificateValidWithExpiredCertificate() throws Exception {
+    public void testIsCertificateValid(@Mocked final X509Certificate certificate) throws Exception {
+        new Expectations(certificateService) {{
+            certificateService.checkValidity(certificate);
+            result = true;
+
+            crlService.isCertificateRevoked(certificate);
+            result = false;
+        }};
+
+        boolean certificateValid = certificateService.isCertificateValid(certificate);
+        assertTrue(certificateValid);
+    }
+
+    @Test
+    public void testIsCertificateValidWithExpiredCertificate(@Mocked final X509Certificate certificate) throws Exception {
+        new Expectations(certificateService) {{
+            certificateService.checkValidity(certificate);
+            result = false;
+        }};
+
+        boolean certificateValid = certificateService.isCertificateValid(certificate);
+        assertFalse(certificateValid);
+    }
+
+    @Test
+    public void testCheckValidityValidWithExpiredCertificate() throws Exception {
         X509Certificate x509Certificate = pkiUtil.createCertificate(BigInteger.ONE, new DateTime().minusDays(2).toDate(), new DateTime().minusDays(1).toDate(), null);
         boolean certificateValid = certificateService.checkValidity(x509Certificate);
         assertFalse(certificateValid);
     }
 
     @Test
-    public void testIsCertificateValidWithNotYetValidCertificate() throws Exception {
+    public void testCheckValidityWithNotYetValidCertificate() throws Exception {
         X509Certificate x509Certificate = pkiUtil.createCertificate(BigInteger.ONE, new DateTime().plusDays(2).toDate(), new DateTime().plusDays(5).toDate(), null);
 
         boolean certificateValid = certificateService.checkValidity(x509Certificate);
         assertFalse(certificateValid);
     }
-
 }

@@ -1,27 +1,12 @@
 package eu.domibus.pki;
 
 import eu.domibus.util.HttpUtil;
+import eu.domibus.util.HttpUtilImpl;
 import mockit.Expectations;
+import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.AuthState;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,8 +33,10 @@ public class CRLUtilTest {
     @Tested
     CRLUtil crlUtil;
 
-    PKIUtil pkiUtil = new PKIUtil();
+    @Injectable
+    HttpUtil httpUtil;
 
+    PKIUtil pkiUtil = new PKIUtil();
 
     @Before
     public void init() {
@@ -128,35 +115,16 @@ public class CRLUtilTest {
 
 //    @Test
     public void testDownloadCRLViaProxy() throws Exception {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        try {
-//            HttpHost target = new HttpHost("httpbin.org", 443, "https");
-            HttpHost proxy = new HttpHost("158.169.9.13", 8012, "http");
-            HttpContext httpContext = new BasicHttpContext();
-            AuthState authState = new AuthState();
-            authState.update(new BasicScheme(), new UsernamePasswordCredentials("baciuco", "password"));
-            httpContext.setAttribute(HttpClientContext.PROXY_AUTH_STATE, authState);
+        String url = "http://onsitecrl.verisign.com/offlineca/NATIONALITANDTELECOMAGENCYPEPPOLRootCA.crl";
+        ByteArrayInputStream inputStream = new HttpUtilImpl().downloadURLDirect(url);
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        X509CRL x509CRL = (X509CRL) cf.generateCRL(inputStream);
+        System.out.println(x509CRL);
 
-            RequestConfig config = RequestConfig.custom()
-                    .setProxy(proxy)
-                    .build();
-            HttpGet request = new HttpGet("http://onsitecrl.verisign.com/offlineca/NATIONALITANDTELECOMAGENCYPEPPOLRootCA.crl");
-            request.setConfig(config);
-
-            System.out.println("Executing request " + request.getRequestLine() + " via " + proxy);
-
-//            CloseableHttpResponse response = httpclient.execute(target, request);
-            CloseableHttpResponse response = httpclient.execute(request, httpContext);
-            try {
-                System.out.println("----------------------------------------");
-                System.out.println(response.getStatusLine());
-                System.out.println(EntityUtils.toString(response.getEntity()));
-            } finally {
-                response.close();
-            }
-        } finally {
-            httpclient.close();
-        }
+        inputStream = new HttpUtilImpl().downloadURLViaProxy(url, "158.169.9.13", 8012, "baciuco", "pass");
+        System.out.println(inputStream);
+        x509CRL = (X509CRL) cf.generateCRL(inputStream);
+        System.out.println(x509CRL);
 
     }
 }
