@@ -4,6 +4,7 @@ import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyStore;
@@ -24,21 +25,9 @@ public class CertificateServiceImpl implements CertificateService {
     @Autowired
     TrustStoreService trustStoreService;
 
+    @Cacheable(value = "certValidationByAlias", key = "#alias")
     @Override
-    public boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException {
-        boolean isValid = checkValidity(cert);
-        if (!isValid) {
-            return false;
-        }
-        try {
-            return crlService.isCertificateRevoked(cert);
-        } catch (Exception e) {
-            throw new DomibusCertificateException(e);
-        }
-    }
-
-    @Override
-    public boolean isCertificateChainValid(KeyStore keyStore, String alias) throws DomibusCertificateException {
+    public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
         KeyStore trustStore = trustStoreService.getTrustStore();
         if (trustStore == null) {
             throw new DomibusCertificateException("Error getting the truststore");
@@ -62,6 +51,19 @@ public class CertificateServiceImpl implements CertificateService {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException {
+        boolean isValid = checkValidity(cert);
+        if (!isValid) {
+            return false;
+        }
+        try {
+            return crlService.isCertificateRevoked(cert);
+        } catch (Exception e) {
+            throw new DomibusCertificateException(e);
+        }
     }
 
     protected boolean checkValidity(X509Certificate cert) {

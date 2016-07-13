@@ -10,5 +10,5 @@ public interface CertificateService {
 
     boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException;
 
-    boolean isCertificateChainValid(KeyStore keyStore, String alias) throws DomibusCRLException;
+    boolean isCertificateChainValid(String alias) throws DomibusCertificateException;
 }

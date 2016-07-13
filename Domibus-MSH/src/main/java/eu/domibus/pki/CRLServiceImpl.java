@@ -21,7 +21,6 @@ public class CRLServiceImpl implements CRLService {
     @Autowired
     protected CRLUtil crlUtil;
 
-    @Cacheable(value = "crlByCert", key = "#cert.subjectX500Principal.name")
     @Override
     public boolean isCertificateRevoked(X509Certificate cert) throws DomibusCRLException {
         List<String> crlDistributionPoints = crlUtil.getCrlDistributionPoints(cert);
@@ -42,7 +41,6 @@ public class CRLServiceImpl implements CRLService {
         return false;
     }
 
-    @Cacheable(value = "crlByUrl", key = "#serialString.concat('-').concat(#crlDistributionPointURL)")
     @Override
     public boolean isCertificateRevoked(String serialString, String crlDistributionPointURL) throws DomibusCRLException {
         X509CRL crl = crlUtil.downloadCRL(crlDistributionPointURL);

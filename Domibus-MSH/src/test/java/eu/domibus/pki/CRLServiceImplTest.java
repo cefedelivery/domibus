@@ -113,10 +113,4 @@ public class CRLServiceImplTest {
         boolean certificateRevoked = crlService.isCertificateRevoked(certificate, crlUrlString);
         assertTrue(certificateRevoked);
     }
-
-    @Test
-    public void getRootCertificate() throws Exception {
-        X509Certificate certificate = null;
-
-    }
 }
