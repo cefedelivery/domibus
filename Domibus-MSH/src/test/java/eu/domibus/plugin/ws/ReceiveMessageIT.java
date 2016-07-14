@@ -84,7 +84,7 @@ public class ReceiveMessageIT extends AbstractIT {
     @Test
     public void testReceiveMessage() throws SOAPException, IOException, SQLException, ParserConfigurationException, SAXException {
         String filename = "SOAPMessage.xml";
-        String messageId = "123b840b-b215-4c70-89e7-59aa0fe73cec@domibus.eu";
+        String messageId = "359b840b-b215-4c70-89e7-59aa0fe73cec@domibus.eu";
         SOAPMessage soapMessage = createSOAPMessage(filename);
         mshWebservice.invoke(soapMessage);
 
