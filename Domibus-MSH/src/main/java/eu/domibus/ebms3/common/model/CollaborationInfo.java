@@ -19,6 +19,8 @@
 
 package eu.domibus.ebms3.common.model;
 
+import eu.domibus.common.model.configuration.Action;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
@@ -41,8 +43,6 @@ import java.util.UUID;
 @Embeddable
 public class CollaborationInfo {
 
-    public static final String DEFAULT_SERVICE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service";
-    public static final String DEFAULT_ACTION = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test";
     @XmlElement(name = "ConversationId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -54,7 +54,7 @@ public class CollaborationInfo {
     @XmlSchemaType(name = "token")
     @Column(name = "COLLABORATION_INFO_ACTION")
     @NotNull
-    protected String action = CollaborationInfo.DEFAULT_ACTION;
+    protected String action = Action.TEST_ACTION;
     @XmlElement(name = "AgreementRef")
     //Embedable
     protected AgreementRef agreementRef;

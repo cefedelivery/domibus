@@ -139,6 +139,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
         Messaging messaging = null;
+        boolean pingMessage = false;
         try (StringWriter sw = new StringWriter()) {
             if (MSHWebservice.LOG.isDebugEnabled()) {
 
@@ -156,24 +157,20 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             messaging = this.getMessaging(request);
 
             checkCharset(messaging);
-
+            pingMessage = checkPingMessage(messaging.getUserMessage());
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
-            if (!messageExists && !(eu.domibus.common.model.configuration.Service.PING_SERVICE.equals(legConfiguration.getService().getValue())
-                    && eu.domibus.common.model.configuration.Action.PING_ACTION.equals(legConfiguration.getAction().getValue()))) { // ping messages are not stored/delivered
+
+            if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
                 this.persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
-            }
-            responseMessage = this.generateReceipt(request, legConfiguration, messageExists);
-
-
-            if (!messageExists) {
                 backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
             }
+            responseMessage = this.generateReceipt(request, legConfiguration, messageExists);
 
         } catch (TransformerException | SOAPException | JAXBException | IOException e) {
             throw new RuntimeException(e);
         } catch (final EbMS3Exception e) {
             try {
-                if (legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
+                if (!pingMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
                     backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED_FAILURE);
                 }
             } catch (Exception ex) {
@@ -211,12 +208,22 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @return result of duplicate check
      */
     private Boolean checkDuplicate(final Messaging messaging) {
-
         return messageLogDao.findByMessageId(messaging.getUserMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
-
-
     }
 
+
+    /**
+     * Check if this message is a ping message
+     *
+     * @param message
+     * @return result of ping service and action check
+     */
+    private Boolean checkPingMessage(final UserMessage message) {
+
+        return eu.domibus.common.model.configuration.Service.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
+                && eu.domibus.common.model.configuration.Action.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
+
+    }
 
     /**
      * Handles Receipt generation for a incoming message
