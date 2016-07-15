@@ -431,11 +431,6 @@
                                                 </file>
                                                 <todir>conf/domibus</todir>
                                             </file>
-                                            <file>
-                                                <file>${project.basedir}/src/main/conf/context.xml
-                                                </file>
-                                                <todir>conf</todir>
-                                            </file>
                                         </files>
                                     </configuration>
                                 </configuration>
@@ -623,7 +618,10 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.faces</groupId>

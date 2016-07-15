@@ -1,7 +1,8 @@
 package eu.domibus.property;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.common.util.StringUtils;
-import org.apache.log4j.Logger;
 
 import java.util.Properties;
 
@@ -10,11 +11,15 @@ import java.util.Properties;
  */
 public class PropertyResolver {
 
-    private static final Logger LOGGER = Logger.getLogger(PropertyResolver.class);
+    private static final Log LOG = LogFactory.getLog(PropertyResolver.class);
 
     private static final String START_DELIMITER = "{";
     private static final String END_DELIMITER = "}";
     private static final int RESOLVE_LEVEL = 3;
+
+    private String startDelimiter = START_DELIMITER;
+    private String endDelimiter = END_DELIMITER;
+    private Integer resolveLevel = RESOLVE_LEVEL;
 
     public String getResolvedProperty(String propertyName) {
         return getResolvedProperty(propertyName, new Properties(), true);
@@ -24,17 +29,19 @@ public class PropertyResolver {
         String result = propertyName;
 
         if(includeSystemProperties) {
+            LOG.debug("Adding the system properties to the available properties");
             properties.putAll(System.getProperties());
         }
 
-        for (int i = 0; i < RESOLVE_LEVEL; i++) {
-            result = getResolvedProperty(result, properties, START_DELIMITER, END_DELIMITER);
+        for (int i = 0; i < resolveLevel; i++) {
+            result = getResolvedProperty(result, properties, startDelimiter, endDelimiter);
         }
         return result;
     }
 
     public String getResolvedProperty(String propertyName, Properties properties, String startVarDelimit, String endVarDelimit) {
         if (StringUtils.isEmpty(propertyName)) {
+            LOG.debug("Could not resolve property: the property name is null");
             return null;
         }
 
@@ -49,6 +56,7 @@ public class PropertyResolver {
             if (endIndex == -1) {
                 // Restore value in case the variable reference is not valid
                 value = propertyName;
+                LOG.debug("Could not resolve property [ " + propertyName + "]." + "Could not find the associated end index for start index " + startIndex );
                 break;
             }
 
@@ -59,18 +67,40 @@ public class PropertyResolver {
                 result = startVarDelimit + variable + endVarDelimit;
             }
 
-            // Replace the system variable reference with the system variable value.
+            LOG.debug("Property [" + variable + "] = [" + result + "]");
+
+            // Replace the variable reference with the variable value.
             value = value.substring(0, startIndex) + result + value.substring(endIndex + endVarDelimit.length());
             // Search for another variable reference.
             startIndex = value.indexOf(startVarDelimit, startIndex + result.length());
         }
+        LOG.debug("Property [" + propertyName + "] has been resolved to [" + value + "]");
 
         return value;
     }
 
-    public static PropertyResolver create() {
-        return new PropertyResolver();
+
+    public void setStartDelimiter(String startDelimiter) {
+        this.startDelimiter = startDelimiter;
     }
 
+    public void setEndDelimiter(String endDelimiter) {
+        this.endDelimiter = endDelimiter;
+    }
 
+    public void setResolveLevel(Integer resolveLevel) {
+        this.resolveLevel = resolveLevel;
+    }
+
+    public String getStartDelimiter() {
+        return startDelimiter;
+    }
+
+    public Integer getResolveLevel() {
+        return resolveLevel;
+    }
+
+    public String getEndDelimiter() {
+        return endDelimiter;
+    }
 }

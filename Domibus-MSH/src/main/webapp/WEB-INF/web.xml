@@ -43,13 +43,17 @@
             classpath:META-INF/cxf/cxf.xml
             classpath:META-INF/cxf/cxf-extension-jaxws.xml
             classpath:META-INF/cxf/cxf-servlet.xml
-            WEB-INF/spring-context.xml
+            /WEB-INF/spring-context.xml
         </param-value>
     </context-param>
 
     <context-param>
         <param-name>log4jFileName</param-name>
         <param-value>log4j.properties</param-value>
+    </context-param>
+    <context-param>
+        <param-name>pluginsLocation</param-name>
+        <param-value>${domibus.config.location}/plugins/lib</param-value>
     </context-param>
 
     <!-- Spring Security -->
@@ -69,8 +73,7 @@
     </listener>
 
     <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener
-        </listener-class>
+        <listener-class>eu.domibus.spring.DomibusContextLoaderListener</listener-class>
     </listener>
 
     <listener>

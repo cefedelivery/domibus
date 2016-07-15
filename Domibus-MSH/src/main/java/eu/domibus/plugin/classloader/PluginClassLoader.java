@@ -1,4 +1,4 @@
-package eu.domibus.classloader;
+package eu.domibus.plugin.classloader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -1,7 +1,7 @@
 Domibus 3.2-RC1
 - Added XSD validation of the PMODE while it is uploaded by the user
 - Added XSD validation for the operations exposed by the backend WS
-- Improved the plugin registration on WildFly
+- Harmonize the plugin registration on Tomcat/WebLogic/WildFly
 - Backend WS, interface changed as for operations getMessageStatus and getMessageErrors
 - Enabled MTOM for backend WS.
 - Ping messages are not stored/delivered to the backend

@@ -1,4 +1,4 @@
-package eu.domibus.classloader;
+package eu.domibus.plugin.classloader;
 
 import mockit.Expectations;
 import mockit.Injectable;
