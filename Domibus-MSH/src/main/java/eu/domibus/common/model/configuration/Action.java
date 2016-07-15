@@ -52,7 +52,7 @@ import javax.xml.bind.annotation.XmlType;
 @Table(name = "TB_ACTION")
 @NamedQueries({@NamedQuery(name = "Action.findByAction", query = "select a.name from Action a where a.value = :ACTION"), @NamedQuery(name = "Action.findByName", query = "select a from Action a where a.name=:NAME")})
 public class Action extends AbstractBaseEntity {
-    public static final String PING_ACTION = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test";
+    public static final String TEST_ACTION = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test";
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME")
     protected String name;

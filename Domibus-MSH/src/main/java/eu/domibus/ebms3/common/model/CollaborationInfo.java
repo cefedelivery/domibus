@@ -54,7 +54,7 @@ public class CollaborationInfo {
     @XmlSchemaType(name = "token")
     @Column(name = "COLLABORATION_INFO_ACTION")
     @NotNull
-    protected String action = Action.PING_ACTION;
+    protected String action = Action.TEST_ACTION;
     @XmlElement(name = "AgreementRef")
     //Embedable
     protected AgreementRef agreementRef;

@@ -138,8 +138,8 @@ public abstract class PModeProvider {
             action = this.findActionName(userMessage.getCollaborationInfo().getAction());
             leg = this.findLegName(agreementName, senderParty, receiverParty, service, action);
 
-            if ((action.equals(Action.PING_ACTION) && (!service.equals(Service.PING_SERVICE)))) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "ebMS3 Test Service: " + Service.PING_SERVICE + " and ebMS3 Test Action: " + Action.PING_ACTION + " can only be used together [CORE] 5.2.2.9", null, null);
+            if ((action.equals(Action.TEST_ACTION) && (!service.equals(Service.TEST_SERVICE)))) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "ebMS3 Test Service: " + Service.TEST_SERVICE + " and ebMS3 Test Action: " + Action.TEST_ACTION + " can only be used together [CORE] 5.2.2.9", null, null);
             }
 
             return senderParty + ":" + receiverParty + ":" + service + ":" + action + ":" + agreementName + ":" + leg;

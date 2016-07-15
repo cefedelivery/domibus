@@ -220,8 +220,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      */
     private Boolean checkPingMessage(final UserMessage message) {
 
-        return eu.domibus.common.model.configuration.Service.PING_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
-                && eu.domibus.common.model.configuration.Action.PING_ACTION.equals(message.getCollaborationInfo().getAction());
+        return eu.domibus.common.model.configuration.Service.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
+                && eu.domibus.common.model.configuration.Action.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
 
     }
 
