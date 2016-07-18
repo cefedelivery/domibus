@@ -51,7 +51,7 @@ public class Service {
 
     @XmlValue
     @Column(name = "SERVICE_VALUE")
-    protected String value = CollaborationInfo.DEFAULT_SERVICE;
+    protected String value = eu.domibus.common.model.configuration.Service.TEST_SERVICE;
     @XmlAttribute(name = "type")
     @Column(name = "SERVICE_TYPE")
     protected String type;

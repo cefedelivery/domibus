@@ -63,9 +63,6 @@ public abstract class PModeProvider {
 
     private static final Log LOG = LogFactory.getLog(PModeProvider.class);
 
-    private static final String EBMS3_TEST_ACTION = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test";
-    private static final String EBMS3_TEST_SERVICE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service"; //TODO: move to appropriate classes
-
     public static final String SCHEMAS_DIR = "schemas/";
     public static final String DOMIBUS_PMODE_XSD = "domibus-pmode.xsd";
     public static final String DOMIBUS_CONFIG_LOCATION = "domibus.config.location";
@@ -141,8 +138,8 @@ public abstract class PModeProvider {
             action = this.findActionName(userMessage.getCollaborationInfo().getAction());
             leg = this.findLegName(agreementName, senderParty, receiverParty, service, action);
 
-            if ((action.equals(PModeProvider.EBMS3_TEST_ACTION) && (!service.equals(PModeProvider.EBMS3_TEST_SERVICE)))) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "ebMS3 Test Service: " + PModeProvider.EBMS3_TEST_SERVICE + " and ebMS3 Test Action: " + PModeProvider.EBMS3_TEST_ACTION + " can only be used together [CORE] 5.2.2.9", userMessage.getMessageInfo().getMessageId(), null);
+            if ((action.equals(Action.TEST_ACTION) && (!service.equals(Service.TEST_SERVICE)))) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "ebMS3 Test Service: " + Service.TEST_SERVICE + " and ebMS3 Test Action: " + Action.TEST_ACTION + " can only be used together [CORE] 5.2.2.9", null, null);
             }
 
             return senderParty + ":" + receiverParty + ":" + service + ":" + action + ":" + agreementName + ":" + leg;
