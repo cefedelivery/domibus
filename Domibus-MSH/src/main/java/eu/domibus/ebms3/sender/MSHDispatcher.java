@@ -91,15 +91,17 @@ public class MSHDispatcher {
         final javax.xml.ws.Service service = javax.xml.ws.Service.create(serviceName);
         Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
 
-        try {
-            boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
-            if (!certificateChainValid) {
-                warnOutput("Certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
-            }
-        } catch (Exception e) {
-            LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
-        }
 
+        if(certificateService.isCertificateValidationEnabled()) {
+            try {
+                boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
+                if (!certificateChainValid) {
+                    warnOutput("Certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
+                }
+            } catch (Exception e) {
+                LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
+            }
+        }
 
         final String endpoint = receiverParty.getEndpoint();
         service.addPort(portName, SOAPBinding.SOAP12HTTP_BINDING, endpoint);

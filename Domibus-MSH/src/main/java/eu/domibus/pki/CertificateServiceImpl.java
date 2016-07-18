@@ -4,12 +4,14 @@ import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
+import java.util.Properties;
 
 /**
  * Created by Cosmin Baciu on 12-Jul-16.
@@ -25,9 +27,14 @@ public class CertificateServiceImpl implements CertificateService {
     @Autowired
     TrustStoreService trustStoreService;
 
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
+
     @Cacheable(value = "certValidationByAlias", key = "#alias")
     @Override
     public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
+        LOG.debug("Checking certificate validation for [" + alias + "]");
         KeyStore trustStore = trustStoreService.getTrustStore();
         if (trustStore == null) {
             throw new DomibusCertificateException("Error getting the truststore");
@@ -61,6 +68,12 @@ public class CertificateServiceImpl implements CertificateService {
             certificateChain = new X509Certificate[]{certificate};
         }
         return certificateChain;
+    }
+
+    @Override
+    public boolean isCertificateValidationEnabled() {
+        String certificateValidationEnabled = domibusProperties.getProperty("domibus.certificate.validation.enabled", "true");
+        return Boolean.valueOf(certificateValidationEnabled);
     }
 
     @Override

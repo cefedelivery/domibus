@@ -8,6 +8,8 @@ import java.security.cert.X509Certificate;
  */
 public interface CertificateService {
 
+    boolean isCertificateValidationEnabled();
+
     boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException;
 
     boolean isCertificateChainValid(String alias) throws DomibusCertificateException;
