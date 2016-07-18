@@ -80,6 +80,7 @@ public class CertificateServiceImpl implements CertificateService {
     public boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException {
         boolean isValid = checkValidity(cert);
         if (!isValid) {
+            LOG.debug("Certificate is not valid: " + cert);
             return false;
         }
         try {

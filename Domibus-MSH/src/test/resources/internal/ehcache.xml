@@ -31,4 +31,9 @@
            maxBytesLocalHeap="5m"
            timeToLiveSeconds="3600">
     </cache>
+    <cache name="certValidationByAlias"
+           maxBytesLocalHeap="5m"
+           timeToLiveSeconds="3600"
+           overflowToDisk="false">
+    </cache>
 </ehcache>
