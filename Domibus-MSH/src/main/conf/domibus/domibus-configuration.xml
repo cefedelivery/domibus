@@ -53,7 +53,7 @@
         <prop key="domibus.backend.jmsInQueue">domibus.backend.jms.inQueue</prop>
         <prop key="domibus.deployment.clustered">false</prop>
         <prop key="messageFactoryClass">com.sun.xml.internal.messaging.saaj.soap.ver1_2.SOAPMessageFactory1_2Impl</prop>
-
+        <prop key="domibus.certificate.validation.enabled">true</prop>
         <!-- Enable the proxy settings only if you use a proxy -->
 
         <prop key="domibus.proxy.enabled">false</prop>
