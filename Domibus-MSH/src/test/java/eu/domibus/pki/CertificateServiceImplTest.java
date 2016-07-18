@@ -12,6 +12,7 @@ import java.math.BigInteger;
 import java.security.KeyStore;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -24,6 +25,9 @@ public class CertificateServiceImplTest {
 
     @Tested
     CertificateServiceImpl certificateService;
+
+    @Injectable
+    private Properties domibusProperties;
 
     @Injectable
     CRLService crlService;
