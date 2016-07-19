@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.common.util.concurrent.TimeLimiter;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
 import eu.domibus.common.NotificationType;
+import eu.domibus.configuration.Storage;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
 import org.apache.commons.io.FileUtils;
@@ -11,6 +12,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
@@ -31,11 +33,13 @@ import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
+import static org.springframework.util.StringUtils.hasLength;
 
 /**
  * Created by feriaad on 02/02/2016.
@@ -67,6 +71,14 @@ public abstract class AbstractIT {
     private static boolean initialized;
 
     @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
+
+    @Autowired
+    private Storage storage;
+
+
+    @Autowired
     protected DataSource dataSource;
 
     @BeforeClass
@@ -74,6 +86,7 @@ public abstract class AbstractIT {
         if (!initialized) {
             FileUtils.deleteDirectory(new File("target/temp"));
             System.setProperty("domibus.config.location", new File("target/test-classes").getAbsolutePath());
+
             initialized = true;
         }
     }
@@ -138,8 +151,12 @@ public abstract class AbstractIT {
      *
      * @param dataset
      */
-    protected void insertDataset(String dataset) {
+    public final void insertDataset(String dataset) {
         try {
+            if(hasLength(System.getProperty(Storage.ATTACHMENT_STORAGE_LOCATION))){
+                domibusProperties.setProperty(Storage.ATTACHMENT_STORAGE_LOCATION, System.getProperty(Storage.ATTACHMENT_STORAGE_LOCATION));
+                storage.initFileSystemStorage();
+            }
             FileInputStream fis = new FileInputStream(new File("target/test-classes/dataset/database/" + dataset).getAbsolutePath());
             importSQL(dataSource.getConnection(), fis);
         } catch (final Exception exc) {

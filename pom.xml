@@ -227,6 +227,9 @@
                                 <argLine>-server -ea -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m
                                     ${surefire.argLine}
                                 </argLine>
+                              <!--systemPropertyVariables>
+                                  <domibus.attachment.storage.location>C:/temp/abc</domibus.attachment.storage.location>
+                              </systemPropertyVariables-->
                                 <includes>
                                     <include>**/*IT.java</include>
                                     <include>**/IT*.java</include>
@@ -237,6 +240,7 @@
                                 </includes>
                             </configuration>
                         </execution>
+
                     </executions>
                 </plugin>
                 <plugin>
