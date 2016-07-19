@@ -1,6 +1,6 @@
 package eu.domibus;
 
-import eu.domibus.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.controller.AdminGUIController;
