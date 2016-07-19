@@ -20,7 +20,6 @@
 package eu.domibus.ebms3.common.dao;
 
 import eu.domibus.common.ErrorCode;
-import eu.domibus.common.dao.CachingPModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -65,7 +64,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         dynamicReceiverProcesses = findDynamicReceiverProcesses();
     }
 
-    private Collection<eu.domibus.common.model.configuration.Process> findDynamicReceiverProcesses() {
+    Collection<eu.domibus.common.model.configuration.Process> findDynamicReceiverProcesses() {
         final Collection<eu.domibus.common.model.configuration.Process> result = new ArrayList<eu.domibus.common.model.configuration.Process>();
         for (final eu.domibus.common.model.configuration.Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
             if (process.isDynamicResponder() && (process.isDynamicInitiator() || process.getInitiatorParties().contains(getConfiguration().getParty()))) {
@@ -95,7 +94,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         return super.findPModeKeyForUserMessage(userMessage);
     }
 
-    private void doDynamicThings(final UserMessage userMessage) throws EbMS3Exception {
+    void doDynamicThings(final UserMessage userMessage) throws EbMS3Exception {
         final Collection<eu.domibus.common.model.configuration.Process> candidates = new HashSet<Process>();
         for (final Process process : this.dynamicReceiverProcesses) {
             if (process.isDynamicInitiator() || process.getInitiatorParties().contains(this.getConfiguration().getParty())) {
@@ -173,7 +172,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         }
     }
 
-    private String extractCommonName(final X509Certificate certificate) throws InvalidNameException {
+    String extractCommonName(final X509Certificate certificate) throws InvalidNameException {
 
         final String dn = certificate.getSubjectDN().getName();
         LOG.debug("DN is: " + dn);
