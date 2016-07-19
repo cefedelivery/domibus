@@ -55,7 +55,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     protected TrustStoreService trustStoreService;
     @Autowired
     private DynamicDiscoveryService dynamicDiscoveryService;
-    private Collection<eu.domibus.common.model.configuration.Process> dynamicReceiverProcesses;
+    protected Collection<eu.domibus.common.model.configuration.Process> dynamicReceiverProcesses;
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
