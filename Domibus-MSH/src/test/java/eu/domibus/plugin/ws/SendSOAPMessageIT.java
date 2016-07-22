@@ -23,6 +23,7 @@ import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -40,7 +41,6 @@ public class SendSOAPMessageIT extends AbstractIT {
     protected static final QName SERVICE = new QName("http://org.ecodex.backend/1_1/", "BackendService_1_1");
     protected static final QName BACKEND_PORT = new QName("http://org.ecodex.backend/1_1/", "BACKEND_PORT");
 
-
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8080);
 
@@ -48,6 +48,7 @@ public class SendSOAPMessageIT extends AbstractIT {
     private MessageFactory messageFactory; // defined in the spring-context.xml
 
     static {
+        Locale.setDefault(Locale.ENGLISH);
         URL url = SendSOAPMessageIT.class.getResource("BackendService_1_1.wsdl");
         if (url == null) {
             url = SendSOAPMessageIT.class.getClassLoader().getResource("schemas/BackendService_1_1.wsdl");
@@ -121,6 +122,7 @@ public class SendSOAPMessageIT extends AbstractIT {
     public void testSendInvalidMessage() throws Exception {
 
         try {
+            //System.out.println("Default locale [" + Locale.getDefault() + "]");
             validateXml(getClass().getClassLoader().getResourceAsStream("dataset/as4/blue2redInvalidMessage.xml"));
         } catch (javax.xml.bind.UnmarshalException soapEx) {
             Assert.assertTrue(soapEx.getCause().getMessage().contains("The content of element 'ns:From' is not complete"));
