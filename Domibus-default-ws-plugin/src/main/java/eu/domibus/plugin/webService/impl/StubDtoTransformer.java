@@ -126,10 +126,9 @@ public final class StubDtoTransformer implements MessageSubmissionTransformer<Me
             partInfo.setInBody(payload.isInBody());
             partInfo.setPayloadDatahandler(payload.getPayloadDatahandler());
             partInfo.setHref(payload.getContentId());
-           /* final Schema schema = new Schema();
+            final Schema schema = new Schema();
             schema.setLocation(payload.getSchemaLocation());
-            partInfo.setSchema(schema);*/
-            boolean descriptionPropertyExists = false;
+            partInfo.setSchema(schema);
             final PartProperties partProperties = new PartProperties();
             for (final Submission.TypedProperty entry : payload.getPayloadProperties()) {
                 final Property property = new Property();
