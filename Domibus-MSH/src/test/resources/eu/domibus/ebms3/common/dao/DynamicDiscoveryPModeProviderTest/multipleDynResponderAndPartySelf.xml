@@ -77,10 +77,36 @@
 							  security="samplePolicy"
 							  receptionAwareness="receptionAwareness"
 							  errorHandling="demoErrorHandling"
-							  compressPayloads="true" />
-
+							  compressPayloads="true">
+			</legConfiguration>
 		</legConfigurations>
-		<process name="testProcessDynamicExpected"
+		<process name="testProcessDynamicExpected_1"
+				 agreement="agreementEmpty"
+				 mep="oneway"
+				 binding="push"
+				 initiatorRole="defaultInitiatorRole"
+				 responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="self"/>
+			</initiatorParties>
+			<legs>
+				<leg name="testLegtestAction"/>
+			</legs>
+		</process>
+		<process name="testProcessDynamicExpected_2"
+				 agreement="agreementEmpty"
+				 mep="oneway"
+				 binding="push"
+				 initiatorRole="defaultInitiatorRole"
+				 responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="self"/>
+			</initiatorParties>
+			<legs>
+				<leg name="testLegtestAction"/>
+			</legs>
+		</process>
+		<process name="testProcessDynamicExpected_3"
 				 agreement="agreementEmpty"
 				 mep="oneway"
 				 binding="push"
