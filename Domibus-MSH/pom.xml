@@ -769,6 +769,14 @@
                     <warName>domibus</warName>
                     <webXml>${webXmlPath}</webXml>
                     <warName>${domibus.name}</warName>
+                    <archive>
+                        <manifestEntries>
+                            <Specification-Version>${project.version}</Specification-Version>
+                            <Specification-Title>${project.artifactId}</Specification-Title>
+                            <Implementation-Title>${project.artifactId}</Implementation-Title>
+                            <Build-Time>${maven.build.timestamp}</Build-Time>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>
