@@ -26,7 +26,7 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.PModeProvider;
-import eu.domibus.common.util.ManifestService;
+import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.*;
@@ -68,7 +68,7 @@ public class AdminGUIController {
     private PModeProvider pModeProvider;
 
     @Autowired
-    private ManifestService manifestService;
+    private DomibusPropertiesService domibusPropertiesService;
 
     @Autowired
     private RoutingService routingService;
@@ -85,7 +85,7 @@ public class AdminGUIController {
 
         final ModelAndView model = new ModelAndView();
         model.addObject("title", "Domibus - Home");
-        model.addObject("displayVersion", manifestService.getDisplayVersion());
+        model.addObject("displayVersion", domibusPropertiesService.getDisplayVersion());
         model.setViewName("home");
         return model;
 

@@ -43,6 +43,8 @@
         <atomikos.version>3.9.3</atomikos.version>
         <webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
         <domibus.name>domibus</domibus.name>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
 
     <pluginRepositories>
@@ -87,6 +89,13 @@
                 <wildfly.version>9.0.2.Final</wildfly.version>
             </properties>
             <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+
                 <plugins>
                     <plugin>
                         <groupId>org.codehaus.cargo</groupId>
@@ -256,6 +265,13 @@
                 <domibus.name>domibus-weblogic</domibus.name>
             </properties>
             <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -394,6 +410,13 @@
                 </dependency>
             </dependencies>
             <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+
                 <plugins>
                     <plugin>
                         <groupId>org.codehaus.cargo</groupId>

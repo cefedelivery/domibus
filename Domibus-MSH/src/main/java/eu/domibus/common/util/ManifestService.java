@@ -2,8 +2,6 @@ package eu.domibus.common.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -15,9 +13,9 @@ import java.util.jar.Manifest;
  * @author Federico Martini
  *         <p/>
  *         Spring will take care of the creation of this Singleton object at startup.
+ *         Since the deploying path can be different among AS, it's better to rely on the classpath. See DomibusPropertiesService.
  */
-@Service(value = "manifestService")
-@Scope(value = "singleton")
+//@Service(value = "manifestService")
 public class ManifestService {
 
     private static final Log LOG = LogFactory.getLog(ManifestService.class);
