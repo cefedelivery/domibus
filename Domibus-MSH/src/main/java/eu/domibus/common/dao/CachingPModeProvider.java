@@ -67,6 +67,7 @@ public class CachingPModeProvider extends PModeProvider {
 
 
     @Override
+    //FIXME: only works for the first leg, as sender=initiator
     protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
         final List<LegConfiguration> candidates = new ArrayList<>();
         for (final Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {

@@ -125,6 +125,7 @@
         </errorHandlings>
         <agreements>
             <agreement name="agreement1110" value="EDELIVERY-1110" type=""/>
+            <agreement name="agreementEmpty" value="" type=""/>
         </agreements>
         <services>
             <service name="testService1" value="bdx:noprocess" type="tc1"/>

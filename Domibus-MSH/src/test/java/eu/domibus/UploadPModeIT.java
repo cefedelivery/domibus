@@ -40,7 +40,9 @@ public class UploadPModeIT extends AbstractIT {
     @Autowired
     AdminGUIController adminGui;
     @Autowired
-    PModeProvider pModeDao;
+    PModeProvider pModeProvider;
+    /*@Autowired
+    PModeProvider pModeDao;*/
     @Autowired()
     @Qualifier("jaxbContextConfig")
     private JAXBContext jaxbContext;
@@ -67,7 +69,7 @@ public class UploadPModeIT extends AbstractIT {
             FileInputStream fis = new FileInputStream(pModeFile);
             //MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-blue_gw", pModeFile.getName(), "text/xml", IOUtils.toByteArray(fis));
             //String response = adminGui.uploadFileHandler(pModeContent);
-            pModeDao.updatePModes(IOUtils.toByteArray(fis));
+            pModeProvider.updatePModes(IOUtils.toByteArray(fis));
             //Assert.assertEquals("You successfully uploaded the PMode file.", response);
         } catch (IOException ioEx) {
             System.out.println("File reading error: " + ioEx.getMessage());
@@ -100,7 +102,7 @@ public class UploadPModeIT extends AbstractIT {
     @Transactional(propagation = Propagation.REQUIRED)
     private Configuration testUpdatePModes(final byte[] bytes) throws JAXBException {
         final Configuration configuration = (Configuration) this.jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(bytes));
-        pModeDao.getConfigurationDAO().updateConfiguration(configuration);
+        pModeProvider.getConfigurationDAO().updateConfiguration(configuration);
         return configuration;
     }
 
@@ -117,8 +119,8 @@ public class UploadPModeIT extends AbstractIT {
             FileInputStream fis = new FileInputStream(pModeFile);
             Configuration configuration = testUpdatePModes(IOUtils.toByteArray(fis));
             // Starts to check that the content of the XML file has actually been saved!
-            Party receiverParty = pModeDao.getReceiverParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
-            Party senderParty = pModeDao.getSenderParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            Party receiverParty = pModeProvider.getReceiverParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            Party senderParty = pModeProvider.getSenderParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             List<String> parties = new ArrayList<>();
             parties.add(receiverParty.getName());
             parties.add(senderParty.getName());
@@ -131,7 +133,7 @@ public class UploadPModeIT extends AbstractIT {
             }
             Assert.assertTrue(partyFound);
 
-            Action savedAction = pModeDao.getAction(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            Action savedAction = pModeProvider.getAction(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             boolean actionFound = false;
             Iterator<Action> actionIterator = configuration.getBusinessProcesses().getActions().iterator();
             while (!actionFound && actionIterator.hasNext()) {
@@ -142,7 +144,7 @@ public class UploadPModeIT extends AbstractIT {
             }
             Assert.assertTrue(actionFound);
 
-            Service savedService = pModeDao.getService(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            Service savedService = pModeProvider.getService(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             boolean serviceFound = false;
             Iterator<Service> serviceIterator = configuration.getBusinessProcesses().getServices().iterator();
             while (!serviceFound && serviceIterator.hasNext()) {
@@ -153,7 +155,7 @@ public class UploadPModeIT extends AbstractIT {
             }
             Assert.assertTrue(serviceFound);
 
-            LegConfiguration savedLegConf = pModeDao.getLegConfiguration(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            LegConfiguration savedLegConf = pModeProvider.getLegConfiguration(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             boolean legConfFound = false;
             Iterator<LegConfiguration> legConfIterator = configuration.getBusinessProcesses().getLegConfigurations().iterator();
             while (!legConfFound && legConfIterator.hasNext()) {
@@ -164,7 +166,7 @@ public class UploadPModeIT extends AbstractIT {
             }
             Assert.assertTrue(legConfFound);
 
-            Agreement savedAgreement = pModeDao.getAgreement(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            Agreement savedAgreement = pModeProvider.getAgreement(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             boolean agreementFound = false;
             Iterator<Agreement> agreementIterator = configuration.getBusinessProcesses().getAgreements().iterator();
             while (!agreementFound && agreementIterator.hasNext()) {
@@ -175,7 +177,7 @@ public class UploadPModeIT extends AbstractIT {
             }
             Assert.assertTrue(agreementFound);
 
-            List<String> mpcNames = pModeDao.getMpcList();
+            List<String> mpcNames = pModeProvider.getMpcList();
             Map<String, Mpc> savedMpcs = new HashMap<>();
             for (String mpcName : mpcNames) {
                 Mpc mpc = new Mpc();
@@ -183,8 +185,8 @@ public class UploadPModeIT extends AbstractIT {
                 mpc.setQualifiedName(PREFIX_MPC_URI + mpcName);
                 mpc.setDefault(true);
                 mpc.setEnabled(true);
-                mpc.setRetentionDownloaded(pModeDao.getRetentionDownloadedByMpcURI(mpc.getQualifiedName()));
-                mpc.setRetentionUndownloaded(pModeDao.getRetentionUndownloadedByMpcURI(mpc.getQualifiedName()));
+                mpc.setRetentionDownloaded(pModeProvider.getRetentionDownloadedByMpcURI(mpc.getQualifiedName()));
+                mpc.setRetentionUndownloaded(pModeProvider.getRetentionUndownloadedByMpcURI(mpc.getQualifiedName()));
                 savedMpcs.put(mpcName, mpc);
             }
 
