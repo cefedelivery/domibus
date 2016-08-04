@@ -61,8 +61,6 @@
 
     <bean id="transformerFactory" class="javax.xml.transform.TransformerFactory" factory-method="newInstance"/>
 
-    <bean id="defaultTransformer" class="eu.domibus.plugin.webService.impl.StubDtoTransformer"/>
-
     <!-- Factory for creating requests and responses-->
     <bean id="messageFactory" class="${messageFactoryClass}"/>
 

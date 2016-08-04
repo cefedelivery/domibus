@@ -26,8 +26,12 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.NotifyMessageCreator;
 import eu.domibus.messaging.ReceiveFailedMessageCreator;
 import eu.domibus.plugin.NotificationListener;
+import eu.domibus.plugin.Submission;
+import eu.domibus.plugin.SubmissionValidator;
 import eu.domibus.plugin.routing.*;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
+import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
+import eu.domibus.submission.SubmissionValidatorProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +69,12 @@ public class BackendNotificationService {
     @Autowired
     private MessageLogDao messageLogDao;
 
+    @Autowired
+    protected SubmissionAS4Transformer submissionAS4Transformer;
+
+    @Autowired
+    protected SubmissionValidatorProvider submissionValidatorProvider;
+
 
     private List<NotificationListener> notificationListenerServices;
 
@@ -84,10 +94,10 @@ public class BackendNotificationService {
     @PostConstruct
     public void init() {
         Map notificationListenerBeanMap = applicationContext.getBeansOfType(NotificationListener.class);
-        if(notificationListenerBeanMap.isEmpty()) {
+        if (notificationListenerBeanMap.isEmpty()) {
             throw new ConfigurationException("No Plugin available! Please configure at least one backend plugin in order to run domibus");
         } else {
-           notificationListenerServices = new ArrayList<NotificationListener>(notificationListenerBeanMap.values());
+            notificationListenerServices = new ArrayList<NotificationListener>(notificationListenerBeanMap.values());
         }
 
         criteriaMap = new HashMap<>();
@@ -120,7 +130,7 @@ public class BackendNotificationService {
             }
             if (matches) {
                 LOG.info("Notify backend " + filter.getBackendName() + " of messageId " + userMessage.getMessageInfo().getMessageId());
-                notify(userMessage.getMessageInfo().getMessageId(), filter.getBackendName(), notificationType);
+                validateAndNotify(userMessage, filter.getBackendName(), notificationType);
                 return;
             }
         }
@@ -128,12 +138,43 @@ public class BackendNotificationService {
         jmsOperations.send(unknownReceiverQueue, new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED));
     }
 
-    private void notify(final String messageId, final String backendName, final NotificationType notificationType) {
+    protected void validateSubmission(UserMessage userMessage, String backendName, NotificationType notificationType) {
+        if (NotificationType.MESSAGE_RECEIVED != notificationType) {
+            LOG.debug("Validation is not configured to be done for notification of type [" + notificationType + "]");
+            return;
+        }
+
+        SubmissionValidator submissionValidator = submissionValidatorProvider.getSubmissionValidator(backendName);
+        if (submissionValidator == null) {
+            LOG.debug("No submission validator found for backend [" + backendName + "]");
+            return;
+        }
+        LOG.info("Performing submission validation for backend [" + backendName + "]");
+        Submission submission = submissionAS4Transformer.transformFromMessaging(userMessage);
+        submissionValidator.validate(submission);
+    }
+
+    protected NotificationListener getNotificationListener(String backendName) {
         for (final NotificationListener notificationListenerService : notificationListenerServices) {
             if (notificationListenerService.getBackendName().equals(backendName)) {
-                jmsOperations.send(notificationListenerService.getBackendNotificationQueue(), new NotifyMessageCreator(messageId, notificationType));
+                return notificationListenerService;
             }
         }
+        return null;
+    }
+
+    protected void validateAndNotify(UserMessage userMessage, String backendName, NotificationType notificationType) {
+        validateSubmission(userMessage, backendName, notificationType);
+        notify(userMessage.getMessageInfo().getMessageId(), backendName, notificationType);
+    }
+
+    private void notify(String messageId, String backendName, NotificationType notificationType) {
+        NotificationListener notificationListener = getNotificationListener(backendName);
+        if (notificationListener == null) {
+            LOG.debug("No notification listeners found for backend [" + backendName + "]");
+            return;
+        }
+        jmsOperations.send(notificationListener.getBackendNotificationQueue(), new NotifyMessageCreator(messageId, notificationType));
     }
 
     public void notifyOfSendFailure(final String messageId) {

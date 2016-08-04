@@ -25,7 +25,6 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
@@ -33,8 +32,10 @@ import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.MessageLogEntry;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.plugin.SubmissionValidationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.attachment.AttachmentUtil;
@@ -162,7 +163,11 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
             if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
                 this.persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
-                backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+                try {
+                    backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+                } catch(SubmissionValidationException e) {
+                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), null, e);
+                }
             }
             responseMessage = this.generateReceipt(request, legConfiguration, messageExists);
 
