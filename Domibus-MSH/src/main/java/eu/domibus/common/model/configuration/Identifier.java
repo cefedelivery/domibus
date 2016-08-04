@@ -120,7 +120,7 @@ public class Identifier extends AbstractBaseEntity {
         final Identifier that = (Identifier) o;
 
         if (!this.partyId.equals(that.partyId)) return false;
-        return this.partyIdType.equals(that.partyIdType);
+        return this.partyIdType == that.partyIdType || this.partyIdType.equals(that.partyIdType);
 
     }
 
