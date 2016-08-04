@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.domibus.common.dao;
+package eu.domibus.ebms3.common.dao;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;

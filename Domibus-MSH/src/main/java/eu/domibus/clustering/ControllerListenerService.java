@@ -1,6 +1,6 @@
 package eu.domibus.clustering;
 
-import eu.domibus.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
