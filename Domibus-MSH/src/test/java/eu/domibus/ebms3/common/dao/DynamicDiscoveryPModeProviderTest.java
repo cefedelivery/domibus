@@ -220,9 +220,7 @@ public class DynamicDiscoveryPModeProviderTest {
         X509Certificate testData = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE);
         assertNotNull(testData);
 
-        DynamicDiscoveryPModeProvider classUnderTest = new DynamicDiscoveryPModeProvider();
-
-        String result = classUnderTest.extractCommonName(testData);
+        String result = dynamicDiscoveryPModeProvider.extractCommonName(testData);
 
         assertEquals(EXPECTED_COMMON_NAME, result);
     }
@@ -230,15 +228,11 @@ public class DynamicDiscoveryPModeProviderTest {
     @Test
     public void testExtractCommonName_PublicKeyWithCommonNameNotAvailable_IllegalArgumentExceptionExpected() throws Exception {
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(startsWith("The certificate does not contain a common name (CN): "));
 
         X509Certificate testData = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_NOT_AVAILABLE);
         assertNotNull(testData);
 
-        DynamicDiscoveryPModeProvider classUnderTest = new DynamicDiscoveryPModeProvider();
-
-        classUnderTest.extractCommonName(testData);
-
+        dynamicDiscoveryPModeProvider.extractCommonName(testData);
     }
 
 
