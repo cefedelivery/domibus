@@ -20,7 +20,7 @@
 package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.ErrorCode;
-import eu.domibus.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;

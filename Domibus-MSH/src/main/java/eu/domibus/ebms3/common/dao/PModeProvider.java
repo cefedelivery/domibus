@@ -17,10 +17,11 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.domibus.common.dao;
+package eu.domibus.ebms3.common.dao;
 
 import eu.domibus.clustering.Command;
 import eu.domibus.common.ErrorCode;
+import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.validators.XmlValidationEventHandler;
