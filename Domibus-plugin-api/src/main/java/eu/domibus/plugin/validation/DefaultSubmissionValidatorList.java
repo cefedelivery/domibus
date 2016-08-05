@@ -18,3 +18,4 @@ public class DefaultSubmissionValidatorList implements SubmissionValidatorList {
         this.submissionValidators = submissionValidators;
     }
 }
+

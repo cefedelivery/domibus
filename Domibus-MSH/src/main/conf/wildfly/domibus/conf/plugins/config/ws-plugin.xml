@@ -39,6 +39,8 @@
         <property name="lister" ref="webserviceNotificationListenerService"/>
     </bean>
 
+    <bean id="defaultTransformer" class="eu.domibus.plugin.webService.impl.StubDtoTransformer"/>
+
     <bean id="webserviceNotificationListenerService"
           class="eu.domibus.submission.WeblogicNotificationListenerService"
           c:queue-ref="notifyBackendWebServiceQueue" c:mode="PULL"
