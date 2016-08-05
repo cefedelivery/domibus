@@ -1,4 +1,4 @@
-package eu.domibus.plugin;
+package eu.domibus.plugin.validation;
 
 /**
  * Created by Cosmin Baciu on 04-Aug-16.

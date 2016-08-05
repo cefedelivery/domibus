@@ -27,11 +27,12 @@ import eu.domibus.messaging.NotifyMessageCreator;
 import eu.domibus.messaging.ReceiveFailedMessageCreator;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
-import eu.domibus.plugin.SubmissionValidator;
+import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.routing.*;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
-import eu.domibus.submission.SubmissionValidatorProvider;
+import eu.domibus.plugin.validation.SubmissionValidatorList;
+import eu.domibus.submission.SubmissionValidatorListProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +74,7 @@ public class BackendNotificationService {
     protected SubmissionAS4Transformer submissionAS4Transformer;
 
     @Autowired
-    protected SubmissionValidatorProvider submissionValidatorProvider;
+    protected SubmissionValidatorListProvider submissionValidatorListProvider;
 
 
     private List<NotificationListener> notificationListenerServices;
@@ -144,14 +145,17 @@ public class BackendNotificationService {
             return;
         }
 
-        SubmissionValidator submissionValidator = submissionValidatorProvider.getSubmissionValidator(backendName);
-        if (submissionValidator == null) {
-            LOG.debug("No submission validator found for backend [" + backendName + "]");
+        SubmissionValidatorList submissionValidatorList = submissionValidatorListProvider.getSubmissionValidatorList(backendName);
+        if (submissionValidatorList == null) {
+            LOG.debug("No submission validators found for backend [" + backendName + "]");
             return;
         }
         LOG.info("Performing submission validation for backend [" + backendName + "]");
         Submission submission = submissionAS4Transformer.transformFromMessaging(userMessage);
-        submissionValidator.validate(submission);
+        List<SubmissionValidator> submissionValidators = submissionValidatorList.getSubmissionValidators();
+        for (SubmissionValidator submissionValidator : submissionValidators) {
+            submissionValidator.validate(submission);
+        }
     }
 
     protected NotificationListener getNotificationListener(String backendName) {
