@@ -46,4 +46,12 @@ public class NotifyMessageCreator implements MessageCreator {
         m.setStringProperty(MessageConstants.NOTIFICATION_TYPE, notificationType.name());
         return m;
     }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public NotificationType getNotificationType() {
+        return notificationType;
+    }
 }

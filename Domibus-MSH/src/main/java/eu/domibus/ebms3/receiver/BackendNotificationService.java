@@ -77,7 +77,7 @@ public class BackendNotificationService {
     protected SubmissionValidatorListProvider submissionValidatorListProvider;
 
 
-    private List<NotificationListener> notificationListenerServices;
+    protected List<NotificationListener> notificationListenerServices;
 
     @Resource(name = "routingCriteriaFactories")
     protected List<CriteriaFactory> routingCriteriaFactories;
@@ -172,7 +172,7 @@ public class BackendNotificationService {
         notify(userMessage.getMessageInfo().getMessageId(), backendName, notificationType);
     }
 
-    private void notify(String messageId, String backendName, NotificationType notificationType) {
+    protected void notify(String messageId, String backendName, NotificationType notificationType) {
         NotificationListener notificationListener = getNotificationListener(backendName);
         if (notificationListener == null) {
             LOG.debug("No notification listeners found for backend [" + backendName + "]");
