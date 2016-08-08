@@ -21,13 +21,32 @@
 
 <html>
 <head>
-  <jsp:include page="header.jsp"/>
+    <jsp:include page="header.jsp"/>
 </head>
 <body>
-<form method="POST" action="updatepmode" enctype="multipart/form-data">
-  PMode File to upload: <input type="file" name="file"><br/>
-  <br/>
-  <input type="submit" value="Upload"> Press here to upload the PMode file. Please notice that the TrustStore will be re-loaded.
+<form method="POST" action="uploadPmodeFile" enctype="multipart/form-data">
+
+    <h3>PMode upload:</h3> <br/>
+    PMode xml file to upload:<br/>
+    <input type="file" name="pmode"><br/>
+
+    <br/>
+    <input type="submit" value="Press here to upload the PMode xml file">
+    Please notice that the TrustStore will be re-loaded.
+</form>
+<br/>
+<br/>
+
+<form method="POST" action="uploadTruststoreFile" enctype="multipart/form-data">
+
+    <h3>Truststore upload:</h3> <br/>
+    Truststore JKS file to upload:<br/>
+    <input type="file" name="truststore"><br/>
+
+    Truststore password: <br/>
+    <input type="text" name="password"><br/>
+    <br/>
+    <input type="submit" value="Press here to upload the truststore jks file">
 </form>
 </body>
 </html>

@@ -145,7 +145,7 @@
                 <li>
                     <c:url value="/home/updatepmode" var="updatepmode">
                     </c:url>
-                    <a href="${updatepmode}">Update PMode</a>
+                    <a href="${updatepmode}">Configuration upload</a>
 
                 </li>
             </sec:authorize>

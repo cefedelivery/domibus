@@ -36,8 +36,7 @@ import javax.annotation.Resource;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -143,6 +142,18 @@ public class TrustStoreService {
         jmsOperations.send(new ReloadTrustStoreMessageCreator());
     }
 
+    public void replaceTruststore(byte[] store, String password) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+        File f = new File(trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file"));
+        if ((f.exists() && f.canWrite())||(!f.exists() && f.getParentFile().exists() && f.getParentFile().canWrite())){
+            KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
+            ts.load(new ByteArrayInputStream(store), password.toCharArray());
+            ts.store(new FileOutputStream(f), trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
+            trustStore = ts;
+            refreshTrustStore();
+        }
+
+    }
+
     class ReloadTrustStoreMessageCreator implements MessageCreator {
         @Override
         public Message createMessage(Session session) throws JMSException {
@@ -151,6 +162,4 @@ public class TrustStoreService {
             return m;
         }
     }
-
-
 }
