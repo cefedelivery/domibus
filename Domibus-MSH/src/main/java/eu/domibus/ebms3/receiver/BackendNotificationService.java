@@ -80,7 +80,7 @@ public class BackendNotificationService {
     private List<NotificationListener> notificationListenerServices;
 
     @Resource(name = "routingCriteriaFactories")
-    private List<CriteriaFactory> routingCriteriaFactories;
+    protected List<CriteriaFactory> routingCriteriaFactories;
 
     @Autowired
     @Qualifier("unknownReceiverQueue")
