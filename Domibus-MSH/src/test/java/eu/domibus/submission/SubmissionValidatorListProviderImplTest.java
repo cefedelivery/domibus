@@ -24,7 +24,7 @@ public class SubmissionValidatorListProviderImplTest {
     SubmissionValidatorListProviderImpl submissionValidatorListProvider;
 
     @Test
-    public void testGetSubmissionValidatorList() throws Exception {
+    public void testGetSubmissionValidatorListWithOneBeanFound() throws Exception {
         new Expectations() {{
             applicationContext.getBeanNamesForType(SubmissionValidatorList.class);
             result = new String[]{"wsPlugin", "jmsPlugin", "customPlugin"};
@@ -39,7 +39,6 @@ public class SubmissionValidatorListProviderImplTest {
 
             Assert.assertEquals(springBean, "customPlugin");
         }};
-
     }
 
     @Test
