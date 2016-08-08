@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public class SchemaPayloadSubmissionValidator implements SubmissionValidator {
 
-    private static final Log LOG = LogFactory.getLog(SchemaPayloadSubmissionValidator.class);
+    protected static final Log LOG = LogFactory.getLog(SchemaPayloadSubmissionValidator.class);
 
     protected JAXBContext jaxbContext;
     protected Resource schema;
