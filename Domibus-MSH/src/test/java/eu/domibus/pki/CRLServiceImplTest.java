@@ -17,6 +17,7 @@ import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertFalse;
@@ -59,7 +60,37 @@ public class CRLServiceImplTest {
     }
 
     @Test
-    public void testIsCertificateRevoked(@Injectable final X509CRLEntry x509CRLEntry) throws Exception {
+    public void testIsCertificateRevoked(@Injectable final X509Certificate certificate) throws Exception {
+        BigInteger serial = new BigInteger("0400000000011E44A5E404", 16);
+        final String crlUrl1 = "http://domain1.crl";
+        final String crlUrl2 = "http://domain2.crl";
+        final List<String> crlUrlList = Arrays.asList(new String[]{crlUrl1, crlUrl2});
+
+        new Expectations(crlService) {{
+            crlUtil.getCrlDistributionPoints(certificate);
+            returns(crlUrlList, crlUrlList);
+
+            crlService.isCertificateRevoked(certificate, crlUrl1);
+            returns(false, true, false);
+
+            crlService.isCertificateRevoked(certificate, crlUrl2);
+            returns(false, true, true);
+        }};
+        //certificate is valid in both CRLs
+        boolean certificateRevoked = crlService.isCertificateRevoked(certificate);
+        assertFalse(certificateRevoked);
+
+        //certificate is revoked in both CRLs
+        certificateRevoked = crlService.isCertificateRevoked(certificate);
+        assertTrue(certificateRevoked);
+
+        //certificate is revoked in the second CRL
+        certificateRevoked = crlService.isCertificateRevoked(certificate);
+        assertTrue(certificateRevoked);
+    }
+
+    @Test
+    public void testIsCertificateRevokedBySerialNumber(@Injectable final X509CRLEntry x509CRLEntry) throws Exception {
         final String crlUrlString = "file://test";
         final String serialNumber = "0400000000011E44A5E405";
         final BigInteger serialNumberInteger = new BigInteger(serialNumber, 16);

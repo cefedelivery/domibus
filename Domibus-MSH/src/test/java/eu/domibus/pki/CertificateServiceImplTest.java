@@ -4,6 +4,7 @@ import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.joda.time.DateTime;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +41,18 @@ public class CertificateServiceImplTest {
     @Before
     public void init() {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+    }
+
+    @Test
+    public void testIsCertificateValidationEnabled() throws Exception {
+        new Expectations() {{
+            domibusProperties.getProperty("domibus.certificate.validation.enabled", "true");
+            returns("true", "false");
+        }};
+
+        Assert.assertTrue(certificateService.isCertificateValidationEnabled());
+        Assert.assertFalse(certificateService.isCertificateValidationEnabled());
+
     }
 
     @Test

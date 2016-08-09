@@ -103,6 +103,8 @@ public class CRLUtil {
             derObjCrlDP = oAsnInStream.readObject();
         } catch (IOException e) {
             throw new DomibusCRLException("Error while extracting CRL distribution point URLs", e);
+        } finally {
+            IOUtils.closeQuietly(oAsnInStream);
         }
         DEROctetString dosCrlDP = (DEROctetString) derObjCrlDP;
         byte[] crldpExtOctets = dosCrlDP.getOctets();
@@ -112,6 +114,8 @@ public class CRLUtil {
             derObj2 = oAsnInStream2.readObject();
         } catch (IOException e) {
             throw new DomibusCRLException("Error while extracting CRL distribution point URLs", e);
+        }finally {
+            IOUtils.closeQuietly(oAsnInStream2);
         }
         CRLDistPoint distPoint = CRLDistPoint.getInstance(derObj2);
         List<String> crlUrls = new ArrayList<String>();
