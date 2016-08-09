@@ -37,6 +37,7 @@ import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.jms.JMSException;
@@ -48,12 +49,17 @@ import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.Collection;
 import java.util.List;
 
@@ -103,12 +109,20 @@ public abstract class PModeProvider {
             Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
             unmarshaller.setSchema(schema);
             unmarshaller.setEventHandler(new XmlValidationEventHandler());
-            final Configuration configuration = (Configuration) unmarshaller.unmarshal(new ByteArrayInputStream(bytes));
+
+            SAXParserFactory spf = SAXParserFactory.newInstance();
+            spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
+            Source xmlSource = new SAXSource(spf.newSAXParser().getXMLReader(), new InputSource(new StringReader(new String(bytes))));
+
+            final Configuration configuration = (Configuration) unmarshaller.unmarshal(xmlSource);
             if (configuration != null) {
                 this.configurationDAO.updateConfiguration(configuration);
                 LOG.info("Configuration successfully updated");
             }
-        } catch (JAXBException | SAXException xmlEx) {
+        } catch (JAXBException | SAXException | ParserConfigurationException xmlEx) {
             if (LOG.isDebugEnabled()) {
                 LOG.error("Xml not correctly processed: ", xmlEx);
             } else {
