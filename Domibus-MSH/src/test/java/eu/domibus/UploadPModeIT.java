@@ -91,7 +91,7 @@ public class UploadPModeIT extends AbstractIT {
             File wrongPmode = new File("src/test/resources/SamplePModes/wrong-domibus-configuration.xml");
             FileInputStream fis = new FileInputStream(wrongPmode);
             MultipartFile pModeContent = new MockMultipartFile("wrong-domibus-configuration", wrongPmode.getName(), "text/xml", IOUtils.toByteArray(fis));
-            String response = adminGui.uploadFileHandler(pModeContent);
+            String response = adminGui.uploadPmodeFile(pModeContent);
             Assert.assertTrue(response.contains("Failed to upload the PMode file due to"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());

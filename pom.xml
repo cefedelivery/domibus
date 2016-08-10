@@ -217,7 +217,7 @@
                         <execution>
                             <id>default-test</id>
                             <configuration>
-                                <argLine>-server -ea -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m
+                                <argLine>-server -ea -Duser.language=en -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m
                                     ${surefire.argLine}
                                 </argLine>
                                 <excludes>

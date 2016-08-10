@@ -30,6 +30,7 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.*;
+import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,9 @@ public class AdminGUIController {
 
     @Autowired
     private List<NotificationListener> notificationListenerServices;
+
+    @Autowired
+    private TrustStoreService trustStoreService;
 
     @Resource(name = "routingCriteriaFactories")
     private List<CriteriaFactory> routingCriteriaFactories;
@@ -263,16 +267,34 @@ public class AdminGUIController {
     /**
      * Upload single file using Spring Controller
      */
-    @RequestMapping(value = "/home/updatepmode", method = RequestMethod.POST)
+    @RequestMapping(value = "/home/uploadPmodeFile", method = RequestMethod.POST)
     public
     @ResponseBody
-    String uploadFileHandler(@RequestParam("file") final MultipartFile file) {
+    String uploadPmodeFile(@RequestParam("pmode") final MultipartFile pmode) {
 
-        if (!file.isEmpty()) {
+        if (!pmode.isEmpty()) {
             try {
-                final byte[] bytes = file.getBytes();
+                final byte[] bytes = pmode.getBytes();
                 pModeProvider.updatePModes(bytes);
-                return "PMode file has been successfully uploaded. TrustStore has been successfully reloaded.";
+                return "PMode file has been successfully uploaded.";
+            } catch (final Exception e) {
+                return "Failed to upload the PMode file due to => " + e.getMessage();
+            }
+        } else {
+            return "Failed to upload the PMode file since it was empty.";
+        }
+    }
+
+    @RequestMapping(value = "/home/uploadTruststoreFile", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    String uploadTruststoreFile(@RequestParam("truststore") final MultipartFile truststore, @RequestParam("password") final String password) {
+
+        if (!truststore.isEmpty()) {
+            try {
+                final byte[] bytes = truststore.getBytes();
+               trustStoreService.replaceTruststore(bytes, password);
+                return "Truststore file has been successfully replaced.";
             } catch (final Exception e) {
                 return "Failed to upload the PMode file due to => " + e.getMessage();
             }
