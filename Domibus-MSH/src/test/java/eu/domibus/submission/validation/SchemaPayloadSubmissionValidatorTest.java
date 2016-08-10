@@ -7,6 +7,9 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.Resource;
@@ -20,6 +23,8 @@ import java.util.Set;
  */
 @RunWith(JMockit.class)
 public class SchemaPayloadSubmissionValidatorTest {
+
+    private static final Log LOG = LogFactory.getLog(SchemaPayloadSubmissionValidator.class);
 
     @Injectable
     JAXBContext jaxbContext;
@@ -66,4 +71,34 @@ public class SchemaPayloadSubmissionValidatorTest {
         }};
     }
 
+    @Test
+    public void testValidateWhenExceptionIsThrown(@Injectable final Submission submission,
+                                                    @Injectable final Submission.Payload payload1) throws Exception {
+        new Expectations() {{
+            submission.getPayloads();
+            Set<Submission.Payload> payloads = new HashSet<>();
+            payloads.add(payload1);
+            result = payloads;
+
+            schema.getInputStream();
+            result = new NullPointerException();
+        }};
+        try {
+            schemaPayloadSubmissionValidator.validate(submission);
+            Assert.fail("It should throw " + SubmissionValidationException.class.getCanonicalName());
+        } catch (SubmissionValidationException e) {
+            LOG.debug("SubmissionValidationException catched " + e.getMessage());
+        }
+        new Expectations() {{
+            schema.getInputStream();
+            result = new SubmissionValidationException();
+        }};
+        try {
+            schemaPayloadSubmissionValidator.validate(submission);
+            Assert.fail("It should throw " + SubmissionValidationException.class.getCanonicalName());
+        } catch (SubmissionValidationException e) {
+            LOG.debug("SubmissionValidationException catched " + e.getMessage());
+        }
+
+    }
 }
