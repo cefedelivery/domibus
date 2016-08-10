@@ -36,6 +36,10 @@
         <servlet-name>mvc-dispatcher</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.html</url-pattern>
+    </servlet-mapping>
     <session-config>
         <tracking-mode>COOKIE</tracking-mode>
     </session-config>
@@ -104,4 +108,7 @@
         <res-auth>Container</res-auth>
     </resource-ref>
 
+    <error-page>
+        <location>/general-error.html</location>
+    </error-page>
 </web-app>
