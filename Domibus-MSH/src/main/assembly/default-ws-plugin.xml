@@ -29,15 +29,30 @@
     <baseDirectory></baseDirectory>
     <includeSiteDirectory>false</includeSiteDirectory>
     <files>
+        <!-- Tomcat -->
         <file>
             <source>${project.basedir}/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
-            <outputDirectory>conf/domibus/plugins/config</outputDirectory>
+            <outputDirectory>conf/domibus/plugins/config/tomcat</outputDirectory>
             <filtered>false</filtered>
         </file>
+        <!-- WebLogic -->
+        <file>
+            <source>${project.basedir}/src/main/conf/weblogic/domibus/conf/plugins/config/ws-plugin.xml</source>
+            <outputDirectory>conf/domibus/plugins/config/weblogic</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <!-- WildFly -->
+        <file>
+            <source>${project.basedir}/src/main/conf/wildfly/domibus/conf/plugins/config/ws-plugin.xml</source>
+            <outputDirectory>conf/domibus/plugins/config/wildfly</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <!-- Plugin jar -->
         <file>
             <source>${project.basedir}/../Domibus-default-ws-plugin/target/domibus-default-ws-plugin-${project.version}.jar</source>
             <outputDirectory>conf/domibus/plugins/lib</outputDirectory>
             <filtered>false</filtered>
         </file>
+
     </files>
 </assembly>
