@@ -33,3 +33,6 @@ target/
 *.iml
 *.ipr
 *.iws
+
+## maven-shade-plugin generated files
+dependency-reduced-pom.xml
