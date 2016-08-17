@@ -27,8 +27,12 @@
     <artifactId>domibus</artifactId>
     <version>3.2-SNAPSHOT</version>
     <packaging>pom</packaging>
+	<name>Domibus MSH</name>
     <modules>
         <module>Domibus-MSH</module>
+		<module>Domibus-MSH-api</module>
+        <module>Domibus-MSH-jms-spi</module>
+        <module>Domibus-MSH-jms-weblogic</module>
         <module>Domibus-plugin-api</module>
         <module>Domibus-ws-stubs</module>
         <module>Domibus-default-ws-plugin</module>
