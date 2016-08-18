@@ -2,6 +2,7 @@ package eu.domibus.jms.weblogic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.stereotype.Component;
 import weblogic.security.internal.SerializedSystemIni;
 import weblogic.security.internal.encryption.ClearOrEncryptedService;
 import weblogic.security.internal.encryption.EncryptionService;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class SecurityHelper {
 
 	private static final String SERVER_NAME_PROPERTY = "weblogic.Name";

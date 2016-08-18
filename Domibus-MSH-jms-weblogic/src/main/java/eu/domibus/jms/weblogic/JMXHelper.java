@@ -2,6 +2,8 @@ package eu.domibus.jms.weblogic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
@@ -16,7 +18,9 @@ import javax.naming.NamingException;
 import java.util.Hashtable;
 import java.util.Map;
 
+@Component
 public class JMXHelper {
+
 	public static final String LOCAL_DOMAIN_RUNTIME_MBEANSERVER_JNDI = "java:comp/env/jmx/domainRuntime";
 	public static final String REMOTE_DOMAIN_RUNTIME_MBEANSERVER_JNDI = "/jndi/weblogic.management.mbeanservers.domainruntime";
 	public static final String DOMAIN_RUNTIME_SERVICE_OBJECTNAME = "com.bea:Name=DomainRuntimeService,Type=weblogic.management.mbeanservers.domainruntime.DomainRuntimeServiceMBean";
@@ -25,7 +29,8 @@ public class JMXHelper {
 
 	private static final Log LOG = LogFactory.getLog(JMXHelper.class);
 
-	private SecurityHelper securityHelper = new SecurityHelper();
+	@Autowired
+	SecurityHelper securityHelper;
 
 	/**
 	 * Locally lookup domain runtime bean server. This will only work if we are already on an admin server.

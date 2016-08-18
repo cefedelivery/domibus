@@ -21,8 +21,16 @@ public class JMSDestinationSPI {
     protected long numberOfMessages;
     protected long numberOfMessagesPending;
 
-    public Object getProperty(String name) {
-        return properties.get(name);
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+    }
+
+    public <T> T getProperty(String name) {
+        return (T) properties.get(name);
     }
 
     public void setProperty(String name, Object value) {
