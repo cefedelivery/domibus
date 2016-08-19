@@ -3,17 +3,24 @@ package eu.domibus.jms.weblogic;
 import eu.domibus.jms.spi.JMSDestinationSPI;
 import eu.domibus.jms.spi.JMSManagerSPI;
 import eu.domibus.jms.spi.JmsMessageSPI;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import weblogic.messaging.runtime.MessageInfo;
 
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.io.StringReader;
+import java.util.*;
 
 /**
  * Created by Cosmin Baciu on 17-Aug-16.
@@ -26,7 +33,6 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
     private static final String PROPERTY_JNDI_NAME = "Jndi";
 
-    protected Map<String, JMSDestinationSPI> destinationMap;
     protected Map<String, ObjectName> queueMap;
     protected Map<String, ObjectName> topicMap;
 
@@ -35,10 +41,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
 
     @Override
     public Map<String, JMSDestinationSPI> getDestinations() {
-        if (destinationMap != null) {
-            return destinationMap;
-        }
-        destinationMap = new TreeMap<String, JMSDestinationSPI>();
+        Map<String, JMSDestinationSPI> destinationMap = new TreeMap<String, JMSDestinationSPI>();
         try {
             MBeanServerConnection mbsc = jmxHelper.getDomainRuntimeMBeanServerConnection();
             ObjectName drs = jmxHelper.getDomainRuntimeService();
@@ -185,6 +188,102 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         }
     }
 
+    @Override
+    public JmsMessageSPI getMessage(String source, String messageId) {
+        JMSDestinationSPI selectedDestination = getDestinations().get(source);
+        if (selectedDestination != null) {
+            String destinationType = selectedDestination.getType();
+            if ("Queue".equals(destinationType)) {
+                try {
+                    ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
+                    return getMessageFromDestination(destination, messageId);
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+        return null;
+    }
+
+    private JmsMessageSPI getMessageFromDestination(ObjectName destination, String messageId) throws Exception {
+        List<JmsMessageSPI> messages = getMessagesFromDestination(destination, getSelector(messageId));
+        if (!messages.isEmpty()) {
+            return messages.get(0);
+        }
+        return null;
+    }
+
+    private List<JmsMessageSPI> getMessagesFromDestination(ObjectName destination, String selector) throws Exception {
+        List<JmsMessageSPI> messages = new ArrayList<JmsMessageSPI>();
+        MBeanServerConnection mbsc = jmxHelper.getDomainRuntimeMBeanServerConnection();
+        if (selector == null) {
+            selector = "true";
+        }
+        Integer timeout = new Integer(0);
+        Integer stateMask = new Integer( // Show messages in destination in all possible states
+                MessageInfo.STATE_VISIBLE | // Visible and available for consumption
+                        MessageInfo.STATE_DELAYED | // Pending delayed delivery
+                        MessageInfo.STATE_PAUSED | // Pending pause operation
+                        MessageInfo.STATE_RECEIVE | // Pending receive operation
+                        MessageInfo.STATE_SEND | // Pending send operation
+                        MessageInfo.STATE_TRANSACTION // Pending send or receive operation as part of global transaction
+        );
+        String messageCursor = (String) mbsc.invoke(destination, "getMessages", new Object[]{selector, timeout, stateMask},
+                new String[]{String.class.getName(), Integer.class.getName(), Integer.class.getName()});
+        Long totalAmountOfMessages = (Long) mbsc.invoke(destination, "getCursorSize", new Object[]{messageCursor}, new String[]{String.class.getName()});
+        CompositeData[] allMessageMetaData = (CompositeData[]) mbsc.invoke(destination, "getItems", new Object[]{messageCursor, new Long(0),
+                new Integer(totalAmountOfMessages.intValue())}, new String[]{String.class.getName(), Long.class.getName(), Integer.class.getName()});
+
+
+        if (allMessageMetaData != null) {
+            for (CompositeData messageMetaData : allMessageMetaData) {
+                JmsMessageSPI message = convertMessage(messageMetaData);
+                String messageId = message.getId();
+                CompositeData messageDataDetails = (CompositeData) mbsc.invoke(destination, "getMessage", new Object[]{messageCursor, messageId}, new String[]{
+                        String.class.getName(), String.class.getName()});
+                message = convertMessage(messageDataDetails);
+                messages.add(message);
+            }
+        }
+        return messages;
+    }
+
+    @Override
+    public List<JmsMessageSPI> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
+        List<JmsMessageSPI> messages = new ArrayList<>();
+        if(source == null) {
+            return messages;
+        }
+
+        JMSDestinationSPI selectedDestination = getDestinations().get(source);
+        if (selectedDestination != null) {
+            String destinationType = selectedDestination.getType();
+            if ("Queue".equals(destinationType)) {
+                try {
+                    Map<String, Object> criteria = new HashMap<String, Object>();
+                    if (jmsType != null) {
+                        criteria.put("JMSType", jmsType);
+                    }
+                    if (fromDate != null) {
+                        criteria.put("JMSTimestamp_from", fromDate.getTime());
+                    }
+                    if (toDate != null) {
+                        criteria.put("JMSTimestamp_to", toDate.getTime());
+                    }
+                    if (selectorClause != null) {
+                        criteria.put("selectorClause", selectorClause);
+                    }
+                    String selector = getSelector(criteria);
+                    ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
+                    messages = getMessagesFromDestination(destination, selector);
+                } catch (Exception e) {
+                    LOG.error("Error getting messages", e);
+                }
+            }
+        }
+        return messages;
+    }
+
     private int deleteMessages(ObjectName destination, String selector) throws Exception {
         MBeanServerConnection mbsc = jmxHelper.getDomainRuntimeMBeanServerConnection();
         Integer deleted = (Integer) mbsc.invoke(destination, "deleteMessages", new Object[]{selector}, new String[]{String.class.getName()});
@@ -213,6 +312,36 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         return selector.toString();
     }
 
+    public String getSelector(Map<String, Object> criteria) {
+        StringBuffer selector = new StringBuffer();
+        // JMSType
+        String jmsType = (String) criteria.get("JMSType");
+        if (!StringUtils.isEmpty(jmsType)) {
+            selector.append(selector.length() > 0 ? " and " : "");
+            selector.append("JMSType='").append(jmsType).append("'");
+        }
+        // JMSTimestamp
+        Long jmsTimestampFrom = (Long) criteria.get("JMSTimestamp_from");
+        if (jmsTimestampFrom != null) {
+            selector.append(selector.length() > 0 ? " and " : "");
+            selector.append("JMSTimestamp>=").append(jmsTimestampFrom);
+        }
+        Long jmsTimestampTo = (Long) criteria.get("JMSTimestamp_to");
+        if (jmsTimestampTo != null) {
+            selector.append(selector.length() > 0 ? " and " : "");
+            selector.append("JMSTimestamp<=").append(jmsTimestampTo);
+        }
+        String selectorClause = (String) criteria.get("selectorClause");
+        if (!StringUtils.isEmpty(selectorClause)) {
+            selector.append(selector.length() > 0 ? " and " : "");
+            selector.append(selectorClause);
+        }
+        if (selector.length() == 0) {
+            selector.append("true");
+        }
+        return selector.toString().trim();
+    }
+
 
     @Override
     public boolean moveMessages(String source, String destination, String[] messageIds) {
@@ -235,5 +364,99 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         Integer moved = (Integer) mbsc.invoke(from, "moveMessages", new Object[] { selector, toDestinationInfo }, new String[] { String.class.getName(),
                 CompositeData.class.getName() });
         return moved;
+    }
+
+    public JmsMessageSPI convertMessage(CompositeData messageData) throws Exception {
+        JmsMessageSPI message = new JmsMessageSPI();
+        String xmlMessage = String.valueOf(messageData.get("MessageXMLText"));
+        Document xmlDocument = parseXML(xmlMessage);
+        String ns = "http://www.bea.com/WLS/JMS/Message";
+        Element root = xmlDocument.getDocumentElement();
+        Element header = getChildElement(root, "Header");
+        Element jmsMessageId = getChildElement(header, "JMSMessageID");
+        String id = jmsMessageId.getTextContent();
+        message.setId(id);
+        message.getProperties().put("JMSMessageID", id);
+        Element jmsTimestamp = getChildElement(header, "JMSTimestamp");
+        String timestamp = jmsTimestamp.getTextContent();
+        message.setTimestamp(new Date(Long.parseLong(timestamp)));
+        message.getProperties().put("JMSTimestamp", timestamp);
+        Element jmsType = getChildElement(header, "JMSType");
+        if (jmsType != null) {
+            String type = jmsType.getTextContent();
+            message.setType(type);
+            message.getProperties().put("JMSType", type);
+        }
+        Element propertiesRoot = getChildElement(header, "Properties");
+        List<Element> properties = getChildElements(propertiesRoot, "property");
+        for (Element property : properties) {
+            String key = property.getAttribute("name");
+            String value = getFirstChildElement(property).getTextContent();
+            message.getProperties().put(key, value);
+        }
+        Element jmsBody = getChildElement(root, "Body");
+        if (jmsBody != null) {
+            message.setContent(jmsBody.getTextContent());
+        }
+        return message;
+    }
+
+    public Document parseXML(String xml) throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        factory.setNamespaceAware(true);
+        InputSource is = new InputSource(new StringReader(xml));
+        return builder.parse(is);
+    }
+
+    public Element getChildElement(Element parent, String name) {
+        for (int i = 0; i < parent.getChildNodes().getLength(); i++) {
+            if (parent.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE) {
+                Element child = (Element) parent.getChildNodes().item(i);
+                String localName = child.getLocalName();
+                if (localName == null) {
+                    localName = child.getNodeName();
+                    if (localName != null && localName.contains(":")) {
+                        localName = localName.substring(localName.indexOf(":") + 1);
+                    }
+                }
+                String ns = child.getNamespaceURI();
+                if (localName.equals(name)) {
+                    return child;
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<Element> getChildElements(Element parent, String name) {
+        List<Element> childElements = new ArrayList<Element>();
+        for (int i = 0; i < parent.getChildNodes().getLength(); i++) {
+            if (parent.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE) {
+                Element child = (Element) parent.getChildNodes().item(i);
+                String localName = child.getLocalName();
+                if (localName == null) {
+                    localName = child.getNodeName();
+                    if (localName != null && localName.contains(":")) {
+                        localName = localName.substring(localName.indexOf(":") + 1);
+                    }
+                }
+                String ns = child.getNamespaceURI();
+                if (localName.equals(name)) {
+                    childElements.add(child);
+                }
+            }
+        }
+        return childElements;
+    }
+
+    public Element getFirstChildElement(Element parent) {
+        for (int i = 0; i < parent.getChildNodes().getLength(); i++) {
+            if (parent.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE) {
+                Element child = (Element) parent.getChildNodes().item(i);
+                return child;
+            }
+        }
+        return null;
     }
 }

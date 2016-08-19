@@ -1,5 +1,7 @@
 package eu.domibus.api.jms;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -9,11 +11,9 @@ public interface JMSManager {
 
     Map<String, JMSDestination> getDestinations();
 
-//    Message getMessage(String source, String messageId);
-//
-//    List<Message> getMessages(String source, String msgType, Date fromDate, Date toDate, XPathFilterType xpathFilter, String selector);
-//
-//    List<Message> getMessages(String source, String msgType, Date fromDate, Date toDate, String selector);
+    JmsMessage getMessage(String source, String messageId);
+
+    List<JmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selector);
 
     boolean sendMessage(JmsMessage message, String connectionFactory, String destination, String destinationType);
 

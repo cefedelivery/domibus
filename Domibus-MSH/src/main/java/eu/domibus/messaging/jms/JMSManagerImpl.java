@@ -9,6 +9,8 @@ import eu.domibus.jms.spi.JmsMessageSPI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +33,19 @@ public class JMSManagerImpl implements JMSManager {
         Map<String, JMSDestinationSPI> destinations = jmsManagerSPI.getDestinations();
         return jmsDestinationMapper.convert(destinations);
     }
+
+    @Override
+    public JmsMessage getMessage(String source, String messageId) {
+        JmsMessageSPI jmsMessageSPI = jmsManagerSPI.getMessage(source, messageId);
+        return jmsMessageMapper.convert(jmsMessageSPI);
+    }
+
+    @Override
+    public List<JmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selector) {
+        List<JmsMessageSPI> messagesSPI = jmsManagerSPI.getMessages(source, jmsType, fromDate, toDate, selector);
+        return jmsMessageMapper.convert(messagesSPI);
+    }
+
 
     @Override
     public boolean sendMessage(JmsMessage message, String connectionFactory, String destination, String destinationType) {

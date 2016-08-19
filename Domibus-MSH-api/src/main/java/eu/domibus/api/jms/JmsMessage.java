@@ -52,7 +52,6 @@ public class JmsMessage {
 		return properties;
 	}
 
-	//TODO separate between headers and properties
 	public Map<String, String> getJMSProperties() {
 		Map<String, String> jmsProperties = new HashMap<String, String>();
 		for (String key : properties.keySet()) {
@@ -63,7 +62,6 @@ public class JmsMessage {
 		return jmsProperties;
 	}
 
-	//TODO separate between headers and properties
 	public Map<String, String> getCustomProperties() {
 		Map<String, String> customProperties = new HashMap<String, String>();
 		for (String key : properties.keySet()) {
