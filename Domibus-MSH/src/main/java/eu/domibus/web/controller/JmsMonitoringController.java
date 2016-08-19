@@ -65,6 +65,36 @@ public class JmsMonitoringController {
 
     }
 
+    @RequestMapping(value = {"/home/jmsmessage"}, method = {GET, POST})
+    public ModelAndView jmsMessagePage(
+            @RequestParam(value = "source", required = false) final String source,
+            @RequestParam(value = "selectedMessages", required = false) final List<String> messageIds,
+            @RequestParam(value = "action", required = false) final String action
+    ) {
+
+        final ModelAndView model = new ModelAndView();
+        model.addObject("source", source);
+
+        JmsMessage jmsMessage = null;
+        if(action.equals("New")) {
+            jmsMessage = new JmsMessage();
+        } else if(messageIds.size() == 1) {
+            jmsMessage = jmsManager.getMessage(source, messageIds.iterator().next());
+        }
+
+        Map<String, JMSDestination> jmsDestinations = jmsManager.getDestinations();
+        model.addObject("destinationMap", jmsDestinations);
+
+        model.addObject("action", action);
+        model.addObject("message", jmsMessage);
+        model.addObject("selectedMessages", messageIds);
+        model.addObject("multiMessage", messageIds.size() > 1 ? true : false);
+
+        model.setViewName("jmsmessage");
+        return model;
+
+    }
+
     protected Date getFromDate(String fromDate) {
         if (StringUtils.isNotEmpty(fromDate)) {
             try {

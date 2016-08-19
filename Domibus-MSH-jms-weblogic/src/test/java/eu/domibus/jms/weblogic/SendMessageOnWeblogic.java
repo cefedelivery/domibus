@@ -1,5 +1,6 @@
 package eu.domibus.jms.weblogic;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import weblogic.security.Security;
 
@@ -7,6 +8,7 @@ import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.security.auth.Subject;
+import java.io.InputStream;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Hashtable;
@@ -45,9 +47,8 @@ public class SendMessageOnWeblogic {
             QueueConnection qc = cf.createQueueConnection();
             QueueSession qs = qc.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
             QueueSender qsr = qs.createSender(queue);
-            String message = "";
-//            InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("jmsMessage.xml");
-//            final String message = IOUtils.toString(resourceAsStream);
+            InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("jms/etrustexJmsMessage.xml");
+            final String message = IOUtils.toString(resourceAsStream);
             TextMessage textMessage = createTextMessage(qs, message, "", null);
             qsr.send(textMessage);
             ic.close();

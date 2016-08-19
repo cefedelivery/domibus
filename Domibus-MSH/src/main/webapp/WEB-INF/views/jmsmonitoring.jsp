@@ -1,6 +1,8 @@
 <%@page session="true" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
 
 <html>
 <head>
@@ -86,7 +88,7 @@
     </table>
 </form>
 
-<form name="eventsForm" method="post" action="jmsmessage.jsp">
+<form name="eventsForm" method="post" action="jmsmessage">
     <input type="hidden" name="source" value="${source}">
     <input id="NewButton" type="submit" name="action" value="New"/>
     <input id="ResendButton" type="submit" name="action" value="Resend" onclick="return validateForm(this);">
@@ -107,10 +109,10 @@
                 <td width="5%" valign="top">
                     <input type="checkbox" name="selectedMessages" value="${message.id}"/>
                 </td>
-                <td valign="top" width="10%" nowrap><a href="jmsmessage.jsp?action=View&selectedMessages=${message.id}">${message.id}</a></td>
+                <td valign="top" width="10%" nowrap><a href="jmsmessage?action=View&source=${source}&selectedMessages=${message.id}">${message.id}</a></td>
                 <td valign="top" width="30%" class="tooltip" alt="${message.type}">${message.type}</td>
                 <td valign="top" width="10%" nowrap><fmt:formatDate value="${message.timestamp}" pattern="yyyy-MM-dd HH:mm:ss.SSS" /></td>
-                <td valign="top" width="100%" class="tooltip" alt="${message.content}">${message.content}</td>
+                <td valign="top" width="100%" class="tooltip" alt="${fn:escapeXml(message.content)}">${message.content}</td>
                 <td valign="top" width="1%">${message.customProperties}</td>
                 <td valign="top" width="1%">${message.JMSProperties}</td>
             </tr>

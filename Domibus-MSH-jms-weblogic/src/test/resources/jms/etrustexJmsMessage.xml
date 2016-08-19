@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope
+        xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+        xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+        xmlns:doc="ec:services:wsdl:Document-1"
+        xmlns:ec="ec:services:wsdl:DocumentBundle-2"
+        xmlns:ec1="ec:schema:xsd:CommonAggregateComponents-2"
+        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+        xmlns:stan="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader">
+    <soapenv:Header>
+        <doc:Header>
+            <ec1:BusinessHeader>
+                <stan:Sender>
+                    <stan:Identifier schemeID="GLN">EUCEG_EC</stan:Identifier>
+                </stan:Sender>
+                <stan:Receiver>
+                    <stan:Identifier schemeID="GLN">EUCEG_000001_EDEL</stan:Identifier>
+                </stan:Receiver>
+                <stan:DocumentIdentification>TEST-GW-BDL-59</stan:DocumentIdentification>
+                <stan:CreationDateAndTime>2016-03-21 14:36:45</stan:CreationDateAndTime>
+                <ec1:ValidationResult>
+                    <svrl:schematron-output schemaVersion=""
+                                            title="Business rules for e-TrustEx DocumentBundle"
+                                            xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                                            xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+                                            xmlns:cct="urn:oasis:names:specification:ubl:schema:xsd:CoreComponentParameters-2"
+                                            xmlns:ec="ec:schema:xsd:DocumentBundle-0.1"
+                                            xmlns:fn="http://www.w3.org/2005/xpath-functions"
+                                            xmlns:iso="http://purl.oclc.org/dsdl/schematron"
+                                            xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2"
+                                            xmlns:sch="http://www.ascc.net/xml/schematron"
+                                            xmlns:stat="urn:oasis:names:specification:ubl:schema:xsd:DocumentStatusCode-1.0"
+                                            xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
+                                            xmlns:udt="urn:un:unece:uncefact:data:draft:UnqualifiedDataTypesSchemaModule:2"
+                                            xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                        <svrl:ns-prefix-in-attribute-values prefix="qdt"
+                                                            uri="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2"/>
+                        <svrl:ns-prefix-in-attribute-values prefix="cct"
+                                                            uri="urn:oasis:names:specification:ubl:schema:xsd:CoreComponentParameters-2"/>
+                        <svrl:ns-prefix-in-attribute-values prefix="cbc"
+                                                            uri="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"/>
+                        <svrl:ns-prefix-in-attribute-values prefix="cac"
+                                                            uri="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"/>
+                        <svrl:ns-prefix-in-attribute-values prefix="udt"
+                                                            uri="urn:un:unece:uncefact:data:draft:UnqualifiedDataTypesSchemaModule:2"/>
+                        <svrl:ns-prefix-in-attribute-values prefix="stat"
+                                                            uri="urn:oasis:names:specification:ubl:schema:xsd:DocumentStatusCode-1.0"/>
+                        <svrl:ns-prefix-in-attribute-values prefix="ec" uri="ec:schema:xsd:DocumentBundle-0.1"/>
+                        <svrl:ns-prefix-in-attribute-values prefix="fn" uri="http://www.w3.org/2005/xpath-functions"/>
+                        <svrl:ns-prefix-in-attribute-values prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
+                        <svrl:active-pattern/>
+                        <svrl:fired-rule context="*[local-name()='DocumentBundle']/cbc:IssueDate"/>
+                        <svrl:failed-assert flag="warning"
+                                            location="/*[local-name()='DocumentBundle']/*[local-name()='IssueDate']"
+                                            test="not ( fn:days-from-duration(xs:date(fn:current-date()) - xs:date(.)) > 365 )">
+                            <svrl:text>error.issuedate_old</svrl:text>
+                        </svrl:failed-assert>
+                        <svrl:active-pattern/>
+                        <svrl:active-pattern id="DocumentBundle_code_list_rules" name="DocumentBundle_code_list_rules"/>
+                    </svrl:schematron-output>
+                </ec1:ValidationResult>
+            </ec1:BusinessHeader>
+        </doc:Header>
+    </soapenv:Header>
+    <soapenv:Body>
+        <doc:SubmitDocumentRequest>
+            <doc:transactionNamespace>{ec:services:wsdl:DocumentBundle-2}SubmitDocumentBundleRequest
+            </doc:transactionNamespace>
+            <ec:DocumentBundle xmlns:ec="ec:schema:xsd:DocumentBundle-1"
+                               xmlns:ec1="ec:schema:xsd:CommonAggregateComponents-2"
+                               xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                               xmlns:stan="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader"
+                               xmlns:urn="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                               xmlns:urn1="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+                <urn1:ID>TEST-GW-BDL-59</urn1:ID>
+                <urn1:IssueDate>2013-09-01</urn1:IssueDate>
+                <urn1:Note>ConversationId:232357</urn1:Note>
+                <urn:SenderParty/>
+                <urn:ReceiverParty/>
+                <ec1:DocumentWrapperReference>
+                    <urn1:ID>TEST-GW-01</urn1:ID>
+                    <urn1:DocumentTypeCode>BINARY</urn1:DocumentTypeCode>
+                    <ec1:ResourceInformationReference>
+                        <ec1:DocumentHashMethod>SHA-512</ec1:DocumentHashMethod>
+                        <urn1:DocumentHash>b2214ca5d1272e917715f19c403af713eae73fd866e626ad4b7332e30f9cee81840c33b591d6be11623b677d943b0fe1fd0f5d57b0b664a16e84e164aa1721e7</urn1:DocumentHash>
+                    </ec1:ResourceInformationReference>
+                </ec1:DocumentWrapperReference>
+            </ec:DocumentBundle>
+        </doc:SubmitDocumentRequest>
+    </soapenv:Body>
+</soapenv:Envelope>
