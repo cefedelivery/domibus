@@ -23,7 +23,7 @@
 
 
 <h1>JMS Message</h1>
-<form name="messageForm" method="post" action="message.jsp">
+<form name="messageForm" method="post" action="jmsmessage/action">
     <input type="hidden" name="source" value="${source}"/>
     <table border="0" width="100%">
 
@@ -131,11 +131,6 @@
 
 </form>
 
-<c:set var="back" value="-1"/>
-<c:if test="${action == 'send' || action == 'move' || action == 'remove'}">
-    <c:set var="back" value="-2"/>
-</c:if>
-
-<a href="jmsmonitoring" onclick="history.go(${back});return false;">Return to JMS Monitoring</a>
+<a href="jmsmonitoring" onclick="history.go(-1);return false;">Return to JMS Monitoring</a>
 </body>
 </html>

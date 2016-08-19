@@ -75,11 +75,13 @@ public class JmsMonitoringController {
         final ModelAndView model = new ModelAndView();
         model.addObject("source", source);
 
-        JmsMessage jmsMessage = null;
-        if(action.equals("New")) {
-            jmsMessage = new JmsMessage();
-        } else if(messageIds.size() == 1) {
-            jmsMessage = jmsManager.getMessage(source, messageIds.iterator().next());
+        JmsMessage jmsMessage = new JmsMessage();
+        if(messageIds != null) {
+            model.addObject("multiMessage", messageIds.size() > 1 ? true : false);
+
+            if(messageIds.size() == 1) {
+                jmsMessage = jmsManager.getMessage(source, messageIds.iterator().next());
+            }
         }
 
         Map<String, JMSDestination> jmsDestinations = jmsManager.getDestinations();
@@ -88,12 +90,73 @@ public class JmsMonitoringController {
         model.addObject("action", action);
         model.addObject("message", jmsMessage);
         model.addObject("selectedMessages", messageIds);
-        model.addObject("multiMessage", messageIds.size() > 1 ? true : false);
 
         model.setViewName("jmsmessage");
         return model;
-
     }
+
+    @RequestMapping(value = {"/home/jmsmessage/action"}, method = {GET, POST})
+    public ModelAndView jmsMessageActionPage(
+            @RequestParam(value = "source", required = false) final String source,
+            @RequestParam(value = "type", required = false) final String type,
+            @RequestParam(value = "content", required = false) final String content,
+            @RequestParam(value = "customProperties", required = false) final Map<String, String> customProperties,
+            @RequestParam(value = "destinationKey", required = false) final String destination,
+            @RequestParam(value = "selectedMessages", required = false) final List<String> messageIds,
+            @RequestParam(value = "action", required = false) final String action
+    ) {
+
+        final ModelAndView model = new ModelAndView();
+        StringBuffer messageOutcome = new StringBuffer();
+
+
+        if ("send".equals(action)) {
+            if(messageIds != null && messageIds.size() > 0) {
+                for (String messageId : messageIds) {
+                    JmsMessage message = jmsManager.getMessage(source, messageId);
+                    boolean success = jmsManager.sendMessage(message, null, destination, "Queue");
+                    if(!success) {
+                        messageOutcome.append("Failed to send message [" + message.getId() + "]");
+                    }
+
+                }
+                if(messageOutcome.length() == 0) {
+                    messageOutcome.append("Messages sent.");
+                }
+            } else { //new message
+                JmsMessage message = new JmsMessage();
+                message.setContent(content);
+                message.setType(type);
+                message.setProperties(customProperties);
+                boolean success = jmsManager.sendMessage(message, null, destination, "Queue");
+                messageOutcome.append(success ? "Message sent." : "Failed to send message.");
+            }
+        } else if ("move".equals(action)) {
+            boolean success = jmsManager.moveMessages(source, destination, messageIds.toArray(new String[0]));
+            if(!success) {
+                messageOutcome.append("Failed to move messages");
+            }
+
+            if(messageOutcome.length() == 0) {
+                messageOutcome.append("Messages moved.");
+            }
+        } else if ("remove".equals(action)) {
+            boolean success = jmsManager.deleteMessages(source, messageIds.toArray(new String[0]));
+            if(!success) {
+                messageOutcome.append("Failed to delete messages");
+            }
+
+            if(messageOutcome.length() == 0) {
+                messageOutcome.append("Messages deleted.");
+            }
+        }
+        model.addObject("messageResult", messageOutcome.toString());
+
+        model.setViewName("jmsmessageaction");
+        return model;
+    }
+
+
 
     protected Date getFromDate(String fromDate) {
         if (StringUtils.isNotEmpty(fromDate)) {
