@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -14,8 +15,12 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import weblogic.messaging.runtime.MessageInfo;
 
+import javax.annotation.Resource;
+import javax.jms.Destination;
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
@@ -38,6 +43,9 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
 
     @Autowired
     JMXHelper jmxHelper;
+
+    @Resource(name = "jmsSender")
+    private JmsOperations jmsOperations;
 
     @Override
     public Map<String, JMSDestinationSPI> getDestinations() {
@@ -172,7 +180,23 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
 
     @Override
     public boolean sendMessage(JmsMessageSPI message, String connectionFactory, String destination, String destinationType) {
-        return false;
+        JMSDestinationSPI jmsDestinationSPI = getDestinations().get(destination);
+        if (jmsDestinationSPI == null) {
+            LOG.warn("Destination [" + destination + "] does not exists");
+            return false;
+        }
+
+        Destination jmsDestination = null;
+        try {
+            String destinationJndi = jmsDestinationSPI.getProperty(PROPERTY_JNDI_NAME);
+            LOG.debug("Found JNDI [" + destinationJndi + "] for destination [" + destination + "]");
+            jmsDestination = InitialContext.doLookup(destinationJndi);
+        } catch (NamingException e) {
+            LOG.error("Error performing lookup for [" + destination + "]");
+            return false;
+        }
+        jmsOperations.send(jmsDestination, new JmsMessageCreator(message));
+        return true;
     }
 
     @Override
@@ -251,7 +275,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
     @Override
     public List<JmsMessageSPI> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
         List<JmsMessageSPI> messages = new ArrayList<>();
-        if(source == null) {
+        if (source == null) {
             return messages;
         }
 
@@ -361,8 +385,8 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
     private int moveMessages(ObjectName from, ObjectName to, String selector) throws Exception {
         MBeanServerConnection mbsc = jmxHelper.getDomainRuntimeMBeanServerConnection();
         CompositeData toDestinationInfo = (CompositeData) mbsc.getAttribute(to, "DestinationInfo");
-        Integer moved = (Integer) mbsc.invoke(from, "moveMessages", new Object[] { selector, toDestinationInfo }, new String[] { String.class.getName(),
-                CompositeData.class.getName() });
+        Integer moved = (Integer) mbsc.invoke(from, "moveMessages", new Object[]{selector, toDestinationInfo}, new String[]{String.class.getName(),
+                CompositeData.class.getName()});
         return moved;
     }
 

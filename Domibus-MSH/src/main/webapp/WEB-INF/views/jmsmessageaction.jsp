@@ -19,6 +19,6 @@
 </div>
 
 
-<a href="jmsmonitoring" onclick="history.go(-2);return false;">Return to JMS Monitoring</a>
+<a href="../jmsmonitoring?source=${source}&fromDate=${fromDate}&toDate=${toDate}&jmsType=${jmsType}&selector=${selector}">Return to JMS Monitoring</a>
 </body>
 </html>

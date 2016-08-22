@@ -66,9 +66,21 @@
                 </c:forEach>
             </select>
         </td></tr>
-        <tr class="row"><td>period:</td><td colspan="2"><input id="From" name="from" size="16" value="${fromDate}"/>&nbsp;-&nbsp;<input id="To" name="to" size="16" value="${toDate}"/></td></tr>
-        <tr class="row"><td>type:</td><td colspan="2"><input name="type" size="120" value="${jmsType}"></td></tr>
-        <tr class="row"><td>selector:</td><td colspan="2"><input name="selector" size="120" value="${selector}"></td></tr>
+        <tr class="row">
+            <td>period:</td>
+            <td colspan="2">
+                <input id="From" name="fromDate" size="16" value="${fromDate}"/>&nbsp;-&nbsp;
+                <input id="To" name="toDate" size="16" value="${toDate}"/>
+            </td>
+        </tr>
+        <tr class="row">
+            <td>type:</td>
+            <td colspan="2"><input name="jmsType" size="120" value="${jmsType}"></td>
+        </tr>
+        <tr class="row">
+            <td>selector:</td>
+            <td colspan="2"><input name="selector" size="120" value="${selector}"></td>
+        </tr>
     </table>
     <table>
         <tr class="row">
@@ -90,6 +102,11 @@
 
 <form name="eventsForm" method="post" action="jmsmessage">
     <input type="hidden" name="source" value="${source}">
+    <input type="hidden" name="fromDate" value="${fromDate}">
+    <input type="hidden" name="toDate" value="${toDate}">
+    <input type="hidden" name="jmsType" value="${jmsType}">
+    <input type="hidden" name="selector" value="${selector}">
+
     <input id="NewButton" type="submit" name="action" value="New"/>
     <input id="ResendButton" type="submit" name="action" value="Resend" onclick="return validateForm(this);">
     <input id="MoveButton" type="submit" name="action" value="Move" onclick="return validateForm(this);"/>
@@ -109,7 +126,7 @@
                 <td width="5%" valign="top">
                     <input type="checkbox" name="selectedMessages" value="${message.id}"/>
                 </td>
-                <td valign="top" width="10%" nowrap><a href="jmsmessage?action=View&source=${source}&selectedMessages=${message.id}">${message.id}</a></td>
+                <td valign="top" width="10%" nowrap><a href="jmsmessage?action=View&source=${source}&selectedMessages=${message.id}&fromDate=${fromDate}&toDate=${toDate}&jmsType=${jmsType}&selector=${selector}">${message.id}</a></td>
                 <td valign="top" width="30%" class="tooltip" alt="${message.type}">${message.type}</td>
                 <td valign="top" width="10%" nowrap><fmt:formatDate value="${message.timestamp}" pattern="yyyy-MM-dd HH:mm:ss.SSS" /></td>
                 <td valign="top" width="100%" class="tooltip" alt="${fn:escapeXml(message.content)}">${message.content}</td>

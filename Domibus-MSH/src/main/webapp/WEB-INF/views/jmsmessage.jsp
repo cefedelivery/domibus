@@ -25,6 +25,11 @@
 <h1>JMS Message</h1>
 <form name="messageForm" method="post" action="jmsmessage/action">
     <input type="hidden" name="source" value="${source}"/>
+    <input type="hidden" name="fromDate" value="${fromDate}">
+    <input type="hidden" name="to" value="${to}">
+    <input type="hidden" name="jmsType" value="${jmsType}">
+    <input type="hidden" name="selector" value="${selector}">
+
     <table border="0" width="100%">
 
     <c:choose>
@@ -45,8 +50,11 @@
                 <tr class="row"><td valign="top" width="100">source:</td><td>${source}</td></tr>
                 <tr class="row">
                     <td valign="top" width="100">id:</td>
-                    <td><input type="hidden" name="selectedMessages" value="${selectedMessages}"/>
-                            ${selectedMessages}
+                    <td>
+                        <c:forEach items="${selectedMessages}" var="id">
+                            <input type="hidden" name="selectedMessages" value="${id}"/>
+                            <c:out value="${id} "/>
+                        </c:forEach>
                     </td>
                 </tr>
                 <tr class="row">
@@ -131,6 +139,6 @@
 
 </form>
 
-<a href="jmsmonitoring" onclick="history.go(-1);return false;">Return to JMS Monitoring</a>
+<a href="jmsmonitoring?source=${source}&fromDate=${fromDate}&toDate=${toDate}&jmsType=${jmsType}&selector=${selector}">Return to JMS Monitoring</a>
 </body>
 </html>

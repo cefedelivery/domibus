@@ -3,6 +3,7 @@ package eu.domibus.web.controller;
 import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.util.JsonUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,15 +35,19 @@ public class JmsMonitoringController {
     @Autowired
     JMSManager jmsManager;
 
+    @Autowired
+    JsonUtil jsonUtil;
+
     protected SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
     @RequestMapping(value = {"/home/jmsmonitoring"}, method = {GET, POST})
     public ModelAndView jmsMonitoringPage(
+            HttpServletRequest request,
             @RequestParam(value = "source", required = false) final String source,
             @RequestParam(value = "jmsType", required = false) final String jmsType,
-            @RequestParam(value = "from", required = false) final String fromDate,
-            @RequestParam(value = "to", required = false) final String toDate,
+            @RequestParam(value = "fromDate", required = false) final String fromDate,
+            @RequestParam(value = "toDate", required = false) final String toDate,
             @RequestParam(value = "selector", required = false) final String selector
     ) {
 
@@ -62,18 +68,29 @@ public class JmsMonitoringController {
         model.addObject("messages", messages);
         model.setViewName("jmsmonitoring");
         return model;
+    }
 
+    protected void addFilters(ModelAndView model, HttpServletRequest request) {
+        model.addObject("source", request.getParameter("source"));
+        model.addObject("jmsType", request.getParameter("jmsType"));
+        model.addObject("selector", request.getParameter("selector"));
+
+        Date from = getFromDate(request.getParameter("fromDate"));
+        Date to = getToDate(request.getParameter("toDate"));
+        model.addObject("fromDate", df.format(from));
+        model.addObject("toDate", df.format(to));
     }
 
     @RequestMapping(value = {"/home/jmsmessage"}, method = {GET, POST})
     public ModelAndView jmsMessagePage(
+            HttpServletRequest request,
             @RequestParam(value = "source", required = false) final String source,
             @RequestParam(value = "selectedMessages", required = false) final List<String> messageIds,
             @RequestParam(value = "action", required = false) final String action
     ) {
 
         final ModelAndView model = new ModelAndView();
-        model.addObject("source", source);
+        addFilters(model, request);
 
         JmsMessage jmsMessage = new JmsMessage();
         if(messageIds != null) {
@@ -97,21 +114,23 @@ public class JmsMonitoringController {
 
     @RequestMapping(value = {"/home/jmsmessage/action"}, method = {GET, POST})
     public ModelAndView jmsMessageActionPage(
+            HttpServletRequest request,
             @RequestParam(value = "source", required = false) final String source,
             @RequestParam(value = "type", required = false) final String type,
             @RequestParam(value = "content", required = false) final String content,
-            @RequestParam(value = "customProperties", required = false) final Map<String, String> customProperties,
             @RequestParam(value = "destinationKey", required = false) final String destination,
-            @RequestParam(value = "selectedMessages", required = false) final List<String> messageIds,
             @RequestParam(value = "action", required = false) final String action
     ) {
 
         final ModelAndView model = new ModelAndView();
+        addFilters(model, request);
+
         StringBuffer messageOutcome = new StringBuffer();
 
+        String[] messageIds = request.getParameterValues("selectedMessages");
 
         if ("send".equals(action)) {
-            if(messageIds != null && messageIds.size() > 0) {
+            if(messageIds != null && messageIds.length > 0) {
                 for (String messageId : messageIds) {
                     JmsMessage message = jmsManager.getMessage(source, messageId);
                     boolean success = jmsManager.sendMessage(message, null, destination, "Queue");
@@ -127,12 +146,12 @@ public class JmsMonitoringController {
                 JmsMessage message = new JmsMessage();
                 message.setContent(content);
                 message.setType(type);
-                message.setProperties(customProperties);
+                message.setProperties(jsonUtil.jsonToMap(request.getParameter("customProperties")));
                 boolean success = jmsManager.sendMessage(message, null, destination, "Queue");
                 messageOutcome.append(success ? "Message sent." : "Failed to send message.");
             }
         } else if ("move".equals(action)) {
-            boolean success = jmsManager.moveMessages(source, destination, messageIds.toArray(new String[0]));
+            boolean success = jmsManager.moveMessages(source, destination, messageIds);
             if(!success) {
                 messageOutcome.append("Failed to move messages");
             }
@@ -141,7 +160,7 @@ public class JmsMonitoringController {
                 messageOutcome.append("Messages moved.");
             }
         } else if ("remove".equals(action)) {
-            boolean success = jmsManager.deleteMessages(source, messageIds.toArray(new String[0]));
+            boolean success = jmsManager.deleteMessages(source, messageIds);
             if(!success) {
                 messageOutcome.append("Failed to delete messages");
             }
@@ -155,8 +174,6 @@ public class JmsMonitoringController {
         model.setViewName("jmsmessageaction");
         return model;
     }
-
-
 
     protected Date getFromDate(String fromDate) {
         if (StringUtils.isNotEmpty(fromDate)) {
@@ -177,6 +194,6 @@ public class JmsMonitoringController {
                 LOG.error("Error parsing to date [" + toDate + "]", e);
             }
         }
-        return new Date();
+        return new DateTime().plusDays(1).toDate();
     }
 }
