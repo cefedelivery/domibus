@@ -10,9 +10,9 @@
         <artifactId>domibus</artifactId>
         <version>3.2-SNAPSHOT</version>
     </parent>
-    <artifactId>domibus-jms-weblogic</artifactId>
+    <artifactId>domibus-jms-activemq</artifactId>
     <packaging>jar</packaging>
-	<name>Domibus MSH JMS WebLogic</name>
+	<name>Domibus MSH JMS ActiveMQ</name>
  
 
     <build>
@@ -30,7 +30,15 @@
             <artifactId>domibus-jms-spi</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
@@ -52,28 +60,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.oracle.weblogic</groupId>
-            <artifactId>weblogic.server.merged</artifactId>
-            <version>12.1.2-0-0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.weblogic</groupId>
-            <artifactId>com.oracle.css.weblogic.security.wls_7.0.0.0</artifactId>
-            <version>12.1.2-0-0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.weblogic</groupId>
-            <artifactId>wlthint3client</artifactId>
-            <version>12.1.1</version>
-            <scope>test</scope>
-        </dependency>
+        </dependency>        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

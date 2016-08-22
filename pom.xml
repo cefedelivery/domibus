@@ -33,6 +33,7 @@
 		<module>Domibus-MSH-api</module>
         <module>Domibus-MSH-jms-spi</module>
         <module>Domibus-MSH-jms-weblogic</module>
+		<module>Domibus-MSH-jms-activemq</module>		
         <module>Domibus-plugin-api</module>
         <module>Domibus-ws-stubs</module>
         <module>Domibus-default-ws-plugin</module>

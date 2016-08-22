@@ -371,6 +371,11 @@
             </activation>
             <dependencies>
                 <dependency>
+                    <groupId>eu.domibus</groupId>
+                    <artifactId>domibus-jms-activemq</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>org.apache.activemq</groupId>
                     <artifactId>activemq-spring</artifactId>
                     <version>${activemq.version}</version>
@@ -527,6 +532,10 @@
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-jms-spi</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
