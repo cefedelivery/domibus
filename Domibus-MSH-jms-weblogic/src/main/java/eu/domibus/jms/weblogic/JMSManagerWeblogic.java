@@ -117,7 +117,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
                         Long numberOfMessagesPending = (Long) mbsc.getAttribute(jmsDestination, "MessagesPendingCount");
 
                         destination.setNumberOfMessages(numberOfMessages);
-                        destination.setNumberOfMessagesPending(numberOfMessagesPending);
+//                        destination.setNumberOfMessagesPending(numberOfMessagesPending);
                         destinationMap.put(destination.getName(), destination);
                     }
                 }
@@ -207,7 +207,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
             int deleted = deleteMessages(destination, getSelector(messageIds));
             return deleted == messageIds.length;
         } catch (Exception e) {
-            LOG.error("Failed to delete messages", e);
+            LOG.error("Failed to delete messages from source [" + source + "]:" + messageIds , e);
             return false;
         }
     }
@@ -377,7 +377,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
             int moved = moveMessages(fromDestination, toDestination, getSelector(messageIds));
             return moved == messageIds.length;
         } catch (Exception e) {
-            LOG.error("Failed to move messages", e);
+            LOG.error("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds , e);
             return false;
         }
     }

@@ -19,7 +19,7 @@ public class JMSDestinationSPI {
     protected String type;
     //	protected ObjectName objectName;
     protected long numberOfMessages;
-    protected long numberOfMessagesPending;
+//    protected long numberOfMessagesPending;
 
     public Map<String, Object> getProperties() {
         return properties;
@@ -61,13 +61,13 @@ public class JMSDestinationSPI {
         this.numberOfMessages = numberOfMessages;
     }
 
-    public long getNumberOfMessagesPending() {
-        return numberOfMessagesPending;
-    }
-
-    public void setNumberOfMessagesPending(Long numberOfMessagesPending) {
-        this.numberOfMessagesPending = numberOfMessagesPending;
-    }
+//    public long getNumberOfMessagesPending() {
+//        return numberOfMessagesPending;
+//    }
+//
+//    public void setNumberOfMessagesPending(Long numberOfMessagesPending) {
+//        this.numberOfMessagesPending = numberOfMessagesPending;
+//    }
 
     public String toString() {
         return name;

@@ -3,19 +3,22 @@ package eu.domibus.jms.activemq;
 import eu.domibus.jms.spi.JMSDestinationSPI;
 import eu.domibus.jms.spi.JMSManagerSPI;
 import eu.domibus.jms.spi.JmsMessageSPI;
+import org.apache.activemq.broker.jmx.BrokerViewMBean;
+import org.apache.activemq.broker.jmx.QueueViewMBean;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.jms.core.JmsOperations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-import javax.jms.Destination;
-import javax.management.*;
+import javax.jms.DeliveryMode;
+import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerInvocationHandler;
+import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import java.io.IOException;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.OpenDataException;
 import java.util.*;
 
 /**
@@ -32,104 +35,104 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
     protected Map<String, ObjectName> queueMap;
     protected Map<String, ObjectName> topicMap;
 
-    @Resource(name = "jmsSender")
-    private JmsOperations jmsOperations;
+    //TODO
+    String activeMQDefaultAdminName = "admin";
+
+    String activeMQDefaultAdminPassword = "123456";
+
+    @Autowired
+    MBeanServerConnection mBeanServerConnection;
+
+    @Autowired
+    @Qualifier("brokerViewMBean")
+    BrokerViewMBean brokerViewMBean;
 
     @Override
     public Map<String, JMSDestinationSPI> getDestinations() {
-        Map<String, JMSDestinationSPI> destinationMap = new TreeMap<String, JMSDestinationSPI>();
+        Map<String, JMSDestinationSPI> destinationMap = new TreeMap<>();
+
+        try {
+            //build the destinationMap every time in order to get up to date statistics
+            for (ObjectName name : getQueueMap().values()) {
+                QueueViewMBean queueMbean = MBeanServerInvocationHandler.newProxyInstance(mBeanServerConnection, name, QueueViewMBean.class, true);
+                JMSDestinationSPI jmsDestinationSPI = new JMSDestinationSPI();
+                jmsDestinationSPI.setName(queueMbean.getName());
+                jmsDestinationSPI.setType(JMSDestinationSPI.QUEUE_TYPE);
+                jmsDestinationSPI.setNumberOfMessages(queueMbean.getQueueSize());
+                jmsDestinationSPI.setProperty(PROPERTY_OBJECT_NAME, name);
+                destinationMap.put(queueMbean.getName(), jmsDestinationSPI);
+                queueMap.put(queueMbean.getName(), name);
+            }
+        } catch (Exception e) {
+            LOG.error("Error getting destinations", e);
+        }
 
         return destinationMap;
     }
 
-    protected Map<String, ObjectName> getQueueMap(MBeanServerConnection mbsc) throws IOException, AttributeNotFoundException, InstanceNotFoundException, MBeanException,
-            ReflectionException {
+    protected QueueViewMBean getQueue(ObjectName objectName) {
+        return MBeanServerInvocationHandler.newProxyInstance(mBeanServerConnection, objectName, QueueViewMBean.class, true);
+    }
+
+    protected QueueViewMBean getQueue(String name) {
+        ObjectName objectName = getQueueMap().get(name);
+        return getQueue(objectName);
+    }
+
+    protected Map<String, ObjectName> getQueueMap() {
         if (queueMap != null) {
             return queueMap;
+        }
+
+        queueMap = new HashMap<>();
+        for (ObjectName name : brokerViewMBean.getQueues()) {
+            QueueViewMBean queueMbean = MBeanServerInvocationHandler.newProxyInstance(mBeanServerConnection, name, QueueViewMBean.class, true);
+            queueMap.put(queueMbean.getName(), name);
         }
 
         return queueMap;
     }
 
-    protected Map<String, ObjectName> getTopicMap(MBeanServerConnection mbsc) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException,
-            ReflectionException, IOException {
-        if (topicMap != null) {
-            return topicMap;
-        }
-        topicMap = new HashMap<String, ObjectName>();
-
-        return topicMap;
-    }
-
     @Override
     public boolean sendMessage(JmsMessageSPI message, String connectionFactory, String destination, String destinationType) {
-        JMSDestinationSPI jmsDestinationSPI = getDestinations().get(destination);
-        if (jmsDestinationSPI == null) {
-            LOG.warn("Destination [" + destination + "] does not exists");
-            return false;
-        }
+        QueueViewMBean queue = getQueue(destination);
 
-        Destination jmsDestination = null;
+        Map<String, String> properties = message.getProperties();
+        properties.put("JMSType", message.getType());
+        properties.put("JMSDeliveryMode", Integer.toString(DeliveryMode.PERSISTENT));
         try {
-            String destinationJndi = jmsDestinationSPI.getProperty(PROPERTY_JNDI_NAME);
-            LOG.debug("Found JNDI [" + destinationJndi + "] for destination [" + destination + "]");
-            jmsDestination = InitialContext.doLookup(destinationJndi);
-        } catch (NamingException e) {
-            LOG.error("Error performing lookup for [" + destination + "]");
+            queue.sendTextMessage(properties, message.getContent(), activeMQDefaultAdminName, activeMQDefaultAdminPassword);
+        } catch (Exception e) {
+            LOG.error("Error sending message [" + message + "] to [" + destination + "]");
             return false;
         }
-        jmsOperations.send(jmsDestination, new JmsMessageCreator(message));
         return true;
     }
 
     @Override
     public boolean deleteMessages(String source, String[] messageIds) {
-        JMSDestinationSPI selectedDestination = getDestinations().get(source);
+        QueueViewMBean queue = getQueue(source);
         try {
-            ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
-            int deleted = deleteMessages(destination, getSelector(messageIds));
+            int deleted = queue.removeMatchingMessages(getSelector(messageIds));
             return deleted == messageIds.length;
         } catch (Exception e) {
-            LOG.error("Failed to delete messages", e);
+            LOG.error("Failed to delete messages from source [" + source + "]:" + messageIds, e);
             return false;
         }
     }
 
     @Override
     public JmsMessageSPI getMessage(String source, String messageId) {
-        JMSDestinationSPI selectedDestination = getDestinations().get(source);
-        if (selectedDestination != null) {
-            String destinationType = selectedDestination.getType();
-            if ("Queue".equals(destinationType)) {
-                try {
-                    ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
-                    return getMessageFromDestination(destination, messageId);
-                } catch (Exception e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
+        QueueViewMBean queue = getQueue(source);
+        try {
+            CompositeData messageMetaData = queue.getMessage(messageId);
+            return convert(messageMetaData);
+        } catch (OpenDataException e) {
+            LOG.error("Failed to get message with id [" + messageId + "]", e);
+            return null;
         }
-        return null;
     }
 
-    private JmsMessageSPI getMessageFromDestination(ObjectName destination, String messageId) throws Exception {
-        List<JmsMessageSPI> messages = getMessagesFromDestination(destination, getSelector(messageId));
-        if (!messages.isEmpty()) {
-            return messages.get(0);
-        }
-        return null;
-    }
-
-    private List<JmsMessageSPI> getMessagesFromDestination(ObjectName destination, String selector) throws Exception {
-        List<JmsMessageSPI> messages = new ArrayList<JmsMessageSPI>();
-        MBeanServerConnection mbsc = null;//jmxHelper.getDomainRuntimeMBeanServerConnection();
-        if (selector == null) {
-            selector = "true";
-        }
-        Integer timeout = new Integer(0);
-
-        return messages;
-    }
 
     @Override
     public List<JmsMessageSPI> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
@@ -139,38 +142,78 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
         }
 
         JMSDestinationSPI selectedDestination = getDestinations().get(source);
-        if (selectedDestination != null) {
-            String destinationType = selectedDestination.getType();
-            if ("Queue".equals(destinationType)) {
-                try {
-                    Map<String, Object> criteria = new HashMap<String, Object>();
-                    if (jmsType != null) {
-                        criteria.put("JMSType", jmsType);
-                    }
-                    if (fromDate != null) {
-                        criteria.put("JMSTimestamp_from", fromDate.getTime());
-                    }
-                    if (toDate != null) {
-                        criteria.put("JMSTimestamp_to", toDate.getTime());
-                    }
-                    if (selectorClause != null) {
-                        criteria.put("selectorClause", selectorClause);
-                    }
-                    String selector = getSelector(criteria);
-                    ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
-                    messages = getMessagesFromDestination(destination, selector);
-                } catch (Exception e) {
-                    LOG.error("Error getting messages", e);
+        if (selectedDestination == null) {
+            LOG.debug("Could not find destination for [" + source + "]");
+            return messages;
+        }
+        String destinationType = selectedDestination.getType();
+        if ("Queue".equals(destinationType)) {
+            try {
+                Map<String, Object> criteria = new HashMap<String, Object>();
+                if (jmsType != null) {
+                    criteria.put("JMSType", jmsType);
                 }
+                if (fromDate != null) {
+                    criteria.put("JMSTimestamp_from", fromDate.getTime());
+                }
+                if (toDate != null) {
+                    criteria.put("JMSTimestamp_to", toDate.getTime());
+                }
+                if (selectorClause != null) {
+                    criteria.put("selectorClause", selectorClause);
+                }
+                String selector = getSelector(criteria);
+                QueueViewMBean queue = getQueue(source);
+                CompositeData[] browse = queue.browse(selector);
+                messages = convert(browse);
+            } catch (Exception e) {
+                LOG.error("Error getting messages for [" + source + "]", e);
             }
         }
         return messages;
     }
 
-    private int deleteMessages(ObjectName destination, String selector) throws Exception {
-        MBeanServerConnection mbsc = null;//jmxHelper.getDomainRuntimeMBeanServerConnection();
-        Integer deleted = (Integer) mbsc.invoke(destination, "deleteMessages", new Object[]{selector}, new String[]{String.class.getName()});
-        return deleted;
+    protected List<JmsMessageSPI> convert(CompositeData[] browse) {
+        if (browse == null) {
+            return null;
+        }
+        List<JmsMessageSPI> result = new ArrayList<>();
+        for (CompositeData compositeData : browse) {
+            result.add(convert(compositeData));
+        }
+        return result;
+    }
+
+
+    protected JmsMessageSPI convert(CompositeData data) {
+        JmsMessageSPI result = new JmsMessageSPI();
+        result.setType((String) data.get("JMSType"));
+        result.setTimestamp((Date) data.get("JMSTimestamp"));
+        result.setId((String) data.get("JMSMessageID"));
+        result.setContent((String) data.get("Text"));
+        Map stringProperties = (Map) data.get("StringProperties");
+
+        Map<String, String> properties = new HashMap<>();
+
+        Set<String> allPropertyNames = data.getCompositeType().keySet();
+        for (String propertyName : allPropertyNames) {
+            if (StringUtils.startsWith(propertyName, "JMS")) {
+                Object propertyValue = data.get(propertyName);
+                //TODO add other types of properties
+                if (propertyValue instanceof String) {
+                    properties.put(propertyName, (String) propertyValue);
+                }
+            }
+        }
+
+        Collection<CompositeDataSupport> stringValues = stringProperties.values();
+        for (CompositeDataSupport stringValue : stringValues) {
+            String key = (String) stringValue.get("key");
+            String value = (String) stringValue.get("value");
+            properties.put(key, value);
+        }
+        result.setProperties(properties);
+        return result;
     }
 
 
@@ -228,24 +271,13 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
 
     @Override
     public boolean moveMessages(String source, String destination, String[] messageIds) {
-        JMSDestinationSPI from = getDestinations().get(source);
-        JMSDestinationSPI to = getDestinations().get(destination);
+        QueueViewMBean queue = getQueue(source);
         try {
-            ObjectName fromDestination = from.getProperty(PROPERTY_OBJECT_NAME);
-            ObjectName toDestination = to.getProperty(PROPERTY_OBJECT_NAME);
-            int moved = moveMessages(fromDestination, toDestination, getSelector(messageIds));
+            int moved = queue.moveMatchingMessagesTo(getSelector(messageIds), destination);
             return moved == messageIds.length;
         } catch (Exception e) {
-            LOG.error("Failed to move messages", e);
+            LOG.error("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds, e);
             return false;
         }
-    }
-
-    private int moveMessages(ObjectName from, ObjectName to, String selector) throws Exception {
-        MBeanServerConnection mbsc = null;//jmxHelper.getDomainRuntimeMBeanServerConnection();
-        CompositeData toDestinationInfo = (CompositeData) mbsc.getAttribute(to, "DestinationInfo");
-        Integer moved = (Integer) mbsc.invoke(from, "moveMessages", new Object[]{selector, toDestinationInfo}, new String[]{String.class.getName(),
-                CompositeData.class.getName()});
-        return moved;
     }
 }

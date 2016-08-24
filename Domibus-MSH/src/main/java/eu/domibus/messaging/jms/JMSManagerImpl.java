@@ -8,6 +8,7 @@ import eu.domibus.jms.spi.JMSManagerSPI;
 import eu.domibus.jms.spi.JmsMessageSPI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.Map;
  * Created by Cosmin Baciu on 17-Aug-16.
  */
 @Component
+@Transactional
 public class JMSManagerImpl implements JMSManager {
 
     @Autowired

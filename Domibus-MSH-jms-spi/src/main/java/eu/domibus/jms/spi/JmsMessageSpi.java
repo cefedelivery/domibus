@@ -11,7 +11,6 @@ public class JmsMessageSPI {
 	protected String content;
 	protected Date timestamp;
 
-	protected Map<String, String> headers = new HashMap<>();
 	protected Map<String, String> properties = new HashMap<>();
 
 	public String getId() {
@@ -76,4 +75,14 @@ public class JmsMessageSPI {
 		this.properties = properties;
 	}
 
+	@Override
+	public String toString() {
+		return new org.apache.commons.lang.builder.ToStringBuilder(this)
+				.append("id", id)
+				.append("type", type)
+				.append("content", content)
+				.append("timestamp", timestamp)
+				.append("properties", properties)
+				.toString();
+	}
 }
