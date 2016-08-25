@@ -28,9 +28,9 @@
         <version>3.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>domibus-MSH</artifactId>
+    <artifactId>domibus-distribution</artifactId>
     <packaging>war</packaging>
-    <name>domibus-MSH</name>
+    <name>domibus-distribution</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
@@ -42,7 +42,6 @@
         <jstl.version>1.2</jstl.version>
         <atomikos.version>3.9.3</atomikos.version>
         <webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
-        <domibus.name>domibus</domibus.name>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
@@ -85,7 +84,7 @@
             <id>wildfly-mysql</id>
             <properties>
                 <webXmlPath>src/main/conf/wildfly/web.xml</webXmlPath>
-                <domibus.name>domibus-wildfly</domibus.name>
+                <domibus.classifier>wildfly-mysql</domibus.classifier>
                 <wildfly.version>9.0.2.Final</wildfly.version>
             </properties>
             <build>
@@ -262,7 +261,7 @@
             <id>weblogic-oracle</id>
             <properties>
                 <webXmlPath>src/main/conf/weblogic/web.xml</webXmlPath>
-                <domibus.name>domibus-weblogic</domibus.name>
+                <domibus.classifier>weblogic-oracle</domibus.classifier>
             </properties>
             <build>
                 <resources>
@@ -359,7 +358,7 @@
             <id>tomcat-mysql</id>
             <properties>
                 <filesToExclude>log4j.properties</filesToExclude>
-                <domibus.name>domibus</domibus.name>
+                <domibus.classifier>tomcat-mysql</domibus.classifier>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -777,7 +776,6 @@
     </dependencies>
 
     <build>
-        <finalName>${domibus.name}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -805,9 +803,9 @@
                 <version>2.3</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <warName>domibus</warName>
                     <webXml>${webXmlPath}</webXml>
-                    <warName>${domibus.name}</warName>
+                    <warName>domibus</warName>
+                    <classifier>${domibus.classifier}</classifier>
                     <archive>
                         <manifestEntries>
                             <Specification-Version>${project.version}</Specification-Version>

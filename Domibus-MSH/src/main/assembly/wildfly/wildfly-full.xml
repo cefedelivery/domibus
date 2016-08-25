@@ -21,7 +21,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
         xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
-    <id>full</id>
+    <id>wildfly-full</id>
     <formats>
         <format>zip</format>
     </formats>
@@ -88,8 +88,9 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.build.directory}/${domibus.name}.war</source>
+            <source>${project.build.directory}/domibus-${domibus.classifier}.war</source>
             <outputDirectory>domibus/standalone/deployments</outputDirectory>
+            <destName>domibus-wildfly.war</destName>
             <filtered>false</filtered>
         </file>
         <file>

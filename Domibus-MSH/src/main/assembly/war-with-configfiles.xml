@@ -140,7 +140,7 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.build.directory}/domibus.war</source>
+            <source>${project.build.directory}/domibus-${domibus.classifier}.war</source>
             <outputDirectory>/</outputDirectory>
             <destName>domibus.war</destName>
             <filtered>false</filtered>
