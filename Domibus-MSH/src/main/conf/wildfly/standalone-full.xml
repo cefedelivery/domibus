@@ -412,48 +412,59 @@
                     <jms-queue name="DLQ">
                         <entry name="java:/jms/queue/DLQ"/>
                     </jms-queue>
-                <jms-queue name="DomibusBusinessMessageOutQueue">
+                   <jms-queue name="DomibusBusinessMessageOutQueue">
                         <entry name="java:/jms/domibus.backend.jms.outQueue"/>
+                        <entry name="java:/jms/queue/DomibusBusinessMessageOutQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusNotifyBackendJmsQueue">
                         <entry name="java:/jms/domibus.notification.jms"/>
+                        <entry name="java:/jms/queue/DomibusNotifyBackendJmsQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusErrorNotifyConsumerQueue">
                         <entry name="java:/jms/domibus.backend.jms.errorNotifyConsumer"/>
+                        <entry name="java:/jms/queue/DomibusErrorNotifyConsumerQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusErrorNotifyProducerQueue">
                         <entry name="java:/jms/domibus.backend.jms.errorNotifyProducer"/>
+                        <entry name="java:/jms/queue/DomibusErrorNotifyProducerQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusBusinessMessageInQueue">
                         <entry name="java:/jms/domibus.backend.jms.inQueue"/>
+                        <entry name="java:/jms/queue/DomibusBusinessMessageInQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusPluginToBackendQueue">
                         <entry name="java:/jms/domibus.backend.jms.replyQueue"/>
+                        <entry name="java:/jms/queue/DomibusPluginToBackendQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusSendMessageQueue">
                         <entry name="java:/jms/domibus.internal.dispatch.queue"/>
+                        <entry name="java:/jms/queue/DomibusSendMessageQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusNotifyBackendWebServiceQueue">
                         <entry name="java:/jms/domibus.notification.webservice"/>
+                        <entry name="java:/jms/queue/DomibusNotifyBackendWebServiceQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusUnknownReceiverQueue">
                         <entry name="java:/jms/domibus.internal.notification.unknown"/>
+                        <entry name="java:/jms/queue/DomibusUnknownReceiverQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusNotifyBackendQueue">
                         <entry name="java:/jms/domibus.internal.notification.queue"/>
+                        <entry name="java:/jms/queue/DomibusNotifyBackendQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-topic name="DomibusClusterCommandTopic">
                         <entry name="java:/jms/domibus.internal.command"/>
+                        <entry name="java:/jms/topic/DomibusClusterCommandTopic"/>
                     </jms-topic>
                 </jms-destinations>
             </hornetq-server>

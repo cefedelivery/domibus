@@ -283,25 +283,25 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         if (selectedDestination != null) {
             String destinationType = selectedDestination.getType();
             if ("Queue".equals(destinationType)) {
+                Map<String, Object> criteria = new HashMap<String, Object>();
+                if (jmsType != null) {
+                    criteria.put("JMSType", jmsType);
+                }
+                if (fromDate != null) {
+                    criteria.put("JMSTimestamp_from", fromDate.getTime());
+                }
+                if (toDate != null) {
+                    criteria.put("JMSTimestamp_to", toDate.getTime());
+                }
+                if (selectorClause != null) {
+                    criteria.put("selectorClause", selectorClause);
+                }
+                String selector = getSelector(criteria);
                 try {
-                    Map<String, Object> criteria = new HashMap<String, Object>();
-                    if (jmsType != null) {
-                        criteria.put("JMSType", jmsType);
-                    }
-                    if (fromDate != null) {
-                        criteria.put("JMSTimestamp_from", fromDate.getTime());
-                    }
-                    if (toDate != null) {
-                        criteria.put("JMSTimestamp_to", toDate.getTime());
-                    }
-                    if (selectorClause != null) {
-                        criteria.put("selectorClause", selectorClause);
-                    }
-                    String selector = getSelector(criteria);
                     ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
                     messages = getMessagesFromDestination(destination, selector);
                 } catch (Exception e) {
-                    LOG.error("Error getting messages", e);
+                    LOG.error("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
                 }
             }
         }

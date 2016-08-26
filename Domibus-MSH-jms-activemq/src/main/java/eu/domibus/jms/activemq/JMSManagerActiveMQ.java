@@ -61,6 +61,7 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
                 jmsDestinationSPI.setNumberOfMessages(queueMbean.getQueueSize());
                 jmsDestinationSPI.setProperty(PROPERTY_OBJECT_NAME, name);
                 destinationMap.put(queueMbean.getName(), jmsDestinationSPI);
+                //TODO check if this is needed
                 queueMap.put(queueMbean.getName(), name);
             }
         } catch (Exception e) {
@@ -148,26 +149,26 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
         }
         String destinationType = selectedDestination.getType();
         if ("Queue".equals(destinationType)) {
+            Map<String, Object> criteria = new HashMap<String, Object>();
+            if (jmsType != null) {
+                criteria.put("JMSType", jmsType);
+            }
+            if (fromDate != null) {
+                criteria.put("JMSTimestamp_from", fromDate.getTime());
+            }
+            if (toDate != null) {
+                criteria.put("JMSTimestamp_to", toDate.getTime());
+            }
+            if (selectorClause != null) {
+                criteria.put("selectorClause", selectorClause);
+            }
+            String selector = getSelector(criteria);
             try {
-                Map<String, Object> criteria = new HashMap<String, Object>();
-                if (jmsType != null) {
-                    criteria.put("JMSType", jmsType);
-                }
-                if (fromDate != null) {
-                    criteria.put("JMSTimestamp_from", fromDate.getTime());
-                }
-                if (toDate != null) {
-                    criteria.put("JMSTimestamp_to", toDate.getTime());
-                }
-                if (selectorClause != null) {
-                    criteria.put("selectorClause", selectorClause);
-                }
-                String selector = getSelector(criteria);
                 QueueViewMBean queue = getQueue(source);
                 CompositeData[] browse = queue.browse(selector);
                 messages = convert(browse);
             } catch (Exception e) {
-                LOG.error("Error getting messages for [" + source + "]", e);
+                LOG.error("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
             }
         }
         return messages;
