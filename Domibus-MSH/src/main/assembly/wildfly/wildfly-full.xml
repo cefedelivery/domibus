@@ -88,7 +88,7 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.build.directory}/domibus-${domibus.classifier}.war</source>
+            <source>${project.build.directory}/${project.artifactId}-${project.version}-${domibus.classifier}.war</source>
             <outputDirectory>domibus/standalone/deployments</outputDirectory>
             <destName>domibus-wildfly.war</destName>
             <filtered>false</filtered>

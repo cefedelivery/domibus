@@ -28,9 +28,9 @@
         <version>3.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>domibus-distribution</artifactId>
+    <artifactId>domibus-MSH</artifactId>
     <packaging>war</packaging>
-    <name>domibus-distribution</name>
+    <name>domibus-MSH</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
@@ -84,7 +84,7 @@
             <id>wildfly-mysql</id>
             <properties>
                 <webXmlPath>src/main/conf/wildfly/web.xml</webXmlPath>
-                <domibus.classifier>wildfly-mysql</domibus.classifier>
+                <domibus.classifier>wildfly</domibus.classifier>
                 <wildfly.version>9.0.2.Final</wildfly.version>
             </properties>
             <build>
@@ -178,6 +178,7 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>2.4</version>
                         <configuration>
+
                             <descriptors>
                                 <descriptor>src/main/assembly/wildfly/wildfly-full.xml</descriptor>
                                 <descriptor>src/main/assembly/wildfly/wildfly-configuration-only.xml</descriptor>
@@ -261,7 +262,7 @@
             <id>weblogic-oracle</id>
             <properties>
                 <webXmlPath>src/main/conf/weblogic/web.xml</webXmlPath>
-                <domibus.classifier>weblogic-oracle</domibus.classifier>
+                <domibus.classifier>weblogic</domibus.classifier>
             </properties>
             <build>
                 <resources>
@@ -358,7 +359,7 @@
             <id>tomcat-mysql</id>
             <properties>
                 <filesToExclude>log4j.properties</filesToExclude>
-                <domibus.classifier>tomcat-mysql</domibus.classifier>
+                <domibus.classifier>tomcat</domibus.classifier>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -484,8 +485,6 @@
                                 <descriptor>src/main/assembly/configuration-only.xml
                                 </descriptor>
                                 <descriptor>src/main/assembly/sql-scripts.xml
-                                </descriptor>
-                                <descriptor>src/main/assembly/war-with-configfiles.xml
                                 </descriptor>
                             </descriptors>
                         </configuration>
@@ -804,7 +803,7 @@
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <webXml>${webXmlPath}</webXml>
-                    <warName>domibus</warName>
+                    <warName>${project.artifactId}-${project.version}</warName>
                     <classifier>${domibus.classifier}</classifier>
                     <archive>
                         <manifestEntries>
