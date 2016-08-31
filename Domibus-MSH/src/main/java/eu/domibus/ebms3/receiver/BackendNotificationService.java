@@ -22,17 +22,20 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
 import eu.domibus.messaging.ReceiveFailedMessageCreator;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
-import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.routing.*;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
+import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
 import eu.domibus.submission.SubmissionValidatorListProvider;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,8 +138,15 @@ public class BackendNotificationService {
                 return;
             }
         }
+        String finalRecipient = null;
+        for (final Property p : userMessage.getMessageProperties().getProperty()) {
+            if (p.getName().equals(MessageConstants.FINAL_RECIPIENT) && p.getType().isEmpty()) {
+                finalRecipient = p.getValue();
+                break;
+            }
+        }
         LOG.error("No backend responsible for message [" + userMessage.getMessageInfo().getMessageId() + "] found. Sending notification to [" + unknownReceiverQueue + "]");
-        jmsOperations.send(unknownReceiverQueue, new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED));
+        jmsOperations.send(unknownReceiverQueue, new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED, finalRecipient));
     }
 
     protected void validateSubmission(UserMessage userMessage, String backendName, NotificationType notificationType) {
@@ -169,16 +179,27 @@ public class BackendNotificationService {
 
     protected void validateAndNotify(UserMessage userMessage, String backendName, NotificationType notificationType) {
         validateSubmission(userMessage, backendName, notificationType);
-        notify(userMessage.getMessageInfo().getMessageId(), backendName, notificationType);
+        String finalRecipient = null;
+        for (final Property p : userMessage.getMessageProperties().getProperty()) {
+            if (p.getName().equals(MessageConstants.FINAL_RECIPIENT) && StringUtils.isEmpty(p.getType())) {
+                finalRecipient = p.getValue();
+                break;
+            }
+        }
+        notify(userMessage.getMessageInfo().getMessageId(), backendName, notificationType, finalRecipient);
     }
 
-    protected void notify(String messageId, String backendName, NotificationType notificationType) {
+        protected void notify(String messageId, String backendName, NotificationType notificationType) {
+            notify(messageId, backendName, notificationType, null);
+        }
+
+        protected void notify(String messageId, String backendName, NotificationType notificationType, String finalRecipient) {
         NotificationListener notificationListener = getNotificationListener(backendName);
         if (notificationListener == null) {
             LOG.debug("No notification listeners found for backend [" + backendName + "]");
             return;
         }
-        jmsOperations.send(notificationListener.getBackendNotificationQueue(), new NotifyMessageCreator(messageId, notificationType));
+        jmsOperations.send(notificationListener.getBackendNotificationQueue(), new NotifyMessageCreator(messageId, notificationType, finalRecipient));
     }
 
     public void notifyOfSendFailure(final String messageId) {

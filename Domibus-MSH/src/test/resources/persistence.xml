@@ -61,6 +61,10 @@
         <class>eu.domibus.plugin.routing.BackendFilter</class>
         <class>eu.domibus.plugin.routing.RoutingCriteria</class>
 
+        <!-- Comment this class if you don't use the default ws plugin.
+        Default ws plugin uses the same db config as the core for storing auth info-->
+        <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
+
         <properties>
             <property name="hibernate.transaction.manager_lookup_class"
                       value="com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup"/>

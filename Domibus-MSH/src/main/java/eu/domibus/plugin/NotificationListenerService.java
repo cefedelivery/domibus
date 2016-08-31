@@ -21,6 +21,7 @@ package eu.domibus.plugin;
 
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
 import org.apache.commons.logging.Log;
@@ -33,6 +34,8 @@ import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.SimpleJmsListenerEndpoint;
 import org.springframework.jms.core.BrowserCallback;
 import org.springframework.jms.core.JmsOperations;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +59,9 @@ public class NotificationListenerService implements MessageListener, JmsListener
     @Autowired
     @Qualifier("internalJmsListenerContainerFactory")
     private JmsListenerContainerFactory jmsListenerContainerFactory;
+
+    @Autowired
+    AuthUtils authUtils;
 
     private Queue backendNotificationQueue;
     private BackendConnector.Mode mode;
@@ -89,16 +95,19 @@ public class NotificationListenerService implements MessageListener, JmsListener
                     backendConnector.messageReceiveFailed(messageId, message.getStringProperty(MessageConstants.ENDPOINT));
 
             }
-
-
         } catch (final JMSException e) {
             LOG.error("", e);
         }
     }
 
-
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
     public final Collection<String> listPendingMessages() {
-        return getQueueElements(NotificationType.MESSAGE_RECEIVED);
+
+        String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+        LOG.info("Authorized as " + (originalUser == null ? "super user" : originalUser));
+
+        /* if originalUser is null, all messages are returned */
+        return getQueueElements(NotificationType.MESSAGE_RECEIVED, originalUser);
     }
 
     public final Collection<String> listSendFailureMessages() {
@@ -110,14 +119,19 @@ public class NotificationListenerService implements MessageListener, JmsListener
     }
 
     private Collection<String> getQueueElements(final NotificationType notificationType) {
+        return getQueueElements(notificationType, null);
+    }
+
+
+    private Collection<String> getQueueElements(final NotificationType notificationType, final String finalRecipient) {
         if (this.mode == BackendConnector.Mode.PUSH) {
             throw new UnsupportedOperationException("this method is only available for clients using Mode.PULL");
         }
-        final Collection<String> result = browseQueue(notificationType);
+        final Collection<String> result = browseQueue(notificationType, finalRecipient);
         return result;
     }
 
-    private Collection<String> browseQueue(final NotificationType notificationType) {
+    private Collection<String> browseQueue(final NotificationType notificationType, final String finalRecipient) {
         final Collection<String> result = new ArrayList<>();
         jmsOperations.browse(backendNotificationQueue, new BrowserCallback<Void>() {
             @Override
@@ -126,7 +140,10 @@ public class NotificationListenerService implements MessageListener, JmsListener
                 while (browserEnumeration.hasMoreElements()) {
                     final Message message = (Message) browserEnumeration.nextElement();
                     if (notificationType.name().equals(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE))) {
-                        result.add(message.getStringProperty(MessageConstants.MESSAGE_ID));
+                        if (finalRecipient == null ||
+                                (finalRecipient != null && finalRecipient.equals(message.getStringProperty(MessageConstants.FINAL_RECIPIENT)))) {
+                            result.add(message.getStringProperty(MessageConstants.MESSAGE_ID));
+                        }
                     }
                 }
                 return null;
@@ -137,6 +154,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
     public void removeFromPending(final String messageId) throws MessageNotFoundException {
         if (this.mode == BackendConnector.Mode.PUSH) {
             LOG.debug("No messages will be removed because this a PUSH consumer");

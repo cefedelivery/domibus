@@ -18,7 +18,7 @@
  */
 
 
-package eu.domibus.ebms3.common.model;
+package eu.domibus.plugin.webService.entity;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;

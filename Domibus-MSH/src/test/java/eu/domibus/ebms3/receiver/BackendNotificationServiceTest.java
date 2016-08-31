@@ -197,7 +197,7 @@ public class BackendNotificationServiceTest {
         backendNotificationService.notify("messageId", backendName, notificationType);
 
         new Verifications() {{
-            jmsTemplateNotify.send(withAny(queue), withAny(new NotifyMessageCreator("", NotificationType.MESSAGE_RECEIVED)));
+            jmsTemplateNotify.send(withAny(queue), withAny(new NotifyMessageCreator("", NotificationType.MESSAGE_RECEIVED, null)));
             times = 0;
         }};
     }

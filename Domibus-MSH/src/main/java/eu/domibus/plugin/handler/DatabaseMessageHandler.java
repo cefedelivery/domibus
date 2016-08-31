@@ -40,10 +40,8 @@ import eu.domibus.common.model.logging.MessageLogEntry;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.messaging.DuplicateMessageException;
-import eu.domibus.messaging.MessageNotFoundException;
-import eu.domibus.messaging.MessagingProcessingException;
-import eu.domibus.messaging.PModeMismatchException;
+import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.messaging.*;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import org.apache.commons.logging.Log;
@@ -51,6 +49,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import javax.jms.Queue;
 import javax.persistence.NoResultException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -96,10 +98,17 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     private PayloadProfileValidator payloadProfileValidator;
     @Autowired
     private PropertyProfileValidator propertyProfileValidator;
+    @Autowired
+    AuthUtils authUtils;
+
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
     public Submission downloadMessage(final String messageId) throws MessageNotFoundException {
+        String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+        LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
+
         DatabaseMessageHandler.LOG.info("looking for message with id: " + messageId);
         final MessageLogEntry messageLogEntry;
         final UserMessage userMessage;
@@ -113,7 +122,14 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             DatabaseMessageHandler.LOG.debug("Message with id [" + messageId + "] was not found", nrEx);
             throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
         }
-
+        if(originalUser != null) {
+            /* check the message was sent for this user */
+            String finalRecipient = getFinalRecipient(userMessage);
+            if (finalRecipient != null && !finalRecipient.equals(originalUser)) {
+                LOG.debug("User:" + originalUser + " is trying to delete message having finalRecipient:" + finalRecipient);
+                throw new AccessDeniedException("You are not authorized to delete message with id " + messageId);
+            }
+        }
         messageLogEntry.setDeleted(new Date());
         this.messageLogDao.update(messageLogEntry);
         if (0 == pModeProvider.getRetentionDownloadedByMpcURI(messageLogEntry.getMpc())) {
@@ -121,14 +137,30 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         }
         return this.transformer.transformFromMessaging(userMessage);
     }
+    private String getFinalRecipient(UserMessage userMessage) {
+        if(userMessage == null || userMessage.getMessageProperties() == null ||
+                userMessage.getMessageProperties().getProperty() == null ) {
+            return null;
+        }
+        String finalRecipient = null;
+        for(Property property : userMessage.getMessageProperties().getProperty()) {
+            if(property.getName() != null && property.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
+                finalRecipient = property.getValue();
+                break;
+            }
+        }
+        return finalRecipient;
+    }
 
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
     public MessageStatus getMessageStatus(final String messageId) {
         return this.messageLogDao.getMessageStatus(messageId);
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
     public List<? extends ErrorResult> getErrorsForMessage(final String messageId) {
         return this.errorLogDao.getErrorsForMessage(messageId);
     }
@@ -136,7 +168,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
+        String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+        LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
+
+
         try {
             final UserMessage m = this.transformer.transformFromSubmission(messageData);
             final MessageInfo messageInfo = m.getMessageInfo();

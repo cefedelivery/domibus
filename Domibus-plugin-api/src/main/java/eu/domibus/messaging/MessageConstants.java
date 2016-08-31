@@ -27,4 +27,8 @@ public class MessageConstants {
     public static final String ENDPOINT = "ENDPOINT";
     public static final String DELAY = "DELAY";
     public static final String NOTIFICATION_TYPE = "NOTIFICATION_TYPE";
+    public static final String ORIGINAL_SENDER = "originalSender";
+    public static final String FINAL_RECIPIENT = "finalRecipient";
+
+
 }

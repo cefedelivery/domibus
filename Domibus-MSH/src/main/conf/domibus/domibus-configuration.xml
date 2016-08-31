@@ -62,10 +62,14 @@
         <prop key="domibus.proxy.user"></prop>
         <prop key="domibus.proxy.password"></prop>
         <prop key="domibus.proxy.nonProxyHosts"></prop>
-    </util:properties>
 
-    <!-- Mimetypes listed in this map will not be compressed (in outgoing messages)
-    even if compression is turned on for the given message. -->
+        <!-- To disable unsecureLogin, set this to false -->
+        <!-- <prop key="domibus.auth.unsecureLoginAllowed">true</prop> -->
+
+</util:properties>
+
+<!-- Mimetypes listed in this map will not be compressed (in outgoing messages)
+even if compression is turned on for the given message. -->
     <util:list id="compressionBlacklist" value-type="java.lang.String">
         <value>application/vnd.etsi.asic-s+zip</value>
         <value>image/jpeg</value>

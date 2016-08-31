@@ -33,10 +33,12 @@ public class NotifyMessageCreator implements MessageCreator {
 
     private final String messageId;
     private NotificationType notificationType;
+    private String finalRecipient;
 
-    public NotifyMessageCreator(final String messageId, final NotificationType notificationType) {
+    public NotifyMessageCreator(final String messageId, final NotificationType notificationType, final String finalRecipient) {
         this.messageId = messageId;
         this.notificationType = notificationType;
+        this.finalRecipient = finalRecipient;
     }
 
     @Override
@@ -44,6 +46,7 @@ public class NotifyMessageCreator implements MessageCreator {
         final Message m = session.createMessage();
         m.setStringProperty(MessageConstants.MESSAGE_ID, messageId);
         m.setStringProperty(MessageConstants.NOTIFICATION_TYPE, notificationType.name());
+        m.setStringProperty(MessageConstants.FINAL_RECIPIENT, finalRecipient);
         return m;
     }
 

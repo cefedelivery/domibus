@@ -76,8 +76,7 @@
             eu.domibus.wss4j.common.crypto.Merlin
         </prop>
         <!-- Type of the used keystore -->
-        <prop key="org.apache.ws.security.crypto.merlin.trustStore.type">
-jks
+        <prop key="org.apache.ws.security.crypto.merlin.trustStore.type">jks
         </prop>
         <!-- The password used to load the keystore -->
         <prop key="org.apache.ws.security.crypto.merlin.keystore.private.password">
@@ -87,7 +86,7 @@ jks
         <prop key="org.apache.ws.security.crypto.merlin.trustStore.password">
             test123
         </prop>
-    <prop key="org.apache.ws.security.crypto.merlin.load.cacerts">
+        <prop key="org.apache.ws.security.crypto.merlin.load.cacerts">
             false
         </prop>
         <!-- The location and name of the trustStore -->
@@ -101,6 +100,10 @@ jks
           class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
 
     <sec:authentication-manager>
+        <sec:authentication-provider ref="allowAllAuthenticationProvider"/>
+    </sec:authentication-manager>
+
+    <sec:authentication-manager id="authenticationManagerForAdminConsole">
         <sec:authentication-provider>
             <sec:password-encoder ref="bcryptEncoder"/>
             <sec:user-service>
@@ -112,5 +115,6 @@ jks
         </sec:authentication-provider>
     </sec:authentication-manager>
 
+    <sec:global-method-security pre-post-annotations="enabled"/>
 
 </beans>

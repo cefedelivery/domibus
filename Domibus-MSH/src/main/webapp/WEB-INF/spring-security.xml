@@ -25,7 +25,10 @@
 	http://www.springframework.org/schema/security
 	http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
-    <http auto-config="true">
+    <http auto-config="true" pattern="/services/**">
+    </http>
+
+    <http auto-config="true" authentication-manager-ref="authenticationManagerForAdminConsole">
         <intercept-url pattern="/home**" access="ROLE_USER"/>
         <intercept-url pattern="/home/messagelog**" access="ROLE_USER"/>
         <intercept-url pattern="/home/errorlog**" access="ROLE_USER"/>
