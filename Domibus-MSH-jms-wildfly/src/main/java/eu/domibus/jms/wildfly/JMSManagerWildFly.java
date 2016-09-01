@@ -107,7 +107,7 @@ public class JMSManagerWildFly implements JMSManagerSPI {
     }
 
     @Override
-    public boolean sendMessage(JmsMessageSPI message, String connectionFactory, String destination, String destinationType) {
+    public boolean sendMessage(JmsMessageSPI message, String destination) {
         JMSDestinationSPI jmsDestinationSPI = getDestinations().get(destination);
         if (jmsDestinationSPI == null) {
             LOG.warn("Destination [" + destination + "] does not exists");

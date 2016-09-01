@@ -15,7 +15,7 @@ public interface JMSManager {
 
     List<JmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selector);
 
-    boolean sendMessage(JmsMessage message, String connectionFactory, String destination, String destinationType);
+    boolean sendMessageToQueue(JmsMessage message, String destination);
 
     boolean deleteMessages(String source, String[] messageIds);
 

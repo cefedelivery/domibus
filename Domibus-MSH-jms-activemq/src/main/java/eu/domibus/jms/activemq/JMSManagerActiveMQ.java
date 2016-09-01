@@ -100,7 +100,7 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
     }
 
     @Override
-    public boolean sendMessage(JmsMessageSPI message, String connectionFactory, String destination, String destinationType) {
+    public boolean sendMessage(JmsMessageSPI message, String destination) {
         QueueViewMBean queue = getQueue(destination);
 
         Map<String, String> properties = message.getProperties();

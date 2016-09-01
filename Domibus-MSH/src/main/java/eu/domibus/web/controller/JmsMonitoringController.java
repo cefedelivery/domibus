@@ -134,7 +134,7 @@ public class JmsMonitoringController {
             if(messageIds != null && messageIds.length > 0) {
                 for (String messageId : messageIds) {
                     JmsMessage message = jmsManager.getMessage(source, messageId);
-                    boolean success = jmsManager.sendMessage(message, null, destination, "Queue");
+                    boolean success = jmsManager.sendMessageToQueue(message, destination);
                     if(!success) {
                         messageOutcome.append("Failed to send message [" + message.getId() + "]");
                     }
@@ -148,7 +148,7 @@ public class JmsMonitoringController {
                 message.setContent(content);
                 message.setType(type);
                 message.setProperties(jsonUtil.jsonToMap(request.getParameter("customProperties")));
-                boolean success = jmsManager.sendMessage(message, null, destination, "Queue");
+                boolean success = jmsManager.sendMessageToQueue(message, destination);
                 messageOutcome.append(success ? "Message sent." : "Failed to send message.");
             }
         } else if ("move".equals(action)) {

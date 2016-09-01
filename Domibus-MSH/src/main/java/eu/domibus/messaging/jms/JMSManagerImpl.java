@@ -50,9 +50,9 @@ public class JMSManagerImpl implements JMSManager {
 
 
     @Override
-    public boolean sendMessage(JmsMessage message, String connectionFactory, String destination, String destinationType) {
+    public boolean sendMessageToQueue(JmsMessage message,String destination) {
         JmsMessageSPI jmsMessageSPI = jmsMessageMapper.convert(message);
-        return jmsManagerSPI.sendMessage(jmsMessageSPI, connectionFactory, destination, destinationType);
+        return jmsManagerSPI.sendMessage(jmsMessageSPI, destination);
     }
 
     @Override

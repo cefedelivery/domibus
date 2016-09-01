@@ -11,7 +11,7 @@ public interface JMSManagerSPI {
 
     Map<String, JMSDestinationSPI> getDestinations();
 
-    boolean sendMessage(JmsMessageSPI message, String connectionFactory, String destination, String destinationType);
+    boolean sendMessage(JmsMessageSPI message, String destination);
 
     boolean deleteMessages(String source, String[] messageIds);
 
