@@ -17,7 +17,6 @@ import org.xml.sax.InputSource;
 import weblogic.messaging.runtime.MessageInfo;
 
 import javax.annotation.Resource;
-import javax.jms.Destination;
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
 import javax.naming.InitialContext;
@@ -192,7 +191,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
             return false;
         }
 
-        Destination jmsDestination = null;
+        javax.jms.Queue jmsDestination = null;
         try {
             String destinationJndi = jmsDestinationSPI.getProperty(PROPERTY_JNDI_NAME);
             LOG.debug("Found JNDI [" + destinationJndi + "] for destination [" + destination + "]");
@@ -201,8 +200,13 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
             LOG.error("Error performing lookup for [" + destination + "]");
             return false;
         }
-        jmsOperations.send(jmsDestination, new JmsMessageCreator(message));
+        sendMessage(message, jmsDestination);
         return true;
+    }
+
+    @Override
+    public void sendMessage(JmsMessageSPI message, javax.jms.Queue destination) {
+        jmsOperations.send(destination, new JmsMessageCreator(message));
     }
 
     @Override

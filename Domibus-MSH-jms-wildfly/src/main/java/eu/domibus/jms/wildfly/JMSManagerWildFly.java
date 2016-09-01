@@ -16,7 +16,10 @@ import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import javax.jms.*;
+import javax.jms.JMSException;
+import javax.jms.QueueBrowser;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.MalformedObjectNameException;
@@ -114,18 +117,20 @@ public class JMSManagerWildFly implements JMSManagerSPI {
             return false;
         }
 
-        Destination jmsDestination = null;
+        javax.jms.Queue jmsDestination = null;
         try {
             jmsDestination = getQueue(destination);
-//            String destinationJndi = getJndiName(jmsDestinationSPI);
-//            LOG.debug("Found JNDI [" + destinationJndi + "] for destination [" + destination + "]");
-//            jmsDestination = InitialContext.doLookup(destinationJndi);
         } catch (NamingException e) {
             LOG.error("Error performing lookup for [" + destination + "]");
             return false;
         }
-        jmsOperations.send(jmsDestination, new JmsMessageCreator(message));
+        sendMessage(message, jmsDestination);
         return true;
+    }
+
+    @Override
+    public void sendMessage(JmsMessageSPI message, javax.jms.Queue destination) {
+        jmsOperations.send(destination, new JmsMessageCreator(message));
     }
 
     protected javax.jms.Queue getQueue(String queueName) throws NamingException {

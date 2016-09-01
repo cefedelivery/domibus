@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.jms.Queue;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -50,9 +51,15 @@ public class JMSManagerImpl implements JMSManager {
 
 
     @Override
-    public boolean sendMessageToQueue(JmsMessage message,String destination) {
+    public boolean sendMessageToQueue(JmsMessage message, String destination) {
         JmsMessageSPI jmsMessageSPI = jmsMessageMapper.convert(message);
         return jmsManagerSPI.sendMessage(jmsMessageSPI, destination);
+    }
+
+    @Override
+    public void sendMessageToQueue(JmsMessage message, Queue destination) {
+        JmsMessageSPI jmsMessageSPI = jmsMessageMapper.convert(message);
+        jmsManagerSPI.sendMessage(jmsMessageSPI, destination);
     }
 
     @Override

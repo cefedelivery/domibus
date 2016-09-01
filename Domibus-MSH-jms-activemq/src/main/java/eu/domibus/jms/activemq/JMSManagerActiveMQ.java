@@ -6,14 +6,16 @@ import eu.domibus.jms.spi.JMSManagerSPI;
 import eu.domibus.jms.spi.JmsMessageSPI;
 import org.apache.activemq.broker.jmx.BrokerViewMBean;
 import org.apache.activemq.broker.jmx.QueueViewMBean;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Component;
 
-import javax.jms.DeliveryMode;
+import javax.annotation.Resource;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.ObjectName;
@@ -34,12 +36,11 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
     private static final String PROPERTY_QUEUE_TYPE = "queueType";
 
     protected Map<String, ObjectName> queueMap;
-    protected Map<String, ObjectName> topicMap;
 
-    //TODO
-    String activeMQDefaultAdminName = "admin";
-
-    String activeMQDefaultAdminPassword = "123456";
+//    //TODO
+//    String activeMQDefaultAdminName = "admin";
+//
+//    String activeMQDefaultAdminPassword = "123456";
 
     @Autowired
     MBeanServerConnection mBeanServerConnection;
@@ -50,6 +51,9 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
 
     @Autowired
     JMSDestinationHelper jmsDestinationHelper;
+
+    @Resource(name = "jmsSender")
+    private JmsOperations jmsOperations;
 
     @Override
     public Map<String, JMSDestinationSPI> getDestinations() {
@@ -101,18 +105,26 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
 
     @Override
     public boolean sendMessage(JmsMessageSPI message, String destination) {
-        QueueViewMBean queue = getQueue(destination);
+//        QueueViewMBean queue = getQueue(destination);
+//
+//        Map<String, String> properties = message.getProperties();
+//        properties.put("JMSType", message.getType());
+//        properties.put("JMSDeliveryMode", Integer.toString(DeliveryMode.PERSISTENT));
+//        try {
+//            queue.sendTextMessage(properties, message.getContent(), activeMQDefaultAdminName, activeMQDefaultAdminPassword);
+//        } catch (Exception e) {
+//            LOG.error("Error sending message [" + message + "] to [" + destination + "]");
+//            return false;
+//        }
 
-        Map<String, String> properties = message.getProperties();
-        properties.put("JMSType", message.getType());
-        properties.put("JMSDeliveryMode", Integer.toString(DeliveryMode.PERSISTENT));
-        try {
-            queue.sendTextMessage(properties, message.getContent(), activeMQDefaultAdminName, activeMQDefaultAdminPassword);
-        } catch (Exception e) {
-            LOG.error("Error sending message [" + message + "] to [" + destination + "]");
-            return false;
-        }
+        ActiveMQQueue activeMQQueue = new ActiveMQQueue(destination);
+        sendMessage(message, activeMQQueue);
         return true;
+    }
+
+    @Override
+    public void sendMessage(JmsMessageSPI message, javax.jms.Queue destination) {
+        jmsOperations.send(destination, new JmsMessageCreator(message));
     }
 
     @Override

@@ -19,6 +19,12 @@
           p:proxyInterface="org.apache.activemq.broker.jmx.BrokerViewMBean"
           p:server-ref="mbeanServerConnection" />
 
+    <bean id="jmsSender"
+          class="org.springframework.jms.core.JmsTemplate"
+          c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
+          p:sessionTransacted="true"
+          p:sessionAcknowledgeMode="0"/>
+
 </beans>
 
 

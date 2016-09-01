@@ -1,5 +1,6 @@
 package eu.domibus.jms.spi;
 
+import javax.jms.Queue;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ public interface JMSManagerSPI {
     Map<String, JMSDestinationSPI> getDestinations();
 
     boolean sendMessage(JmsMessageSPI message, String destination);
+
+    void sendMessage(JmsMessageSPI message, Queue destination);
 
     boolean deleteMessages(String source, String[] messageIds);
 
