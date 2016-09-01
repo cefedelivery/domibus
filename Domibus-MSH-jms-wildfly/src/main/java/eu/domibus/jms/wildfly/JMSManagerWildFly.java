@@ -1,5 +1,6 @@
 package eu.domibus.jms.wildfly;
 
+import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.jms.spi.JMSDestinationSPI;
 import eu.domibus.jms.spi.JMSManagerSPI;
 import eu.domibus.jms.spi.JmsMessageSPI;
@@ -47,6 +48,9 @@ public class JMSManagerWildFly implements JMSManagerSPI {
     @Resource(name = "jmsSender")
     private JmsOperations jmsOperations;
 
+    @Autowired
+    JMSDestinationHelper jmsDestinationHelper;
+
     @Override
     public Map<String, JMSDestinationSPI> getDestinations() {
         Map<String, JMSDestinationSPI> destinationMap = new TreeMap<>();
@@ -61,6 +65,7 @@ public class JMSManagerWildFly implements JMSManagerSPI {
                 jmsDestinationSPI.setNumberOfMessages(jmsQueueControl.getMessageCount());
                 jmsDestinationSPI.setProperty(PROPERTY_OBJECT_NAME, objectName);
                 jmsDestinationSPI.setProperty(PROPERTY_JNDI_NAME, jmsQueueControl.getAddress());
+                jmsDestinationSPI.setInternal(jmsDestinationHelper.isInternal(jmsQueueControl.getAddress()));
                 destinationMap.put(jmsQueueControl.getName(), jmsDestinationSPI);
             }
         } catch (Exception e) {

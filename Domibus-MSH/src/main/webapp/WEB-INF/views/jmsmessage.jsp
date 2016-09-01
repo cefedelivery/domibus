@@ -34,9 +34,9 @@
 
     <c:choose>
         <c:when test="${multiMessage}">
-            <tr class="row"><td valign="top" width="100">source:</td><td>${source}</td></tr>
+            <tr class="row"><td valign="top" width="100">Source:</td><td>${source}</td></tr>
             <tr class="row">
-                <td valign="top" width="100">id:</td>
+                <td valign="top" width="100">Id:</td>
                 <td>
                     <c:forEach items="${selectedMessages}" var="id">
                         <input type="hidden" name="selectedMessages" value="${id}"/>
@@ -47,9 +47,9 @@
         </c:when>
         <c:otherwise>
             <c:if test="${action != 'New'}">
-                <tr class="row"><td valign="top" width="100">source:</td><td>${source}</td></tr>
+                <tr class="row"><td valign="top" width="100">Source:</td><td>${source}</td></tr>
                 <tr class="row">
-                    <td valign="top" width="100">id:</td>
+                    <td valign="top" width="100">Id:</td>
                     <td>
                         <c:forEach items="${selectedMessages}" var="id">
                             <input type="hidden" name="selectedMessages" value="${id}"/>
@@ -58,7 +58,7 @@
                     </td>
                 </tr>
                 <tr class="row">
-                    <td valign="top" width="100">timestamp:</td>
+                    <td valign="top" width="100">Timestamp:</td>
                     <td>
                         <c:if test="${not empty message.timestamp}">
                             <fmt:formatDate value="${message.timestamp}" pattern="yyyy-MM-dd HH:mm:ss.SSS" />
@@ -69,11 +69,11 @@
             </c:if>
 
             <tr class="row">
-                <td valign="top" width="100">type:</td>
+                <td valign="top" width="100">JMS type:</td>
                 <td><input name="type" size="132" value="${message.type}"/></td>
             </tr>
             <tr class="row">
-                <td valign="top" width="100">properties:</td>
+                <td valign="top" width="100">Properties:</td>
                 <td>
                     <table border="0" width="100%">
                         <c:forEach items="${message.JMSProperties}" var="jmsProperty">
@@ -91,7 +91,7 @@
                 </td>
             </tr>
             <tr class="row">
-                <td valign="top" width="100">content:</td>
+                <td valign="top" width="100">Content:</td>
                 <td>
                     <textarea cols="132" rows="20" name="content">${message.content}</textarea>
                 </td>

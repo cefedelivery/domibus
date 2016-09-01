@@ -1,5 +1,6 @@
 package eu.domibus.jms.activemq;
 
+import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.jms.spi.JMSDestinationSPI;
 import eu.domibus.jms.spi.JMSManagerSPI;
 import eu.domibus.jms.spi.JmsMessageSPI;
@@ -30,7 +31,7 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
     private static final Log LOG = LogFactory.getLog(JMSManagerActiveMQ.class);
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
-    private static final String PROPERTY_JNDI_NAME = "Jndi";
+    private static final String PROPERTY_QUEUE_TYPE = "queueType";
 
     protected Map<String, ObjectName> queueMap;
     protected Map<String, ObjectName> topicMap;
@@ -47,6 +48,9 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
     @Qualifier("brokerViewMBean")
     BrokerViewMBean brokerViewMBean;
 
+    @Autowired
+    JMSDestinationHelper jmsDestinationHelper;
+
     @Override
     public Map<String, JMSDestinationSPI> getDestinations() {
         Map<String, JMSDestinationSPI> destinationMap = new TreeMap<>();
@@ -57,6 +61,7 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
                 QueueViewMBean queueMbean = MBeanServerInvocationHandler.newProxyInstance(mBeanServerConnection, name, QueueViewMBean.class, true);
                 JMSDestinationSPI jmsDestinationSPI = new JMSDestinationSPI();
                 jmsDestinationSPI.setName(queueMbean.getName());
+                jmsDestinationSPI.setInternal(jmsDestinationHelper.isInternal(queueMbean.getName()));
                 jmsDestinationSPI.setType(JMSDestinationSPI.QUEUE_TYPE);
                 jmsDestinationSPI.setNumberOfMessages(queueMbean.getQueueSize());
                 jmsDestinationSPI.setProperty(PROPERTY_OBJECT_NAME, name);

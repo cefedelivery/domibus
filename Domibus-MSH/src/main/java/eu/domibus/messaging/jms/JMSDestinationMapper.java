@@ -26,7 +26,7 @@ public class JMSDestinationMapper {
         result.setType(jmsDestinationSPI.getType());
         result.setName(jmsDestinationSPI.getName());
         result.setNumberOfMessages(jmsDestinationSPI.getNumberOfMessages());
-//        result.setNumberOfMessagesPending(jmsDestinationSPI.getNumberOfMessagesPending());
+        result.setInternal(jmsDestinationSPI.isInternal());
         result.setProperties(jmsDestinationSPI.getProperties());
         return result;
     }

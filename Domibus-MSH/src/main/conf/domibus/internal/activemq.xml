@@ -81,7 +81,7 @@
                    physicalName="domibus.backend.jms.inQueue"/>
             <queue id="errorNotifyConsumerQueue" physicalName="domibus.backend.jms.errorNotifyConsumer" />
             <queue id="errorNotifyProducerQueue" physicalName="domibus.backend.jms.errorNotifyProducer" />
-            <queue id="domibusDLQ" physicalName="domibus.jms.DLQ" />
+            <queue id="domibusDLQ" physicalName="domibus.DLQ" />
             <topic id="clusterCommandTopic" physicalName="domibus.internal.command"/>
 
         </destinations>
@@ -93,7 +93,7 @@
                             <!--<individualDeadLetterStrategy queuePrefix="DLQ."/>-->
                             <sharedDeadLetterStrategy processExpired="false">
                                 <deadLetterQueue>
-                                    <queue physicalName="domibus.jms.DLQ"/>
+                                    <queue physicalName="domibus.DLQ"/>
                                 </deadLetterQueue>
                             </sharedDeadLetterStrategy>
                         </deadLetterStrategy>

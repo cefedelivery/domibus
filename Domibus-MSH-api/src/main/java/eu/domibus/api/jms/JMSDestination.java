@@ -8,18 +8,13 @@ import java.util.Map;
  */
 public class JMSDestination {
     public final static String QUEUE_TYPE = "Queue";
-    public final static String TOPIC_TYPE = "Topic";
 
     protected Map<String, Object> properties = new HashMap<>();
 
     protected String name;
-    //	protected String jndiName;
-//	protected String serverAddress;
-//	protected Integer serverPort;
+    protected boolean isInternal;
     protected String type;
-    //	protected ObjectName objectName;
     protected long numberOfMessages;
-    protected long numberOfMessagesPending;
 
     public Map<String, Object> getProperties() {
         return properties;
@@ -61,16 +56,15 @@ public class JMSDestination {
         this.numberOfMessages = numberOfMessages;
     }
 
-    public long getNumberOfMessagesPending() {
-        return numberOfMessagesPending;
-    }
-
-    public void setNumberOfMessagesPending(Long numberOfMessagesPending) {
-        this.numberOfMessagesPending = numberOfMessagesPending;
-    }
-
     public String toString() {
         return name;
     }
 
+    public boolean isInternal() {
+        return isInternal;
+    }
+
+    public void setInternal(boolean internal) {
+        isInternal = internal;
+    }
 }

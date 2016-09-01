@@ -6,6 +6,11 @@
 
 <html>
 <head>
+    <style type="text/css">
+
+    </style>
+
+
     <jsp:include page="header.jsp"/>
 
     <script>
@@ -45,7 +50,7 @@
 <form name="filterForm" method="post" action="jmsmonitoring">
     <input type="hidden" name="action" value="filter"/>
     <table border="0" width="100%">
-        <tr class="row"><td>source:</td><td colspan="2">
+        <tr class="row"><td>Source:</td><td colspan="2">
             <select name="source">
                 <c:forEach items="${destinationMap}" var="destination">
                     <option value="${destination.key}"
@@ -53,32 +58,34 @@
                                 <c:out value="selected"/>
                             </c:if>
                     >
-                    ${destination.key}
+                        <c:choose>
+                            <c:when test="${destination.value.internal == true}">
+                                [internal] ${destination.key}
+                            </c:when>
+                            <c:otherwise>
+                                  ${destination.key}
+                            </c:otherwise>
+                        </c:choose>
                         (
                         ${destination.value.numberOfMessages}
-                        <c:choose>
-                            <c:when test="${destination.value.numberOfMessagesPending} > 0">
-                                , ${destination.value.numberOfMessagesPending} pending
-                            </c:when>
-                        </c:choose>
                         )
                     </option>
                 </c:forEach>
             </select>
         </td></tr>
         <tr class="row">
-            <td>period:</td>
+            <td>Period:</td>
             <td colspan="2">
                 <input id="From" name="fromDate" size="16" value="${fromDate}"/>&nbsp;-&nbsp;
                 <input id="To" name="toDate" size="16" value="${toDate}"/>
             </td>
         </tr>
         <tr class="row">
-            <td>type:</td>
+            <td>JMS type:</td>
             <td colspan="2"><input name="jmsType" size="120" value="${jmsType}"></td>
         </tr>
         <tr class="row">
-            <td>selector:</td>
+            <td title="JMS message selector expression(for syntax please refer to https://docs.oracle.com/cd/E19798-01/821-1841/bncer/index.html)">Selector:</td>
             <td colspan="2"><input name="selector" size="120" value="${selector}"></td>
         </tr>
     </table>
@@ -115,7 +122,7 @@
         <tr class="row_high">
             <td><input type="checkbox" id="selectAll" onclick="checkAll(this)"/></td>
             <td><b>Id</b></td>
-            <td><b>Type</b></td>
+            <td><b>JMS type</b></td>
             <td><b>Time</b></td>
             <td><b>Content</b></td>
             <td><b>Custom properties</b></td>
@@ -127,9 +134,9 @@
                     <input type="checkbox" name="selectedMessages" value="${message.id}"/>
                 </td>
                 <td valign="top" width="10%" nowrap><a href="jmsmessage?action=View&source=${source}&selectedMessages=${message.id}&fromDate=${fromDate}&toDate=${toDate}&jmsType=${jmsType}&selector=${selector}">${message.id}</a></td>
-                <td valign="top" width="30%" class="tooltip" alt="${message.type}">${message.type}</td>
+                <td valign="top" width="30%">${message.type}</td>
                 <td valign="top" width="10%" nowrap><fmt:formatDate value="${message.timestamp}" pattern="yyyy-MM-dd HH:mm:ss.SSS" /></td>
-                <td valign="top" width="100%" class="tooltip" alt="${fn:escapeXml(message.content)}">${message.content}</td>
+                <td valign="top" width="100%">${message.content}</td>
                 <td valign="top" width="1%">${message.customProperties}</td>
                 <td valign="top" width="1%">${message.JMSProperties}</td>
             </tr>

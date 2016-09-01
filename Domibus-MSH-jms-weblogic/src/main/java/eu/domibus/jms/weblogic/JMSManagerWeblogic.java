@@ -1,5 +1,6 @@
 package eu.domibus.jms.weblogic;
 
+import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.jms.spi.JMSDestinationSPI;
 import eu.domibus.jms.spi.JMSManagerSPI;
 import eu.domibus.jms.spi.JmsMessageSPI;
@@ -47,6 +48,9 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
     @Resource(name = "jmsSender")
     private JmsOperations jmsOperations;
 
+    @Autowired
+    JMSDestinationHelper jmsDestinationHelper;
+
     @Override
     public Map<String, JMSDestinationSPI> getDestinations() {
         Map<String, JMSDestinationSPI> destinationMap = new TreeMap<String, JMSDestinationSPI>();
@@ -82,6 +86,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
                             destinationName = destinationName.substring(destinationName.lastIndexOf("@") + 1);
                         }
                         destination.setName(destinationName);
+
 //                        destination.setServerAddress(serverAddress);
 //                        destination.setServerPort(serverPort);
                         ObjectName configQueue = getQueueMap(mbsc).get(destinationName);
@@ -92,6 +97,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
                             String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
 //                            destination.setJndiName(configQueueJndiName);
                             destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
+                            destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
                         }
                         ObjectName configTopic = getTopicMap(mbsc).get(destinationName);
                         if (configTopic != null) {
@@ -114,7 +120,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
                             }
                         }
                         Long numberOfMessages = (Long) mbsc.getAttribute(jmsDestination, "MessagesCurrentCount");
-                        Long numberOfMessagesPending = (Long) mbsc.getAttribute(jmsDestination, "MessagesPendingCount");
+//                        Long numberOfMessagesPending = (Long) mbsc.getAttribute(jmsDestination, "MessagesPendingCount");
 
                         destination.setNumberOfMessages(numberOfMessages);
 //                        destination.setNumberOfMessagesPending(numberOfMessagesPending);

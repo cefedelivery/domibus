@@ -53,6 +53,7 @@ public class JmsMonitoringController {
 
         final ModelAndView model = new ModelAndView();
         Map<String, JMSDestination> jmsDestinations = jmsManager.getDestinations();
+
         model.addObject("destinationMap", jmsDestinations);
         model.addObject("source", source);
         model.addObject("jmsType", jmsType);

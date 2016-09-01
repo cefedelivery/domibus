@@ -13,13 +13,9 @@ public class JMSDestinationSPI {
     protected Map<String, Object> properties = new HashMap<>();
 
     protected String name;
-    //	protected String jndiName;
-//	protected String serverAddress;
-//	protected Integer serverPort;
+    protected boolean isInternal;
     protected String type;
-    //	protected ObjectName objectName;
     protected long numberOfMessages;
-//    protected long numberOfMessagesPending;
 
     public Map<String, Object> getProperties() {
         return properties;
@@ -61,16 +57,15 @@ public class JMSDestinationSPI {
         this.numberOfMessages = numberOfMessages;
     }
 
-//    public long getNumberOfMessagesPending() {
-//        return numberOfMessagesPending;
-//    }
-//
-//    public void setNumberOfMessagesPending(Long numberOfMessagesPending) {
-//        this.numberOfMessagesPending = numberOfMessagesPending;
-//    }
-
     public String toString() {
         return name;
     }
 
+    public boolean isInternal() {
+        return isInternal;
+    }
+
+    public void setInternal(boolean internal) {
+        isInternal = internal;
+    }
 }
