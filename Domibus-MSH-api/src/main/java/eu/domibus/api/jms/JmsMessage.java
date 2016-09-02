@@ -8,12 +8,14 @@ import java.util.Map;
  * Created by Cosmin Baciu on 17-Aug-16.
  */
 public class JmsMessage {
+
+	public static final String PROPERTY_ORIGINAL_QUEUE = "originalQueue";
+
 	protected String id;
 	protected String type;
 	protected String content;
 	protected Date timestamp;
 
-	protected Map<String, String> headers = new HashMap<>();
 	protected Map<String, String> properties = new HashMap<>();
 
 	public String getId() {
@@ -48,9 +50,7 @@ public class JmsMessage {
 		this.timestamp = timestamp;
 	}
 
-	public Map<String, String> getProperties() {
-		return properties;
-	}
+
 
 	public Map<String, String> getJMSProperties() {
 		Map<String, String> jmsProperties = new HashMap<String, String>();
@@ -70,6 +70,10 @@ public class JmsMessage {
 			}
 		}
 		return customProperties;
+	}
+
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 
 	public void setProperties(Map<String, String> properties) {

@@ -6,10 +6,13 @@ import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.jms.spi.JMSDestinationSPI;
 import eu.domibus.jms.spi.JMSManagerSPI;
 import eu.domibus.jms.spi.JmsMessageSPI;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.jms.JMSException;
 import javax.jms.Queue;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +24,8 @@ import java.util.Map;
 @Component
 @Transactional
 public class JMSManagerImpl implements JMSManager {
+
+    private static final Log LOG = LogFactory.getLog(JMSManagerImpl.class);
 
     @Autowired
     JMSManagerSPI jmsManagerSPI;
@@ -52,12 +57,18 @@ public class JMSManagerImpl implements JMSManager {
 
     @Override
     public boolean sendMessageToQueue(JmsMessage message, String destination) {
+        message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination);
         JmsMessageSPI jmsMessageSPI = jmsMessageMapper.convert(message);
         return jmsManagerSPI.sendMessage(jmsMessageSPI, destination);
     }
 
     @Override
     public void sendMessageToQueue(JmsMessage message, Queue destination) {
+        try {
+            message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination.getQueueName());
+        } catch (JMSException e) {
+            LOG.warn("Could not add the property [" + JmsMessage.PROPERTY_ORIGINAL_QUEUE + "] on the destination", e);
+        }
         JmsMessageSPI jmsMessageSPI = jmsMessageMapper.convert(message);
         jmsManagerSPI.sendMessage(jmsMessageSPI, destination);
     }

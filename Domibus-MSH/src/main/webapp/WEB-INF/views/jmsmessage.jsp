@@ -102,18 +102,25 @@
 
     </table>
 
-
         <table border="0" width="100%">
             <c:if test="${action != 'View' && action != 'Remove'}">
                 <tr class="row">
                     <td valign="top" width="100">destination:</td>
                     <td>
-                        <select name="destinationKey"
-                                onchange="toggleOtherDestination(document.messageForm.destinationKey.options[document.messageForm.destinationKey.selectedIndex].value);">
-                            <c:forEach items="${destinationMap}" var="destination">
-                                <option>${destination.key}</option>
-                            </c:forEach>
-                        </select>
+                        <c:choose>
+                            <c:when test="${not empty originalQueue}">
+                                <input type="hidden" name="destinationKey" value="${originalQueue}"/>
+                                <c:out value="${originalQueue} "/>
+                            </c:when>
+                            <c:otherwise>
+                                <select name="destinationKey"
+                                        onchange="toggleOtherDestination(document.messageForm.destinationKey.options[document.messageForm.destinationKey.selectedIndex].value);">
+                                    <c:forEach items="${destinationMap}" var="destination">
+                                        <option>${destination.key}</option>
+                                    </c:forEach>
+                                </select>
+                            </c:otherwise>
+                        </c:choose>
                     </td>
                 </tr>
             </c:if>

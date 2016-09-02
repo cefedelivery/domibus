@@ -98,7 +98,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
                             destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
                             destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
                         }
-                        ObjectName configTopic = getTopicMap(mbsc).get(destinationName);
+                        /*ObjectName configTopic = getTopicMap(mbsc).get(destinationName);
                         if (configTopic != null) {
                             destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
                             destination.setType("Topic");
@@ -117,7 +117,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
 //                                subscriberDestination.setJndiName(null);
                                 destinationMap.put(subscriberDestination.getName(), subscriberDestination);
                             }
-                        }
+                        }*/
                         Long numberOfMessages = (Long) mbsc.getAttribute(jmsDestination, "MessagesCurrentCount");
 //                        Long numberOfMessagesPending = (Long) mbsc.getAttribute(jmsDestination, "MessagesPendingCount");
 
