@@ -18,9 +18,8 @@
  */
 
 package eu.domibus.ebms3.common.model;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+
+import eu.domibus.api.jms.JmsMessage;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -35,10 +34,9 @@ public class DelayedDispatchMessageCreator extends DispatchMessageCreator {
         this.delay = delay;
     }
 
-    @Override
-    public Message createMessage(final Session session) throws JMSException {
-        final Message m = super.createMessage(session);
-        m.setLongProperty("AMQ_SCHEDULED_DELAY", delay);
+    public JmsMessage createMessage() {
+        JmsMessage m = super.createMessage();
+        m.setProperty("AMQ_SCHEDULED_DELAY", delay);
         return m;
     }
 }

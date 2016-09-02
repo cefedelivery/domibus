@@ -11,7 +11,7 @@ public class JmsMessageSPI {
 	protected String content;
 	protected Date timestamp;
 
-	protected Map<String, String> properties = new HashMap<>();
+	protected Map<String, Object> properties = new HashMap<>();
 
 	public String getId() {
 		return id;
@@ -45,13 +45,13 @@ public class JmsMessageSPI {
 		this.timestamp = timestamp;
 	}
 
-	public Map<String, String> getProperties() {
+	public Map<String, Object> getProperties() {
 		return properties;
 	}
 
 	//TODO separate between headers and properties
-	public Map<String, String> getJMSProperties() {
-		Map<String, String> jmsProperties = new HashMap<String, String>();
+	public Map<String, Object> getJMSProperties() {
+		Map<String, Object> jmsProperties = new HashMap<>();
 		for (String key : properties.keySet()) {
 			if (key.startsWith("JMS")) {
 				jmsProperties.put(key, properties.get(key));
@@ -61,8 +61,8 @@ public class JmsMessageSPI {
 	}
 
 	//TODO separate between headers and properties
-	public Map<String, String> getCustomProperties() {
-		Map<String, String> customProperties = new HashMap<String, String>();
+	public Map<String, Object> getCustomProperties() {
+		Map<String, Object> customProperties = new HashMap<>();
 		for (String key : properties.keySet()) {
 			if (!key.startsWith("JMS")) {
 				customProperties.put(key, properties.get(key));
@@ -71,7 +71,7 @@ public class JmsMessageSPI {
 		return customProperties;
 	}
 
-	public void setProperties(Map<String, String> properties) {
+	public void setProperties(Map<String, Object> properties) {
 		this.properties = properties;
 	}
 

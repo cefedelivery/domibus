@@ -28,11 +28,15 @@ public class JmsMessageCreator implements MessageCreator {
         if (jmsMessageSPI.getType() != null) {
             result.setJMSType(jmsMessageSPI.getType());
         }
-        Map<String, String> customProperties = jmsMessageSPI.getCustomProperties();
+        Map<String, Object> customProperties = jmsMessageSPI.getCustomProperties();
         if (!customProperties.isEmpty()) {
             for (String pName : customProperties.keySet()) {
-                String pValue = customProperties.get(pName);
-                result.setStringProperty(pName, pValue);
+                Object pValue = customProperties.get(pName);
+                result.setObjectProperty(pName, pValue);
+//                if (pValue instanceof String) {
+//                    result.setStringProperty(pName, (String) pValue);
+//                }
+
             }
         }
         return result;

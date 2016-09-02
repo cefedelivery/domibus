@@ -16,11 +16,11 @@ import java.util.Map;
 public class JsonUtilImpl implements JsonUtil {
 
     @Override
-    public Map<String, String> jsonToMap(String map) {
+    public Map<String, Object> jsonToMap(String map) {
         if (map == null) {
             return null;
         }
-        Type type = new TypeToken<Map<String, String>>() {
+        Type type = new TypeToken<Map<String, Object>>() {
         }.getType();
         return new Gson().fromJson(map, type);
     }

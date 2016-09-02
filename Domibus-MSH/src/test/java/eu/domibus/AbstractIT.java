@@ -162,8 +162,10 @@ public abstract class AbstractIT {
         Destination destination = session.createQueue(queueName);
         MessageProducer producer = session.createProducer(destination);
         // Creates the Message using Spring MessageCreator
-        NotifyMessageCreator messageCreator = new NotifyMessageCreator(messageId, NotificationType.MESSAGE_RECEIVED);
-        Message msg = messageCreator.createMessage(session);
+//        NotifyMessageCreator messageCreator = new NotifyMessageCreator(messageId, NotificationType.MESSAGE_RECEIVED);
+        Message msg = session.createTextMessage();
+        msg.setStringProperty(MessageConstants.MESSAGE_ID, messageId);
+        msg.setObjectProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED);
         msg.setStringProperty(MessageConstants.ENDPOINT, "backendInterfaceEndpoint");
         producer.send(msg);
         System.out.println("Message with ID [:" + messageId + "] sent in queue!");

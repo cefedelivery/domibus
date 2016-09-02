@@ -238,13 +238,13 @@ public class JMSManagerWildFly implements JMSManagerSPI {
         result.setType(textMessage.getJMSType());
         Enumeration propertyNames = textMessage.getPropertyNames();
 
-        Map<String, String> properties = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();
         while (propertyNames.hasMoreElements()) {
             String name = (String) propertyNames.nextElement();
             Object objectProperty = textMessage.getObjectProperty(name);
-            if (objectProperty instanceof String) {
-                properties.put(name, (String) objectProperty);
-            }
+//            if (objectProperty instanceof String) {
+                properties.put(name, objectProperty);
+//            }
         }
         result.setProperties(properties);
         return result;
@@ -264,7 +264,6 @@ public class JMSManagerWildFly implements JMSManagerSPI {
     protected JmsMessageSPI convert(Map<String, Object> map) {
         JmsMessageSPI result = new JmsMessageSPI();
 
-
         result.setType((String) map.get("JMSType"));
         Long jmsTimestamp = (Long) map.get("JMSTimestamp");
         if (jmsTimestamp != null) {
@@ -273,13 +272,13 @@ public class JMSManagerWildFly implements JMSManagerSPI {
 
         result.setId((String) map.get("JMSMessageID"));
 
-        Map<String, String> properties = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             Object propertyValue = entry.getValue();
-            //TODO add other types of properties
-            if (propertyValue instanceof String) {
-                properties.put(entry.getKey(), (String) propertyValue);
-            }
+
+//            if (propertyValue instanceof String) {
+                properties.put(entry.getKey(), propertyValue);
+//            }
         }
         result.setProperties(properties);
         return result;

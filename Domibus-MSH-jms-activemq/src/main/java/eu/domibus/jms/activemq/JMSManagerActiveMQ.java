@@ -211,7 +211,7 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
         result.setContent((String) data.get("Text"));
         Map stringProperties = (Map) data.get("StringProperties");
 
-        Map<String, String> properties = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();
 
         Set<String> allPropertyNames = data.getCompositeType().keySet();
         for (String propertyName : allPropertyNames) {

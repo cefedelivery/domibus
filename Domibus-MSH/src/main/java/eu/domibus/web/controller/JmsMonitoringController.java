@@ -108,7 +108,7 @@ public class JmsMonitoringController {
         model.addObject("action", action);
         model.addObject("message", jmsMessage);
         if(jmsMessage.getProperties() != null) {
-            String originalQueue = jmsMessage.getProperties().get(JmsMessage.PROPERTY_ORIGINAL_QUEUE);
+            String originalQueue = jmsMessage.getProperty(JmsMessage.PROPERTY_ORIGINAL_QUEUE);
             model.addObject("originalQueue", originalQueue);
         }
 

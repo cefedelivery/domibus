@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public interface JsonUtil {
 
-    Map<String, String> jsonToMap(String map);
+    Map<String, Object> jsonToMap(String map);
 
     List<String> jsonToList(String list);
 }
