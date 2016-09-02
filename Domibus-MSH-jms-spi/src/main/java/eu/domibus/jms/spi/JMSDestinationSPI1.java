@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public class JMSDestinationSPI {
     public final static String QUEUE_TYPE = "Queue";
-    public final static String TOPIC_TYPE = "Topic";
+    public final static String TOPIC_TYPE = "Topic"; 
 
     protected Map<String, Object> properties = new HashMap<>();
 
