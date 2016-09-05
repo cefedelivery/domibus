@@ -165,7 +165,7 @@ public abstract class AbstractIT {
 //        NotifyMessageCreator messageCreator = new NotifyMessageCreator(messageId, NotificationType.MESSAGE_RECEIVED);
         Message msg = session.createTextMessage();
         msg.setStringProperty(MessageConstants.MESSAGE_ID, messageId);
-        msg.setObjectProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED);
+        msg.setObjectProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
         msg.setStringProperty(MessageConstants.ENDPOINT, "backendInterfaceEndpoint");
         producer.send(msg);
         System.out.println("Message with ID [:" + messageId + "] sent in queue!");
