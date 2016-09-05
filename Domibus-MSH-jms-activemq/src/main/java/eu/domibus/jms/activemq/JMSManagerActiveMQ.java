@@ -33,7 +33,6 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
     private static final Log LOG = LogFactory.getLog(JMSManagerActiveMQ.class);
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
-    private static final String PROPERTY_QUEUE_TYPE = "queueType";
 
     protected Map<String, ObjectName> queueMap;
 
