@@ -32,5 +32,12 @@
         <intercept-url pattern="/home/messagefilter**" access="ROLE_USER"/>
         <intercept-url pattern="/home/updatepmode**" access="ROLE_ADMIN"/>
         <logout logout-success-url="/home"/>
+
+        <headers>
+            <frame-options policy="DENY" />
+            <content-type-options />
+            <xss-protection enabled="true" />
+        </headers>
+
     </http>
 </beans:beans>
