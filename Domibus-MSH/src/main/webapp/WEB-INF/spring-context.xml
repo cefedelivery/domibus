@@ -31,8 +31,6 @@
     <import resource="cxf-endpoint.xml"/>
     <import resource="spring-security.xml"/>
 
-
-
     <context:annotation-config/>
     <context:component-scan base-package="eu.domibus"/>
     <context:property-placeholder properties-ref="domibusProperties" ignore-resource-not-found="false"/>
