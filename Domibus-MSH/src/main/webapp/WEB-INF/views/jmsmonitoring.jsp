@@ -114,8 +114,8 @@
     <input type="hidden" name="jmsType" value="${jmsType}">
     <input type="hidden" name="selector" value="${selector}">
 
-    <input id="NewButton" type="submit" name="action" value="New"/>
-    <input id="ResendButton" type="submit" name="action" value="Resend" onclick="return validateForm(this);">
+    <input id="NewButton" type="submit" name="action" value="New" style="display: none;"/>
+    <input id="ResendButton" type="submit" name="action" value="Resend" style="display: none;" onclick="return validateForm(this);">
     <input id="MoveButton" type="submit" name="action" value="Move" onclick="return validateForm(this);"/>
     <input id="RemoveButton" type="submit" name="action" value="Remove" onclick="return validateForm(this);"/>
     <table border="0" width="100%">
