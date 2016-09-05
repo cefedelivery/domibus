@@ -170,6 +170,12 @@
                 <artifactId>jsr305</artifactId>
                 <version>3.0.0</version>
             </dependency>
+            <dependency>
+                <groupId>org.jmockit</groupId>
+                <artifactId>jmockit</artifactId>
+                <version>1.22</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
