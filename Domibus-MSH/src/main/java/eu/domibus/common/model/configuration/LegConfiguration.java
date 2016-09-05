@@ -36,9 +36,14 @@ import java.util.Map;
 @Entity
 @Table(name = "TB_LEG")
 @NamedQueries({
-        @NamedQuery(name = "LegConfiguration.findForPartiesAndAgreements", query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and (:AGREEMENT is null or :AGREEMENT = '' or  p.agreement.name=:AGREEMENT)"),
-        @NamedQuery(name = "LegConfiguration.findForPMode", query = "select l.name from LegConfiguration l where l.service.name=:SERVICE and l.action.name=:ACTION and l.name in :CANDIDATES"),
-        @NamedQuery(name = "LegConfiguration.findByName", query = "select l from LegConfiguration l where l.name=:NAME")})
+        @NamedQuery(name = "LegConfiguration.findForPartiesAndAgreements",
+                query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and (p.agreement.name=:AGREEMENT and p.agreement is not null)"),
+        @NamedQuery(name = "LegConfiguration.findForPartiesAndAgreementsOAE",
+                query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and p.agreement is null"),
+        @NamedQuery(name = "LegConfiguration.findForPMode",
+                query = "select l.name from LegConfiguration l where l.service.name=:SERVICE and l.action.name=:ACTION and l.name in :CANDIDATES"),
+        @NamedQuery(name = "LegConfiguration.findByName",
+                query = "select l from LegConfiguration l where l.name=:NAME")})
 
 public class LegConfiguration extends AbstractBaseEntity {
 
