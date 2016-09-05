@@ -10,7 +10,7 @@
 
 
     <bean id="mbeanServerConnection" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
-        <property name="serviceUrl" value="service:jmx:rmi://localhost:1198/jndi/rmi://localhost:1199/jmxrmi"/>
+        <property name="serviceUrl" value="${activeMQ.JMXURL}"/>
         <property name="connectOnStartup" value="false"/>
     </bean>
 
