@@ -32,6 +32,7 @@
         <module>Domibus-MSH</module>
 		<module>Domibus-MSH-api</module>
         <module>Domibus-MSH-jms-spi</module>
+        <module>Domibus-MSH-jms-spi-helper</module>
         <module>Domibus-MSH-jms-weblogic</module>
 		<module>Domibus-MSH-jms-activemq</module>	
 		<module>Domibus-MSH-jms-wildfly</module>		

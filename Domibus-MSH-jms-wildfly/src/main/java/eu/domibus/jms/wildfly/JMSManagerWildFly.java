@@ -4,6 +4,8 @@ import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.jms.spi.JMSDestinationSPI;
 import eu.domibus.jms.spi.JMSManagerSPI;
 import eu.domibus.jms.spi.JmsMessageSPI;
+import eu.domibus.jms.spi.helper.JMSSelectorUtil;
+import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,6 +55,9 @@ public class JMSManagerWildFly implements JMSManagerSPI {
 
     @Autowired
     JMSDestinationHelper jmsDestinationHelper;
+
+    @Autowired
+    JMSSelectorUtil jmsSelectorUtil;
 
     @Override
     public Map<String, JMSDestinationSPI> getDestinations() {
@@ -149,7 +154,7 @@ public class JMSManagerWildFly implements JMSManagerSPI {
     public boolean deleteMessages(String source, String[] messageIds) {
         JMSQueueControl queue = getQueueControl(source);
         try {
-            int deleted = queue.removeMessages(getSelector(messageIds));
+            int deleted = queue.removeMessages(jmsSelectorUtil.getSelector(messageIds));
             return deleted == messageIds.length;
         } catch (Exception e) {
             LOG.error("Failed to delete messages from source [" + source + "]:" + messageIds, e);
@@ -159,7 +164,7 @@ public class JMSManagerWildFly implements JMSManagerSPI {
 
     @Override
     public JmsMessageSPI getMessage(String source, String messageId) {
-        String selector = getSelector(messageId);
+        String selector = jmsSelectorUtil.getSelector(messageId);
 
         List<JmsMessageSPI> messages = null;
         try {
@@ -195,7 +200,7 @@ public class JMSManagerWildFly implements JMSManagerSPI {
         if (selectorClause != null) {
             criteria.put("selectorClause", selectorClause);
         }
-        String selector = getSelector(criteria);
+        String selector = jmsSelectorUtil.getSelector(criteria);
 
         try {
             return getMessagesFromDestination(source, selector);
@@ -284,61 +289,11 @@ public class JMSManagerWildFly implements JMSManagerSPI {
         return result;
     }
 
-
-    private String getSelector(String messageId) {
-        StringBuffer selector = new StringBuffer("JMSMessageID = '").append(messageId).append("'");
-        return selector.toString();
-    }
-
-    private String getSelector(String[] messageIds) {
-        if (messageIds.length == 1) {
-            return getSelector(messageIds[0]);
-        }
-        StringBuffer selector = new StringBuffer("JMSMessageID IN (");
-        for (int i = 0; i < messageIds.length; i++) {
-            String messageId = messageIds[i];
-            if (i > 0) {
-                selector.append(", ");
-            }
-            selector.append("'").append(messageId).append("'");
-        }
-        selector.append(")");
-        return selector.toString();
-    }
-
-    public String getSelector(Map<String, Object> criteria) {
-        StringBuffer selector = new StringBuffer();
-        // JMSType
-        String jmsType = (String) criteria.get("JMSType");
-        if (!StringUtils.isEmpty(jmsType)) {
-            selector.append(selector.length() > 0 ? " and " : "");
-            selector.append("JMSType='").append(jmsType).append("'");
-        }
-        // JMSTimestamp
-        Long jmsTimestampFrom = (Long) criteria.get("JMSTimestamp_from");
-        if (jmsTimestampFrom != null) {
-            selector.append(selector.length() > 0 ? " and " : "");
-            selector.append("JMSTimestamp>=").append(jmsTimestampFrom);
-        }
-        Long jmsTimestampTo = (Long) criteria.get("JMSTimestamp_to");
-        if (jmsTimestampTo != null) {
-            selector.append(selector.length() > 0 ? " and " : "");
-            selector.append("JMSTimestamp<=").append(jmsTimestampTo);
-        }
-        String selectorClause = (String) criteria.get("selectorClause");
-        if (!StringUtils.isEmpty(selectorClause)) {
-            selector.append(selector.length() > 0 ? " and " : "");
-            selector.append(selectorClause);
-        }
-        return selector.toString().trim();
-    }
-
-
     @Override
     public boolean moveMessages(String source, String destination, String[] messageIds) {
         JMSQueueControl queue = getQueueControl(source);
         try {
-            int moved = queue.moveMessages(getSelector(messageIds), destination);
+            int moved = queue.moveMessages(jmsSelectorUtil.getSelector(messageIds), destination);
             return moved == messageIds.length;
         } catch (Exception e) {
             LOG.error("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds, e);

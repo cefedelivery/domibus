@@ -4,6 +4,8 @@ import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.jms.spi.JMSDestinationSPI;
 import eu.domibus.jms.spi.JMSManagerSPI;
 import eu.domibus.jms.spi.JmsMessageSPI;
+import eu.domibus.jms.spi.helper.JMSSelectorUtil;
+import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,6 +51,9 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
 
     @Autowired
     JMSDestinationHelper jmsDestinationHelper;
+
+    @Autowired
+    JMSSelectorUtil jmsSelectorUtil;
 
     @Override
     public Map<String, JMSDestinationSPI> getDestinations() {
@@ -214,7 +219,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         JMSDestinationSPI selectedDestination = getDestinations().get(source);
         try {
             ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
-            int deleted = deleteMessages(destination, getSelector(messageIds));
+            int deleted = deleteMessages(destination, jmsSelectorUtil.getSelector(messageIds));
             return deleted == messageIds.length;
         } catch (Exception e) {
             LOG.error("Failed to delete messages from source [" + source + "]:" + messageIds , e);
@@ -240,7 +245,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
     }
 
     private JmsMessageSPI getMessageFromDestination(ObjectName destination, String messageId) throws Exception {
-        List<JmsMessageSPI> messages = getMessagesFromDestination(destination, getSelector(messageId));
+        List<JmsMessageSPI> messages = getMessagesFromDestination(destination, jmsSelectorUtil.getSelector(messageId));
         if (!messages.isEmpty()) {
             return messages.get(0);
         }
@@ -306,7 +311,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
                 if (selectorClause != null) {
                     criteria.put("selectorClause", selectorClause);
                 }
-                String selector = getSelector(criteria);
+                String selector = jmsSelectorUtil.getSelector(criteria);
                 try {
                     ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
                     messages = getMessagesFromDestination(destination, selector);
@@ -325,56 +330,6 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
     }
 
 
-    private String getSelector(String messageId) {
-        StringBuffer selector = new StringBuffer("JMSMessageID = '").append(messageId).append("'");
-        return selector.toString();
-    }
-
-    private String getSelector(String[] messageIds) {
-        if (messageIds.length == 1) {
-            return getSelector(messageIds[0]);
-        }
-        StringBuffer selector = new StringBuffer("JMSMessageID IN (");
-        for (int i = 0; i < messageIds.length; i++) {
-            String messageId = messageIds[i];
-            if (i > 0) {
-                selector.append(", ");
-            }
-            selector.append("'").append(messageId).append("'");
-        }
-        selector.append(")");
-        return selector.toString();
-    }
-
-    public String getSelector(Map<String, Object> criteria) {
-        StringBuffer selector = new StringBuffer();
-        // JMSType
-        String jmsType = (String) criteria.get("JMSType");
-        if (!StringUtils.isEmpty(jmsType)) {
-            selector.append(selector.length() > 0 ? " and " : "");
-            selector.append("JMSType='").append(jmsType).append("'");
-        }
-        // JMSTimestamp
-        Long jmsTimestampFrom = (Long) criteria.get("JMSTimestamp_from");
-        if (jmsTimestampFrom != null) {
-            selector.append(selector.length() > 0 ? " and " : "");
-            selector.append("JMSTimestamp>=").append(jmsTimestampFrom);
-        }
-        Long jmsTimestampTo = (Long) criteria.get("JMSTimestamp_to");
-        if (jmsTimestampTo != null) {
-            selector.append(selector.length() > 0 ? " and " : "");
-            selector.append("JMSTimestamp<=").append(jmsTimestampTo);
-        }
-        String selectorClause = (String) criteria.get("selectorClause");
-        if (!StringUtils.isEmpty(selectorClause)) {
-            selector.append(selector.length() > 0 ? " and " : "");
-            selector.append(selectorClause);
-        }
-        if (selector.length() == 0) {
-            selector.append("true");
-        }
-        return selector.toString().trim();
-    }
 
 
     @Override
@@ -384,7 +339,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         try {
             ObjectName fromDestination = from.getProperty(PROPERTY_OBJECT_NAME);
             ObjectName toDestination = to.getProperty(PROPERTY_OBJECT_NAME);
-            int moved = moveMessages(fromDestination, toDestination, getSelector(messageIds));
+            int moved = moveMessages(fromDestination, toDestination, jmsSelectorUtil.getSelector(messageIds));
             return moved == messageIds.length;
         } catch (Exception e) {
             LOG.error("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds , e);

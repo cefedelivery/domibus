@@ -1,4 +1,4 @@
-package eu.domibus.jms.weblogic;
+package eu.domibus.jms.spi.helper;
 
 import eu.domibus.jms.spi.JmsMessageSPI;
 import org.springframework.jms.core.MessageCreator;
