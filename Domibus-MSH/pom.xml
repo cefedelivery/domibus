@@ -36,7 +36,7 @@
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hibernate.version>4.1.9.Final</hibernate.version>
-        <cxf.version>3.1.6</cxf.version>
+        <cxf.version>3.1.7</cxf.version>
         <log4j.version>1.2.17</log4j.version>
         <spring.security.version>3.2.0.RELEASE</spring.security.version>
         <jstl.version>1.2</jstl.version>
