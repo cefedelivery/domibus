@@ -30,6 +30,7 @@
     </parent>
     <artifactId>domibus-plugin-api</artifactId>
     <packaging>jar</packaging>
+	<name>Domibus MSH Plugin API</name>
 
     <profiles>
         <profile>

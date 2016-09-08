@@ -149,6 +149,14 @@
 
                 </li>
             </sec:authorize>
+            <sec:authorize ifAllGranted="ROLE_ADMIN">
+                <li>
+                    <c:url value="/home/jmsmonitoring" var="jmsmonitoring">
+                    </c:url>
+                    <a href="${jmsmonitoring}">JMS Monitoring</a>
+
+                </li>
+            </sec:authorize>
             <li>
                 <a href="javascript:formSubmit()"> Logout</a>
             </li>

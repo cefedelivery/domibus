@@ -27,8 +27,15 @@
     <artifactId>domibus</artifactId>
     <version>3.2-SNAPSHOT</version>
     <packaging>pom</packaging>
+	<name>Domibus MSH</name>
     <modules>
         <module>Domibus-MSH</module>
+		<module>Domibus-MSH-api</module>
+        <module>Domibus-MSH-jms-spi</module>
+        <module>Domibus-MSH-jms-spi-helper</module>
+        <module>Domibus-MSH-jms-weblogic</module>
+		<module>Domibus-MSH-jms-activemq</module>	
+		<module>Domibus-MSH-jms-wildfly</module>		
         <module>Domibus-plugin-api</module>
         <module>Domibus-ws-stubs</module>
         <module>Domibus-default-ws-plugin</module>
@@ -68,6 +75,11 @@
 
         <dependencies>
             <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.7</version>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.11</version>
@@ -77,6 +89,11 @@
                 <groupId>commons-logging</groupId>
                 <artifactId>commons-logging</artifactId>
                 <version>1.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -91,6 +108,16 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-tx</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context-support</artifactId>
                 <version>${spring.version}</version>
             </dependency>
             <dependency>
@@ -142,6 +169,12 @@
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>3.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmockit</groupId>
+                <artifactId>jmockit</artifactId>
+                <version>1.22</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

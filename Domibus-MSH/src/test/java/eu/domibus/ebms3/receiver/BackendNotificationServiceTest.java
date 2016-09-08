@@ -1,8 +1,11 @@
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
@@ -42,6 +45,9 @@ public class BackendNotificationServiceTest {
 
     @Injectable
     JmsOperations jmsTemplateNotify;
+
+    @Injectable
+    JMSManager jmsManager;
 
     @Injectable
     BackendFilterDao backendFilterDao;
@@ -197,7 +203,8 @@ public class BackendNotificationServiceTest {
         backendNotificationService.notify("messageId", backendName, notificationType);
 
         new Verifications() {{
-            jmsTemplateNotify.send(withAny(queue), withAny(new NotifyMessageCreator("", NotificationType.MESSAGE_RECEIVED)));
+            jmsManager.sendMessageToQueue(withAny(new JmsMessage()), withAny(queue));
+//            jmsTemplateNotify.send(withAny(queue), withAny(new NotifyMessageCreator("", NotificationType.MESSAGE_RECEIVED)));
             times = 0;
         }};
     }
@@ -205,7 +212,6 @@ public class BackendNotificationServiceTest {
     @Test
     public void testNotifyWithConfiguredNotificationListener(
             @Injectable final NotificationListener notificationListener,
-            @Injectable final NotificationType notificationType,
             @Injectable final Queue queue) throws Exception {
         final String backendName = "customPlugin";
         new Expectations(backendNotificationService) {{
@@ -217,15 +223,17 @@ public class BackendNotificationServiceTest {
         }};
 
         final String messageId = "123";
+        final NotificationType notificationType = NotificationType.MESSAGE_RECEIVED;
         backendNotificationService.notify(messageId, backendName, notificationType);
 
         new Verifications() {{
-            NotifyMessageCreator notifyMessageCreator = null;
-            jmsTemplateNotify.send(queue, notifyMessageCreator = withCapture());
+            JmsMessage jmsMessage = null;
+            jmsManager.sendMessageToQueue(jmsMessage = withCapture(), queue);
+//            jmsTemplateNotify.send(queue, jmsMessage = withCapture());
             times = 1;
 
-            Assert.assertEquals(notifyMessageCreator.getMessageId(), messageId);
-            Assert.assertEquals(notifyMessageCreator.getNotificationType(), notificationType);
+            Assert.assertEquals(jmsMessage.getProperty(MessageConstants.MESSAGE_ID), messageId);
+            Assert.assertEquals(jmsMessage.getProperty(MessageConstants.NOTIFICATION_TYPE), notificationType.name());
         }};
     }
 }

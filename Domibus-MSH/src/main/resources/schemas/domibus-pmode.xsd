@@ -424,7 +424,7 @@
                                     <xs:attribute name="name" use="required" type="xs:string"/>
                                     <xs:attribute name="responderRole" use="required"
                                                   type="xs:string"/>
-                                    <xs:attribute name="agreement" use="required" type="xs:string"/>
+                                    <xs:attribute name="agreement" type="xs:string"/>
                                     <xs:attribute name="binding" type="xs:string" use="required"/>
                                     <xs:attribute name="mep" type="xs:string" use="required"/>
                                     <xs:attribute name="initiatorRole" use="required"

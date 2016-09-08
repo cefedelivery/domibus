@@ -19,18 +19,15 @@
 
 package eu.domibus.ebms3.common.model;
 
+import eu.domibus.api.jms.JMSMessageBuilder;
+import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.messaging.MessageConstants;
-import org.springframework.jms.core.MessageCreator;
-
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
 
 
 /**
  * @author Christian Koch, Stefan Mueller
  */
-public class DispatchMessageCreator implements MessageCreator {
+public class DispatchMessageCreator {
 
     private final String messageId;
     private final String endpoint;
@@ -40,11 +37,11 @@ public class DispatchMessageCreator implements MessageCreator {
         this.endpoint = endpoint;
     }
 
-    @Override
-    public Message createMessage(final Session session) throws JMSException {
-        final Message message = session.createMessage();
-        message.setStringProperty(MessageConstants.MESSAGE_ID, messageId);
-        message.setStringProperty(MessageConstants.ENDPOINT, endpoint);
-        return message;
+    public JmsMessage createMessage() {
+        return JMSMessageBuilder
+                .create()
+                .property(MessageConstants.MESSAGE_ID, messageId)
+                .property(MessageConstants.ENDPOINT, endpoint)
+                .build();
     }
 }
