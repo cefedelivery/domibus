@@ -149,7 +149,7 @@ public class TrustStoreService {
             ts.load(new ByteArrayInputStream(store), password.toCharArray());
             ts.store(new FileOutputStream(f), trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
             trustStore = ts;
-            refreshTrustStore();
+            updateTrustStore();
         }
 
     }
