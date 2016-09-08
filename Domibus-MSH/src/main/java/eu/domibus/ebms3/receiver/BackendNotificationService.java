@@ -19,6 +19,7 @@
 
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
@@ -27,10 +28,10 @@ import eu.domibus.messaging.NotifyMessageCreator;
 import eu.domibus.messaging.ReceiveFailedMessageCreator;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
-import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.routing.*;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
+import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
 import eu.domibus.submission.SubmissionValidatorListProvider;
 import org.apache.commons.logging.Log;
@@ -38,7 +39,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
-import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -57,9 +57,12 @@ public class BackendNotificationService {
 
     private static final Log LOG = LogFactory.getLog(BackendNotificationService.class);
 
-    @Qualifier("jmsTemplateNotify")
+//    @Qualifier("jmsTemplateNotify")
+//    @Autowired
+//    private JmsOperations jmsOperations;
+
     @Autowired
-    private JmsOperations jmsOperations;
+    JMSManager jmsManager;
 
     @Autowired
     private BackendFilterDao backendFilterDao;
@@ -136,7 +139,8 @@ public class BackendNotificationService {
             }
         }
         LOG.error("No backend responsible for message [" + userMessage.getMessageInfo().getMessageId() + "] found. Sending notification to [" + unknownReceiverQueue + "]");
-        jmsOperations.send(unknownReceiverQueue, new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED));
+        jmsManager.sendMessageToQueue(new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED).createMessage(), unknownReceiverQueue);
+        //jmsOperations.send(unknownReceiverQueue, new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED));
     }
 
     protected void validateSubmission(UserMessage userMessage, String backendName, NotificationType notificationType) {
@@ -178,7 +182,8 @@ public class BackendNotificationService {
             LOG.debug("No notification listeners found for backend [" + backendName + "]");
             return;
         }
-        jmsOperations.send(notificationListener.getBackendNotificationQueue(), new NotifyMessageCreator(messageId, notificationType));
+        jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType).createMessage(), notificationListener.getBackendNotificationQueue());
+//        jmsOperations.send(notificationListener.getBackendNotificationQueue(), new NotifyMessageCreator(messageId, notificationType));
     }
 
     public void notifyOfSendFailure(final String messageId) {
@@ -196,7 +201,9 @@ public class BackendNotificationService {
         final String backendName = messageLogDao.findBackendForMessageId(messageId);
         for (final NotificationListener notificationListenerService : notificationListenerServices) {
             if (notificationListenerService.getBackendName().equals(backendName)) {
-                jmsOperations.send(notificationListenerService.getBackendNotificationQueue(), new ReceiveFailedMessageCreator(messageId, endpoint));
+                jmsManager.sendMessageToQueue(new ReceiveFailedMessageCreator(messageId, endpoint).createMessage(), notificationListenerService.getBackendNotificationQueue());
+//                jmsOperations.send(notificationListenerService.getBackendNotificationQueue(), new ReceiveFailedMessageCreator(messageId, endpoint));
+
             }
         }
     }

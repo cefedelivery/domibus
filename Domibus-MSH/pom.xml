@@ -36,13 +36,12 @@
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hibernate.version>4.1.9.Final</hibernate.version>
-        <cxf.version>3.1.6</cxf.version>
+        <cxf.version>3.1.7</cxf.version>
         <log4j.version>1.2.17</log4j.version>
         <spring.security.version>3.2.0.RELEASE</spring.security.version>
         <jstl.version>1.2</jstl.version>
         <atomikos.version>3.9.3</atomikos.version>
         <webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
-        <domibus.name>domibus</domibus.name>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
@@ -85,7 +84,7 @@
             <id>wildfly-mysql</id>
             <properties>
                 <webXmlPath>src/main/conf/wildfly/web.xml</webXmlPath>
-                <domibus.name>domibus-wildfly</domibus.name>
+                <domibus.classifier>wildfly</domibus.classifier>
                 <wildfly.version>9.0.2.Final</wildfly.version>
             </properties>
             <build>
@@ -179,6 +178,7 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>2.4</version>
                         <configuration>
+
                             <descriptors>
                                 <descriptor>src/main/assembly/wildfly/wildfly-full.xml</descriptor>
                                 <descriptor>src/main/assembly/wildfly/wildfly-configuration-only.xml</descriptor>
@@ -202,6 +202,11 @@
             </build>
 
             <dependencies>
+                <dependency>
+                    <groupId>eu.domibus</groupId>
+                    <artifactId>domibus-jms-wildfly</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
                 <dependency>
                     <groupId>org.glassfish.main.javaee-api</groupId>
                     <artifactId>javax.jws</artifactId>
@@ -262,7 +267,7 @@
             <id>weblogic-oracle</id>
             <properties>
                 <webXmlPath>src/main/conf/weblogic/web.xml</webXmlPath>
-                <domibus.name>domibus-weblogic</domibus.name>
+                <domibus.classifier>weblogic</domibus.classifier>
             </properties>
             <build>
                 <resources>
@@ -299,6 +304,11 @@
                 </plugins>
             </build>
             <dependencies>
+                <dependency>
+                    <groupId>eu.domibus</groupId>
+                    <artifactId>domibus-jms-weblogic</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
                 <dependency>
                     <groupId>org.glassfish.main.javaee-api</groupId>
                     <artifactId>javax.jws</artifactId>
@@ -359,12 +369,17 @@
             <id>tomcat-mysql</id>
             <properties>
                 <filesToExclude>log4j.properties</filesToExclude>
-                <domibus.name>domibus</domibus.name>
+                <domibus.classifier>tomcat</domibus.classifier>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
+                <dependency>
+                    <groupId>eu.domibus</groupId>
+                    <artifactId>domibus-jms-activemq</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
                 <dependency>
                     <groupId>org.apache.activemq</groupId>
                     <artifactId>activemq-spring</artifactId>
@@ -486,8 +501,6 @@
                                 </descriptor>
                                 <descriptor>src/main/assembly/sql-scripts.xml
                                 </descriptor>
-                                <descriptor>src/main/assembly/war-with-configfiles.xml
-                                </descriptor>
                             </descriptors>
                         </configuration>
                         <executions>
@@ -512,7 +525,20 @@
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-plugin-api</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-jms-spi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -527,7 +553,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -550,12 +575,10 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -771,13 +794,11 @@
         <dependency>
             <groupId>org.jmockit</groupId>
             <artifactId>jmockit</artifactId>
-            <version>1.22</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
-        <finalName>${domibus.name}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -837,9 +858,9 @@
                 <version>2.3</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <warName>domibus</warName>
                     <webXml>${webXmlPath}</webXml>
-                    <warName>${domibus.name}</warName>
+                    <warName>${project.artifactId}-${project.version}</warName>
+                    <classifier>${domibus.classifier}</classifier>
                     <archive>
                         <manifestEntries>
                             <Specification-Version>${project.version}</Specification-Version>

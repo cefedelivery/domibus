@@ -33,8 +33,8 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -95,8 +95,16 @@ public class PModeDao extends PModeProvider {
     }
 
     protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
-        final Query candidatesQuery = this.entityManager.createNamedQuery("LegConfiguration.findForPartiesAndAgreements");
-        candidatesQuery.setParameter("AGREEMENT", agreementName);
+        String namedQuery;
+        if (agreementName.equals(OPTIONAL_AND_EMPTY)) {
+            namedQuery = "LegConfiguration.findForPartiesAndAgreementsOAE";
+        } else {
+            namedQuery = "LegConfiguration.findForPartiesAndAgreements";
+        }
+        final Query candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
+        if (!agreementName.equals(OPTIONAL_AND_EMPTY)) {
+            candidatesQuery.setParameter("AGREEMENT", agreementName);
+        }
         candidatesQuery.setParameter("SENDER_PARTY", senderParty);
         candidatesQuery.setParameter("RECEIVER_PARTY", receiverParty);
         final List<LegConfiguration> candidates = candidatesQuery.getResultList();
@@ -106,7 +114,7 @@ public class PModeDao extends PModeProvider {
         final TypedQuery<String> query = this.entityManager.createNamedQuery("LegConfiguration.findForPMode", String.class);
         query.setParameter("SERVICE", service);
         query.setParameter("ACTION", action);
-        final Collection<String> candidateIds = new ArrayList();
+        final Collection<String> candidateIds = new HashSet<>();
         for (final LegConfiguration candidate : candidates) {
             candidateIds.add(candidate.getName());
         }
@@ -121,7 +129,7 @@ public class PModeDao extends PModeProvider {
 
     protected String findAgreement(final AgreementRef agreementRef) throws EbMS3Exception {
         if (agreementRef == null || agreementRef.getValue() == null || agreementRef.getValue().isEmpty()) {
-            return ""; //AgreementRef is optional
+            return OPTIONAL_AND_EMPTY; //AgreementRef is optional
         }
         final String value = agreementRef.getValue();
         final String type = agreementRef.getType();

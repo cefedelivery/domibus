@@ -19,6 +19,7 @@
 
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
@@ -60,6 +61,9 @@ public class RetryService {
     @Autowired
     @Qualifier("jmsTemplateDispatch")
     private JmsOperations jmsOperations;
+
+    @Autowired
+    JMSManager jmsManager;
 
     @Autowired
     @Qualifier("sendMessageQueue")
@@ -110,6 +114,7 @@ public class RetryService {
     }
 
     private void sendJmsMessage(final String messageId) {
-        jmsOperations.send(dispatchQueue, new DispatchMessageCreator(messageId, messageLogDao.findEndpointForMessageId(messageId)));
+        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, messageLogDao.findEndpointForMessageId(messageId)).createMessage(), dispatchQueue);
+//        jmsOperations.send(dispatchQueue, new DispatchMessageCreator(messageId, messageLogDao.findEndpointForMessageId(messageId)));
     }
 }
