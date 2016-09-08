@@ -240,7 +240,7 @@
                             </goals>
                             <configuration>
                                 <!-- Sets the VM argument line used when integration tests are run. -->
-                                <argLine>-server -ea -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m
+                                <argLine>-server -ea -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m -Duser.language=en
                                     ${failsafeArgLine}
                                 </argLine>
                                 <!-- Skips integration tests if the value of skipITs property is true-->
