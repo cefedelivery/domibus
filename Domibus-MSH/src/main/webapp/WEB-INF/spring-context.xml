@@ -24,11 +24,12 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
+    <import resource="classpath*:config/*-jms-context.xml"/>
+
     <import resource="file:///${domibus.config.location}/domibus-plugins.xml"/>
     <import resource="msh-config.xml"/>
     <import resource="cxf-endpoint.xml"/>
     <import resource="spring-security.xml"/>
-
 
     <context:annotation-config/>
     <context:component-scan base-package="eu.domibus"/>
