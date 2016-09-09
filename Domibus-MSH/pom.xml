@@ -861,14 +861,6 @@
                     <webXml>${webXmlPath}</webXml>
                     <warName>${project.artifactId}-${project.version}</warName>
                     <classifier>${domibus.classifier}</classifier>
-                    <archive>
-                        <manifestEntries>
-                            <Specification-Version>${project.version}</Specification-Version>
-                            <Specification-Title>${project.artifactId}</Specification-Title>
-                            <Implementation-Title>${project.artifactId}</Implementation-Title>
-                            <Build-Time>${maven.build.timestamp}</Build-Time>
-                        </manifestEntries>
-                    </archive>
                 </configuration>
             </plugin>
             <plugin>
