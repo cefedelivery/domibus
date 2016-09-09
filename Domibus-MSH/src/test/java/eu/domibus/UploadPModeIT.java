@@ -1,7 +1,7 @@
 package eu.domibus;
 
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.model.configuration.*;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.controller.AdminGUIController;
 import org.apache.commons.io.IOUtils;
@@ -211,4 +211,21 @@ public class UploadPModeIT extends AbstractIT {
     }
 
 
+    /**
+     * Tests that the PMode is not saved in the DB because there is a validation error (maxLength exceeded).
+     */
+    @Test
+    public void testSavePModeValidationError() throws IOException {
+
+        try {
+            File wrongPmode = new File("src/test/resources/SamplePModes/domibus-configuration-long-names.xml");
+            FileInputStream fis = new FileInputStream(wrongPmode);
+            MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-long-names", wrongPmode.getName(), "text/xml", IOUtils.toByteArray(fis));
+            String response = adminGui.uploadPmodeFile(pModeContent);
+            Assert.assertTrue(response.contains("is not facet-valid with respect to maxLength"));
+        } catch (IOException ioEx) {
+            System.out.println("Error: " + ioEx.getMessage());
+            throw ioEx;
+        }
+    }
 }
