@@ -1,5 +1,6 @@
 Domibus 3.2 RC-1:   Run the appropriate DB migration script.
                     Replace domibus.war and the plugin(s) jar(s) into \domibus\conf\domibus\plugins\lib"
+                    For Tomcat installations only, the activemq.xml file has to be replaced and re-configured according to your environment (transportConnector uri, authenticationUser, redeliveryPolicy).
                     Update the configuration file following these steps:
                     -   in file "\domibus\conf\domibus\plugins\config\ws-plugin.xml":
                             o   add <bean id="defaultTransformer" class="eu.domibus.plugin.webService.impl.StubDtoTransformer"/> (as an element in the node beans)
@@ -38,7 +39,6 @@ Domibus 3.2 RC-1:   Run the appropriate DB migration script.
                                             <amq:redeliveryPolicy/>
                                         </amq:redeliveryPolicy>
                                     </amq:xaConnectionFactory>
-                    - replace file "\domibus\conf\domibus\internal\activemq.xml" with the one from the RC-1
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.1.1:      Replace the war. This release updated the type of one column for the MySQL db. Please run the migration script.
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
