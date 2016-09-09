@@ -120,6 +120,7 @@ public class DomibusAlgorithmSuiteLoader implements AlgorithmSuiteLoader {
                     )
             );
             ALGORITHM_SUITE_TYPES.get(BASIC_128_GCM_SHA_256_MGF_SHA_256).setMGFAlgo(WSConstants.MGF_SHA256);
+            ALGORITHM_SUITE_TYPES.get(BASIC_128_GCM_SHA_256_MGF_SHA_256).setEncryptionDigest(SPConstants.SHA256);
         }
 
         DomibusAlgorithmSuite(final SPConstants.SPVersion version, final Policy nestedPolicy) {
