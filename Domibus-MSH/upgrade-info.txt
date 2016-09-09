@@ -25,6 +25,8 @@ Domibus 3.2 RC-1:   Run the appropriate DB migration script.
                     -   in file "\domibus\conf\domibus\domibus-configuration.xml":
                             o   replace class="eu.domibus.common.dao.CachingPModeProvider"/> by class="eu.domibus.common.dao.PModeDao "/> if you are using Oracle DB.
                             o   add <prop key="domibus.certificate.validation.enabled">true</prop>
+                            o   add <prop key="domibus.jms.internalQueue.expression">.*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*</prop>
+                            o   only for Tomcat users: add <prop key="activeMQ.JMXURL">service:jmx:rmi://localhost:1198/jndi/rmi://localhost:1199/jmxrmi</prop>
                     -   in file "\domibus\conf\domibus\domibus-datasources.xml":
                             o   replace  <amq:xaConnectionFactory id="xaJmsConnectionFactory" brokerURL="tcp://localhost:61616" userName="domibus" password="changeit"/>    with
 
@@ -36,6 +38,7 @@ Domibus 3.2 RC-1:   Run the appropriate DB migration script.
                                             <amq:redeliveryPolicy/>
                                         </amq:redeliveryPolicy>
                                     </amq:xaConnectionFactory>
+                    - replace file "\domibus\conf\domibus\internal\activemq.xml" with the one from the RC-1
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.1.1:      Replace the war. This release updated the type of one column for the MySQL db. Please run the migration script.
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
