@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
@@ -8,10 +9,13 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import mockit.Mock;
+import mockit.MockUp;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import no.difi.vefa.edelivery.lookup.model.ProcessIdentifier;
 import no.difi.vefa.edelivery.lookup.model.TransportProfile;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -101,6 +105,16 @@ public class DynamicDiscoveryPModeProviderTest {
     @Before
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
+    }
+
+    @BeforeClass
+    public static void setup() {
+        new MockUp<PModeProvider>() {
+            @Mock
+            public String findPModeKeyForUserMessage(final UserMessage userMessage) throws EbMS3Exception {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreement found", null, null);
+            }
+        };
     }
 
 
@@ -235,6 +249,15 @@ public class DynamicDiscoveryPModeProviderTest {
         dynamicDiscoveryPModeProvider.extractCommonName(testData);
     }
 
+    @Test
+    public void testFindPModeKeyForUserMessage_noPmodeKeyFound_dynamicDiscoveryCalled() throws Exception {
+
+        DynamicDiscoveryPModeProvider mock = mock(DynamicDiscoveryPModeProvider.class);
+
+        doNothing().when(mock).doDynamicThings(null);
+
+        mock.findPModeKeyForUserMessage(null);
+    }
 
     /**
      * Build UserMessage for testing. Only the fields that are mandatory for the testing doDynamicThings are filled.
@@ -338,4 +361,5 @@ public class DynamicDiscoveryPModeProviderTest {
             return null;
         }
     }
+
 }
