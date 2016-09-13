@@ -84,7 +84,9 @@
 					deliveryFailureNotifyProducer="false"/>
 		</errorHandlings>
 		<agreements>
-			<agreement name="agreementEmpty" value="" type=""/>
+			<agreement name="agreement1" value="A1" type=""/>
+			<agreement name="agreement2" value="A2" type=""/>
+			<agreement name="agreement3" value="A3" type=""/>
 		</agreements>
 		<services>
 			<service name="testService1" value="bdx:noprocess" type="tc1"/>
@@ -110,12 +112,12 @@
 					errorHandling="demoErrorHandling"
 					compressPayloads="true"/>
 		</legConfigurations>
-<process name="tc1Process" 
-		agreement="agreementEmpty" 
-		mep="oneway" 
-		binding="push" 
-		initiatorRole="defaultInitiatorRole" 
-		responderRole="defaultResponderRole">
+<process name="tc1Process"
+		 agreement=""
+		 mep="oneway"
+		 binding="push"
+		 initiatorRole="defaultInitiatorRole"
+		 responderRole="defaultResponderRole">
 	<initiatorParties>
 		<initiatorParty name="blue_gw"/>
 		<initiatorParty name="red_gw"/>
