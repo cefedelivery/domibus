@@ -370,6 +370,7 @@
             <properties>
                 <filesToExclude>log4j.properties</filesToExclude>
                 <domibus.classifier>tomcat</domibus.classifier>
+                <tomcat.version>8.0.24</tomcat.version>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -458,7 +459,7 @@
                                         <containerId>tomcat8x</containerId>
                                         <zipUrlInstaller>
                                             <url>
-                                                https://joinup.ec.europa.eu/nexus/service/local/repositories/central/content/org/apache/tomcat/tomcat/8.0.24/tomcat-8.0.24.zip
+                                                https://joinup.ec.europa.eu/nexus/service/local/repositories/central/content/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip
                                             </url>
                                         </zipUrlInstaller>
                                     </container>

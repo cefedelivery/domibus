@@ -33,7 +33,7 @@
 
     <broker useJmx="true" brokerName="localhost"  persistent="true" schedulerSupport="true" dataDirectory="${domibus.work.location:${domibus.config.location}}/work/activemq_data" tmpDataDirectory="${domibus.work.location:${domibus.config.location}}/temp">
         <managementContext>
-            <managementContext createConnector="true" connectorPort="1199" rmiServerPort="1198"/>
+            <managementContext createConnector="true" connectorPort="1199" rmiServerPort="1200"/>
         </managementContext>
         <transportConnectors>
             <transportConnector uri="tcp://localhost:61616" disableAsyncDispatch="true"/>

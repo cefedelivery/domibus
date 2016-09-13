@@ -58,12 +58,6 @@
             <useDefaultExcludes>true</useDefaultExcludes>
             <filtered>false</filtered>
         </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/main/conf/domibus/schemas</directory>
-            <outputDirectory>domibus/conf/domibus/schemas</outputDirectory>
-            <useDefaultExcludes>true</useDefaultExcludes>
-            <filtered>false</filtered>
-        </fileSet>
     </fileSets>
 
     <files>
