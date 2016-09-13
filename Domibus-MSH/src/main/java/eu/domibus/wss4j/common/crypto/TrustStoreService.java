@@ -21,6 +21,7 @@ package eu.domibus.wss4j.common.crypto;
 
 import eu.domibus.clustering.Command;
 import eu.domibus.common.exception.ConfigurationException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,10 @@ import java.util.Properties;
 public class TrustStoreService {
 
     private static final Log LOG = LogFactory.getLog(TrustStoreService.class);
+
+    //TODO remove this and use prooperty place holder
+    public static final String DOMIBUS_CONFIG_LOCATION = "domibus.config.location";
+    public static final String KEYSTORES_DEFAULT_LOCATION = "keystores";
 
     @Resource(name = "trustStoreProperties")
     private Properties trustStoreProperties;
@@ -142,15 +147,24 @@ public class TrustStoreService {
         jmsOperations.send(new ReloadTrustStoreMessageCreator());
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void replaceTruststore(byte[] store, String password) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
-        File f = new File(trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file"));
-        if ((f.exists() && f.canWrite())||(!f.exists() && f.getParentFile().exists() && f.getParentFile().canWrite())){
-            KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
-            ts.load(new ByteArrayInputStream(store), password.toCharArray());
-            ts.store(new FileOutputStream(f), trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
-            trustStore = ts;
-            updateTrustStore();
+        String truststoreFileValue = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
+        File truststoreFile = new File(truststoreFileValue);
+        if (!truststoreFile.getParentFile().exists()) {
+            LOG.debug("Creating directory [" + truststoreFile.getParentFile() + "]");
+            FileUtils.forceMkdir(truststoreFile.getParentFile());
         }
+        LOG.debug("Replacing the existing truststore file [" + truststoreFileValue + "] with the provided one");
+
+        KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
+        ts.load(new ByteArrayInputStream(store), password.toCharArray());
+        FileOutputStream fileOutputStream = new FileOutputStream(truststoreFile);
+        ts.store(fileOutputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
+        fileOutputStream.flush();
+        fileOutputStream.close();
+        trustStore = ts;
+        updateTrustStore();
 
     }
 
