@@ -80,7 +80,6 @@
                            deliveryFailureNotifyProducer="false"/>
         </errorHandlings>
         <agreements>
-            <agreement name="agreementEmpty" value="" type=""/>
             <agreement name="agreement1110" value="EDELIVERY-1110" type=""/>
         </agreements>
         <services>
@@ -142,7 +141,7 @@
                               compressPayloads="false"/>
         </legConfigurations>
         <process name="euCegProcess"
-                 agreement="agreementEmpty"
+                 agreement=""
                  mep="oneway"
                  binding="pushAndPush"
                  initiatorRole="defaultInitiatorRole"
