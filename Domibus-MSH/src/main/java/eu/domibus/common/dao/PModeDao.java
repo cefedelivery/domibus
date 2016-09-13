@@ -96,14 +96,16 @@ public class PModeDao extends PModeProvider {
 
     protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
         String namedQuery;
-        if (agreementName.equals(OPTIONAL_AND_EMPTY)) {
+        /*if (agreementName.equals(OPTIONAL_AND_EMPTY)) {
             namedQuery = "LegConfiguration.findForPartiesAndAgreementsOAE";
-        } else {
+        } else {*/
             namedQuery = "LegConfiguration.findForPartiesAndAgreements";
-        }
+        //}
         final Query candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
         if (!agreementName.equals(OPTIONAL_AND_EMPTY)) {
             candidatesQuery.setParameter("AGREEMENT", agreementName);
+        } else { // Please notice that this is only for backward compatibility and will be removed ASAP!
+            candidatesQuery.setParameter("AGREEMENT", "agreementEmpty");
         }
         candidatesQuery.setParameter("SENDER_PARTY", senderParty);
         candidatesQuery.setParameter("RECEIVER_PARTY", receiverParty);
