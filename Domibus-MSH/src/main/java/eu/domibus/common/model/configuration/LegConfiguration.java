@@ -37,7 +37,9 @@ import java.util.Map;
 @Table(name = "TB_LEG")
 @NamedQueries({
         @NamedQuery(name = "LegConfiguration.findForPartiesAndAgreements",
-                query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and (p.agreement.name=:AGREEMENT and p.agreement is not null)"),
+                //query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and (p.agreement.name=:AGREEMENT and p.agreement is not null)"),
+                query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and (:AGREEMENT = '' or  p.agreement.name=:AGREEMENT)"),
+
         @NamedQuery(name = "LegConfiguration.findForPartiesAndAgreementsOAE",
                 query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and p.agreement is null"),
         @NamedQuery(name = "LegConfiguration.findForPMode",
