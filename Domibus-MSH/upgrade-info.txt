@@ -4,7 +4,13 @@ Domibus 3.2 RC-1:   Run the appropriate DB migration script.
                     Update the configuration file following these steps:
                     -   in file "\domibus\conf\domibus\plugins\config\ws-plugin.xml":
                             o   add <bean id="defaultTransformer" class="eu.domibus.plugin.webService.impl.StubDtoTransformer"/> (as an element in the node beans)
-                            o   add (as the last element inside the node "beans"):
+                            o   replace
+                                 <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
+                                 .......
+                                 </jaxws:endpoint>
+
+                                 with
+
                                 <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
 
                                     <jaxws:properties>
