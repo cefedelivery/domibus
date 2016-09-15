@@ -20,15 +20,12 @@
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:jaxws="http://cxf.apache.org/jaxws"
-       xmlns:amq="http://activemq.apache.org/schema/core"
        xmlns:c="http://www.springframework.org/schema/c"
        xmlns:p="http://www.springframework.org/schema/p"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
-       http://activemq.apache.org/schema/core
-       http://activemq.apache.org/schema/core/activemq-core.xsd">
+       http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
     <!-- This is an example for the configuration of the Domibus-ecodex-ws-plugin -->
     <!-- Example starts here -->
@@ -42,16 +39,28 @@
         <property name="lister" ref="webserviceNotificationListenerService"/>
     </bean>
 
+    <bean id="defaultTransformer" class="eu.domibus.plugin.webService.impl.StubDtoTransformer"/>
+
     <bean id="webserviceNotificationListenerService"
           class="eu.domibus.submission.WeblogicNotificationListenerService"
           c:queue-ref="notifyBackendWebServiceQueue" c:mode="PULL"
           p:backendConnector-ref="backendWebservice">
         <property name="queueJndi" value="jms/domibus.notification.webservice"/>
     </bean>
-		  
 
-    <jaxws:endpoint id="backendInterfaceEndpoint"
-                    implementor="#backendWebservice" address="/backend"/>
+    <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="true"/>
+        </jaxws:properties>
+
+        <jaxws:schemaLocations>
+            <jaxws:schemaLocation>schemas/domibus-submission.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>schemas/xml.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>schemas/domibus-backend.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>schemas/xmlmime.xsd</jaxws:schemaLocation>
+        </jaxws:schemaLocations>
+
+    </jaxws:endpoint>
     <!-- Example ends here -->
 
 </beans>

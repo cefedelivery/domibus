@@ -24,7 +24,9 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
-    <import resource="domibus-plugins.xml"/>
+    <import resource="classpath*:config/*-jms-context.xml"/>
+
+    <import resource="file:///${domibus.config.location}/domibus-plugins.xml"/>
     <import resource="msh-config.xml"/>
     <import resource="cxf-endpoint.xml"/>
     <import resource="spring-security.xml"/>
@@ -41,18 +43,13 @@
         <property name="cacheManager" ref="ehcache"/>
     </bean>
     <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
-        <property name="configLocation" value="ehcache.xml"/>
-    </bean>
-
-    <bean id="jaxbContextMessagingOnly" class="javax.xml.bind.JAXBContext" factory-method="newInstance">
-        <constructor-arg type="java.lang.String"
-                         value="eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704"/>
+        <property name="configLocation" value="file:///${domibus.config.location}/internal/ehcache.xml"/>
     </bean>
 
     <!-- JAXB Context for mapping of ebMS3 schema -->
     <bean id="jaxbContextEBMS" class="javax.xml.bind.JAXBContext" factory-method="newInstance">
         <constructor-arg type="java.lang.String"
-                         value="eu.domibus.common.model.org.oasis_open.docs.ebxml_bp.ebbp_signals_2_0:eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704:eu.domibus.common.model.org.w3._2003._05.soap_envelope:eu.domibus.common.model.org.w3._2005._05.xmlmime:eu.domibus.common.model.org.xmlsoap.schemas.soap.envelope"/>
+                         value="eu.domibus.ebms3.common.model"/>
     </bean>
 
     <!-- JAXB context for mapping of pMode XML configuration -->
@@ -66,14 +63,15 @@
 
     <bean id="transformerFactory" class="javax.xml.transform.TransformerFactory" factory-method="newInstance"/>
 
+
+
     <!-- Factory for creating requests and responses-->
-    <bean id="messageFactory"
-          class="com.sun.xml.internal.messaging.saaj.soap.ver1_2.SOAPMessageFactory1_2Impl"/>
+    <bean id="messageFactory" class="${messageFactoryClass}"/>
 
     <!-- datetimeformat to be used inside the ebXML message -->
     <bean id="xmlDateTimeFormat" class="java.text.SimpleDateFormat">
         <constructor-arg value="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"/>
     </bean>
-    <bean id="dateFormatter" class="eu.domibus.ebms3.common.TimestampDateFormatter"/>
+    <bean id="dateFormatter" class="eu.domibus.ebms3.common.model.TimestampDateFormatter"/>
 
 </beans>

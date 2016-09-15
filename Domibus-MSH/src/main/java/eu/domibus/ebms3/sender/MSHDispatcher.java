@@ -28,11 +28,13 @@ package eu.domibus.ebms3.sender;
 import com.google.common.base.Strings;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.ebms3.common.PolicyFactory;
+import eu.domibus.common.model.configuration.Party;
+import eu.domibus.ebms3.common.model.PolicyFactory;
+import eu.domibus.pki.CertificateService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
@@ -75,6 +77,9 @@ public class MSHDispatcher {
     private PModeProvider pModeProvider;
 
     @Autowired
+    CertificateService certificateService;
+
+    @Autowired
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
 
@@ -84,7 +89,21 @@ public class MSHDispatcher {
         final QName serviceName = new QName("http://domibus.eu", "msh-dispatch-service");
         final QName portName = new QName("http://domibus.eu", "msh-dispatch");
         final javax.xml.ws.Service service = javax.xml.ws.Service.create(serviceName);
-        final String endpoint = pModeProvider.getReceiverParty(pModeKey).getEndpoint();
+        Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+
+
+        if(certificateService.isCertificateValidationEnabled()) {
+            try {
+                boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
+                if (!certificateChainValid) {
+                    warnOutput("Certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
+                }
+            } catch (Exception e) {
+                LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
+            }
+        }
+
+        final String endpoint = receiverParty.getEndpoint();
         service.addPort(portName, SOAPBinding.SOAP12HTTP_BINDING, endpoint);
         final Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
         Policy policy = null;
@@ -152,6 +171,13 @@ public class MSHDispatcher {
             policy.setPassword(httpProxyPassword);
             httpConduit.setProxyAuthorization(policy);
         }
+    }
+
+    private void warnOutput(String message) {
+        LOG.warn("\n\n\n");
+        LOG.warn("**************** WARNING **************** WARNING **************** WARNING **************** ");
+        LOG.warn(message);
+        LOG.warn("*******************************************************************************************\n\n\n");
     }
 }
 

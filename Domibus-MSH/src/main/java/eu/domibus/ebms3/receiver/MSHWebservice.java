@@ -25,23 +25,17 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.MessageType;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.MessageLogEntry;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartInfo;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Property;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
-import eu.domibus.ebms3.common.CompressionService;
-import eu.domibus.ebms3.common.MessageIdGenerator;
-import eu.domibus.ebms3.common.TimestampDateFormatter;
+import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.plugin.validation.SubmissionValidationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.attachment.AttachmentUtil;
@@ -65,6 +59,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.*;
+import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -145,6 +140,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
         Messaging messaging = null;
+        boolean pingMessage = false;
         try (StringWriter sw = new StringWriter()) {
             if (MSHWebservice.LOG.isDebugEnabled()) {
 
@@ -162,24 +158,24 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             messaging = this.getMessaging(request);
 
             checkCharset(messaging);
-
+            pingMessage = checkPingMessage(messaging.getUserMessage());
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
-            if (!messageExists && !(eu.domibus.common.model.configuration.Service.PING_SERVICE.equals(legConfiguration.getService().getValue())
-                    && eu.domibus.common.model.configuration.Action.PING_ACTION.equals(legConfiguration.getAction().getValue()))) { // ping messages are not stored/delivered
+
+            if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
                 this.persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
+                try {
+                    backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+                } catch(SubmissionValidationException e) {
+                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), null, e);
+                }
             }
             responseMessage = this.generateReceipt(request, legConfiguration, messageExists);
-
-
-            if (!messageExists) {
-                backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
-            }
 
         } catch (TransformerException | SOAPException | JAXBException | IOException e) {
             throw new RuntimeException(e);
         } catch (final EbMS3Exception e) {
             try {
-                if (legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
+                if (!pingMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
                     backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED_FAILURE);
                 }
             } catch (Exception ex) {
@@ -217,12 +213,22 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @return result of duplicate check
      */
     private Boolean checkDuplicate(final Messaging messaging) {
-
         return messageLogDao.findByMessageId(messaging.getUserMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
-
-
     }
 
+
+    /**
+     * Check if this message is a ping message
+     *
+     * @param message
+     * @return result of ping service and action check
+     */
+    private Boolean checkPingMessage(final UserMessage message) {
+
+        return eu.domibus.common.model.configuration.Service.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
+                && eu.domibus.common.model.configuration.Action.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
+
+    }
 
     /**
      * Handles Receipt generation for a incoming message

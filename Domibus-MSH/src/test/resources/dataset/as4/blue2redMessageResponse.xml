@@ -1,0 +1,7 @@
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+    <soap:Body>
+        <ns7:sendResponse xmlns:ns7="http://org.ecodex.backend/1_1/">
+            <messageID>6f6aeccb-04af-404b-b224-0249acf7b562@domibus.eu</messageID>
+        </ns7:sendResponse>
+    </soap:Body>
+</soap:Envelope>

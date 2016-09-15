@@ -19,7 +19,7 @@
 
 package eu.domibus.common.dao;
 
-import eu.domibus.common.model.AbstractBaseEntity;
+import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.transaction.annotation.Propagation;

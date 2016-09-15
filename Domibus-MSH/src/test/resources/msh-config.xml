@@ -26,12 +26,12 @@
     <context:annotation-config/>
     <context:component-scan base-package="eu.domibus"/>
     <bean id="compressionMimeTypeBlacklist"
-          class="eu.domibus.ebms3.common.CompressionMimeTypeBlacklist">
+          class="eu.domibus.ebms3.common.model.CompressionMimeTypeBlacklist">
         <property name="entries" ref="compressionBlacklist"/>
     </bean>
 
     <bean id="messageIdGenerator"
-          class="eu.domibus.ebms3.common.MessageIdGenerator">
+          class="eu.domibus.ebms3.common.model.MessageIdGenerator">
         <property name="messageIdSuffix"
                   value="${domibus.msh.messageid.suffix}"/>
     </bean>
@@ -39,7 +39,7 @@
     <bean id="retentionWorkerJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass"
-                  value="eu.domibus.ebms3.common.RetentionWorker"/>
+                  value="eu.domibus.ebms3.common.model.RetentionWorker"/>
         <property name="durability" value="true"/>
     </bean>
 
@@ -83,7 +83,7 @@
                     org.quartz.impl.jdbcjobstore.StdJDBCDelegate
                 </prop>
 
-                <prop key="org.quartz.jobStore.isClustered">false</prop>
+                <prop key="org.quartz.jobStore.isClustered">${domibus.deployment.clustered}</prop>
                 <prop key="org.quartz.jobStore.clusterCheckinInterval">20000
                 </prop>
 

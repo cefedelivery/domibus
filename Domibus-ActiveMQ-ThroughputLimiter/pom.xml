@@ -26,7 +26,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.1.0</version>
+        <version>3.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>domibus-ActiveMQ-ThroughputLimiter</artifactId>
@@ -52,7 +52,7 @@
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-plugin-api</artifactId>
-            <version>3.1.0</version>
+            <version>3.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
@@ -60,12 +60,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
             </plugin>
         </plugins>
     </build>

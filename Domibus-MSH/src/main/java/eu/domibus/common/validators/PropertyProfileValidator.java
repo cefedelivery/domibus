@@ -20,11 +20,11 @@
 package eu.domibus.common.validators;
 
 import eu.domibus.common.ErrorCode;
-import eu.domibus.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Property;
 import eu.domibus.common.model.configuration.PropertySet;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
+import eu.domibus.ebms3.common.model.Messaging;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +59,7 @@ public class PropertyProfileValidator {
 
         modifiablePropertyList.addAll(profile);
 
-        for (final eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Property property : messaging.getUserMessage().getMessageProperties().getProperty()) {
+        for (final eu.domibus.ebms3.common.model.Property property : messaging.getUserMessage().getMessageProperties().getProperty()) {
             Property profiled = null;
             for (final Property profiledProperty : modifiablePropertyList) {
                 if (profiledProperty.getKey().equals(property.getName())) {

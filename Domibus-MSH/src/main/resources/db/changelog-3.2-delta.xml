@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <!-- Domibus 3.1.1 - 3.2 -->
+    <changeSet dbms="oracle" author="martifp" id="changelog-3.2-delta">
+        <createSequence sequenceName="HIBERNATE_SEQUENCE" minValue="1" maxValue="9999999999999999999999999999"
+                        incrementBy="1" startValue="1" cacheSize="20" cycle="false" ordered="false"/>
+    </changeSet>
+    <changeSet author="Cosmin Baciu" id="changelog-3.2-delta-tb_message_log-index">
+        <createIndex indexName="IDX_TB_ML_MSG_ID" tableName="TB_MESSAGE_LOG">
+            <column name="MESSAGE_ID"/>
+        </createIndex>
+    </changeSet>
+
+
+</databaseChangeLog>

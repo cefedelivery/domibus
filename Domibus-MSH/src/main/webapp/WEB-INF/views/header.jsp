@@ -145,7 +145,15 @@
                 <li>
                     <c:url value="/home/updatepmode" var="updatepmode">
                     </c:url>
-                    <a href="${updatepmode}">Update PMode</a>
+                    <a href="${updatepmode}">Configuration upload</a>
+
+                </li>
+            </sec:authorize>
+            <sec:authorize ifAllGranted="ROLE_ADMIN">
+                <li>
+                    <c:url value="/home/jmsmonitoring" var="jmsmonitoring">
+                    </c:url>
+                    <a href="${jmsmonitoring}">JMS Monitoring</a>
 
                 </li>
             </sec:authorize>

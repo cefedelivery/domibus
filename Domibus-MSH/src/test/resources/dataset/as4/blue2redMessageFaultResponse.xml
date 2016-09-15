@@ -1,0 +1,16 @@
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+    <soap:Body>
+        <soap:Fault>
+            <soap:Code>
+                <soap:Value>soap:Sender</soap:Value>
+            </soap:Code>
+            <soap:Reason>
+                <soap:Text xml:lang="en">
+                    Could not validate soapheader caused by: org.xml.sax.SAXParseException: cvc-complex-type.2.4.b: The
+                    content of element 'ns:PartyInfo' is not complete. One of
+                    '{"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/":From}' is expected..
+                </soap:Text>
+            </soap:Reason>
+        </soap:Fault>
+    </soap:Body>
+</soap:Envelope>

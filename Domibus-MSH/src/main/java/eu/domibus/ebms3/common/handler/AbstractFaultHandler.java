@@ -19,8 +19,8 @@
 
 package eu.domibus.ebms3.common.handler;
 
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.ObjectFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,7 @@ public abstract class AbstractFaultHandler implements SOAPHandler<SOAPMessageCon
     protected JAXBContext jaxbContext;
 
     /**
-     * This method extracts a ebMS3 messaging header {@link eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging} from a {@link javax.xml.soap.SOAPMessage}
+     * This method extracts a ebMS3 messaging header {@link Messaging} from a {@link javax.xml.soap.SOAPMessage}
      *
      * @param soapMessage
      * @return

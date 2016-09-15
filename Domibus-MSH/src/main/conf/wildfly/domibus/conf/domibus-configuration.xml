@@ -36,7 +36,7 @@
     <!-- Internal configuration provider. Do not change unless you have special requirements (i.e. dynamic
     discovery injection of PModes)-->
     <bean id="pModeProvider"
-          class="eu.domibus.common.dao.CachingPModeProvider"/>
+          class="eu.domibus.ebms3.common.dao.CachingPModeProvider"/>
 
     <!-- General domibus properties -->
     <util:properties id="domibusProperties">
@@ -55,6 +55,9 @@
 	    <prop key="domibus.backend.etrustexInQueue">jms/domibus.backend.etrustex.inQueue</prop>
         <prop key="domibus.deployment.clustered">false</prop>
         <prop key="messageFactoryClass">com.sun.xml.messaging.saaj.soap.ver1_2.SOAPMessageFactory1_2Impl</prop>
+        <prop key="domibus.certificate.validation.enabled">true</prop>
+        <!-- regular expression used for identifying the internal queues in the Admin Page -->
+        <prop key="domibus.jms.internalQueue.expression">.*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*</prop>
 
         <!-- Enable the proxy settings only if you use a proxy -->
         <!--

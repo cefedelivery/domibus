@@ -22,8 +22,9 @@ package eu.domibus.common.dao;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.AgreementRef;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartyId;
+import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.AgreementRef;
+import eu.domibus.ebms3.common.model.PartyId;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,8 +33,8 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -93,19 +94,36 @@ public class PModeDao extends PModeProvider {
 
     }
 
-    protected String findLegName(final String agreementRef, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
-        final Query candidatesQuery = this.entityManager.createNamedQuery("LegConfiguration.findForPartiesAndAgreements");
-        candidatesQuery.setParameter("AGREEMENT", agreementRef);
+    protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
+        String namedQuery;
+        if (agreementName.equals(OPTIONAL_AND_EMPTY)) {
+            namedQuery = "LegConfiguration.findForPartiesAndAgreementsOAE";
+        } else {
+            namedQuery = "LegConfiguration.findForPartiesAndAgreements";
+        }
+        Query candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
+        if (!agreementName.equals(OPTIONAL_AND_EMPTY)) {
+            candidatesQuery.setParameter("AGREEMENT", agreementName);
+        }
         candidatesQuery.setParameter("SENDER_PARTY", senderParty);
         candidatesQuery.setParameter("RECEIVER_PARTY", receiverParty);
-        final List<LegConfiguration> candidates = candidatesQuery.getResultList();
+
+        List<LegConfiguration> candidates = candidatesQuery.getResultList();
         if (candidates == null || candidates.isEmpty()) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
+            // To be removed when the backward compatibility will be finally broken!
+            namedQuery = "LegConfiguration.findForPartiesAndAgreementEmpty";
+            candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
+            candidatesQuery.setParameter("SENDER_PARTY", senderParty);
+            candidatesQuery.setParameter("RECEIVER_PARTY", receiverParty);
+            candidates = candidatesQuery.getResultList();
+            if (candidates == null || candidates.isEmpty()) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
+            }
         }
         final TypedQuery<String> query = this.entityManager.createNamedQuery("LegConfiguration.findForPMode", String.class);
         query.setParameter("SERVICE", service);
         query.setParameter("ACTION", action);
-        final Collection<String> candidateIds = new ArrayList();
+        final Collection<String> candidateIds = new HashSet<>();
         for (final LegConfiguration candidate : candidates) {
             candidateIds.add(candidate.getName());
         }
@@ -118,12 +136,11 @@ public class PModeDao extends PModeProvider {
         throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
     }
 
-    protected String findAgreementRef(final AgreementRef agreementRef) throws EbMS3Exception {
+    protected String findAgreement(final AgreementRef agreementRef) throws EbMS3Exception {
         if (agreementRef == null || agreementRef.getValue() == null || agreementRef.getValue().isEmpty()) {
-            return ""; //AgreementRef is optional
+            return OPTIONAL_AND_EMPTY;
         }
         final String value = agreementRef.getValue();
-        final String pmode = agreementRef.getPmode(); //FIXME? This value is ignored!
         final String type = agreementRef.getType();
         final TypedQuery<String> query = this.entityManager.createNamedQuery("Agreement.findByValueAndType", String.class);
         query.setParameter("VALUE", value);
@@ -131,9 +148,9 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            PModeDao.LOG.info("No matching agreementRef found", e);
+            PModeDao.LOG.info("No matching agreement found", e);
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreementRef found", null, null);//FIXME: Throw ValueInconsistent if CPA not recognized [5.2.2.7]
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreement found", null, null);
     }
 
     protected String findActionName(final String action) throws EbMS3Exception {
@@ -151,7 +168,7 @@ public class PModeDao extends PModeProvider {
         }
     }
 
-    protected String findServiceName(final eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Service service) throws EbMS3Exception {
+    protected String findServiceName(final eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception {
         final String type = service.getType();
         final String value = service.getValue();
         final TypedQuery<String> query;

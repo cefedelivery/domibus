@@ -58,8 +58,8 @@ public class DownloadMessageIT extends AbstractIT {
         try {
             backendWebService.downloadMessage(downloadMessageRequest, downloadMessageResponse, ebMSHeaderInfo);
         } catch (DownloadMessageFault re) {
-            String message = "Downloading message failed, reason: No message with ID invalid@e-delivery.eu pending for download";
-            Assert.assertEquals(message, re.getMessage());
+            String message = "No message with ID invalid@e-delivery.eu pending for download";
+            Assert.assertEquals(message, re.getFaultInfo().getMessage());
             throw re;
         }
         Assert.fail("DownloadMessageFault was expected but was not raised");

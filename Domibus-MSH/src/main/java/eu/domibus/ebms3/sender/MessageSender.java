@@ -19,17 +19,18 @@
 
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
-import eu.domibus.ebms3.common.DelayedDispatchMessageCreator;
+import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.DelayedDispatchMessageCreator;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.messaging.MessageConstants;
 import org.apache.commons.logging.Log;
@@ -37,7 +38,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.Queue;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 
@@ -63,9 +64,16 @@ public class MessageSender implements MessageListener {
 
     private final String UNRECOVERABLE_ERROR_RETRY = "domibus.dispatch.ebms.error.unrecoverable.retry";
 
+//    @Autowired
+//    @Qualifier("jmsTemplateDispatch")
+//    private JmsOperations jmsOperationsDispatch;
+
     @Autowired
-    @Qualifier("jmsTemplateDispatch")
-    private JmsOperations jmsOperationsDispatch;
+    JMSManager jmsManager;
+
+    @Autowired
+    @Qualifier("sendMessageQueue")
+    private Queue sendMessageQueue;
 
     @Autowired
     private ErrorLogDao errorLogDao;
@@ -172,10 +180,6 @@ public class MessageSender implements MessageListener {
         //TODO: notify backends of error
     }
 
-
-
-
-
     @Transactional(propagation = Propagation.REQUIRED)
     public void onMessage(final Message message) {
         Long delay = null;
@@ -184,7 +188,8 @@ public class MessageSender implements MessageListener {
             messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
             delay = message.getLongProperty(MessageConstants.DELAY);
             if (delay > 0) {
-                jmsOperationsDispatch.send(new DelayedDispatchMessageCreator(messageId, message.getStringProperty(MessageConstants.ENDPOINT), delay));
+                jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, message.getStringProperty(MessageConstants.ENDPOINT), delay).createMessage(), sendMessageQueue);
+//                jmsOperationsDispatch.send(new DelayedDispatchMessageCreator(messageId, message.getStringProperty(MessageConstants.ENDPOINT), delay));
                 return;
             }
         } catch (final NumberFormatException nfe) {

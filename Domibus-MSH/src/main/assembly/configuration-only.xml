@@ -20,7 +20,7 @@
 <assembly xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
-    <id>configuration</id>
+    <id>tomcat-configuration</id>
     <formats>
         <format>zip</format>
     </formats>
@@ -28,12 +28,6 @@
     <baseDirectory>config</baseDirectory>
     <includeSiteDirectory>false</includeSiteDirectory>
     <files>
-        <file>
-            <source>${project.build.directory}/docbkx/pdf/Domibus.pdf</source>
-            <outputDirectory>/</outputDirectory>
-            <destName>Installation_Instructions.pdf</destName>
-            <filtered>false</filtered>
-        </file>
         <file>
             <source>
                 ${project.basedir}/src/main/conf/domibus/domibus-configuration.xml
@@ -90,6 +84,16 @@
             <destName>log4j.properties</destName>
             <filtered>false</filtered>
         </file>
+        <file>
+            <source>${project.basedir}/src/main/conf/domibus/policies/eDeliveryPolicy.xml</source>
+            <outputDirectory>policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/src/main/conf/domibus/policies/eSensPolicy.xml</source>
+            <outputDirectory>policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
     </files>
     <fileSets>
         <fileSet>
@@ -115,47 +119,4 @@
             <filtered>false</filtered>
         </fileSet>
     </fileSets>
-    <!--dependencySets>
-      <dependencySet>
-        <outputDirectory/>
-        <includes/>
-        <excludes/>
-        <fileMode/>
-        <directoryMode/>
-        <useStrictFiltering/>
-        <outputFileNameMapping/>
-        <unpack/>
-        <unpackOptions>
-          <includes/>
-          <excludes/>
-          <filtered/>
-          <lineEnding/>
-          <useDefaultExcludes/>
-        </unpackOptions>
-        <scope/>
-        <useProjectArtifact/>
-        <useProjectAttachments/>
-        <useTransitiveDependencies/>
-        <useTransitiveFiltering/>
-      </dependencySet>
-    </dependencySets>
-    <repositories>
-      <repository>
-        <outputDirectory/>
-        <includes/>
-        <excludes/>
-        <fileMode/>
-        <directoryMode/>
-        <includeMetadata/>
-        <groupVersionAlignments>
-          <groupVersionAlignment>
-            <id/>
-            <version/>
-            <excludes/>
-          </groupVersionAlignment>
-        </groupVersionAlignments>
-        <scope/>
-      </repository>
-    </repositories>
-    <componentDescriptors/-->
 </assembly>

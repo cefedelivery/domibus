@@ -75,7 +75,7 @@
           c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
           p:defaultDestination-ref="pluginToBackendQueue"
           p:sessionTransacted="true"
-          p:sessionAcknowledgeMode="1"/>
+          p:sessionAcknowledgeMode="0"/>
 
     <bean id="mshToBackendTemplate"
           class="org.springframework.jms.core.JmsTemplate"

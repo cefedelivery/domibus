@@ -24,29 +24,23 @@ package eu.domibus.plugin.handler;
  * @Since 3.0
  */
 
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
-import eu.domibus.common.model.MessageType;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.MessageLogEntry;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.MessageInfo;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
-import eu.domibus.ebms3.common.CompressionService;
-import eu.domibus.ebms3.common.DispatchMessageCreator;
-import eu.domibus.ebms3.common.MessageIdGenerator;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.messaging.DuplicateMessageException;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
@@ -76,10 +70,13 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     private final ObjectFactory objectFactory = new ObjectFactory();
 
-    private final eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory ebMS3Of = new eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory();
+    private final ObjectFactory ebMS3Of = new ObjectFactory();
 
-    @Resource(name = "jmsTemplateDispatch")
-    private JmsOperations jmsOperations;
+//    @Resource(name = "jmsTemplateDispatch")
+//    private JmsOperations jmsOperations;
+
+    @Autowired
+    JMSManager jmsManager;
 
     @Autowired
     @Qualifier("sendMessageQueue")
@@ -161,9 +158,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             if (refToMessageId != null && refToMessageId.length() > 255) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "RefToMessageId value is too long (over 255 characters)", refToMessageId, null);
             }
-            //check if the messageId is unique. This should only fail if the ID is set from the outside
+            // check if the messageId is unique. This should only fail if the ID is set from the outside
             if (!MessageStatus.NOT_FOUND.equals(messageLogDao.getMessageStatus(messageId))) {
-                throw new DuplicateMessageException("Message with id:" + messageId + "already exists. Message identifiers must be unique");
+                throw new DuplicateMessageException("Message with id [" + messageId + "] already exists. Message identifiers must be unique");
             }
 
             final String pmodeKey;
@@ -185,7 +182,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             // Verifies that the message is not for the current gateway.
             Configuration config = pModeProvider.getConfigurationDAO().read();
             if (config.getParty().equals(to)) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "It is forbidden to submit a message to the sender gateway[" + to.getName() + "]", null, null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "It is forbidden to submit a message to the sending access point[" + to.getName() + "]", null, null);
             }
 
             final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
@@ -229,7 +226,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             messageLogEntry.setMpc(message.getUserMessage().getMpc());
             messageLogEntry.setEndpoint(to.getEndpoint());
             messageLogEntry.setBackend(backendName);
-            this.jmsOperations.send(sendMessageQueue, new DispatchMessageCreator(messageId, to.getEndpoint()));
+            jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, to.getEndpoint()).createMessage(), sendMessageQueue);
+//            this.jmsOperations.send(sendMessageQueue, new DispatchMessageCreator(messageId, to.getEndpoint()));
             messageLogEntry.setMessageStatus(MessageStatus.SEND_ENQUEUED);
             this.messageLogDao.create(messageLogEntry);
 

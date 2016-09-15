@@ -21,7 +21,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
         xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
-    <id>full</id>
+    <id>wildfly-full</id>
     <formats>
         <format>zip</format>
     </formats>
@@ -58,12 +58,6 @@
             <useDefaultExcludes>true</useDefaultExcludes>
             <filtered>false</filtered>
         </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/main/conf/domibus/schemas</directory>
-            <outputDirectory>domibus/conf/domibus/schemas</outputDirectory>
-            <useDefaultExcludes>true</useDefaultExcludes>
-            <filtered>false</filtered>
-        </fileSet>
     </fileSets>
 
     <files>
@@ -78,6 +72,11 @@
             <filtered>false</filtered>
         </file>
         <file>
+            <source>${project.basedir}/src/main/conf/domibus/policies/eSensPolicy.xml</source>
+            <outputDirectory>domibus/conf/domibus/policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
             <source>${project.basedir}/src/main/conf/wildfly/standalone-full.xml</source>
             <outputDirectory>domibus/standalone/configuration</outputDirectory>
             <filtered>false</filtered>
@@ -88,14 +87,9 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.build.directory}/${domibus.name}.war</source>
+            <source>${project.build.directory}/${project.artifactId}-${project.version}-${domibus.classifier}.war</source>
             <outputDirectory>domibus/standalone/deployments</outputDirectory>
-            <filtered>false</filtered>
-        </file>
-        <file>
-            <source>${project.build.directory}/docbkx/pdf/Domibus.pdf</source>
-            <outputDirectory>/</outputDirectory>
-            <destName>Installation_Instructions.pdf</destName>
+            <destName>domibus-wildfly.war</destName>
             <filtered>false</filtered>
         </file>
         <file>

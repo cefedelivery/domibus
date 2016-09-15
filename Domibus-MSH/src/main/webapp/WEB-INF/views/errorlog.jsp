@@ -144,7 +144,7 @@
                 <a href="<c:url value="/home/messagelog"><c:param name="messageId" value="${o.messageInErrorId}"/></c:url>">${o.messageInErrorId}</a>
             </td>
             <td>${o.errorCode}</td>
-            <td>${o.errorDetail}</td>
+            <td><c:out value="${o.errorDetail}" /></td>
             <td>${o.timestamp}</td>
             <td>${o.notified}</td>
         </tr>

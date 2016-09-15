@@ -24,11 +24,10 @@
        xmlns:c="http://www.springframework.org/schema/c"
        xmlns:p="http://www.springframework.org/schema/p"
        xmlns="http://www.springframework.org/schema/beans"
+       xmlns:soap="http://cxf.apache.org/bindings/soap"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
-
-
        http://activemq.apache.org/schema/core
        http://activemq.apache.org/schema/core/activemq-core.xsd">
 
@@ -44,13 +43,28 @@
         <property name="lister" ref="webserviceNotificationListenerService"/>
     </bean>
 
+    <bean id="defaultTransformer" class="eu.domibus.plugin.webService.impl.StubDtoTransformer"/>
+
     <bean id="webserviceNotificationListenerService"
           class="eu.domibus.plugin.NotificationListenerService"
           c:queue-ref="notifyBackendWebServiceQueue" c:mode="PULL"
           p:backendConnector-ref="backendWebservice"/>
 
-    <jaxws:endpoint id="backendInterfaceEndpoint"
-                    implementor="#backendWebservice" address="/backend"/>
+    <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
+        <jaxws:binding>
+            <soap:soapBinding mtomEnabled="true" version="1.2"/>
+        </jaxws:binding>
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="true"/>
+        </jaxws:properties>
+
+        <jaxws:schemaLocations>
+            <jaxws:schemaLocation>schemas/domibus-submission.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>schemas/xml.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>schemas/domibus-backend.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>schemas/xmlmime.xsd</jaxws:schemaLocation>
+        </jaxws:schemaLocations>
+    </jaxws:endpoint>
     <!-- Example ends here -->
 
 

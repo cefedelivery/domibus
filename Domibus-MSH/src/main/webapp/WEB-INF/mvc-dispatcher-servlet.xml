@@ -11,7 +11,8 @@
 
 
     <bean id="multipartResolver"
-          class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver"><property
+            name="maxUploadSize" value="10000000" /></bean>
 
     <bean id="messageSource"
           class="org.springframework.context.support.ResourceBundleMessageSource">

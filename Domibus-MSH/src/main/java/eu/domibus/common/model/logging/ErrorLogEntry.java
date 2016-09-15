@@ -23,8 +23,9 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.AbstractBaseEntity;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
+import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import eu.domibus.ebms3.common.model.Error;
+import eu.domibus.ebms3.common.model.Messaging;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -83,7 +84,7 @@ public class ErrorLogEntry extends AbstractBaseEntity implements ErrorResult {
      * @return
      */
     public static ErrorLogEntry parse(final Messaging messaging, final MSHRole role) {
-        final eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Error error = messaging.getSignalMessage().getError().iterator().next();
+        final Error error = messaging.getSignalMessage().getError().iterator().next();
 
         final ErrorLogEntry errorLogEntry = new ErrorLogEntry();
         errorLogEntry.setTimestamp(messaging.getSignalMessage().getMessageInfo().getTimestamp());

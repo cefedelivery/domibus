@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<db:configuration xmlns:db="http://domibus.eu/configuration"
+				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				  xsi:schemaLocation="http://domibus.eu/configuration file:/C:/development/git-repos/domibus/Domibus-MSH/domibus-configuration.xsd" party="self">
+	<mpcs>
+		<mpc name="defaultMpc"
+			 qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+			 enabled="true"
+			 default="true"
+			 retention_downloaded="0"
+			 retention_undownloaded="60"/>
+	</mpcs>
+	<businessProcesses>
+		<roles>
+			<role name="defaultInitiatorRole"
+				  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
+			<role name="defaultResponderRole"
+				  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
+		</roles>
+		<parties>
+			<partyIdTypes>
+				<partyIdType name="partyTypeEmpty" value=""/>
+			</partyIdTypes>
+			<party name="self"
+				   endpoint="http://test.domibus.eu/domibus-msh"
+				   allowChunking="false"
+					>
+				<identifier partyId="TEST_10000" partyIdType="partyTypeEmpty"/>
+			</party>
+		</parties>
+		<meps>
+			<mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
+			<binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+		</meps>
+		<properties>
+			<property name="testProperty"
+					  key="test"
+					  datatype="string"
+					  required="true"/>
+			<propertySet name="testPropertySet">
+				<propertyRef property="testProperty"/>
+			</propertySet>
+		</properties>
+		<payloadProfiles>
+		</payloadProfiles>
+		<securities>
+			<security name="samplePolicy"
+					  policy="samplePolicy.xml"
+					  signatureMethod="RSA_SHA256" />
+		</securities>
+		<errorHandlings>
+			<errorHandling name="demoErrorHandling"
+						   errorAsResponse="true"
+						   businessErrorNotifyProducer="false"
+						   businessErrorNotifyConsumer="false"
+						   deliveryFailureNotifyProducer="false"/>
+		</errorHandlings>
+		<agreements>
+			<agreement name="agreementEmpty" value="" type=""/>
+		</agreements>
+		<services>
+			<service name="testService" value="serviceValue" type="serviceType"/>
+		</services>
+		<actions>
+			<action name="testAction" value="testAction"/>
+		</actions>
+		<as4>
+			<receptionAwareness name="receptionAwareness" retry="1;2;CONSTANT" duplicateDetection="true"/>
+			<reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
+		</as4>
+		<legConfigurations>
+			<legConfiguration name="testLegtestAction"
+							  service="testService"
+							  action="testAction"
+							  defaultMpc="defaultMpc"
+							  reliability="AS4Reliability"
+							  security="samplePolicy"
+							  receptionAwareness="receptionAwareness"
+							  errorHandling="demoErrorHandling"
+							  compressPayloads="true">
+			</legConfiguration>
+		</legConfigurations>
+		<process name="testProcessDynamicExpected_1"
+				 agreement="agreementEmpty"
+				 mep="oneway"
+				 binding="push"
+				 initiatorRole="defaultInitiatorRole"
+				 responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="self"/>
+			</initiatorParties>
+			<legs>
+				<leg name="testLegtestAction"/>
+			</legs>
+		</process>
+		<process name="testProcessDynamicExpected_2"
+				 agreement="agreementEmpty"
+				 mep="oneway"
+				 binding="push"
+				 initiatorRole="defaultInitiatorRole"
+				 responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="self"/>
+			</initiatorParties>
+			<legs>
+				<leg name="testLegtestAction"/>
+			</legs>
+		</process>
+		<process name="testProcessDynamicExpected_3"
+				 agreement="agreementEmpty"
+				 mep="oneway"
+				 binding="push"
+				 initiatorRole="defaultInitiatorRole"
+				 responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="self"/>
+			</initiatorParties>
+			<legs>
+				<leg name="testLegtestAction"/>
+			</legs>
+		</process>
+		<process name="testProcessStaticNotExpected"
+				 agreement="agreementEmpty"
+				 mep="oneway"
+				 binding="push"
+				 initiatorRole="defaultInitiatorRole"
+				 responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="self"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="self"/>
+			</responderParties>
+			<legs>
+				<leg name="testLegtestAction"/>
+			</legs>
+		</process>
+	</businessProcesses>
+</db:configuration>

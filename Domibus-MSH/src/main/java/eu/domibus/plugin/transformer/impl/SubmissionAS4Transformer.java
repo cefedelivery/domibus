@@ -19,8 +19,7 @@
 
 package eu.domibus.plugin.transformer.impl;
 
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
-import eu.domibus.ebms3.common.MessageIdGenerator;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.plugin.Submission;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -127,9 +126,9 @@ public class SubmissionAS4Transformer {
             partInfo.setInBody(payload.isInBody());
             partInfo.setPayloadDatahandler(payload.getPayloadDatahandler());
             partInfo.setHref(payload.getContentId());
-            final Schema schema = new Schema();
+           /* final Schema schema = new Schema();
             schema.setLocation(payload.getSchemaLocation());
-            partInfo.setSchema(schema);
+            partInfo.setSchema(schema);*/
             boolean descriptionPropertyExists = false;
             final PartProperties partProperties = new PartProperties();
             for (final Submission.TypedProperty entry : payload.getPayloadProperties()) {
@@ -188,7 +187,7 @@ public class SubmissionAS4Transformer {
                 if(partInfo.getDescription() != null){
                     description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), partInfo.getDescription().getValue());
                 }
-                result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), description, (partInfo.getSchema() != null) ? partInfo.getSchema().getLocation() : null);
+                result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), description, (partInfo.getSchema() != null ? partInfo.getSchema().getLocation() : null));
             }
         }
         result.setFromRole(messaging.getPartyInfo().getFrom().getRole());

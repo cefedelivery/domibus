@@ -26,7 +26,7 @@
     http://activemq.apache.org/schema/core/activemq-core.xsd">
 
 
-    <import resource="domibus-transactions.xml"/>
+    <import resource="file:///${domibus.config.location}/domibus-transactions.xml"/>
 
     <!-- JMS Configuration -->
     <!-- Connection Pool -->
@@ -40,13 +40,19 @@
 
     <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
     <amq:xaConnectionFactory id="xaJmsConnectionFactory"
-                             brokerURL="vm://localhost?broker.persistent=false" userName="domibus" password="changeit"/>
+                             brokerURL="vm://localhost?broker.persistent=false"
+                             userName="domibus" password="changeit">
+        <!-- do not remove this! otherwise the redeliveryPolicy configured in activemq.xml will be ignored -->
+        <amq:redeliveryPolicy>
+            <amq:redeliveryPolicy/>
+        </amq:redeliveryPolicy>
+    </amq:xaConnectionFactory>
 
     <!--  lets create an ActiveMQ Broker -->
     <bean id="broker"
           class="org.apache.activemq.xbean.BrokerFactoryBean">
         <property name="config"
-                  value="activemq.xml"/>
+                  value="file:///${domibus.config.location}/internal/activemq.xml"/>
     </bean>
 
     <amq:queue id="sendMessageQueue"
@@ -69,7 +75,7 @@
     <bean id="entityManagerFactory" primary="true"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="persistenceXmlLocation">
-            <value>persistence.xml</value>
+            <value>file:///${domibus.config.location}/persistence.xml</value>
         </property>
         <property name="persistenceUnitName" value="domibusJTA"/>
         <property name="dataSource" ref="dataSource"/>
@@ -82,4 +88,16 @@
             </bean>
         </property>
     </bean>
+
+
+    <bean id="internalJmsListenerContainerFactory"
+          class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+        <property name="connectionFactory"
+                  ref="domibusJMS-XAConnectionFactory"/>
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="concurrency" value="3-10"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="sessionAcknowledgeMode" value="0"/>
+    </bean>
+
 </beans>

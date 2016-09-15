@@ -19,7 +19,7 @@
 
 package eu.domibus.common.model.configuration;
 
-import eu.domibus.common.model.AbstractBaseEntity;
+import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -54,7 +54,7 @@ import javax.xml.bind.annotation.XmlType;
         @NamedQuery(name = "Service.findByName", query = "select s from Service s where s.name=:NAME"),
         @NamedQuery(name = "Service.findWithoutType", query = "select s.name from Service s where s.value = :SERVICE and (s.serviceType='' or s.serviceType is null)")})
 public class Service extends AbstractBaseEntity {
-    public static final String PING_SERVICE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service";
+    public static final String TEST_SERVICE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service";
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME")
     protected String name;

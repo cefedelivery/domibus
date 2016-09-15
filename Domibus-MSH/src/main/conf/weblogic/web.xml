@@ -36,6 +36,9 @@
         <servlet-name>mvc-dispatcher</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
+    <session-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
@@ -43,8 +46,12 @@
             classpath:META-INF/cxf/cxf.xml
             classpath:META-INF/cxf/cxf-extension-jaxws.xml
             classpath:META-INF/cxf/cxf-servlet.xml
-            WEB-INF/spring-context.xml
+            /WEB-INF/spring-context.xml
         </param-value>
+    </context-param>
+    <context-param>
+        <param-name>pluginsLocation</param-name>
+        <param-value>${domibus.config.location}/plugins/lib</param-value>
     </context-param>
 
     <!-- Spring Security -->
@@ -60,8 +67,7 @@
     </filter-mapping>
 
     <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener
-        </listener-class>
+        <listener-class>eu.domibus.spring.DomibusContextLoaderListener</listener-class>
     </listener>
 
     <listener>
@@ -89,4 +95,7 @@
         <res-auth>Container</res-auth>
     </resource-ref>
 
+    <error-page>
+        <location>/general-error.html</location>
+    </error-page>
 </web-app>

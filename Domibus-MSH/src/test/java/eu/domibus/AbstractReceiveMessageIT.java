@@ -37,9 +37,6 @@ public abstract class AbstractReceiveMessageIT extends AbstractIT {
 
         setPolicyInInterceptor.handleMessage(sm);
 
-        System.out.println("Passed setPolicyIn!!!!!!!!!!!!!!!!!!!!!!!!");
-        System.out.println(sm.getId());
-
         return sm.getContent(SOAPMessage.class);
     }
 

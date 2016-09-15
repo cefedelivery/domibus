@@ -21,12 +21,12 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.MessageInfo;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
+import eu.domibus.ebms3.common.model.MessageInfo;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

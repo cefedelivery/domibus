@@ -19,13 +19,14 @@
 
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.model.logging.MessageLogEntry;
-import eu.domibus.ebms3.common.DispatchMessageCreator;
+import eu.domibus.ebms3.common.model.DispatchMessageCreator;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.messaging.MessageConstants;
 import org.apache.commons.logging.Log;
@@ -60,6 +61,9 @@ public class RetryService {
     @Autowired
     @Qualifier("jmsTemplateDispatch")
     private JmsOperations jmsOperations;
+
+    @Autowired
+    JMSManager jmsManager;
 
     @Autowired
     @Qualifier("sendMessageQueue")
@@ -110,6 +114,7 @@ public class RetryService {
     }
 
     private void sendJmsMessage(final String messageId) {
-        jmsOperations.send(dispatchQueue, new DispatchMessageCreator(messageId, messageLogDao.findEndpointForMessageId(messageId)));
+        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, messageLogDao.findEndpointForMessageId(messageId)).createMessage(), dispatchQueue);
+//        jmsOperations.send(dispatchQueue, new DispatchMessageCreator(messageId, messageLogDao.findEndpointForMessageId(messageId)));
     }
 }

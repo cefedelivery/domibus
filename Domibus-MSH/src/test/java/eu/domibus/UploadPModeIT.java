@@ -1,7 +1,7 @@
 package eu.domibus;
 
-import eu.domibus.common.dao.PModeProvider;
 import eu.domibus.common.model.configuration.*;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.controller.AdminGUIController;
 import org.apache.commons.io.IOUtils;
@@ -32,7 +32,7 @@ import java.util.*;
 @Transactional
 public class UploadPModeIT extends AbstractIT {
 
-    private static final String BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY = "blue_gw:red_gw:testService1:tc1Action:agreementEmpty:pushTestcase1tc1Action";
+    private static final String BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY = "blue_gw:red_gw:testService1:tc1Action:agreement1110:pushTestcase1tc1Action";
 
     private static final String PREFIX_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/";
 
@@ -40,7 +40,9 @@ public class UploadPModeIT extends AbstractIT {
     @Autowired
     AdminGUIController adminGui;
     @Autowired
-    PModeProvider pModeDao;
+    PModeProvider pModeProvider;
+    /*@Autowired
+    PModeProvider pModeDao;*/
     @Autowired()
     @Qualifier("jaxbContextConfig")
     private JAXBContext jaxbContext;
@@ -67,7 +69,7 @@ public class UploadPModeIT extends AbstractIT {
             FileInputStream fis = new FileInputStream(pModeFile);
             //MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-blue_gw", pModeFile.getName(), "text/xml", IOUtils.toByteArray(fis));
             //String response = adminGui.uploadFileHandler(pModeContent);
-            pModeDao.updatePModes(IOUtils.toByteArray(fis));
+            pModeProvider.updatePModes(IOUtils.toByteArray(fis));
             //Assert.assertEquals("You successfully uploaded the PMode file.", response);
         } catch (IOException ioEx) {
             System.out.println("File reading error: " + ioEx.getMessage());
@@ -89,7 +91,7 @@ public class UploadPModeIT extends AbstractIT {
             File wrongPmode = new File("src/test/resources/SamplePModes/wrong-domibus-configuration.xml");
             FileInputStream fis = new FileInputStream(wrongPmode);
             MultipartFile pModeContent = new MockMultipartFile("wrong-domibus-configuration", wrongPmode.getName(), "text/xml", IOUtils.toByteArray(fis));
-            String response = adminGui.uploadFileHandler(pModeContent);
+            String response = adminGui.uploadPmodeFile(pModeContent);
             Assert.assertTrue(response.contains("Failed to upload the PMode file due to"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());
@@ -100,7 +102,7 @@ public class UploadPModeIT extends AbstractIT {
     @Transactional(propagation = Propagation.REQUIRED)
     private Configuration testUpdatePModes(final byte[] bytes) throws JAXBException {
         final Configuration configuration = (Configuration) this.jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(bytes));
-        pModeDao.getConfigurationDAO().updateConfiguration(configuration);
+        pModeProvider.getConfigurationDAO().updateConfiguration(configuration);
         return configuration;
     }
 
@@ -117,8 +119,8 @@ public class UploadPModeIT extends AbstractIT {
             FileInputStream fis = new FileInputStream(pModeFile);
             Configuration configuration = testUpdatePModes(IOUtils.toByteArray(fis));
             // Starts to check that the content of the XML file has actually been saved!
-            Party receiverParty = pModeDao.getReceiverParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
-            Party senderParty = pModeDao.getSenderParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            Party receiverParty = pModeProvider.getReceiverParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            Party senderParty = pModeProvider.getSenderParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             List<String> parties = new ArrayList<>();
             parties.add(receiverParty.getName());
             parties.add(senderParty.getName());
@@ -131,7 +133,7 @@ public class UploadPModeIT extends AbstractIT {
             }
             Assert.assertTrue(partyFound);
 
-            Action savedAction = pModeDao.getAction(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            Action savedAction = pModeProvider.getAction(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             boolean actionFound = false;
             Iterator<Action> actionIterator = configuration.getBusinessProcesses().getActions().iterator();
             while (!actionFound && actionIterator.hasNext()) {
@@ -142,7 +144,7 @@ public class UploadPModeIT extends AbstractIT {
             }
             Assert.assertTrue(actionFound);
 
-            Service savedService = pModeDao.getService(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            Service savedService = pModeProvider.getService(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             boolean serviceFound = false;
             Iterator<Service> serviceIterator = configuration.getBusinessProcesses().getServices().iterator();
             while (!serviceFound && serviceIterator.hasNext()) {
@@ -153,7 +155,7 @@ public class UploadPModeIT extends AbstractIT {
             }
             Assert.assertTrue(serviceFound);
 
-            LegConfiguration savedLegConf = pModeDao.getLegConfiguration(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            LegConfiguration savedLegConf = pModeProvider.getLegConfiguration(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             boolean legConfFound = false;
             Iterator<LegConfiguration> legConfIterator = configuration.getBusinessProcesses().getLegConfigurations().iterator();
             while (!legConfFound && legConfIterator.hasNext()) {
@@ -164,7 +166,7 @@ public class UploadPModeIT extends AbstractIT {
             }
             Assert.assertTrue(legConfFound);
 
-            Agreement savedAgreement = pModeDao.getAgreement(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            Agreement savedAgreement = pModeProvider.getAgreement(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             boolean agreementFound = false;
             Iterator<Agreement> agreementIterator = configuration.getBusinessProcesses().getAgreements().iterator();
             while (!agreementFound && agreementIterator.hasNext()) {
@@ -175,7 +177,7 @@ public class UploadPModeIT extends AbstractIT {
             }
             Assert.assertTrue(agreementFound);
 
-            List<String> mpcNames = pModeDao.getMpcList();
+            List<String> mpcNames = pModeProvider.getMpcList();
             Map<String, Mpc> savedMpcs = new HashMap<>();
             for (String mpcName : mpcNames) {
                 Mpc mpc = new Mpc();
@@ -183,8 +185,8 @@ public class UploadPModeIT extends AbstractIT {
                 mpc.setQualifiedName(PREFIX_MPC_URI + mpcName);
                 mpc.setDefault(true);
                 mpc.setEnabled(true);
-                mpc.setRetentionDownloaded(pModeDao.getRetentionDownloadedByMpcURI(mpc.getQualifiedName()));
-                mpc.setRetentionUndownloaded(pModeDao.getRetentionUndownloadedByMpcURI(mpc.getQualifiedName()));
+                mpc.setRetentionDownloaded(pModeProvider.getRetentionDownloadedByMpcURI(mpc.getQualifiedName()));
+                mpc.setRetentionUndownloaded(pModeProvider.getRetentionUndownloadedByMpcURI(mpc.getQualifiedName()));
                 savedMpcs.put(mpcName, mpc);
             }
 
@@ -209,4 +211,21 @@ public class UploadPModeIT extends AbstractIT {
     }
 
 
+    /**
+     * Tests that the PMode is not saved in the DB because there is a validation error (maxLength exceeded).
+     */
+    //@Test disabled because the XML schema validation has been disabled for RC1!
+    public void testSavePModeValidationError() throws IOException {
+
+        try {
+            File wrongPmode = new File("src/test/resources/SamplePModes/domibus-configuration-long-names.xml");
+            FileInputStream fis = new FileInputStream(wrongPmode);
+            MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-long-names", wrongPmode.getName(), "text/xml", IOUtils.toByteArray(fis));
+            String response = adminGui.uploadPmodeFile(pModeContent);
+            Assert.assertTrue(response.contains("is not facet-valid with respect to maxLength"));
+        } catch (IOException ioEx) {
+            System.out.println("Error: " + ioEx.getMessage());
+            throw ioEx;
+        }
+    }
 }

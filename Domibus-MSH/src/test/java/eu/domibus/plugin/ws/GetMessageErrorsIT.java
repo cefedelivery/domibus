@@ -20,15 +20,13 @@
 package eu.domibus.plugin.ws;
 
 import eu.domibus.AbstractIT;
-import eu.domibus.common.ErrorResult;
-import eu.domibus.plugin.webService.MessageErrorsRequest;
 import eu.domibus.plugin.webService.generated.BackendInterface;
+import eu.domibus.plugin.webService.generated.ErrorResultImplArray;
+import eu.domibus.plugin.webService.generated.GetErrorsRequest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Collection;
 
 
 /**
@@ -56,9 +54,9 @@ public class GetMessageErrorsIT extends AbstractIT {
     @Test
     public void testGetMessageErrorsOk() {
         String messageId = "9008713e-1912-460c-97b3-40ec12a29f49@domibus.eu";
-        MessageErrorsRequest messageErrorsRequest = createMessageErrorsRequest(messageId);
-        Collection<? extends ErrorResult> response = backendWebService.getMessageErrors(messageErrorsRequest);
-        Assert.assertFalse(response.isEmpty());
+        GetErrorsRequest errorsRequest = createMessageErrorsRequest(messageId);
+        ErrorResultImplArray response = backendWebService.getMessageErrors(errorsRequest);
+        Assert.assertFalse(response.getItem().isEmpty());
     }
 
     /**
@@ -68,16 +66,15 @@ public class GetMessageErrorsIT extends AbstractIT {
     public void testGetEmptyMessageErrorsList() {
 
         String messageId = "2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu";
-        MessageErrorsRequest messageErrorsRequest = createMessageErrorsRequest(messageId);
-        Collection<? extends ErrorResult> response = backendWebService.getMessageErrors(messageErrorsRequest);
-        Assert.assertTrue(response.isEmpty());
+        GetErrorsRequest errorsRequest = createMessageErrorsRequest(messageId);
+        ErrorResultImplArray response = backendWebService.getMessageErrors(errorsRequest);
+        Assert.assertTrue(response.getItem().isEmpty());
     }
 
-    private MessageErrorsRequest createMessageErrorsRequest(final String messageId) {
+    private GetErrorsRequest createMessageErrorsRequest(final String messageId) {
 
-        MessageErrorsRequest messageErrorsRequest = new MessageErrorsRequest();
-        messageErrorsRequest.setMessageID(messageId);
-
-        return messageErrorsRequest;
+        GetErrorsRequest errorsRequest = new GetErrorsRequest();
+        errorsRequest.setMessageID(messageId);
+        return errorsRequest;
     }
 }

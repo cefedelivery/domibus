@@ -1,5 +1,6 @@
 package eu.domibus.common.validators;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
@@ -8,6 +9,8 @@ import javax.xml.bind.ValidationEvent;
 import javax.xml.bind.ValidationEventHandler;
 import javax.xml.bind.ValidationEventLocator;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by martifp on 21/04/2016.
@@ -16,8 +19,17 @@ public class XmlValidationEventHandler implements ValidationEventHandler {
 
     private static final Log LOG = LogFactory.getLog(XmlValidationEventHandler.class);
 
-    public boolean handleEvent(ValidationEvent event) {
+    protected List<String> errors = new ArrayList<>();
 
+    public boolean hasErrors() {
+        return !errors.isEmpty();
+    }
+
+    public String getErrorMessage() {
+        return StringUtils.join(errors, "\n");
+    }
+
+    public boolean handleEvent(ValidationEvent event) {
         if (event == null) {
             throw new IllegalArgumentException("No event found!");
         }
@@ -43,8 +55,10 @@ public class XmlValidationEventHandler implements ValidationEventHandler {
         }
 
         String location = getLocation(event);
+        String errorMessage = "[" + severity + "] is [" + event.getMessage() + "] at [" + location + "]";
+        errors.add(errorMessage);
 
-        LOG.debug("[" + severity + "] is [" + event.getMessage() + "] at [" + location + "]");
+        LOG.debug(errorMessage);
 
         return retVal;
     }

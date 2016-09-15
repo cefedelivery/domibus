@@ -29,10 +29,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.ws.Provider;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -145,6 +142,21 @@ public class ReceiveMessageIT extends AbstractIT {
         verifyMessageStatus(messageId);
     }
 
+    @Test
+    public void testReceivePingMessage() throws IOException, SOAPException, SQLException, ParserConfigurationException, SAXException {
+        String filename = "SOAPPingMessage.xml";
+        String messageId = "ping123@domibus.eu";
+        SOAPMessage soapMessage = createSOAPMessage(filename);
+        SOAPMessage responseMessage = mshWebservice.invoke(soapMessage);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        responseMessage.writeTo(out);
+        Assert.assertFalse(out.toString().contains("eb:Error"));
+        try {
+            verifyMessageStatus(messageId);
+        }catch(SQLException e) {
+            Assert.assertEquals("No data is available [2000-178]", e.getMessage());
+        }
+    }
 
     private SOAPMessage createSOAPMessagePolicyInterceptor(String dataset) throws SOAPException, IOException, ParserConfigurationException, SAXException {
         InputStream is = new FileInputStream(new File("target/test-classes/dataset/as4/" + dataset).getAbsolutePath());

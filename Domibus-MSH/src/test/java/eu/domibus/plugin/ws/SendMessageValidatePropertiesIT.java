@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.SQLException;
-import java.util.Set;
+import java.util.List;
 
 /**
  * This JUNIT implements the Test cases Validate Message Properties - 01, Validate Message Properties - 02, Validate Message Properties - 03,
@@ -46,7 +46,7 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
 
         String payloadHref = "payload";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessage(payloadHref, null);
+        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         try {
@@ -70,8 +70,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
 
         String payloadHref = "payload";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessage(payloadHref, null);
-        Set<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
+        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
+        List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
         properties.add(super.createProperty("aNumber", "xxx", INT_TYPE));
         properties.add(super.createProperty("aBoolean", "true", BOOLEAN_TYPE));
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
@@ -97,8 +97,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
 
         String payloadHref = "payload";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessage(payloadHref, null);
-        Set<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
+        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
+        List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
         properties.add(super.createProperty("aNumber", "123", INT_TYPE));
         properties.add(super.createProperty("aBoolean", "ciao", BOOLEAN_TYPE));
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
@@ -124,8 +124,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
 
         String payloadHref = "payload";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessage(payloadHref, null);
-        Set<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
+        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
+        List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
         Property aStringProperty = properties.iterator().next();
         aStringProperty.setValue(null);
         properties.add(super.createProperty("aNumber", "123", INT_TYPE));
@@ -153,9 +153,9 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
 
         String payloadHref = "payload";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessage(payloadHref, null);
+        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
 
-        Set<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
+        List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
         properties.add(super.createProperty("aNumber", "123", INT_TYPE));
         properties.add(super.createProperty("aBoolean", "true", BOOLEAN_TYPE));
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
@@ -175,8 +175,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
 
         String payloadHref = "payload";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessage(payloadHref, null);
-        Set<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
+        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
+        List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
         properties.add(super.createProperty("aNumber", "123", INT_TYPE));
         properties.add(super.createProperty("aBoolean", "ciao", BOOLEAN_TYPE));
         properties.add(super.createProperty("aFloat", "23.45", "float"));
