@@ -7,7 +7,8 @@ INSERT INTO "TB_ACTION" VALUES (4,'tc3ActionLeg1','TC3Leg1',1);
 INSERT INTO "TB_ACTION" VALUES (5,'tc3ActionLeg2','TC3Leg2',1);
 INSERT INTO "TB_ACTION" VALUES (6,'pingAction','http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test',1);
 
-INSERT INTO "TB_AGREEMENT" VALUES (1,'agreement1110','','EDELIVERY-1110',1);
+INSERT INTO "TB_AGREEMENT" VALUES (1,'agreementEmpty','','',1);
+INSERT INTO "TB_AGREEMENT" VALUES (2,'agreement1110','','EDELIVERY-1110',1);
 
 INSERT INTO "TB_PARTY" VALUES (1,'http://fmstest.flame.co.za:8080/AS4','flame',NULL,NULL,1);
 INSERT INTO "TB_PARTY" VALUES (2,'http://5.153.46.53:29001/AS4','ibmgw',NULL,NULL,1);
@@ -34,7 +35,8 @@ INSERT INTO "TB_MEP_BINDING" VALUES (2,'pushAndPush','http://docs.oasis-open.org
 INSERT INTO "TB_PROCESS" VALUES (1,0x00,0x00,'tc2Process',NULL,1,2,1,2,1);
 INSERT INTO "TB_PROCESS" VALUES (2,0x00,0x00,'tc3Process',1,1,1,2,2,1);
 INSERT INTO "TB_PROCESS" VALUES (3,0x00,0x00,'noSecProcess',1,1,2,1,2,1);
-INSERT INTO "TB_PROCESS" VALUES (4,0x00,0x00,'tc1Process',NULL,1,2,1,2,1);
+-- INSERT INTO "TB_PROCESS" VALUES (4,0x00,0x00,'tc1Process',NULL,1,2,1,2,1); Replace with this line when agreementRef backward compatibility is removed
+INSERT INTO "TB_PROCESS" VALUES (4,0x00,0x00,'tc1Process',1,1,2,1,2,1);
 
 INSERT INTO "TB_JOIN_PROCESS_INIT_PARTY" VALUES (1,1);
 INSERT INTO "TB_JOIN_PROCESS_INIT_PARTY" VALUES (2,1);

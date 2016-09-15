@@ -50,7 +50,8 @@ public class SendMessageIT extends AbstractSendMessageIT {
         CollaborationInfo collaborationInfo = new CollaborationInfo();
         collaborationInfo.setAction("TC3Leg1");
         AgreementRef agreementRef = new AgreementRef();
-        agreementRef.setValue("EDELIVERY-1110");
+        //agreementRef.setValue("EDELIVERY-1110"); Replace with this line when agreementRef backward compatibility is removed!
+        agreementRef.setValue("");
         collaborationInfo.setAgreementRef(agreementRef);
         Service service = new Service();
         service.setValue("bdx:noprocess");

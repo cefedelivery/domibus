@@ -214,7 +214,7 @@ public class UploadPModeIT extends AbstractIT {
     /**
      * Tests that the PMode is not saved in the DB because there is a validation error (maxLength exceeded).
      */
-    @Test
+    //@Test disabled because the XML schema validation has been disabled for RC1!
     public void testSavePModeValidationError() throws IOException {
 
         try {
