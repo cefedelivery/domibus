@@ -19,12 +19,13 @@
 
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.xml.UnmarshallerResult;
+import eu.domibus.api.xml.XMLUtil;
 import eu.domibus.clustering.Command;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
-import eu.domibus.common.validators.XmlValidationEventHandler;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -37,7 +38,6 @@ import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.jms.JMSException;
@@ -45,21 +45,12 @@ import javax.jms.Message;
 import javax.jms.Session;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
+import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.util.Collection;
 import java.util.List;
 
@@ -90,52 +81,47 @@ public abstract class PModeProvider {
     @Autowired
     private JmsOperations jmsOperations;
 
+    @Autowired
+    XMLUtil xmlUtil;
+
     public abstract void init();
 
     public abstract void refresh();
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void updatePModes(final byte[] bytes) throws XmlProcessingException {
+    public String updatePModes(final byte[] bytes) throws XmlProcessingException {
+        LOG.debug("Updating the PMode");
+        Configuration configuration = null;
+        UnmarshallerResult unmarshallerResult = null;
         try {
-            Schema schema;
-            SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            final InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(SCHEMAS_DIR + DOMIBUS_PMODE_XSD);
-            if (xsdStream != null) {
-                schema = sf.newSchema(new StreamSource(xsdStream));
-            } else {
-                String filePath = System.getProperty(DOMIBUS_CONFIG_LOCATION) + "/" + SCHEMAS_DIR;
-                schema = sf.newSchema(new File(filePath + DOMIBUS_PMODE_XSD));
-            }
-            Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
-            unmarshaller.setSchema(schema);
-            unmarshaller.setEventHandler(new XmlValidationEventHandler());
-
-            SAXParserFactory spf = SAXParserFactory.newInstance();
-
-            spf.setNamespaceAware(true);
-            spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-
-            Source xmlSource = new SAXSource(spf.newSAXParser().getXMLReader(), new InputSource(new ByteArrayInputStream(bytes)));
-
-            final Configuration configuration = (Configuration) unmarshaller.unmarshal(xmlSource);
-            if (configuration != null) {
-                this.configurationDAO.updateConfiguration(configuration);
-                LOG.info("Configuration successfully updated");
-            }
-        } catch (JAXBException | SAXException | ParserConfigurationException xmlEx) {
-            if (LOG.isDebugEnabled()) {
-                LOG.error("Xml not correctly processed: ", xmlEx);
-            } else {
-                LOG.error("Xml not correctly processed: ", xmlEx.getCause());
-            }
-            throw new XmlProcessingException(xmlEx.getCause().getMessage());
+            ByteArrayInputStream xmlStream = new ByteArrayInputStream(bytes);
+            InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(SCHEMAS_DIR + DOMIBUS_PMODE_XSD);
+            unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, xmlStream, xsdStream);
+            configuration = unmarshallerResult.getResult();
+        } catch (JAXBException | SAXException | ParserConfigurationException | XMLStreamException xmlEx) {
+            LOG.error("Error updating the PMode", xmlEx);
+            throw new XmlProcessingException("Error updating the PMode", xmlEx);
         }
+        if (unmarshallerResult == null
+                || configuration == null) {
+            throw new XmlProcessingException("Error updating the PMode: could not process the PMode file");
+        }
+
+        String resultMessage = null;
+        boolean isPmodeValid = unmarshallerResult.isValid();
+        if(!isPmodeValid) {
+            String warningMessage = "The PMode file is not XSD compliant. It is recommended to correct the issues: [" + unmarshallerResult.getErrorMessage() + "]";
+            resultMessage = warningMessage;
+            LOG.warn(warningMessage);
+        }
+
+        configurationDAO.updateConfiguration(configuration);
+        LOG.info("Configuration successfully updated");
         // Sends a message into the topic queue in order to refresh all the singleton instances of the PModeProvider.
         jmsOperations.send(new ReloadPmodeMessageCreator());
-    }
 
+        return resultMessage;
+    }
 
     @Transactional(propagation = Propagation.REQUIRED, noRollbackFor = IllegalStateException.class)
     public String findPModeKeyForUserMessage(final UserMessage userMessage) throws EbMS3Exception {
