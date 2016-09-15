@@ -37,11 +37,11 @@ import java.util.Map;
 @Table(name = "TB_LEG")
 @NamedQueries({
         @NamedQuery(name = "LegConfiguration.findForPartiesAndAgreements",
-                //query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and (p.agreement.name=:AGREEMENT and p.agreement is not null)"),
-                query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and (:AGREEMENT = '' or  p.agreement.name=:AGREEMENT)"),
-
+                query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and (p.agreement.name=:AGREEMENT and p.agreement is not null)"),
         @NamedQuery(name = "LegConfiguration.findForPartiesAndAgreementsOAE",
                 query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and p.agreement is null"),
+        @NamedQuery(name = "LegConfiguration.findForPartiesAndAgreementEmpty",
+                query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and (p.agreement.name='agreementEmpty')"),
         @NamedQuery(name = "LegConfiguration.findForPMode",
                 query = "select l.name from LegConfiguration l where l.service.name=:SERVICE and l.action.name=:ACTION and l.name in :CANDIDATES"),
         @NamedQuery(name = "LegConfiguration.findByName",

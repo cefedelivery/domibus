@@ -95,27 +95,30 @@ public class PModeDao extends PModeProvider {
     }
 
     protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
-        // Please notice that this is only for backward compatibility and will be removed ASAP!
-        String namedQuery = "LegConfiguration.findForPartiesAndAgreements";
-        final Query candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
-        candidatesQuery.setParameter("AGREEMENT", agreementName);
-        /*
         String namedQuery;
         if (agreementName.equals(OPTIONAL_AND_EMPTY)) {
             namedQuery = "LegConfiguration.findForPartiesAndAgreementsOAE";
         } else {
             namedQuery = "LegConfiguration.findForPartiesAndAgreements";
         }
-        final Query candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
+        Query candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
         if (!agreementName.equals(OPTIONAL_AND_EMPTY)) {
             candidatesQuery.setParameter("AGREEMENT", agreementName);
-        } */
+        }
         candidatesQuery.setParameter("SENDER_PARTY", senderParty);
         candidatesQuery.setParameter("RECEIVER_PARTY", receiverParty);
 
-        final List<LegConfiguration> candidates = candidatesQuery.getResultList();
+        List<LegConfiguration> candidates = candidatesQuery.getResultList();
         if (candidates == null || candidates.isEmpty()) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
+            // To be removed when the backward compatibility will be finally broken!
+            namedQuery = "LegConfiguration.findForPartiesAndAgreementEmpty";
+            candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
+            candidatesQuery.setParameter("SENDER_PARTY", senderParty);
+            candidatesQuery.setParameter("RECEIVER_PARTY", receiverParty);
+            candidates = candidatesQuery.getResultList();
+            if (candidates == null || candidates.isEmpty()) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
+            }
         }
         final TypedQuery<String> query = this.entityManager.createNamedQuery("LegConfiguration.findForPMode", String.class);
         query.setParameter("SERVICE", service);
@@ -135,8 +138,7 @@ public class PModeDao extends PModeProvider {
 
     protected String findAgreement(final AgreementRef agreementRef) throws EbMS3Exception {
         if (agreementRef == null || agreementRef.getValue() == null || agreementRef.getValue().isEmpty()) {
-            return ""; //AgreementRef is optional
-            // return OPTIONAL_AND_EMPTY; replace with this after backward compatibility is removed!
+            return OPTIONAL_AND_EMPTY;
         }
         final String value = agreementRef.getValue();
         final String type = agreementRef.getType();
