@@ -90,6 +90,16 @@
             <destName>log4j.properties</destName>
             <filtered>false</filtered>
         </file>
+        <file>
+            <source>${project.basedir}/src/main/conf/domibus/policies/eDeliveryPolicy.xml</source>
+            <outputDirectory>policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/src/main/conf/domibus/policies/eSensPolicy.xml</source>
+            <outputDirectory>policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
     </files>
     <fileSets>
         <fileSet>
