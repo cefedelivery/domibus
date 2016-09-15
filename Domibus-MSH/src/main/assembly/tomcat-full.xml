@@ -71,12 +71,6 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.build.directory}/docbkx/pdf/Domibus.pdf</source>
-            <outputDirectory>/</outputDirectory>
-            <destName>Installation_Instructions.pdf</destName>
-            <filtered>false</filtered>
-        </file>
-        <file>
             <source>${project.basedir}/changelog.txt</source>
             <outputDirectory>/</outputDirectory>
             <filtered>false</filtered>

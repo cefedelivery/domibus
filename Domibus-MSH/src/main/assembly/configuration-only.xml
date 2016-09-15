@@ -29,12 +29,6 @@
     <includeSiteDirectory>false</includeSiteDirectory>
     <files>
         <file>
-            <source>${project.build.directory}/docbkx/pdf/Domibus.pdf</source>
-            <outputDirectory>/</outputDirectory>
-            <destName>Installation_Instructions.pdf</destName>
-            <filtered>false</filtered>
-        </file>
-        <file>
             <source>
                 ${project.basedir}/src/main/conf/domibus/domibus-configuration.xml
             </source>

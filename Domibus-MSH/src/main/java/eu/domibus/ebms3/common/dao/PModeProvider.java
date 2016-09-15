@@ -107,7 +107,8 @@ public abstract class PModeProvider {
                 schema = sf.newSchema(new File(filePath + DOMIBUS_PMODE_XSD));
             }
             Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
-            unmarshaller.setSchema(schema);
+            //for RC1 disable the schema validation
+//            unmarshaller.setSchema(schema);
             unmarshaller.setEventHandler(new XmlValidationEventHandler());
 
             SAXParserFactory spf = SAXParserFactory.newInstance();
