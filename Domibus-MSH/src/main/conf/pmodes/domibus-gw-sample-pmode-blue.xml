@@ -7,7 +7,7 @@
 			 enabled="true"
 			 default="true"
 			 retention_downloaded="0"
-			 retention_undownloaded="0"/>
+			 retention_undownloaded="14400"/>
 	</mpcs>
 	<businessProcesses>
 		<roles>
