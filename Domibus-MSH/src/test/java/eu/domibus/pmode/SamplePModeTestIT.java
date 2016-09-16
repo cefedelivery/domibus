@@ -25,12 +25,12 @@ import static org.junit.Assert.assertTrue;
 public class SamplePModeTestIT {
 
     @Test
-    public void testRetentionUndownloadedIsBiggerThanZeroForBluePmode() throws Exception {
+    public void testRetentionValuesForBluePmode() throws Exception {
         testRetentionUndownloadedIsBiggerThanZero("src/main/conf/pmodes/domibus-gw-sample-pmode-blue.xml");
     }
 
     @Test
-    public void testRetentionUndownloadedIsBiggerThanZeroForRedPmode() throws Exception {
+    public void testRetentionValuesForRedPmode() throws Exception {
         testRetentionUndownloadedIsBiggerThanZero("src/main/conf/pmodes/domibus-gw-sample-pmode-red.xml");
     }
 
@@ -43,13 +43,14 @@ public class SamplePModeTestIT {
         assertNotNull(mpcList);
         for (Mpc mpc : mpcList) {
             assertTrue(mpc.getRetentionUndownloaded() > 0);
+            assertTrue(mpc.getRetentionDownloaded() == 0);
         }
     }
 
     protected Configuration readPMode(String location) throws Exception {
         File pmodeFile = new File(location);
-        String bluePMode = FileUtils.readFileToString(pmodeFile);
-        bluePMode = StringUtils.replaceEach(bluePMode, new String[]{"<red_hostname>", "<blue_hostname>"}, new String[]{"red_hostname", "blue_hostname"});
+        String pmodeContent = FileUtils.readFileToString(pmodeFile);
+        pmodeContent = StringUtils.replaceEach(pmodeContent, new String[]{"<red_hostname>", "<blue_hostname>"}, new String[]{"red_hostname", "blue_hostname"});
 
         JAXBContext jaxbContext = JAXBContext.newInstance("eu.domibus.common.model.configuration");
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -57,7 +58,7 @@ public class SamplePModeTestIT {
         spf.setNamespaceAware(true);
 
         XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        XMLEventReader eventReader = inputFactory.createXMLEventReader(IOUtils.toInputStream(bluePMode));
+        XMLEventReader eventReader = inputFactory.createXMLEventReader(IOUtils.toInputStream(pmodeContent));
         return (Configuration) unmarshaller.unmarshal(eventReader);
     }
 }
