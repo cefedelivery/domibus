@@ -1,5 +1,6 @@
-package eu.domibus;
+package eu.domibus.pmode;
 
+import eu.domibus.AbstractIT;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
