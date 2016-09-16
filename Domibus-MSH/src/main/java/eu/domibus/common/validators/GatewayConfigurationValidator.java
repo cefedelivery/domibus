@@ -25,8 +25,6 @@ public class GatewayConfigurationValidator {
 
     private static final String BLUE_GW_ALIAS = "blue_gw";
 
-    private static final String MD5_DOMIBUS_DATASOURCE_XML = "3aecbfa79b63d039a2fc05b26311c5ac";
-    private static final String MD5_DOMIBUS_SECURITY_XML = "6c999533a80fdcbb3755fb1c715644de";
 
     final String domibusConfigLocation = System.getProperty("domibus.config.location");
 
@@ -37,8 +35,14 @@ public class GatewayConfigurationValidator {
     public void validateConfiguration() throws Exception {
         LOG.info("Checking gateway configuration ...");
         validateCerts();
-        validateFileHash("domibus-datasources.xml", MD5_DOMIBUS_DATASOURCE_XML);
-        validateFileHash("domibus-security.xml", MD5_DOMIBUS_SECURITY_XML);
+        File datasourcesHash = (new File(domibusConfigLocation, "domibus-datasources.xml.sha256"));
+        if (datasourcesHash.exists()) {
+            validateFileHash("domibus-datasources.xml", FileUtils.readFileToString(datasourcesHash).trim());
+        }
+        File securityHash = (new File(domibusConfigLocation, "domibus-security.xml.sha256"));
+        if (securityHash.exists()) {
+            validateFileHash("domibus-security.xml", FileUtils.readFileToString(new File(domibusConfigLocation, "domibus-security.xml.sha256")).trim());
+        }
     }
 
     private void validateCerts() {
@@ -59,7 +63,7 @@ public class GatewayConfigurationValidator {
             warnOutput("CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
         }
         try {
-            if(ks.containsAlias(BLUE_GW_ALIAS)) {
+            if (ks.containsAlias(BLUE_GW_ALIAS)) {
                 warnOutput("SAMPLE CERTIFICATES ARE BEING USED - NOT FOR PRODUCTION USAGE");
             }
 
@@ -73,9 +77,9 @@ public class GatewayConfigurationValidator {
     private void validateFileHash(String filename, String expectedHash) throws IOException {
         File file = new File(domibusConfigLocation + "/" + filename);
         try {
-            String hash  = DigestUtils.md5Hex(FileUtils.readFileToByteArray(file));
+            String hash = DigestUtils.sha256Hex(FileUtils.readFileToByteArray(file));
             LOG.debug("Hash for " + filename + ": " + hash);
-            if(hash.compareTo(expectedHash) == 0) {
+            if (hash.compareTo(expectedHash) == 0) {
                 warnOutput("SAMPLE CONFIGURATION FILE IS BEING USED - NOT FOR PRODUCTION USAGE " + filename);
             }
 

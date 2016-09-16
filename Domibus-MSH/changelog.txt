@@ -1,5 +1,4 @@
 Domibus 3.2-RC1
-- Added XSD validation of the PMODE while it is uploaded by the user
 - Added XSD validation for the operations exposed by the backend WS
 - Harmonize the plugin registration on Tomcat/WebLogic/WildFly
 - CRL validation
@@ -7,6 +6,8 @@ Domibus 3.2-RC1
 - Enabled MTOM for backend WS.
 - Ping messages are not stored/delivered to the backend
 - Possibility to validate the payload using custom validators
+- JMS monitoring via the Admin page
+- Added support for dead letter queues
 Domibus 3.1.1
 - Fixed retry logic issue
 - Set BINARY_DATA type to LONGBLOB on mysql (migration scripts created)
@@ -61,3 +62,5 @@ Domibus 3.0-RC1
  Domibus 3.0-RC3
  - bugfixes
  - experimental SMP/SML support
+
+

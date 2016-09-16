@@ -1,7 +1,6 @@
 package eu.domibus.spring;
 
 import eu.domibus.plugin.classloader.PluginClassLoader;
-import eu.domibus.property.PropertyResolver;
 import eu.domibus.property.PropertyResolverBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;

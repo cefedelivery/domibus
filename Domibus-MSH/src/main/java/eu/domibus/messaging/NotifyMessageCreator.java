@@ -19,17 +19,14 @@
 
 package eu.domibus.messaging;
 
+import eu.domibus.api.jms.JMSMessageBuilder;
+import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.NotificationType;
-import org.springframework.jms.core.MessageCreator;
-
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
 
 /**
  * @author Christian Koch, Stefan Mueller
  */
-public class NotifyMessageCreator implements MessageCreator {
+public class NotifyMessageCreator  {
 
     private final String messageId;
     private NotificationType notificationType;
@@ -41,13 +38,13 @@ public class NotifyMessageCreator implements MessageCreator {
         this.finalRecipient = finalRecipient;
     }
 
-    @Override
-    public Message createMessage(final Session session) throws JMSException {
-        final Message m = session.createMessage();
-        m.setStringProperty(MessageConstants.MESSAGE_ID, messageId);
-        m.setStringProperty(MessageConstants.NOTIFICATION_TYPE, notificationType.name());
-        m.setStringProperty(MessageConstants.FINAL_RECIPIENT, finalRecipient);
-        return m;
+    public JmsMessage createMessage()  {
+        return JMSMessageBuilder
+                .create()
+                .property(MessageConstants.MESSAGE_ID, messageId)
+                .property(MessageConstants.NOTIFICATION_TYPE, notificationType.name())
+                .property(MessageConstants.FINAL_RECIPIENT, finalRecipient)
+                .build();
     }
 
     public String getMessageId() {

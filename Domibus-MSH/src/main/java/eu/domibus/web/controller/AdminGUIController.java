@@ -293,13 +293,14 @@ public class AdminGUIController {
         if (!truststore.isEmpty()) {
             try {
                 final byte[] bytes = truststore.getBytes();
-               trustStoreService.replaceTruststore(bytes, password);
+                trustStoreService.replaceTruststore(bytes, password);
                 return "Truststore file has been successfully replaced.";
             } catch (final Exception e) {
-                return "Failed to upload the PMode file due to => " + e.getMessage();
+                LOG.error("Failed to upload the truststore file", e);
+                return "Failed to upload the truststore file due to => " + e.getMessage();
             }
         } else {
-            return "Failed to upload the PMode file since it was empty.";
+            return "Failed to upload the truststore file since it was empty.";
         }
     }
 }

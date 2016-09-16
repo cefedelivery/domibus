@@ -21,17 +21,19 @@
 <spring:beans
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns:spring="http://www.springframework.org/schema/beans"
+        xmlns:util="http://www.springframework.org/schema/util"
         xmlns:context="http://www.springframework.org/schema/context"
         xmlns="http://activemq.apache.org/schema/core"
         xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-  http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+  http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+  http://www.springframework.org/schema/util
+  http://www.springframework.org/schema/util/spring-util.xsd">
 
     <context:property-placeholder system-properties-mode="ENVIRONMENT" />
 
-
-    <broker useJmx="true"  persistent="true" schedulerSupport="true" dataDirectory="${domibus.work.location:${domibus.config.location}}/work/activemq_data" tmpDataDirectory="${domibus.work.location:${domibus.config.location}}/temp">
+    <broker useJmx="true" brokerName="localhost"  persistent="true" schedulerSupport="true" dataDirectory="${domibus.work.location:${domibus.config.location}}/work/activemq_data" tmpDataDirectory="${domibus.work.location:${domibus.config.location}}/temp">
         <managementContext>
-            <managementContext createConnector="true" connectorPort="1199"/>
+            <managementContext createConnector="true" connectorPort="1199" rmiServerPort="1200"/>
         </managementContext>
         <transportConnectors>
             <transportConnector uri="tcp://localhost:61616" disableAsyncDispatch="true"/>
@@ -79,15 +81,21 @@
                    physicalName="domibus.backend.jms.inQueue"/>
             <queue id="errorNotifyConsumerQueue" physicalName="domibus.backend.jms.errorNotifyConsumer" />
             <queue id="errorNotifyProducerQueue" physicalName="domibus.backend.jms.errorNotifyProducer" />
+            <queue id="domibusDLQ" physicalName="domibus.DLQ" />
             <topic id="clusterCommandTopic" physicalName="domibus.internal.command"/>
 
         </destinations>
         <destinationPolicy>
             <policyMap>
                 <policyEntries>
-                    <policyEntry queue="domibus.internal.>">
+                    <policyEntry queue=">">
                         <deadLetterStrategy>
-                            <individualDeadLetterStrategy queuePrefix="DLQ."/>
+                            <!--<individualDeadLetterStrategy queuePrefix="DLQ."/>-->
+                            <sharedDeadLetterStrategy processExpired="false">
+                                <deadLetterQueue>
+                                    <queue physicalName="domibus.DLQ"/>
+                                </deadLetterQueue>
+                            </sharedDeadLetterStrategy>
                         </deadLetterStrategy>
                         <dispatchPolicy>
                             <roundRobinDispatchPolicy/>
@@ -123,11 +131,8 @@
                         <redeliveryPolicyEntries>
                             <redeliveryPolicy queue="sendMessageQueue"
                                               maximumRedeliveries="0"/>
-                            <!--redeliveryPolicy  queue="notifyBackendQueue" maximumRedeliveries="-1"
-                                               redeliveryDelay="10000"/-->
-                            <!-- this policy is used for notification queues to ensure delivery to the backends -->
-                            <redeliveryPolicy  queue="domibus.notification.>" maximumRedeliveries="-1"
-                                                  redeliveryDelay="10000"/>
+                            <redeliveryPolicy queue="*"
+                                              maximumRedeliveries="10" redeliveryDelay="300000"/>
                         </redeliveryPolicyEntries>
                     </redeliveryPolicyMap>
                 </redeliveryPolicyMap>

@@ -24,6 +24,7 @@ package eu.domibus.plugin.handler;
  * @Since 3.0
  */
 
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.dao.MessageLogDao;
@@ -73,8 +74,11 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
-    @Resource(name = "jmsTemplateDispatch")
-    private JmsOperations jmsOperations;
+//    @Resource(name = "jmsTemplateDispatch")
+//    private JmsOperations jmsOperations;
+
+    @Autowired
+    JMSManager jmsManager;
 
     @Autowired
     @Qualifier("sendMessageQueue")
@@ -259,7 +263,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             messageLogEntry.setMpc(message.getUserMessage().getMpc());
             messageLogEntry.setEndpoint(to.getEndpoint());
             messageLogEntry.setBackend(backendName);
-            this.jmsOperations.send(sendMessageQueue, new DispatchMessageCreator(messageId, to.getEndpoint()));
+            jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, to.getEndpoint()).createMessage(), sendMessageQueue);
+//            this.jmsOperations.send(sendMessageQueue, new DispatchMessageCreator(messageId, to.getEndpoint()));
             messageLogEntry.setMessageStatus(MessageStatus.SEND_ENQUEUED);
             this.messageLogDao.create(messageLogEntry);
 

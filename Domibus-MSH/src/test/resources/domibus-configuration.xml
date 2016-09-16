@@ -56,6 +56,7 @@
         <prop key="domibus.backend.jmsInQueue">domibus.backend.jms.inQueue</prop>
         <prop key="domibus.deployment.clustered">false</prop>
         <prop key="messageFactoryClass">com.sun.xml.internal.messaging.saaj.soap.ver1_2.SOAPMessageFactory1_2Impl</prop>
+        <prop key="activeMQ.JMXURL">service:jmx:rmi://localhost:1198/jndi/rmi://localhost:1199/jmxrmi</prop>
 
         <!-- Enable the proxy settings only if you use a proxy -->
 

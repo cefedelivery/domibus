@@ -44,34 +44,30 @@
             <filtered>false</filtered>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/artifacts/domibus-container
-            </directory>
+            <directory>${project.build.directory}/cargo/installs/tomcat-${tomcat.version}/apache-tomcat-${tomcat.version}</directory>
             <outputDirectory>domibus</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
-            <excludes>
-                <exclude>work</exclude>
-
-                <exclude>logs/**/*</exclude>
-                <exclude>temp/**/*</exclude>
-                <exclude>webapps/cargocpc/**/*</exclude>
-                <exclude>webapps/holodeck/**/*</exclude>
-                <exclude>conf/Catalina/**/*</exclude>
-                <exclude>conf/domibus/db/</exclude>
-                <exclude>conf/domibus/keystores/</exclude>
-                <exclude>conf/domibus/policies/</exclude>
-                <exclude>conf/domibus/example/</exclude>
-                <exclude>conf/domibus/temp/</exclude>
-                <exclude>conf/domibus/plugins/</exclude>
-            </excludes>
             <filtered>false</filtered>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/main/conf/domibus</directory>
+            <outputDirectory>domibus/conf/domibus</outputDirectory>
+            <useDefaultExcludes>true</useDefaultExcludes>
+            <filtered>false</filtered>
+            <excludes>
+                <exclude>example/**</exclude>
+                <exclude>policies/**</exclude>
+                <exclude>keystores/**</exclude>
+                <exclude>plugins/**</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
 
     <files>
         <file>
-            <source>${project.build.directory}/docbkx/pdf/Domibus.pdf</source>
-            <outputDirectory>/</outputDirectory>
-            <destName>Installation_Instructions.pdf</destName>
+            <source>${project.build.directory}/${project.artifactId}-${project.version}-${domibus.classifier}.war</source>
+            <outputDirectory>domibus/webapps</outputDirectory>
+            <destName>domibus.war</destName>
             <filtered>false</filtered>
         </file>
         <file>
@@ -101,6 +97,11 @@
         <!--</file>-->
         <file>
             <source>${project.basedir}/src/main/conf/domibus/policies/eDeliveryPolicy.xml</source>
+            <outputDirectory>domibus/conf/domibus/policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/src/main/conf/domibus/policies/eSensPolicy.xml</source>
             <outputDirectory>domibus/conf/domibus/policies</outputDirectory>
             <filtered>false</filtered>
         </file>

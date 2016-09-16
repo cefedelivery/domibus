@@ -1,18 +1,67 @@
-Domibus 3.2 RC-1:   Replace the war and the WS plugin. This release has changes for the DB tables; please run the migration script.
+Domibus 3.2 RC-1:   Run the appropriate DB migration script.
+                    Replace domibus.war and the plugin(s) jar(s) into \domibus\conf\domibus\plugins\lib"
+                    For Tomcat installations only, the activemq.xml file has to be replaced and re-configured according to your environment (transportConnector uri, authenticationUser, redeliveryPolicy).
+                    Update the configuration file following these steps:
+                    -   in file "\domibus\conf\domibus\plugins\config\ws-plugin.xml":
+                            o   add <bean id="defaultTransformer" class="eu.domibus.plugin.webService.impl.StubDtoTransformer"/> (as an element in the node beans)
+                            o   replace
+                                 <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
+                                 .......
+                                 </jaxws:endpoint>
+
+                                 with
+
+                                <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
+
+                                    <jaxws:properties>
+                                        <entry key="schema-validation-enabled" value="true"/>
+                                        <entry key="mtom-enabled" value="true"/>
+                                    </jaxws:properties>
+
+                                    <jaxws:schemaLocations>
+                                        <jaxws:schemaLocation>schemas/domibus-submission.xsd</jaxws:schemaLocation>
+                                        <jaxws:schemaLocation>schemas/xml.xsd</jaxws:schemaLocation>
+                                        <jaxws:schemaLocation>schemas/domibus-backend.xsd</jaxws:schemaLocation>
+                                        <jaxws:schemaLocation>schemas/xmlmime.xsd</jaxws:schemaLocation>
+                                    </jaxws:schemaLocations>
+
+                                </jaxws:endpoint>
+
+                    -   in file "\domibus\conf\domibus\internal\ehcache.xml":
+                            o   add <cache name="certValidationByAlias" maxBytesLocalHeap="5m" timeToLiveSeconds="3600" overflowToDisk="false"/>
+                    -   in file "\domibus\conf\domibus\domibus-configuration.xml":
+                            o   replace class="eu.domibus.common.dao.CachingPModeProvider"/> by class="eu.domibus.ebms3.common.dao.CachingPModeProvider"/> or by class="eu.domibus.common.dao.PModeDao"/> if you are using Oracle DB
+                            o   add <prop key="domibus.certificate.validation.enabled">true</prop>
+                            o   add <prop key="domibus.jms.internalQueue.expression">.*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*</prop>
+                            o   only for Tomcat users: add <prop key="activeMQ.JMXURL">service:jmx:rmi://localhost:1198/jndi/rmi://localhost:1199/jmxrmi</prop>
+                    -   in file "\domibus\conf\domibus\domibus-datasources.xml":
+                            o   replace  <amq:xaConnectionFactory id="xaJmsConnectionFactory" brokerURL="tcp://localhost:61616" userName="domibus" password="changeit"/>    with
+
+                                    <amq:xaConnectionFactory id="xaJmsConnectionFactory"
+                                                     brokerURL="tcp://localhost:61616"
+                                                     userName="domibus" password="changeit">
+                                        <!-- do not remove this! otherwise the redeliveryPolicy configured in activemq.xml will be ignored -->
+                                        <amq:redeliveryPolicy>
+                                            <amq:redeliveryPolicy/>
+                                        </amq:redeliveryPolicy>
+                                    </amq:xaConnectionFactory>
+
+                    If you are using samples keystores, mind that they have been changed because the old ones are expiring on the 26th of October 2016.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.1.1:      Replace the war. This release updated the type of one column for the MySQL db. Please run the migration script.
--------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.1.0:      Re-install the domibus-security.xml and re-configure the properties according with the installed Truststore and Keystore.
                     For Tomcat installations only, the activemq.xml has to be re-installed and re-configured and the domibus-ActiveMQ-ThroughputLimiter jar can be deleted.
                     There have been some changes to the database, please use the new scripts.
                     Run the migration script if you are upgrading from 3.0 to 3.1
--------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.1 RC-2:   Replace the war and jar(plugins) files. There have been some changes to the MessageFilter, please use a clean database.
--------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.1 RC-1:   Domibus 3.1 is a major release that has to be installed from scratch.
                     There have been some changes to the database, please use the new script.
                     There is a new PMode generation plugin available (BETA-3), use this to regenerate your PMode files
--------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.0 BETA-2: Replace the war file.
--------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.0 BETA-1: Domibus 3.0 is a major release that has to be installed from scratch. There is no available upgrade path.
--------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------

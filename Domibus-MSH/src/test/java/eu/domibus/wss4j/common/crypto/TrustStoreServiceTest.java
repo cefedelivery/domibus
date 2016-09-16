@@ -2,17 +2,21 @@ package eu.domibus.wss4j.common.crypto;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.springframework.jms.core.JmsOperations;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.KeyStore;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -34,11 +38,25 @@ public class TrustStoreServiceTest {
     private static final String TRUSTSTORE_PASSWORD_PROPERTY_NAME = "org.apache.ws.security.crypto.merlin.trustStore.password";
     private static final String TRUSTSTORE_PASSWORD_PROPERTY_VALUE = "1234";
 
+    private static boolean initialized;
+
     @InjectMocks
     private TrustStoreService classUnderTest;
 
+    @Mock
+    private JmsOperations jmsOperations;
+
     @Spy
     private Properties trustStoreProperties;
+
+    @BeforeClass
+    public static void init() throws IOException {
+        if (!initialized) {
+            FileUtils.deleteDirectory(new File("target/temp"));
+            System.setProperty("domibus.config.location", new File("target/test-classes").getAbsolutePath());
+            initialized = true;
+        }
+    }
 
     @Before
     public void initMocks() {
