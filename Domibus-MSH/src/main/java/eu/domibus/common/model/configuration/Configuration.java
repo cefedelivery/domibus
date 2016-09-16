@@ -93,6 +93,10 @@ public class Configuration extends AbstractBaseEntity {
         return this.mpcs;
     }
 
+    public Mpcs getMpcsXml() {
+        return mpcsXml;
+    }
+
     public void setMpcs(final Set<Mpc> mpcs) {
         this.mpcs = mpcs;
     }

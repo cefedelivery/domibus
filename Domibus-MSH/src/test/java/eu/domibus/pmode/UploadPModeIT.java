@@ -1,5 +1,6 @@
-package eu.domibus;
+package eu.domibus.pmode;
 
+import eu.domibus.AbstractIT;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
@@ -214,7 +215,7 @@ public class UploadPModeIT extends AbstractIT {
     /**
      * Tests that the PMode is not saved in the DB because there is a validation error (maxLength exceeded).
      */
-    @Test
+    //@Test disabled because the XML schema validation has been disabled for RC1!
     public void testSavePModeValidationError() throws IOException {
 
         try {

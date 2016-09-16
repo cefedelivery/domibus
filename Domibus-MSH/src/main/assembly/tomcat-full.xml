@@ -71,12 +71,6 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.build.directory}/docbkx/pdf/Domibus.pdf</source>
-            <outputDirectory>/</outputDirectory>
-            <destName>Installation_Instructions.pdf</destName>
-            <filtered>false</filtered>
-        </file>
-        <file>
             <source>${project.basedir}/changelog.txt</source>
             <outputDirectory>/</outputDirectory>
             <filtered>false</filtered>
@@ -103,6 +97,11 @@
         <!--</file>-->
         <file>
             <source>${project.basedir}/src/main/conf/domibus/policies/eDeliveryPolicy.xml</source>
+            <outputDirectory>domibus/conf/domibus/policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/src/main/conf/domibus/policies/eSensPolicy.xml</source>
             <outputDirectory>domibus/conf/domibus/policies</outputDirectory>
             <filtered>false</filtered>
         </file>
