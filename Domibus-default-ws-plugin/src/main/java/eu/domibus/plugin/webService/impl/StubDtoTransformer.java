@@ -9,6 +9,7 @@ import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.webService.generated.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
@@ -17,7 +18,8 @@ import java.util.*;
  *
  * @author Federico Martini
  */
-public final class StubDtoTransformer implements MessageSubmissionTransformer<Messaging>, MessageRetrievalTransformer<UserMessage> {
+@Component
+public class StubDtoTransformer implements MessageSubmissionTransformer<Messaging>, MessageRetrievalTransformer<UserMessage> {
 
 
     private static final Log LOGGER = LogFactory.getLog(StubDtoTransformer.class);
