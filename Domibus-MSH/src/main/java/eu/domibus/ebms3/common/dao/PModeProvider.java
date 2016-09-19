@@ -89,38 +89,54 @@ public abstract class PModeProvider {
     public abstract void refresh();
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public String updatePModes(final byte[] bytes) throws XmlProcessingException {
+    public String updatePModes(byte[] bytes) throws XmlProcessingException {
         LOG.debug("Updating the PMode");
-        Configuration configuration = null;
-        UnmarshallerResult unmarshallerResult = null;
-        try {
-            ByteArrayInputStream xmlStream = new ByteArrayInputStream(bytes);
-            InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(SCHEMAS_DIR + DOMIBUS_PMODE_XSD);
-            unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, xmlStream, xsdStream);
-            configuration = unmarshallerResult.getResult();
-        } catch (JAXBException | SAXException | ParserConfigurationException | XMLStreamException xmlEx) {
-            LOG.error("Error updating the PMode", xmlEx);
-            throw new XmlProcessingException("Error updating the PMode", xmlEx);
-        }
-        if (unmarshallerResult == null
-                || configuration == null) {
-            throw new XmlProcessingException("Error updating the PMode: could not process the PMode file");
+
+        //unmarshall the PMode with whitespaces ignored
+        UnmarshallerResult unmarshalledConfigurationWithWhiteSpacesIgnored = unmarshall(bytes, true);
+
+        if (!unmarshalledConfigurationWithWhiteSpacesIgnored.isValid()) {
+            String errorMessage = "The PMode file is not XSD compliant(whitespaces are ignored). Please correct the issues: [" + unmarshalledConfigurationWithWhiteSpacesIgnored.getErrorMessage() + "]";
+            throw new XmlProcessingException(errorMessage);
         }
 
         String resultMessage = null;
-        boolean isPmodeValid = unmarshallerResult.isValid();
-        if(!isPmodeValid) {
-            String warningMessage = "The PMode file is not XSD compliant. It is recommended to correct the issues: [" + unmarshallerResult.getErrorMessage() + "]";
+        //unmarshall the PMode taking into account the whitespaces
+        UnmarshallerResult unmarshalledConfiguration = unmarshall(bytes, false);
+        if (!unmarshalledConfiguration.isValid()) {
+            String warningMessage = "The PMode file is not XSD compliant. It is recommended to correct the issues: [" + unmarshalledConfiguration.getErrorMessage() + "]";
             resultMessage = warningMessage;
             LOG.warn(warningMessage);
         }
 
+        Configuration configuration = unmarshalledConfiguration.getResult();
         configurationDAO.updateConfiguration(configuration);
         LOG.info("Configuration successfully updated");
         // Sends a message into the topic queue in order to refresh all the singleton instances of the PModeProvider.
         jmsOperations.send(new ReloadPmodeMessageCreator());
 
         return resultMessage;
+    }
+
+    protected UnmarshallerResult unmarshall(byte[] bytes, boolean ignoreWhitespaces) throws XmlProcessingException {
+        Configuration configuration = null;
+        UnmarshallerResult unmarshallerResult = null;
+
+        InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(SCHEMAS_DIR + DOMIBUS_PMODE_XSD);
+        ByteArrayInputStream xmlStream = new ByteArrayInputStream(bytes);
+
+        try {
+            unmarshallerResult = xmlUtil.unmarshal(ignoreWhitespaces, jaxbContext, xmlStream, xsdStream);
+            configuration = unmarshallerResult.getResult();
+        } catch (JAXBException | SAXException | ParserConfigurationException | XMLStreamException e) {
+            LOG.error("Error unmarshalling the PMode", e);
+            throw new XmlProcessingException("Error unmarshalling the PMode: " + e.getMessage(), e);
+        }
+        if (unmarshallerResult == null
+                || configuration == null) {
+            throw new XmlProcessingException("Error unmarshalling the PMode: could not process the PMode file");
+        }
+        return unmarshallerResult;
     }
 
     @Transactional(propagation = Propagation.REQUIRED, noRollbackFor = IllegalStateException.class)

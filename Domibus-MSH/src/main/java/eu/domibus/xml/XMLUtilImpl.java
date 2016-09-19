@@ -4,6 +4,7 @@ import eu.domibus.api.xml.DefaultUnmarshallerResult;
 import eu.domibus.api.xml.UnmarshallerResult;
 import eu.domibus.api.xml.XMLUtil;
 import eu.domibus.common.validators.XmlValidationEventHandler;
+import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
@@ -23,14 +24,19 @@ import java.io.InputStream;
 /**
  * Created by Cosmin Baciu on 14-Sep-16.
  */
+@Component
 public class XMLUtilImpl implements XMLUtil {
 
     @Override
     public UnmarshallerResult unmarshal(boolean ignoreWhitespaces, JAXBContext jaxbContext, InputStream xmlStream, InputStream xsdStream) throws SAXException, JAXBException, ParserConfigurationException, XMLStreamException {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = schemaFactory.newSchema(new StreamSource(xsdStream));
+
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        unmarshaller.setSchema(schema);
+        if(xsdStream != null) {
+            Schema schema = schemaFactory.newSchema(new StreamSource(xsdStream));
+            unmarshaller.setSchema(schema);
+        }
+
         XmlValidationEventHandler jaxbValidationEventHandler = new XmlValidationEventHandler();
         unmarshaller.setEventHandler(jaxbValidationEventHandler);
 

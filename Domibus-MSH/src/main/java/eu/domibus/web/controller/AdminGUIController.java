@@ -281,7 +281,7 @@ public class AdminGUIController {
             String pmodeUpdateMessage = pModeProvider.updatePModes(bytes);
             String message = "PMode file has been successfully uploaded";
             if(StringUtils.isNotEmpty(pmodeUpdateMessage)) {
-                message = " but some issues were detected: " + pmodeUpdateMessage;
+                message += " but some issues were detected: " + pmodeUpdateMessage;
             }
             return message;
         } catch (final Exception e) {
