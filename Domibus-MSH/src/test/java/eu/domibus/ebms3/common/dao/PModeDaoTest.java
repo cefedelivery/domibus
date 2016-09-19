@@ -10,6 +10,7 @@ import eu.domibus.xml.XMLUtilImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -87,6 +88,11 @@ public class PModeDaoTest {
 
     @Autowired
     JAXBContext jaxbContext;
+
+    @Before
+    public void resetMocks() {
+        Mockito.reset(configurationDAO);
+    }
 
 
     @Test
