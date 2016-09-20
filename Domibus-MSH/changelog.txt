@@ -8,6 +8,7 @@ Domibus 3.2-RC1
 - Possibility to validate the payload using custom validators
 - JMS monitoring via the Admin page
 - Added support for dead letter queues
+- Added support for Java 8
 Domibus 3.1.1
 - Fixed retry logic issue
 - Set BINARY_DATA type to LONGBLOB on mysql (migration scripts created)
