@@ -1,3 +1,5 @@
+Domibus 3.2-FR
+- Changed table names to be all UPPERCASE to fix the issue related to case sensitivity on Linux
 Domibus 3.2-RC1
 - Added XSD validation for the operations exposed by the backend WS
 - Harmonize the plugin registration on Tomcat/WebLogic/WildFly
