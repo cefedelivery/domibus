@@ -30,6 +30,7 @@ import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.XmlProcessingException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -89,7 +91,7 @@ public abstract class PModeProvider {
     public abstract void refresh();
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public String updatePModes(byte[] bytes) throws XmlProcessingException {
+    public List<String> updatePModes(byte[] bytes) throws XmlProcessingException {
         LOG.debug("Updating the PMode");
 
         //unmarshall the PMode with whitespaces ignored
@@ -97,16 +99,19 @@ public abstract class PModeProvider {
 
         if (!unmarshalledConfigurationWithWhiteSpacesIgnored.isValid()) {
             String errorMessage = "The PMode file is not XSD compliant(whitespaces are ignored). Please correct the issues: [" + unmarshalledConfigurationWithWhiteSpacesIgnored.getErrorMessage() + "]";
-            throw new XmlProcessingException(errorMessage);
+            XmlProcessingException xmlProcessingException = new XmlProcessingException(errorMessage);
+            xmlProcessingException.addErrors(unmarshalledConfigurationWithWhiteSpacesIgnored.getErrors());
+            throw xmlProcessingException;
         }
 
-        String resultMessage = null;
+        List<String> resultMessage = null;
         //unmarshall the PMode taking into account the whitespaces
         UnmarshallerResult unmarshalledConfiguration = unmarshall(bytes, false);
         if (!unmarshalledConfiguration.isValid()) {
-            String warningMessage = "The PMode file is not XSD compliant. It is recommended to correct the issues: [" + unmarshalledConfiguration.getErrorMessage() + "]";
-            resultMessage = warningMessage;
-            LOG.warn(warningMessage);
+            resultMessage = new ArrayList<>();
+            resultMessage.add("The PMode file is not XSD compliant. It is recommended to correct the issues:");
+            resultMessage.addAll(unmarshalledConfiguration.getErrors());
+            LOG.warn(StringUtils.join(resultMessage, " "));
         }
 
         Configuration configuration = unmarshalledConfiguration.getResult();

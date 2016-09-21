@@ -28,6 +28,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.never;
@@ -101,8 +102,9 @@ public class PModeDaoTest {
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
         UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, new ByteArrayInputStream(pModeBytes), null);
 
-        String updatePmodeMessage = pModeDao.updatePModes(pModeBytes);
+        List<String> updatePmodeMessage = pModeDao.updatePModes(pModeBytes);
         assertNotNull(updatePmodeMessage);
+        assertTrue(updatePmodeMessage.size() > 0);
 
         ArgumentCaptor<Configuration> parameter = ArgumentCaptor.forClass(Configuration.class);
         Mockito.verify(configurationDAO).updateConfiguration(parameter.capture());
@@ -121,7 +123,7 @@ public class PModeDaoTest {
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
         UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, new ByteArrayInputStream(pModeBytes), null);
 
-        String updatePmodeMessage = pModeDao.updatePModes(pModeBytes);
+        List<String> updatePmodeMessage = pModeDao.updatePModes(pModeBytes);
         //there are no warnings
         assertNull(updatePmodeMessage);
 
@@ -146,6 +148,8 @@ public class PModeDaoTest {
             fail("The Pmode is invalid so it should have thrown an exception");
         } catch (XmlProcessingException e) {
             LOG.info("Exception thrown as expected due to invalid PMode");
+            assertNotNull(e.getErrors());
+            assertTrue(e.getErrors().size() > 0);
         }
 
         Mockito.verify(configurationDAO, never()).updateConfiguration((Configuration) Mockito.anyObject());
