@@ -66,7 +66,7 @@ public class UploadPModeIT extends AbstractIT {
     public void testSavePModeOk() throws IOException, XmlProcessingException {
 
         try {
-            File pModeFile = new File("src/test/resources/SamplePModes/domibus-configuration-blue_gw.xml");
+            File pModeFile = new File("src/test/resources/SamplePModes/domibus-configuration-valid.xml");
             FileInputStream fis = new FileInputStream(pModeFile);
             //MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-blue_gw", pModeFile.getName(), "text/xml", IOUtils.toByteArray(fis));
             //String response = adminGui.uploadFileHandler(pModeContent);
@@ -89,7 +89,7 @@ public class UploadPModeIT extends AbstractIT {
 
 
         try {
-            File wrongPmode = new File("src/test/resources/SamplePModes/wrong-domibus-configuration.xml");
+            File wrongPmode = new File("src/test/resources/SamplePModes/domibus-configuration-xsd-not-compliant.xml");
             FileInputStream fis = new FileInputStream(wrongPmode);
             MultipartFile pModeContent = new MockMultipartFile("wrong-domibus-configuration", wrongPmode.getName(), "text/xml", IOUtils.toByteArray(fis));
             String response = adminGui.uploadPmodeFile(pModeContent);
@@ -116,7 +116,7 @@ public class UploadPModeIT extends AbstractIT {
     public void testVerifyPModeContent() throws IOException, JAXBException {
 
         try {
-            File pModeFile = new File("src/test/resources/SamplePModes/domibus-configuration-blue_gw.xml");
+            File pModeFile = new File("src/test/resources/SamplePModes/domibus-configuration-valid.xml");
             FileInputStream fis = new FileInputStream(pModeFile);
             Configuration configuration = testUpdatePModes(IOUtils.toByteArray(fis));
             // Starts to check that the content of the XML file has actually been saved!
@@ -215,7 +215,7 @@ public class UploadPModeIT extends AbstractIT {
     /**
      * Tests that the PMode is not saved in the DB because there is a validation error (maxLength exceeded).
      */
-    //@Test disabled because the XML schema validation has been disabled for RC1!
+    @Test
     public void testSavePModeValidationError() throws IOException {
 
         try {

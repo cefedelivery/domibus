@@ -47,7 +47,7 @@ public class XmlValidationEventHandler implements ValidationEventHandler {
                 break;
             case ValidationEvent.FATAL_ERROR:
                 severity = "FATAL_ERROR";
-                retVal = false; // terminate after fatal errors
+                retVal = true; // continue after fatal errors because we want to show all errors together
                 break;
             default:
                 assert false :
@@ -61,6 +61,10 @@ public class XmlValidationEventHandler implements ValidationEventHandler {
         LOG.debug(errorMessage);
 
         return retVal;
+    }
+
+    public List<String> getErrors() {
+        return errors;
     }
 
     /**

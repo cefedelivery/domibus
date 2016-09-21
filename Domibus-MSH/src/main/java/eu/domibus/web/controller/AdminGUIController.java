@@ -28,9 +28,11 @@ import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.*;
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -271,17 +273,24 @@ public class AdminGUIController {
     public
     @ResponseBody
     String uploadPmodeFile(@RequestParam("pmode") final MultipartFile pmode) {
-
-        if (!pmode.isEmpty()) {
-            try {
-                final byte[] bytes = pmode.getBytes();
-                pModeProvider.updatePModes(bytes);
-                return "PMode file has been successfully uploaded.";
-            } catch (final Exception e) {
-                return "Failed to upload the PMode file due to => " + e.getMessage();
-            }
-        } else {
+        if (pmode.isEmpty()) {
             return "Failed to upload the PMode file since it was empty.";
+        }
+
+        try {
+            final byte[] bytes = pmode.getBytes();
+            List<String> pmodeUpdateMessage = pModeProvider.updatePModes(bytes);
+            String message = "PMode file has been successfully uploaded";
+            if (pmodeUpdateMessage != null && pmodeUpdateMessage.size() > 0) {
+                message += " but some issues were detected: <br>" + StringUtils.join(pmodeUpdateMessage, "<br>");
+            }
+            return message;
+        } catch (final XmlProcessingException e) {
+            LOG.error("Error uploading the PMode", e);
+            return "Failed to upload the PMode file due to: <br><br> " + StringUtils.join(e.getErrors(), "<br>");
+        } catch (Exception e) {
+            LOG.error("Error uploading the PMode", e);
+            return "Failed to upload the PMode file due to: <br><br> " + e.getMessage();
         }
     }
 
