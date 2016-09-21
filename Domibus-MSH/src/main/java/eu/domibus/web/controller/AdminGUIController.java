@@ -25,6 +25,7 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.dao.MessageLogDao;
+import eu.domibus.common.model.logging.MessageLogEntry;
 import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessageType;
@@ -97,21 +98,21 @@ public class AdminGUIController {
 
     @RequestMapping(value = {"/home/messagelog"}, method = GET)
     public ModelAndView messageLogPage(
-            @RequestParam(value = "page", defaultValue = "1") final int page,
-            @RequestParam(value = "size", defaultValue = "10") final int size,
-            @RequestParam(value = "orderby", required = false) final String column,
-            @RequestParam(value = "asc", defaultValue = "true") final boolean asc,
-            @RequestParam(value = "messageId", required = false) final String messageId,
-            @RequestParam(value = "messageStatus", required = false) final MessageStatus messageStatus,
-            @RequestParam(value = "notificationStatus", required = false) final NotificationStatus notificationStatus,
-            @RequestParam(value = "mshRole", required = false) final MSHRole mshRole,
-            @RequestParam(value = "messageType", required = false) final MessageType messageType,
-            @RequestParam(value = "receivedFrom", required = false) final String receivedFrom,
-            @RequestParam(value = "receivedTo", required = false) final String receivedTo
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "orderby", required = false) String column,
+            @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+            @RequestParam(value = "messageId", required = false) String messageId,
+            @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus,
+            @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus,
+            @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
+            @RequestParam(value = "messageType", required = false) MessageType messageType,
+            @RequestParam(value = "receivedFrom", required = false) String receivedFrom,
+            @RequestParam(value = "receivedTo", required = false) String receivedTo
     ) {
 
 
-        final HashMap<String, Object> filters = new HashMap<String, Object>();
+        HashMap<String, Object> filters = new HashMap<>();
         filters.put("messageId", messageId);
         filters.put("messageStatus", messageStatus);
         filters.put("notificationStatus", notificationStatus);
@@ -120,15 +121,25 @@ public class AdminGUIController {
         filters.put("receivedFrom", receivedFrom);
         filters.put("receivedTo", receivedTo);
 
-        final long entries = mld.countEntries();
+        List<MessageLogEntry> messageLogEntries = mld.findPaged(size * (page - 1), size, column, asc, filters);
+//        long entries = mld.countEntries();
+        long entries = mld.countMessages(filters);
         long pages = entries / size;
         if (entries % size != 0) {
             pages++;
         }
-        final int begin = Math.max(1, page - 5);
-        final long end = Math.min(begin + 10, pages);
+        int begin = Math.max(1, page - 5);
+        long end = Math.min(begin + 10, pages);
 
-        final ModelAndView model = new ModelAndView();
+        ModelAndView model = new ModelAndView();
+        model.addObject("messageId", messageId);
+        model.addObject("messageStatus", messageStatus);
+        model.addObject("notificationStatus", notificationStatus);
+        model.addObject("mshRole", mshRole);
+        model.addObject("messageType", messageType);
+        model.addObject("receivedFrom", receivedFrom);
+        model.addObject("receivedTo", receivedTo);
+
         model.addObject("page", page);
         model.addObject("size", size);
         model.addObject("pages", pages);
@@ -137,7 +148,7 @@ public class AdminGUIController {
         model.addObject("beginIndex", begin);
         model.addObject("endIndex", end);
         if (page <= pages) {
-            model.addObject("table", mld.findPaged(size * (page - 1), size, column, asc, filters));
+            model.addObject("table", messageLogEntries);
         }
         model.addObject("title", "Domibus - Messages Log: ");
         model.addObject("messagestatusvalues", MessageStatus.values());

@@ -62,30 +62,64 @@
 <div id="filtermask">
     <form action="messagelog" method="get">
         <h3>Filter:</h3>
-        MessageId: <input name="messageId" type="text" size="30" maxlength="30">
-        MessageStatus: <select name="messageStatus" size="1">
-        <option/>
-        <c:forEach var="ms" items="${messagestatusvalues}">
-            <option>${ms}</option>
-        </c:forEach></select>
-        NotificationStatus: <select name="notificationStatus" size="1">
-        <option/>
-        <c:forEach var="ns" items="${notificationstatusvalues}">
-            <option>${ns}</option>
-        </c:forEach></select>
-        MshRole: <select name="mshRole" size="1">
-        <option/>
-        <c:forEach var="msh" items="${mshrolevalues}">
-            <option>${msh}</option>
-        </c:forEach></select>
-        MessageType: <select name="messageType" size="1">
-        <option/>
-        <c:forEach var="mt" items="${messagetypevalues}">
-            <option>${mt}</option>
-        </c:forEach></select>
+        MessageId: <input name="messageId" type="text" size="45" maxlength="255" value="${messageId}">
+
+        MessageStatus:
+        <select name="messageStatus" size="1">
+            <option/>
+            <c:forEach var="ms" items="${messagestatusvalues}">
+                <option
+                    <c:if test="${ms == messageStatus}">
+                        <c:out value="selected"/>
+                    </c:if>
+                >
+                ${ms}
+                </option>
+            </c:forEach>
+        </select>
+        NotificationStatus:
+        <select name="notificationStatus" size="1">
+            <option/>
+            <c:forEach var="ns" items="${notificationstatusvalues}">
+                <option
+                        <c:if test="${ns == notificationStatus}">
+                            <c:out value="selected"/>
+                        </c:if>
+                >
+                ${ns}
+                </option>
+            </c:forEach>
+        </select>
+        MshRole:
+        <select name="mshRole" size="1">
+            <option/>
+            <c:forEach var="msh" items="${mshrolevalues}">
+                <option
+                        <c:if test="${msh == mshRole}">
+                            <c:out value="selected"/>
+                        </c:if>
+                >
+                ${msh}
+                </option>
+            </c:forEach>
+        </select>
+        MessageType:
+        <select name="messageType" size="1">
+            <option/>
+            <c:forEach var="mt" items="${messagetypevalues}">
+                <option
+                        <c:if test="${mt == messageType}">
+                            <c:out value="selected"/>
+                        </c:if>
+                >
+                ${mt}
+                </option>
+            </c:forEach>
+        </select>
         <br/>
-        <nobr><h4>Received:</h4> From: <input name="receivedFrom" type="text" size="20" maxlength="30"> To: <input
-                name="receivedTo" type="text" size="20" maxlength="30"></nobr>
+        <nobr><h4>Received:</h4>
+           From:<input name="receivedFrom" type="text" size="20" maxlength="30" value="${receivedFrom}">
+           To:  <input name="receivedTo" type="text" size="20" maxlength="30" value="${receivedTo}"></nobr>
         <input name="size" type="hidden" value="${size}">
         <input type="submit" value="Search">
     </form>
