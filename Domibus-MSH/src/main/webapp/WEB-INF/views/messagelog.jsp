@@ -118,10 +118,14 @@
         </select>
         <br/>
         <nobr><h4>Received:</h4>
-           From:<input name="receivedFrom" type="text" size="20" maxlength="30" value="${receivedFrom}">
-           To:  <input name="receivedTo" type="text" size="20" maxlength="30" value="${receivedTo}"></nobr>
+           <c:set value="Timestamp format must be yyyy-mm-dd hh:mm:ss[.fffffffff]" var="timestampTooltip"/>
+           From:<input name="receivedFrom" type="text" size="20" maxlength="30" value="${receivedFrom}" title="${timestampTooltip}">
+           To:  <input name="receivedTo" type="text" size="20" maxlength="30" value="${receivedTo}" title="${timestampTooltip}"></nobr>
         <input name="size" type="hidden" value="${size}">
         <input type="submit" value="Search">
+        <br/><br/>
+        <c:url value="/home/messagelog" var="messagelog"/>
+        <a href="${messagelog}">Clear filters</a>
     </form>
 </div>
 <!-- row selection -->
