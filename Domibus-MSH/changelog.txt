@@ -1,3 +1,6 @@
+Domibus 3.2
+- Added XSD validation of the PMODE when it is uploaded by the user.
+- Fixed the filtering and the pagination on the "Message Log" page
 Domibus 3.2-RC1
 - Added XSD validation for the operations exposed by the backend WS
 - Harmonize the plugin registration on Tomcat/WebLogic/WildFly
