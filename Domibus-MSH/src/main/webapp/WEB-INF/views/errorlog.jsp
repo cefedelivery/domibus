@@ -23,7 +23,7 @@
 <head>
     <jsp:include page="header.jsp"/>
     <!-- basic filter URL -->
-    <c:url value="/home/errorlog" var="filterederrorlog">
+    <c:url value="errorlog" var="filterederrorlog">
         <c:if test="${not empty param.errorSignalMessageId}"><c:param name="errorSignalMessageId"
                                                                       value="${param.errorSignalMessageId}"/></c:if>
         <c:if test="${not empty param.mshRole}"><c:param name="mshRole" value="${param.mshRole}"/></c:if>
@@ -65,27 +65,53 @@
 <div id="filtermask">
     <form action="errorlog" method="get">
         <h3>Filter:</h3>
-        ErrorSignalMessageId: <input name="errorSignalMessageId" type="text" size="30" maxlength="30">
-        MshRole: <select name="mshrole" size="1">
-        <option/>
-        <c:forEach var="msh" items="${mshrolevalues}">
-            <option>${msh}</option>
-        </c:forEach></select>
-        messageInErrorId: <input name="messageInErrorId" type="text" size="30" maxlength="30">
-        ErrorCode: <select name="errorCode" size="1">
-        <option/>
-        <c:forEach var="ec" items="${errorCodevalues}">
-            <option>${ec}</option>
-        </c:forEach></select>
-        ErrorDetail: <input name="errorDetail" type="text" size="30" maxlength="30">
+        ErrorSignalMessageId: <input name="errorSignalMessageId" type="text" size="45" maxlength="255" value="${errorSignalMessageId}"/>
+        MshRole:
+        <select name="mshRole" size="1">
+            <option/>
+            <c:forEach var="msh" items="${mshrolevalues}">
+                <option
+                        <c:if test="${msh == mshRole}">
+                            <c:out value="selected"/>
+                        </c:if>
+                >
+                        ${msh}
+                </option>
+            </c:forEach>
+        </select>
+        messageInErrorId: <input name="messageInErrorId" type="text" size="45" maxlength="255" value="${messageInErrorId}"/>
+        ErrorCode:
+        <select name="errorCode" size="1">
+            <option/>
+            <c:forEach var="ec" items="${errorcodevalues}">
+                <option
+                    <c:if test="${ec == errorCode}">
+                        <c:out value="selected"/>
+                    </c:if>
+                >
+                ${ec}
+                </option>
+            </c:forEach>
+        </select>
+        ErrorDetail: <input name="errorDetail" type="text" size="30" maxlength="255" value="${errorDetail}">
         <br/>
-        <nobr><h4>Timestamp:</h4> From: <input name="timestampFrom" type="text" size="20" maxlength="30"> To: <input
-                name="timestampTo" type="text" size="20" maxlength="30"></nobr>
+        <nobr>
+            <h4>Timestamp:</h4>
+            <c:set value="Timestamp format must be yyyy-mm-dd hh:mm:ss[.fffffffff]" var="timestampTooltip"/>
+            From: <input name="timestampFrom" type="text" size="20" maxlength="30" value="${timestampFrom}" title="${timestampTooltip}">
+            To: <input name="timestampTo" type="text" size="20" maxlength="30" value="${timestampTo}" title="${timestampTooltip}">
+        </nobr>
         <br/>
-        <nobr><h4>Notified:</h4> From: <input name="notifiedFrom" type="text" size="20" maxlength="30"> To: <input
-                name="notifiedTo" type="text" size="20" maxlength="30"></nobr>
+        <nobr>
+            <h4>Notified:</h4>
+            From: <input name="notifiedFrom" type="text" size="20" maxlength="30" value="${notifiedFrom}" title="${timestampTooltip}">
+            To: <input name="notifiedTo" type="text" size="20" maxlength="30" value="${notifiedTo}" title="${timestampTooltip}">
+        </nobr>
         <input name="size" type="hidden" value="${size}">
         <input type="submit" value="Search">
+        <br/><br/>
+        <c:url value="/home/errorlog" var="errorLogUrl"/>
+        <a href="${errorLogUrl}">Clear filters</a>
     </form>
 </div>
 <div>
