@@ -2,7 +2,7 @@ Domibus 3.2-FR
 - Added XSD validation of the PMODE when it is uploaded by the user.
 - Fixed the filtering and the pagination on the "Message Log" page
 - Changed table names to be all UPPERCASE to fix the issue related to case sensitivity on Linux
-- Fixed the filtering on the Message Log page
+- Fixed the filtering and the pagination on the Message Log and the Error Log pages
 Domibus 3.2-RC1
 - Added XSD validation for the operations exposed by the backend WS
 - Harmonize the plugin registration on Tomcat/WebLogic/WildFly
