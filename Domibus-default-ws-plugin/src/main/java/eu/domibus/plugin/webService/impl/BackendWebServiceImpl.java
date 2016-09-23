@@ -34,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
@@ -59,6 +60,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     private static final ObjectFactory EBMS_OBJECT_FACTORY = new ObjectFactory();
 
     private static final String MIME_TYPE = "MimeType";
+
+    private static final String DEFAULT_MT = "Text/Xml";
 
     @Autowired
     private StubDtoTransformer messageRetrievalTransformer;
@@ -100,7 +103,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                 if (payload.getPayloadId().equals(href)) {
                     this.copyPartProperties(payload, extendedPartInfo);
                     extendedPartInfo.setInBody(false);
-                    extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(payload.getValue(), null)));
+                    LOG.debug("sendMessage - payload Content Type: " + payload.getContentType());
+                    extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(payload.getValue(), payload.getContentType() == null ? DEFAULT_MT : payload.getContentType())));
                     foundPayload = true;
                     break;
                 }
@@ -114,7 +118,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                 if (href == null && bodyload.getPayloadId() == null || href != null && href.equals(bodyload.getPayloadId())) {
                     this.copyPartProperties(bodyload, extendedPartInfo);
                     extendedPartInfo.setInBody(true);
-                    extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(bodyload.getValue(), "text/xml")));
+                    LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
+                    extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(bodyload.getValue(), bodyload.getContentType() == null ? DEFAULT_MT : bodyload.getContentType())));
                 } else {
                     throw new SendMessageFault("No payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
                 }
@@ -203,36 +208,43 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
     public void downloadMessage(final DownloadMessageRequest downloadMessageRequest, final Holder<DownloadMessageResponse> downloadMessageResponse, final Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
         UserMessage userMessage = null;
+        boolean isMessageIdValued = !StringUtils.isEmpty(downloadMessageRequest.getMessageID());
         try {
-            if (downloadMessageRequest.getMessageID() != null && !downloadMessageRequest.getMessageID().isEmpty()) {
+            if (isMessageIdValued) {
                 userMessage = downloadMessage(downloadMessageRequest.getMessageID(), null);
             }
         } catch (final MessageNotFoundException mnfEx) {
-            LOG.error("Downloading message failed", mnfEx);
-            throw new DownloadMessageFault("Downloading message failed", createDownloadMessageFault(mnfEx));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Message not found, id [" + downloadMessageRequest.getMessageID() + "]", mnfEx);
+            }
+            LOG.error("Message not found [" + downloadMessageRequest.getMessageID() + "]");
+            throw new DownloadMessageFault("Message not found, id [" + downloadMessageRequest.getMessageID() + "]", createDownloadMessageFault(mnfEx));
         }
         final Messaging result = BackendWebServiceImpl.EBMS_OBJECT_FACTORY.createMessaging();
         result.setUserMessage(userMessage);
         ebMSHeaderInfo.value = result;
         downloadMessageResponse.value = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponse();
 
-        for (final PartInfo partInfo : result.getUserMessage().getPayloadInfo().getPartInfo()) {
-            ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
-            final PayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createPayloadType();
-            try {
-                payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
-            } catch (final IOException ioEx) {
-                LOG.error("", ioEx);
-                throw new DownloadMessageFault("", createDownloadMessageFault(ioEx));
+        if (isMessageIdValued && result != null) {
+            for (final PartInfo partInfo : result.getUserMessage().getPayloadInfo().getPartInfo()) {
+                ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
+                final PayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createPayloadType();
+                try {
+                    LOG.debug("downloadMessage - payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
+                    payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
+                } catch (final IOException ioEx) {
+                    LOG.error("", ioEx);
+                    throw new DownloadMessageFault("", createDownloadMessageFault(ioEx));
+                }
+                if (extPartInfo.isInBody()) {
+                    extPartInfo.setHref("#bodyload");
+                    payloadType.setPayloadId("#bodyload");
+                    downloadMessageResponse.value.setBodyload(payloadType);
+                    continue;
+                }
+                payloadType.setPayloadId(partInfo.getHref());
+                downloadMessageResponse.value.getPayload().add(payloadType);
             }
-            if (extPartInfo.isInBody()) {
-                extPartInfo.setHref("#bodyload");
-                payloadType.setPayloadId("#bodyload");
-                downloadMessageResponse.value.setBodyload(payloadType);
-                continue;
-            }
-            payloadType.setPayloadId(partInfo.getHref());
-            downloadMessageResponse.value.getPayload().add(payloadType);
         }
     }
 

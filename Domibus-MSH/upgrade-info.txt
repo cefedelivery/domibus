@@ -1,4 +1,30 @@
 Domibus 3.2 FR:   Run the appropriate DB migration script.
+                  Resolved issue with MTOM download requests when the schema validation is ON.
+                  Update the configuration file following these steps:
+                  -   in file "\domibus\conf\domibus\plugins\config\ws-plugin.xml":
+                          o   remove <bean id="defaultTransformer" class="eu.domibus.plugin.webService.impl.StubDtoTransformer"/>
+                          o   replace
+                               <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
+                               .......
+                               </jaxws:endpoint>
+
+                               with
+
+                              <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
+
+                                      <jaxws:properties>
+                                          <entry key="schema-validation-enabled" value="true"/>
+                                          <entry key="mtom-enabled" value="false"/>
+                                      </jaxws:properties>
+
+                                      <jaxws:schemaLocations>
+                                          <jaxws:schemaLocation>schemas/domibus-header.xsd</jaxws:schemaLocation>
+                                          <jaxws:schemaLocation>schemas/domibus-backend.xsd</jaxws:schemaLocation>
+                                          <jaxws:schemaLocation>schemas/xml.xsd</jaxws:schemaLocation>
+                                          <jaxws:schemaLocation>schemas/xmlmime.xsd</jaxws:schemaLocation>
+                                      </jaxws:schemaLocations>
+
+                              </jaxws:endpoint>
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2 RC-1:   Run the appropriate DB migration script.
                     Replace domibus.war and the plugin(s) jar(s) into \domibus\conf\domibus\plugins\lib"

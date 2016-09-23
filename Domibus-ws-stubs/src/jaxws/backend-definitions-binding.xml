@@ -1,0 +1,11 @@
+<jaxws:bindings version="2.0"
+                xmlns:jaxws="http://java.sun.com/xml/ns/jaxws"
+                xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                wsdlLocation="../wsdl/BackendService_1_1.wsdl">
+
+
+    <jaxws:bindings node="wsdl:definitions">
+        <jaxws:package name="eu.domibus.plugin.webService.generated"/>
+    </jaxws:bindings>
+
+</jaxws:bindings>

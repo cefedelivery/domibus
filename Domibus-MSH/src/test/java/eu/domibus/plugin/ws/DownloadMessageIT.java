@@ -58,7 +58,7 @@ public class DownloadMessageIT extends AbstractIT {
         try {
             backendWebService.downloadMessage(downloadMessageRequest, downloadMessageResponse, ebMSHeaderInfo);
         } catch (DownloadMessageFault re) {
-            String message = "No message with ID invalid@e-delivery.eu pending for download";
+            String message = "No message with id [invalid@e-delivery.eu] pending for download";
             Assert.assertEquals(message, re.getFaultInfo().getMessage());
             throw re;
         }
