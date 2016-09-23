@@ -142,6 +142,12 @@ public class BackendNotificationService {
                 return;
             }
         }
+        String finalRecipient = getFinalRecipient(userMessage);
+        LOG.error("No backend responsible for message [" + userMessage.getMessageInfo().getMessageId() + "] found. Sending notification to [" + unknownReceiverQueue + "]");
+        jmsManager.sendMessageToQueue(new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED, finalRecipient).createMessage(), unknownReceiverQueue);
+        //jmsOperations.send(unknownReceiverQueue, new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED));
+    }
+    private String getFinalRecipient(UserMessage userMessage) {
         String finalRecipient = null;
         for (final Property p : userMessage.getMessageProperties().getProperty()) {
             if (p.getName().equals(MessageConstants.FINAL_RECIPIENT) && p.getType().isEmpty()) {
@@ -149,9 +155,7 @@ public class BackendNotificationService {
                 break;
             }
         }
-        LOG.error("No backend responsible for message [" + userMessage.getMessageInfo().getMessageId() + "] found. Sending notification to [" + unknownReceiverQueue + "]");
-        jmsManager.sendMessageToQueue(new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED, finalRecipient).createMessage(), unknownReceiverQueue);
-        //jmsOperations.send(unknownReceiverQueue, new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED));
+        return finalRecipient;
     }
 
     protected void validateSubmission(UserMessage userMessage, String backendName, NotificationType notificationType) {
@@ -184,13 +188,7 @@ public class BackendNotificationService {
 
     protected void validateAndNotify(UserMessage userMessage, String backendName, NotificationType notificationType) {
         validateSubmission(userMessage, backendName, notificationType);
-        String finalRecipient = null;
-        for (final Property p : userMessage.getMessageProperties().getProperty()) {
-            if (p.getName().equals(MessageConstants.FINAL_RECIPIENT) && StringUtils.isEmpty(p.getType())) {
-                finalRecipient = p.getValue();
-                break;
-            }
-        }
+        String finalRecipient = getFinalRecipient(userMessage);
         notify(userMessage.getMessageInfo().getMessageId(), backendName, notificationType, finalRecipient);
     }
 

@@ -58,6 +58,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.jms.Message;
 import javax.jms.Queue;
 import javax.persistence.NoResultException;
 import java.util.Collection;
@@ -126,14 +127,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             DatabaseMessageHandler.LOG.debug("Message with id [" + messageId + "] was not found", nrEx);
             throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
         }
-        if(originalUser != null) {
-            /* check the message was sent for this user */
-            String finalRecipient = getFinalRecipient(userMessage);
-            if (finalRecipient != null && !finalRecipient.equals(originalUser)) {
-                LOG.debug("User:" + originalUser + " is trying to delete message having finalRecipient:" + finalRecipient);
-                throw new AccessDeniedException("You are not authorized to delete message with id " + messageId);
-            }
-        }
+
+        validateOriginalUser(userMessage, originalUser, MessageConstants.FINAL_RECIPIENT);
         messageLogEntry.setDeleted(new Date());
         this.messageLogDao.update(messageLogEntry);
         if (0 == pModeProvider.getRetentionDownloadedByMpcURI(messageLogEntry.getMpc())) {
@@ -141,21 +136,34 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         }
         return this.transformer.transformFromMessaging(userMessage);
     }
-    private String getFinalRecipient(UserMessage userMessage) {
+
+
+    private void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String type) {
+        if(authOriginalUser != null) {
+            LOG.debug("OriginalUser is " + authOriginalUser );
+            /* check the message belongs to the authenticated user */
+            String originalUser = getOriginalUser(userMessage, type);
+            if (originalUser != null && !originalUser.equals(authOriginalUser)) {
+                LOG.debug("User:" + authOriginalUser + " is trying to delete message having finalRecipient:" + originalUser);
+                throw new AccessDeniedException("You are not allowed to handle this message. You are authorized as " + authOriginalUser);
+            }
+        }
+    }
+
+    private String getOriginalUser(UserMessage userMessage, String type) {
         if(userMessage == null || userMessage.getMessageProperties() == null ||
                 userMessage.getMessageProperties().getProperty() == null ) {
             return null;
         }
-        String finalRecipient = null;
+        String originalUser = null;
         for(Property property : userMessage.getMessageProperties().getProperty()) {
-            if(property.getName() != null && property.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
-                finalRecipient = property.getValue();
+            if(property.getName() != null && property.getName().equals(type)) {
+                originalUser = property.getValue();
                 break;
             }
         }
-        return finalRecipient;
+        return originalUser;
     }
-
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
@@ -203,6 +211,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             final String pmodeKey;
             final Messaging message = this.ebMS3Of.createMessaging();
             message.setUserMessage(m);
+
+            validateOriginalUser(m, originalUser, MessageConstants.ORIGINAL_SENDER);
+
             try {
                 pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(m);
             } catch (IllegalStateException e) { //if no pmodes are configured

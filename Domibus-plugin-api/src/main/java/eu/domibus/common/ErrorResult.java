@@ -24,7 +24,7 @@ import java.util.Date;
 
 /**
  * This interface describes Objects representing ebMS3 error messages. those could i.e. be exceptions,
- * database entity or xml elements.
+ * database entities or xml elements.
  *
  * @author Christian Koch, Stefan Mueller
  */

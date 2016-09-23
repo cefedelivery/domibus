@@ -114,8 +114,8 @@ public abstract class PModeProvider {
             SAXParserFactory spf = SAXParserFactory.newInstance();
 
             spf.setNamespaceAware(true);
-            spf.setFeature("http://xml.org/sax/features/external-general-entity", false);
-            spf.setFeature("http://xml.org/sax/features/external-parameter-entity", false);
+            spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 
             Source xmlSource = new SAXSource(spf.newSAXParser().getXMLReader(), new InputSource(new ByteArrayInputStream(bytes)));

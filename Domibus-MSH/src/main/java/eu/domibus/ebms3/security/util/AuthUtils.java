@@ -1,7 +1,9 @@
 package eu.domibus.ebms3.security.util;
 
+import eu.domibus.common.AuthRole;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.interceptor.security.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,28 +28,32 @@ public class AuthUtils {
     /* Returns the original user passed via the security context OR
     * null when the user has the role ROLE_ADMIN or unsecure authorizations is allowed
     * */
-    public String getOriginalUserFromSecurityContext(SecurityContext securityContext) {
-        String originalUser = null;
+    public String getOriginalUserFromSecurityContext(SecurityContext securityContext) throws AccessDeniedException {
 
         /* unsecured login allowed */
-        if("true".equals(domibusProperties.getProperty(UNSECURE_LOGIN_ALLOWED, "true")))
-            return originalUser;
-
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-            if(!authorities.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-                originalUser = (String) authentication.getPrincipal();
-            }
-        } catch (NullPointerException e) {
-            LOG.info("Could not extract originalUser from authentication object, possibly due to unsecured login");
+        if(unsecureLoginAllowed()) {
+            return null;
         }
+
+        if(SecurityContextHolder.getContext() == null || SecurityContextHolder.getContext().getAuthentication() == null) {
+            LOG.error("Authentication is missing from the security context. Unsecure login is not allowed");
+            throw new AccessDeniedException("Authentication is missing from the security context. Unsecure login is not allowed");
+        }
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String originalUser = null;
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        if(!authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))) {
+            originalUser = (String) authentication.getPrincipal();
+            LOG.debug("Security context OriginalUser is " + originalUser);
+        }
+
         return originalUser;
     }
 
-    public boolean isUnsecureLoginAllowed() {
+    private boolean unsecureLoginAllowed() {
         /* unsecured login allowed */
-        return "true".equals(domibusProperties.getProperty("domibus.auth.unsecureLoginAllowed", "true"));
+        return "true".equals(domibusProperties.getProperty(UNSECURE_LOGIN_ALLOWED, "true"));
     }
 
 }
