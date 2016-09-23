@@ -189,7 +189,8 @@ public class AdminGUIController {
         filters.put("notifiedFrom", notifiedFrom);
         filters.put("notifiedTo", notifiedTo);
 
-        long entries = eld.countEntries();
+        long entries = eld.countEntries(filters);
+//        long entries = eld.countEntries();
         long pages = entries / size;
         if (entries % size != 0) {
             pages++;
