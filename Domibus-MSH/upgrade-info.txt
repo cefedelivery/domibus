@@ -1,4 +1,42 @@
 Domibus 3.2 FR:   Run the appropriate DB migration script.
+                  Replace domibus.war and the plugin(s) jar(s) into \domibus\conf\domibus\plugins\lib"
+                  Update the configuration files following these steps:
+                  - replace in file conf/domibus/domibus-security.xml all from the comment
+                          <!-- Administration GUI user credentials-->
+                      with:
+                          <bean name="bcryptEncoder"
+                                class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+                          <sec:authentication-manager>
+                              <sec:authentication-provider ref="allowAllAuthenticationProvider"/>
+                          </sec:authentication-manager>
+                          <sec:authentication-manager id="authenticationManagerForAdminConsole">
+                              <sec:authentication-provider>
+                                  <sec:password-encoder ref="bcryptEncoder"/>
+                                  <sec:user-service>
+                                      <sec:user name="user" password="$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu"
+                                                authorities="ROLE_USER"/>
+                                      <sec:user name="admin" password="$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36"
+                                                authorities="ROLE_USER, ROLE_ADMIN"/>
+                                  </sec:user-service>
+                              </sec:authentication-provider>
+                          </sec:authentication-manager>
+                          <sec:global-method-security pre-post-annotations="enabled"/>
+                  [Only if WS default plugin is used]
+                    - in file conf/domibus/plugins/config/ws-config.xml
+                        - add the interceptor below to <jaxws:endpoint>:
+                            <jaxws:inInterceptors>
+                                <ref bean="customAuthenticationInterceptor"/>
+                            </jaxws:inInterceptors>
+                        - add customAuthenticationInterceptor bean under <beans> tag
+                            <bean id="customAuthenticationInterceptor" class="eu.domibus.plugin.webService.impl.CustomAuthenticationInterceptor" />
+                    - in file conf/domibus/internal/ehcache.xml, add
+                        <cache name="crlByCert" 
+                            maxBytesLocalHeap="5m" 
+                            timeToLiveSeconds="3600" 
+                            overflowToDisk="false">
+                         </cache>
+                    - [Tomcat only] conf/domibus/persistence.xml, add in the <persistence-unit> tag:
+                        <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2 RC-1:   Run the appropriate DB migration script.
                     Replace domibus.war and the plugin(s) jar(s) into \domibus\conf\domibus\plugins\lib"

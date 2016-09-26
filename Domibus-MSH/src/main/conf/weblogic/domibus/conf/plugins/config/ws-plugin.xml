@@ -60,7 +60,7 @@
             <jaxws:schemaLocation>schemas/xmlmime.xsd</jaxws:schemaLocation>
         </jaxws:schemaLocations>
 
-        <jaxws:inInterceptors>-->
+        <jaxws:inInterceptors>
             <ref bean="customAuthenticationInterceptor"/>
         </jaxws:inInterceptors>
     </jaxws:endpoint>
