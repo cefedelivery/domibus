@@ -21,9 +21,15 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.ErrorLogDao;
+import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.SignalMessageDao;
+import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
+import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
@@ -41,57 +47,78 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
 /**
- * @author Christian Koch, Stefan Mueller
+ * @author Christian Koch, Stefan Mueller, Federico Martini
  */
 @Service
-public class EbmsErrorChecker {
+public class ResponseHandler {
 
-    private static final Log LOG = LogFactory.getLog(EbmsErrorChecker.class);
+    private static final Log logger = LogFactory.getLog(ResponseHandler.class);
 
     @Autowired
     @Qualifier("jaxbContextEBMS")
-    JAXBContext jaxbContext;
+    private JAXBContext jaxbContext;
 
     @Autowired
-    ErrorLogDao errorLogDao;
+    private ErrorLogDao errorLogDao;
 
-    public EbmsErrorChecker.CheckResult check(final SOAPMessage response) throws EbMS3Exception {
+    @Autowired
+    private SignalMessageDao signalMessageDao;
 
+    @Autowired
+    private SignalMessageLogDao signalMessageLogDao;
+
+    @Autowired
+    private MessagingDao messagingDao;
+
+    public CheckResult handle(final SOAPMessage response) throws EbMS3Exception {
 
         final Messaging messaging;
 
         try {
             messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) response.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
-        } catch (JAXBException | SOAPException e) {
-            EbmsErrorChecker.LOG.error(e.getMessage(), e);
-            return EbmsErrorChecker.CheckResult.MARSHALL_ERROR;
+        } catch (JAXBException | SOAPException ex) {
+            logger.error("Unable to read message due to error: ", ex);
+            return CheckResult.UNMARSHALL_ERROR;
         }
 
         final SignalMessage signalMessage = messaging.getSignalMessage();
-
+        // Stores the signal message
+        signalMessageDao.create(signalMessage);
+        // Updating the reference to the signal message
+        messagingDao.update(messaging);
+        // Saves an entry of the signal message log
+        SignalMessageLog signalMessageLog = new SignalMessageLog(messaging.getSignalMessage().getMessageInfo().getMessageId(), MessageStatus.ACKNOWLEDGED, NotificationStatus.NOT_REQUIRED, MSHRole.RECEIVING, messaging.getUserMessage().getMpc());
+        signalMessageLogDao.create(signalMessageLog);
+        // Checks if the signal message is Ok
         if (signalMessage.getError() == null || signalMessage.getError().size() == 0) {
-            return EbmsErrorChecker.CheckResult.OK;
+            return CheckResult.OK;
         }
+        return handleErrors(signalMessage);
+
+    }
+
+    private CheckResult handleErrors(SignalMessage signalMessage) throws EbMS3Exception {
         //TODO: piggybacking support
         for (final Error error : signalMessage.getError()) {
             if (ErrorCode.SEVERITY_FAILURE.equalsIgnoreCase(error.getSeverity())) {
-                EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
-                e.setMshRole(MSHRole.SENDING);
-                throw e;
+                EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
+                ebMS3Ex.setMshRole(MSHRole.SENDING);
+                throw ebMS3Ex;
             }
 
             if (ErrorCode.SEVERITY_WARNING.equalsIgnoreCase(error.getSeverity())) {
-                EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
+                EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
 
-                final ErrorLogEntry errorLogEntry = new ErrorLogEntry(e);
+                final ErrorLogEntry errorLogEntry = new ErrorLogEntry(ebMS3Ex);
                 this.errorLogDao.create(errorLogEntry);
             }
         }
 
-        return EbmsErrorChecker.CheckResult.WARNING;
+        return CheckResult.WARNING;
     }
 
+
     public enum CheckResult {
-        OK, WARNING, MARSHALL_ERROR
+        OK, WARNING, UNMARSHALL_ERROR
     }
 }

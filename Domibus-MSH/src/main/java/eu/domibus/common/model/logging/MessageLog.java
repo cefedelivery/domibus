@@ -29,54 +29,42 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
-import eu.domibus.ebms3.common.model.MessageType;
 
 import javax.persistence.*;
 import java.util.Date;
 
 /**
- * @author Christian Koch, Stefan Mueller
+ * @author Federico Martini
+ * @since 3.2
  */
-@Entity
-@Table(name = "TB_MESSAGE_LOG")
-@NamedQueries({
-        @NamedQuery(name = "MessageLogEntry.findUndeletedMessages",
-                query = "select mle.messageId from MessageLogEntry mle where mle.deleted is null and mle.mshRole=:MSH_ROLE and mle.messageType=:MESSAGE_TYPE"),
-        @NamedQuery(name = "MessageLogEntry.findRetryMessages", query = "select mle.messageId from MessageLogEntry mle where mle.messageStatus = eu.domibus.common.MessageStatus.WAITING_FOR_RETRY and mle.nextAttempt < CURRENT_TIMESTAMP and 1 <= mle.sendAttempts and mle.sendAttempts <= mle.sendAttemptsMax"),
-        @NamedQuery(name = "MessageLogEntry.findTimedoutMessages", query = "select mle.messageId from MessageLogEntry mle where mle.messageStatus = eu.domibus.common.MessageStatus.WAITING_FOR_RETRY and mle.nextAttempt < :TIMESTAMP_WITH_TOLERANCE"),
-        @NamedQuery(name = "MessageLogEntry.findByMessageId", query = "select mle from MessageLogEntry mle where mle.messageId=:MESSAGE_ID and mle.mshRole=:MSH_ROLE"),
-        @NamedQuery(name = "MessageLogEntry.findBackendForMessage", query = "select mle.backend from MessageLogEntry mle where mle.messageId=:MESSAGE_ID"),
-        @NamedQuery(name = "MessageLogEntry.setMessageStatus",
-                query = "update MessageLogEntry mle set mle.deleted=:TIMESTAMP, mle.messageStatus=:MESSAGE_STATUS where mle.messageId=:MESSAGE_ID"),
-        @NamedQuery(name = "MessageLogEntry.setMessageStatusAndNotificationStatus",
-                query = "update MessageLogEntry mle set mle.deleted=:TIMESTAMP, mle.messageStatus=:MESSAGE_STATUS, mle.notificationStatus=:NOTIFICATION_STATUS where mle.messageId=:MESSAGE_ID"),
-        @NamedQuery(name = "MessageLogEntry.getMessageStatus", query = "select mle.messageStatus from MessageLogEntry  mle where mle.messageId=:MESSAGE_ID"),
-        @NamedQuery(name = "MessageLogEntry.findEntries", query = "select mle from MessageLogEntry mle"),
-        @NamedQuery(name = "MessageLogEntry.findUndownloadedUserMessagesOlderThan", query = "select mle.messageId from MessageLogEntry mle where (mle.messageStatus = eu.domibus.common.MessageStatus.RECEIVED or mle.messageStatus = eu.domibus.common.MessageStatus.RECEIVED_WITH_WARNINGS) and mle.deleted is null and mle.mpc = :MPC and mle.received < :DATE"),
-        @NamedQuery(name = "MessageLogEntry.findDownloadedUserMessagesOlderThan", query = "select mle.messageId from MessageLogEntry mle where (mle.messageStatus = eu.domibus.common.MessageStatus.RECEIVED or mle.messageStatus = eu.domibus.common.MessageStatus.RECEIVED_WITH_WARNINGS) and mle.mpc = :MPC and mle.deleted is not null and mle.deleted < :DATE"),
-        @NamedQuery(name = "MessageLogEntry.findEndpointForId", query = "select mle.endpoint from MessageLogEntry mle where mle.messageId =:MESSAGE_ID"),
-        @NamedQuery(name = "MessageLogEntry.setNotificationStatus", query = "update MessageLogEntry mle set mle.notificationStatus=:NOTIFICATION_STATUS where mle.messageId=:MESSAGE_ID"),
-        @NamedQuery(name = "MessageLogEntry.countEntries", query = "select count(mle.messageId) from MessageLogEntry mle")})
-public class MessageLogEntry extends AbstractBaseEntity {
+@MappedSuperclass
+public abstract class MessageLog extends AbstractBaseEntity {
 
     @Column(name = "MESSAGE_STATUS")
     @Enumerated(EnumType.STRING)
     private MessageStatus messageStatus;
+
     @Column(name = "NOTIFICATION_STATUS")
     @Enumerated(EnumType.STRING)
     private NotificationStatus notificationStatus;
+
     @Column(name = "MESSAGE_ID")
     private String messageId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "MSH_ROLE")
     private MSHRole mshRole;
-    @Enumerated(EnumType.STRING)
+
+    //@Enumerated(EnumType.STRING)
     @Column(name = "MESSAGE_TYPE")
-    private MessageType messageType;
+    private String messageType;
+
     @Column(name = "MPC")
     private String mpc;
+
     @Column(name = "BACKEND")
     private String backend;
+
     @Column(name = "ENDPOINT")
     private String endpoint;
     /**
@@ -93,13 +81,17 @@ public class MessageLogEntry extends AbstractBaseEntity {
     @Column(name = "DELETED")
     @Temporal(TemporalType.TIMESTAMP)
     private Date deleted;
+
     @Column(name = "RECEIVED")
     @Temporal(TemporalType.TIMESTAMP)
     private Date received;
+
     @Column(name = "SEND_ATTEMPTS")
     private int sendAttempts;
+
     @Column(name = "SEND_ATTEMPTS_MAX")
     private int sendAttemptsMax;
+
     @Column(name = "NEXT_ATTEMPT")
     @Temporal(TemporalType.TIMESTAMP)
     private Date nextAttempt;
@@ -120,11 +112,11 @@ public class MessageLogEntry extends AbstractBaseEntity {
         this.mpc = mpc;
     }
 
-    public MessageType getMessageType() {
+    public String getMessageType() {
         return this.messageType;
     }
 
-    public void setMessageType(final MessageType messageType) {
+    public void setMessageType(final String messageType) {
         this.messageType = messageType;
     }
 

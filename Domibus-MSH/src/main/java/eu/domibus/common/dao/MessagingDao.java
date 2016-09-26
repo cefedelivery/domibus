@@ -95,7 +95,7 @@ public class MessagingDao extends BasicDao<Messaging> {
     public void delete(final String messageId, final MessageStatus messageStatus) {
         clearPayloadData(messageId);
 
-        final Query messageStatusQuery = this.em.createNamedQuery("MessageLogEntry.setMessageStatus");
+        final Query messageStatusQuery = this.em.createNamedQuery("UserMessageLog.setMessageStatus");
         messageStatusQuery.setParameter("MESSAGE_ID", messageId);
         messageStatusQuery.setParameter("TIMESTAMP", new Date());
         messageStatusQuery.setParameter("MESSAGE_STATUS", messageStatus);
@@ -106,7 +106,7 @@ public class MessagingDao extends BasicDao<Messaging> {
     public void delete(final String messageId, final MessageStatus messageStatus, final NotificationStatus notificationStatus) {
         clearPayloadData(messageId);
 
-        final Query messageStatusQuery = this.em.createNamedQuery("MessageLogEntry.setMessageStatusAndNotificationStatus");
+        final Query messageStatusQuery = this.em.createNamedQuery("UserMessageLog.setMessageStatusAndNotificationStatus");
         messageStatusQuery.setParameter("MESSAGE_ID", messageId);
         messageStatusQuery.setParameter("TIMESTAMP", new Date());
         messageStatusQuery.setParameter("MESSAGE_STATUS", messageStatus);

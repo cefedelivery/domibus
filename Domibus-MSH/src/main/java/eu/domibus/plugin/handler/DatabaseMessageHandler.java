@@ -27,9 +27,8 @@ package eu.domibus.plugin.handler;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.ErrorLogDao;
-import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
 import eu.domibus.common.model.configuration.Configuration;
@@ -37,9 +36,11 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.logging.MessageLogEntry;
+import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.messaging.DuplicateMessageException;
 import eu.domibus.messaging.MessageNotFoundException;
@@ -51,12 +52,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import javax.jms.Queue;
 import javax.persistence.NoResultException;
 import java.util.Date;
@@ -72,9 +71,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
-//    @Resource(name = "jmsTemplateDispatch")
-//    private JmsOperations jmsOperations;
-
     @Autowired
     JMSManager jmsManager;
 
@@ -89,7 +85,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Autowired
     private MessagingDao messagingDao;
     @Autowired
-    private MessageLogDao messageLogDao;
+    private UserMessageLogDao userMessageLogDao;
     @Autowired
     private ErrorLogDao errorLogDao;
     @Autowired
@@ -105,12 +101,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Transactional(propagation = Propagation.MANDATORY)
     public Submission downloadMessage(final String messageId) throws MessageNotFoundException {
         DatabaseMessageHandler.LOG.info("looking for message with id: " + messageId);
-        final MessageLogEntry messageLogEntry;
+        final MessageLog userMessageLog;
         final UserMessage userMessage;
         try {
             userMessage = this.messagingDao.findUserMessageByMessageId(messageId);
-            messageLogEntry = this.messageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
-            if (messageLogEntry == null) {
+            userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
+            if (userMessageLog == null) {
                 throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
             }
         } catch (final NoResultException nrEx) {
@@ -118,9 +114,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
         }
 
-        messageLogEntry.setDeleted(new Date());
-        this.messageLogDao.update(messageLogEntry);
-        if (0 == pModeProvider.getRetentionDownloadedByMpcURI(messageLogEntry.getMpc())) {
+        userMessageLog.setDeleted(new Date());
+        this.userMessageLogDao.update(userMessageLog);
+        if (0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessageLog.getMpc())) {
             messagingDao.delete(messageId);
         }
         return this.transformer.transformFromMessaging(userMessage);
@@ -129,7 +125,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     public MessageStatus getMessageStatus(final String messageId) {
-        return this.messageLogDao.getMessageStatus(messageId);
+        return this.userMessageLogDao.getMessageStatus(messageId);
     }
 
     @Override
@@ -158,8 +154,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             if (refToMessageId != null && refToMessageId.length() > 255) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "RefToMessageId value is too long (over 255 characters)", refToMessageId, null);
             }
-            // check if the messageId is unique. This should only fail if the ID is set from the outside
-            if (!MessageStatus.NOT_FOUND.equals(messageLogDao.getMessageStatus(messageId))) {
+            // handle if the messageId is unique. This should only fail if the ID is set from the outside
+            if (!MessageStatus.NOT_FOUND.equals(userMessageLogDao.getMessageStatus(messageId))) {
                 throw new DuplicateMessageException("Message with id [" + messageId + "] already exists. Message identifiers must be unique");
             }
 
@@ -213,23 +209,14 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
             //We do not create MessageIds for SignalMessages, as those should never be submitted via the backend
             this.messagingDao.create(message);
-            final MessageLogEntry messageLogEntry = new MessageLogEntry();
-            messageLogEntry.setMessageId(m.getMessageInfo().getMessageId());
-            messageLogEntry.setMshRole(MSHRole.SENDING);
-            messageLogEntry.setReceived(new Date());
-            messageLogEntry.setMessageType(MessageType.USER_MESSAGE);
-            messageLogEntry.setSendAttempts(0);
-            messageLogEntry.setSendAttemptsMax(sendAttemptsMax);
-            messageLogEntry.setNextAttempt(messageLogEntry.getReceived());
-            messageLogEntry.setNotificationStatus(legConfiguration.getErrorHandling().isBusinessErrorNotifyProducer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED);
-            messageLogEntry.setMessageStatus(MessageStatus.READY_TO_SEND);
-            messageLogEntry.setMpc(message.getUserMessage().getMpc());
-            messageLogEntry.setEndpoint(to.getEndpoint());
-            messageLogEntry.setBackend(backendName);
+            NotificationStatus notificaStatus = legConfiguration.getErrorHandling().isBusinessErrorNotifyProducer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED;
+            final UserMessageLog userMessageLog =
+                    new UserMessageLog(m.getMessageInfo().getMessageId(), MessageStatus.READY_TO_SEND, notificaStatus, MSHRole.SENDING, message.getUserMessage().getMpc(), backendName, to.getEndpoint(), sendAttemptsMax);
+            // Sends message to the proper queue
             jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, to.getEndpoint()).createMessage(), sendMessageQueue);
 //            this.jmsOperations.send(sendMessageQueue, new DispatchMessageCreator(messageId, to.getEndpoint()));
-            messageLogEntry.setMessageStatus(MessageStatus.SEND_ENQUEUED);
-            this.messageLogDao.create(messageLogEntry);
+            userMessageLog.setMessageStatus(MessageStatus.SEND_ENQUEUED);
+            this.userMessageLogDao.create(userMessageLog);
 
             return m.getMessageInfo().getMessageId();
 
@@ -238,5 +225,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             throw MessagingExceptionFactory.transform(e);
         }
     }
+
 
 }

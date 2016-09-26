@@ -19,8 +19,8 @@
 
 package eu.domibus.ebms3.common.model;
 
-import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.messaging.MessageConstants;
@@ -50,7 +50,7 @@ public class MessageRetentionService {
     private PModeProvider pModeProvider;
 
     @Autowired
-    private MessageLogDao messageLogDao;
+    private UserMessageLogDao userMessageLogDao;
 
     @Autowired
     private MessagingDao messagingDao;
@@ -69,12 +69,12 @@ public class MessageRetentionService {
         for (final String mpc : mpcs) {
             final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
             if (messageRetentionDownloaded > 0) { // if -1 the messages will be kept indefinetely and if 0 it already has been deleted
-                final List<String> messageIds = messageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);
+                final List<String> messageIds = userMessageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);
                 delete(messageIds);
             }
             final int messageRetentionUndownladed = pModeProvider.getRetentionUndownloadedByMpcURI(mpc);
             if (messageRetentionUndownladed > -1) { // if -1 the messages will be kept indefinetely and if 0, although it makes no sense, is legal
-                final List<String> messageIds = messageLogDao.getUndownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionUndownladed * -1), mpc);
+                final List<String> messageIds = userMessageLogDao.getUndownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionUndownladed * -1), mpc);
                 delete(messageIds);
             }
         }

@@ -27,7 +27,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReceptionAwareness;
 import eu.domibus.common.model.configuration.RetryStrategy;
-import eu.domibus.common.model.logging.MessageLogEntry;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -90,15 +90,15 @@ public class UpdateRetryLoggingServiceTest {
         final String messageId = UUID.randomUUID().toString();
         final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
-        final MessageLogEntry messageLogEntry = new MessageLogEntry();
-        messageLogEntry.setSendAttempts(3);
-        messageLogEntry.setSendAttemptsMax(3);
-        messageLogEntry.setReceived(new Date(receivedTime));
-        messageLogEntry.setNotificationStatus(NotificationStatus.REQUIRED);
+        final UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setSendAttempts(3);
+        userMessageLog.setSendAttemptsMax(3);
+        userMessageLog.setReceived(new Date(receivedTime));
+        userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
 
         new Expectations() {{
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
-            result = messageLogEntry;
+            result = userMessageLog;
         }};
 
 
@@ -127,15 +127,15 @@ public class UpdateRetryLoggingServiceTest {
         final String messageId = UUID.randomUUID().toString();
         final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
-        final MessageLogEntry messageLogEntry = new MessageLogEntry();
-        messageLogEntry.setSendAttempts(3);
-        messageLogEntry.setSendAttemptsMax(3);
-        messageLogEntry.setReceived(new Date(receivedTime));
-        messageLogEntry.setNotificationStatus(NotificationStatus.NOT_REQUIRED);
+        final UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setSendAttempts(3);
+        userMessageLog.setSendAttemptsMax(3);
+        userMessageLog.setReceived(new Date(receivedTime));
+        userMessageLog.setNotificationStatus(NotificationStatus.NOT_REQUIRED);
 
         new Expectations() {{
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
-            result = messageLogEntry;
+            result = userMessageLog;
         }};
 
 
@@ -163,15 +163,15 @@ public class UpdateRetryLoggingServiceTest {
         final String messageId = UUID.randomUUID().toString();
         final long received = ONE_HOUR_BEFORE_FIRST_OF_JANUARY_2016; // received one hour ago
 
-        final MessageLogEntry messageLogEntry = new MessageLogEntry();
-        messageLogEntry.setSendAttempts(0);
-        messageLogEntry.setSendAttemptsMax(3);
-        messageLogEntry.setReceived(new Date(received));
-        messageLogEntry.setNotificationStatus(NotificationStatus.REQUIRED);
+        final UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setSendAttempts(0);
+        userMessageLog.setSendAttemptsMax(3);
+        userMessageLog.setReceived(new Date(received));
+        userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
 
         new Expectations() {{
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
-            result = messageLogEntry;
+            result = userMessageLog;
         }};
 
 
@@ -200,15 +200,15 @@ public class UpdateRetryLoggingServiceTest {
         final String messageId = UUID.randomUUID().toString();
         final long received = ONE_HOUR_BEFORE_FIRST_OF_JANUARY_2016; // received one hour ago
 
-        final MessageLogEntry messageLogEntry = new MessageLogEntry();
-        messageLogEntry.setSendAttempts(0);
-        messageLogEntry.setSendAttemptsMax(3);
-        messageLogEntry.setReceived(new Date(received));
-        messageLogEntry.setNotificationStatus(NotificationStatus.REQUIRED);
+        final UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setSendAttempts(0);
+        userMessageLog.setSendAttemptsMax(3);
+        userMessageLog.setReceived(new Date(received));
+        userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
 
         new Expectations() {{
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
-            result = messageLogEntry;
+            result = userMessageLog;
         }};
 
 
@@ -225,8 +225,8 @@ public class UpdateRetryLoggingServiceTest {
      * Max retries limit not reached
      * Timeout limit not reached
      * Expected result:
-     * MessageLogEntry#getMessageStatus() == WAITING_FOR_RETRY
-     * MessageLogEntry#getSendAttempts() == 1
+     * UserMessageLog#getMessageStatus() == WAITING_FOR_RETRY
+     * UserMessageLog#getSendAttempts() == 1
      *
      * @throws Exception
      */
@@ -238,22 +238,22 @@ public class UpdateRetryLoggingServiceTest {
         final long received = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016;
 
 
-        final MessageLogEntry messageLogEntry = new MessageLogEntry();
-        messageLogEntry.setSendAttempts(0);
-        messageLogEntry.setSendAttemptsMax(3);
-        messageLogEntry.setReceived(new Date(received));
+        final UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setSendAttempts(0);
+        userMessageLog.setSendAttemptsMax(3);
+        userMessageLog.setReceived(new Date(received));
 
         new Expectations() {{
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
-            result = messageLogEntry;
+            result = userMessageLog;
         }};
 
 
         updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
 
 
-        assertEquals(MessageStatus.WAITING_FOR_RETRY, messageLogEntry.getMessageStatus());
-        assertEquals(1, messageLogEntry.getSendAttempts());
+        assertEquals(MessageStatus.WAITING_FOR_RETRY, userMessageLog.getMessageStatus());
+        assertEquals(1, userMessageLog.getSendAttempts());
 
     }
 
