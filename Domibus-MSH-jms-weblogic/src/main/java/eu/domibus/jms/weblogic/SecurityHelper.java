@@ -18,16 +18,14 @@ public class SecurityHelper {
 
 	private static final String SERVER_NAME_PROPERTY = "weblogic.Name";
 	private static final String BOOT_IDENTITY_FILE_PROPERTY = "weblogic.system.BootIdentityFile";
-	private static final String ADMIN_USER_PROPERTY = "weblogic.management.username";
-	private static final String ADMIN_PASSWORD_PROPERTY = "weblogic.management.password";
 
 	private static final Log LOG = LogFactory.getLog(SecurityHelper.class);
 
 	public Map<String, String> getBootIdentity() {
 		Map<String, String> bootIdentity = new HashMap<String, String>();
 		String servername = System.getProperty(SERVER_NAME_PROPERTY);
-		String username = System.getProperty(ADMIN_USER_PROPERTY);
-		String password = System.getProperty(ADMIN_PASSWORD_PROPERTY);
+		String username = System.getProperty("weblogic.management.username");
+		String password = System.getProperty("weblogic.management.password");
 		if (username != null && password != null) {
 			bootIdentity.put("username", username);
 			bootIdentity.put("password", password);

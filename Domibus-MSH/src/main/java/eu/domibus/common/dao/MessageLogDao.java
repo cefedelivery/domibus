@@ -50,72 +50,99 @@ public class MessageLogDao extends BasicDao<MessageLogEntry> {
     }
 
     public List<String> findRetryMessages() {
-        final TypedQuery<String> query = this.em.createNamedQuery("MessageLogEntry.findRetryMessages", String.class);
+        TypedQuery<String> query = this.em.createNamedQuery("MessageLogEntry.findRetryMessages", String.class);
 
         return query.getResultList();
     }
 
-    public List<String> findTimedoutMessages(final int timeoutTolerance) {
-        final TypedQuery<String> query = this.em.createNamedQuery("MessageLogEntry.findTimedoutMessages", String.class);
+    public List<String> findTimedoutMessages(int timeoutTolerance) {
+        TypedQuery<String> query = this.em.createNamedQuery("MessageLogEntry.findTimedoutMessages", String.class);
         query.setParameter("TIMESTAMP_WITH_TOLERANCE", new Date(System.currentTimeMillis() - timeoutTolerance));
 
         return query.getResultList();
     }
 
-    public void setMessageAsAck(final String messageId) {
+    public void setMessageAsAck(String messageId) {
         this.setMessageStatus(messageId, MessageStatus.ACKNOWLEDGED);
     }
 
-    public void setMessageAsAckWithWarnings(final String messageId) {
+    public void setMessageAsAckWithWarnings(String messageId) {
         this.setMessageStatus(messageId, MessageStatus.ACKNOWLEDGED_WITH_WARNING);
     }
 
-    private void setMessageStatus(final String messageId, final MessageStatus messageStatus) {
+    private void setMessageStatus(String messageId, MessageStatus messageStatus) {
 
-        final Query query = this.em.createNamedQuery("MessageLogEntry.setMessageStatus");
+        Query query = this.em.createNamedQuery("MessageLogEntry.setMessageStatus");
         query.setParameter("MESSAGE_ID", messageId);
         query.setParameter("TIMESTAMP", new Date());
         query.setParameter("MESSAGE_STATUS", messageStatus);
-        final int result = query.executeUpdate();
+        int result = query.executeUpdate();
         if (result != 1) {
             this.em.getTransaction().setRollbackOnly();
             BasicDao.LOG.error("Could not set message " + messageId + " as " + messageStatus);
         }
     }
 
-    public MessageStatus getMessageStatus(final String messageId) {
+    public MessageStatus getMessageStatus(String messageId) {
 
-        final TypedQuery<MessageStatus> query = this.em.createNamedQuery("MessageLogEntry.getMessageStatus", MessageStatus.class);
+        TypedQuery<MessageStatus> query = this.em.createNamedQuery("MessageLogEntry.getMessageStatus", MessageStatus.class);
         query.setParameter("MESSAGE_ID", messageId);
         try {
             return query.getSingleResult();
-        } catch (final NoResultException nrEx) {
+        } catch (NoResultException nrEx) {
             BasicDao.LOG.debug("Query MessageLogEntry.getMessageStatus did not find any result for message with id [" + messageId + "]", nrEx);
             return MessageStatus.NOT_FOUND;
         }
     }
 
-    public MessageLogEntry findByMessageId(final String messageId, final MSHRole mshRole) {
-        final TypedQuery<MessageLogEntry> query = this.em.createNamedQuery("MessageLogEntry.findByMessageId", MessageLogEntry.class);
+    public MessageLogEntry findByMessageId(String messageId, MSHRole mshRole) {
+        TypedQuery<MessageLogEntry> query = this.em.createNamedQuery("MessageLogEntry.findByMessageId", MessageLogEntry.class);
         query.setParameter("MESSAGE_ID", messageId);
         query.setParameter("MSH_ROLE", mshRole);
 
         try {
             return query.getSingleResult();
-        } catch (final NoResultException nrEx) {
+        } catch (NoResultException nrEx) {
             BasicDao.LOG.debug("Query MessageLogEntry.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]", nrEx);
             return null;
         }
     }
 
-    public List<MessageLogEntry> findPaged(final int from, final int max, final String column, final boolean asc, final HashMap<String, Object> filters) {
+    public Long countMessages(HashMap<String, Object> filters) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<MessageLogEntry> mle = cq.from(MessageLogEntry.class);
+        cq.select(cb.count(mle));
+        List<Predicate> predicates = getPredicates(filters, cb, mle);
+        cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+        TypedQuery<Long> query = em.createQuery(cq);
+        return query.getSingleResult();
+    }
 
-        final CriteriaBuilder cb = this.em.getCriteriaBuilder();
-        final CriteriaQuery<MessageLogEntry> cq = cb.createQuery(MessageLogEntry.class);
-        final Root<MessageLogEntry> mle = cq.from(MessageLogEntry.class);
+    public List<MessageLogEntry> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<MessageLogEntry> cq = cb.createQuery(MessageLogEntry.class);
+        Root<MessageLogEntry> mle = cq.from(MessageLogEntry.class);
         cq.select(mle);
-        final List<Predicate> predicates = new ArrayList<Predicate>();
-        for (final Map.Entry<String, Object> filter : filters.entrySet()) {
+        List<Predicate> predicates = getPredicates(filters, cb, mle);
+        cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+        if (column != null) {
+            if (asc) {
+                cq.orderBy(cb.asc(mle.get(column)));
+            } else {
+                cq.orderBy(cb.desc(mle.get(column)));
+            }
+
+        }
+        TypedQuery<MessageLogEntry> query = this.em.createQuery(cq);
+        query.setFirstResult(from);
+        query.setMaxResults(max);
+        return query.getResultList();
+    }
+
+    protected List<Predicate> getPredicates(HashMap<String, Object> filters, CriteriaBuilder cb, Root<MessageLogEntry> mle) {
+        List<Predicate> predicates = new ArrayList<>();
+        for (Map.Entry<String, Object> filter : filters.entrySet()) {
             if (filter.getValue() != null) {
                 if (filter.getValue() instanceof String) {
                     if (!filter.getValue().toString().isEmpty()) {
@@ -136,73 +163,61 @@ public class MessageLogDao extends BasicDao<MessageLogEntry> {
                 }
             }
         }
-        cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
-        if (column != null) {
-            if (asc) {
-                cq.orderBy(cb.asc(mle.get(column)));
-            } else {
-                cq.orderBy(cb.desc(mle.get(column)));
-            }
-
-        }
-        final TypedQuery<MessageLogEntry> query = this.em.createQuery(cq);
-        query.setFirstResult(from);
-        query.setMaxResults(max);
-        return query.getResultList();
+        return predicates;
     }
 
     public List<MessageLogEntry> findAll() {
-        final TypedQuery<MessageLogEntry> query = this.em.createNamedQuery("MessageLogEntry.findEntries", MessageLogEntry.class);
+        TypedQuery<MessageLogEntry> query = this.em.createNamedQuery("MessageLogEntry.findEntries", MessageLogEntry.class);
         return query.getResultList();
     }
 
     public long countEntries() {
-        final TypedQuery<Long> query = this.em.createNamedQuery("MessageLogEntry.countEntries", Long.class);
+        TypedQuery<Long> query = this.em.createNamedQuery("MessageLogEntry.countEntries", Long.class);
         return query.getSingleResult();
     }
 
-    public List<String> getUndownloadedUserMessagesOlderThan(final Date date, final String mpc) {
-        final TypedQuery<String> query = em.createNamedQuery("MessageLogEntry.findUndownloadedUserMessagesOlderThan", String.class);
+    public List<String> getUndownloadedUserMessagesOlderThan(Date date, String mpc) {
+        TypedQuery<String> query = em.createNamedQuery("MessageLogEntry.findUndownloadedUserMessagesOlderThan", String.class);
         query.setParameter("DATE", date);
         query.setParameter("MPC", mpc);
         try {
             return query.getResultList();
-        } catch (final NoResultException nrEx) {
+        } catch (NoResultException nrEx) {
             BasicDao.LOG.debug("Query MessageLogEntry.findUndownloadedUserMessagesOlderThan did not find any result for date [" + date + "] and MPC [" + mpc + "]", nrEx);
             return Collections.EMPTY_LIST;
         }
     }
 
-    public List<String> getDownloadedUserMessagesOlderThan(final Date date, final String mpc) {
-        final TypedQuery<String> query = em.createNamedQuery("MessageLogEntry.findDownloadedUserMessagesOlderThan", String.class);
+    public List<String> getDownloadedUserMessagesOlderThan(Date date, String mpc) {
+        TypedQuery<String> query = em.createNamedQuery("MessageLogEntry.findDownloadedUserMessagesOlderThan", String.class);
         query.setParameter("DATE", date);
         query.setParameter("MPC", mpc);
         try {
             return query.getResultList();
-        } catch (final NoResultException nrEx) {
+        } catch (NoResultException nrEx) {
             BasicDao.LOG.warn("Query MessageLogEntry.findDownloadedUserMessagesOlderThan did not find any result for date [" + date + "] and MPC [" + mpc + "]", nrEx);
             return Collections.EMPTY_LIST;
         }
     }
 
-    public String findEndpointForMessageId(final String messageId) {
-        final TypedQuery<String> query = em.createNamedQuery("MessageLogEntry.findEndpointForId", String.class);
+    public String findEndpointForMessageId(String messageId) {
+        TypedQuery<String> query = em.createNamedQuery("MessageLogEntry.findEndpointForId", String.class);
         query.setParameter("MESSAGE_ID", messageId);
         return query.getSingleResult();
     }
 
-    public void setMessageAsWaitingForReceipt(final String messageId) {
+    public void setMessageAsWaitingForReceipt(String messageId) {
         this.setMessageStatus(messageId, MessageStatus.WAITING_FOR_RECEIPT);
     }
 
-    public String findBackendForMessageId(final String messageId) {
-        final TypedQuery<String> query = em.createNamedQuery("MessageLogEntry.findBackendForMessage", String.class);
+    public String findBackendForMessageId(String messageId) {
+        TypedQuery<String> query = em.createNamedQuery("MessageLogEntry.findBackendForMessage", String.class);
         query.setParameter("MESSAGE_ID", messageId);
         return query.getSingleResult();
     }
 
     public void setAsNotified(String messageId) {
-        final Query query = em.createNamedQuery("MessageLogEntry.setNotificationStatus");
+        Query query = em.createNamedQuery("MessageLogEntry.setNotificationStatus");
         query.setParameter("MESSAGE_ID", messageId);
         query.setParameter("NOTIFICATION_STATUS", NotificationStatus.NOTIFIED);
         query.executeUpdate();

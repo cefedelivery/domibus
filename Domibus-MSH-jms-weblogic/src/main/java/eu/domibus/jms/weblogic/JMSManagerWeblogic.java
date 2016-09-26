@@ -202,7 +202,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
             LOG.debug("Found JNDI [" + destinationJndi + "] for destination [" + destination + "]");
             jmsDestination = InitialContext.doLookup(destinationJndi);
         } catch (NamingException e) {
-            LOG.error("Error performing lookup for [" + destination + "]");
+            LOG.error("Error performing lookup for [" + destination + "]", e);
             return false;
         }
         sendMessage(message, jmsDestination);
