@@ -33,8 +33,7 @@ public class ExtendedPartInfo extends PartInfo {
     @XmlTransient
     protected boolean inBody;
 
-    @XmlTransient
-    protected DataHandler payloadDatahandler;
+    protected transient DataHandler payloadDatahandler;
 
     public ExtendedPartInfo() {
 

@@ -3,6 +3,10 @@
                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
                xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
+    <jaxb:globalBindings optionalProperty="primitive">
+        <jaxb:serializable/>
+    </jaxb:globalBindings>
+
     <!-- XSD types packages customization -->
     <jaxb:bindings schemaLocation="../wsdl/domibus-backend.xsd" node="/xsd:schema">
         <jaxb:schemaBindings>
