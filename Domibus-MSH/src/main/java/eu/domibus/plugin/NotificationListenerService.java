@@ -151,7 +151,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
             }
         });
         if (!received) {
-            throw new MessageNotFoundException("No message with ID " + messageId + " pending for download");
+            throw new MessageNotFoundException("No message with id [" + messageId + "] pending for download");
         }
         jmsOperations.receiveSelected(getBackendNotificationQueue(), selector);
     }
