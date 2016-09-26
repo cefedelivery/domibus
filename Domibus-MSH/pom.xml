@@ -562,12 +562,10 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -960,38 +958,38 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>generate-mysql-script-full-3.2</id>
+                        <id>generate-mysql-script-full-3.2-fr</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>updateSQL</goal>
                         </goals>
                         <configuration>
                             <changeLogFile>
-                                src/main/resources/db/changelog-3.2.xml
+                                src/main/resources/db/changelog-3.2-fr.xml
                             </changeLogFile>
                             <url>
-                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.2.mysql
+                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.2-fr.mysql
                             </url>
                             <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.2.ddl
+                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.2-fr.ddl
                             </migrationSqlOutputFile>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-oracle-script-full-3.2</id>
+                        <id>generate-oracle-script-full-3.2-fr</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>updateSQL</goal>
                         </goals>
                         <configuration>
                             <changeLogFile>
-                                src/main/resources/db/changelog-3.2.xml
+                                src/main/resources/db/changelog-3.2-fr.xml
                             </changeLogFile>
                             <url>
-                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.2.oracle
+                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.2-fr.oracle
                             </url>
                             <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/oracle10g-3.2.ddl
+                                ${project.build.directory}/sql-scripts/oracle10g-3.2-fr.ddl
                             </migrationSqlOutputFile>
                         </configuration>
                     </execution>
@@ -1069,38 +1067,38 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-mysql-script-delta-3.2</id>
+                        <id>generate-mysql-script-delta-3.2-fr</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>updateSQL</goal>
                         </goals>
                         <configuration>
                             <changeLogFile>
-                                src/main/resources/db/changelog-3.2-delta.xml
+                                src/main/resources/db/changelog-3.2-fr-delta.xml
                             </changeLogFile>
                             <url>
-                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.2-delta.mysql
+                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.2-fr-delta.mysql
                             </url>
                             <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.1.1-to-3.2-migration.ddl
+                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.2-to-3.2-fr-migration.ddl
                             </migrationSqlOutputFile>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-oracle-script-delta-3.2</id>
+                        <id>generate-oracle-script-delta-3.2-fr</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>updateSQL</goal>
                         </goals>
                         <configuration>
                             <changeLogFile>
-                                src/main/resources/db/changelog-3.2-delta.xml
+                                src/main/resources/db/changelog-3.2-fr-delta.xml
                             </changeLogFile>
                             <url>
-                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.2-delta.oracle
+                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.2-fr-delta.oracle
                             </url>
                             <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/oracle10g-3.1.1-to-3.2-migration.ddl
+                                ${project.build.directory}/sql-scripts/oracle10g-3.2-to-3.2-fr-migration.ddl
                             </migrationSqlOutputFile>
                         </configuration>
                     </execution>

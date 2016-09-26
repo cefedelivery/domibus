@@ -10,9 +10,9 @@
         <artifactId>domibus</artifactId>
         <version>3.2-SNAPSHOT</version>
     </parent>
-    <artifactId>domibus-api</artifactId>
+    <artifactId>domibus-soapui-tests</artifactId>
     <packaging>jar</packaging>
-	<name>Domibus MSH API</name>
+	<name>Domibus MSH SoapUI</name>
 
     <build>
         <plugins>
@@ -22,21 +22,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+  
 </project>

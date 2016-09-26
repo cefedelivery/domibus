@@ -1,3 +1,8 @@
+Domibus 3.2-FR
+- Added XSD validation of the PMODE when it is uploaded by the user.
+- Fixed the filtering and the pagination on the "Message Log" page
+- Changed table names to be all UPPERCASE to fix the issue related to case sensitivity on Linux
+- Fixed the filtering on the Message Log page
 Domibus 3.2-RC1
 - Added XSD validation for the operations exposed by the backend WS
 - Harmonize the plugin registration on Tomcat/WebLogic/WildFly
@@ -8,6 +13,7 @@ Domibus 3.2-RC1
 - Possibility to validate the payload using custom validators
 - JMS monitoring via the Admin page
 - Added support for dead letter queues
+- Added support for Java 8
 Domibus 3.1.1
 - Fixed retry logic issue
 - Set BINARY_DATA type to LONGBLOB on mysql (migration scripts created)

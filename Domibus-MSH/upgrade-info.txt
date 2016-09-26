@@ -1,3 +1,5 @@
+Domibus 3.2 FR:   Run the appropriate DB migration script.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2 RC-1:   Run the appropriate DB migration script.
                     Replace domibus.war and the plugin(s) jar(s) into \domibus\conf\domibus\plugins\lib"
                     For Tomcat installations only, the activemq.xml file has to be replaced and re-configured according to your environment (transportConnector uri, authenticationUser, redeliveryPolicy).
@@ -34,7 +36,7 @@ Domibus 3.2 RC-1:   Run the appropriate DB migration script.
                             o   add <prop key="domibus.certificate.validation.enabled">true</prop>
                             o   add <prop key="domibus.jms.internalQueue.expression">.*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*</prop>
                             o   only for Tomcat users: add <prop key="activeMQ.JMXURL">service:jmx:rmi://localhost:1198/jndi/rmi://localhost:1199/jmxrmi</prop>
-                    -   in file "\domibus\conf\domibus\domibus-datasources.xml":
+                    -   only for Tomcat users: in file "\domibus\conf\domibus\domibus-datasources.xml":
                             o   replace  <amq:xaConnectionFactory id="xaJmsConnectionFactory" brokerURL="tcp://localhost:61616" userName="domibus" password="changeit"/>    with
 
                                     <amq:xaConnectionFactory id="xaJmsConnectionFactory"

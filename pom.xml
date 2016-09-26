@@ -35,7 +35,8 @@
         <module>Domibus-MSH-jms-spi-helper</module>
         <module>Domibus-MSH-jms-weblogic</module>
 		<module>Domibus-MSH-jms-activemq</module>	
-		<module>Domibus-MSH-jms-wildfly</module>		
+		<module>Domibus-MSH-jms-wildfly</module>
+        <module>Domibus-MSH-soapui-tests</module>
         <module>Domibus-plugin-api</module>
         <module>Domibus-ws-stubs</module>
         <module>Domibus-default-ws-plugin</module>
@@ -118,6 +119,16 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-jms</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-aop</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-orm</artifactId>
                 <version>${spring.version}</version>
             </dependency>
             <dependency>
