@@ -68,6 +68,10 @@
         <prop key="domibus.proxy.password">password</prop>
         <prop key="domibus.proxy.nonProxyHosts">localhost|*.cec.eu.int</prop>
         -->
+
+        <!-- To disable unsecureLogin, set this to false -->
+        <!--<prop key="domibus.auth.unsecureLoginAllowed">false</prop>-->
+
     </util:properties>
 
 

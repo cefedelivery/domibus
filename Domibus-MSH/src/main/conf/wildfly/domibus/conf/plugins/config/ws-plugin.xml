@@ -59,8 +59,13 @@
             <jaxws:schemaLocation>schemas/domibus-backend.xsd</jaxws:schemaLocation>
             <jaxws:schemaLocation>schemas/xmlmime.xsd</jaxws:schemaLocation>
         </jaxws:schemaLocations>
+        <jaxws:inInterceptors>-->
+            <ref bean="customAuthenticationInterceptor"/>
+        </jaxws:inInterceptors>
 
     </jaxws:endpoint>
+    <bean id="customAuthenticationInterceptor" class="eu.domibus.plugin.webService.impl.CustomAuthenticationInterceptor">
+    </bean>
     <!-- Example ends here -->
 
 </beans>
