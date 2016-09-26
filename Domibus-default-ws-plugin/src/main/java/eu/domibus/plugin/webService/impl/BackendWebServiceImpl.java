@@ -250,10 +250,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                 LOG.debug("downloadMessage - payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
                 payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
             } catch (final IOException ioEx) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(ERROR_IS_PAYLOAD_DATA_HANDLER, ioEx);
-                }
-                LOG.error(ERROR_IS_PAYLOAD_DATA_HANDLER);
+                LOG.error(ERROR_IS_PAYLOAD_DATA_HANDLER, ioEx);
                 throw new DownloadMessageFault(ERROR_IS_PAYLOAD_DATA_HANDLER, createDownloadMessageFault(ioEx));
             }
             if (extPartInfo.isInBody()) {
