@@ -24,6 +24,7 @@ import javax.xml.ws.Service;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -49,12 +50,13 @@ public class SendSOAPMessageIT extends AbstractIT {
 
     static {
         Locale.setDefault(Locale.ENGLISH);
-        URL url = SendSOAPMessageIT.class.getResource("BackendService_1_1.wsdl");
+        URL url = SendSOAPMessageIT.class.getResource("schemas/BackendService_1_1.wsdl");
         if (url == null) {
             url = SendSOAPMessageIT.class.getClassLoader().getResource("schemas/BackendService_1_1.wsdl");
         }
         if (url == null) {
-            Logger.getLogger(SendSOAPMessageIT.class.getName()).log(java.util.logging.Level.INFO, "Can not initialize the default wsdl from {0}", "BackendService_1_1.wsdl");
+            Logger.getLogger(SendSOAPMessageIT.class.getName()).log(Level.SEVERE, "Can not initialize the default wsdl from {0}", "schemas/BackendService_1_1.wsdl");
+            assert false;
         }
         WSDL_LOCATION = url;
     }
@@ -138,7 +140,7 @@ public class SendSOAPMessageIT extends AbstractIT {
         sources[0] = new StreamSource(getClass().getClassLoader().getResourceAsStream("schemas/xml.xsd"));
         sources[1] = new StreamSource(getClass().getClassLoader().getResourceAsStream("schemas/xmlmime.xsd"));
         sources[2] = new StreamSource(getClass().getClassLoader().getResourceAsStream("schemas/envelope.xsd"));
-        sources[3] = new StreamSource(getClass().getClassLoader().getResourceAsStream("schemas/domibus-submission.xsd"));
+        sources[3] = new StreamSource(getClass().getClassLoader().getResourceAsStream("schemas/domibus-header.xsd"));
         Schema xmlSchema = sf.newSchema(sources);
 
         JAXBContext jaxbContext = JAXBContext.newInstance("eu.domibus.common.model.org.w3._2003._05.soap_envelope");

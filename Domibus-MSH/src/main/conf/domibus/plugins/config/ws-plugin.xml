@@ -52,13 +52,13 @@
 
         <jaxws:properties>
             <entry key="schema-validation-enabled" value="true"/>
-            <entry key="mtom-enabled" value="true"/>
+            <entry key="mtom-enabled" value="false"/>
         </jaxws:properties>
 
         <jaxws:schemaLocations>
-            <jaxws:schemaLocation>schemas/domibus-submission.xsd</jaxws:schemaLocation>
-            <jaxws:schemaLocation>schemas/xml.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>schemas/domibus-header.xsd</jaxws:schemaLocation>
             <jaxws:schemaLocation>schemas/domibus-backend.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>schemas/xml.xsd</jaxws:schemaLocation>
             <jaxws:schemaLocation>schemas/xmlmime.xsd</jaxws:schemaLocation>
         </jaxws:schemaLocations>
 

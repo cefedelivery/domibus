@@ -90,7 +90,7 @@ public class AdminGUIController {
     @RequestMapping(value = {"/home"}, method = GET)
     public ModelAndView welcomePage() {
 
-        final ModelAndView model = new ModelAndView();
+        ModelAndView model = new ModelAndView();
         model.addObject("title", "Domibus - Home");
         model.addObject("displayVersion", domibusPropertiesService.getDisplayVersion());
         model.setViewName("home");
@@ -164,21 +164,21 @@ public class AdminGUIController {
 
     @RequestMapping(value = {"/home/errorlog**"}, method = GET)
     public ModelAndView errorLogPage(
-            @RequestParam(value = "page", defaultValue = "1") final int page,
-            @RequestParam(value = "size", defaultValue = "10") final int size,
-            @RequestParam(value = "orderby", required = false) final String column,
-            @RequestParam(value = "asc", defaultValue = "true") final boolean asc,
-            @RequestParam(value = "errorSignalMessageId", required = false) final String errorSignalMessageId,
-            @RequestParam(value = "mshRole", required = false) final MSHRole mshRole,
-            @RequestParam(value = "messageInErrorId", required = false) final String messageInErrorId,
-            @RequestParam(value = "errorCode", required = false) final ErrorCode errorCode,
-            @RequestParam(value = "errorDetail", required = false) final String errorDetail,
-            @RequestParam(value = "timestampFrom", required = false) final String timestampFrom,
-            @RequestParam(value = "timestampTo", required = false) final String timestampTo,
-            @RequestParam(value = "notifiedFrom", required = false) final String notifiedFrom,
-            @RequestParam(value = "notifiedTo", required = false) final String notifiedTo) {
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "orderby", required = false) String column,
+            @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+            @RequestParam(value = "errorSignalMessageId", required = false) String errorSignalMessageId,
+            @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
+            @RequestParam(value = "messageInErrorId", required = false) String messageInErrorId,
+            @RequestParam(value = "errorCode", required = false) ErrorCode errorCode,
+            @RequestParam(value = "errorDetail", required = false) String errorDetail,
+            @RequestParam(value = "timestampFrom", required = false) String timestampFrom,
+            @RequestParam(value = "timestampTo", required = false) String timestampTo,
+            @RequestParam(value = "notifiedFrom", required = false) String notifiedFrom,
+            @RequestParam(value = "notifiedTo", required = false) String notifiedTo) {
 
-        final HashMap<String, Object> filters = new HashMap<String, Object>();
+        HashMap<String, Object> filters = new HashMap<>();
         filters.put("errorSignalMessageId", errorSignalMessageId);
         filters.put("mshRole", mshRole);
         filters.put("messageInErrorId", messageInErrorId);
@@ -189,15 +189,26 @@ public class AdminGUIController {
         filters.put("notifiedFrom", notifiedFrom);
         filters.put("notifiedTo", notifiedTo);
 
-        final long entries = eld.countEntries();
+        long entries = eld.countEntries(filters);
+//        long entries = eld.countEntries();
         long pages = entries / size;
         if (entries % size != 0) {
             pages++;
         }
-        final int begin = Math.max(1, page - 5);
-        final long end = Math.min(begin + 10, pages);
+        int begin = Math.max(1, page - 5);
+        long end = Math.min(begin + 10, pages);
 
-        final ModelAndView model = new ModelAndView();
+        ModelAndView model = new ModelAndView();
+        model.addObject("errorSignalMessageId", errorSignalMessageId);
+        model.addObject("mshRole", mshRole);
+        model.addObject("messageInErrorId", messageInErrorId);
+        model.addObject("errorCode", errorCode);
+        model.addObject("errorDetail", errorDetail);
+        model.addObject("timestampFrom", timestampFrom);
+        model.addObject("timestampTo", timestampTo);
+        model.addObject("notifiedFrom", notifiedFrom);
+        model.addObject("notifiedTo", notifiedTo);
+
         model.addObject("page", page);
         model.addObject("size", size);
         model.addObject("pages", pages);
@@ -218,7 +229,7 @@ public class AdminGUIController {
     @RequestMapping(value = {"/home/updatepmode**"}, method = GET)
     public ModelAndView updatePModePage() {
 
-        final ModelAndView model = new ModelAndView();
+        ModelAndView model = new ModelAndView();
         model.addObject("title", "Domibus - Update PMode");
         model.setViewName("updatepmode");
         return model;
@@ -227,9 +238,9 @@ public class AdminGUIController {
     @RequestMapping(value = {"/home/messagefilter"}, method = GET)
     public ModelAndView messageFilterPage() {
 
-        final ModelAndView model = new ModelAndView();
+        ModelAndView model = new ModelAndView();
         model.addObject("title", "Domibus - Message Filter: Routing Criteria");
-        final List<String> routingCriteriaNames = new ArrayList<>();
+        List<String> routingCriteriaNames = new ArrayList<>();
         model.addObject("routingcriterias", routingCriteriaFactories);
         model.addObject("backendConnectors", routingService.getBackendFilters());
         model.setViewName("messagefilter");
@@ -244,25 +255,25 @@ public class AdminGUIController {
     @RequestMapping(value = "/home/messagefilter", method = RequestMethod.POST)
     public
     @ResponseBody
-    String updateFilters(@RequestParam final MultiValueMap<String, String> map) {
-        final List<String> mappedBackends = map.get("backends");
-        final List<BackendFilter> backendFilters = routingService.getBackendFilters();
+    String updateFilters(@RequestParam MultiValueMap<String, String> map) {
+        List<String> mappedBackends = map.get("backends");
+        List<BackendFilter> backendFilters = routingService.getBackendFilters();
         for (int j = 0; j < mappedBackends.size(); j++) {
-            final String backendName = mappedBackends.get(j);
+            String backendName = mappedBackends.get(j);
 
-            for (final BackendFilter backendFilter : backendFilters) {
+            for (BackendFilter backendFilter : backendFilters) {
                 if (backendFilter.getBackendName().equals(backendName)) {
                     backendFilter.setIndex(j);
 
-                    final List<String> mappedRoutingCrierias = map.get(backendName.replaceAll(" ", "") + "filter");
-                    final List<String> mappedExpression = map.get(backendName.replaceAll(" ", "") + "selection");
+                    List<String> mappedRoutingCrierias = map.get(backendName.replaceAll(" ", "") + "filter");
+                    List<String> mappedExpression = map.get(backendName.replaceAll(" ", "") + "selection");
 
                     backendFilter.getRoutingCriterias().clear();
                     if (mappedRoutingCrierias != null) {
                         for (int i = 0; i < mappedRoutingCrierias.size(); i++) {
-                            for (final CriteriaFactory criteriaFactory : routingCriteriaFactories) {
+                            for (CriteriaFactory criteriaFactory : routingCriteriaFactories) {
                                 if (mappedRoutingCrierias.get(i).equals(criteriaFactory.getName())) {
-                                    final IRoutingCriteria criteria = criteriaFactory.getInstance();
+                                    IRoutingCriteria criteria = criteriaFactory.getInstance();
                                     criteria.setExpression(mappedExpression.get(i));
                                     backendFilter.getRoutingCriterias().add((RoutingCriteria) criteria);
                                 }
@@ -283,20 +294,20 @@ public class AdminGUIController {
     @RequestMapping(value = "/home/uploadPmodeFile", method = RequestMethod.POST)
     public
     @ResponseBody
-    String uploadPmodeFile(@RequestParam("pmode") final MultipartFile pmode) {
+    String uploadPmodeFile(@RequestParam("pmode") MultipartFile pmode) {
         if (pmode.isEmpty()) {
             return "Failed to upload the PMode file since it was empty.";
         }
 
         try {
-            final byte[] bytes = pmode.getBytes();
+            byte[] bytes = pmode.getBytes();
             List<String> pmodeUpdateMessage = pModeProvider.updatePModes(bytes);
             String message = "PMode file has been successfully uploaded";
             if (pmodeUpdateMessage != null && pmodeUpdateMessage.size() > 0) {
                 message += " but some issues were detected: <br>" + StringUtils.join(pmodeUpdateMessage, "<br>");
             }
             return message;
-        } catch (final XmlProcessingException e) {
+        } catch (XmlProcessingException e) {
             LOG.error("Error uploading the PMode", e);
             return "Failed to upload the PMode file due to: <br><br> " + StringUtils.join(e.getErrors(), "<br>");
         } catch (Exception e) {
@@ -308,14 +319,14 @@ public class AdminGUIController {
     @RequestMapping(value = "/home/uploadTruststoreFile", method = RequestMethod.POST)
     public
     @ResponseBody
-    String uploadTruststoreFile(@RequestParam("truststore") final MultipartFile truststore, @RequestParam("password") final String password) {
+    String uploadTruststoreFile(@RequestParam("truststore") MultipartFile truststore, @RequestParam("password") String password) {
 
         if (!truststore.isEmpty()) {
             try {
-                final byte[] bytes = truststore.getBytes();
+                byte[] bytes = truststore.getBytes();
                 trustStoreService.replaceTruststore(bytes, password);
                 return "Truststore file has been successfully replaced.";
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("Failed to upload the truststore file", e);
                 return "Failed to upload the truststore file due to => " + e.getMessage();
             }

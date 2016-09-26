@@ -80,7 +80,7 @@
             <xsd:sequence>
                 <xsd:element minOccurs="0" name="bodyload" type="tns:PayloadURLType"/>
                 <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true"
-                            type="tns:PayloadURLType"/>
+                             type="tns:PayloadURLType"/>
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
