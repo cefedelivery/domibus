@@ -16,14 +16,6 @@
 
 
             <xsd:annotation>
-                <xsd:appinfo>
-                    <jaxb:globalBindings optionalProperty="primitive">
-                        <jaxb:serializable/>
-                    </jaxb:globalBindings>
-                </xsd:appinfo>
-            </xsd:annotation>
-
-            <xsd:annotation>
 
                 <xsd:appinfo>Schema for Domibus messages' headers submission</xsd:appinfo>
 
