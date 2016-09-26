@@ -4,7 +4,7 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <!-- Domibus 3.2 - 3.2-fr -->
-    <changeSet author="idragusa" id="linux_case_sensitive">
+    <changeSet author="idragusa" id="changelog_linux_case_sensitive">
         <renameTable oldTableName="qrtz_blob_triggers" newTableName="QRTZ_BLOB_TRIGGERS" />
         <renameTable oldTableName="qrtz_calendars" newTableName="QRTZ_CALENDARS" />
         <renameTable oldTableName="qrtz_cron_triggers" newTableName="QRTZ_CRON_TRIGGERS" />
@@ -59,4 +59,42 @@
         <renameTable oldTableName="tb_signal_message" newTableName="TB_SIGNAL_MESSAGE" />
         <renameTable oldTableName="tb_user_message" newTableName="TB_USER_MESSAGE" />
     </changeSet>
+
+    <changeSet author="idragusa" id="changelog-ws-plugin-auth">
+        <createTable tableName="TB_AUTHENTICATION_ENTRY" >
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="CERTIFICATE_ID" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="USERNAME" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="PASSWD" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="AUTH_ROLES" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ORIGINAL_USER" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="BACKEND" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        <insert tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="USERNAME" value="admin"/>
+            <column name="PASSWD" value="8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"/>
+            <column name="AUTH_ROLES" value="ROLE_ADMIN"/>
+        </insert>
+        <insert tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="USERNAME" value="user"/>
+            <column name="PASSWD" value="8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"/>
+            <column name="AUTH_ROLES" value="ROLE_USER"/>
+            <column name="ORIGINAL_USER" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

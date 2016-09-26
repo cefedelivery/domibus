@@ -1,4 +1,5 @@
 Domibus 3.2-FR
+- Added authentication/authorization example to the WS default plugin. Disabled by default, to assure backwards compatibility with older versions.
 - Added XSD validation of the PMODE when it is uploaded by the user.
 - Fixed the filtering and the pagination on the "Message Log" page
 - Changed table names to be all UPPERCASE to fix the issue related to case sensitivity on Linux
