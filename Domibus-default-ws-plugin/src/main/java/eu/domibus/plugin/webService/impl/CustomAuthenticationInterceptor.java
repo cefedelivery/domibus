@@ -93,7 +93,7 @@ public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Me
                 authenticate(authentication, httpRequest);
             } else if ("http".equalsIgnoreCase(httpRequest.getScheme())) {
                 if (certHeaderValue == null) {
-                    throw new AuthenticationException("There is no client certificate in the request");
+                    throw new AuthenticationException("There is no valid authentication in this request and unsecure login is not alllowed.");
                 }
                 Authentication authentication = new BlueCoatClientCertificateAuthentication(certHeaderValue);
                 authenticate(authentication, httpRequest);

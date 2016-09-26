@@ -150,7 +150,7 @@ public class BackendNotificationService {
     private String getFinalRecipient(UserMessage userMessage) {
         String finalRecipient = null;
         for (final Property p : userMessage.getMessageProperties().getProperty()) {
-            if (p.getName().equals(MessageConstants.FINAL_RECIPIENT) && p.getType().isEmpty()) {
+            if (p.getName() != null && p.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
                 finalRecipient = p.getValue();
                 break;
             }

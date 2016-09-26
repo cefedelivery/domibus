@@ -31,7 +31,7 @@ public class AuthUtils {
     public String getOriginalUserFromSecurityContext(SecurityContext securityContext) throws AccessDeniedException {
 
         /* unsecured login allowed */
-        if(unsecureLoginAllowed()) {
+        if(isUnsecureLoginAllowed()) {
             return null;
         }
 
@@ -51,7 +51,7 @@ public class AuthUtils {
         return originalUser;
     }
 
-    private boolean unsecureLoginAllowed() {
+    public boolean isUnsecureLoginAllowed() {
         /* unsecured login allowed */
         return "true".equals(domibusProperties.getProperty(UNSECURE_LOGIN_ALLOWED, "true"));
     }
