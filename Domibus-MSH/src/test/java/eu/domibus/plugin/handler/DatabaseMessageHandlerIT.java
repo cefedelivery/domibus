@@ -29,8 +29,14 @@ public class DatabaseMessageHandlerIT extends AbstractIT {
     }
 
     @Test
-    public void testSendMessageOK() throws SendMessageFault, InterruptedException, SQLException {
+    public void testSubmitMessageOK() throws SendMessageFault, InterruptedException, SQLException {
+        //TODO
 
+    }
+
+    @Test
+    public void testDownloadMessageOK() throws SendMessageFault, InterruptedException, SQLException {
+        //TODO
 
     }
 

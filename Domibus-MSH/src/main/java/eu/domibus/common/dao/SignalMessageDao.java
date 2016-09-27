@@ -20,10 +20,13 @@
 package eu.domibus.common.dao;
 
 import eu.domibus.ebms3.common.model.SignalMessage;
-import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import java.util.List;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -37,12 +40,38 @@ public class SignalMessageDao extends BasicDao<SignalMessage> {
         super(SignalMessage.class);
     }
 
-    public SignalMessage findSignalMessageByMessageId(final String messageId) {
+    public List<SignalMessage> findSignalMessagesByRefMessageId(final String originalMessageId) {
+        try {
+            final TypedQuery<SignalMessage> query = em.createNamedQuery("SignalMessage.findSignalMessageByRefMessageId", SignalMessage.class);
+            query.setParameter("ORI_MESSAGE_ID", originalMessageId);
+            return query.getResultList();
+        } catch (NoResultException nrEx) {
+            logger.debug("Could not find any signal message for original message id[" + originalMessageId + "]", nrEx);
+            return null;
+        }
+    }
 
-        final TypedQuery<SignalMessage> query = this.em.createNamedQuery("Messaging.findSignalMessageByMessageId", SignalMessage.class);
-        query.setParameter("MESSAGE_ID", messageId);
+    public List<String> findSignalMessageIdsByRefMessageId(final String originalMessageId) {
+        try {
+            final TypedQuery<String> query = em.createNamedQuery("SignalMessage.findRefToMessageIdByRefMessageId", String.class);
+            query.setParameter("ORI_MESSAGE_ID", originalMessageId);
+            return query.getResultList();
+        } catch (NoResultException nrEx) {
+            logger.debug("Could not find any signal message id for original message id[" + originalMessageId + "]", nrEx);
+            return null;
+        }
+    }
 
-        return DataAccessUtils.singleResult(query.getResultList());
+    /**
+     * Clear receipts of the Signal Message.
+     *
+     * @param signalMessage
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void clear(final SignalMessage signalMessage) {
+        signalMessage.getReceipt().getAny().clear();
+        signalMessage.setReceipt(null);
+        update(signalMessage);
     }
 
 

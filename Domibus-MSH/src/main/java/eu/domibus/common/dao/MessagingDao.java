@@ -23,7 +23,6 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
-import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Repository;
@@ -54,14 +53,6 @@ public class MessagingDao extends BasicDao<Messaging> {
     public UserMessage findUserMessageByMessageId(final String messageId) {
 
         final TypedQuery<UserMessage> query = this.em.createNamedQuery("Messaging.findUserMessageByMessageId", UserMessage.class);
-        query.setParameter("MESSAGE_ID", messageId);
-
-        return DataAccessUtils.singleResult(query.getResultList());
-    }
-
-    public SignalMessage findSignalMessageByMessageId(final String messageId) {
-
-        final TypedQuery<SignalMessage> query = this.em.createNamedQuery("Messaging.findSignalMessageByMessageId", SignalMessage.class);
         query.setParameter("MESSAGE_ID", messageId);
 
         return DataAccessUtils.singleResult(query.getResultList());

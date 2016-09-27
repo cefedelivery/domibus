@@ -42,20 +42,6 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
 
     public abstract MessageLog findByMessageId(String messageId, MSHRole mshRole);
 
-    public abstract String findEndpointForMessageId(String messageId);
-
-    public abstract String findBackendForMessageId(String messageId);
-
-    public abstract void setAsNotified(String messageId);
-
-    public abstract List<String> findRetryMessages();
-
-    public abstract List<String> findTimedoutMessages(int timeoutTolerance);
-
-    public abstract List<String> getDownloadedUserMessagesOlderThan(Date date, String mpc);
-
-    public abstract List<String> getUndownloadedUserMessagesOlderThan(Date date, String mpc);
-
     public Long countMessages(HashMap<String, Object> filters) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);

@@ -69,8 +69,8 @@ public class Messaging extends AbstractBaseEntity {
     @XmlElement(name = "SignalMessage")
     @JoinColumn(name = "SIGNAL_MESSAGE_ID")
     @OneToOne(cascade = CascadeType.ALL)
-
     protected SignalMessage signalMessage;
+
     @XmlElement(name = "UserMessage")
     @JoinColumn(name = "USER_MESSAGE_ID")
     @OneToOne(cascade = CascadeType.ALL)

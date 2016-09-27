@@ -25,9 +25,6 @@
 
 package eu.domibus.common.model.logging;
 
-import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.MessageType;
 
 import javax.persistence.*;
@@ -61,24 +58,11 @@ import java.util.Date;
 public class UserMessageLog extends MessageLog {
 
     public UserMessageLog() {
-        setMessageType(MessageType.USER_MESSAGE);
-    }
 
-    public UserMessageLog(String messageId, MessageStatus messageStatus, NotificationStatus notificationStatus, MSHRole mshRole, String mpc, String backend, String endpoint, int sendAttemptsMax) {
-        this();
-        setMessageId(messageId);
-        setMessageStatus(messageStatus);
-        setNotificationStatus(notificationStatus);
-        setMshRole(mshRole);
-        setMpc(mpc);
-        setBackend(backend);
-        setEndpoint(endpoint);
+        setMessageType(MessageType.USER_MESSAGE);
         setReceived(new Date());
-        setDeleted(null);
         setNextAttempt(getReceived());
         setSendAttempts(0);
-        setSendAttemptsMax(sendAttemptsMax);
     }
-
 
 }
