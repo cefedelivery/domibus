@@ -1,8 +1,5 @@
 package eu.domibus.common.model.logging;
 
-import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.MessageType;
 
 import javax.persistence.*;
@@ -15,7 +12,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "TB_MESSAGE_LOG")
-@DiscriminatorColumn(name = "MESSAGE_TYPE")
+@DiscriminatorValue("SIGNAL_MESSAGE")
 @NamedQueries({
         @NamedQuery(name = "SignalMessageLog.findUndeletedMessages",
                 query = "select mle.messageId from SignalMessageLog mle where mle.deleted is null and mle.mshRole=:MSH_ROLE and mle.messageType=:MESSAGE_TYPE"),
@@ -37,36 +34,11 @@ import java.util.Date;
 public class SignalMessageLog extends MessageLog {
 
     public SignalMessageLog() {
-        setMessageType(MessageType.SIGNAL_MESSAGE.toString());
-    }
-
-    public SignalMessageLog(String messageId, MessageStatus messageStatus, NotificationStatus notificationStatus, MSHRole mshRole, String mpc) {
-        this();
-        setMessageId(messageId);
-        setMessageStatus(messageStatus);
-        setNotificationStatus(notificationStatus);
-        setMshRole(mshRole);
-        setMpc(mpc);
+        setMessageType(MessageType.SIGNAL_MESSAGE);
         setReceived(new Date());
         setNextAttempt(getReceived());
-        setSendAttempts(0);
-        setSendAttemptsMax(1);
     }
 
-    public SignalMessageLog(String messageId, MessageStatus messageStatus, NotificationStatus notificationStatus, MSHRole mshRole, String mpc, String backend, String endpoint, int sendAttemptsMax) {
-        this();
-        setMessageId(messageId);
-        setMessageStatus(messageStatus);
-        setNotificationStatus(notificationStatus);
-        setMshRole(mshRole);
-        setMpc(mpc);
-        setBackend(backend);
-        setEndpoint(endpoint);
-        setReceived(new Date());
-        setNextAttempt(getReceived());
-        setSendAttempts(0);
-        setSendAttemptsMax(sendAttemptsMax);
-    }
 
 }
 

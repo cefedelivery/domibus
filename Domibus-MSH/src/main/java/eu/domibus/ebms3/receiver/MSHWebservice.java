@@ -28,7 +28,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.ReplyPattern;
-import eu.domibus.common.model.logging.SignalMessageLog;
+import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
@@ -295,9 +295,14 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             signalMessageDao.create(signalMessage);
             // Updating the reference to the signal message
             messagingDao.update(messaging);
+            // Builds the signal message log
+            SignalMessageLogBuilder smlBuilder = SignalMessageLogBuilder.create()
+                    .setMessageId(messaging.getSignalMessage().getMessageInfo().getMessageId())
+                    .setMessageStatus(MessageStatus.ACKNOWLEDGED)
+                    .setMshRole(MSHRole.SENDING)
+                    .setNotificationStatus(NotificationStatus.NOT_REQUIRED);
             // Saves an entry of the signal message log
-            SignalMessageLog signalMessageLog = new SignalMessageLog(messaging.getSignalMessage().getMessageInfo().getMessageId(), MessageStatus.ACKNOWLEDGED, NotificationStatus.NOT_REQUIRED, MSHRole.RECEIVING, messaging.getUserMessage().getMpc());
-            signalMessageLogDao.create(signalMessageLog);
+            signalMessageLogDao.create(smlBuilder.build());
         } catch (JAXBException | SOAPException ex) {
             logger.error("Unable to save the SignalMessage due to error: ", ex);
         }

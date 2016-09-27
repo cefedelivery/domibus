@@ -29,7 +29,7 @@ import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.logging.SignalMessageLog;
+import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
@@ -86,9 +86,14 @@ public class ResponseHandler {
         signalMessageDao.create(signalMessage);
         // Updating the reference to the signal message
         messagingDao.update(messaging);
+        // Builds the signal message log
+        SignalMessageLogBuilder smlBuilder = SignalMessageLogBuilder.create()
+                .setMessageId(messaging.getSignalMessage().getMessageInfo().getMessageId())
+                .setMessageStatus(MessageStatus.ACKNOWLEDGED)
+                .setMshRole(MSHRole.RECEIVING)
+                .setNotificationStatus(NotificationStatus.NOT_REQUIRED);
         // Saves an entry of the signal message log
-        SignalMessageLog signalMessageLog = new SignalMessageLog(messaging.getSignalMessage().getMessageInfo().getMessageId(), MessageStatus.ACKNOWLEDGED, NotificationStatus.NOT_REQUIRED, MSHRole.RECEIVING, messaging.getUserMessage().getMpc());
-        signalMessageLogDao.create(signalMessageLog);
+        signalMessageLogDao.create(smlBuilder.build());
         // Checks if the signal message is Ok
         if (signalMessage.getError() == null || signalMessage.getError().size() == 0) {
             return CheckResult.OK;

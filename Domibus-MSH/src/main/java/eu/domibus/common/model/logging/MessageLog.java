@@ -29,6 +29,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import eu.domibus.ebms3.common.model.MessageType;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -38,6 +39,7 @@ import java.util.Date;
  * @since 3.2
  */
 @MappedSuperclass
+@DiscriminatorColumn(name = "MESSAGE_TYPE")
 public abstract class MessageLog extends AbstractBaseEntity {
 
     @Column(name = "MESSAGE_STATUS")
@@ -55,9 +57,9 @@ public abstract class MessageLog extends AbstractBaseEntity {
     @Column(name = "MSH_ROLE")
     private MSHRole mshRole;
 
-    //@Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     @Column(name = "MESSAGE_TYPE")
-    private String messageType;
+    private MessageType messageType;
 
     @Column(name = "MPC")
     private String mpc;
@@ -112,11 +114,11 @@ public abstract class MessageLog extends AbstractBaseEntity {
         this.mpc = mpc;
     }
 
-    public String getMessageType() {
+    public MessageType getMessageType() {
         return this.messageType;
     }
 
-    public void setMessageType(final String messageType) {
+    public void setMessageType(final MessageType messageType) {
         this.messageType = messageType;
     }
 

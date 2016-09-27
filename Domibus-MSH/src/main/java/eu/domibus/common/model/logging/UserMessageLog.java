@@ -39,7 +39,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "TB_MESSAGE_LOG")
-@DiscriminatorColumn(name = "MESSAGE_TYPE")
+@DiscriminatorValue("USER_MESSAGE")
 @NamedQueries({
         @NamedQuery(name = "UserMessageLog.findUndeletedMessages",
                 query = "select mle.messageId from UserMessageLog mle where mle.deleted is null and mle.mshRole=:MSH_ROLE and mle.messageType=:MESSAGE_TYPE"),
@@ -61,7 +61,7 @@ import java.util.Date;
 public class UserMessageLog extends MessageLog {
 
     public UserMessageLog() {
-        setMessageType(MessageType.USER_MESSAGE.toString());
+        setMessageType(MessageType.USER_MESSAGE);
     }
 
     public UserMessageLog(String messageId, MessageStatus messageStatus, NotificationStatus notificationStatus, MSHRole mshRole, String mpc, String backend, String endpoint, int sendAttemptsMax) {
@@ -74,6 +74,7 @@ public class UserMessageLog extends MessageLog {
         setBackend(backend);
         setEndpoint(endpoint);
         setReceived(new Date());
+        setDeleted(null);
         setNextAttempt(getReceived());
         setSendAttempts(0);
         setSendAttemptsMax(sendAttemptsMax);
