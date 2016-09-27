@@ -57,6 +57,9 @@
             <outputDirectory>domibus/conf/domibus</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <filtered>false</filtered>
+            <excludes>
+                <exclude>plugins/**</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
 
@@ -87,6 +90,16 @@
             <filtered>false</filtered>
         </file>
         <file>
+            <source>${project.basedir}/src/main/conf/wildfly/domibus/conf/plugins/config/ws-plugin.xml</source>
+            <outputDirectory>domibus/conf/domibus/plugins/config</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/../Domibus-default-ws-plugin/target/domibus-default-ws-plugin-${project.version}.jar</source>
+            <outputDirectory>domibus/conf/domibus/plugins/lib</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
             <source>${project.build.directory}/${project.artifactId}-${project.version}-${domibus.classifier}.war</source>
             <outputDirectory>domibus/standalone/deployments</outputDirectory>
             <destName>domibus-wildfly.war</destName>
@@ -99,11 +112,6 @@
         </file>
         <file>
             <source>${project.basedir}/upgrade-info.txt</source>
-            <outputDirectory>/</outputDirectory>
-            <filtered>false</filtered>
-        </file>
-        <file>
-            <source>${project.basedir}/src/main/conf/wildfly/Wildfly_installation.pdf</source>
             <outputDirectory>/</outputDirectory>
             <filtered>false</filtered>
         </file>
