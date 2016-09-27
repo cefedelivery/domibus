@@ -5,6 +5,7 @@ Domibus 3.2-FR
 - Fixed the download message request issue when the schema validation and MTOM are both enabled.
 - Schema validation for all WS operations is enabled by default. MTOM is disabled by default.
 - Fixed the filtering and the pagination on the Message Log and the Error Log pages
+- Fixed issue with the signal messages that were not stored/cleared.
 Domibus 3.2-RC1
 - Added XSD validation for the operations exposed by the backend WS
 - Harmonize the plugin registration on Tomcat/WebLogic/WildFly
