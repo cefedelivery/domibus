@@ -302,7 +302,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             // Builds the signal message log
             SignalMessageLogBuilder smlBuilder = SignalMessageLogBuilder.create()
                     .setMessageId(messaging.getSignalMessage().getMessageInfo().getMessageId())
-                    .setMessageStatus(MessageStatus.ACKNOWLEDGED)
+                    .setMessageStatus(MessageStatus.SEND_IN_PROGRESS)
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(NotificationStatus.NOT_REQUIRED);
             // Saves an entry of the signal message log

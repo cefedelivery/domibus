@@ -46,6 +46,7 @@ public class SendMessageWithPayloadProfileIT extends AbstractSendMessageIT {
         SendRequest sendRequest = createSendRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
+        super.prepareSendMessage("validAS4Response2.xml");
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }
@@ -64,6 +65,7 @@ public class SendMessageWithPayloadProfileIT extends AbstractSendMessageIT {
         SendRequest sendRequest = createSendRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
 
+        super.prepareSendMessage("validAS4Response.xml");
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }
@@ -80,6 +82,7 @@ public class SendMessageWithPayloadProfileIT extends AbstractSendMessageIT {
         String payloadHref = "payload_invalid";
         SendRequest sendRequest = createSendRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
+        super.prepareSendMessage("validAS4Response.xml");
 
         try {
             backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
@@ -103,6 +106,7 @@ public class SendMessageWithPayloadProfileIT extends AbstractSendMessageIT {
         String payloadHref = "payload";
         SendRequest sendRequest = createSendRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref + "000");
+        super.prepareSendMessage("validAS4Response.xml");
 
         try {
             backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);

@@ -58,6 +58,8 @@ public class SendMessageIT extends AbstractSendMessageIT {
         collaborationInfo.setService(service);
         ebMSHeaderInfo.getUserMessage().setCollaborationInfo(collaborationInfo);
 
+        super.prepareSendMessage("validAS4Response.xml");
+
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }
