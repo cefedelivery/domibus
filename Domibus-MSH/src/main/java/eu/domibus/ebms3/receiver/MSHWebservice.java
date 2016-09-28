@@ -287,7 +287,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return responseMessage;
     }
 
-    private void saveResponse(SOAPMessage responseMessage) {
+    private void saveResponse(final SOAPMessage responseMessage) {
         try {
             Messaging messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
             final SignalMessage signalMessage = messaging.getSignalMessage();

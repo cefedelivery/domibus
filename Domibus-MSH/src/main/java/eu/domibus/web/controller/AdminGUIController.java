@@ -24,8 +24,8 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.ErrorLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.common.services.MessagesLogService;
 import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessageType;
@@ -64,9 +64,10 @@ public class AdminGUIController {
     private final static Log LOG = LogFactory.getLog(AdminGUIController.class);
 
     @Autowired
-    private UserMessageLogDao userMessageLogDao;
+    private MessagesLogService messagesLogService;
+
     @Autowired
-    private ErrorLogDao eld;
+    private ErrorLogDao eld; //TODO refactor, eliminate this.
 
     @Autowired
     private PModeProvider pModeProvider;
@@ -123,12 +124,11 @@ public class AdminGUIController {
         filters.put("receivedFrom", receivedFrom);
         filters.put("receivedTo", receivedTo);
 
-        List<MessageLog> messageLogEntries = userMessageLogDao.findPaged(size * (page - 1), size, column, asc, filters);
-//        long entries = userMessageLogDao.countEntries();
-        long entries = userMessageLogDao.countMessages(filters);
-        long pages = entries / size;
-        if (entries % size != 0) {
-            pages++;
+        long pages = 0;
+        List<? extends MessageLog> messageLogEntries = new ArrayList<>();
+        if (messageType != null) {
+            messageLogEntries = messagesLogService.findMessageLogs(page, size, column, asc, filters);
+            pages = messagesLogService.countMessages(size, filters);
         }
         int begin = Math.max(1, page - 5);
         long end = Math.min(begin + 10, pages);

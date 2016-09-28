@@ -10,8 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -78,7 +83,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         }
     }
 
-    /* public Long countMessages(HashMap<String, Object> filters) {
+    public Long countMessages(HashMap<String, Object> filters) {
          CriteriaBuilder cb = this.em.getCriteriaBuilder();
          CriteriaQuery<Long> cq = cb.createQuery(Long.class);
          Root<UserMessageLog> mle = cq.from(UserMessageLog.class);
@@ -109,16 +114,6 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
          query.setMaxResults(max);
          return query.getResultList();
      }
- */
-    public List<UserMessageLog> findAll() {
-        TypedQuery<UserMessageLog> query = this.em.createNamedQuery("UserMessageLog.findEntries", UserMessageLog.class);
-        return query.getResultList();
-    }
-
-    public long countEntries() {
-        TypedQuery<Long> query = this.em.createNamedQuery("UserMessageLog.countEntries", Long.class);
-        return query.getSingleResult();
-    }
 
     public List<String> getUndownloadedUserMessagesOlderThan(Date date, String mpc) {
         TypedQuery<String> query = em.createNamedQuery("UserMessageLog.findUndownloadedUserMessagesOlderThan", String.class);

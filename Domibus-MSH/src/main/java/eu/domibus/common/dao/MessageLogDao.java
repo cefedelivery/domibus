@@ -4,9 +4,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.logging.MessageLog;
 
-import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.sql.Timestamp;
@@ -42,7 +40,11 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
 
     public abstract MessageLog findByMessageId(String messageId, MSHRole mshRole);
 
-    public Long countMessages(HashMap<String, Object> filters) {
+    public abstract Long countMessages(HashMap<String, Object> filters);
+
+    public abstract List<? extends MessageLog> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters);
+
+/*    public Long countMessages(HashMap<String, Object> filters) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
         Root<MessageLog> mle = cq.from(MessageLog.class);
@@ -53,10 +55,10 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         return query.getSingleResult();
     }
 
-    public List<MessageLog> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
+    public List<? extends MessageLog> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
-        CriteriaQuery<MessageLog> cq = cb.createQuery(MessageLog.class);
-        Root<MessageLog> mle = cq.from(MessageLog.class);
+        CriteriaQuery<? extends MessageLog> cq = cb.createQuery(MessageLog.class);
+        Root<? extends MessageLog> mle = cq.from(MessageLog.class);
         cq.select(mle);
         List<Predicate> predicates = getPredicates(filters, cb, mle);
         cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
@@ -68,13 +70,13 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
             }
 
         }
-        TypedQuery<MessageLog> query = this.em.createQuery(cq);
+        TypedQuery<? extends MessageLog> query = this.em.createQuery(cq);
         query.setFirstResult(from);
         query.setMaxResults(max);
         return query.getResultList();
-    }
+    }*/
 
-    protected List<Predicate> getPredicates(HashMap<String, Object> filters, CriteriaBuilder cb, Root<MessageLog> mle) {
+    protected List<Predicate> getPredicates(HashMap<String, Object> filters, CriteriaBuilder cb, Root<? extends MessageLog> mle) {
         List<Predicate> predicates = new ArrayList<>();
         for (Map.Entry<String, Object> filter : filters.entrySet()) {
             if (filter.getValue() != null) {
