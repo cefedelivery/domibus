@@ -53,7 +53,7 @@ public class SignalMessageDao extends BasicDao<SignalMessage> {
 
     public List<String> findSignalMessageIdsByRefMessageId(final String originalMessageId) {
         try {
-            final TypedQuery<String> query = em.createNamedQuery("SignalMessage.findRefToMessageIdByRefMessageId", String.class);
+            final TypedQuery<String> query = em.createNamedQuery("SignalMessage.findSignalMessageIdByRefMessageId", String.class);
             query.setParameter("ORI_MESSAGE_ID", originalMessageId);
             return query.getResultList();
         } catch (NoResultException nrEx) {

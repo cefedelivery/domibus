@@ -29,6 +29,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.io.File;
@@ -56,6 +57,17 @@ public class MessagingDao extends BasicDao<Messaging> {
         query.setParameter("MESSAGE_ID", messageId);
 
         return DataAccessUtils.singleResult(query.getResultList());
+    }
+
+    public Messaging findMessageByMessageId(final String messageId) {
+        try {
+            final TypedQuery<Messaging> query = em.createNamedQuery("Messaging.findMessageByMessageId", Messaging.class);
+            query.setParameter("MESSAGE_ID", messageId);
+            return query.getSingleResult();
+        } catch (NoResultException nrEx) {
+            logger.debug("Could not find any message for message id[" + messageId + "]", nrEx);
+            return null;
+        }
     }
 
     /**

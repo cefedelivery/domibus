@@ -85,7 +85,11 @@ public class ResponseHandler {
         // Stores the signal message
         signalMessageDao.create(signalMessage);
         // Updating the reference to the signal message
-        messagingDao.update(messaging);
+        Messaging sentMessage = messagingDao.findMessageByMessageId(messaging.getSignalMessage().getMessageInfo().getRefToMessageId());
+        if (sentMessage != null) {
+            sentMessage.setSignalMessage(signalMessage);
+            messagingDao.update(sentMessage);
+        }
         // Builds the signal message log
         SignalMessageLogBuilder smlBuilder = SignalMessageLogBuilder.create()
                 .setMessageId(messaging.getSignalMessage().getMessageInfo().getMessageId())

@@ -50,6 +50,8 @@ import java.util.Map;
 @NamedQueries({
         @NamedQuery(name = "Messaging.findUserMessageByMessageId",
                 query = "select messaging.userMessage from Messaging messaging where messaging.userMessage.messageInfo.messageId = :MESSAGE_ID"),
+        @NamedQuery(name = "Messaging.findMessageByMessageId",
+                query = "select messaging from Messaging messaging where messaging.userMessage.messageInfo.messageId = :MESSAGE_ID"),
         @NamedQuery(name = "Messaging.findSignalMessageByMessageId",
                 query = "select messaging.signalMessage from Messaging messaging where messaging.signalMessage.messageInfo.messageId = :MESSAGE_ID"),
 

@@ -46,7 +46,7 @@ import java.util.Set;
 @Entity
 @Table(name = "TB_SIGNAL_MESSAGE")
 @NamedQueries({
-        @NamedQuery(name = "SignalMessage.findRefToMessageIdByRefMessageId",
+        @NamedQuery(name = "SignalMessage.findSignalMessageIdByRefMessageId",
                 query = "select signalMessage.messageInfo.messageId from SignalMessage signalMessage where signalMessage.messageInfo.refToMessageId = :ORI_MESSAGE_ID"),
         @NamedQuery(name = "SignalMessage.findSignalMessageByRefMessageId",
                 query = "select signalMessage from SignalMessage signalMessage where signalMessage.messageInfo.refToMessageId = :ORI_MESSAGE_ID"),

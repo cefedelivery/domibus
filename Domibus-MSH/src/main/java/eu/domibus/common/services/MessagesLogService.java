@@ -60,6 +60,7 @@ public class MessagesLogService {
                 entries = userMessageLogDao.countMessages(filters);
         }
 
+        if (size <= 0) size = 10;
         long pages = entries / size;
         if (entries % size != 0) {
             pages++;

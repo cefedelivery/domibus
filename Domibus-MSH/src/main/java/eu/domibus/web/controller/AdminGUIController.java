@@ -109,7 +109,7 @@ public class AdminGUIController {
             @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus,
             @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus,
             @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
-            @RequestParam(value = "messageType", required = false) MessageType messageType,
+            @RequestParam(value = "messageType", defaultValue = "USER_MESSAGE") MessageType messageType,
             @RequestParam(value = "receivedFrom", required = false) String receivedFrom,
             @RequestParam(value = "receivedTo", required = false) String receivedTo
     ) {
