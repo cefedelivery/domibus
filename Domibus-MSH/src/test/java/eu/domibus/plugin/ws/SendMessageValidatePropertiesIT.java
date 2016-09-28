@@ -160,6 +160,7 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
         properties.add(super.createProperty("aBoolean", "true", BOOLEAN_TYPE));
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
+        super.prepareSendMessage("validAS4Response.xml");
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }

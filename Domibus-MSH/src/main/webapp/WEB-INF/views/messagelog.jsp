@@ -64,6 +64,19 @@
         <h3>Filter:</h3>
         MessageId: <input name="messageId" type="text" size="45" maxlength="255" value="${messageId}">
 
+        MessageType:
+        <select name="messageType" size="1" required>
+            <option/>
+            <c:forEach var="mt" items="${messagetypevalues}">
+                <option
+                        <c:if test="${mt == messageType}">
+                            <c:out value="selected" default="${messagetypevalues[1]}"/>
+                        </c:if>
+                >
+                ${mt}
+                </option>
+            </c:forEach>
+        </select>
         MessageStatus:
         <select name="messageStatus" size="1">
             <option/>
@@ -100,19 +113,6 @@
                         </c:if>
                 >
                 ${msh}
-                </option>
-            </c:forEach>
-        </select>
-        MessageType:
-        <select name="messageType" size="1">
-            <option/>
-            <c:forEach var="mt" items="${messagetypevalues}">
-                <option
-                        <c:if test="${mt == messageType}">
-                            <c:out value="selected"/>
-                        </c:if>
-                >
-                ${mt}
                 </option>
             </c:forEach>
         </select>

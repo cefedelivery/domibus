@@ -19,9 +19,11 @@
 
 package eu.domibus.ebms3.common.model;
 
-import eu.domibus.common.AuthRole;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.SignalMessageDao;
+import eu.domibus.common.dao.SignalMessageLogDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.security.util.AuthUtils;
@@ -62,6 +64,12 @@ public class MessageRetentionService {
     private MessagingDao messagingDao;
 
     @Autowired
+    private SignalMessageDao signalMessageDao;
+
+    @Autowired
+    private SignalMessageLogDao signalMessageLogDao;
+
+    @Autowired
     private BackendNotificationService backendNotificationService;
 
     // we could use any internal jmsOperations as we need to browse the queues anyways
@@ -78,12 +86,12 @@ public class MessageRetentionService {
         for (final String mpc : mpcs) {
             final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
             if (messageRetentionDownloaded > 0) { // if -1 the messages will be kept indefinetely and if 0 it already has been deleted
-                final List<String> messageIds = messageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);
+                final List<String> messageIds = userMessageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);
                 delete(messageIds);
             }
-            final int messageRetentionUndownladed = pModeProvider.getRetentionUndownloadedByMpcURI(mpc);
-            if (messageRetentionUndownladed > -1) { // if -1 the messages will be kept indefinetely and if 0, although it makes no sense, is legal
-                final List<String> messageIds = messageLogDao.getUndownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionUndownladed * -1), mpc);
+            final int messageRetentionUndownloaded = pModeProvider.getRetentionUndownloadedByMpcURI(mpc);
+            if (messageRetentionUndownloaded > -1) { // if -1 the messages will be kept indefinetely and if 0, although it makes no sense, is legal
+                final List<String> messageIds = userMessageLogDao.getUndownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionUndownloaded * -1), mpc);
                 delete(messageIds);
             }
         }
@@ -110,6 +118,22 @@ public class MessageRetentionService {
                 }
             }
             messagingDao.delete(messageId);
+            handleSignalMessageDelete(messageId);
+        }
+    }
+
+    private void handleSignalMessageDelete(String messageId) {
+        List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
+        if (!signalMessages.isEmpty()) {
+            for (SignalMessage signalMessage : signalMessages) {
+                signalMessageDao.clear(signalMessage);
+            }
+        }
+        List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
+        if (!signalMessageIds.isEmpty()) {
+            for (String signalMessageId : signalMessageIds) {
+                signalMessageLogDao.setMessageStatus(signalMessageId, MessageStatus.DELETED);
+            }
         }
     }
 }

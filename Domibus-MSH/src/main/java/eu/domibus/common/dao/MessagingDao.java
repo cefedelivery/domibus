@@ -23,13 +23,13 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
-import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.io.File;
@@ -59,12 +59,15 @@ public class MessagingDao extends BasicDao<Messaging> {
         return DataAccessUtils.singleResult(query.getResultList());
     }
 
-    public SignalMessage findSignalMessageByMessageId(final String messageId) {
-
-        final TypedQuery<SignalMessage> query = this.em.createNamedQuery("Messaging.findSignalMessageByMessageId", SignalMessage.class);
-        query.setParameter("MESSAGE_ID", messageId);
-
-        return DataAccessUtils.singleResult(query.getResultList());
+    public Messaging findMessageByMessageId(final String messageId) {
+        try {
+            final TypedQuery<Messaging> query = em.createNamedQuery("Messaging.findMessageByMessageId", Messaging.class);
+            query.setParameter("MESSAGE_ID", messageId);
+            return query.getSingleResult();
+        } catch (NoResultException nrEx) {
+            logger.debug("Could not find any message for message id[" + messageId + "]", nrEx);
+            return null;
+        }
     }
 
     /**
@@ -95,7 +98,7 @@ public class MessagingDao extends BasicDao<Messaging> {
     public void delete(final String messageId, final MessageStatus messageStatus) {
         clearPayloadData(messageId);
 
-        final Query messageStatusQuery = this.em.createNamedQuery("MessageLogEntry.setMessageStatus");
+        final Query messageStatusQuery = this.em.createNamedQuery("UserMessageLog.setMessageStatus");
         messageStatusQuery.setParameter("MESSAGE_ID", messageId);
         messageStatusQuery.setParameter("TIMESTAMP", new Date());
         messageStatusQuery.setParameter("MESSAGE_STATUS", messageStatus);
@@ -106,7 +109,7 @@ public class MessagingDao extends BasicDao<Messaging> {
     public void delete(final String messageId, final MessageStatus messageStatus, final NotificationStatus notificationStatus) {
         clearPayloadData(messageId);
 
-        final Query messageStatusQuery = this.em.createNamedQuery("MessageLogEntry.setMessageStatusAndNotificationStatus");
+        final Query messageStatusQuery = this.em.createNamedQuery("UserMessageLog.setMessageStatusAndNotificationStatus");
         messageStatusQuery.setParameter("MESSAGE_ID", messageId);
         messageStatusQuery.setParameter("TIMESTAMP", new Date());
         messageStatusQuery.setParameter("MESSAGE_STATUS", messageStatus);

@@ -40,9 +40,12 @@ import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.MessageLogEntry;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.security.util.AuthUtils;
-import eu.domibus.messaging.*;
+import eu.domibus.messaging.DuplicateMessageException;
+import eu.domibus.messaging.MessageNotFoundException;
+import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.messaging.PModeMismatchException;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import org.apache.commons.logging.Log;
@@ -70,9 +73,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
-//    @Resource(name = "jmsTemplateDispatch")
-//    private JmsOperations jmsOperations;
-
     @Autowired
     JMSManager jmsManager;
 
@@ -82,20 +82,34 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     private CompressionService compressionService;
+
     @Autowired
     private SubmissionAS4Transformer transformer;
+
     @Autowired
     private MessagingDao messagingDao;
+
     @Autowired
-    private MessageLogDao messageLogDao;
+    private SignalMessageDao signalMessageDao;
+
+    @Autowired
+    private UserMessageLogDao userMessageLogDao;
+
+    @Autowired
+    private SignalMessageLogDao signalMessageLogDao;
+
     @Autowired
     private ErrorLogDao errorLogDao;
+
     @Autowired
     private PModeProvider pModeProvider;
+
     @Autowired
     private MessageIdGenerator messageIdGenerator;
+
     @Autowired
     private PayloadProfileValidator payloadProfileValidator;
+
     @Autowired
     private PropertyProfileValidator propertyProfileValidator;
     @Autowired
@@ -111,12 +125,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
         DatabaseMessageHandler.LOG.info("looking for message with id: " + messageId);
-        final MessageLogEntry messageLogEntry;
+        final MessageLog userMessageLog;
         final UserMessage userMessage;
         try {
             userMessage = this.messagingDao.findUserMessageByMessageId(messageId);
-            messageLogEntry = this.messageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
-            if (messageLogEntry == null) {
+            userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
+            if (userMessageLog == null) {
                 throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
             }
         } catch (final NoResultException nrEx) {
@@ -125,14 +139,29 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         }
 
         validateOriginalUser(userMessage, originalUser, MessageConstants.FINAL_RECIPIENT);
-        messageLogEntry.setDeleted(new Date());
-        this.messageLogDao.update(messageLogEntry);
-        if (0 == pModeProvider.getRetentionDownloadedByMpcURI(messageLogEntry.getMpc())) {
-            messagingDao.delete(messageId);
-        }
-        return this.transformer.transformFromMessaging(userMessage);
-    }
 
+        // Deleting the message and signal message if the retention download is zero
+        if (0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc())) {
+            messagingDao.delete(messageId);
+            List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
+            if (!signalMessages.isEmpty()) {
+                for (SignalMessage signalMessage : signalMessages) {
+                    signalMessageDao.clear(signalMessage);
+                }
+            }
+        }
+        // Updates the User Message log
+        userMessageLog.setDeleted(new Date());
+        userMessageLogDao.update(userMessageLog);
+        // Updates the Signal Message log
+        List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
+        if (!signalMessageIds.isEmpty()) {
+            for (String signalMessageId : signalMessageIds) {
+                signalMessageLogDao.setMessageStatus(signalMessageId, MessageStatus.DELETED);
+            }
+        }
+        return transformer.transformFromMessaging(userMessage);
+    }
 
     private void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String type) {
         if(authOriginalUser != null) {
@@ -166,7 +195,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         if(!authUtils.isUnsecureLoginAllowed())
             authUtils.hasAdminRole();
 
-        return this.messageLogDao.getMessageStatus(messageId);
+        return this.userMessageLogDao.getMessageStatus(messageId);
     }
 
     @Override
@@ -186,37 +215,36 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
-
         try {
-            final UserMessage m = this.transformer.transformFromSubmission(messageData);
-            final MessageInfo messageInfo = m.getMessageInfo();
+            final UserMessage userMessage = this.transformer.transformFromSubmission(messageData);
+            final MessageInfo messageInfo = userMessage.getMessageInfo();
             if (messageInfo == null) {
-                m.setMessageInfo(this.objectFactory.createMessageInfo());
+                userMessage.setMessageInfo(this.objectFactory.createMessageInfo());
             }
-            String messageId = m.getMessageInfo().getMessageId();
-            if (messageId == null || m.getMessageInfo().getMessageId().trim().isEmpty()) {
+            String messageId = userMessage.getMessageInfo().getMessageId();
+            if (messageId == null || userMessage.getMessageInfo().getMessageId().trim().isEmpty()) {
                 messageId = messageIdGenerator.generateMessageId();
-                m.getMessageInfo().setMessageId(messageId);
+                userMessage.getMessageInfo().setMessageId(messageId);
             } else if (messageId.length() > 255) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "MessageId value is too long (over 255 characters)", null, null);
             }
-            String refToMessageId = m.getMessageInfo().getRefToMessageId();
+            String refToMessageId = userMessage.getMessageInfo().getRefToMessageId();
             if (refToMessageId != null && refToMessageId.length() > 255) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "RefToMessageId value is too long (over 255 characters)", refToMessageId, null);
             }
-            // check if the messageId is unique. This should only fail if the ID is set from the outside
-            if (!MessageStatus.NOT_FOUND.equals(messageLogDao.getMessageStatus(messageId))) {
+            // handle if the messageId is unique. This should only fail if the ID is set from the outside
+            if (!MessageStatus.NOT_FOUND.equals(userMessageLogDao.getMessageStatus(messageId))) {
                 throw new DuplicateMessageException("Message with id [" + messageId + "] already exists. Message identifiers must be unique");
             }
 
             final String pmodeKey;
             final Messaging message = this.ebMS3Of.createMessaging();
-            message.setUserMessage(m);
+            message.setUserMessage(userMessage);
 
-            validateOriginalUser(m, originalUser, MessageConstants.ORIGINAL_SENDER);
+            validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
 
             try {
-                pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(m);
+                pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(userMessage);
             } catch (IllegalStateException e) { //if no pmodes are configured
                 LOG.debug(e);
                 throw new PModeMismatchException("PMode could not be found. Are PModes configured in the database?");
@@ -234,7 +262,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "It is forbidden to submit a message to the sending access point[" + to.getName() + "]", null, null);
             }
 
-            final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
+            final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
             final Map<Party, Mpc> mpcMap = legConfiguration.getPartyMpcMap();
             String mpc = Mpc.DEFAULT_MPC;
             if (legConfiguration.getDefaultMpc() != null) {
@@ -243,7 +271,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             if (mpcMap != null && mpcMap.containsKey(to)) {
                 mpc = mpcMap.get(to).getQualifiedName();
             }
-            m.setMpc(mpc);
+            userMessage.setMpc(mpc);
             this.payloadProfileValidator.validate(message, pmodeKey);
             this.propertyProfileValidator.validate(message, pmodeKey);
             int sendAttemptsMax = 1;
@@ -253,34 +281,32 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             }
 
             try {
-                final boolean compressed = this.compressionService.handleCompression(m, legConfiguration);
-                LOG.debug("Compression for message with id: " + m.getMessageInfo().getMessageId() + " applied: " + compressed);
+                final boolean compressed = this.compressionService.handleCompression(userMessage, legConfiguration);
+                LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
             } catch (final EbMS3Exception e) {
                 this.errorLogDao.create(new ErrorLogEntry(e));
                 throw e;
             }
 
-            //We do not create MessageIds for SignalMessages, as those should never be submitted via the backend
-            this.messagingDao.create(message);
-            final MessageLogEntry messageLogEntry = new MessageLogEntry();
-            messageLogEntry.setMessageId(m.getMessageInfo().getMessageId());
-            messageLogEntry.setMshRole(MSHRole.SENDING);
-            messageLogEntry.setReceived(new Date());
-            messageLogEntry.setMessageType(MessageType.USER_MESSAGE);
-            messageLogEntry.setSendAttempts(0);
-            messageLogEntry.setSendAttemptsMax(sendAttemptsMax);
-            messageLogEntry.setNextAttempt(messageLogEntry.getReceived());
-            messageLogEntry.setNotificationStatus(legConfiguration.getErrorHandling().isBusinessErrorNotifyProducer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED);
-            messageLogEntry.setMessageStatus(MessageStatus.READY_TO_SEND);
-            messageLogEntry.setMpc(message.getUserMessage().getMpc());
-            messageLogEntry.setEndpoint(to.getEndpoint());
-            messageLogEntry.setBackend(backendName);
+            // We do not create MessageIds for SignalMessages, as those should never be submitted via the backend
+            messagingDao.create(message);
+            // TODO Should we store the user message log before it is dispatched to the queue ?
+            // Sends message to the proper queue
             jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, to.getEndpoint()).createMessage(), sendMessageQueue);
-//            this.jmsOperations.send(sendMessageQueue, new DispatchMessageCreator(messageId, to.getEndpoint()));
-            messageLogEntry.setMessageStatus(MessageStatus.SEND_ENQUEUED);
-            this.messageLogDao.create(messageLogEntry);
+            // Builds the user message log
+            UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
+                    .setMessageId(userMessage.getMessageInfo().getMessageId())
+                    .setMessageStatus(MessageStatus.SEND_ENQUEUED)
+                    .setMshRole(MSHRole.SENDING)
+                    .setNotificationStatus(legConfiguration.getErrorHandling().isBusinessErrorNotifyProducer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED)
+                    .setMpc(message.getUserMessage().getMpc())
+                    .setSendAttemptsMax(sendAttemptsMax)
+                    .setBackendName(backendName)
+                    .setEndpoint(to.getEndpoint());
 
-            return m.getMessageInfo().getMessageId();
+            userMessageLogDao.create(umlBuilder.build());
+
+            return userMessage.getMessageInfo().getMessageId();
 
         } catch (final EbMS3Exception e) {
             LOG.error("Error submitting to backendName :" + backendName, e);

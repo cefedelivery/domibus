@@ -37,7 +37,7 @@ import java.util.Collection;
  */
 
 public abstract class BasicDao<T extends AbstractBaseEntity> {
-    protected static final Log LOG = LogFactory.getLog(BasicDao.class);
+    protected static final Log logger = LogFactory.getLog(BasicDao.class);
     private final Class<T> typeOfT;
     @PersistenceContext
     protected EntityManager em;

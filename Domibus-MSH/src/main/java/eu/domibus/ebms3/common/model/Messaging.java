@@ -50,6 +50,8 @@ import java.util.Map;
 @NamedQueries({
         @NamedQuery(name = "Messaging.findUserMessageByMessageId",
                 query = "select messaging.userMessage from Messaging messaging where messaging.userMessage.messageInfo.messageId = :MESSAGE_ID"),
+        @NamedQuery(name = "Messaging.findMessageByMessageId",
+                query = "select messaging from Messaging messaging where messaging.userMessage.messageInfo.messageId = :MESSAGE_ID"),
         @NamedQuery(name = "Messaging.findSignalMessageByMessageId",
                 query = "select messaging.signalMessage from Messaging messaging where messaging.signalMessage.messageInfo.messageId = :MESSAGE_ID"),
 
@@ -59,37 +61,42 @@ import java.util.Map;
 })
 public class Messaging extends AbstractBaseEntity {
 
-    @XmlAnyAttribute
-    @Transient
-    //According to how we read the spec those attributes serve no purpose in the AS4 profile, therefore they are discarded
-    private final Map<QName, String> otherAttributes = new HashMap<>();
-    @XmlElement(name = "SignalMessage")
-    @JoinColumn(name = "SIGNAL_MESSAGE_ID")
-    @OneToOne(cascade = CascadeType.ALL)
-    protected SignalMessage signalMessage;
-    @XmlElement(name = "UserMessage")
-    @JoinColumn(name = "USER_MESSAGE_ID")
-    @OneToOne(cascade = CascadeType.ALL)
-    protected UserMessage userMessage;
-    @XmlAnyElement(lax = true)
-    @Transient
-    //According to how we read the spec those attributes serve no purpose in the AS4 profile, therefore they are discarded
-    protected List<Object> any;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlID
     @XmlSchemaType(name = "ID")
     @Column(name = "ID")
     protected String id;
+
+    @XmlElement(name = "SignalMessage")
+    @JoinColumn(name = "SIGNAL_MESSAGE_ID")
+    @OneToOne(cascade = CascadeType.ALL)
+    protected SignalMessage signalMessage;
+
+    @XmlElement(name = "UserMessage")
+    @JoinColumn(name = "USER_MESSAGE_ID")
+    @OneToOne(cascade = CascadeType.ALL)
+    protected UserMessage userMessage;
+
     /*    @XmlAttribute(name = "mustUnderstand", namespace = "http://schemas.xmlsoap.org/soap/envelope/")
-        @XmlJavaTypeAdapter(ZeroOneBooleanAdapter.class)
-        @Transient
-        @AssertTrue
-        protected Boolean s11MustUnderstand = true;*/
+    @XmlJavaTypeAdapter(ZeroOneBooleanAdapter.class)
+    @Transient
+    @AssertTrue
+    protected Boolean s11MustUnderstand = true;*/
     @XmlAttribute(name = "mustUnderstand", namespace = "http://www.w3.org/2003/05/soap-envelope")
     @Transient
     @AssertTrue
     protected Boolean s12MustUnderstand = true;
+
+    @XmlAnyAttribute
+    @Transient
+    //According to how we read the spec those attributes serve no purpose in the AS4 profile, therefore they are discarded
+    private final Map<QName, String> otherAttributes = new HashMap<>();
+
+    @XmlAnyElement(lax = true)
+    @Transient
+    //According to how we read the spec those attributes serve no purpose in the AS4 profile, therefore they are discarded
+    protected List<Object> any;
 
     /**
      * The OPTIONAL element is named
