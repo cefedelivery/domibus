@@ -74,15 +74,6 @@ public class MessageRetentionService {
 
     @Transactional
     public void deleteExpiredMessages() {
-
-        if(!authUtils.isUnsecureLoginAllowed()) {
-            SecurityContextHolder.getContext()
-                    .setAuthentication(new UsernamePasswordAuthenticationToken(
-                            "retention_user",
-                            "retention_password",
-                            Collections.singleton(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))));
-        }
-
         final List<String> mpcs = pModeProvider.getMpcURIList();
         for (final String mpc : mpcs) {
             final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);

@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.security.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Properties;
 
 @Component(value = "authUtils")
@@ -62,5 +64,17 @@ public class AuthUtils {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void authorizeAdmin() {}
+
+    public void setAuthenticationToSecurityContext(String user, String password) {
+        setAuthenticationToSecurityContext(user, password, AuthRole.ROLE_ADMIN);
+    }
+
+    public void setAuthenticationToSecurityContext(String user, String password, AuthRole authRole) {
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(
+                        user,
+                        password,
+                        Collections.singleton(new SimpleGrantedAuthority(authRole.name()))));
+    }
 
 }

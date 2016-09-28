@@ -52,11 +52,7 @@ public class SendRetryWorker extends QuartzJobBean {
     protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
 
         if(!authUtils.isUnsecureLoginAllowed()) {
-            SecurityContextHolder.getContext()
-                    .setAuthentication(new UsernamePasswordAuthenticationToken(
-                            "retry_user",
-                            "retry_password",
-                            Collections.singleton(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))));
+            authUtils.setAuthenticationToSecurityContext("retry_user", "retry_password");
         }
 
         retryService.enqueueMessages();
