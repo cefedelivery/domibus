@@ -83,7 +83,7 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
         pstmt.setString(1, messageId);
         ResultSet resultSet = pstmt.executeQuery();
         resultSet.next();
-        Assert.assertEquals(resultSet.getString("MESSAGE_STATUS"), MessageStatus.ACKNOWLEDGED.name());
+        Assert.assertEquals(MessageStatus.ACKNOWLEDGED.name(), resultSet.getString("MESSAGE_STATUS"));
         pstmt.close();
     }
 

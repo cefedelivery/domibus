@@ -22,8 +22,8 @@ package eu.domibus.ebms3.sender;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReceptionAwareness;
 import eu.domibus.common.model.configuration.RetryStrategy;
@@ -55,7 +55,7 @@ public class UpdateRetryLoggingServiceTest {
     private BackendNotificationService backendNotificationService;
 
     @Injectable
-    private MessageLogDao messageLogDao;
+    private UserMessageLogDao messageLogDao;
 
     @Injectable
     private MessagingDao messagingDao;

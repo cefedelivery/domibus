@@ -4,7 +4,6 @@ import eu.domibus.AbstractIT;
 import eu.domibus.plugin.webService.generated.SendMessageFault;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.SQLException;
 
@@ -16,8 +15,8 @@ public class DatabaseMessageHandlerIT extends AbstractIT {
 
     private static boolean initialized;
 
-    @Autowired
-    private DatabaseMessageHandler dmh;
+   /* @Autowired
+    private DatabaseMessageHandler dmh;*/
 
     @Before
     public void before() {

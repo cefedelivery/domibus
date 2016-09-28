@@ -3,10 +3,9 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.NotificationType;
-import eu.domibus.common.dao.MessageLogDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.MessageConstants;
-import eu.domibus.messaging.NotifyMessageCreator;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.routing.CriteriaFactory;
@@ -56,7 +55,7 @@ public class BackendNotificationServiceTest {
     RoutingService routingService;
 
     @Injectable
-    MessageLogDao messageLogDao;
+    UserMessageLogDao messageLogDao;
 
     @Injectable
     SubmissionAS4Transformer submissionAS4Transformer;
