@@ -49,19 +49,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.core.JmsOperations;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import javax.jms.Message;
 import javax.jms.Queue;
 import javax.persistence.NoResultException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -110,7 +105,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Transactional(propagation = Propagation.MANDATORY)
     public Submission downloadMessage(final String messageId) throws MessageNotFoundException {
         if(!authUtils.isUnsecureLoginAllowed())
-            authUtils.authorizeUser();
+            authUtils.hasUserOrAdminRole();
 
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
@@ -169,7 +164,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Override
     public MessageStatus getMessageStatus(final String messageId) {
         if(!authUtils.isUnsecureLoginAllowed())
-            authUtils.authorizeAdmin();
+            authUtils.hasAdminRole();
 
         return this.messageLogDao.getMessageStatus(messageId);
     }
@@ -177,7 +172,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Override
     public List<? extends ErrorResult> getErrorsForMessage(final String messageId) {
         if(!authUtils.isUnsecureLoginAllowed())
-            authUtils.authorizeAdmin();
+            authUtils.hasAdminRole();
 
         return this.errorLogDao.getErrorsForMessage(messageId);
     }
@@ -187,7 +182,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Transactional
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
         if(authUtils.isUnsecureLoginAllowed())
-            authUtils.authorizeUser();
+            authUtils.hasUserOrAdminRole();
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 

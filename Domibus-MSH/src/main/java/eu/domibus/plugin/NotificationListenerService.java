@@ -34,7 +34,6 @@ import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.SimpleJmsListenerEndpoint;
 import org.springframework.jms.core.BrowserCallback;
 import org.springframework.jms.core.JmsOperations;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,7 +101,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
     public final Collection<String> listPendingMessages() {
         if(!authUtils.isUnsecureLoginAllowed())
-            authUtils.authorizeUser();
+            authUtils.hasUserOrAdminRole();
 
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.info("Authorized as " + (originalUser == null ? "super user" : originalUser));
@@ -157,7 +156,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     @Transactional(propagation = Propagation.MANDATORY)
     public void removeFromPending(final String messageId) throws MessageNotFoundException {
         if(!authUtils.isUnsecureLoginAllowed())
-            authUtils.authorizeUser();
+            authUtils.hasUserOrAdminRole();
 
         if (this.mode == BackendConnector.Mode.PUSH) {
             LOG.debug("No messages will be removed because this a PUSH consumer");

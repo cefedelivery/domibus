@@ -60,10 +60,10 @@ public class AuthUtils {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public void authorizeUser() {}
+    public void hasUserOrAdminRole() {}
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public void authorizeAdmin() {}
+    public void hasAdminRole() {}
 
     public void setAuthenticationToSecurityContext(String user, String password) {
         setAuthenticationToSecurityContext(user, password, AuthRole.ROLE_ADMIN);
