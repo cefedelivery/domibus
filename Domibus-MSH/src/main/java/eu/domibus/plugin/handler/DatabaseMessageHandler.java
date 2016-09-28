@@ -20,16 +20,13 @@
 package eu.domibus.plugin.handler;
 
 /**
- * @author Christian Koch, Stefan Mueller
+ * @author Christian Koch, Stefan Mueller, Federico Martini, Ioana Dragusanu
  * @Since 3.0
  */
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.*;
-import eu.domibus.common.dao.ErrorLogDao;
-import eu.domibus.common.dao.MessageLogDao;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
 import eu.domibus.common.model.configuration.Configuration;
@@ -37,15 +34,14 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.logging.MessageLogEntry;
+import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.messaging.DuplicateMessageException;
-import eu.domibus.messaging.MessageNotFoundException;
-import eu.domibus.messaging.MessagingProcessingException;
-import eu.domibus.messaging.PModeMismatchException;
+import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.messaging.*;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import org.apache.commons.logging.Log;
@@ -112,6 +108,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     private PropertyProfileValidator propertyProfileValidator;
+
     @Autowired
     AuthUtils authUtils;
 
@@ -125,7 +122,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
         DatabaseMessageHandler.LOG.info("looking for message with id: " + messageId);
-        final MessageLog userMessageLog;
+        final UserMessageLog userMessageLog;
         final UserMessage userMessage;
         try {
             userMessage = this.messagingDao.findUserMessageByMessageId(messageId);
@@ -210,6 +207,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Override
     @Transactional
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
+
         if(authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
