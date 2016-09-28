@@ -3,7 +3,7 @@
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-    <!-- Domibus 3.2 - 3.2-fr -->
+    <!-- Domibus 3.2-rc1 - 3.2.0 -->
     <changeSet author="idragusa" id="changelog_linux_case_sensitive">
         <renameTable oldTableName="qrtz_blob_triggers" newTableName="QRTZ_BLOB_TRIGGERS" />
         <renameTable oldTableName="qrtz_calendars" newTableName="QRTZ_CALENDARS" />

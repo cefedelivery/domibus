@@ -3,7 +3,7 @@
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-    <!-- Domibus 3.1.1 - 3.2 -->
+    <!-- Domibus 3.1.1 - 3.2 rc1-->
     <changeSet dbms="oracle" author="martifp" id="changelog-3.2-delta-1">
         <createSequence sequenceName="HIBERNATE_SEQUENCE" minValue="1" maxValue="9999999999999999999999999999"
                         incrementBy="1" startValue="1" cacheSize="20" cycle="false" ordered="false"/>
