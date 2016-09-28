@@ -39,8 +39,6 @@
         <property name="lister" ref="webserviceNotificationListenerService"/>
     </bean>
 
-    <bean id="defaultTransformer" class="eu.domibus.plugin.webService.impl.StubDtoTransformer"/>
-
     <bean id="webserviceNotificationListenerService"
           class="eu.domibus.submission.WeblogicNotificationListenerService"
           c:queue-ref="notifyBackendWebServiceQueue" c:mode="PULL"
@@ -54,7 +52,7 @@
         </jaxws:properties>
 
         <jaxws:schemaLocations>
-            <jaxws:schemaLocation>schemas/domibus-submission.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>schemas/domibus-header.xsd</jaxws:schemaLocation>
             <jaxws:schemaLocation>schemas/xml.xsd</jaxws:schemaLocation>
             <jaxws:schemaLocation>schemas/domibus-backend.xsd</jaxws:schemaLocation>
             <jaxws:schemaLocation>schemas/xmlmime.xsd</jaxws:schemaLocation>

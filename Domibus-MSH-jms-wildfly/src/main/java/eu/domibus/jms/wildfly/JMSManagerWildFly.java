@@ -107,7 +107,7 @@ public class JMSManagerWildFly implements JMSManagerSPI {
                 ObjectName objectName = ObjectName.getInstance(mbeanObjectName);
                 queueMap.put(queueName, objectName);
             } catch (MalformedObjectNameException e) {
-                LOG.error("Error getting queue [" + queueName + "] using mbeanName [" + mbeanObjectName + "]");
+                LOG.error("Error getting queue [" + queueName + "] using mbeanName [" + mbeanObjectName + "]", e);
             }
         }
 
@@ -126,7 +126,7 @@ public class JMSManagerWildFly implements JMSManagerSPI {
         try {
             jmsDestination = getQueue(destination);
         } catch (NamingException e) {
-            LOG.error("Error performing lookup for [" + destination + "]");
+            LOG.error("Error performing lookup for [" + destination + "]", e);
             return false;
         }
         sendMessage(message, jmsDestination);
@@ -224,7 +224,7 @@ public class JMSManagerWildFly implements JMSManagerSPI {
                     try {
                         result.add(convert(textMessage));
                     } catch (Exception e) {
-                        LOG.error("Error converting message [" + textMessage + "]");
+                        LOG.error("Error converting message [" + textMessage + "]", e);
                     }
 
                 }

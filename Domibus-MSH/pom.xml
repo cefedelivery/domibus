@@ -152,21 +152,15 @@
                                         </include>
                                     </includes>
                                     <replacements>
+                                        <!-- Please keep the values from the "token" and the "value" fields on one line and do not include any whitespaces -->
                                         <replacement>
                                             <token>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M"</token>
-                                            <value>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M
-                                                -Ddomibus.config.location=%JBOSS_HOME%/conf/domibus"
-                                            </value>
+                                            <value>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M -Ddomibus.config.location=%JBOSS_HOME%/conf/domibus"</value>
                                         </replacement>
+                                        <!-- Please keep the values from the "token" and the "value" fields on one line and do not include any whitespaces -->
                                         <replacement>
-                                            <token>JAVA_OPTS="-Xms64m -Xmx512m -XX:MaxPermSize=256m
-                                                -Djava.net.preferIPv4Stack=true"
-                                            </token>
-                                            <value>JAVA_OPTS="-Xms64m -Xmx512m -XX:MaxPermSize=256m
-                                                -Djava.net.preferIPv4Stack=true
-                                                -Ddomibus.config.location=\$JBOSS_HOME/conf/domibus"
-                                            </value>
-
+                                            <token>JAVA_OPTS="-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true"</token>
+                                            <value>JAVA_OPTS="-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Ddomibus.config.location=\$JBOSS_HOME/conf/domibus"</value>
                                         </replacement>
                                     </replacements>
                                 </configuration>

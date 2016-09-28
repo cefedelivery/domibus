@@ -56,12 +56,41 @@ public class ErrorLogDao extends BasicDao<ErrorLogEntry> {
         return query.getResultList();
     }
 
+    public long countEntries(HashMap<String, Object> filters) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<ErrorLogEntry> mle = cq.from(ErrorLogEntry.class);
+        cq.select(cb.count(mle));
+        List<Predicate> predicates = getPredicates(filters, cb, mle);
+        cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+        TypedQuery<Long> query = em.createQuery(cq);
+        return query.getSingleResult();
+
+    }
+
     public List<ErrorLogEntry> findPaged(final int from, final int max, final String column, final boolean asc, final HashMap<String, Object> filters) {
         final CriteriaBuilder cb = this.em.getCriteriaBuilder();
         final CriteriaQuery<ErrorLogEntry> cq = cb.createQuery(ErrorLogEntry.class);
         final Root<ErrorLogEntry> ele = cq.from(ErrorLogEntry.class);
         cq.select(ele);
-        final List<Predicate> predicates = new ArrayList<Predicate>();
+        List<Predicate> predicates = getPredicates(filters, cb, ele);
+        cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+        if (column != null) {
+            if (asc) {
+                cq.orderBy(cb.asc(ele.get(column)));
+            } else {
+                cq.orderBy(cb.desc(ele.get(column)));
+            }
+
+        }
+        final TypedQuery<ErrorLogEntry> query = this.em.createQuery(cq);
+        query.setFirstResult(from);
+        query.setMaxResults(max);
+        return query.getResultList();
+    }
+
+    protected List<Predicate> getPredicates(HashMap<String, Object> filters, CriteriaBuilder cb, Root<ErrorLogEntry> ele) {
+        List<Predicate> predicates = new ArrayList<Predicate>();
         for (final Map.Entry<String, Object> filter : filters.entrySet()) {
             if (filter.getValue() != null) {
                 if (filter.getValue() instanceof String) {
@@ -91,19 +120,7 @@ public class ErrorLogDao extends BasicDao<ErrorLogEntry> {
                 }
             }
         }
-        cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
-        if (column != null) {
-            if (asc) {
-                cq.orderBy(cb.asc(ele.get(column)));
-            } else {
-                cq.orderBy(cb.desc(ele.get(column)));
-            }
-
-        }
-        final TypedQuery<ErrorLogEntry> query = this.em.createQuery(cq);
-        query.setFirstResult(from);
-        query.setMaxResults(max);
-        return query.getResultList();
+        return predicates;
     }
 
     public List<ErrorLogEntry> findAll() {
@@ -115,4 +132,6 @@ public class ErrorLogDao extends BasicDao<ErrorLogEntry> {
         final TypedQuery<Long> query = this.em.createNamedQuery("ErrorLogEntry.countEntries", Long.class);
         return query.getSingleResult();
     }
+
+
 }

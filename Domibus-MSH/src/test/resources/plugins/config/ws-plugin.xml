@@ -24,7 +24,6 @@
        xmlns:c="http://www.springframework.org/schema/c"
        xmlns:p="http://www.springframework.org/schema/p"
        xmlns="http://www.springframework.org/schema/beans"
-       xmlns:soap="http://cxf.apache.org/bindings/soap"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
@@ -49,19 +48,19 @@
           p:backendConnector-ref="backendWebservice"/>
 
     <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
-        <jaxws:binding>
-            <soap:soapBinding mtomEnabled="true" version="1.2"/>
-        </jaxws:binding>
+
         <jaxws:properties>
             <entry key="schema-validation-enabled" value="true"/>
+            <entry key="mtom-enabled" value="false"/>
         </jaxws:properties>
 
         <jaxws:schemaLocations>
-            <jaxws:schemaLocation>schemas/domibus-submission.xsd</jaxws:schemaLocation>
-            <jaxws:schemaLocation>schemas/xml.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>schemas/domibus-header.xsd</jaxws:schemaLocation>
             <jaxws:schemaLocation>schemas/domibus-backend.xsd</jaxws:schemaLocation>
+            <jaxws:schemaLocation>schemas/xml.xsd</jaxws:schemaLocation>
             <jaxws:schemaLocation>schemas/xmlmime.xsd</jaxws:schemaLocation>
         </jaxws:schemaLocations>
+
     </jaxws:endpoint>
     <!-- Example ends here -->
 
