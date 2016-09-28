@@ -2,7 +2,7 @@ Domibus 3.2 (from 3.1.1):
                 Run the appropriate DB migration script.
                 Update the configuration file following these steps:
                 -  in file "\domibus\conf\domibus\plugins\config\ws-plugin.xml":
-                          o   replace
+                        o   replace
                                <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
                                .......
                                </jaxws:endpoint>
@@ -22,16 +22,46 @@ Domibus 3.2 (from 3.1.1):
                                           <jaxws:schemaLocation>schemas/xml.xsd</jaxws:schemaLocation>
                                           <jaxws:schemaLocation>schemas/xmlmime.xsd</jaxws:schemaLocation>
                                       </jaxws:schemaLocations>
+                                      <jaxws:inInterceptors>
+                                            <ref bean="customAuthenticationInterceptor"/>
+                                      </jaxws:inInterceptors>
 
                               </jaxws:endpoint>
+                        o   add customAuthenticationInterceptor bean under <beans> tag
+                                <bean id="customAuthenticationInterceptor" class="eu.domibus.plugin.webService.impl.CustomAuthenticationInterceptor" />
                 -  in file "\domibus\conf\domibus\internal\ehcache.xml":
                         o   add <cache name="certValidationByAlias" maxBytesLocalHeap="5m" timeToLiveSeconds="3600" overflowToDisk="false"/>
+                        o   add <cache name="crlByCert"  maxBytesLocalHeap="5m"  timeToLiveSeconds="3600"  overflowToDisk="false"/>
                 -  in file "\domibus\conf\domibus\domibus-configuration.xml":
                         o   replace class="eu.domibus.common.dao.CachingPModeProvider"/> by class="eu.domibus.ebms3.common.dao.CachingPModeProvider"/> or by class="eu.domibus.common.dao.PModeDao"/> if you are using Oracle DB
                         o   add <prop key="domibus.certificate.validation.enabled">true</prop>
                         o   add <prop key="domibus.jms.internalQueue.expression">.*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*</prop>
                         o   only for Tomcat users: add <prop key="activeMQ.JMXURL">service:jmx:rmi://localhost:1198/jndi/rmi://localhost:1199/jmxrmi</prop>
-                -  only for Tomcat users: in file "\domibus\conf\domibus\domibus-datasources.xml":
+                -  in file conf/domibus/domibus-security.xml
+                        o   replace all from the comment
+                                 <!-- Administration GUI user credentials-->
+                                 ...
+                             with:
+                                <!-- Administration GUI user credentials-->
+                                 <bean name="bcryptEncoder"
+                                       class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+                                 <sec:authentication-manager>
+                                     <sec:authentication-provider ref="allowAllAuthenticationProvider"/>
+                                 </sec:authentication-manager>
+                                 <sec:authentication-manager id="authenticationManagerForAdminConsole">
+                                     <sec:authentication-provider>
+                                         <sec:password-encoder ref="bcryptEncoder"/>
+                                         <sec:user-service>
+                                             <sec:user name="user" password="$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu"
+                                                       authorities="ROLE_USER"/>
+                                             <sec:user name="admin" password="$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36"
+                                                       authorities="ROLE_USER, ROLE_ADMIN"/>
+                                         </sec:user-service>
+                                     </sec:authentication-provider>
+                                 </sec:authentication-manager>
+                                 <sec:global-method-security pre-post-annotations="enabled"/>
+
+                -  [Tomcat only] in file "\domibus\conf\domibus\domibus-datasources.xml":
                         o   replace  <amq:xaConnectionFactory id="xaJmsConnectionFactory" brokerURL="tcp://localhost:61616" userName="domibus" password="changeit"/>    with
 
                                 <amq:xaConnectionFactory id="xaJmsConnectionFactory"
@@ -42,11 +72,15 @@ Domibus 3.2 (from 3.1.1):
                                         <amq:redeliveryPolicy/>
                                     </amq:redeliveryPolicy>
                                 </amq:xaConnectionFactory>
+                -  [Tomcat only] conf/domibus/persistence.xml, add in the <persistence-unit> tag:
+                                 <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
+
 
                 If you are using samples keystores, please update them since they are expiring on the 26th of October 2016.
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2 (from RC1):
                   Run the appropriate DB migration script.
+                  Replace domibus.war and the plugin(s) jar(s) into \domibus\conf\domibus\plugins\lib"
                   Update the configuration file following these steps:
                   -   in file "\domibus\conf\domibus\plugins\config\ws-plugin.xml":
                           o   remove <bean id="defaultTransformer" class="eu.domibus.plugin.webService.impl.StubDtoTransformer"/>
@@ -71,7 +105,45 @@ Domibus 3.2 (from RC1):
                                           <jaxws:schemaLocation>schemas/xmlmime.xsd</jaxws:schemaLocation>
                                       </jaxws:schemaLocations>
 
+                                      <jaxws:inInterceptors>
+                                            <ref bean="customAuthenticationInterceptor"/>
+                                      </jaxws:inInterceptors>
+
                               </jaxws:endpoint>
+                          o   add customAuthenticationInterceptor bean under <beans> tag
+                                <bean id="customAuthenticationInterceptor" class="eu.domibus.plugin.webService.impl.CustomAuthenticationInterceptor" />
+                  -  in file conf/domibus/internal/ehcache.xml, add
+                                            <cache name="crlByCert" 
+                                                maxBytesLocalHeap="5m" 
+                                                timeToLiveSeconds="3600" 
+                                                overflowToDisk="false">
+                                             </cache>
+                -  in file conf/domibus/domibus-security.xml
+                        o   replace all from the comment
+                                 <!-- Administration GUI user credentials-->
+                                 ...
+                             with:
+                                <!-- Administration GUI user credentials-->
+                                 <bean name="bcryptEncoder"
+                                       class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+                                 <sec:authentication-manager>
+                                     <sec:authentication-provider ref="allowAllAuthenticationProvider"/>
+                                 </sec:authentication-manager>
+                                 <sec:authentication-manager id="authenticationManagerForAdminConsole">
+                                     <sec:authentication-provider>
+                                         <sec:password-encoder ref="bcryptEncoder"/>
+                                         <sec:user-service>
+                                             <sec:user name="user" password="$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu"
+                                                       authorities="ROLE_USER"/>
+                                             <sec:user name="admin" password="$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36"
+                                                       authorities="ROLE_USER, ROLE_ADMIN"/>
+                                         </sec:user-service>
+                                     </sec:authentication-provider>
+                                 </sec:authentication-manager>
+                                 <sec:global-method-security pre-post-annotations="enabled"/>
+
+                  - [Tomcat only] in fiel conf/domibus/persistence.xml, add to the <persistence-unit> tag:
+                                <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2 RC1:   Run the appropriate DB migration script.
                     Replace domibus.war and the plugin(s) jar(s) into \domibus\conf\domibus\plugins\lib"
