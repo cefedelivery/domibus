@@ -94,6 +94,7 @@ public class DownloadMessageJMSIT extends AbstractIT {
 
         backendJms.deliverMessage(messageId);
 
+
         Message message = popQueueMessage(connection, JMS_BACKEND_OUT_QUEUE_NAME);
 
         connection.close();

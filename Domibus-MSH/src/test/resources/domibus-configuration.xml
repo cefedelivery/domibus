@@ -66,6 +66,9 @@
         <prop key="domibus.proxy.user"></prop>
         <prop key="domibus.proxy.password"></prop>
         <prop key="domibus.proxy.nonProxyHosts"></prop>
+
+        <prop key="domibus.auth.unsecureLoginAllowed">true</prop>
+
     </util:properties>
 
     <!-- Mimetypes listed in this map will not be compressed (in outgoing messages)

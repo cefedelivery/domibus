@@ -19,11 +19,18 @@
 
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.common.AuthRole;
+import eu.domibus.ebms3.security.util.AuthUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Collections;
 
 /**
  * Quartz based worker responsible for the periodical execution of {@link eu.domibus.ebms3.sender.MessageSender#sendUserMessage(String)}
@@ -38,9 +45,19 @@ public class SendRetryWorker extends QuartzJobBean {
     @Autowired
     private RetryService retryService;
 
+    @Autowired
+    AuthUtils authUtils;
 
     @Override
     protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
+
+        if(!authUtils.isUnsecureLoginAllowed()) {
+            SecurityContextHolder.getContext()
+                    .setAuthentication(new UsernamePasswordAuthenticationToken(
+                            "retry_user",
+                            "retry_password",
+                            Collections.singleton(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))));
+        }
 
         retryService.enqueueMessages();
     }

@@ -100,8 +100,9 @@ public class NotificationListenerService implements MessageListener, JmsListener
         }
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
     public final Collection<String> listPendingMessages() {
+        if(!authUtils.isUnsecureLoginAllowed())
+            authUtils.authorizeUser();
 
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.info("Authorized as " + (originalUser == null ? "super user" : originalUser));
@@ -154,8 +155,10 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
     public void removeFromPending(final String messageId) throws MessageNotFoundException {
+        if(!authUtils.isUnsecureLoginAllowed())
+            authUtils.authorizeUser();
+
         if (this.mode == BackendConnector.Mode.PUSH) {
             LOG.debug("No messages will be removed because this a PUSH consumer");
             return;

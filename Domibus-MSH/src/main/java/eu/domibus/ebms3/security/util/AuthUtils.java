@@ -4,6 +4,7 @@ import eu.domibus.common.AuthRole;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.security.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -55,5 +56,11 @@ public class AuthUtils {
         /* unsecured login allowed */
         return "true".equals(domibusProperties.getProperty(UNSECURE_LOGIN_ALLOWED, "true"));
     }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public void authorizeUser() {}
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    public void authorizeAdmin() {}
 
 }

@@ -3,6 +3,7 @@ package eu.domibus;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.common.util.concurrent.TimeLimiter;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
+import eu.domibus.common.AuthRole;
 import eu.domibus.common.NotificationType;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
@@ -11,6 +12,9 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
@@ -31,6 +35,7 @@ import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -76,6 +81,11 @@ public abstract class AbstractIT {
             System.setProperty("domibus.config.location", new File("target/test-classes").getAbsolutePath());
             initialized = true;
         }
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(
+                        "test_user",
+                        "test_password",
+                        Collections.singleton(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))));
     }
 
     /**
@@ -167,6 +177,7 @@ public abstract class AbstractIT {
         msg.setStringProperty(MessageConstants.MESSAGE_ID, messageId);
         msg.setObjectProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
         msg.setStringProperty(MessageConstants.ENDPOINT, "backendInterfaceEndpoint");
+        msg.setStringProperty(MessageConstants.FINAL_RECIPIENT, "testRecipient");
         producer.send(msg);
         System.out.println("Message with ID [:" + messageId + "] sent in queue!");
         producer.close();

@@ -176,7 +176,7 @@ public class BackendNotificationServiceTest {
         new Expectations(backendNotificationService) {{
             backendNotificationService.validateSubmission(userMessage, backendName, notificationType);
             result = null;
-            backendNotificationService.notify(anyString, backendName, notificationType);
+            backendNotificationService.notify(anyString, backendName, notificationType, null);
             result = null;
         }};
 
@@ -185,7 +185,7 @@ public class BackendNotificationServiceTest {
         new Verifications() {{
             backendNotificationService.validateSubmission(userMessage, backendName, notificationType);
             times = 1;
-            backendNotificationService.notify(anyString, backendName, notificationType);
+            backendNotificationService.notify(anyString, backendName, notificationType, null);
             times = 1;
         }};
     }

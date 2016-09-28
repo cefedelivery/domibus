@@ -19,7 +19,9 @@
 
 package eu.domibus.ebms3.common.model;
 
+import eu.domibus.common.AuthRole;
 import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.ebms3.security.util.AuthUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
@@ -27,6 +29,11 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Collections;
 
 
 /**
@@ -45,14 +52,23 @@ public class RetentionWorker extends QuartzJobBean {
     @Autowired
     private ConfigurationDAO configurationDAO;
 
+    @Autowired
+    AuthUtils authUtils;
+
     @Override
     protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
 
         RetentionWorker.LOG.debug("RetentionWorker executed");
+        if(!authUtils.isUnsecureLoginAllowed()) {
+            SecurityContextHolder.getContext()
+                    .setAuthentication(new UsernamePasswordAuthenticationToken(
+                            "retention_user",
+                            "retention_password",
+                            Collections.singleton(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))));
+        }
+
         if (configurationDAO.configurationExists()) {
             messageRetentionService.deleteExpiredMessages();
         }
     }
-
-
 }

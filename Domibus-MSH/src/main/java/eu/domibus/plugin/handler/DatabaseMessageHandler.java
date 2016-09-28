@@ -106,11 +106,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Autowired
     AuthUtils authUtils;
 
-
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
     public Submission downloadMessage(final String messageId) throws MessageNotFoundException {
+        if(!authUtils.isUnsecureLoginAllowed())
+            authUtils.authorizeUser();
+
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
@@ -166,22 +167,27 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
     public MessageStatus getMessageStatus(final String messageId) {
+        if(!authUtils.isUnsecureLoginAllowed())
+            authUtils.authorizeAdmin();
+
         return this.messageLogDao.getMessageStatus(messageId);
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
     public List<? extends ErrorResult> getErrorsForMessage(final String messageId) {
+        if(!authUtils.isUnsecureLoginAllowed())
+            authUtils.authorizeAdmin();
+
         return this.errorLogDao.getErrorsForMessage(messageId);
     }
 
 
     @Override
     @Transactional
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN') OR @authUtils.isUnsecureLoginAllowed()")
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
+        if(authUtils.isUnsecureLoginAllowed())
+            authUtils.authorizeUser();
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 

@@ -19,10 +19,12 @@
 
 package eu.domibus.ebms3.common.model;
 
+import eu.domibus.common.AuthRole;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
+import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.NotificationListener;
 import org.apache.commons.lang.time.DateUtils;
@@ -30,12 +32,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.BrowserCallback;
 import org.springframework.jms.core.JmsOperations;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
 import javax.jms.QueueBrowser;
 import javax.jms.Session;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -63,8 +69,20 @@ public class MessageRetentionService {
     @Autowired
     private JmsOperations jmsOperations;
 
+    @Autowired
+    AuthUtils authUtils;
+
     @Transactional
     public void deleteExpiredMessages() {
+
+        if(!authUtils.isUnsecureLoginAllowed()) {
+            SecurityContextHolder.getContext()
+                    .setAuthentication(new UsernamePasswordAuthenticationToken(
+                            "retention_user",
+                            "retention_password",
+                            Collections.singleton(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))));
+        }
+
         final List<String> mpcs = pModeProvider.getMpcURIList();
         for (final String mpc : mpcs) {
             final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
