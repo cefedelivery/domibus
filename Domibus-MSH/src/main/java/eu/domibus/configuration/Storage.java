@@ -18,7 +18,7 @@ import java.util.Properties;
 @Component
 public class Storage {
 
-    private static final String ATTACHMENT_STORAGE_LOCATION = "domibus.attachment.storage.location";
+    public static final String ATTACHMENT_STORAGE_LOCATION = "domibus.attachment.storage.location";
     private static final Log LOG = LogFactory.getLog(Storage.class);
 
     public static File storageDirectory = null;

@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
     BackendInterface backendWebService;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         if (!initialized) {
             insertDataset("sendMessageValidateProperties.sql");
             initialized = true;

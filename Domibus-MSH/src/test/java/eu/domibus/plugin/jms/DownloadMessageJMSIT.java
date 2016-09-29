@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import java.io.IOException;
 
 /**
  * This JUNIT implements the Test cases Download Message-03 and Download Message-04.
@@ -52,7 +53,7 @@ public class DownloadMessageJMSIT extends AbstractIT {
     BackendConnector backendJms;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
 
         if (!initialized) {
             insertDataset("downloadMessage.sql");

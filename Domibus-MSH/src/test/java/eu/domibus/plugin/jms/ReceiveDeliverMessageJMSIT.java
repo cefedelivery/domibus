@@ -70,7 +70,7 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
 
         if (!initialized) {
             // The dataset is executed only once for each class
-            insertDataset("receiveMessageJMS.sql");
+            insertDataset("receiveMessageJMS.sql", this.getMode());
             initialized = true;
         }
 

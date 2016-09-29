@@ -4,13 +4,16 @@ import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.common.util.concurrent.TimeLimiter;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
 import eu.domibus.common.NotificationType;
+import eu.domibus.configuration.Storage;
 import eu.domibus.messaging.MessageConstants;
-import eu.domibus.messaging.NotifyMessageCreator;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
@@ -29,9 +32,12 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 import java.util.Scanner;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +51,8 @@ import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 @DirtiesContext
 @Rollback
 public abstract class AbstractIT {
+
+    public enum Mode {DATABASE, FILESYSTEM}
 
     protected static final String WS_NOT_QUEUE = "domibus.notification.webservice";
 
@@ -66,8 +74,17 @@ public abstract class AbstractIT {
 
     private static boolean initialized;
 
+    private static final Log LOG = LogFactory.getLog(AbstractIT.class);
+
     @Autowired
     protected DataSource dataSource;
+
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
+
+    @Autowired
+    private Storage storage;
 
     @BeforeClass
     public static void init() throws IOException {
@@ -85,7 +102,7 @@ public abstract class AbstractIT {
      * @param in
      * @throws SQLException
      */
-    public static void importSQL(Connection conn, InputStream in) throws SQLException {
+    private void importSQL(Connection conn, InputStream in, Mode mode) throws SQLException, IOException {
         Scanner s = new Scanner(in);
         s.useDelimiter("(;(\r)?\n)|(--\n)");
         Statement st = null;
@@ -104,6 +121,25 @@ public abstract class AbstractIT {
             }
         } finally {
             if (st != null) st.close();
+        }
+
+        if (Mode.FILESYSTEM.equals(mode)) {
+            //write to FS
+            String readPayloads = "SELECT * FROM TB_PART_INFO";
+            st = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            ResultSet rs = st.executeQuery(readPayloads);
+            while (rs.next()) {
+                String filename = domibusProperties.getProperty(Storage.ATTACHMENT_STORAGE_LOCATION) + "/" + UUID.randomUUID().toString() + ".payload";
+                FileOutputStream f = new FileOutputStream(filename);
+                f.write(rs.getBytes("BINARY_DATA"));
+                f.close();
+                rs.updateNull("BINARY_DATA");
+                rs.updateString("FILENAME", filename);
+                rs.updateRow();
+
+
+            }
+            st.close();
         }
     }
 
@@ -133,15 +169,30 @@ public abstract class AbstractIT {
         return null;
     }
 
+
+    protected void insertDataset(String dataset) throws IOException {
+        this.insertDataset(dataset, this.getMode());
+    }
+
+
     /**
      * Insert the given dataset inside the database
      *
      * @param dataset
      */
-    protected void insertDataset(String dataset) {
+    protected void insertDataset(String dataset, Mode mode) throws IOException {
+        if (Mode.FILESYSTEM.equals(mode)) {
+            File target = new File("target/test-classes/dataset/storage");
+            if (!target.exists()) {
+                target.mkdirs();
+            }
+            domibusProperties.put(Storage.ATTACHMENT_STORAGE_LOCATION, new File("target/test-classes/dataset/storage").getAbsolutePath());
+            storage.initFileSystemStorage();
+        }
+
         try {
             FileInputStream fis = new FileInputStream(new File("target/test-classes/dataset/database/" + dataset).getAbsolutePath());
-            importSQL(dataSource.getConnection(), fis);
+            importSQL(dataSource.getConnection(), fis, mode);
         } catch (final Exception exc) {
             Assert.fail(exc.getMessage());
             exc.printStackTrace();
@@ -253,6 +304,10 @@ public abstract class AbstractIT {
             }
         }
         return "NOk";
+    }
+
+    protected Mode getMode() {
+        return Mode.valueOf(System.getProperty("attachment.mode", Mode.DATABASE.name()));
     }
 
 }

@@ -9,6 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+
 
 /**
  * Created by draguio on 16/02/2016.
@@ -21,7 +23,7 @@ public class GetMessageStatusIT extends AbstractIT {
     private static boolean initialized;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         if (!initialized) {
             insertDataset("getMessageStatus.sql");
             initialized = true;
