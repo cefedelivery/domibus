@@ -63,7 +63,4 @@
         </jaxws:inInterceptors>
     </jaxws:endpoint>
 
-    <bean id="customAuthenticationInterceptor" class="eu.domibus.plugin.webService.impl.CustomAuthenticationInterceptor">
-    </bean>
-
 </beans>
