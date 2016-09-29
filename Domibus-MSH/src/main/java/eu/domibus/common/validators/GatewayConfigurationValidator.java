@@ -7,9 +7,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -35,14 +33,8 @@ public class GatewayConfigurationValidator {
     public void validateConfiguration() throws Exception {
         LOG.info("Checking gateway configuration ...");
         validateCerts();
-        File datasourcesHash = (new File(domibusConfigLocation, "domibus-datasources.xml.sha256"));
-        if (datasourcesHash.exists()) {
-            validateFileHash("domibus-datasources.xml", FileUtils.readFileToString(datasourcesHash).trim());
-        }
-        File securityHash = (new File(domibusConfigLocation, "domibus-security.xml.sha256"));
-        if (securityHash.exists()) {
-            validateFileHash("domibus-security.xml", FileUtils.readFileToString(new File(domibusConfigLocation, "domibus-security.xml.sha256")).trim());
-        }
+        validateFileHash("domibus-datasources.xml", new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus-datasources.xml.sha256"))).readLine());
+        validateFileHash("domibus-security.xml", new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus-security.xml.sha256"))).readLine());
     }
 
     private void validateCerts() {
