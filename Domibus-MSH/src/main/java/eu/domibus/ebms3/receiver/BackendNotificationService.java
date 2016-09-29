@@ -21,7 +21,7 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.NotificationType;
-import eu.domibus.common.dao.MessageLogDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -75,7 +75,7 @@ public class BackendNotificationService {
     private RoutingService routingService;
 
     @Autowired
-    private MessageLogDao messageLogDao;
+    private UserMessageLogDao userMessageLogDao;
 
     @Autowired
     protected SubmissionAS4Transformer submissionAS4Transformer;
@@ -207,18 +207,18 @@ public class BackendNotificationService {
     }
 
     public void notifyOfSendFailure(final String messageId) {
-        final String backendName = messageLogDao.findBackendForMessageId(messageId);
+        final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_FAILURE);
 
     }
 
     public void notifyOfSendSuccess(final String messageId) {
-        final String backendName = messageLogDao.findBackendForMessageId(messageId);
+        final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_SUCCESS);
     }
 
     public void notifyOfReceiveFailure(final String messageId, String endpoint) {
-        final String backendName = messageLogDao.findBackendForMessageId(messageId);
+        final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         for (final NotificationListener notificationListenerService : notificationListenerServices) {
             if (notificationListenerService.getBackendName().equals(backendName)) {
                 jmsManager.sendMessageToQueue(new ReceiveFailedMessageCreator(messageId, endpoint).createMessage(), notificationListenerService.getBackendNotificationQueue());

@@ -63,12 +63,29 @@ public class ReceiveMessageIT extends AbstractIT {
 
     private void verifyMessageStatus(String messageId) throws SQLException {
         Connection con = dataSource.getConnection();
-        String sql = "SELECT MESSAGE_ID, MESSAGE_STATUS FROM TB_MESSAGE_LOG WHERE MESSAGE_ID = ?";
+        String sql = "SELECT MESSAGE_ID, MESSAGE_STATUS FROM TB_MESSAGE_LOG WHERE MESSAGE_TYPE like 'USER_MESSAGE' AND MESSAGE_ID = ?";
         PreparedStatement pstmt = con.prepareStatement(sql);
         pstmt.setString(1, messageId);
         ResultSet resultSet = pstmt.executeQuery();
         resultSet.next();
         Assert.assertEquals(resultSet.getString("MESSAGE_STATUS"), MessageStatus.RECEIVED.name());
+        pstmt.close();
+    }
+
+    private void verifySignalMessageStatus(String messageId) throws SQLException {
+        Connection con = dataSource.getConnection();
+        String sql = "SELECT MESSAGE_ID FROM TB_MESSAGE_INFO WHERE REF_TO_MESSAGE_ID= ?";
+        PreparedStatement pstmt = con.prepareStatement(sql);
+        pstmt.setString(1, messageId);
+        ResultSet resultSet = pstmt.executeQuery();
+        resultSet.next();
+
+        sql = "SELECT MESSAGE_STATUS FROM TB_MESSAGE_LOG WHERE MESSAGE_TYPE like 'SIGNAL_MESSAGE' AND MESSAGE_ID = ?";
+        pstmt = con.prepareStatement(sql);
+        pstmt.setString(1, resultSet.getString("MESSAGE_ID"));
+        resultSet = pstmt.executeQuery();
+        resultSet.next();
+        Assert.assertEquals(resultSet.getString("MESSAGE_STATUS"), MessageStatus.SEND_IN_PROGRESS.name());
         pstmt.close();
     }
 
@@ -83,12 +100,12 @@ public class ReceiveMessageIT extends AbstractIT {
      */
     @Test
     public void testReceiveMessage() throws SOAPException, IOException, SQLException, ParserConfigurationException, SAXException {
-        String filename = "SOAPMessage.xml";
-        String messageId = "359b840b-b215-4c70-89e7-59aa0fe73cec@domibus.eu";
+        String filename = "SOAPMessage2.xml";
+        String messageId = "43bb6883-77d2-4a41-bac4-52a485d50084@domibus.eu";
         SOAPMessage soapMessage = createSOAPMessage(filename);
         mshWebservice.invoke(soapMessage);
-
         verifyMessageStatus(messageId);
+        verifySignalMessageStatus(messageId);
     }
 
     protected SOAPMessage createSOAPMessage(String dataset) throws SOAPException, IOException, ParserConfigurationException, SAXException {

@@ -22,10 +22,10 @@ package eu.domibus.ebms3.sender;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.logging.MessageLogEntry;
+import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,7 @@ public class UpdateRetryLoggingService {
     private BackendNotificationService backendNotificationService;
 
     @Autowired
-    private MessageLogDao messageLogDao;
+    private UserMessageLogDao userMessageLogDao;
 
     @Autowired
     private MessagingDao messagingDao;
@@ -49,19 +49,19 @@ public class UpdateRetryLoggingService {
      * @param legConfiguration processing information for the message
      */
     public void updateRetryLogging(final String messageId, final LegConfiguration legConfiguration) {
-        final MessageLogEntry messageLogEntry = this.messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
-        //messageLogEntry.setMessageStatus(MessageStatus.SEND_ATTEMPT_FAILED); //This is not stored in the database
-        if (messageLogEntry.getSendAttempts() < messageLogEntry.getSendAttemptsMax() //check that there are attempts left
-                && (messageLogEntry.getReceived().getTime() + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis()) {// chek that there is time left
-            messageLogEntry.setSendAttempts(messageLogEntry.getSendAttempts() + 1);
+        final MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
+        //userMessageLog.setMessageStatus(MessageStatus.SEND_ATTEMPT_FAILED); //This is not stored in the database
+        if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax() //handle that there are attempts left
+                && (userMessageLog.getReceived().getTime() + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis()) {// chek that there is time left
+            userMessageLog.setSendAttempts(userMessageLog.getSendAttempts() + 1);
             if (legConfiguration.getReceptionAwareness() != null) {
-                messageLogEntry.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(messageLogEntry.getNextAttempt(), messageLogEntry.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
-                messageLogEntry.setMessageStatus(MessageStatus.WAITING_FOR_RETRY);
-                messageLogDao.update(messageLogEntry);
+                userMessageLog.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(userMessageLog.getNextAttempt(), userMessageLog.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
+                userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RETRY);
+                userMessageLogDao.update(userMessageLog);
             }
 
         } else { // mark message as ultimately failed if max retries reached
-            if (NotificationStatus.REQUIRED.equals(messageLogEntry.getNotificationStatus())) {
+            if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus())) {
                 backendNotificationService.notifyOfSendFailure(messageId);
                 messagingDao.delete(messageId, MessageStatus.SEND_FAILURE, NotificationStatus.NOTIFIED);
             } else {

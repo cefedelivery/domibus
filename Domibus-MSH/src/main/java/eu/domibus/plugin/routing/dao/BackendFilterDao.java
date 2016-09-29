@@ -64,7 +64,7 @@ public class BackendFilterDao extends BasicDao<BackendFilter> {
             Collections.sort(result);
             return result;
         } catch (final NoResultException nrEx) {
-            BasicDao.LOG.debug("Query BackendFilter.findEntries did not find any result", nrEx);
+            BasicDao.logger.debug("Query BackendFilter.findEntries did not find any result", nrEx);
             return new ArrayList<>();
         }
     }

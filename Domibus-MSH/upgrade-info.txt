@@ -27,8 +27,6 @@ Domibus 3.2 (from 3.1.1):
                                       </jaxws:inInterceptors>
 
                               </jaxws:endpoint>
-                        o   add customAuthenticationInterceptor bean under <beans> tag
-                                <bean id="customAuthenticationInterceptor" class="eu.domibus.plugin.webService.impl.CustomAuthenticationInterceptor" />
                 -  in file "\domibus\conf\domibus\internal\ehcache.xml":
                         o   add <cache name="certValidationByAlias" maxBytesLocalHeap="5m" timeToLiveSeconds="3600" overflowToDisk="false"/>
                         o   add <cache name="crlByCert"  maxBytesLocalHeap="5m"  timeToLiveSeconds="3600"  overflowToDisk="false"/>
@@ -110,8 +108,6 @@ Domibus 3.2 (from RC1):
                                       </jaxws:inInterceptors>
 
                               </jaxws:endpoint>
-                          o   add customAuthenticationInterceptor bean under <beans> tag
-                                <bean id="customAuthenticationInterceptor" class="eu.domibus.plugin.webService.impl.CustomAuthenticationInterceptor" />
                   -  in file conf/domibus/internal/ehcache.xml, add
                                             <cache name="crlByCert" 
                                                 maxBytesLocalHeap="5m" 

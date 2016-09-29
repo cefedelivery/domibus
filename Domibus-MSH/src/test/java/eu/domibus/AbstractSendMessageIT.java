@@ -11,7 +11,6 @@ import eu.domibus.plugin.webService.generated.SendRequest;
 import eu.domibus.plugin.webService.generated.SendResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -49,14 +48,13 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
     private ReliabilityChecker reliabilityChecker;
 
 
-    @Before
-    public void prepareSendMessage() {
+    public void prepareSendMessage(String responseFileName) {
         /* Initialize the mock objects */
         MockitoAnnotations.initMocks(this);
         /* Mock the nonRepudiationChecker, it fails because security in/out policy interceptors are not ran */
         Mockito.when(nonRepudiationChecker.compareUnorderedReferenceNodeLists(Mockito.any(NodeList.class), Mockito.any(NodeList.class))).thenReturn(true);
 
-        String body = getAS4Response("validAS4Response.xml");
+        String body = getAS4Response(responseFileName);
 
         // Mock the response from the recipient MSH
         stubFor(post(urlEqualTo("/domibus/services/msh"))
@@ -83,7 +81,7 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
         pstmt.setString(1, messageId);
         ResultSet resultSet = pstmt.executeQuery();
         resultSet.next();
-        Assert.assertEquals(resultSet.getString("MESSAGE_STATUS"), MessageStatus.ACKNOWLEDGED.name());
+        Assert.assertEquals(MessageStatus.ACKNOWLEDGED.name(), resultSet.getString("MESSAGE_STATUS"));
         pstmt.close();
     }
 

@@ -23,9 +23,9 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.model.logging.MessageLogEntry;
+import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.ebms3.common.model.DispatchMessageCreator;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.messaging.MessageConstants;
@@ -70,19 +70,19 @@ public class RetryService {
     private Queue dispatchQueue;
 
     @Autowired
-    private MessageLogDao messageLogDao;
+    private UserMessageLogDao userMessageLogDao;
 
     @Autowired
     private MessagingDao messagingDao;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {
-        final List<String> messageIdsToPurge = messageLogDao.findTimedoutMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
+        final List<String> messageIdsToPurge = userMessageLogDao.findTimedoutMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String messageIdToPurge : messageIdsToPurge) {
             purgeTimedoutMessage(messageIdToPurge);
         }
         LOG.debug(messageIdsToPurge.size() + " messages to purge found");
-        final List<String> messageIdsToSend = messageLogDao.findRetryMessages();
+        final List<String> messageIdsToSend = userMessageLogDao.findRetryMessages();
         if (!messageIdsToSend.isEmpty()) {
             jmsOperations.browse(dispatchQueue, new BrowserCallback<Void>() {
                 @Override
@@ -101,9 +101,9 @@ public class RetryService {
     }
 
     private void purgeTimedoutMessage(final String messageIdToPurge) {
-        final MessageLogEntry messageLogEntry = messageLogDao.findByMessageId(messageIdToPurge, MSHRole.SENDING);
+        final MessageLog userMessageLog = userMessageLogDao.findByMessageId(messageIdToPurge, MSHRole.SENDING);
 
-        final boolean notify = NotificationStatus.REQUIRED.equals(messageLogEntry.getNotificationStatus());
+        final boolean notify = NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus());
 
         if (notify) {
             backendNotificationService.notifyOfSendFailure(messageIdToPurge);
@@ -114,7 +114,7 @@ public class RetryService {
     }
 
     private void sendJmsMessage(final String messageId) {
-        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, messageLogDao.findEndpointForMessageId(messageId)).createMessage(), dispatchQueue);
-//        jmsOperations.send(dispatchQueue, new DispatchMessageCreator(messageId, messageLogDao.findEndpointForMessageId(messageId)));
+        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, userMessageLogDao.findEndpointForMessageId(messageId)).createMessage(), dispatchQueue);
+//        jmsOperations.send(dispatchQueue, new DispatchMessageCreator(messageId, userMessageLogDao.findEndpointForMessageId(messageId)));
     }
 }

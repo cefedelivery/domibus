@@ -22,7 +22,9 @@ import java.util.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
+@Component(value="customAuthenticationInterceptor")
 public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Message> {
 
     private static final Log LOG = LogFactory.getLog(CustomAuthenticationInterceptor.class);
