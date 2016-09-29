@@ -208,7 +208,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Transactional
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
 
-        if(authUtils.isUnsecureLoginAllowed())
+        if(!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
