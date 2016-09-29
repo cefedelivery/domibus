@@ -70,9 +70,9 @@ Domibus 3.2 (from 3.1.1):
                                         <amq:redeliveryPolicy/>
                                     </amq:redeliveryPolicy>
                                 </amq:xaConnectionFactory>
-                -  [Tomcat only] conf/domibus/persistence.xml, add in the <persistence-unit> tag:
-                                 <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
 
+                - [Tomcat only] in file conf/domibus/persistence.xml, add to the <persistence-unit> tag:
+                                <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
 
                 If you are using samples keystores, please update them since they are expiring on the 26th of October 2016.
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -138,8 +138,8 @@ Domibus 3.2 (from RC1):
                                  </sec:authentication-manager>
                                  <sec:global-method-security pre-post-annotations="enabled"/>
 
-                  - [Tomcat only] in fiel conf/domibus/persistence.xml, add to the <persistence-unit> tag:
-                                <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
+                  - [Tomcat only] in file conf/domibus/persistence.xml, add to the <persistence-unit> tag:
+                                  <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2 RC1:   Run the appropriate DB migration script.
                     Replace domibus.war and the plugin(s) jar(s) into \domibus\conf\domibus\plugins\lib"
