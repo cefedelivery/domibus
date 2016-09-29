@@ -48,6 +48,11 @@
             <outputDirectory>domibus</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <filtered>false</filtered>
+            <excludes>
+                <exclude>work</exclude>
+                <exclude>temp/**</exclude>
+                <exclude>webapps/**/*</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/main/conf/domibus</directory>
