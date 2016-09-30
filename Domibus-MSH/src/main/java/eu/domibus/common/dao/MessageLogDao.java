@@ -3,7 +3,12 @@ package eu.domibus.common.dao;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.logging.MessageLog;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -17,64 +22,65 @@ import java.util.*;
  */
 public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
 
+    protected static final Log logger = LogFactory.getLog(MessageLog.class);
+
     public <F extends MessageLog> MessageLogDao(final Class<F> type) {
 
         super(type);
     }
 
-    public void setMessageAsAck(String messageId) {
-        this.setMessageStatus(messageId, MessageStatus.ACKNOWLEDGED);
+    public void setMessageAsDeleted(String messageId) {
+        setMessageStatus(messageId, MessageStatus.DELETED);
+    }
+
+    public void setMessageAsAcknowledged(String messageId) {
+        setMessageStatus(messageId, MessageStatus.ACKNOWLEDGED);
     }
 
     public void setMessageAsAckWithWarnings(String messageId) {
-        this.setMessageStatus(messageId, MessageStatus.ACKNOWLEDGED_WITH_WARNING);
+        setMessageStatus(messageId, MessageStatus.ACKNOWLEDGED_WITH_WARNING);
     }
 
     public void setMessageAsWaitingForReceipt(String messageId) {
-        this.setMessageStatus(messageId, MessageStatus.WAITING_FOR_RECEIPT);
+        setMessageStatus(messageId, MessageStatus.WAITING_FOR_RECEIPT);
     }
 
-    protected abstract void setMessageStatus(String messageId, MessageStatus messageStatus);
-
-    public abstract MessageStatus getMessageStatus(String messageId);
-
-    public abstract MessageLog findByMessageId(String messageId, MSHRole mshRole);
-
-    public abstract Long countMessages(HashMap<String, Object> filters);
-
-    public abstract List<? extends MessageLog> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters);
-
-/*    public Long countMessages(HashMap<String, Object> filters) {
-        CriteriaBuilder cb = this.em.getCriteriaBuilder();
-        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-        Root<MessageLog> mle = cq.from(MessageLog.class);
-        cq.select(cb.count(mle));
-        List<Predicate> predicates = getPredicates(filters, cb, mle);
-        cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
-        TypedQuery<Long> query = em.createQuery(cq);
-        return query.getSingleResult();
+    public void setMessageAsSendFailure(String messageId) {
+        setMessageStatus(messageId, MessageStatus.SEND_FAILURE);
     }
 
-    public List<? extends MessageLog> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
-        CriteriaBuilder cb = this.em.getCriteriaBuilder();
-        CriteriaQuery<? extends MessageLog> cq = cb.createQuery(MessageLog.class);
-        Root<? extends MessageLog> mle = cq.from(MessageLog.class);
-        cq.select(mle);
-        List<Predicate> predicates = getPredicates(filters, cb, mle);
-        cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
-        if (column != null) {
-            if (asc) {
-                cq.orderBy(cb.asc(mle.get(column)));
-            } else {
-                cq.orderBy(cb.desc(mle.get(column)));
-            }
+    @Transactional(propagation = Propagation.MANDATORY)
+    private void setMessageStatus(String messageId, MessageStatus messageStatus) {
 
+        MessageLog messageLog = findByMessageId(messageId);
+        messageLog.setMessageStatus(messageStatus);
+
+        switch (messageStatus) {
+            case DELETED:
+                messageLog.setDeleted(new Date());
+                break;
+            default:
         }
-        TypedQuery<? extends MessageLog> query = this.em.createQuery(cq);
-        query.setFirstResult(from);
-        query.setMaxResults(max);
-        return query.getResultList();
-    }*/
+        super.update(messageLog);
+        logger.debug("Message Log status updated to [" + messageStatus + "]");
+    }
+
+    public MessageStatus getMessageStatus(String messageId) {
+        try {
+            return findByMessageId(messageId).getMessageStatus();
+        } catch (NoResultException nrEx) {
+            logger.debug("No result for message with id [" + messageId + "]", nrEx);
+            return MessageStatus.NOT_FOUND;
+        }
+    }
+
+    protected abstract MessageLog findByMessageId(String messageId);
+
+    protected abstract MessageLog findByMessageId(String messageId, MSHRole mshRole);
+
+    protected abstract Long countMessages(HashMap<String, Object> filters);
+
+    protected abstract List<? extends MessageLog> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters);
 
     protected List<Predicate> getPredicates(HashMap<String, Object> filters, CriteriaBuilder cb, Root<? extends MessageLog> mle) {
         List<Predicate> predicates = new ArrayList<>();

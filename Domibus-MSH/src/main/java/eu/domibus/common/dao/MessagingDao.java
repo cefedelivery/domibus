@@ -24,6 +24,8 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -40,12 +42,13 @@ import java.util.List;
 import static org.springframework.util.StringUtils.hasLength;
 
 /**
- * @author Christian Koch, Stefan Mueller
+ * @author Christian Koch, Stefan Mueller, Federico Martini
  * @since 3.0
  */
-
 @Repository
 public class MessagingDao extends BasicDao<Messaging> {
+
+    protected static final Log logger = LogFactory.getLog(MessagingDao.class);
 
     public MessagingDao() {
         super(Messaging.class);
@@ -70,41 +73,6 @@ public class MessagingDao extends BasicDao<Messaging> {
         }
     }
 
-    /**
-     * Removes the binary payload data of a given
-     * {@link UserMessage} and sets
-     * status to {@link eu.domibus.common.MessageStatus#DELETED}.
-     *
-     * @param messaging the message to be updated
-     */
-    @Override
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void delete(final Messaging messaging) {
-        final String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
-        delete(messageId);
-    }
-
-    /**
-     * Clear payloaddata for corresponding message with the given messageId. Set MessageStatus to DELETED
-     *
-     * @param messageId
-     */
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void delete(final String messageId) {
-        delete(messageId, MessageStatus.DELETED);
-    }
-
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void delete(final String messageId, final MessageStatus messageStatus) {
-        clearPayloadData(messageId);
-
-        final Query messageStatusQuery = this.em.createNamedQuery("UserMessageLog.setMessageStatus");
-        messageStatusQuery.setParameter("MESSAGE_ID", messageId);
-        messageStatusQuery.setParameter("TIMESTAMP", new Date());
-        messageStatusQuery.setParameter("MESSAGE_STATUS", messageStatus);
-        messageStatusQuery.executeUpdate();
-    }
-
     @Transactional(propagation = Propagation.MANDATORY)
     public void delete(final String messageId, final MessageStatus messageStatus, final NotificationStatus notificationStatus) {
         clearPayloadData(messageId);
@@ -117,8 +85,13 @@ public class MessagingDao extends BasicDao<Messaging> {
         messageStatusQuery.executeUpdate();
     }
 
+    /**
+     * Clears the payloads data for the message with the given messageId.
+     *
+     * @param messageId
+     */
     @Transactional(propagation = Propagation.MANDATORY)
-    public void clearPayloadData(final String messageId) {
+    public void clearPayloadData(String messageId) {
         final Query payloadsQuery = em.createNamedQuery("Messaging.findPartInfosForMessage");
         payloadsQuery.setParameter("MESSAGE_ID", messageId);
         List<PartInfo> results = payloadsQuery.getResultList();

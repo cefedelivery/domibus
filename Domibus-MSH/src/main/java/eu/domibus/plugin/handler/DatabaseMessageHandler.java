@@ -56,7 +56,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.Queue;
 import javax.persistence.NoResultException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -125,8 +124,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         final UserMessageLog userMessageLog;
         final UserMessage userMessage;
         try {
-            userMessage = this.messagingDao.findUserMessageByMessageId(messageId);
-            userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
+            userMessage = messagingDao.findUserMessageByMessageId(messageId);
+            userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
             if (userMessageLog == null) {
                 throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
             }
@@ -139,7 +138,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
         // Deleting the message and signal message if the retention download is zero
         if (0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc())) {
-            messagingDao.delete(messageId);
+            messagingDao.clearPayloadData(messageId);
             List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
             if (!signalMessages.isEmpty()) {
                 for (SignalMessage signalMessage : signalMessages) {
@@ -147,14 +146,13 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 }
             }
         }
-        // Updates the User Message log
-        userMessageLog.setDeleted(new Date());
-        userMessageLogDao.update(userMessageLog);
-        // Updates the Signal Message log
+        // Sets the log status to deleted because the message can only be downloaded once.
+        userMessageLogDao.setMessageAsDeleted(messageId);
+        // Sets the log status to deleted also for the signal messages (if present).
         List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
         if (!signalMessageIds.isEmpty()) {
             for (String signalMessageId : signalMessageIds) {
-                signalMessageLogDao.setMessageStatus(signalMessageId, MessageStatus.DELETED);
+                signalMessageLogDao.setMessageAsDeleted(signalMessageId);
             }
         }
         return transformer.transformFromMessaging(userMessage);
@@ -192,7 +190,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         if(!authUtils.isUnsecureLoginAllowed())
             authUtils.hasAdminRole();
 
-        return this.userMessageLogDao.getMessageStatus(messageId);
+        return userMessageLogDao.getMessageStatus(messageId);
     }
 
     @Override
@@ -200,7 +198,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         if(!authUtils.isUnsecureLoginAllowed())
             authUtils.hasAdminRole();
 
-        return this.errorLogDao.getErrorsForMessage(messageId);
+        return errorLogDao.getErrorsForMessage(messageId);
     }
 
 
@@ -214,10 +212,10 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
         try {
-            final UserMessage userMessage = this.transformer.transformFromSubmission(messageData);
+            final UserMessage userMessage = transformer.transformFromSubmission(messageData);
             final MessageInfo messageInfo = userMessage.getMessageInfo();
             if (messageInfo == null) {
-                userMessage.setMessageInfo(this.objectFactory.createMessageInfo());
+                userMessage.setMessageInfo(objectFactory.createMessageInfo());
             }
             String messageId = userMessage.getMessageInfo().getMessageId();
             if (messageId == null || userMessage.getMessageInfo().getMessageId().trim().isEmpty()) {
@@ -236,13 +234,13 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             }
 
             final String pmodeKey;
-            final Messaging message = this.ebMS3Of.createMessaging();
+            final Messaging message = ebMS3Of.createMessaging();
             message.setUserMessage(userMessage);
 
             validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
 
             try {
-                pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(userMessage);
+                pmodeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
             } catch (IllegalStateException e) { //if no pmodes are configured
                 LOG.debug(e);
                 throw new PModeMismatchException("PMode could not be found. Are PModes configured in the database?");
@@ -270,8 +268,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 mpc = mpcMap.get(to).getQualifiedName();
             }
             userMessage.setMpc(mpc);
-            this.payloadProfileValidator.validate(message, pmodeKey);
-            this.propertyProfileValidator.validate(message, pmodeKey);
+            payloadProfileValidator.validate(message, pmodeKey);
+            propertyProfileValidator.validate(message, pmodeKey);
             int sendAttemptsMax = 1;
 
             if (legConfiguration.getReceptionAwareness() != null) {
@@ -279,10 +277,10 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             }
 
             try {
-                final boolean compressed = this.compressionService.handleCompression(userMessage, legConfiguration);
+                final boolean compressed = compressionService.handleCompression(userMessage, legConfiguration);
                 LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
             } catch (final EbMS3Exception e) {
-                this.errorLogDao.create(new ErrorLogEntry(e));
+                errorLogDao.create(new ErrorLogEntry(e));
                 throw e;
             }
 

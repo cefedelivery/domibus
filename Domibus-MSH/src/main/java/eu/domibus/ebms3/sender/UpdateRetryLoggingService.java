@@ -65,7 +65,8 @@ public class UpdateRetryLoggingService {
                 backendNotificationService.notifyOfSendFailure(messageId);
                 messagingDao.delete(messageId, MessageStatus.SEND_FAILURE, NotificationStatus.NOTIFIED);
             } else {
-                messagingDao.delete(messageId, MessageStatus.SEND_FAILURE);
+                messagingDao.clearPayloadData(messageId);
+                userMessageLogDao.setMessageAsSendFailure(messageId);
             }
         }
     }

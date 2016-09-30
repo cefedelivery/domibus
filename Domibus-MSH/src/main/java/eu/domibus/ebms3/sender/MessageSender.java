@@ -136,7 +136,7 @@ public class MessageSender implements MessageListener {
                 case OK:
                     switch (isOk) {
                         case OK:
-                            this.userMessageLogDao.setMessageAsAck(messageId);
+                            this.userMessageLogDao.setMessageAsAcknowledged(messageId);
                             break;
                         case WARNING:
                             this.userMessageLogDao.setMessageAsAckWithWarnings(messageId);
@@ -166,7 +166,7 @@ public class MessageSender implements MessageListener {
     private void handleEbms3Exception(final EbMS3Exception exceptionToHandle, final String messageId) {
         exceptionToHandle.setRefToMessageId(messageId);
         if (!exceptionToHandle.isRecoverable() && !Boolean.parseBoolean(System.getProperty(UNRECOVERABLE_ERROR_RETRY))) {
-            userMessageLogDao.setMessageAsAck(messageId);
+            userMessageLogDao.setMessageAsAcknowledged(messageId);
         }
 
         exceptionToHandle.setMshRole(MSHRole.SENDING);
