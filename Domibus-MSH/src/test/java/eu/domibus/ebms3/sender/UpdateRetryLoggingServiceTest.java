@@ -138,12 +138,11 @@ public class UpdateRetryLoggingServiceTest {
             result = userMessageLog;
         }};
 
-
         updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
 
-
         new Verifications() {{
-            messagingDao.delete(messageId, MessageStatus.SEND_FAILURE);
+            messagingDao.clearPayloadData(messageId);
+            messageLogDao.setMessageAsSendFailure(messageId);
         }};
 
     }
