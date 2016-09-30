@@ -33,8 +33,12 @@ public class GatewayConfigurationValidator {
     public void validateConfiguration() throws Exception {
         LOG.info("Checking gateway configuration ...");
         validateCerts();
-        validateFileHash("domibus-datasources.xml", new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus-datasources.xml.sha256"))).readLine());
-        validateFileHash("domibus-security.xml", new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus-security.xml.sha256"))).readLine());
+        try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus-datasources.xml.sha256"))));) {
+            validateFileHash("domibus-datasources.xml", br.readLine());
+        }
+        try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus-security.xml.sha256"))));) {
+            validateFileHash("domibus-security.xml", br.readLine());
+        }
     }
 
     private void validateCerts() {
