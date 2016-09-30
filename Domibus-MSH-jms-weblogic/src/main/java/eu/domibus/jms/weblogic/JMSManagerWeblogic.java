@@ -79,55 +79,20 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
                         LOG.debug("JMS Destination " + jmsDestination);
                         JMSDestinationSPI destination = new JMSDestinationSPI();
                         String destinationFQName = (String) mbsc.getAttribute(jmsDestination, "Name");
-                        String moduleName = destinationFQName.substring(0, destinationFQName.indexOf("!"));
-                        String destinationName = destinationFQName.substring(destinationFQName.indexOf("!") + 1);
-                        if (destinationName.contains(".")) {
-                            String jmsServerName = destinationName.substring(0, destinationName.lastIndexOf("."));
-                            destinationName = destinationName.substring(destinationName.lastIndexOf(".") + 1);
-                        }
-                        if (destinationName.contains("@")) {
-                            String jmsServerName = destinationName.substring(0, destinationName.lastIndexOf("@"));
-                            destinationName = destinationName.substring(destinationName.lastIndexOf("@") + 1);
-                        }
+                        String destinationName = getQueueName(destinationFQName);
                         destination.setName(destinationName);
 
-//                        destination.setServerAddress(serverAddress);
-//                        destination.setServerPort(serverPort);
                         ObjectName configQueue = getQueueMap(mbsc).get(destinationName);
                         if (configQueue != null) {
                             destination.setType("Queue");
                             destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
-//                            destination.setObjectName(jmsDestination);
                             String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
-//                            destination.setJndiName(configQueueJndiName);
                             destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
                             destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
                         }
-                        /*ObjectName configTopic = getTopicMap(mbsc).get(destinationName);
-                        if (configTopic != null) {
-                            destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
-                            destination.setType("Topic");
-                            String configTopicJndiName = (String) mbsc.getAttribute(configTopic, "JNDIName");
-//                            destination.setJndiName(configTopicJndiName);
-                            destination.setProperty(PROPERTY_JNDI_NAME, configTopicJndiName);
-                            ObjectName[] jmsDurableSubscribers = (ObjectName[]) mbsc.getAttribute(jmsDestination, "DurableSubscribers");
-                            for (ObjectName jmsDurableSubscriber : jmsDurableSubscribers) {
-                                JMSDestinationSPI subscriberDestination = new JMSDestinationSPI();
-                                subscriberDestination.setProperty(PROPERTY_OBJECT_NAME, jmsDurableSubscriber);
-//                                subscriberDestination.setObjectName(jmsDurableSubscriber);
-                                String subscriptionName = (String) mbsc.getAttribute(jmsDurableSubscriber, "SubscriptionName");
-                                subscriberDestination.setName(destination.getName() + "_" + subscriptionName);
-                                subscriberDestination.setType("Queue");
-                                subscriberDestination.setProperty(PROPERTY_JNDI_NAME, null);
-//                                subscriberDestination.setJndiName(null);
-                                destinationMap.put(subscriberDestination.getName(), subscriberDestination);
-                            }
-                        }*/
                         Long numberOfMessages = (Long) mbsc.getAttribute(jmsDestination, "MessagesCurrentCount");
-//                        Long numberOfMessagesPending = (Long) mbsc.getAttribute(jmsDestination, "MessagesPendingCount");
 
                         destination.setNumberOfMessages(numberOfMessages);
-//                        destination.setNumberOfMessagesPending(numberOfMessagesPending);
                         destinationMap.put(destination.getName(), destination);
                     }
                 }
@@ -138,6 +103,20 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         return destinationMap;
     }
 
+    protected String getQueueName(String destinationName) {
+        String result = destinationName;
+        if (result.contains("!")) {
+            result = result.substring(result.lastIndexOf("!") + 1);
+        }
+        if (result.contains(".")) {
+            result = result.substring(result.lastIndexOf(".") + 1);
+        }
+        if (result.contains("@")) {
+            result = result.substring(result.lastIndexOf("@") + 1);
+        }
+        return result;
+    }
+
     protected Map<String, ObjectName> getQueueMap(MBeanServerConnection mbsc) throws IOException, AttributeNotFoundException, InstanceNotFoundException, MBeanException,
             ReflectionException {
         if (queueMap != null) {
@@ -145,7 +124,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         }
         ObjectName drs = jmxHelper.getDomainRuntimeService();
         ObjectName config = (ObjectName) mbsc.getAttribute(drs, "DomainConfiguration");
-        queueMap = new HashMap<String, ObjectName>();
+        queueMap = new HashMap<>();
         ObjectName[] configJmsSystemResources = (ObjectName[]) mbsc.getAttribute(config, "JMSSystemResources");
         for (ObjectName configJmsSystemResource : configJmsSystemResources) {
             ObjectName configJmsResource = (ObjectName) mbsc.getAttribute(configJmsSystemResource, "JMSResource");
@@ -190,7 +169,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
 
     @Override
     public boolean sendMessage(JmsMessageSPI message, String destination) {
-        JMSDestinationSPI jmsDestinationSPI = getDestinations().get(destination);
+        JMSDestinationSPI jmsDestinationSPI = getJMSDestinationSPI(destination);
         if (jmsDestinationSPI == null) {
             LOG.warn("Destination [" + destination + "] does not exists");
             return false;
@@ -216,7 +195,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
 
     @Override
     public boolean deleteMessages(String source, String[] messageIds) {
-        JMSDestinationSPI selectedDestination = getDestinations().get(source);
+        JMSDestinationSPI selectedDestination = getJMSDestinationSPI(source);
         try {
             ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
             int deleted = deleteMessages(destination, jmsSelectorUtil.getSelector(messageIds));
@@ -229,7 +208,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
 
     @Override
     public JmsMessageSPI getMessage(String source, String messageId) {
-        JMSDestinationSPI selectedDestination = getDestinations().get(source);
+        JMSDestinationSPI selectedDestination = getJMSDestinationSPI(source);
         if (selectedDestination != null) {
             String destinationType = selectedDestination.getType();
             if ("Queue".equals(destinationType)) {
@@ -287,6 +266,11 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         return messages;
     }
 
+    protected JMSDestinationSPI getJMSDestinationSPI(String name) {
+        String queueName = getQueueName(name);
+        return getDestinations().get(queueName);
+    }
+
     @Override
     public List<JmsMessageSPI> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
         List<JmsMessageSPI> messages = new ArrayList<>();
@@ -294,7 +278,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
             return messages;
         }
 
-        JMSDestinationSPI selectedDestination = getDestinations().get(source);
+        JMSDestinationSPI selectedDestination = getJMSDestinationSPI(source);
         if (selectedDestination != null) {
             String destinationType = selectedDestination.getType();
             if ("Queue".equals(destinationType)) {
@@ -334,8 +318,8 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
 
     @Override
     public boolean moveMessages(String source, String destination, String[] messageIds) {
-        JMSDestinationSPI from = getDestinations().get(source);
-        JMSDestinationSPI to = getDestinations().get(destination);
+        JMSDestinationSPI from = getJMSDestinationSPI(source);
+        JMSDestinationSPI to = getJMSDestinationSPI(destination);
         try {
             ObjectName fromDestination = from.getProperty(PROPERTY_OBJECT_NAME);
             ObjectName toDestination = to.getProperty(PROPERTY_OBJECT_NAME);

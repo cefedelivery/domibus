@@ -76,7 +76,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     }
 
     @Transactional
-    public void onMessage(final Message message) {
+    public void onMessage(Message message) {
         try {
             final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
             final NotificationType notificationType = NotificationType.valueOf(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE));
@@ -94,8 +94,9 @@ public class NotificationListenerService implements MessageListener, JmsListener
                     backendConnector.messageReceiveFailed(messageId, message.getStringProperty(MessageConstants.ENDPOINT));
 
             }
-        } catch (final JMSException e) {
-            LOG.error("", e);
+        } catch (Exception e) {
+            LOG.error("Error processing message", e);
+            throw new RuntimeException("Error processing message", e);
         }
     }
 
