@@ -280,6 +280,7 @@
                                 </excludes>
                                 <systemPropertyVariables>
                                     <attachment.mode>FILESYSTEM</attachment.mode>
+                                    <storage.location>${project.build.testOutputDirectory}/dataset/storage</storage.location>
                                 </systemPropertyVariables>
                             </configuration>
                         </execution>
@@ -327,6 +328,7 @@
                                 <skipTests>${skipITs}</skipTests>
                                 <systemPropertyVariables>
                                     <attachment.mode>FILESYSTEM</attachment.mode>
+                                    <storage.location>${project.build.testOutputDirectory}/dataset/storage</storage.location>
                                 </systemPropertyVariables>
                             </configuration>
                         </execution>
