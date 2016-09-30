@@ -2,6 +2,7 @@ package eu.domibus.plugin.webService.service.impl;
 
 import eu.domibus.plugin.webService.common.exception.AuthenticationException;
 import eu.domibus.plugin.webService.service.ICRLVerifierService;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -128,23 +129,25 @@ public class CRLVerifierServiceImpl implements ICRLVerifierService {
         if (crldpExt == null) {
             return new ArrayList<>();
         }
-        ASN1InputStream oAsnInStream = new ASN1InputStream(
-                new ByteArrayInputStream(crldpExt));
+        ASN1InputStream oAsnInStream = new ASN1InputStream(new ByteArrayInputStream(crldpExt));
         ASN1Primitive derObjCrlDP = null;
         try {
             derObjCrlDP = oAsnInStream.readObject();
         } catch (IOException e) {
             throw new AuthenticationException("Error while extracting CRL distribution point URLs", e);
+        } finally {
+            IOUtils.closeQuietly(oAsnInStream);
         }
         DEROctetString dosCrlDP = (DEROctetString) derObjCrlDP;
         byte[] crldpExtOctets = dosCrlDP.getOctets();
-        ASN1InputStream oAsnInStream2 = new ASN1InputStream(
-                new ByteArrayInputStream(crldpExtOctets));
+        ASN1InputStream oAsnInStream2 = new ASN1InputStream(new ByteArrayInputStream(crldpExtOctets));
         ASN1Primitive derObj2 = null;
         try {
             derObj2 = oAsnInStream2.readObject();
         } catch (IOException e) {
             throw new AuthenticationException("Error while extracting CRL distribution point URLs", e);
+        } finally {
+            IOUtils.closeQuietly(oAsnInStream2);
         }
         CRLDistPoint distPoint = CRLDistPoint.getInstance(derObj2);
         List<String> crlUrls = new ArrayList<String>();
