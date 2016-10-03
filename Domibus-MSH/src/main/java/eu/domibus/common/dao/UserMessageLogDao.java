@@ -3,6 +3,8 @@ package eu.domibus.common.dao;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.UserMessageLog;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
@@ -23,6 +25,8 @@ import java.util.List;
  */
 @Repository
 public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
+
+    private static final Log LOG = LogFactory.getLog(UserMessageLogDao.class);
 
     public UserMessageLogDao() {
         super(UserMessageLog.class);
@@ -55,7 +59,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         try {
             return query.getSingleResult();
         } catch (NoResultException nrEx) {
-            logger.debug("Query UserMessageLog.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]", nrEx);
+            LOG.debug("Query UserMessageLog.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]", nrEx);
             return null;
         }
     }
@@ -99,7 +103,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         try {
             return query.getResultList();
         } catch (NoResultException nrEx) {
-            logger.debug("Query UserMessageLog.findUndownloadedUserMessagesOlderThan did not find any result for date [" + date + "] and MPC [" + mpc + "]", nrEx);
+            LOG.debug("Query UserMessageLog.findUndownloadedUserMessagesOlderThan did not find any result for date [" + date + "] and MPC [" + mpc + "]", nrEx);
             return Collections.EMPTY_LIST;
         }
     }
@@ -111,7 +115,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         try {
             return query.getResultList();
         } catch (NoResultException nrEx) {
-            logger.warn("Query UserMessageLog.findDownloadedUserMessagesOlderThan did not find any result for date [" + date + "] and MPC [" + mpc + "]", nrEx);
+            LOG.debug("Query UserMessageLog.findDownloadedUserMessagesOlderThan did not find any result for date [" + date + "] and MPC [" + mpc + "]", nrEx);
             return Collections.EMPTY_LIST;
         }
     }

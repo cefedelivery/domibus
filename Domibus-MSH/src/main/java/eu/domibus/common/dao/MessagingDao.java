@@ -48,7 +48,7 @@ import static org.springframework.util.StringUtils.hasLength;
 @Repository
 public class MessagingDao extends BasicDao<Messaging> {
 
-    protected static final Log logger = LogFactory.getLog(MessagingDao.class);
+    private static final Log LOG = LogFactory.getLog(MessagingDao.class);
 
     public MessagingDao() {
         super(Messaging.class);
@@ -68,7 +68,7 @@ public class MessagingDao extends BasicDao<Messaging> {
             query.setParameter("MESSAGE_ID", messageId);
             return query.getSingleResult();
         } catch (NoResultException nrEx) {
-            logger.debug("Could not find any message for message id[" + messageId + "]", nrEx);
+            LOG.debug("Could not find any message for message id[" + messageId + "]", nrEx);
             return null;
         }
     }

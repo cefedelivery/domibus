@@ -21,6 +21,8 @@ package eu.domibus.plugin.routing.dao;
 
 import eu.domibus.common.dao.BasicDao;
 import eu.domibus.plugin.routing.BackendFilter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +38,8 @@ import java.util.List;
 @Service
 @Transactional
 public class BackendFilterDao extends BasicDao<BackendFilter> {
+
+    private static final Log LOG = LogFactory.getLog(BackendFilterDao.class);
 
     public BackendFilterDao() {
         super(BackendFilter.class);
@@ -64,7 +68,7 @@ public class BackendFilterDao extends BasicDao<BackendFilter> {
             Collections.sort(result);
             return result;
         } catch (final NoResultException nrEx) {
-            BasicDao.logger.debug("Query BackendFilter.findEntries did not find any result", nrEx);
+            LOG.debug("Query BackendFilter.findEntries did not find any result", nrEx);
             return new ArrayList<>();
         }
     }

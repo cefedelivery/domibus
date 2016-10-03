@@ -30,14 +30,12 @@ import eu.domibus.messaging.NotifyMessageCreator;
 import eu.domibus.messaging.ReceiveFailedMessageCreator;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
-import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.routing.*;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
 import eu.domibus.submission.SubmissionValidatorListProvider;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,10 +58,6 @@ import java.util.Map;
 public class BackendNotificationService {
 
     private static final Log LOG = LogFactory.getLog(BackendNotificationService.class);
-
-//    @Qualifier("jmsTemplateNotify")
-//    @Autowired
-//    private JmsOperations jmsOperations;
 
     @Autowired
     JMSManager jmsManager;
@@ -145,8 +139,8 @@ public class BackendNotificationService {
         String finalRecipient = getFinalRecipient(userMessage);
         LOG.error("No backend responsible for message [" + userMessage.getMessageInfo().getMessageId() + "] found. Sending notification to [" + unknownReceiverQueue + "]");
         jmsManager.sendMessageToQueue(new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED, finalRecipient).createMessage(), unknownReceiverQueue);
-        //jmsOperations.send(unknownReceiverQueue, new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED));
     }
+
     private String getFinalRecipient(UserMessage userMessage) {
         String finalRecipient = null;
         for (final Property p : userMessage.getMessageProperties().getProperty()) {
@@ -222,7 +216,6 @@ public class BackendNotificationService {
         for (final NotificationListener notificationListenerService : notificationListenerServices) {
             if (notificationListenerService.getBackendName().equals(backendName)) {
                 jmsManager.sendMessageToQueue(new ReceiveFailedMessageCreator(messageId, endpoint).createMessage(), notificationListenerService.getBackendNotificationQueue());
-//                jmsOperations.send(notificationListenerService.getBackendNotificationQueue(), new ReceiveFailedMessageCreator(messageId, endpoint));
 
             }
         }

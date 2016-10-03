@@ -22,7 +22,7 @@ import java.util.*;
  */
 public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
 
-    protected static final Log logger = LogFactory.getLog(MessageLog.class);
+    private static final Log LOG = LogFactory.getLog(MessageLog.class);
 
     public <F extends MessageLog> MessageLogDao(final Class<F> type) {
 
@@ -57,19 +57,21 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
 
         switch (messageStatus) {
             case DELETED:
+            case ACKNOWLEDGED:
+            case ACKNOWLEDGED_WITH_WARNING:
                 messageLog.setDeleted(new Date());
                 break;
             default:
         }
         super.update(messageLog);
-        logger.debug("Message Log status updated to [" + messageStatus + "]");
+        LOG.debug("Message Log status updated to [" + messageStatus + "]");
     }
 
     public MessageStatus getMessageStatus(String messageId) {
         try {
             return findByMessageId(messageId).getMessageStatus();
         } catch (NoResultException nrEx) {
-            logger.debug("No result for message with id [" + messageId + "]", nrEx);
+            LOG.debug("No result for message with id [" + messageId + "]", nrEx);
             return MessageStatus.NOT_FOUND;
         }
     }

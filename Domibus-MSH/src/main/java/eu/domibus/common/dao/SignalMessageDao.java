@@ -20,6 +20,8 @@
 package eu.domibus.common.dao;
 
 import eu.domibus.ebms3.common.model.SignalMessage;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +38,8 @@ import java.util.List;
 @Repository
 public class SignalMessageDao extends BasicDao<SignalMessage> {
 
+    private static final Log LOG = LogFactory.getLog(SignalMessageDao.class);
+
     public SignalMessageDao() {
         super(SignalMessage.class);
     }
@@ -46,7 +50,7 @@ public class SignalMessageDao extends BasicDao<SignalMessage> {
             query.setParameter("ORI_MESSAGE_ID", originalMessageId);
             return query.getResultList();
         } catch (NoResultException nrEx) {
-            logger.debug("Could not find any signal message for original message id[" + originalMessageId + "]", nrEx);
+            LOG.debug("Could not find any signal message for original message id[" + originalMessageId + "]", nrEx);
             return null;
         }
     }
@@ -57,7 +61,7 @@ public class SignalMessageDao extends BasicDao<SignalMessage> {
             query.setParameter("ORI_MESSAGE_ID", originalMessageId);
             return query.getResultList();
         } catch (NoResultException nrEx) {
-            logger.debug("Could not find any signal message id for original message id[" + originalMessageId + "]", nrEx);
+            LOG.debug("Could not find any signal message id for original message id[" + originalMessageId + "]", nrEx);
             return null;
         }
     }

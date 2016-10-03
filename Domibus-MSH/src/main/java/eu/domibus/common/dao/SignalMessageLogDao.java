@@ -2,6 +2,8 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.model.logging.SignalMessageLog;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
@@ -19,6 +21,8 @@ import java.util.List;
  */
 @Repository
 public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
+
+    private static final Log LOG = LogFactory.getLog(SignalMessageLogDao.class);
 
     public SignalMessageLogDao() {
         super(SignalMessageLog.class);
@@ -38,7 +42,7 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         try {
             return query.getSingleResult();
         } catch (NoResultException nrEx) {
-            logger.debug("Query SignalMessageLog.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]", nrEx);
+            LOG.debug("Query SignalMessageLog.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]", nrEx);
             return null;
         }
     }

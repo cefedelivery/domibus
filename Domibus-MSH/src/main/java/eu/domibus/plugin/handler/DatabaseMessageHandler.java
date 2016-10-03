@@ -120,7 +120,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
-        DatabaseMessageHandler.LOG.info("looking for message with id: " + messageId);
+        LOG.info("Searching message with id [" + messageId + "]");
         final UserMessageLog userMessageLog;
         final UserMessage userMessage;
         try {
@@ -130,7 +130,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
             }
         } catch (final NoResultException nrEx) {
-            DatabaseMessageHandler.LOG.debug("Message with id [" + messageId + "] was not found", nrEx);
+            LOG.debug("Message with id [" + messageId + "] was not found", nrEx);
             throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
         }
 
