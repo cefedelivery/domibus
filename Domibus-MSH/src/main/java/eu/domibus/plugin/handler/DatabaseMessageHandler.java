@@ -145,16 +145,17 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                     signalMessageDao.clear(signalMessage);
                 }
             }
-        }
-        // Sets the log status to deleted because the message can only be downloaded once.
-        userMessageLogDao.setMessageAsDeleted(messageId);
-        // Sets the log status to deleted also for the signal messages (if present).
-        List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
-        if (!signalMessageIds.isEmpty()) {
-            for (String signalMessageId : signalMessageIds) {
-                signalMessageLogDao.setMessageAsDeleted(signalMessageId);
+            // Sets the log status to deleted.
+            userMessageLogDao.setMessageAsDeleted(messageId);
+            // Sets the log status to deleted also for the signal messages (if present).
+            List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
+            if (!signalMessageIds.isEmpty()) {
+                for (String signalMessageId : signalMessageIds) {
+                    signalMessageLogDao.setMessageAsDeleted(signalMessageId);
+                }
             }
         }
+        userMessageLogDao.setMessageAsDownloaded(messageId);
         return transformer.transformFromMessaging(userMessage);
     }
 

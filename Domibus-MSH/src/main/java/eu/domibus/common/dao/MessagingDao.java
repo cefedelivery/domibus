@@ -92,7 +92,7 @@ public class MessagingDao extends BasicDao<Messaging> {
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public void clearPayloadData(String messageId) {
-        final Query payloadsQuery = em.createNamedQuery("Messaging.findPartInfosForMessage");
+        Query payloadsQuery = em.createNamedQuery("Messaging.findPartInfosForMessage");
         payloadsQuery.setParameter("MESSAGE_ID", messageId);
         List<PartInfo> results = payloadsQuery.getResultList();
         if (results.isEmpty()) {
@@ -112,6 +112,7 @@ public class MessagingDao extends BasicDao<Messaging> {
             emptyQuery.setParameter("PARTINFOS", databasePayloads);
             emptyQuery.executeUpdate();
         }
+        LOG.debug("Payload data for user message [" + messageId + "] have been cleared");
     }
 
 }

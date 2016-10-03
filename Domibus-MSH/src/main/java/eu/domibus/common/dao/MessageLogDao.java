@@ -29,6 +29,10 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         super(type);
     }
 
+    public void setMessageAsDownloaded(String messageId) {
+        setMessageStatus(messageId, MessageStatus.DOWNLOADED);
+    }
+
     public void setMessageAsDeleted(String messageId) {
         setMessageStatus(messageId, MessageStatus.DELETED);
     }
@@ -64,7 +68,7 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
             default:
         }
         super.update(messageLog);
-        LOG.debug("Message Log status updated to [" + messageStatus + "]");
+        LOG.debug(messageLog.getClass().getSimpleName() + " status updated to [" + messageStatus + "]");
     }
 
     public MessageStatus getMessageStatus(String messageId) {
