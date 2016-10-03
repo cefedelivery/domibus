@@ -95,6 +95,10 @@
             <column name="AUTH_ROLES" value="ROLE_USER"/>
             <column name="ORIGINAL_USER" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1"/>
         </insert>
+        <insert tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="CERTIFICATE_ID" value="CN=blue_gw,O=eDelivery,C=BE:10370035830817850458"/>
+            <column name="AUTH_ROLES" value="ROLE_ADMIN"/>
+        </insert>
     </changeSet>
 
 </databaseChangeLog>

@@ -19,6 +19,7 @@
 
 package eu.domibus.plugin;
 
+import eu.domibus.common.AuthRole;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.ebms3.security.util.AuthUtils;
@@ -77,6 +78,9 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
     @Transactional
     public void onMessage(final Message message) {
+        if(!authUtils.isUnsecureLoginAllowed())
+            authUtils.setAuthenticationToSecurityContext("notif","notif", AuthRole.ROLE_ADMIN);
+
         try {
             final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
             final NotificationType notificationType = NotificationType.valueOf(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE));
