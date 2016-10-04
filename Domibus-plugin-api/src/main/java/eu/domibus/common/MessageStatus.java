@@ -88,10 +88,5 @@
          * The message has been processed by the MSH but the payloads have been deleted due to the message retention
          * policy of the corresponding PMode.
          */
-        DELETED,
-
-        /**
-         * The message has been downloaded
-         */
-        DOWNLOADED
+        DELETED
     }

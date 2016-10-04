@@ -29,9 +29,9 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         super(type);
     }
 
-    public void setMessageAsDownloaded(String messageId) {
+/*    public void setMessageAsDownloaded(String messageId) {
         setMessageStatus(messageId, MessageStatus.DOWNLOADED);
-    }
+    }*/
 
     public void setMessageAsDeleted(String messageId) {
         setMessageStatus(messageId, MessageStatus.DELETED);

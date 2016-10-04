@@ -155,7 +155,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 }
             }
         }
-        userMessageLogDao.setMessageAsDownloaded(messageId);
+        //userMessageLogDao.setMessageAsDownloaded(messageId);
         return transformer.transformFromMessaging(userMessage);
     }
 
