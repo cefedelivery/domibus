@@ -33,6 +33,9 @@
             <directory>${project.basedir}/src/main/conf/wildfly/domibus/conf</directory>
             <outputDirectory>/</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
+            <excludes>
+                <exclude>plugins/**</exclude>
+            </excludes>
             <filtered>false</filtered>
         </fileSet>
     </fileSets>
@@ -51,11 +54,6 @@
         <file>
             <source>${project.basedir}/src/main/conf/domibus/policies/eSensPolicy.xml</source>
             <outputDirectory>policies</outputDirectory>
-            <filtered>false</filtered>
-        </file>
-        <file>
-            <source>${project.basedir}/src/main/conf/wildfly/Wildfly_installation.pdf</source>
-            <outputDirectory>/</outputDirectory>
             <filtered>false</filtered>
         </file>
     </files>

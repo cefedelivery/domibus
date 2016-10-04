@@ -9,7 +9,7 @@
                         incrementBy="1" startValue="1" cacheSize="20" cycle="false" ordered="false"/>
     </changeSet>
     <changeSet author="Cosmin Baciu" id="changelog-3.2-delta-tb_message_log-index">
-        <createIndex indexName="IDX_TB_ML_MSG_ID" tableName="TB_MESSAGE_LOG">
+        <createIndex indexName="IDX_TB_ML_MSG_ID" tableName="tb_message_log">
             <column name="MESSAGE_ID"/>
         </createIndex>
     </changeSet>
