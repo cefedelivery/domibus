@@ -53,10 +53,7 @@
         <sonar.exclusions>
             **/validators/EbMS3MessageValidator.java, **/controller/AdminGUIController.java,
             **/discovery/PartyIndentifierResolverService.java,
-            **/quartz/**, **/model/org/**, **/ebms3/common/dao/**,
-            **/ebbp_signals_2_0/**, **/common/model/org/w3/**, **/w3/_2003/_05/soap_envelope/**,
-            **common/model/org/xmlsoap/schemas/soap/envelope/**,
-            **eu/domibus/plugin/webService/generated/**
+            **/quartz/**, **/target/**
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
         <sonar.host.url>http://158.166.148.181:9000/sonar</sonar.host.url>

@@ -1,11 +1,11 @@
 package eu.domibus.plugin.webService.security;
 
 import eu.domibus.common.AuthRole;
-import eu.domibus.plugin.webService.impl.CustomAuthenticationInterceptor;
+import eu.domibus.plugin.webService.common.exception.AuthenticationException;
 import eu.domibus.plugin.webService.common.util.HashUtil;
 import eu.domibus.plugin.webService.dao.AuthenticationDAO;
 import eu.domibus.plugin.webService.entity.AuthenticationEntry;
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
+import eu.domibus.plugin.webService.impl.CustomAuthenticationInterceptor;
 import eu.domibus.plugin.webService.service.IBlueCoatCertificateService;
 import eu.domibus.plugin.webService.service.IX509CertificateService;
 import org.apache.commons.logging.Log;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -65,8 +64,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 AuthenticationEntry basicAuthenticationEntry = authenticationDAO.findByUser(authentication.getName());
                 try {
                     res = HashUtil.getSHA256Hash((String) authentication.getCredentials()).equals(basicAuthenticationEntry.getPasswd());
-                } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-                    LOG.error("Problem hashing the provided password");
+                } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
+                    LOG.error("Problem hashing the provided password", ex);
                 }
                 authentication.setAuthenticated(res);
 

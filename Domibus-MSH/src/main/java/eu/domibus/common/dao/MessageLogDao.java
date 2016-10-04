@@ -5,8 +5,6 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.logging.MessageLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -24,14 +22,10 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
 
     private static final Log LOG = LogFactory.getLog(MessageLog.class);
 
-    public <F extends MessageLog> MessageLogDao(final Class<F> type) {
+    public MessageLogDao(final Class<F> type) {
 
         super(type);
     }
-
-/*    public void setMessageAsDownloaded(String messageId) {
-        setMessageStatus(messageId, MessageStatus.DOWNLOADED);
-    }*/
 
     public void setMessageAsDeleted(String messageId) {
         setMessageStatus(messageId, MessageStatus.DELETED);
@@ -53,7 +47,6 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         setMessageStatus(messageId, MessageStatus.SEND_FAILURE);
     }
 
-    @Transactional(propagation = Propagation.MANDATORY)
     private void setMessageStatus(String messageId, MessageStatus messageStatus) {
 
         MessageLog messageLog = findByMessageId(messageId);
@@ -86,7 +79,7 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
 
     protected abstract Long countMessages(HashMap<String, Object> filters);
 
-    protected abstract List<? extends MessageLog> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters);
+    protected abstract List<F> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters);
 
     protected List<Predicate> getPredicates(HashMap<String, Object> filters, CriteriaBuilder cb, Root<? extends MessageLog> mle) {
         List<Predicate> predicates = new ArrayList<>();
@@ -94,7 +87,7 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
             if (filter.getValue() != null) {
                 if (filter.getValue() instanceof String) {
                     if (!filter.getValue().toString().isEmpty()) {
-                        switch (filter.getKey().toString()) {
+                        switch (filter.getKey()) {
                             case "receivedFrom":
                                 predicates.add(cb.greaterThanOrEqualTo(mle.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
                                 break;
