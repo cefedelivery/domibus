@@ -19,7 +19,6 @@
 
 package eu.domibus.ebms3.common.model;
 
-import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
@@ -113,7 +112,8 @@ public class MessageRetentionService {
                     }
                 }
             }
-            messagingDao.delete(messageId);
+            messagingDao.clearPayloadData(messageId);
+            userMessageLogDao.setMessageAsDeleted(messageId);
             handleSignalMessageDelete(messageId);
         }
     }
@@ -128,8 +128,9 @@ public class MessageRetentionService {
         List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
         if (!signalMessageIds.isEmpty()) {
             for (String signalMessageId : signalMessageIds) {
-                signalMessageLogDao.setMessageStatus(signalMessageId, MessageStatus.DELETED);
+                signalMessageLogDao.setMessageAsDeleted(signalMessageId);
             }
         }
     }
+
 }

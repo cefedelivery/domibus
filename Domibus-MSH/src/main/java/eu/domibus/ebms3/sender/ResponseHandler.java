@@ -92,7 +92,7 @@ public class ResponseHandler {
         }
         // Builds the signal message log
         SignalMessageLogBuilder smlBuilder = SignalMessageLogBuilder.create()
-                .setMessageId(messaging.getSignalMessage().getMessageInfo().getMessageId())
+                .setMessageId(signalMessage.getMessageInfo().getMessageId())
                 .setMessageStatus(MessageStatus.RECEIVED)
                 .setMshRole(MSHRole.RECEIVING)
                 .setNotificationStatus(NotificationStatus.NOT_REQUIRED);

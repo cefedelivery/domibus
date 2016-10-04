@@ -4,8 +4,6 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 
-import java.util.Date;
-
 /**
  * @author Federico Martini
  * @since 3.2
@@ -46,7 +44,7 @@ public class SignalMessageLogBuilder {
         return this;
     }
 
-    public SignalMessageLogBuilder setNextAttempt(Date date) {
+/*    public SignalMessageLogBuilder setNextAttempt(Date date) {
         signalMessageLog.setNextAttempt(date);
         return this;
     }
@@ -59,6 +57,6 @@ public class SignalMessageLogBuilder {
     public SignalMessageLogBuilder setSendAttemptsMax(int maxAttempts) {
         signalMessageLog.setSendAttemptsMax(maxAttempts);
         return this;
-    }
+    }*/
 
 }

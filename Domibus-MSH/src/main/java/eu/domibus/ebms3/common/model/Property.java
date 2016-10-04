@@ -19,6 +19,10 @@
 
 package eu.domibus.ebms3.common.model;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -99,31 +103,29 @@ public class Property extends AbstractBaseEntity implements Comparable<Property>
     }
 
     @Override
-    public String toString() {
-        return "Property{" +
-                "value='" + value + '\'' +
-                ", name='" + name + '\'' +
-                ", type='" + type + '\'' +
-                '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Property)) return false;
-        Property property = (Property) o;
-        if (!value.equals(property.value)) return false;
-        if (!name.equals(property.name)) return false;
-        return !(type != null ? !type.equals(property.type) : property.type != null);
 
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Property property = (Property) o;
+
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(value, property.value)
+                .append(name, property.name)
+                .append(type, property.type)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = 31 * value.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        return result;
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(value)
+                .append(name)
+                .append(type)
+                .toHashCode();
     }
 
     @Override
@@ -137,5 +139,14 @@ public class Property extends AbstractBaseEntity implements Comparable<Property>
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("value", value)
+                .append("name", name)
+                .append("type", type)
+                .toString();
     }
 }

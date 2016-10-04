@@ -109,12 +109,12 @@ public class RetryService {
             backendNotificationService.notifyOfSendFailure(messageIdToPurge);
             messagingDao.delete(messageIdToPurge, MessageStatus.SEND_FAILURE, NotificationStatus.NOTIFIED);
         } else {
-            messagingDao.delete(messageIdToPurge, MessageStatus.SEND_FAILURE);
+            messagingDao.clearPayloadData(messageIdToPurge);
+            userMessageLogDao.setMessageAsSendFailure(messageIdToPurge);
         }
     }
 
     private void sendJmsMessage(final String messageId) {
         jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, userMessageLogDao.findEndpointForMessageId(messageId)).createMessage(), dispatchQueue);
-//        jmsOperations.send(dispatchQueue, new DispatchMessageCreator(messageId, userMessageLogDao.findEndpointForMessageId(messageId)));
     }
 }

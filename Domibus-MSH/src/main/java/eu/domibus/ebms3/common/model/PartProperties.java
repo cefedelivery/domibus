@@ -19,6 +19,10 @@
 
 package eu.domibus.ebms3.common.model;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -78,25 +82,30 @@ public class PartProperties {
     }
 
     @Override
-    public String toString() {
-        return "PartProperties{" +
-                "property=" + this.property +
-                '}';
-    }
-
-    @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PartProperties)) return false;
 
-        final PartProperties that = (PartProperties) o;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        return !(this.property != null ? !this.property.equals(that.property) : that.property != null);
+        PartProperties that = (PartProperties) o;
 
+        return new EqualsBuilder()
+                .append(property, that.property)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return this.property != null ? this.property.hashCode() : 0;
+        return new HashCodeBuilder(17, 37)
+                .append(property)
+                .toHashCode();
     }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("property", property)
+                .toString();
+    }
+
 }

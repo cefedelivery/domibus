@@ -38,23 +38,19 @@ import java.util.Date;
 @Table(name = "TB_MESSAGE_LOG")
 @DiscriminatorValue("USER_MESSAGE")
 @NamedQueries({
-        @NamedQuery(name = "UserMessageLog.findUndeletedMessages",
-                query = "select mle.messageId from UserMessageLog mle where mle.deleted is null and mle.mshRole=:MSH_ROLE and mle.messageType=:MESSAGE_TYPE"),
-        @NamedQuery(name = "UserMessageLog.findRetryMessages", query = "select mle.messageId from UserMessageLog mle where mle.messageStatus = eu.domibus.common.MessageStatus.WAITING_FOR_RETRY and mle.nextAttempt < CURRENT_TIMESTAMP and 1 <= mle.sendAttempts and mle.sendAttempts <= mle.sendAttemptsMax"),
-        @NamedQuery(name = "UserMessageLog.findTimedoutMessages", query = "select mle.messageId from UserMessageLog mle where mle.messageStatus = eu.domibus.common.MessageStatus.WAITING_FOR_RETRY and mle.nextAttempt < :TIMESTAMP_WITH_TOLERANCE"),
-        @NamedQuery(name = "UserMessageLog.findByMessageId", query = "select mle from UserMessageLog mle where mle.messageId=:MESSAGE_ID and mle.mshRole=:MSH_ROLE"),
-        @NamedQuery(name = "UserMessageLog.findBackendForMessage", query = "select mle.backend from UserMessageLog mle where mle.messageId=:MESSAGE_ID"),
-        @NamedQuery(name = "UserMessageLog.setMessageStatus",
-                query = "update UserMessageLog mle set mle.deleted=:TIMESTAMP, mle.messageStatus=:MESSAGE_STATUS where mle.messageId=:MESSAGE_ID"),
+        @NamedQuery(name = "UserMessageLog.findRetryMessages", query = "select userMessageLog.messageId from UserMessageLog userMessageLog where userMessageLog.messageStatus = eu.domibus.common.MessageStatus.WAITING_FOR_RETRY and userMessageLog.nextAttempt < CURRENT_TIMESTAMP and 1 <= userMessageLog.sendAttempts and userMessageLog.sendAttempts <= userMessageLog.sendAttemptsMax"),
+        @NamedQuery(name = "UserMessageLog.findTimedoutMessages", query = "select userMessageLog.messageId from UserMessageLog userMessageLog where userMessageLog.messageStatus = eu.domibus.common.MessageStatus.WAITING_FOR_RETRY and userMessageLog.nextAttempt < :TIMESTAMP_WITH_TOLERANCE"),
+        @NamedQuery(name = "UserMessageLog.findByMessageId", query = "select userMessageLog from UserMessageLog userMessageLog where userMessageLog.messageId=:MESSAGE_ID"),
+        @NamedQuery(name = "UserMessageLog.findByMessageIdAndRole", query = "select userMessageLog from UserMessageLog userMessageLog where userMessageLog.messageId=:MESSAGE_ID and userMessageLog.mshRole=:MSH_ROLE"),
+        @NamedQuery(name = "UserMessageLog.findBackendForMessage", query = "select userMessageLog.backend from UserMessageLog userMessageLog where userMessageLog.messageId=:MESSAGE_ID"),
+        @NamedQuery(name = "UserMessageLog.findEntries", query = "select userMessageLog from UserMessageLog userMessageLog"),
+        @NamedQuery(name = "UserMessageLog.findUndownloadedUserMessagesOlderThan", query = "select userMessageLog.messageId from UserMessageLog userMessageLog where (userMessageLog.messageStatus = eu.domibus.common.MessageStatus.RECEIVED or userMessageLog.messageStatus = eu.domibus.common.MessageStatus.RECEIVED_WITH_WARNINGS) and userMessageLog.deleted is null and userMessageLog.mpc = :MPC and userMessageLog.received < :DATE"),
+        @NamedQuery(name = "UserMessageLog.findDownloadedUserMessagesOlderThan", query = "select userMessageLog.messageId from UserMessageLog userMessageLog where (userMessageLog.messageStatus = eu.domibus.common.MessageStatus.RECEIVED or userMessageLog.messageStatus = eu.domibus.common.MessageStatus.RECEIVED_WITH_WARNINGS) and userMessageLog.mpc = :MPC and userMessageLog.received is not null and userMessageLog.received < :DATE"),
+        @NamedQuery(name = "UserMessageLog.setNotificationStatus", query = "update UserMessageLog userMessageLog set userMessageLog.notificationStatus=:NOTIFICATION_STATUS where userMessageLog.messageId=:MESSAGE_ID"),
+        @NamedQuery(name = "UserMessageLog.countEntries", query = "select count(userMessageLog.messageId) from UserMessageLog userMessageLog"),
         @NamedQuery(name = "UserMessageLog.setMessageStatusAndNotificationStatus",
-                query = "update UserMessageLog mle set mle.deleted=:TIMESTAMP, mle.messageStatus=:MESSAGE_STATUS, mle.notificationStatus=:NOTIFICATION_STATUS where mle.messageId=:MESSAGE_ID"),
-        @NamedQuery(name = "UserMessageLog.getMessageStatus", query = "select mle.messageStatus from UserMessageLog  mle where mle.messageId=:MESSAGE_ID"),
-        @NamedQuery(name = "UserMessageLog.findEntries", query = "select mle from UserMessageLog mle"),
-        @NamedQuery(name = "UserMessageLog.findUndownloadedUserMessagesOlderThan", query = "select mle.messageId from UserMessageLog mle where (mle.messageStatus = eu.domibus.common.MessageStatus.RECEIVED or mle.messageStatus = eu.domibus.common.MessageStatus.RECEIVED_WITH_WARNINGS) and mle.deleted is null and mle.mpc = :MPC and mle.received < :DATE"),
-        @NamedQuery(name = "UserMessageLog.findDownloadedUserMessagesOlderThan", query = "select mle.messageId from UserMessageLog mle where (mle.messageStatus = eu.domibus.common.MessageStatus.RECEIVED or mle.messageStatus = eu.domibus.common.MessageStatus.RECEIVED_WITH_WARNINGS) and mle.mpc = :MPC and mle.deleted is not null and mle.deleted < :DATE"),
-        @NamedQuery(name = "UserMessageLog.findEndpointForId", query = "select mle.endpoint from UserMessageLog mle where mle.messageId =:MESSAGE_ID"),
-        @NamedQuery(name = "UserMessageLog.setNotificationStatus", query = "update UserMessageLog mle set mle.notificationStatus=:NOTIFICATION_STATUS where mle.messageId=:MESSAGE_ID"),
-        @NamedQuery(name = "UserMessageLog.countEntries", query = "select count(mle.messageId) from UserMessageLog mle")})
+                query = "update UserMessageLog userMessageLog set userMessageLog.deleted=:TIMESTAMP, userMessageLog.messageStatus=:MESSAGE_STATUS, userMessageLog.notificationStatus=:NOTIFICATION_STATUS where userMessageLog.messageId=:MESSAGE_ID")
+})
 public class UserMessageLog extends MessageLog {
 
     public UserMessageLog() {

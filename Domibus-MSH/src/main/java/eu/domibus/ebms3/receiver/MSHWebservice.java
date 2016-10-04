@@ -27,15 +27,18 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
-import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.validation.SubmissionValidationException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.attachment.AttachmentUtil;
@@ -65,7 +68,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.zip.ZipException;
 
@@ -83,7 +85,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     public static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
 
-    private static final Log logger = LogFactory.getLog(MSHWebservice.class);
+    private static final Log LOG = LogFactory.getLog(MSHWebservice.class);
 
     @Autowired
     private BackendNotificationService backendNotificationService;
@@ -142,7 +144,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             pmodeKey = (String) request.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
         } catch (final SOAPException soapEx) {
             //this error should never occur because pmode handling is done inside the in-interceptorchain
-            logger.error("Cannot find PModeKey property for incoming Message", soapEx);
+            LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
             assert false;
         }
 
@@ -150,17 +152,17 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         Messaging messaging = null;
         boolean pingMessage = false;
         try (StringWriter sw = new StringWriter()) {
-            if (MSHWebservice.logger.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
 
                 this.transformerFactory.newTransformer().transform(
                         new DOMSource(request.getSOAPPart()),
                         new StreamResult(sw));
 
-                MSHWebservice.logger.debug(sw.toString());
-                MSHWebservice.logger.debug("received attachments:");
+                LOG.debug(sw.toString());
+                LOG.debug("received attachments:");
                 final Iterator i = request.getAttachments();
                 while (i.hasNext()) {
-                    MSHWebservice.logger.debug(i.next());
+                    LOG.debug(i.next());
                 }
             }
             messaging = this.getMessaging(request);
@@ -187,7 +189,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED_FAILURE);
                 }
             } catch (Exception ex) {
-                logger.warn("could not notify backend of rejected message ", ex);
+                LOG.warn("could not notify backend of rejected message ", ex);
             }
             throw new WebServiceException(e);
         }
@@ -258,9 +260,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
 
         if (ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())) {
-            MSHWebservice.logger.debug("Checking reliability for incoming message");
+            LOG.debug("Checking reliability for incoming message");
             try {
-                responseMessage = this.messageFactory.createMessage();
+                responseMessage = messageFactory.createMessage();
                 InputStream generateAS4ReceiptStream = this.getClass().getClassLoader().getResourceAsStream(XSLT_GENERATE_AS4_RECEIPT_XSL);
                 Source messageToReceiptTransform = new StreamSource(generateAS4ReceiptStream);
                 final Transformer transformer = this.transformerFactory.newTransformer(messageToReceiptTransform);
@@ -308,7 +310,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             // Saves an entry of the signal message log
             signalMessageLogDao.create(smlBuilder.build());
         } catch (JAXBException | SOAPException ex) {
-            logger.error("Unable to save the SignalMessage due to error: ", ex);
+            LOG.error("Unable to save the SignalMessage due to error: ", ex);
         }
 
     }
@@ -327,15 +329,70 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     //TODO: improve error handling
     private String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging) throws SOAPException, JAXBException, TransformerException, EbMS3Exception {
 
+        UserMessage userMessage = messaging.getUserMessage();
 
+        handlePayloads(request, userMessage);
+
+        boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
+        try {
+            this.payloadProfileValidator.validate(messaging, pmodeKey);
+            this.propertyProfileValidator.validate(messaging, pmodeKey);
+        } catch (EbMS3Exception e) {
+            e.setMshRole(MSHRole.RECEIVING);
+            throw e;
+        }
+        LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
+
+        try {
+            messagingDao.create(messaging);
+
+            Party to = pModeProvider.getReceiverParty(pmodeKey);
+
+            // Builds the user message log
+            UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
+                    .setMessageId(userMessage.getMessageInfo().getMessageId())
+                    .setMessageStatus(MessageStatus.RECEIVED)
+                    .setMshRole(MSHRole.RECEIVING)
+                    .setNotificationStatus(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED)
+                    .setMpc(StringUtils.isEmpty(userMessage.getMpc()) ? Mpc.DEFAULT_MPC : userMessage.getMpc())
+                    .setSendAttemptsMax(0)
+                    .setBackendName(getFinalRecipientName(userMessage))
+                    .setEndpoint(to.getEndpoint());
+            // Saves the user message log
+            userMessageLogDao.create(umlBuilder.build());
+
+        } catch (Exception exc) {
+            LOG.error("Could not persist message " + exc.getMessage());
+            if (exc instanceof ZipException || (exc.getCause() != null && exc.getCause() instanceof ZipException)) {
+                LOG.debug("InstanceOf ZipException");
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
+                ex.setMshRole(MSHRole.RECEIVING);
+                throw ex;
+            }
+            throw exc;
+        }
+
+        return userMessage.getMessageInfo().getMessageId();
+    }
+
+    private String getFinalRecipientName(UserMessage userMessage) {
+        for (Property property : userMessage.getMessageProperties().getProperty()) {
+            if (property.getName() != null && property.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
+                return property.getValue();
+            }
+        }
+        return null;
+    }
+
+    private void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
         boolean bodyloadFound = false;
-        for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
+        for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
             final String cid = partInfo.getHref();
-            MSHWebservice.logger.debug("looking for attachment with cid: " + cid);
+            LOG.debug("looking for attachment with cid: " + cid);
             boolean payloadFound = false;
             if (cid == null || cid.isEmpty() || cid.startsWith("#")) {
                 if (bodyloadFound) {
-                    EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "More than one Partinfo referencing the soap body found", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
+                    EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "More than one Partinfo referencing the soap body found", userMessage.getMessageInfo().getMessageId(), null);
                     ex.setMshRole(MSHRole.RECEIVING);
                     throw ex;
                 }
@@ -358,7 +415,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 attachmentPart = attachmentIterator.next();
                 //remove square brackets from cid for further processing
                 attachmentPart.setContentId(AttachmentUtil.cleanContentId(attachmentPart.getContentId()));
-                MSHWebservice.logger.debug("comparing with: " + attachmentPart.getContentId());
+                LOG.debug("comparing with: " + attachmentPart.getContentId());
                 if (attachmentPart.getContentId().equals(AttachmentUtil.cleanContentId(cid))) {
                     partInfo.setPayloadDatahandler(attachmentPart.getDataHandler());
                     partInfo.setInBody(false);
@@ -366,46 +423,11 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 }
             }
             if (!payloadFound) {
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0011, "No Attachment found for cid: " + cid + " of message: " + messaging.getUserMessage().getMessageInfo().getMessageId(), messaging.getUserMessage().getMessageInfo().getMessageId(), null);
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0011, "No Attachment found for cid: " + cid + " of message: " + userMessage.getMessageInfo().getMessageId(), userMessage.getMessageInfo().getMessageId(), null);
                 ex.setMshRole(MSHRole.RECEIVING);
                 throw ex;
             }
         }
-
-        final boolean compressed = this.compressionService.handleDecompression(messaging.getUserMessage(), legConfiguration);
-        try {
-            this.payloadProfileValidator.validate(messaging, pmodeKey);
-            this.propertyProfileValidator.validate(messaging, pmodeKey);
-        } catch (EbMS3Exception e) {
-            e.setMshRole(MSHRole.RECEIVING);
-            throw e;
-        }
-        MSHWebservice.logger.debug("Compression for message with id: " + messaging.getUserMessage().getMessageInfo().getMessageId() + " applied: " + compressed);
-        final UserMessageLog userMessageLog = new UserMessageLog();
-        userMessageLog.setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId());
-        userMessageLog.setMshRole(MSHRole.RECEIVING);
-        userMessageLog.setReceived(new Date());
-        final String mpc = messaging.getUserMessage().getMpc();
-        userMessageLog.setMpc((mpc == null || mpc.isEmpty()) ? Mpc.DEFAULT_MPC : mpc);
-        userMessageLog.setMessageStatus(MessageStatus.RECEIVED);
-        // Saves an entry of the User Message Log
-        this.userMessageLogDao.create(userMessageLog);
-        try {
-            this.messagingDao.create(messaging);
-        } catch (Exception exc) {
-            logger.error("Could not persist message " + exc.getMessage());
-            if(exc instanceof ZipException ||
-                    (exc.getCause() != null && exc.getCause() instanceof ZipException)) {
-                logger.debug("InstanceOf ZipException");
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), messaging.getUserMessage().getMessageInfo().getMessageId(), exc);
-                ex.setMshRole(MSHRole.RECEIVING);
-                throw ex;
-
-            }
-            throw exc;
-        }
-
-        return userMessageLog.getMessageId();
     }
 
     private Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {

@@ -59,7 +59,7 @@ import javax.xml.ws.soap.SOAPFaultException;
 @Service(value = "messageSenderService")
 public class MessageSender implements MessageListener {
 
-    private static final Log logger = LogFactory.getLog(MessageSender.class);
+    private static final Log LOG = LogFactory.getLog(MessageSender.class);
 
     private final String UNRECOVERABLE_ERROR_RETRY = "domibus.dispatch.ebms.error.unrecoverable.retry";
 
@@ -114,10 +114,10 @@ public class MessageSender implements MessageListener {
             pModeKey = this.pModeProvider.findPModeKeyForUserMessage(userMessage);
             legConfiguration = this.pModeProvider.getLegConfiguration(pModeKey);
 
-            MessageSender.logger.debug("PMode found : " + pModeKey);
+            LOG.debug("PMode found : " + pModeKey);
             final SOAPMessage soapMessage = this.messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             final SOAPMessage response = this.mshDispatcher.dispatch(soapMessage, pModeKey);
-            isOk = this.responseHandler.handle(response);
+            isOk = responseHandler.handle(response);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
                 EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occured during marshalling", messageId, null);
                 e.setMshRole(MSHRole.SENDING);
@@ -127,7 +127,7 @@ public class MessageSender implements MessageListener {
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 this.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
-            } else MessageSender.logger.warn("Error for message with ID [" + messageId + "]", soapFEx);
+            } else LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
 
         } catch (final EbMS3Exception e) {
             this.handleEbms3Exception(e, messageId);
@@ -136,10 +136,10 @@ public class MessageSender implements MessageListener {
                 case OK:
                     switch (isOk) {
                         case OK:
-                            this.userMessageLogDao.setMessageAsAck(messageId);
+                            userMessageLogDao.setMessageAsAcknowledged(messageId);
                             break;
                         case WARNING:
-                            this.userMessageLogDao.setMessageAsAckWithWarnings(messageId);
+                            userMessageLogDao.setMessageAsAckWithWarnings(messageId);
                             break;
                         default:
                             assert false;
@@ -149,7 +149,7 @@ public class MessageSender implements MessageListener {
                     messagingDao.clearPayloadData(messageId);
                     break;
                 case WAITING_FOR_CALLBACK:
-                    this.userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
+                    userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
                     break;
                 case FAIL:
                     updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
@@ -166,11 +166,12 @@ public class MessageSender implements MessageListener {
     private void handleEbms3Exception(final EbMS3Exception exceptionToHandle, final String messageId) {
         exceptionToHandle.setRefToMessageId(messageId);
         if (!exceptionToHandle.isRecoverable() && !Boolean.parseBoolean(System.getProperty(UNRECOVERABLE_ERROR_RETRY))) {
-            userMessageLogDao.setMessageAsAck(messageId);
+            userMessageLogDao.setMessageAsAcknowledged(messageId);
+            // TODO Shouldn't clear the payload data here ?
         }
 
         exceptionToHandle.setMshRole(MSHRole.SENDING);
-        MessageSender.logger.error("Error for message with ID [" + messageId + "]", exceptionToHandle);
+        LOG.error("Error for message with ID [" + messageId + "]", exceptionToHandle);
         this.errorLogDao.create(new ErrorLogEntry(exceptionToHandle));
         //TODO: notify backends of error
     }
@@ -184,14 +185,14 @@ public class MessageSender implements MessageListener {
             delay = message.getLongProperty(MessageConstants.DELAY);
             if (delay > 0) {
                 jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, message.getStringProperty(MessageConstants.ENDPOINT), delay).createMessage(), sendMessageQueue);
-//                jmsOperationsDispatch.send(new DelayedDispatchMessageCreator(messageId, message.getStringProperty(MessageConstants.ENDPOINT), delay));
                 return;
             }
         } catch (final NumberFormatException nfe) {
             //This is ok, no delay has been set
         } catch (final JMSException e) {
-            logger.error("", e);
+            LOG.error("", e);
         }
         sendUserMessage(messageId);
     }
+
 }

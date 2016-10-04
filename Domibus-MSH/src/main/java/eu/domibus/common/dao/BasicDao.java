@@ -20,8 +20,6 @@
 package eu.domibus.common.dao;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,13 +30,14 @@ import java.util.Collection;
 /**
  * A basic DAO implementation providing the standard CRUD operations,
  *
- * @author Christian Koch, Stefan Mueller
+ * @author Christian Koch, Stefan Mueller, Federico Martini
  * @since 3.0
  */
 
 public abstract class BasicDao<T extends AbstractBaseEntity> {
-    protected static final Log logger = LogFactory.getLog(BasicDao.class);
+
     private final Class<T> typeOfT;
+
     @PersistenceContext
     protected EntityManager em;
 
@@ -49,18 +48,22 @@ public abstract class BasicDao<T extends AbstractBaseEntity> {
         this.typeOfT = typeOfT;
     }
 
+    public <T> T findById(Class<T> typeOfT, String id) {
+        return em.find(typeOfT, id);
+    }
+
     @Transactional(propagation = Propagation.MANDATORY)
     public void create(final T entity) {
-        this.em.persist(entity);
+        em.persist(entity);
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
     public void delete(final T entity) {
-        this.em.remove(this.em.merge(entity));
+        em.remove(em.merge(entity));
     }
 
     public T read(final int id) {
-        return this.em.find(this.typeOfT, id);
+        return em.find(this.typeOfT, id);
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
@@ -72,6 +75,7 @@ public abstract class BasicDao<T extends AbstractBaseEntity> {
 
     @Transactional(propagation = Propagation.MANDATORY)
     public void update(final T entity) {
-        this.em.merge(entity);
+        em.merge(entity);
     }
+
 }
