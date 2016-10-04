@@ -98,8 +98,9 @@ public class NotificationListenerService implements MessageListener, JmsListener
                     backendConnector.messageReceiveFailed(messageId, message.getStringProperty(MessageConstants.ENDPOINT));
 
             }
-        } catch (final JMSException e) {
-            LOG.error("", e);
+        } catch (Exception e) {
+            LOG.error("Error processing message", e);
+            throw new RuntimeException("Error processing message", e);
         }
     }
 

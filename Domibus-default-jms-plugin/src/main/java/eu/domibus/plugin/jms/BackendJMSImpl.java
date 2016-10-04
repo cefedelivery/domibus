@@ -67,7 +67,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private MessageRetrievalTransformer<MapMessage> messageRetrievalTransformer;
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
 
-    public BackendJMSImpl(final String name) {
+    public BackendJMSImpl(String name) {
         super(name);
     }
 
@@ -116,8 +116,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             final MessageCreator replyMessageCreator = new ReplyMessageCreator(messageID, errorMessage, map.getJMSCorrelationID());
             replyJmsTemplate.send(replyMessageCreator);
 
-        } catch (final JMSException e) {
-            BackendJMSImpl.LOG.error("Exception occurred: ", e);
+        } catch (Exception e) {
+            LOG.error("Exception occurred while receiving message", e);
+            throw new RuntimeException("Exception occurred while receiving message", e);
         }
     }
 
