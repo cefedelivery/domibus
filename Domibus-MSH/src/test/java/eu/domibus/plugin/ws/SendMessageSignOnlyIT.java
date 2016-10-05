@@ -20,6 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.NodeList;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -41,7 +42,7 @@ public class SendMessageSignOnlyIT extends AbstractSendMessageIT {
     private ReliabilityChecker reliabilityChecker;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         // Initialize the mock objects
         MockitoAnnotations.initMocks(this);
         Mockito.when(nonRepudiationChecker.compareUnorderedReferenceNodeLists(Mockito.any(NodeList.class), Mockito.any(NodeList.class))).thenReturn(true);

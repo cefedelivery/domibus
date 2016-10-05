@@ -57,6 +57,7 @@
         <prop key="domibus.deployment.clustered">false</prop>
         <prop key="messageFactoryClass">com.sun.xml.internal.messaging.saaj.soap.ver1_2.SOAPMessageFactory1_2Impl</prop>
         <prop key="activeMQ.JMXURL">service:jmx:rmi://localhost:1198/jndi/rmi://localhost:1199/jmxrmi</prop>
+        <prop key="domibus.attachment.storage.location">#{ systemProperties['storage.location']!= null?systemProperties['storage.location'] : '' }</prop>
 
         <!-- Enable the proxy settings only if you use a proxy -->
 
