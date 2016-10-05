@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.jms.ConnectionFactory;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * This JUNIT implements the Test cases List Pending Messages-01 and List Pending Messages-02.
@@ -30,7 +31,7 @@ public class PendingMessagesListIT extends AbstractIT {
     BackendInterface backendWebService;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         if (!initialized) {
             insertDataset("pendingMessagesListDataset.sql");
             initialized = true;

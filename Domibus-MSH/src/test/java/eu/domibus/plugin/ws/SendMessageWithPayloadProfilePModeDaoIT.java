@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 /**
@@ -16,7 +17,7 @@ public class SendMessageWithPayloadProfilePModeDaoIT extends SendMessageWithPayl
     private static boolean initialized;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         if (!initialized) {
             // The dataset is executed only once for each class
             insertDataset("sendMessageWithPayloadProfileDataset.sql");

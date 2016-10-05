@@ -836,6 +836,7 @@
                             </includes>
                         </fileSet>
                     </fileSets>
+                    <individualFilesOutputDirectory>${project.build.outputDirectory}</individualFilesOutputDirectory>
                 </configuration>
             </plugin>
             <plugin>
