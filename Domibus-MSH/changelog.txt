@@ -9,6 +9,7 @@ Domibus 3.2-FR
 - Fixed issue with the signal messages that were not stored/cleared.
 - Message Log page is now showing also the signal messages.
 - Fixed issue about message delete timestamp not correctly set and MessageRetentionService failing to clear data of downloaded and retained messages.
+- Fixed the retry mechanism in the JMS listeners
 Domibus 3.2-RC1
 - Added XSD validation for the operations exposed by the backend WS
 - Harmonize the plugin registration on Tomcat/WebLogic/WildFly
@@ -20,6 +21,7 @@ Domibus 3.2-RC1
 - JMS monitoring via the Admin page
 - Added support for dead letter queues
 - Added support for Java 8
+- Added dynamic hash calculation of config files
 Domibus 3.1.1
 - Fixed retry logic issue
 - Set BINARY_DATA type to LONGBLOB on mysql (migration scripts created)

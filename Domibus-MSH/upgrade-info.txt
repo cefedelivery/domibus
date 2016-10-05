@@ -29,7 +29,7 @@ Domibus 3.2 (from 3.1.1):
                               </jaxws:endpoint>
                 -  in file "\domibus\conf\domibus\internal\ehcache.xml":
                         o   add <cache name="certValidationByAlias" maxBytesLocalHeap="5m" timeToLiveSeconds="3600" overflowToDisk="false"/>
-                        o   add <cache name="crlByCert"  maxBytesLocalHeap="5m"  timeToLiveSeconds="3600"  overflowToDisk="false"/>
+                        o   add <cache name="crlByCert" maxBytesLocalHeap="5m" timeToLiveSeconds="3600" overflowToDisk="false"/>
                 -  in file "\domibus\conf\domibus\domibus-configuration.xml":
                         o   replace class="eu.domibus.common.dao.CachingPModeProvider"/> by class="eu.domibus.ebms3.common.dao.CachingPModeProvider"/> or by class="eu.domibus.common.dao.PModeDao"/> if you are using Oracle DB
                         o   add <prop key="domibus.certificate.validation.enabled">true</prop>
