@@ -328,6 +328,7 @@
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:messaging:3.0">
             <hornetq-server>
+                <jmx-management-enabled>true</jmx-management-enabled>
                 <journal-file-size>102400</journal-file-size>
                 <connectors>
                     <http-connector name="http-connector" socket-binding="http">

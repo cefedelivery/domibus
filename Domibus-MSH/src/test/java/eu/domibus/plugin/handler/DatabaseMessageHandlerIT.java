@@ -5,6 +5,7 @@ import eu.domibus.plugin.webService.generated.SendMessageFault;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 /**
@@ -19,7 +20,7 @@ public class DatabaseMessageHandlerIT extends AbstractIT {
     private DatabaseMessageHandler dmh;*/
 
     @Before
-    public void before() {
+    public void before() throws IOException{
         if (!initialized) {
             // The dataset is executed only once for each class
             insertDataset("sendMessageDataset.sql");

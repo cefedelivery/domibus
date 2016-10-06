@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 /**
@@ -23,7 +24,7 @@ public class SendMessageWithPayloadProfileIT extends AbstractSendMessageIT {
     BackendInterface backendWebService;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         if (!initialized) {
             // The dataset is executed only once for each class
             insertDataset("sendMessageWithPayloadProfileDataset.sql");

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.xml.ws.Holder;
+import java.io.IOException;
 
 /**
  * This JUNIT implements the Test cases Download Message-01 and Download Message-02.
@@ -33,7 +34,7 @@ public class DownloadMessageIT extends AbstractIT {
     BackendInterface backendWebService;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         if (!initialized) {
             insertDataset("downloadMessage.sql");
             initialized = true;

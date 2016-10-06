@@ -36,6 +36,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -57,7 +58,7 @@ public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
     private ReliabilityChecker reliabilityChecker;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         if (!initialized) {
             // The dataset is executed only once for each class
             insertDataset("sendMessageEncryptAllDataset.sql");

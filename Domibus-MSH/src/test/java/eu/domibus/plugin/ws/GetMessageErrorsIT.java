@@ -28,6 +28,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+
 
 /**
  * This JUNIT implements the Test cases Get Message Errors-01 and Get Message Errors-02.
@@ -41,7 +43,7 @@ public class GetMessageErrorsIT extends AbstractIT {
     BackendInterface backendWebService;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         if (!initialized) {
             insertDataset("getMessageErrorsDataset.sql");
             initialized = true;

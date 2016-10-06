@@ -27,15 +27,15 @@
     <artifactId>domibus</artifactId>
     <version>3.2-SNAPSHOT</version>
     <packaging>pom</packaging>
-	<name>Domibus MSH</name>
+    <name>Domibus MSH</name>
     <modules>
         <module>Domibus-MSH</module>
-		<module>Domibus-MSH-api</module>
+        <module>Domibus-MSH-api</module>
         <module>Domibus-MSH-jms-spi</module>
         <module>Domibus-MSH-jms-spi-helper</module>
         <module>Domibus-MSH-jms-weblogic</module>
-		<module>Domibus-MSH-jms-activemq</module>	
-		<module>Domibus-MSH-jms-wildfly</module>
+        <module>Domibus-MSH-jms-activemq</module>
+        <module>Domibus-MSH-jms-wildfly</module>
         <module>Domibus-MSH-soapui-tests</module>
         <module>Domibus-plugin-api</module>
         <module>Domibus-ws-stubs</module>
@@ -252,14 +252,34 @@
                     <version>2.18.1</version>
                     <executions>
                         <execution>
-                            <id>default-test</id>
+                            <id>test-database</id>
                             <configuration>
-                                <argLine>-server -ea -Duser.language=en -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m
+                                <argLine>-server -ea -Duser.language=en -XX:-UseSplitVerifier -Xms512m -Xmx1024m
+                                    -XX:MaxPermSize=512m
                                     ${surefire.argLine}
                                 </argLine>
                                 <excludes>
                                     <exclude>**/IT*.java</exclude>
                                 </excludes>
+                                <systemPropertyVariables>
+                                    <attachment.mode>DATABASE</attachment.mode>
+                                </systemPropertyVariables>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>test-filesystem</id>
+                            <configuration>
+                                <argLine>-server -ea -Duser.language=en -XX:-UseSplitVerifier -Xms512m -Xmx1024m
+                                    -XX:MaxPermSize=512m
+                                    ${surefire.argLine}
+                                </argLine>
+                                <excludes>
+                                    <exclude>**/IT*.java</exclude>
+                                </excludes>
+                                <systemPropertyVariables>
+                                    <attachment.mode>FILESYSTEM</attachment.mode>
+                                    <storage.location>${project.build.testOutputDirectory}/dataset/storage</storage.location>
+                                </systemPropertyVariables>
                             </configuration>
                         </execution>
                     </executions>
@@ -270,18 +290,44 @@
                     <version>2.19.1</version>
                     <executions>
                         <execution>
-                            <id>integration-tests</id>
+                            <id>integration-tests-database</id>
+                            <phase>integration-test</phase>
                             <goals>
                                 <goal>integration-test</goal>
                                 <goal>verify</goal>
                             </goals>
                             <configuration>
                                 <!-- Sets the VM argument line used when integration tests are run. -->
-                                <argLine>-server -ea -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m -Duser.language=en
+                                <argLine>-server -ea -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m
+                                    -Duser.language=en
                                     ${failsafeArgLine}
                                 </argLine>
                                 <!-- Skips integration tests if the value of skipITs property is true-->
                                 <skipTests>${skipITs}</skipTests>
+                                <systemPropertyVariables>
+                                    <attachment.mode>DATABASE</attachment.mode>
+                                </systemPropertyVariables>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>integration-tests-filesystem</id>
+                            <phase>integration-test</phase>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                            <configuration>
+                                <!-- Sets the VM argument line used when integration tests are run. -->
+                                <argLine>-server -ea -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m
+                                    -Duser.language=en
+                                    ${failsafeArgLine}
+                                </argLine>
+                                <!-- Skips integration tests if the value of skipITs property is true-->
+                                <skipTests>${skipITs}</skipTests>
+                                <systemPropertyVariables>
+                                    <attachment.mode>FILESYSTEM</attachment.mode>
+                                    <storage.location>${project.build.testOutputDirectory}/dataset/storage</storage.location>
+                                </systemPropertyVariables>
                             </configuration>
                         </execution>
                     </executions>
@@ -341,8 +387,6 @@
                             <append>true</append>
                         </configuration>
                     </execution>
-
-
                 </executions>
             </plugin>
         </plugins>

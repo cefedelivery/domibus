@@ -52,7 +52,7 @@ public class ReceiveMessageIT extends AbstractIT {
     SetPolicyInInterceptor setPolicyInInterceptor;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
 
         if (!initialized) {
             // The dataset is executed only once for each class
