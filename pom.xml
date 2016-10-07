@@ -252,34 +252,14 @@
                     <version>2.18.1</version>
                     <executions>
                         <execution>
-                            <id>test-database</id>
+                            <id>default-test</id>
                             <configuration>
-                                <argLine>-server -ea -Duser.language=en -XX:-UseSplitVerifier -Xms512m -Xmx1024m
-                                    -XX:MaxPermSize=512m
+                                <argLine>-server -ea -Duser.language=en -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m
                                     ${surefire.argLine}
                                 </argLine>
                                 <excludes>
                                     <exclude>**/IT*.java</exclude>
                                 </excludes>
-                                <systemPropertyVariables>
-                                    <attachment.mode>DATABASE</attachment.mode>
-                                </systemPropertyVariables>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>test-filesystem</id>
-                            <configuration>
-                                <argLine>-server -ea -Duser.language=en -XX:-UseSplitVerifier -Xms512m -Xmx1024m
-                                    -XX:MaxPermSize=512m
-                                    ${surefire.argLine}
-                                </argLine>
-                                <excludes>
-                                    <exclude>**/IT*.java</exclude>
-                                </excludes>
-                                <systemPropertyVariables>
-                                    <attachment.mode>FILESYSTEM</attachment.mode>
-                                    <storage.location>${project.build.testOutputDirectory}/dataset/storage</storage.location>
-                                </systemPropertyVariables>
                             </configuration>
                         </execution>
                     </executions>
