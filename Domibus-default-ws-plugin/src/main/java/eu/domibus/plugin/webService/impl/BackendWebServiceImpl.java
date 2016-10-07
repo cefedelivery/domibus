@@ -19,6 +19,7 @@
 
 package eu.domibus.plugin.webService.impl;
 
+import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
@@ -35,9 +36,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
+import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
@@ -243,6 +247,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     private void fillInfoParts(Holder<DownloadMessageResponse> downloadMessageResponse, Messaging result) throws DownloadMessageFault {
 
+        boolean mtomEnabled = false; // TODO get the property from WS configuration
         for (final PartInfo partInfo : result.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
             final PayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createPayloadType();
@@ -253,14 +258,29 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                 LOG.error(ERROR_IS_PAYLOAD_DATA_HANDLER, ioEx);
                 throw new DownloadMessageFault(ERROR_IS_PAYLOAD_DATA_HANDLER, createDownloadMessageFault(ioEx));
             }
+            JAXBElement<PayloadType> payloadElement = null;
             if (extPartInfo.isInBody()) {
                 extPartInfo.setHref("#bodyload");
                 payloadType.setPayloadId("#bodyload");
-                downloadMessageResponse.value.setBodyload(payloadType);
-                continue;
+                payloadElement = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponseBodyload(payloadType);
+            } else if (mtomEnabled) {
+                payloadType.setPayloadId(partInfo.getHref());
+                AnyPayloadType anyPayloadType = BackendWebServiceImpl.WEBSERVICE_OF.createAnyPayloadType();
+                //Node item = null;
+                Document xmlDoc = new DocumentImpl();
+                Element root = xmlDoc.createElement("TODO");
+                //item = xmlDoc.createElement("bookingID");
+                //item.appendChild(xmlDoc.createTextNode(payloadType.toString());
+                //root.appendChild(item);
+                xmlDoc.appendChild(root);
+                anyPayloadType.setAny(root);
+                JAXBElement<AnyPayloadType> anyPayloadTypeElement = BackendWebServiceImpl.WEBSERVICE_OF.createPayload(anyPayloadType);
+                downloadMessageResponse.value.getContent().add(anyPayloadTypeElement);
+            } else {
+                payloadType.setPayloadId(partInfo.getHref());
+                payloadElement = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponsePayload(payloadType);
             }
-            payloadType.setPayloadId(partInfo.getHref());
-            downloadMessageResponse.value.getPayload().add(payloadType);
+            downloadMessageResponse.value.getContent().add(payloadElement);
         }
     }
 
