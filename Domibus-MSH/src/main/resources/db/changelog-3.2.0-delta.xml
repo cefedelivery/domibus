@@ -4,7 +4,7 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <!-- Domibus 3.2-rc1 - 3.2.0 -->
-    <changeSet author="idragusa" id="changelog_linux_case_sensitive">
+    <changeSet dbms="mysql" author="idragusa" id="changelog_linux_case_sensitive">
         <renameTable oldTableName="qrtz_blob_triggers" newTableName="QRTZ_BLOB_TRIGGERS" />
         <renameTable oldTableName="qrtz_calendars" newTableName="QRTZ_CALENDARS" />
         <renameTable oldTableName="qrtz_cron_triggers" newTableName="QRTZ_CRON_TRIGGERS" />
@@ -84,6 +84,11 @@
                 <constraints nullable="true"/>
             </column>
         </createTable>
+    </changeSet>
+    <changeSet dbms="oracle" id="insert_trigger" author="idragusa">
+        <sql endDelimiter="\n/">CREATE OR REPLACE TRIGGER trigger_auth BEFORE INSERT ON TB_AUTHENTICATION_ENTRY FOR EACH ROW BEGIN :new.ID_PK := HIBERNATE_SEQUENCE.nextval; END trigger_auth;</sql>
+    </changeSet>
+    <changeSet id="insert_ws_default_auth" author="idragusa">
         <insert tableName="TB_AUTHENTICATION_ENTRY">
             <column name="USERNAME" value="admin"/>
             <column name="PASSWD" value="8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"/>
