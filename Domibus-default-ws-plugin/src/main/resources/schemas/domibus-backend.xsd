@@ -93,22 +93,6 @@
         </xsd:complexType>
     </xsd:element>
 
-    <!--    <xsd:group name="NormalPayloadType">
-            <xsd:simpleContent>
-                <xsd:extension base="ns1:base64Binary">
-                    <xsd:attribute name="payloadId" type="xsd:token" use="required"/>
-                </xsd:extension>
-            </xsd:simpleContent>
-        </xsd:group>
-
-        <xsd:complexType name="XopPayloadType">
-            <xsd:simpleContent>
-                <xsd:extension base="ns1:base64Binary">
-                    <xsd:attribute name="href" type="xsd:token" use="required"/>
-                </xsd:extension>
-            </xsd:simpleContent>
-        </xsd:complexType>-->
-
     <xsd:complexType name="PayloadType">
         <xsd:simpleContent>
             <xsd:extension base="ns1:base64Binary">
@@ -116,7 +100,6 @@
             </xsd:extension>
         </xsd:simpleContent>
     </xsd:complexType>
-
 
     <xsd:complexType name="errorResultImpl">
         <xsd:sequence>
