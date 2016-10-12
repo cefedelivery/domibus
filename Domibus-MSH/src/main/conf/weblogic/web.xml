@@ -67,6 +67,10 @@
     </filter-mapping>
 
     <listener>
+        <listener-class>eu.domibus.logging.DomibusLoggingConfiguratorListener</listener-class>
+    </listener>
+
+    <listener>
         <listener-class>eu.domibus.spring.DomibusContextLoaderListener</listener-class>
     </listener>
 

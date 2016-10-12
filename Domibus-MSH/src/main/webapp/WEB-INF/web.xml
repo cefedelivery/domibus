@@ -76,7 +76,7 @@
     </filter-mapping>
 
     <listener>
-        <listener-class>eu.domibus.common.util.DomibusLocationLog4jConfigureListener</listener-class>
+        <listener-class>eu.domibus.logging.DomibusLoggingConfiguratorListener</listener-class>
     </listener>
 
     <listener>
