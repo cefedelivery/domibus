@@ -1,0 +1,46 @@
+version: '2'
+services:
+  mysqlC2:
+    container_name: mysqlC2
+    image: domibus/mysql:3.1.1
+    command: --lower-case-table-names=1
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=domibus
+      - MYSQL_USER=edelivery
+      - MYSQL_PASSWORD=edelivery
+    expose:
+      - "3306"
+  mysqlC3:
+    container_name: mysqlC3
+    image: domibus/mysql:3.1.1
+    command: --lower-case-table-names=1
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=domibus
+      - MYSQL_USER=edelivery
+      - MYSQL_PASSWORD=edelivery
+    expose:
+      - "3306"
+  domibusC2:
+    container_name: domibusC2
+    image: domibus:3.1.1
+    environment:
+      - dbServerName=mysqlC2
+      - dbServerPort=3306
+    command: dockerize -wait tcp://$dbServerName:$dbServerPort -timeout 20s
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysqlC2
+  domibusC3:
+      container_name: domibusC3
+      image: domibus:3.1.1
+      environment:
+        - dbServerName=mysqlC3
+        - dbServerPort=3306
+      command: dockerize -wait tcp://$dbServerName:$dbServerPort -timeout 20s
+      ports:
+        - "9080:8080"
+      depends_on:
+        - mysqlC3
