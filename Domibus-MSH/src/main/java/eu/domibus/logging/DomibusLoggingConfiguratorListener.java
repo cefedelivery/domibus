@@ -7,7 +7,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 /**
- * @author Christian Koch, Stefan Mueller, Cosmin Baciu
+ * @author Cosmin Baciu
+ * @since 3.3
  */
 public class DomibusLoggingConfiguratorListener implements ServletContextListener {
 

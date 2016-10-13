@@ -10,6 +10,7 @@ import java.io.File;
 
 /**
  * Created by Cosmin Baciu on 12-Oct-16.
+ * @since 3.3
  */
 @Component
 public class DomibusLoggingConfigurator {
