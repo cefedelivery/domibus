@@ -29,55 +29,40 @@ public class DomibusLoggingConfiguratorListenerTest {
     DomibusLoggingConfigurator domibusLoggingConfigurator;
 
     @Test
-    public void testConfigureLogging() throws Exception {
+    public void testContextInitialized() throws Exception {
         new Expectations() {{
-            servletContextEvent.getServletContext();
-            result = servletContext;
-
-            servletContext.getInitParameter("log4jFileName");
-            result = "myLog4j.properties";
-
-            domibusLoggingConfigurator.configureLogging("myLog4j.properties");
+            domibusLoggingConfigurator.configureLogging();
             result = null;
         }};
 
         domibusLoggingConfiguratorListener.contextInitialized(servletContextEvent);
 
         new Verifications() {{
-            String fileLocation = null;
-            domibusLoggingConfigurator.configureLogging(fileLocation = withCapture());
+            domibusLoggingConfigurator.configureLogging();
             times = 1;
-
-            Assert.assertEquals("myLog4j.properties", fileLocation);
         }};
     }
 
     @Test
-    public void testConfigureLoggingWithException(final @Capturing Log log) throws Exception {
+    public void testContextInitializedWithException(final @Capturing Log log) throws Exception {
         new Expectations() {{
-            servletContextEvent.getServletContext();
-            result = servletContext;
-
-            servletContext.getInitParameter("log4jFileName");
-            result = "myLog4j.properties";
-
-            domibusLoggingConfigurator.configureLogging("myLog4j.properties");
+            domibusLoggingConfigurator.configureLogging();
             result = new RuntimeException("Error configuring the logging");
         }};
 
         domibusLoggingConfiguratorListener.contextInitialized(servletContextEvent);
 
         new Verifications() {{
-            String fileLocation = null;
-            domibusLoggingConfigurator.configureLogging(fileLocation = withCapture());
+            domibusLoggingConfigurator.configureLogging();
             times = 1;
-
-            Assert.assertEquals("myLog4j.properties", fileLocation);
 
             log.warn(anyString, withAny(new RuntimeException()));
             times = 1;
         }};
     }
 
-
+    @Test
+    public void testContextDestroyed() throws Exception {
+        domibusLoggingConfiguratorListener.contextDestroyed(servletContextEvent);
+    }
 }

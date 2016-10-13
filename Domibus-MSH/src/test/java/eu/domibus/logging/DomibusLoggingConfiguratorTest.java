@@ -2,7 +2,7 @@ package eu.domibus.logging;
 
 import mockit.*;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Assert;
 import org.junit.Test;
@@ -23,68 +23,57 @@ public class DomibusLoggingConfiguratorTest {
     DomibusLoggingConfigurator domibusLoggingConfigurator;
 
     @Test
-    public void testConfigureLoggingOnlyWithLogFileName(@Mocked System mock) throws Exception {
+    public void testConfigureLoggingWithCustomLog4jFile(@Mocked System mock) throws Exception {
         new Expectations(domibusLoggingConfigurator) {{
+            domibusLoggingConfigurator.getDefaultLog4jFilePath();
+            result = "/user/log4j.properties";
+
             System.getProperty(anyString);
-            result = "c:";
+            result = "/user/mylog4j.properties";
         }};
 
-        domibusLoggingConfigurator.configureLogging("log4j.properties");
+        domibusLoggingConfigurator.configureLogging();
 
         new Verifications() {{
-            String confLocation = null;
             String fileLocation = null;
-            domibusLoggingConfigurator.configureLogging(confLocation = withCapture(), fileLocation = withCapture());
+            domibusLoggingConfigurator.configureLogging(fileLocation = withCapture());
             times = 1;
 
-            Assert.assertEquals("c:", confLocation);
-            Assert.assertEquals("log4j.properties", fileLocation);
+            Assert.assertEquals("/user/mylog4j.properties", fileLocation);
         }};
     }
 
     @Test
-    public void testConfigureLoggingWithEmptyConfigLocation() throws Exception {
-        domibusLoggingConfigurator.configureLogging("", "log4j.properties");
+    public void testConfigureLoggingWithTheDefaultLog4jFile(@Mocked System mock) throws Exception {
+        new Expectations(domibusLoggingConfigurator) {{
+            domibusLoggingConfigurator.getDefaultLog4jFilePath();
+            result = "/user/log4j.properties";
+
+            System.getProperty(anyString);
+            result = null;
+        }};
+
+        domibusLoggingConfigurator.configureLogging();
+
+        new Verifications() {{
+            String fileLocation = null;
+            domibusLoggingConfigurator.configureLogging(fileLocation = withCapture());
+            times = 1;
+
+            Assert.assertEquals("/user/log4j.properties", fileLocation);
+        }};
+    }
+
+    @Test
+    public void testConfigureLoggingWithEmptyConfigLocation(final @Capturing Log log) throws Exception {
+        domibusLoggingConfigurator.configureLogging(null);
 
         new Verifications() {{
             PropertyConfigurator.configure(anyString);
             times = 0;
-        }};
-    }
 
-    @Test
-    public void testConfigureLoggingWithEmptyLogFileName(@Mocked File file) throws Exception {
-        new Expectations() {{
-            new File(anyString).exists();
-            result = true;
-        }};
-
-        domibusLoggingConfigurator.configureLogging("c:", null);
-
-        new Verifications() {{
-            String logFileLocation = null;
-            PropertyConfigurator.configure(logFileLocation = withCapture());
+            log.warn(anyString);
             times = 1;
-
-            Assert.assertTrue(StringUtils.contains(logFileLocation, "log4j.properties"));
-        }};
-    }
-
-    @Test
-    public void testConfigureLoggingWithConfiguredFileName(@Mocked File file) throws Exception {
-        new Expectations() {{
-            new File(anyString).exists();
-            result = true;
-        }};
-
-        domibusLoggingConfigurator.configureLogging("c:", "mylog4j.properties");
-
-        new Verifications() {{
-            String logFileLocation = null;
-            PropertyConfigurator.configure(logFileLocation = withCapture());
-            times = 1;
-
-            Assert.assertTrue(StringUtils.contains(logFileLocation, "mylog4j.properties"));
         }};
     }
 
@@ -95,11 +84,60 @@ public class DomibusLoggingConfiguratorTest {
             result = false;
         }};
 
-        domibusLoggingConfigurator.configureLogging("c:", "mylog4j.properties");
+        domibusLoggingConfigurator.configureLogging("/user/log4j.properties");
 
         new Verifications() {{
             PropertyConfigurator.configure(anyString);
             times = 0;
         }};
     }
+
+    @Test
+    public void testConfigureLoggingWithExistingLogFile(@Mocked File file) throws Exception {
+        new Expectations() {{
+            new File(anyString).exists();
+            result = true;
+        }};
+
+        domibusLoggingConfigurator.configureLogging("/user/log4j.properties");
+
+        new Verifications() {{
+            PropertyConfigurator.configure(anyString);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void testGetDefaultLog4jFilePathWithConfiguredDomibusLocation(@Mocked System mock) throws Exception {
+        new Expectations(domibusLoggingConfigurator) {{
+            System.getProperty(anyString);
+            result = "/user/mylog4j.properties";
+        }};
+
+        domibusLoggingConfigurator.getDefaultLog4jFilePath();
+
+        new Verifications() {{
+            String fileLocation = null;
+            domibusLoggingConfigurator.getLogFileLocation(fileLocation = withCapture(), anyString);
+            times = 1;
+
+            Assert.assertEquals("/user/mylog4j.properties", fileLocation);
+        }};
+    }
+
+    @Test
+    public void testGetDefaultLog4jFilePathWithMissingDomibusLocation(@Mocked System mock, final @Capturing Log log) throws Exception {
+        new Expectations(domibusLoggingConfigurator) {{
+            System.getProperty(anyString);
+            result = null;
+        }};
+
+        domibusLoggingConfigurator.getDefaultLog4jFilePath();
+
+        new Verifications() {{
+            log.error(anyString);
+            times = 1;
+        }};
+    }
+
 }
