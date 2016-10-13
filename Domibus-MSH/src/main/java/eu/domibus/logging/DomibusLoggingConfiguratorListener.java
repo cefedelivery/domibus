@@ -27,5 +27,6 @@ public class DomibusLoggingConfiguratorListener implements ServletContextListene
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        //nothing to clean
     }
 }
