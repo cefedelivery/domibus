@@ -7,6 +7,8 @@ import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.webService.generated.*;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -172,7 +174,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
 
         final CollaborationInfo collaborationInfo = messaging.getCollaborationInfo();
         result.setAction(collaborationInfo.getAction());
-        result.setService(messaging.getCollaborationInfo().getService().getValue());
+        result.setService(StringUtils.trim(messaging.getCollaborationInfo().getService().getValue()));
         result.setServiceType(messaging.getCollaborationInfo().getService().getType());
         if (collaborationInfo.getAgreementRef() != null) {
             result.setAgreementRef(collaborationInfo.getAgreementRef().getValue());
@@ -207,10 +209,10 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         result.setToRole(messaging.getPartyInfo().getTo().getRole());
 
         PartyId partyId = messaging.getPartyInfo().getFrom().getPartyId();
-        result.addFromParty(partyId.getValue(), partyId.getType());
+        result.addFromParty(StringUtils.trim(partyId.getValue()), StringUtils.trim(partyId.getType()));
 
         partyId = messaging.getPartyInfo().getTo().getPartyId();
-        result.addToParty(partyId.getValue(), partyId.getType());
+        result.addToParty(StringUtils.trim(partyId.getValue()), StringUtils.trim(partyId.getType()));
 
         if (messaging.getMessageProperties() != null) {
             for (final Property property : messaging.getMessageProperties().getProperty()) {
