@@ -36,6 +36,8 @@
         <module>Domibus-MSH-jms-weblogic</module>
         <module>Domibus-MSH-jms-activemq</module>
         <module>Domibus-MSH-jms-wildfly</module>
+		<module>Domibus-MSH-taskexecutor-weblogic</module>
+		
         <module>Domibus-MSH-soapui-tests</module>
         <module>Domibus-MSH-docker</module>
         <module>Domibus-plugin-api</module>

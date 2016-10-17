@@ -304,6 +304,11 @@
                     <version>${project.version}</version>
                 </dependency>
                 <dependency>
+                    <groupId>eu.domibus</groupId>
+                    <artifactId>domibus-taskexecutor-weblogic</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>org.glassfish.main.javaee-api</groupId>
                     <artifactId>javax.jws</artifactId>
                     <version>3.1.2.2</version>
