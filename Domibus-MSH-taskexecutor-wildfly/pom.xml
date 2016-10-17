@@ -10,10 +10,9 @@
         <artifactId>domibus</artifactId>
         <version>3.3-SNAPSHOT</version>
     </parent>
-    <artifactId>domibus-taskexecutor-weblogic</artifactId>
+    <artifactId>domibus-taskexecutor-wildfly</artifactId>
     <packaging>jar</packaging>
-	<name>Domibus MSH TaskExecutor for WebLogic</name>
- 
+	<name>Domibus MSH TaskExecutor for WildFly</name>
 
     <build>
         <plugins>
@@ -25,6 +24,11 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
@@ -39,13 +43,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.weblogic</groupId>
-            <artifactId>weblogic.server.merged</artifactId>
-            <version>12.1.2-0-0</version>
-            <scope>provided</scope>
-        </dependency>
+        </dependency>       
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>

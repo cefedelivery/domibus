@@ -7,27 +7,19 @@ import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 
-import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 public class DomibusWorkManagerTaskExecutor
         extends JndiLocatorSupport
-        implements SchedulingTaskExecutor, WorkManager {
+        implements SchedulingTaskExecutor {
 
     protected WorkManager workManager;
 
     protected WorkListener workListener;
 
-    public void setWorkManager(WorkManager workManager) {
-        this.workManager = workManager;
-    }
-
-    public void setWorkListener(WorkListener workListener) {
-        this.workListener = workListener;
-    }
-
+    @Override
     public void execute(Runnable task) {
         Assert.state(this.workManager != null, "No WorkManager specified");
         Work work = new DomibusDelegatingWork(task);
@@ -44,16 +36,19 @@ public class DomibusWorkManagerTaskExecutor
         }
     }
 
+    @Override
     public void execute(Runnable task, long startTimeout) {
         execute(task);
     }
 
+    @Override
     public Future<?> submit(Runnable task) {
         FutureTask<Object> future = new FutureTask<Object>(task, null);
         execute(future);
         return future;
     }
 
+    @Override
     public <T> Future<T> submit(Callable<T> task) {
         FutureTask<T> future = new FutureTask<T>(task);
         execute(future);
@@ -64,28 +59,12 @@ public class DomibusWorkManagerTaskExecutor
         return true;
     }
 
-    public WorkItem schedule(Work work)
-            throws WorkException, IllegalArgumentException {
-
-        return this.workManager.schedule(work);
+    public void setWorkManager(WorkManager workManager) {
+        this.workManager = workManager;
     }
 
-    public WorkItem schedule(Work work, WorkListener workListener)
-            throws WorkException, IllegalArgumentException {
-
-        return this.workManager.schedule(work, workListener);
-    }
-
-    public boolean waitForAll(Collection workItems, long timeout)
-            throws InterruptedException, IllegalArgumentException {
-
-        return this.workManager.waitForAll(workItems, timeout);
-    }
-
-    public Collection waitForAny(Collection workItems, long timeout)
-            throws InterruptedException, IllegalArgumentException {
-
-        return this.workManager.waitForAny(workItems, timeout);
+    public void setWorkListener(WorkListener workListener) {
+        this.workListener = workListener;
     }
 
 }
