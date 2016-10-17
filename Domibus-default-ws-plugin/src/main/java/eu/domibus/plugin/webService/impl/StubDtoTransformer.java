@@ -173,17 +173,17 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         final Submission result = new Submission();
 
         final CollaborationInfo collaborationInfo = messaging.getCollaborationInfo();
-        result.setAction(collaborationInfo.getAction());
-        result.setService(StringUtils.trim(messaging.getCollaborationInfo().getService().getValue()));
-        result.setServiceType(messaging.getCollaborationInfo().getService().getType());
+        result.setAction( StringUtils.trim(collaborationInfo.getAction()) );
+        result.setService( StringUtils.trim(messaging.getCollaborationInfo().getService().getValue()));
+        result.setServiceType( StringUtils.trim(messaging.getCollaborationInfo().getService().getType()) );
         if (collaborationInfo.getAgreementRef() != null) {
-            result.setAgreementRef(collaborationInfo.getAgreementRef().getValue());
-            result.setAgreementRefType(collaborationInfo.getAgreementRef().getType());
+            result.setAgreementRef( StringUtils.trim(collaborationInfo.getAgreementRef().getValue()) );
+            result.setAgreementRefType( StringUtils.trim(collaborationInfo.getAgreementRef().getType()) );
         }
-        result.setConversationId(collaborationInfo.getConversationId());
+        result.setConversationId( StringUtils.trim(collaborationInfo.getConversationId()) );
 
-        result.setMessageId(messaging.getMessageInfo().getMessageId());
-        result.setRefToMessageId(messaging.getMessageInfo().getRefToMessageId());
+        result.setMessageId( StringUtils.trim(messaging.getMessageInfo().getMessageId()) );
+        result.setRefToMessageId( StringUtils.trim(messaging.getMessageInfo().getRefToMessageId()) );
 
         if (messaging.getPayloadInfo() != null) {
             for (final PartInfo partInfo : messaging.getPayloadInfo().getPartInfo()) {
@@ -205,14 +205,14 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
                 result.addPayload(extPartInfo.getHref(), extPartInfo.getPayloadDatahandler(), properties, extPartInfo.isInBody(), description, /*(partInfo.getSchema() != null) ? partInfo.getSchema().getLocation() :*/ null);
             }
         }
-        result.setFromRole(messaging.getPartyInfo().getFrom().getRole());
-        result.setToRole(messaging.getPartyInfo().getTo().getRole());
+        result.setFromRole( StringUtils.trim(messaging.getPartyInfo().getFrom().getRole()) );
+        result.setToRole( StringUtils.trim(messaging.getPartyInfo().getTo().getRole()) );
 
         PartyId partyId = messaging.getPartyInfo().getFrom().getPartyId();
-        result.addFromParty(StringUtils.trim(partyId.getValue()), StringUtils.trim(partyId.getType()));
+        result.addFromParty( StringUtils.trim(partyId.getValue()), StringUtils.trim(partyId.getType()) );
 
         partyId = messaging.getPartyInfo().getTo().getPartyId();
-        result.addToParty(StringUtils.trim(partyId.getValue()), StringUtils.trim(partyId.getType()));
+        result.addToParty( StringUtils.trim(partyId.getValue()), StringUtils.trim(partyId.getType()) );
 
         if (messaging.getMessageProperties() != null) {
             for (final Property property : messaging.getMessageProperties().getProperty()) {
