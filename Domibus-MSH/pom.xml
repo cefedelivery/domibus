@@ -30,7 +30,7 @@
 
     <artifactId>domibus-MSH</artifactId>
     <packaging>war</packaging>
-    <name>domibus-MSH</name>
+    <name>Domibus MSH Core</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
@@ -380,6 +380,11 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
+                <dependency>
+                    <groupId>eu.domibus</groupId>
+                    <artifactId>domibus-taskexecutor-tomcat</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
                 <dependency>
                     <groupId>eu.domibus</groupId>
                     <artifactId>domibus-jms-activemq</artifactId>

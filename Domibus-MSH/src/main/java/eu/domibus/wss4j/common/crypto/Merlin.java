@@ -19,7 +19,7 @@
 
 package eu.domibus.wss4j.common.crypto;
 
-import eu.domibus.common.util.SpringContextHelper;
+import eu.domibus.spring.SpringContextProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.wss4j.common.crypto.PasswordEncryptor;
@@ -41,7 +41,7 @@ public class Merlin extends org.apache.wss4j.common.crypto.Merlin {
 
     public Merlin(final Properties properties, final ClassLoader loader, final PasswordEncryptor passwordEncryptor) throws WSSecurityException, IOException {
         super(properties, loader, passwordEncryptor);
-        trustStoreService = (TrustStoreService) SpringContextHelper.getApplicationContext().getBean("trustStoreService");
+        trustStoreService = (TrustStoreService) SpringContextProvider.getApplicationContext().getBean("trustStoreService");
         setTrustStore(trustStoreService.getTrustStore());
         trustStoreService.setCrypto(this);
         LOG.debug("Merlin crypto successfully initialized");
