@@ -25,6 +25,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
 
 
     private static final Log LOGGER = LogFactory.getLog(StubDtoTransformer.class);
+    private static final String CLASS_NAME = "StubDtoTransformer";
 
     @Override
     public UserMessage transformFromSubmission(final Submission submission, final UserMessage target) {
@@ -169,6 +170,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
      * @return
      */
     public Submission transformFromMessaging(final UserMessage messaging) {
+        LOGGER.info("Entered method: " + CLASS_NAME + ":transformFromMessaging(final UserMessage messaging)" );
 
         final Submission result = new Submission();
 
@@ -192,7 +194,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
                 final Collection<Submission.TypedProperty> properties = new ArrayList<>();
                 if (extPartInfo.getPartProperties() != null) {
                     for (final Property property : extPartInfo.getPartProperties().getProperty()) {
-                        properties.add(new Submission.TypedProperty(property.getName(), property.getValue(), property.getType()));
+                        properties.add(new Submission.TypedProperty( StringUtils.trim( property.getName() ), StringUtils.trim(property.getValue()), StringUtils.trim(property.getType()) ));
                         if (property.getName().equals("MIME_TYPE")) {
                             mime = property.getValue();
                         }
@@ -219,6 +221,8 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
                 result.addMessageProperty(property.getName(), property.getValue(), property.getType());
             }
         }
+
+        LOGGER.info("Exiting from method: " + CLASS_NAME + ":transformFromMessaging(final UserMessage messaging)" );
         return result;
     }
 
