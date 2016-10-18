@@ -41,7 +41,10 @@ import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.security.util.AuthUtils;
-import eu.domibus.messaging.*;
+import eu.domibus.messaging.DuplicateMessageException;
+import eu.domibus.messaging.MessageConstants;
+import eu.domibus.messaging.MessageNotFoundException;
+import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import org.apache.commons.logging.Log;
@@ -239,12 +242,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
             validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
 
-            try {
-                pmodeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
-            } catch (IllegalStateException e) { //if no pmodes are configured
-                LOG.debug(e);
-                throw new PModeMismatchException("PMode could not be found. Are PModes configured in the database?");
-            }
+            pmodeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
 
             Party from = pModeProvider.getSenderParty(pmodeKey);
             Party to = pModeProvider.getReceiverParty(pmodeKey);
@@ -257,7 +255,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             if (config.getParty().equals(to)) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "It is forbidden to submit a message to the sending access point[" + to.getName() + "]", null, null);
             }
-            // Verifies that the message is being sent by the same party as the one configured for the sending access point./*
+            // Verifies that the message is being sent by the same party as the one configured for the sending access point
             if (!config.getParty().equals(from)) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name [" + from.getName() + "] does not correspond to the access point's name [" + config.getParty().getName() + "]", null, null);
             }

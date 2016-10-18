@@ -15,6 +15,7 @@ import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.messaging.DuplicateMessageException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
@@ -34,9 +35,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import javax.jms.Queue;
 import java.sql.SQLException;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author Federico Martini
  * @since 3.2
+ *
+ * in the Verifications() the execution "times" is by default 1.
  */
 @RunWith(JMockit.class)
 public class DatabaseMessageHandlerTest {
@@ -211,25 +216,17 @@ public class DatabaseMessageHandlerTest {
         }};
 
         String messageId = dmh.submit(messageData, BACKEND);
-        Assert.assertEquals(messageId, MESS_ID);
+        assertEquals(messageId, MESS_ID);
 
         new Verifications() {{
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
-            times = 1;
             messageIdGenerator.generateMessageId();
-            times = 1;
             userMessageLogDao.getMessageStatus(MESS_ID);
-            times = 1;
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
-            times = 1;
             pModeProvider.getLegConfiguration(anyString);
-            times = 1;
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
-            times = 1;
             messagingDao.create(withAny(new Messaging()));
-            times = 1;
             userMessageLogDao.create(withAny(new UserMessageLog()));
-            times = 1;
         }};
 
     }
@@ -277,25 +274,17 @@ public class DatabaseMessageHandlerTest {
         }};
 
         String messageId = dmh.submit(messageData, BACKEND);
-        Assert.assertEquals(messageId, MESS_ID);
+        assertEquals(messageId, MESS_ID);
 
         new Verifications() {{
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
-            times = 1;
             messageIdGenerator.generateMessageId();
-            times = 1;
             userMessageLogDao.getMessageStatus(MESS_ID);
-            times = 1;
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
-            times = 1;
             pModeProvider.getLegConfiguration(anyString);
-            times = 1;
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
-            times = 1;
             messagingDao.create(withAny(new Messaging()));
-            times = 1;
             userMessageLogDao.create(withAny(new UserMessageLog()));
-            times = 1;
         }};
 
     }
@@ -316,12 +305,11 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
-            assert (mpEx.getEbms3ErrorCode().equals(ErrorCode.EBMS_0008));
+            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0008);
         }
 
         new Verifications() {{
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
-            times = 1;
             messageIdGenerator.generateMessageId();
             times = 0;
             userMessageLogDao.getMessageStatus(MESS_ID);
@@ -358,14 +346,12 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
-            assert (mpEx.getEbms3ErrorCode().equals(ErrorCode.EBMS_0008));
+            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0008);
         }
 
         new Verifications() {{
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
-            times = 1;
             messageIdGenerator.generateMessageId();
-            times = 1;
             userMessageLogDao.getMessageStatus(MESS_ID);
             times = 0;
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
@@ -424,19 +410,15 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
-            assert (mpEx.getEbms3ErrorCode().equals(ErrorCode.EBMS_0010));
+            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
             assert (mpEx.getMessage().contains("does not correspond to the access point's name"));
         }
 
         new Verifications() {{
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
-            times = 1;
             messageIdGenerator.generateMessageId();
-            times = 1;
             userMessageLogDao.getMessageStatus(MESS_ID);
-            times = 1;
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
-            times = 1;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
             messagingDao.create(withAny(new Messaging()));
@@ -486,19 +468,15 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
-            assert (mpEx.getEbms3ErrorCode().equals(ErrorCode.EBMS_0010));
+            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
             assert (mpEx.getMessage().contains("The initiator party's name is the same as the responder party's one"));
         }
 
         new Verifications() {{
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
-            times = 1;
             messageIdGenerator.generateMessageId();
-            times = 1;
             userMessageLogDao.getMessageStatus(MESS_ID);
-            times = 1;
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
-            times = 1;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
             messagingDao.create(withAny(new Messaging()));
@@ -555,19 +533,15 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
-            assert (mpEx.getEbms3ErrorCode().equals(ErrorCode.EBMS_0010));
+            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
             assert (mpEx.getMessage().contains("It is forbidden to submit a message to the sending access point"));
         }
 
         new Verifications() {{
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
-            times = 1;
             messageIdGenerator.generateMessageId();
-            times = 1;
             userMessageLogDao.getMessageStatus(MESS_ID);
-            times = 1;
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
-            times = 1;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
             messagingDao.create(withAny(new Messaging()));
@@ -623,25 +597,18 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
-            assert (mpEx.getEbms3ErrorCode().equals(ErrorCode.EBMS_0303));
+            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0303);
             assert (mpEx.getMessage().contains("No mime type found for payload with cid:"));
         }
 
         new Verifications() {{
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
-            times = 1;
             messageIdGenerator.generateMessageId();
-            times = 1;
             userMessageLogDao.getMessageStatus(MESS_ID);
-            times = 1;
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
-            times = 1;
             pModeProvider.getLegConfiguration(anyString);
-            times = 1;
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
-            times = 1;
             errorLogDao.create(withAny(new ErrorLogEntry()));
-            times = 1;
             messagingDao.create(withAny(new Messaging()));
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
@@ -649,6 +616,80 @@ public class DatabaseMessageHandlerTest {
         }};
 
     }
+
+    @Test
+    public void testSubmitMessagePModeNOk(@Injectable final Submission messageData) throws Exception {
+        new Expectations() {{
+
+            UserMessage userMessage = createUserMessage();
+            transformer.transformFromSubmission(messageData);
+            result = userMessage;
+
+            messageIdGenerator.generateMessageId();
+            result = MESS_ID;
+
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            result = MessageStatus.NOT_FOUND;
+
+            pModeProvider.findPModeKeyForUserMessage(userMessage);
+            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "PMode could not be found. Are PModes configured in the database?", MESS_ID, null);
+
+        }};
+
+        try {
+            dmh.submit(messageData, BACKEND);
+            Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
+        } catch (MessagingProcessingException mpEx) {
+            LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
+            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
+            assert (mpEx.getMessage().contains("PMode could not be found. Are PModes configured in the database?"));
+        }
+
+        new Verifications() {{
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            messageIdGenerator.generateMessageId();
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            pModeProvider.getLegConfiguration(anyString);
+            times = 0;
+            messagingDao.create(withAny(new Messaging()));
+            times = 0;
+            userMessageLogDao.create(withAny(new UserMessageLog()));
+            times = 0;
+        }};
+    }
+
+    @Test
+    public void testSubmitDuplicateMessage(@Injectable final Submission messageData) throws Exception {
+        new Expectations() {{
+
+            UserMessage userMessage = new UserMessage();
+            transformer.transformFromSubmission(messageData);
+            result = userMessage;
+
+            messageIdGenerator.generateMessageId();
+            result = MESS_ID;
+
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            result = MessageStatus.ACKNOWLEDGED;
+
+        }};
+
+        try {
+            dmh.submit(messageData, BACKEND);
+            Assert.fail("It should throw " + DuplicateMessageException.class.getCanonicalName());
+        } catch (DuplicateMessageException ex) {
+            LOG.debug("DuplicateMessageException catched " + ex.getMessage());
+            assert (ex.getMessage().contains("already exists. Message identifiers must be unique"));
+        }
+
+        new Verifications() {{
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            messageIdGenerator.generateMessageId();
+            userMessageLogDao.getMessageStatus(MESS_ID);
+        }};
+    }
+
 
     @Test
     public void testDownloadMessageOK() throws SendMessageFault, InterruptedException, SQLException {
