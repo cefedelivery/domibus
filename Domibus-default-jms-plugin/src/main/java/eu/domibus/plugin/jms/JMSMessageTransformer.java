@@ -47,6 +47,7 @@ import java.util.*;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.*;
 import static org.springframework.util.StringUtils.hasLength;
+import static org.springframework.util.StringUtils.trimWhitespace;
 
 /**
  * This class is responsible for transformations from {@link javax.jms.MapMessage} to {@link eu.domibus.plugin.Submission} and vice versa
@@ -184,76 +185,76 @@ public class JMSMessageTransformer
 
         try {
 
-            target.setMessageId(messageIn.getStringProperty(MESSAGE_ID));
+            target.setMessageId(trimWhitespace(messageIn.getStringProperty(MESSAGE_ID)));
 
-            String fromPartyID = messageIn.getStringProperty(FROM_PARTY_ID);
+            String fromPartyID = trimWhitespace(messageIn.getStringProperty(FROM_PARTY_ID));
             if (!hasLength(fromPartyID)) {
                 fromPartyID = properties.getProperty(FROM_PARTY_ID);
             }
 
-            String fromPartyType = messageIn.getStringProperty(FROM_PARTY_TYPE);
+            String fromPartyType = trimWhitespace(messageIn.getStringProperty(FROM_PARTY_TYPE));
             if (!hasLength(fromPartyType)) {
                 fromPartyType = properties.getProperty(FROM_PARTY_TYPE);
             }
             target.addFromParty(fromPartyID, fromPartyType);
 
 
-            target.setFromRole(messageIn.getStringProperty(FROM_ROLE));
+            target.setFromRole(trimWhitespace(messageIn.getStringProperty(FROM_ROLE)));
             if (!hasLength(target.getFromRole())) {
                 target.setFromRole(properties.getProperty(FROM_ROLE));
             }
 
-            String toPartyID = messageIn.getStringProperty(TO_PARTY_ID);
+            String toPartyID = trimWhitespace(messageIn.getStringProperty(TO_PARTY_ID));
             if (!hasLength(toPartyID)) {
                 toPartyID = properties.getProperty(TO_PARTY_ID);
             }
 
-            String toPartyType = messageIn.getStringProperty(TO_PARTY_TYPE);
+            String toPartyType = trimWhitespace(messageIn.getStringProperty(TO_PARTY_TYPE));
             if (!hasLength(toPartyType)) {
                 toPartyType = properties.getProperty(TO_PARTY_TYPE);
             }
 
             target.addToParty(toPartyID, toPartyType);
 
-            target.setToRole(messageIn.getStringProperty(TO_ROLE));
+            target.setToRole(trimWhitespace(messageIn.getStringProperty(TO_ROLE)));
 
-            target.setAction(messageIn.getStringProperty(ACTION));
+            target.setAction(trimWhitespace(messageIn.getStringProperty(ACTION)));
             if (!hasLength(target.getAction())) {
                 target.setAction(properties.getProperty(ACTION));
             }
 
-            target.setService(messageIn.getStringProperty(SERVICE));
+            target.setService(trimWhitespace(messageIn.getStringProperty(SERVICE)));
             if (!hasLength(target.getService())) {
                 target.setService(properties.getProperty(SERVICE));
             }
 
-            target.setServiceType(messageIn.getStringProperty(SERVICE_TYPE));
+            target.setServiceType(trimWhitespace(messageIn.getStringProperty(SERVICE_TYPE)));
             if (!hasLength(target.getServiceType())) {
                 target.setServiceType(properties.getProperty(SERVICE_TYPE));
             }
 
-            target.setAgreementRef(messageIn.getStringProperty(AGREEMENT_REF));
+            target.setAgreementRef(trimWhitespace(messageIn.getStringProperty(AGREEMENT_REF)));
             if (!hasLength(target.getAgreementRef())) {
                 target.setAgreementRef(properties.getProperty(AGREEMENT_REF));
             }
 
 
-            target.setConversationId(messageIn.getStringProperty(CONVERSATION_ID));
+            target.setConversationId(trimWhitespace(messageIn.getStringProperty(CONVERSATION_ID)));
 
             //not part of ebMS3, eCODEX legacy property
-            if (hasLength(messageIn.getStringProperty(PROPERTY_ORIGINAL_SENDER))) {
-                target.addMessageProperty(PROPERTY_ORIGINAL_SENDER, messageIn.getStringProperty(PROPERTY_ORIGINAL_SENDER));
+            if (hasLength(trimWhitespace(messageIn.getStringProperty(PROPERTY_ORIGINAL_SENDER)))) {
+                target.addMessageProperty(PROPERTY_ORIGINAL_SENDER, trimWhitespace(messageIn.getStringProperty(PROPERTY_ORIGINAL_SENDER)));
             }
 
             //not part of ebMS3, eCODEX legacy property
-            if (hasLength(messageIn.getStringProperty(PROPERTY_FINAL_RECIPIENT))) {
-                target.addMessageProperty(PROPERTY_FINAL_RECIPIENT, messageIn.getStringProperty(PROPERTY_FINAL_RECIPIENT));
+            if (hasLength(trimWhitespace(messageIn.getStringProperty(PROPERTY_FINAL_RECIPIENT)))) {
+                target.addMessageProperty(PROPERTY_FINAL_RECIPIENT, trimWhitespace(messageIn.getStringProperty(PROPERTY_FINAL_RECIPIENT)));
             }
 
-            target.setRefToMessageId(messageIn.getStringProperty(REF_TO_MESSAGE_ID));
+            target.setRefToMessageId(trimWhitespace(messageIn.getStringProperty(REF_TO_MESSAGE_ID)));
 
             final int numPayloads = messageIn.getIntProperty(TOTAL_NUMBER_OF_PAYLOADS);
-            String bodyloadEnabled = messageIn.getStringProperty(JMSMessageConstants.P1_IN_BODY);
+            String bodyloadEnabled = trimWhitespace(messageIn.getStringProperty(JMSMessageConstants.P1_IN_BODY));
             if(!hasLength(bodyloadEnabled)){
                 bodyloadEnabled = properties.getProperty(P1_IN_BODY);
             }
@@ -262,7 +263,7 @@ public class JMSMessageTransformer
             while (allProps.hasMoreElements()) {
                 String key = allProps.nextElement();
                 if (key.startsWith(PROPERTY_PREFIX)) {
-                    target.addMessageProperty(key.substring(PROPERTY_PREFIX.length()), messageIn.getStringProperty(key), messageIn.getStringProperty(PROPERTY_TYPE_PREFIX + key.substring(PROPERTY_PREFIX.length())));
+                    target.addMessageProperty(key.substring(PROPERTY_PREFIX.length()), trimWhitespace(messageIn.getStringProperty(key)), trimWhitespace(messageIn.getStringProperty(PROPERTY_TYPE_PREFIX + key.substring(PROPERTY_PREFIX.length()))));
                 }
             }
 
@@ -275,13 +276,13 @@ public class JMSMessageTransformer
                 final String mimeType;
                 String description = null;
                 final String payMimeTypeProp = String.valueOf(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, i));
-                mimeType = messageIn.getStringProperty(payMimeTypeProp);
+                mimeType = trimWhitespace(messageIn.getStringProperty(payMimeTypeProp));
                 final String payDescrip = String.valueOf(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, i));
                 if (messageIn.getStringProperty(payDescrip) != null) {
-                    description = messageIn.getStringProperty(payDescrip);
+                    description = trimWhitespace(messageIn.getStringProperty(payDescrip));
                 }
                 final String payContID = String.valueOf(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, i));
-                contentId = messageIn.getStringProperty(payContID);
+                contentId = trimWhitespace(messageIn.getStringProperty(payContID));
                 final Collection<Submission.TypedProperty> partProperties = new ArrayList<>();
                 if (mimeType != null && !mimeType.trim().equals("")) {
                     partProperties.add(new Submission.TypedProperty(MIME_TYPE, mimeType));
