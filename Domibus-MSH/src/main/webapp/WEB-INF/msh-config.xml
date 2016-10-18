@@ -59,6 +59,7 @@
         <property name="transactionManager">
             <ref bean="transactionManager"/>
         </property>
+        <property name="configLocation" value="file:///${domibus.config.location}/quartz.properties"/>
         <property name="quartzProperties">
             <props>
                 <prop key="org.quartz.jobStore.misfireThreshold">6000000</prop>
