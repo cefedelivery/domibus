@@ -64,8 +64,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     private static final Log LOG = LogFactory.getLog(DatabaseMessageHandler.class);
 
-    private final ObjectFactory objectFactory = new ObjectFactory();
-
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
     @Autowired
@@ -114,7 +112,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public Submission downloadMessage(final String messageId) throws MessageNotFoundException {
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
 
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
@@ -160,8 +158,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     }
 
     private void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String type) {
-        if(authOriginalUser != null) {
-            LOG.debug("OriginalUser is " + authOriginalUser );
+        if (authOriginalUser != null) {
+            LOG.debug("OriginalUser is " + authOriginalUser);
             /* check the message belongs to the authenticated user */
             String originalUser = getOriginalUser(userMessage, type);
             if (originalUser != null && !originalUser.equals(authOriginalUser)) {
@@ -172,13 +170,13 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     }
 
     private String getOriginalUser(UserMessage userMessage, String type) {
-        if(userMessage == null || userMessage.getMessageProperties() == null ||
-                userMessage.getMessageProperties().getProperty() == null ) {
+        if (userMessage == null || userMessage.getMessageProperties() == null ||
+                userMessage.getMessageProperties().getProperty() == null) {
             return null;
         }
         String originalUser = null;
-        for(Property property : userMessage.getMessageProperties().getProperty()) {
-            if(property.getName() != null && property.getName().equals(type)) {
+        for (Property property : userMessage.getMessageProperties().getProperty()) {
+            if (property.getName() != null && property.getName().equals(type)) {
                 originalUser = property.getValue();
                 break;
             }
@@ -188,7 +186,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     public MessageStatus getMessageStatus(final String messageId) {
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasAdminRole();
 
         return userMessageLogDao.getMessageStatus(messageId);
@@ -196,7 +194,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     public List<? extends ErrorResult> getErrorsForMessage(final String messageId) {
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasAdminRole();
 
         return errorLogDao.getErrorsForMessage(messageId);
@@ -214,20 +212,19 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
+        UserMessage userMessage = transformer.transformFromSubmission(messageData);
+
         try {
-            final UserMessage userMessage = transformer.transformFromSubmission(messageData);
-            final MessageInfo messageInfo = userMessage.getMessageInfo();
-            if (messageInfo == null) {
-                userMessage.setMessageInfo(objectFactory.createMessageInfo());
-            }
-            String messageId = userMessage.getMessageInfo().getMessageId();
-            if (messageId == null || userMessage.getMessageInfo().getMessageId().trim().isEmpty()) {
+            // MessageInfo is always initialized in the get method
+            MessageInfo messageInfo = userMessage.getMessageInfo();
+            String messageId = messageInfo.getMessageId();
+            if (messageId == null || messageId.trim().isEmpty()) {
                 messageId = messageIdGenerator.generateMessageId();
-                userMessage.getMessageInfo().setMessageId(messageId);
+                messageInfo.setMessageId(messageId);
             } else if (messageId.length() > 255) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "MessageId value is too long (over 255 characters)", null, null);
             }
-            String refToMessageId = userMessage.getMessageInfo().getRefToMessageId();
+            String refToMessageId = messageInfo.getRefToMessageId();
             if (refToMessageId != null && refToMessageId.length() > 255) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "RefToMessageId value is too long (over 255 characters)", refToMessageId, null);
             }
@@ -236,8 +233,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 throw new DuplicateMessageException("Message with id [" + messageId + "] already exists. Message identifiers must be unique");
             }
 
-            final String pmodeKey;
-            final Messaging message = ebMS3Of.createMessaging();
+            String pmodeKey;
+            Messaging message = ebMS3Of.createMessaging();
             message.setUserMessage(userMessage);
 
             validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
@@ -249,8 +246,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 throw new PModeMismatchException("PMode could not be found. Are PModes configured in the database?");
             }
 
-            final Party from = pModeProvider.getSenderParty(pmodeKey);
-            final Party to = pModeProvider.getReceiverParty(pmodeKey);
+            Party from = pModeProvider.getSenderParty(pmodeKey);
+            Party to = pModeProvider.getReceiverParty(pmodeKey);
             // Verifies that the initiator and responder party are not the same.
             if (from.getName().equals(to.getName())) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name is the same as the responder party's one[" + from.getName() + "]", null, null);
@@ -265,31 +262,15 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name [" + from.getName() + "] does not correspond to the access point's name [" + config.getParty().getName() + "]", null, null);
             }
 
-            final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
-            final Map<Party, Mpc> mpcMap = legConfiguration.getPartyMpcMap();
-            String mpc = Mpc.DEFAULT_MPC;
-            if (legConfiguration.getDefaultMpc() != null) {
-                mpc = legConfiguration.getDefaultMpc().getQualifiedName();
-            }
-            if (mpcMap != null && mpcMap.containsKey(to)) {
-                mpc = mpcMap.get(to).getQualifiedName();
-            }
-            userMessage.setMpc(mpc);
+            LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
+
+            fillMpc(userMessage, legConfiguration, to);
+
             payloadProfileValidator.validate(message, pmodeKey);
             propertyProfileValidator.validate(message, pmodeKey);
-            int sendAttemptsMax = 1;
 
-            if (legConfiguration.getReceptionAwareness() != null) {
-                sendAttemptsMax = legConfiguration.getReceptionAwareness().getRetryCount();
-            }
-
-            try {
-                final boolean compressed = compressionService.handleCompression(userMessage, legConfiguration);
-                LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
-            } catch (final EbMS3Exception e) {
-                errorLogDao.create(new ErrorLogEntry(e));
-                throw e;
-            }
+            boolean compressed = compressionService.handleCompression(userMessage, legConfiguration);
+            LOG.debug("Compression for message with id: " + messageId + " applied: " + compressed);
 
             // We do not create MessageIds for SignalMessages, as those should never be submitted via the backend
             messagingDao.create(message);
@@ -303,7 +284,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(legConfiguration.getErrorHandling().isBusinessErrorNotifyProducer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED)
                     .setMpc(message.getUserMessage().getMpc())
-                    .setSendAttemptsMax(sendAttemptsMax)
+                    .setSendAttemptsMax(legConfiguration.getReceptionAwareness() == null ? 1 : legConfiguration.getReceptionAwareness().getRetryCount())
                     .setBackendName(backendName)
                     .setEndpoint(to.getEndpoint());
 
@@ -311,10 +292,25 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
             return userMessage.getMessageInfo().getMessageId();
 
-        } catch (final EbMS3Exception e) {
-            LOG.error("Error submitting to backendName :" + backendName, e);
-            throw MessagingExceptionFactory.transform(e);
+        } catch (final EbMS3Exception ebms3Ex) {
+            if (ebms3Ex.getErrorCode().equals(ErrorCode.EbMS3ErrorCode.EBMS_0303)) {
+                errorLogDao.create(new ErrorLogEntry(ebms3Ex));
+            }
+            LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", ebms3Ex);
+            throw MessagingExceptionFactory.transform(ebms3Ex);
         }
+    }
+
+    private void fillMpc(UserMessage userMessage, LegConfiguration legConfiguration, Party to) {
+        final Map<Party, Mpc> mpcMap = legConfiguration.getPartyMpcMap();
+        String mpc = Mpc.DEFAULT_MPC;
+        if (legConfiguration.getDefaultMpc() != null) {
+            mpc = legConfiguration.getDefaultMpc().getQualifiedName();
+        }
+        if (mpcMap != null && mpcMap.containsKey(to)) {
+            mpc = mpcMap.get(to).getQualifiedName();
+        }
+        userMessage.setMpc(mpc);
     }
 
 }
