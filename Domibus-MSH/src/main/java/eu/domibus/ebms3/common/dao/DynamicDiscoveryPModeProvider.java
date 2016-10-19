@@ -27,7 +27,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,7 +52,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
     private static final Log LOG = LogFactory.getLog(DynamicDiscoveryPModeProvider.class);
     @Autowired
-    protected TrustStoreService trustStoreService;
+    protected CryptoService cryptoService;
     @Autowired
     private DynamicDiscoveryService dynamicDiscoveryService;
     protected Collection<eu.domibus.common.model.configuration.Process> dynamicReceiverProcesses;
@@ -136,7 +136,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         userMessage.getPartyInfo().getTo().getPartyId().add(receiverParty);
 
         //add certificate to Truststore
-        trustStoreService.addCertificate(endpoint.getCertificate(), cn, true);
+        cryptoService.addCertificate(endpoint.getCertificate(), cn, true);
 
         //check if party is available in cache
         Party configurationToParty = null;

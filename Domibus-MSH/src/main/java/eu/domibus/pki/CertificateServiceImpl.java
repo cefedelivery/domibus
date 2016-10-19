@@ -1,6 +1,6 @@
 package eu.domibus.pki;
 
-import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,8 @@ import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 /**
- * Created by Cosmin Baciu on 12-Jul-16.
+ * @Author Cosmin Baciu
+ * @Since 3.2
  */
 @Service
 public class CertificateServiceImpl implements CertificateService {
@@ -25,7 +26,7 @@ public class CertificateServiceImpl implements CertificateService {
     CRLService crlService;
 
     @Autowired
-    TrustStoreService trustStoreService;
+    CryptoService cryptoService;
 
     @Autowired
     @Qualifier("domibusProperties")
@@ -35,7 +36,7 @@ public class CertificateServiceImpl implements CertificateService {
     @Override
     public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
         LOG.debug("Checking certificate validation for [" + alias + "]");
-        KeyStore trustStore = trustStoreService.getTrustStore();
+        KeyStore trustStore = cryptoService.getTrustStore();
         if (trustStore == null) {
             throw new DomibusCertificateException("Error getting the truststore");
         }
@@ -59,6 +60,7 @@ public class CertificateServiceImpl implements CertificateService {
 
         return true;
     }
+
 
     protected X509Certificate[] getCertificateChain(KeyStore trustStore, String alias) throws KeyStoreException {
         //TODO get the certificate chain manually based on the issued by info from the original certificate
@@ -100,6 +102,30 @@ public class CertificateServiceImpl implements CertificateService {
         }
 
         return result;
+    }
+
+    /**
+     * Verifies the existence and validity of sender's certificate.
+     *
+     * @param alias
+     * @throws DomibusCertificateException
+     * @Author Federico Martini
+     * @Since 3.3
+     */
+    @Override
+    public void verifySender(String alias) throws DomibusCertificateException {
+        LOG.debug("Verifying the certificate of the sender[" + alias + "]");
+        try {
+            X509Certificate certificate = (X509Certificate) cryptoService.getCertificateFromKeystore(alias);
+            if (certificate == null) {
+                throw new DomibusCertificateException("Error: the sender's certificate does not exist for alias[" + alias + "]");
+            }
+            if (!isCertificateValid(certificate)) {
+                throw new DomibusCertificateException("Error: the sender's certificate is not valid anymore for alias [" + alias + "]");
+            }
+        } catch (KeyStoreException ksEx) {
+            throw new DomibusCertificateException("Error getting the certificate from keystore for alias [" + alias + "]", ksEx);
+        }
     }
 
 }

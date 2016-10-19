@@ -1,6 +1,6 @@
 package eu.domibus.pki;
 
-import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.joda.time.DateTime;
@@ -34,7 +34,7 @@ public class CertificateServiceImplTest {
     CRLService crlService;
 
     @Injectable
-    TrustStoreService trustStoreService;
+    CryptoService cryptoService;
 
     PKIUtil pkiUtil = new PKIUtil();
 
@@ -63,7 +63,7 @@ public class CertificateServiceImplTest {
         final X509Certificate receiverCertificate = pkiUtil.createCertificate(BigInteger.ONE, null);
 
         new Expectations(certificateService) {{
-            trustStoreService.getTrustStore();
+            cryptoService.getTrustStore();
             result = trustStore;
 
             trustStore.getCertificateChain(receiverAlias);
@@ -97,7 +97,7 @@ public class CertificateServiceImplTest {
         final X509Certificate receiverCertificate = pkiUtil.createCertificate(BigInteger.ONE, null);
 
         new Expectations(certificateService) {{
-            trustStoreService.getTrustStore();
+            cryptoService.getTrustStore();
             result = trustStore;
 
             trustStore.getCertificateChain(receiverAlias);

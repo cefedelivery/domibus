@@ -1,6 +1,5 @@
 package eu.domibus.pki;
 
-import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
 /**
@@ -13,4 +12,6 @@ public interface CertificateService {
     boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException;
 
     boolean isCertificateChainValid(String alias) throws DomibusCertificateException;
+
+    void verifySender(String alias) throws DomibusCertificateException;
 }

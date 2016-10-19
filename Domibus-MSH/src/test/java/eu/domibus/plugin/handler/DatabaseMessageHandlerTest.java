@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.jms.Queue;
@@ -153,11 +154,6 @@ public class DatabaseMessageHandlerTest {
         PayloadInfo payloadInfo = new PayloadInfo();
         PartInfo partInfo = new PartInfo();
         partInfo.setHref("cid:message");
-/*        Description description = new Description();
-        description.setValue("e-sens-sbdh-order");
-        description.setLang("en-US");
-        partInfo.setDescription(description);
-*/
 
         PartProperties partProperties = new PartProperties();
         partProperties.getProperties().add(createProperty("text/xml", "MimeType", STRING_TYPE));
@@ -177,6 +173,9 @@ public class DatabaseMessageHandlerTest {
     @Test
     public void testSubmitMessageGreen2RedOk(@Injectable final Submission messageData) throws Exception {
         new Expectations() {{
+
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
 
             UserMessage userMessage = createUserMessage();
             transformer.transformFromSubmission(messageData);
@@ -304,7 +303,7 @@ public class DatabaseMessageHandlerTest {
             dmh.submit(messageData, BACKEND);
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
-            LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
+            LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
             assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0008);
         }
 
@@ -345,7 +344,7 @@ public class DatabaseMessageHandlerTest {
             dmh.submit(messageData, BACKEND);
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
-            LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
+            LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
             assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0008);
         }
 
@@ -409,7 +408,7 @@ public class DatabaseMessageHandlerTest {
             dmh.submit(messageData, BACKEND);
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
-            LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
+            LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
             assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
             assert (mpEx.getMessage().contains("does not correspond to the access point's name"));
         }
@@ -467,7 +466,7 @@ public class DatabaseMessageHandlerTest {
             dmh.submit(messageData, BACKEND);
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
-            LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
+            LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
             assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
             assert (mpEx.getMessage().contains("The initiator party's name is the same as the responder party's one"));
         }
@@ -532,7 +531,7 @@ public class DatabaseMessageHandlerTest {
             dmh.submit(messageData, BACKEND);
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
-            LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
+            LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
             assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
             assert (mpEx.getMessage().contains("It is forbidden to submit a message to the sending access point"));
         }
@@ -596,7 +595,7 @@ public class DatabaseMessageHandlerTest {
             dmh.submit(messageData, BACKEND);
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
-            LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
+            LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
             assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0303);
             assert (mpEx.getMessage().contains("No mime type found for payload with cid:"));
         }
@@ -640,7 +639,7 @@ public class DatabaseMessageHandlerTest {
             dmh.submit(messageData, BACKEND);
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
-            LOG.debug("MessagingProcessingException catched " + mpEx.getMessage());
+            LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
             assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
             assert (mpEx.getMessage().contains("PMode could not be found. Are PModes configured in the database?"));
         }
@@ -679,7 +678,7 @@ public class DatabaseMessageHandlerTest {
             dmh.submit(messageData, BACKEND);
             Assert.fail("It should throw " + DuplicateMessageException.class.getCanonicalName());
         } catch (DuplicateMessageException ex) {
-            LOG.debug("DuplicateMessageException catched " + ex.getMessage());
+            LOG.debug("DuplicateMessageException catched: " + ex.getMessage());
             assert (ex.getMessage().contains("already exists. Message identifiers must be unique"));
         }
 
@@ -687,6 +686,34 @@ public class DatabaseMessageHandlerTest {
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
+        }};
+    }
+
+    @Test
+    public void testVerifyOriginalUserNOk(@Injectable final Submission messageData) throws Exception {
+        new Expectations() {{
+
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            result = "mycorner";
+
+            UserMessage userMessage = createUserMessage();
+            transformer.transformFromSubmission(messageData);
+            result = userMessage;
+
+        }};
+
+        try {
+            dmh.submit(messageData, BACKEND);
+            Assert.fail("It should throw " + AccessDeniedException.class.getCanonicalName());
+        } catch (AccessDeniedException ex) {
+            LOG.debug("AccessDeniedException catched: " + ex.getMessage());
+            assert (ex.getMessage().contains("You are not allowed to handle this message. You are authorized as [mycorner]"));
+        }
+
+        new Verifications() {{
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            messageIdGenerator.generateMessageId();
+            times = 0;
         }};
     }
 

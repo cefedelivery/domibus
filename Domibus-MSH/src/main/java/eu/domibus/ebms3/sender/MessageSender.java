@@ -109,21 +109,21 @@ public class MessageSender implements MessageListener {
         LegConfiguration legConfiguration = null;
         final String pModeKey;
 
-        final UserMessage userMessage = this.messagingDao.findUserMessageByMessageId(messageId);
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         try {
-            pModeKey = this.pModeProvider.findPModeKeyForUserMessage(userMessage);
+            pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
             legConfiguration = this.pModeProvider.getLegConfiguration(pModeKey);
 
             LOG.debug("PMode found : " + pModeKey);
-            final SOAPMessage soapMessage = this.messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
-            final SOAPMessage response = this.mshDispatcher.dispatch(soapMessage, pModeKey);
+            final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
+            final SOAPMessage response = mshDispatcher.dispatch(soapMessage, pModeKey);
             isOk = responseHandler.handle(response);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
-                EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occured during marshalling", messageId, null);
+                EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occurred during marshalling", messageId, null);
                 e.setMshRole(MSHRole.SENDING);
                 throw e;
             }
-            reliabilityCheckSuccessful = this.reliabilityChecker.check(soapMessage, response, pModeKey);
+            reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, response, pModeKey);
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 this.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);

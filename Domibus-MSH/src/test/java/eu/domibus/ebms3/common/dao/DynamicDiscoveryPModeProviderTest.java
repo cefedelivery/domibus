@@ -7,7 +7,7 @@ import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import no.difi.vefa.edelivery.lookup.model.ProcessIdentifier;
 import no.difi.vefa.edelivery.lookup.model.TransportProfile;
@@ -37,7 +37,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -96,7 +95,7 @@ public class DynamicDiscoveryPModeProviderTest {
     DynamicDiscoveryService dynamicDiscoveryService;
 
     @Spy
-    TrustStoreService trustStoreService;
+    CryptoService cryptoService;
 
     @Before
     public void initMocks() {
@@ -198,7 +197,7 @@ public class DynamicDiscoveryPModeProviderTest {
         Endpoint testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, ADDRESS, ALIAS_CN_AVAILABLE);
         doReturn(testDataEndpoint).when(dynamicDiscoveryService).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
 
-        doReturn(true).when(trustStoreService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
+        doReturn(true).when(cryptoService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
 
         UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UUID.randomUUID().toString());
 

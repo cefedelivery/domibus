@@ -162,19 +162,18 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     private void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String type) {
         if (authOriginalUser != null) {
-            LOG.debug("OriginalUser is " + authOriginalUser);
+            LOG.debug("OriginalUser is [" + authOriginalUser + "]");
             /* check the message belongs to the authenticated user */
             String originalUser = getOriginalUser(userMessage, type);
             if (originalUser != null && !originalUser.equals(authOriginalUser)) {
-                LOG.debug("User:" + authOriginalUser + " is trying to delete message having finalRecipient:" + originalUser);
-                throw new AccessDeniedException("You are not allowed to handle this message. You are authorized as " + authOriginalUser);
+                LOG.debug("User [" + authOriginalUser + "] is trying to submit/access a message having as final recipient: " + originalUser);
+                throw new AccessDeniedException("You are not allowed to handle this message. You are authorized as [" + authOriginalUser + "]");
             }
         }
     }
 
     private String getOriginalUser(UserMessage userMessage, String type) {
-        if (userMessage == null || userMessage.getMessageProperties() == null ||
-                userMessage.getMessageProperties().getProperty() == null) {
+        if (userMessage == null || userMessage.getMessageProperties() == null || userMessage.getMessageProperties().getProperty() == null) {
             return null;
         }
         String originalUser = null;
@@ -217,6 +216,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
         UserMessage userMessage = transformer.transformFromSubmission(messageData);
 
+        validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
+
         try {
             // MessageInfo is always initialized in the get method
             MessageInfo messageInfo = userMessage.getMessageInfo();
@@ -236,16 +237,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 throw new DuplicateMessageException("Message with id [" + messageId + "] already exists. Message identifiers must be unique");
             }
 
-            String pmodeKey;
             Messaging message = ebMS3Of.createMessaging();
             message.setUserMessage(userMessage);
 
-            validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
-
-            pmodeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
-
-            Party from = pModeProvider.getSenderParty(pmodeKey);
-            Party to = pModeProvider.getReceiverParty(pmodeKey);
+            String pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
+            Party from = pModeProvider.getSenderParty(pModeKey);
+            Party to = pModeProvider.getReceiverParty(pModeKey);
             // Verifies that the initiator and responder party are not the same.
             if (from.getName().equals(to.getName())) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name is the same as the responder party's one[" + from.getName() + "]", null, null);
@@ -260,12 +257,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name [" + from.getName() + "] does not correspond to the access point's name [" + config.getParty().getName() + "]", null, null);
             }
 
-            LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
+            LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
 
             fillMpc(userMessage, legConfiguration, to);
 
-            payloadProfileValidator.validate(message, pmodeKey);
-            propertyProfileValidator.validate(message, pmodeKey);
+            payloadProfileValidator.validate(message, pModeKey);
+            propertyProfileValidator.validate(message, pModeKey);
 
             boolean compressed = compressionService.handleCompression(userMessage, legConfiguration);
             LOG.debug("Compression for message with id: " + messageId + " applied: " + compressed);

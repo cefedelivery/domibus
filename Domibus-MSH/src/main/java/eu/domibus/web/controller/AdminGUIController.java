@@ -32,7 +32,7 @@ import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.*;
-import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,7 +82,7 @@ public class AdminGUIController {
     private List<NotificationListener> notificationListenerServices;
 
     @Autowired
-    private TrustStoreService trustStoreService;
+    private CryptoService cryptoService;
 
     @Resource(name = "routingCriteriaFactories")
     private List<CriteriaFactory> routingCriteriaFactories;
@@ -324,7 +324,7 @@ public class AdminGUIController {
         if (!truststore.isEmpty()) {
             try {
                 byte[] bytes = truststore.getBytes();
-                trustStoreService.replaceTruststore(bytes, password);
+                cryptoService.replaceTruststore(bytes, password);
                 return "Truststore file has been successfully replaced.";
             } catch (Exception e) {
                 LOG.error("Failed to upload the truststore file", e);

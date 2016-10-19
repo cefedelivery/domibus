@@ -18,23 +18,18 @@
  */
 
 package eu.domibus.ebms3.sender;
-/**
- * @author Christian Koch, Stefan Mueller
- * @Since 3.0
- */
-
-//import eu.domibus.ebms3.pmode.model.PMode;
 
 import com.google.common.base.Strings;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.PolicyFactory;
 import eu.domibus.pki.CertificateService;
+import eu.domibus.pki.DomibusCertificateException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
@@ -58,7 +53,10 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPBinding;
 import java.util.Properties;
 
-
+/**
+ * @author Christian Koch, Stefan Mueller
+ * @Since 3.0
+ */
 @Service
 public class MSHDispatcher {
 
@@ -89,9 +87,20 @@ public class MSHDispatcher {
         final QName serviceName = new QName("http://domibus.eu", "msh-dispatch-service");
         final QName portName = new QName("http://domibus.eu", "msh-dispatch");
         final javax.xml.ws.Service service = javax.xml.ws.Service.create(serviceName);
+
+        // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
+        Party sendingParty = pModeProvider.getSenderParty(pModeKey);
+        try {
+            certificateService.verifySender(sendingParty.getName());
+        } catch (DomibusCertificateException dcEx) {
+            String msg = "Could not find and verify sender's certificate [" + sendingParty.getName() + "]";
+            LOG.error(msg, dcEx);
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, msg, null, dcEx);
+            ex.setMshRole(MSHRole.SENDING);
+            throw ex;
+        }
+        // Verifies the validity of receiver's certificate.
         Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
-
-
         if(certificateService.isCertificateValidationEnabled()) {
             try {
                 boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
@@ -106,7 +115,7 @@ public class MSHDispatcher {
         final String endpoint = receiverParty.getEndpoint();
         service.addPort(portName, SOAPBinding.SOAP12HTTP_BINDING, endpoint);
         final Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
-        Policy policy = null;
+        Policy policy;
         try {
             policy = policyFactory.parsePolicy("policies/" + pModeProvider.getLegConfiguration(pModeKey).getSecurity().getPolicy());
         } catch (final ConfigurationException e) {
@@ -123,8 +132,8 @@ public class MSHDispatcher {
         final HTTPConduit httpConduit = (HTTPConduit) client.getConduit();
         final HTTPClientPolicy httpClientPolicy = httpConduit.getClient();
         httpConduit.setClient(httpClientPolicy);
-        httpClientPolicy.setConnectionTimeout(120000);
-        httpClientPolicy.setReceiveTimeout(120000);
+        httpClientPolicy.setConnectionTimeout(120000); // TODO should be a configurable parameter
+        httpClientPolicy.setReceiveTimeout(120000);  // TODO should be a configurable parameter
         final TLSClientParameters params = tlsReader.getTlsClientParameters();
         if (params != null && endpoint.startsWith("https://")) {
             httpConduit.setTlsClientParameters(params);
