@@ -7,13 +7,13 @@ import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.webService.generated.*;
-
-import static org.springframework.util.StringUtils.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+
+import static org.springframework.util.StringUtils.trimWhitespace;
 
 /**
  * Converter class for Submission <-> UserMessage objects.
@@ -23,9 +23,7 @@ import java.util.*;
 @Component
 public class StubDtoTransformer implements MessageSubmissionTransformer<Messaging>, MessageRetrievalTransformer<UserMessage> {
 
-
-    private static final Log LOGGER = LogFactory.getLog(StubDtoTransformer.class);
-    private static final String CLASS_NAME = "StubDtoTransformer";
+    private static final Log LOG = LogFactory.getLog(StubDtoTransformer.class);
 
     @Override
     public UserMessage transformFromSubmission(final Submission submission, final UserMessage target) {
@@ -86,12 +84,12 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
     private void generateMessageInfo(final Submission submission, final UserMessage result) {
         final MessageInfo messageInfo = new MessageInfo();
         messageInfo.setMessageId(submission.getMessageId());
-        LOGGER.debug("MESSAGE ID " + messageInfo.getMessageId());
+        LOG.debug("MESSAGE ID " + messageInfo.getMessageId());
               /*  (submission.getMessageId() != null && submission.getMessageId().trim().length() > 0)
                         ? submission.getMessageId() : this.messageIdGenerator.generateMessageId());*/
         GregorianCalendar gc = new GregorianCalendar();
         messageInfo.setTimestamp(new XMLGregorianCalendarImpl(gc));
-        LOGGER.debug("TIMESTAMP " + messageInfo.getTimestamp());
+        LOG.debug("TIMESTAMP " + messageInfo.getTimestamp());
         messageInfo.setRefToMessageId(submission.getRefToMessageId());
         result.setMessageInfo(messageInfo);
     }
@@ -170,7 +168,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
      * @return
      */
     public Submission transformFromMessaging(final UserMessage messaging) {
-        LOGGER.info("Entered method: " + CLASS_NAME + ":transformFromMessaging(final UserMessage messaging)" );
+        LOG.debug("Entered method: transformFromMessaging(final UserMessage messaging)");
 
         final Submission result = new Submission();
 
@@ -222,7 +220,6 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
             }
         }
 
-        LOGGER.info("Exiting from method: " + CLASS_NAME + ":transformFromMessaging(final UserMessage messaging)" );
         return result;
     }
 

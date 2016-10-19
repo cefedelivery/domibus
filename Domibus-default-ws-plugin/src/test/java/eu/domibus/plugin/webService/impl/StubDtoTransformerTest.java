@@ -1,22 +1,21 @@
 package eu.domibus.plugin.webService.impl;
 
-import static org.junit.Assert.fail;
-
-import java.util.*;
-
-import javax.activation.DataHandler;
-import javax.mail.util.ByteArrayDataSource;
-
+import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
-import eu.domibus.plugin.webService.generated.*;
+import eu.domibus.messaging.MessageConstants;
+import eu.domibus.plugin.Submission;
+import eu.domibus.plugin.webService.generated.PayloadType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
+import javax.activation.DataHandler;
+import javax.mail.util.ByteArrayDataSource;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.GregorianCalendar;
 
-import eu.domibus.plugin.Submission;
 
 public class StubDtoTransformerTest
 {
@@ -36,8 +35,6 @@ public class StubDtoTransformerTest
     private static final String PROTOCOL_AS4             = "AS4";
     private static final String SERVICE_NOPROCESS        = "bdx:noprocess";
     private static final String SERVICE_TYPE_TC1         = "tc1";
-    private static final String PROPERTY_ORIGINAL_SENDER = "originalSender";
-    private static final String PROPERTY_FINAL_RECIPIENT = "finalRecipient";
     private static final String PROPERTY_ENDPOINT        = "endPointAddress";
 
     /**
@@ -55,9 +52,9 @@ public class StubDtoTransformerTest
 	submissionObj.setFromRole(INITIATOR_ROLE);
 	submissionObj.addToParty(DOMIBUS_RED, UNREGISTERED_PARTY_TYPE);
 	submissionObj.setToRole(RESPONDER_ROLE);
-	submissionObj.addMessageProperty(PROPERTY_ORIGINAL_SENDER, ORIGINAL_SENDER);
+        submissionObj.addMessageProperty(MessageConstants.ORIGINAL_SENDER, ORIGINAL_SENDER);
 	submissionObj.addMessageProperty(PROPERTY_ENDPOINT, "http://localhost:8080/domibus/domibus-blue");
-	submissionObj.addMessageProperty(PROPERTY_FINAL_RECIPIENT, FINAL_RECIPIENT);
+        submissionObj.addMessageProperty(MessageConstants.FINAL_RECIPIENT, FINAL_RECIPIENT);
 	submissionObj.setAgreementRef("12345");
 	submissionObj.setRefToMessageId("123456");
 
@@ -73,7 +70,22 @@ public class StubDtoTransformerTest
 	StubDtoTransformer testObj = new StubDtoTransformer();
 	objUserMessage = testObj.transformFromSubmission(submissionObj, objUserMessage);
 
-	Assert.assertEquals(DOMIBUS_BLUE, objUserMessage.getPartyInfo().getFrom().getPartyId().getValue());
+        Assert.assertEquals("1234", objUserMessage.getMessageInfo().getMessageId());
+        Assert.assertEquals(DOMIBUS_BLUE, objUserMessage.getPartyInfo().getFrom().getPartyId().getValue());
+        Assert.assertEquals(UNREGISTERED_PARTY_TYPE, objUserMessage.getPartyInfo().getFrom().getPartyId().getType());
+        Assert.assertEquals(INITIATOR_ROLE, objUserMessage.getPartyInfo().getFrom().getRole());
+        Assert.assertEquals(DOMIBUS_RED, objUserMessage.getPartyInfo().getTo().getPartyId().getValue());
+        Assert.assertEquals(UNREGISTERED_PARTY_TYPE, objUserMessage.getPartyInfo().getTo().getPartyId().getType());
+        Assert.assertEquals(RESPONDER_ROLE, objUserMessage.getPartyInfo().getTo().getRole());
+        Assert.assertEquals("12345", objUserMessage.getCollaborationInfo().getAgreementRef().getValue());
+        Assert.assertEquals(ACTION_TC1LEG1, objUserMessage.getCollaborationInfo().getAction());
+        Assert.assertEquals(SERVICE_NOPROCESS, objUserMessage.getCollaborationInfo().getService().getValue());
+        Assert.assertEquals(SERVICE_TYPE_TC1, objUserMessage.getCollaborationInfo().getService().getType());
+        Assert.assertEquals(MessageConstants.ORIGINAL_SENDER, objUserMessage.getMessageProperties().getProperty().get(0).getName());
+        Assert.assertEquals(ORIGINAL_SENDER, objUserMessage.getMessageProperties().getProperty().get(0).getValue());
+        Assert.assertEquals(MessageConstants.FINAL_RECIPIENT, objUserMessage.getMessageProperties().getProperty().get(2).getName());
+        Assert.assertEquals(FINAL_RECIPIENT, objUserMessage.getMessageProperties().getProperty().get(2).getValue());
+
 
     }
 
@@ -251,17 +263,15 @@ public class StubDtoTransformerTest
 	Submission objSubmission = testObj.transformFromMessaging(userMessageObj);
 
 	Assert.assertNotNull("Submission object in the response should not be null:", objSubmission);
-	for (Iterator<Submission.Party> itr = objSubmission.getFromParties().iterator(); itr.hasNext(); )
-	{
-	    Submission.Party fromPartyObj = itr.next();
+        for (Submission.Party fromPartyObj : objSubmission.getFromParties())
+        {
 	    Assert.assertEquals(DOMIBUS_BLUE, fromPartyObj.getPartyId());
 	    Assert.assertEquals(UNREGISTERED_PARTY_TYPE, fromPartyObj.getPartyIdType());
-	}
+        }
 	Assert.assertEquals(INITIATOR_ROLE, objSubmission.getFromRole());
 
-	for (Iterator<Submission.Party> itr = objSubmission.getToParties().iterator(); itr.hasNext(); )
+        for (Submission.Party toPartyObj : objSubmission.getToParties())
 	{
-	    Submission.Party toPartyObj = itr.next();
 	    Assert.assertEquals(DOMIBUS_RED, toPartyObj.getPartyId());
 	    Assert.assertEquals(UNREGISTERED_PARTY_TYPE, toPartyObj.getPartyIdType());
 	}
@@ -271,9 +281,8 @@ public class StubDtoTransformerTest
 	Assert.assertEquals(SERVICE_TYPE_TC1, objSubmission.getServiceType());
 	Assert.assertEquals(ACTION_TC1LEG1, objSubmission.getAction());
 
-	for (Iterator<Submission.TypedProperty> itr = objSubmission.getMessageProperties().iterator(); itr.hasNext(); )
+        for (Submission.TypedProperty prop : objSubmission.getMessageProperties())
 	{
-	    Submission.TypedProperty prop = itr.next();
 	    Assert.assertEquals(MIME_TYPE, prop.getKey());
 	    Assert.assertEquals(DEFAULT_MT, prop.getValue());
 	}
