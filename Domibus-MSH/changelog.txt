@@ -1,3 +1,5 @@
+Domibus 3.3-RC1
+- Quartz integration with managed threads in WebLogic and WildFly
 Domibus 3.2-FR
 - Added authentication/authorization example to the WS default plugin. Disabled by default, to assure backwards compatibility with older versions.
 - Added XSD validation of the PMODE when it is uploaded by the user.
