@@ -8,7 +8,7 @@ import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.webService.generated.*;
 
-import org.apache.commons.lang.StringUtils;
+import static org.springframework.util.StringUtils.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -175,17 +175,17 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         final Submission result = new Submission();
 
         final CollaborationInfo collaborationInfo = messaging.getCollaborationInfo();
-        result.setAction( StringUtils.trim(collaborationInfo.getAction()) );
-        result.setService( StringUtils.trim(messaging.getCollaborationInfo().getService().getValue()));
-        result.setServiceType( StringUtils.trim(messaging.getCollaborationInfo().getService().getType()) );
+        result.setAction( trimWhitespace(collaborationInfo.getAction()) );
+        result.setService( trimWhitespace(messaging.getCollaborationInfo().getService().getValue()));
+        result.setServiceType( trimWhitespace(messaging.getCollaborationInfo().getService().getType()) );
         if (collaborationInfo.getAgreementRef() != null) {
-            result.setAgreementRef( StringUtils.trim(collaborationInfo.getAgreementRef().getValue()) );
-            result.setAgreementRefType( StringUtils.trim(collaborationInfo.getAgreementRef().getType()) );
+            result.setAgreementRef( trimWhitespace(collaborationInfo.getAgreementRef().getValue()) );
+            result.setAgreementRefType( trimWhitespace(collaborationInfo.getAgreementRef().getType()) );
         }
-        result.setConversationId( StringUtils.trim(collaborationInfo.getConversationId()) );
+        result.setConversationId( trimWhitespace(collaborationInfo.getConversationId()) );
 
-        result.setMessageId( StringUtils.trim(messaging.getMessageInfo().getMessageId()) );
-        result.setRefToMessageId( StringUtils.trim(messaging.getMessageInfo().getRefToMessageId()) );
+        result.setMessageId( trimWhitespace(messaging.getMessageInfo().getMessageId()) );
+        result.setRefToMessageId( trimWhitespace(messaging.getMessageInfo().getRefToMessageId()) );
 
         if (messaging.getPayloadInfo() != null) {
             for (final PartInfo partInfo : messaging.getPayloadInfo().getPartInfo()) {
@@ -194,7 +194,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
                 final Collection<Submission.TypedProperty> properties = new ArrayList<>();
                 if (extPartInfo.getPartProperties() != null) {
                     for (final Property property : extPartInfo.getPartProperties().getProperty()) {
-                        properties.add(new Submission.TypedProperty( StringUtils.trim( property.getName() ), StringUtils.trim(property.getValue()), StringUtils.trim(property.getType()) ));
+                        properties.add(new Submission.TypedProperty( trimWhitespace( property.getName() ), trimWhitespace(property.getValue()), trimWhitespace(property.getType()) ));
                         if (property.getName().equals("MIME_TYPE")) {
                             mime = property.getValue();
                         }
@@ -202,23 +202,23 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
                 }
                 Submission.Description description = null;
                 if (partInfo.getDescription() != null) {
-                    description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), partInfo.getDescription().getValue());
+                    description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), trimWhitespace(partInfo.getDescription().getValue()));
                 }
                 result.addPayload(extPartInfo.getHref(), extPartInfo.getPayloadDatahandler(), properties, extPartInfo.isInBody(), description, /*(partInfo.getSchema() != null) ? partInfo.getSchema().getLocation() :*/ null);
             }
         }
-        result.setFromRole( StringUtils.trim(messaging.getPartyInfo().getFrom().getRole()) );
-        result.setToRole( StringUtils.trim(messaging.getPartyInfo().getTo().getRole()) );
+        result.setFromRole( trimWhitespace(messaging.getPartyInfo().getFrom().getRole()) );
+        result.setToRole( trimWhitespace(messaging.getPartyInfo().getTo().getRole()) );
 
         PartyId partyId = messaging.getPartyInfo().getFrom().getPartyId();
-        result.addFromParty( StringUtils.trim(partyId.getValue()), StringUtils.trim(partyId.getType()) );
+        result.addFromParty( trimWhitespace(partyId.getValue()), trimWhitespace(partyId.getType()) );
 
         partyId = messaging.getPartyInfo().getTo().getPartyId();
-        result.addToParty( StringUtils.trim(partyId.getValue()), StringUtils.trim(partyId.getType()) );
+        result.addToParty( trimWhitespace(partyId.getValue()), trimWhitespace(partyId.getType()) );
 
         if (messaging.getMessageProperties() != null) {
             for (final Property property : messaging.getMessageProperties().getProperty()) {
-                result.addMessageProperty(property.getName(), property.getValue(), property.getType());
+                result.addMessageProperty(trimWhitespace(property.getName()), trimWhitespace(property.getValue()), trimWhitespace(property.getType()));
             }
         }
 
