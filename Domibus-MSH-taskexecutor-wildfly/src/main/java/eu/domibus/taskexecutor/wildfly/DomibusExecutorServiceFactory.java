@@ -26,13 +26,13 @@ public class DomibusExecutorServiceFactory implements FactoryBean<ManagedExecuto
         return result;
     }
 
-    protected ManagedExecutorService getDefaultWorkManager() {
+    protected ManagedExecutorService getDefaultExecutorService() {
         ManagedExecutorService result = lookupExecutorService(DEFAULT_EXECUTOR_SERVICE);
         LOGGER.debug("Default executor service: " + DEFAULT_EXECUTOR_SERVICE + " = " + result);
         return result;
     }
 
-    protected ManagedExecutorService getGlobalWorkManager() {
+    protected ManagedExecutorService getGlobalExecutorService() {
         ManagedExecutorService result = lookupExecutorService(executorServiceJndiName);
         LOGGER.debug("Global executor service: " + executorServiceJndiName + " = " + result);
         return result;
@@ -42,13 +42,13 @@ public class DomibusExecutorServiceFactory implements FactoryBean<ManagedExecuto
     public ManagedExecutorService getObject() throws Exception {
         ManagedExecutorService result = null;
 
-        result = getGlobalWorkManager();
+        result = getGlobalExecutorService();
         if (result != null) {
             LOGGER.debug("Using global executor service: " + result);
             return result;
         }
 
-        result = getDefaultWorkManager();
+        result = getDefaultExecutorService();
         if (result != null) {
             LOGGER.debug("Using global executor service: " + result);
             return result;

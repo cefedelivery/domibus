@@ -10,7 +10,7 @@ import javax.naming.NamingException;
 
 public class WorkManagerFactory implements FactoryBean<WorkManager> {
 
-    private static final Log LOGGER = LogFactory.getLog(WorkManagerFactory.class);
+    private static final Log LOG = LogFactory.getLog(WorkManagerFactory.class);
 
     public static final String DEFAULT_WORK_MANAGER = "java:comp/env/wm/default";
 
@@ -21,20 +21,20 @@ public class WorkManagerFactory implements FactoryBean<WorkManager> {
         try {
             result = InitialContext.doLookup(jndiName);
         } catch (NamingException e) {
-            LOGGER.warn("Failed to lookup work manager: " + jndiName);
+            LOG.warn("Failed to lookup work manager: " + jndiName);
         }
         return result;
     }
 
     protected WorkManager getDefaultWorkManager() {
         WorkManager result = lookupWorkManager(DEFAULT_WORK_MANAGER);
-        LOGGER.debug("Default work manager: " + DEFAULT_WORK_MANAGER + " = " + result);
+        LOG.debug("Default work manager: " + DEFAULT_WORK_MANAGER + " = " + result);
         return result;
     }
 
     protected WorkManager getGlobalWorkManager() {
         WorkManager result = lookupWorkManager(workManagerJndiName);
-        LOGGER.debug("Global work manager: " + workManagerJndiName + " = " + result);
+        LOG.debug("Global work manager: " + workManagerJndiName + " = " + result);
         return result;
     }
 
@@ -44,17 +44,17 @@ public class WorkManagerFactory implements FactoryBean<WorkManager> {
 
         result = getGlobalWorkManager();
         if (result != null) {
-            LOGGER.debug("Using global work manager: " + result);
+            LOG.debug("Using global work manager: " + result);
             return result;
         }
 
         result = getDefaultWorkManager();
         if (result != null) {
-            LOGGER.debug("Using global work manager: " + result);
+            LOG.debug("Using global work manager: " + result);
             return result;
         }
 
-        LOGGER.error("Failed to get work manager");
+        LOG.error("Failed to get work manager");
         return null;
     }
 
