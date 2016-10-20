@@ -91,7 +91,8 @@ public class MSHDispatcher {
         // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
         Party sendingParty = pModeProvider.getSenderParty(pModeKey);
         try {
-            certificateService.verifySender(sendingParty.getName());
+            certificateService.isCertificateValid(sendingParty.getName());
+            LOG.info("Sender certificate exists, in the keystore, and is valid [" + sendingParty.getName() + "]");
         } catch (DomibusCertificateException dcEx) {
             String msg = "Could not find and verify sender's certificate [" + sendingParty.getName() + "]";
             LOG.error(msg, dcEx);
