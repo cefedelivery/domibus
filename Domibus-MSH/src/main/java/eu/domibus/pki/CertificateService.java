@@ -13,5 +13,5 @@ public interface CertificateService {
 
     boolean isCertificateChainValid(String alias) throws DomibusCertificateException;
 
-    void verifySender(String alias) throws DomibusCertificateException;
+    boolean isCertificateValid(String alias) throws DomibusCertificateException;
 }

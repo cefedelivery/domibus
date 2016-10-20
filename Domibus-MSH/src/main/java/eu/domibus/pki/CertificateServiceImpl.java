@@ -105,27 +105,29 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     /**
-     * Verifies the existence and validity of sender's certificate.
+     * Verifies the existence and validity of a certificate.
      *
-     * @param alias
-     * @throws DomibusCertificateException
      * @Author Federico Martini
      * @Since 3.3
+     * @param alias
+     * @return boolean
+     * @throws DomibusCertificateException
      */
     @Override
-    public void verifySender(String alias) throws DomibusCertificateException {
-        LOG.debug("Verifying the certificate of the sender[" + alias + "]");
+    public boolean isCertificateValid(String alias) throws DomibusCertificateException {
+        LOG.debug("Verifying the certificate with alias [" + alias + "]");
         try {
             X509Certificate certificate = (X509Certificate) cryptoService.getCertificateFromKeystore(alias);
             if (certificate == null) {
-                throw new DomibusCertificateException("Error: the sender's certificate does not exist for alias[" + alias + "]");
+                throw new DomibusCertificateException("Error: the certificate does not exist for alias[" + alias + "]");
             }
             if (!isCertificateValid(certificate)) {
-                throw new DomibusCertificateException("Error: the sender's certificate is not valid anymore for alias [" + alias + "]");
+                throw new DomibusCertificateException("Error: the certificate is not valid anymore for alias [" + alias + "]");
             }
         } catch (KeyStoreException ksEx) {
             throw new DomibusCertificateException("Error getting the certificate from keystore for alias [" + alias + "]", ksEx);
         }
+        return true;
     }
 
 }

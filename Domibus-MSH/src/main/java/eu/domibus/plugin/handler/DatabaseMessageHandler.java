@@ -19,11 +19,6 @@
 
 package eu.domibus.plugin.handler;
 
-/**
- * @author Christian Koch, Stefan Mueller, Federico Martini, Ioana Dragusanu
- * @Since 3.0
- */
-
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
@@ -62,6 +57,10 @@ import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Christian Koch, Stefan Mueller, Federico Martini, Ioana Dragusanu
+ * @Since 3.0
+ */
 @Service
 public class DatabaseMessageHandler implements MessageSubmitter<Submission>, MessageRetriever<Submission> {
 
@@ -122,10 +121,13 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
         LOG.info("Searching message with id [" + messageId + "]");
-        final UserMessageLog userMessageLog;
-        final UserMessage userMessage;
+        UserMessageLog userMessageLog;
+        UserMessage userMessage;
         try {
             userMessage = messagingDao.findUserMessageByMessageId(messageId);
+            // Authorization check
+            validateOriginalUser(userMessage, originalUser, MessageConstants.FINAL_RECIPIENT);
+
             userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
             if (userMessageLog == null) {
                 throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
@@ -134,8 +136,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             LOG.debug("Message with id [" + messageId + "] was not found", nrEx);
             throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
         }
-
-        validateOriginalUser(userMessage, originalUser, MessageConstants.FINAL_RECIPIENT);
 
         // Deleting the message and signal message if the retention download is zero
         if (0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc())) {
@@ -160,11 +160,11 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         return transformer.transformFromMessaging(userMessage);
     }
 
-    private void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String type) {
+    private void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String recipient) {
         if (authOriginalUser != null) {
             LOG.debug("OriginalUser is [" + authOriginalUser + "]");
             /* check the message belongs to the authenticated user */
-            String originalUser = getOriginalUser(userMessage, type);
+            String originalUser = getOriginalUser(userMessage, recipient);
             if (originalUser != null && !originalUser.equals(authOriginalUser)) {
                 LOG.debug("User [" + authOriginalUser + "] is trying to submit/access a message having as final recipient: " + originalUser);
                 throw new AccessDeniedException("You are not allowed to handle this message. You are authorized as [" + authOriginalUser + "]");
@@ -269,7 +269,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
             // We do not create MessageIds for SignalMessages, as those should never be submitted via the backend
             messagingDao.create(message);
-            // TODO Should we store the user message log before it is dispatched to the queue ?
             // Sends message to the proper queue
             jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, to.getEndpoint()).createMessage(), sendMessageQueue);
             // Builds the user message log
@@ -277,9 +276,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                     .setMessageId(userMessage.getMessageInfo().getMessageId())
                     .setMessageStatus(MessageStatus.SEND_ENQUEUED)
                     .setMshRole(MSHRole.SENDING)
-                    .setNotificationStatus(legConfiguration.getErrorHandling().isBusinessErrorNotifyProducer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED)
+                    .setNotificationStatus(getNotificationStatus(legConfiguration))
                     .setMpc(message.getUserMessage().getMpc())
-                    .setSendAttemptsMax(legConfiguration.getReceptionAwareness() == null ? 1 : legConfiguration.getReceptionAwareness().getRetryCount())
+                    .setSendAttemptsMax(getMaxAttempts(legConfiguration))
                     .setBackendName(backendName)
                     .setEndpoint(to.getEndpoint());
 
@@ -288,12 +287,18 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             return userMessage.getMessageInfo().getMessageId();
 
         } catch (final EbMS3Exception ebms3Ex) {
-            if (ebms3Ex.getErrorCode().equals(ErrorCode.EbMS3ErrorCode.EBMS_0303)) {
-                errorLogDao.create(new ErrorLogEntry(ebms3Ex));
-            }
+            errorLogDao.create(new ErrorLogEntry(ebms3Ex));
             LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", ebms3Ex);
             throw MessagingExceptionFactory.transform(ebms3Ex);
         }
+    }
+
+    private NotificationStatus getNotificationStatus(LegConfiguration legConfiguration) {
+        return legConfiguration.getErrorHandling().isBusinessErrorNotifyProducer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED;
+    }
+
+    private int getMaxAttempts(LegConfiguration legConfiguration) {
+        return legConfiguration.getReceptionAwareness() == null ? 1 : legConfiguration.getReceptionAwareness().getRetryCount();
     }
 
     private void fillMpc(UserMessage userMessage, LegConfiguration legConfiguration, Party to) {

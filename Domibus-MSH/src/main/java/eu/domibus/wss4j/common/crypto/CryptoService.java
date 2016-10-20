@@ -7,7 +7,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Scope;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,6 @@ import java.util.Properties;
  * @author Christian Koch, Stefan Mueller, Federico Martini
  */
 @Service(value = "cryptoService")
-@Scope(value = "singleton")
 public class CryptoService {
 
     private static final Log LOG = LogFactory.getLog(CryptoService.class);
