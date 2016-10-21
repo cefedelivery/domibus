@@ -47,8 +47,8 @@ public class CertificateServiceImpl implements CertificateService {
         } catch (KeyStoreException e) {
             throw new DomibusCertificateException("Error getting the certificate chain from the truststore for [" + alias + "]", e);
         }
-        if (certificateChain == null) {
-            throw new DomibusCertificateException("Could not find alias in the truststore[" + alias + "]");
+        if (certificateChain == null || certificateChain.length == 0 || certificateChain[0] == null) {
+            throw new DomibusCertificateException("Could not find alias in the truststore [" + alias + "]");
         }
 
         for (X509Certificate certificate : certificateChain) {
@@ -128,6 +128,21 @@ public class CertificateServiceImpl implements CertificateService {
             throw new DomibusCertificateException("Error getting the certificate from keystore for alias [" + alias + "]", ksEx);
         }
         return true;
+    }
+
+    /**
+     * Verifies that a third party is trusted and its certificate is valid.
+     *
+     * @param alias
+     * @return boolean
+     * @throws DomibusCertificateException
+     * @Author Federico Martini
+     * @Since 3.3
+     */
+    @Override
+    public boolean isTrusted(String alias) throws DomibusCertificateException {
+        LOG.debug("Verifying trust of third party [" + alias + "]");
+        return isCertificateChainValid(alias);
     }
 
 }

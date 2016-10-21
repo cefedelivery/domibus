@@ -92,7 +92,7 @@ public class MSHDispatcher {
         Party sendingParty = pModeProvider.getSenderParty(pModeKey);
         try {
             certificateService.isCertificateValid(sendingParty.getName());
-            LOG.info("Sender certificate exists, in the keystore, and is valid [" + sendingParty.getName() + "]");
+            LOG.info("Sender certificate exists and is valid [" + sendingParty.getName() + "]");
         } catch (DomibusCertificateException dcEx) {
             String msg = "Could not find and verify sender's certificate [" + sendingParty.getName() + "]";
             LOG.error(msg, dcEx);

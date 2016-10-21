@@ -37,6 +37,8 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.pki.CertificateService;
+import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -128,6 +130,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Autowired
     private PropertyProfileValidator propertyProfileValidator;
 
+    @Autowired
+    CertificateService certificateService;
+
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
     }
@@ -154,9 +159,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         try (StringWriter sw = new StringWriter()) {
             if (LOG.isDebugEnabled()) {
 
-                this.transformerFactory.newTransformer().transform(
-                        new DOMSource(request.getSOAPPart()),
-                        new StreamResult(sw));
+                transformerFactory.newTransformer().transform(new DOMSource(request.getSOAPPart()), new StreamResult(sw));
 
                 LOG.debug(sw.toString());
                 LOG.debug("received attachments:");
@@ -165,18 +168,20 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     LOG.debug(i.next());
                 }
             }
-            messaging = this.getMessaging(request);
+            messaging = getMessaging(request);
+            String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
+            // Verifies that the sender is really who claims to send the message and its certificate.
+            verifySender(pmodeKey, messageId);
 
             checkCharset(messaging);
             pingMessage = checkPingMessage(messaging.getUserMessage());
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
-
             if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
                 this.persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
                 try {
                     backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
                 } catch(SubmissionValidationException e) {
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), null, e);
+                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
                 }
             }
             responseMessage = this.generateReceipt(request, legConfiguration, messageExists);
@@ -195,6 +200,29 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
 
         return responseMessage;
+    }
+
+    /**
+     * Verifies if the sender is trusted. This should block messages sent from "possible" hacked access points.
+     *
+     * @param pmodeKey
+     * @param messageId
+     * @throws EbMS3Exception
+     * @author Federico Martini
+     */
+    private void verifySender(String pmodeKey, String messageId) throws EbMS3Exception {
+        Party sendingParty = pModeProvider.getSenderParty(pmodeKey);
+        try {
+            certificateService.isTrusted(sendingParty.getName());
+            // TODO check that the KeyInfo in the message' signature contains the party id.
+            LOG.info("Sender is trusted and its certificate is valid [" + sendingParty.getName() + "]");
+        } catch (DomibusCertificateException dcEx) {
+            String msg = "Could not find and verify sender's certificate [" + sendingParty.getName() + "]";
+            LOG.fatal(msg, dcEx);
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, msg, messageId, dcEx);
+            ex.setMshRole(MSHRole.SENDING);
+            throw ex;
+        }
     }
 
 
@@ -335,8 +363,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
         try {
-            this.payloadProfileValidator.validate(messaging, pmodeKey);
-            this.propertyProfileValidator.validate(messaging, pmodeKey);
+            payloadProfileValidator.validate(messaging, pmodeKey);
+            propertyProfileValidator.validate(messaging, pmodeKey);
         } catch (EbMS3Exception e) {
             e.setMshRole(MSHRole.RECEIVING);
             throw e;
@@ -432,8 +460,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     private Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
         final Node messagingXml = (Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
-        final Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
+        final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
         @SuppressWarnings("unchecked") final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);
         return root.getValue();
     }
+
 }

@@ -171,4 +171,12 @@ public class CryptoService {
         }
     }
 
+    void setTrustStoreProperties(Properties trustStoreProperties) {
+        this.trustStoreProperties = trustStoreProperties;
+    }
+
+    void setKeyStoreProperties(Properties keystoreProperties) {
+        this.keystoreProperties = keystoreProperties;
+    }
+
 }
