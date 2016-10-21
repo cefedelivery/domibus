@@ -93,7 +93,7 @@ public class StubDtoTransformerTest
      * Testing Basic happy flow scenario of transform from Messaging to Submission class
      * for ws plugin implementation of Domibus!
      */
-    @Test public void transformToSubmission()
+    @Test public void transformToSubmission_HappyFlow()
     {
 	LOG.info("Started with test case: testTransformFromMessaging_HappyFlow");
 
@@ -174,7 +174,32 @@ public class StubDtoTransformerTest
 	Submission objSubmission = testObj.transformToSubmission(ebmsHeaderInfo);
 
 	Assert.assertNotNull("Submission object in the response should not be null:", objSubmission);
+        for (Submission.Party fromParty : objSubmission.getFromParties())
+        {
+	    Assert.assertEquals(DOMIBUS_BLUE, fromParty.getPartyId());
+	    Assert.assertEquals(UNREGISTERED_PARTY_TYPE, fromParty.getPartyIdType());
+        }
+        Assert.assertEquals(INITIATOR_ROLE, objSubmission.getFromRole());
 
+        for (Submission.Party toParty : objSubmission.getToParties())
+        {
+	    Assert.assertEquals(DOMIBUS_RED, toParty.getPartyId());
+	    Assert.assertEquals(UNREGISTERED_PARTY_TYPE, toParty.getPartyIdType());
+        }
+        Assert.assertEquals(RESPONDER_ROLE, objSubmission.getToRole());
+
+        Assert.assertEquals(SERVICE_NOPROCESS, objSubmission.getService());
+        Assert.assertEquals(SERVICE_TYPE_TC1, objSubmission.getServiceType());
+        Assert.assertEquals(ACTION_TC1LEG1, objSubmission.getAction());
+
+        for (Submission.Payload objPayloadSet : objSubmission.getPayloads())
+        {
+	    for (Submission.TypedProperty objTypedProperty : objPayloadSet.getPayloadProperties())
+	    {
+	        Assert.assertEquals(MIME_TYPE, objTypedProperty.getKey());
+	        Assert.assertEquals(DEFAULT_MT, objTypedProperty.getValue());
+	    }
+        }
 	LOG.info("Completed with test case: testTransformFromMessaging_HappyFlow");
     }
 
@@ -185,7 +210,7 @@ public class StubDtoTransformerTest
      * should be trimmed.
      */
 
-    @Test public void transformFromMessaging()
+    @Test public void transformFromMessaging_trimWhiteSpace()
     {
 	LOG.info("Started with test case: testTransformFromMessaging_TrimWhiteSpace");
 
