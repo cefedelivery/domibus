@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static org.springframework.util.StringUtils.trimWhitespace;
+import static org.apache.commons.lang.StringUtils.trim;
 
 /**
  * Converter class for Submission <-> UserMessage objects.
@@ -173,50 +173,50 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         final Submission result = new Submission();
 
         final CollaborationInfo collaborationInfo = messaging.getCollaborationInfo();
-        result.setAction( trimWhitespace(collaborationInfo.getAction()) );
-        result.setService( trimWhitespace(messaging.getCollaborationInfo().getService().getValue()));
-        result.setServiceType( trimWhitespace(messaging.getCollaborationInfo().getService().getType()) );
+        result.setAction(trim(collaborationInfo.getAction()));
+        result.setService(trim(messaging.getCollaborationInfo().getService().getValue()));
+        result.setServiceType(trim(messaging.getCollaborationInfo().getService().getType()));
         if (collaborationInfo.getAgreementRef() != null) {
-            result.setAgreementRef( trimWhitespace(collaborationInfo.getAgreementRef().getValue()) );
-            result.setAgreementRefType( trimWhitespace(collaborationInfo.getAgreementRef().getType()) );
+            result.setAgreementRef(trim(collaborationInfo.getAgreementRef().getValue()));
+            result.setAgreementRefType(trim(collaborationInfo.getAgreementRef().getType()));
         }
-        result.setConversationId( trimWhitespace(collaborationInfo.getConversationId()) );
+        result.setConversationId(trim(collaborationInfo.getConversationId()));
 
-        result.setMessageId( trimWhitespace(messaging.getMessageInfo().getMessageId()) );
-        result.setRefToMessageId( trimWhitespace(messaging.getMessageInfo().getRefToMessageId()) );
+        result.setMessageId(trim(messaging.getMessageInfo().getMessageId()));
+        result.setRefToMessageId(trim(messaging.getMessageInfo().getRefToMessageId()));
 
         if (messaging.getPayloadInfo() != null) {
             for (final PartInfo partInfo : messaging.getPayloadInfo().getPartInfo()) {
                 ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
-                String mime = "";
+//                String mime = "";
                 final Collection<Submission.TypedProperty> properties = new ArrayList<>();
                 if (extPartInfo.getPartProperties() != null) {
                     for (final Property property : extPartInfo.getPartProperties().getProperty()) {
-                        properties.add(new Submission.TypedProperty( trimWhitespace( property.getName() ), trimWhitespace(property.getValue()), trimWhitespace(property.getType()) ));
+                        properties.add(new Submission.TypedProperty(trim(property.getName()), trim(property.getValue()), trim(property.getType())));
                         if (property.getName().equals("MIME_TYPE")) {
-                            mime = property.getValue();
+//                            mime = property.getValue();
                         }
                     }
                 }
                 Submission.Description description = null;
                 if (partInfo.getDescription() != null) {
-                    description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), trimWhitespace(partInfo.getDescription().getValue()));
+                    description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), trim(partInfo.getDescription().getValue()));
                 }
                 result.addPayload(extPartInfo.getHref(), extPartInfo.getPayloadDatahandler(), properties, extPartInfo.isInBody(), description, /*(partInfo.getSchema() != null) ? partInfo.getSchema().getLocation() :*/ null);
             }
         }
-        result.setFromRole( trimWhitespace(messaging.getPartyInfo().getFrom().getRole()) );
-        result.setToRole( trimWhitespace(messaging.getPartyInfo().getTo().getRole()) );
+        result.setFromRole(trim(messaging.getPartyInfo().getFrom().getRole()));
+        result.setToRole(trim(messaging.getPartyInfo().getTo().getRole()));
 
         PartyId partyId = messaging.getPartyInfo().getFrom().getPartyId();
-        result.addFromParty( trimWhitespace(partyId.getValue()), trimWhitespace(partyId.getType()) );
+        result.addFromParty(trim(partyId.getValue()), trim(partyId.getType()));
 
         partyId = messaging.getPartyInfo().getTo().getPartyId();
-        result.addToParty( trimWhitespace(partyId.getValue()), trimWhitespace(partyId.getType()) );
+        result.addToParty(trim(partyId.getValue()), trim(partyId.getType()));
 
         if (messaging.getMessageProperties() != null) {
             for (final Property property : messaging.getMessageProperties().getProperty()) {
-                result.addMessageProperty(trimWhitespace(property.getName()), trimWhitespace(property.getValue()), trimWhitespace(property.getType()));
+                result.addMessageProperty(trim(property.getName()), trim(property.getValue()), trim(property.getType()));
             }
         }
 
