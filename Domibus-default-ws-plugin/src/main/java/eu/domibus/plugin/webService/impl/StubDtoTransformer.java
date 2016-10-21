@@ -188,14 +188,10 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         if (messaging.getPayloadInfo() != null) {
             for (final PartInfo partInfo : messaging.getPayloadInfo().getPartInfo()) {
                 ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
-//                String mime = "";
                 final Collection<Submission.TypedProperty> properties = new ArrayList<>();
                 if (extPartInfo.getPartProperties() != null) {
                     for (final Property property : extPartInfo.getPartProperties().getProperty()) {
                         properties.add(new Submission.TypedProperty(trim(property.getName()), trim(property.getValue()), trim(property.getType())));
-                        if (property.getName().equals("MIME_TYPE")) {
-//                            mime = property.getValue();
-                        }
                     }
                 }
                 Submission.Description description = null;

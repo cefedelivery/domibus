@@ -70,6 +70,7 @@ public class StubDtoTransformerTest {
         objUserMessage = testObj.transformFromSubmission(submissionObj, objUserMessage);
 
         Assert.assertEquals("1234", objUserMessage.getMessageInfo().getMessageId());
+        Assert.assertEquals("123456", objUserMessage.getMessageInfo().getRefToMessageId());
         Assert.assertEquals(DOMIBUS_BLUE, objUserMessage.getPartyInfo().getFrom().getPartyId().getValue());
         Assert.assertEquals(UNREGISTERED_PARTY_TYPE, objUserMessage.getPartyInfo().getFrom().getPartyId().getType());
         Assert.assertEquals(INITIATOR_ROLE, objUserMessage.getPartyInfo().getFrom().getRole());
