@@ -91,13 +91,12 @@ public class JMSMessageTransformer
                 messageOut.setStringProperty(FROM_PARTY_ID, fromParty.getPartyId());
                 messageOut.setStringProperty(FROM_PARTY_TYPE, fromParty.getPartyIdType());
             }
+            messageOut.setStringProperty(FROM_ROLE, submission.getFromRole());
 
             for (final Submission.Party toParty : submission.getToParties()) {
                 messageOut.setStringProperty(TO_PARTY_ID, toParty.getPartyId());
                 messageOut.setStringProperty(TO_PARTY_TYPE, toParty.getPartyIdType());
             }
-
-            messageOut.setStringProperty(FROM_ROLE, submission.getFromRole());
             messageOut.setStringProperty(TO_ROLE, submission.getToRole());
 
 
@@ -214,10 +213,12 @@ public class JMSMessageTransformer
             if (isEmpty(toPartyType)) {
                 toPartyType = properties.getProperty(TO_PARTY_TYPE);
             }
-
             target.addToParty(toPartyID, toPartyType);
 
             target.setToRole(trim(messageIn.getStringProperty(TO_ROLE)));
+            if (isEmpty(target.getToRole())) {
+                target.setToRole(properties.getProperty(TO_ROLE));
+            }
 
             target.setAction(trim(messageIn.getStringProperty(ACTION)));
             if (isEmpty(target.getAction())) {
@@ -243,13 +244,15 @@ public class JMSMessageTransformer
             target.setConversationId(trim(messageIn.getStringProperty(CONVERSATION_ID)));
 
             //not part of ebMS3, eCODEX legacy property
-            if (!isEmpty(trim(messageIn.getStringProperty(PROPERTY_ORIGINAL_SENDER)))) {
-                target.addMessageProperty(PROPERTY_ORIGINAL_SENDER, trim(messageIn.getStringProperty(PROPERTY_ORIGINAL_SENDER)));
+            String strOriginalSender = trim(messageIn.getStringProperty(PROPERTY_ORIGINAL_SENDER));
+            if (!isEmpty(strOriginalSender)) {
+                target.addMessageProperty(PROPERTY_ORIGINAL_SENDER, strOriginalSender);
             }
 
             //not part of ebMS3, eCODEX legacy property
-            if (!isEmpty(trim(messageIn.getStringProperty(PROPERTY_FINAL_RECIPIENT)))) {
-                target.addMessageProperty(PROPERTY_FINAL_RECIPIENT, trim(messageIn.getStringProperty(PROPERTY_FINAL_RECIPIENT)));
+            String strFinalRecipient = trim(messageIn.getStringProperty(PROPERTY_FINAL_RECIPIENT));
+            if (!isEmpty(strFinalRecipient)) {
+                target.addMessageProperty(PROPERTY_FINAL_RECIPIENT, strFinalRecipient);
             }
 
             target.setRefToMessageId(trim(messageIn.getStringProperty(REF_TO_MESSAGE_ID)));
@@ -272,7 +275,7 @@ public class JMSMessageTransformer
             for (int i = 1; i <= numPayloads; i++) {
                 final String propPayload = String.valueOf(MessageFormat.format(PAYLOAD_NAME_FORMAT, i));
 
-                final String bodyloadFileName = BODYLOAD_FILE_NAME_FORMAT;
+//                final String bodyloadFileName = BODYLOAD_FILE_NAME_FORMAT;
                 final String contentId;
                 final String mimeType;
                 String description = null;
