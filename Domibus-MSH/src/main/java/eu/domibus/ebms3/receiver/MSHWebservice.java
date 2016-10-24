@@ -64,10 +64,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.*;
 import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.Iterator;
 import java.util.zip.ZipException;
 
@@ -363,16 +360,22 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         } catch (Exception exc) {
             LOG.error("Could not persist message " + exc.getMessage());
-            if (exc instanceof ZipException || (exc.getCause() != null && exc.getCause() instanceof ZipException)) {
-                LOG.debug("InstanceOf ZipException");
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
-                ex.setMshRole(MSHRole.RECEIVING);
-                throw ex;
-            }
+            checkException(exc, userMessage);
             throw exc;
         }
 
         return userMessage.getMessageInfo().getMessageId();
+    }
+    private void checkException(Exception exc, UserMessage userMessage) throws EbMS3Exception {
+        if( (exc instanceof ZipException) ||
+            (exc.getCause() != null && exc.getCause() instanceof ZipException) ||
+            (exc instanceof EOFException) ||
+            (exc.getCause() != null && exc.getCause() instanceof EOFException)) {
+                LOG.debug("InstanceOf ZipException or EOFException");
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
+                ex.setMshRole(MSHRole.RECEIVING);
+                throw ex;
+        }
     }
 
     private String getFinalRecipientName(UserMessage userMessage) {
