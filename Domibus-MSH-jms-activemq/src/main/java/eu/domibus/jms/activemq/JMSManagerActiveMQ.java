@@ -38,11 +38,6 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
 
     protected Map<String, ObjectName> queueMap;
 
-//    //TODO
-//    String activeMQDefaultAdminName = "admin";
-//
-//    String activeMQDefaultAdminPassword = "123456";
-
     @Autowired
     MBeanServerConnection mBeanServerConnection;
 
@@ -66,22 +61,25 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
         try {
             //build the destinationMap every time in order to get up to date statistics
             for (ObjectName name : getQueueMap().values()) {
-                QueueViewMBean queueMbean = MBeanServerInvocationHandler.newProxyInstance(mBeanServerConnection, name, QueueViewMBean.class, true);
-                JMSDestinationSPI jmsDestinationSPI = new JMSDestinationSPI();
-                jmsDestinationSPI.setName(queueMbean.getName());
-                jmsDestinationSPI.setInternal(jmsDestinationHelper.isInternal(queueMbean.getName()));
-                jmsDestinationSPI.setType(JMSDestinationSPI.QUEUE_TYPE);
-                jmsDestinationSPI.setNumberOfMessages(queueMbean.getQueueSize());
-                jmsDestinationSPI.setProperty(PROPERTY_OBJECT_NAME, name);
+                QueueViewMBean queueMbean = getQueue(name);
+                JMSDestinationSPI jmsDestinationSPI = createJmsDestinationSPI(name, queueMbean);
                 destinationMap.put(queueMbean.getName(), jmsDestinationSPI);
-                //TODO check if this is needed
-                queueMap.put(queueMbean.getName(), name);
             }
         } catch (Exception e) {
             LOG.error("Error getting destinations", e);
         }
 
         return destinationMap;
+    }
+
+    protected JMSDestinationSPI createJmsDestinationSPI(ObjectName name, QueueViewMBean queueMbean) {
+        JMSDestinationSPI jmsDestinationSPI = new JMSDestinationSPI();
+        jmsDestinationSPI.setName(queueMbean.getName());
+        jmsDestinationSPI.setInternal(jmsDestinationHelper.isInternal(queueMbean.getName()));
+        jmsDestinationSPI.setType(JMSDestinationSPI.QUEUE_TYPE);
+        jmsDestinationSPI.setNumberOfMessages(queueMbean.getQueueSize());
+        jmsDestinationSPI.setProperty(PROPERTY_OBJECT_NAME, name);
+        return jmsDestinationSPI;
     }
 
     protected QueueViewMBean getQueue(ObjectName objectName) {
@@ -100,7 +98,7 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
 
         queueMap = new HashMap<>();
         for (ObjectName name : brokerViewMBean.getQueues()) {
-            QueueViewMBean queueMbean = MBeanServerInvocationHandler.newProxyInstance(mBeanServerConnection, name, QueueViewMBean.class, true);
+            QueueViewMBean queueMbean = getQueue(name);
             queueMap.put(queueMbean.getName(), name);
         }
 
@@ -109,18 +107,6 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
 
     @Override
     public boolean sendMessage(JmsMessageSPI message, String destination) {
-//        QueueViewMBean queue = getQueue(destination);
-//
-//        Map<String, String> properties = message.getProperties();
-//        properties.put("JMSType", message.getType());
-//        properties.put("JMSDeliveryMode", Integer.toString(DeliveryMode.PERSISTENT));
-//        try {
-//            queue.sendTextMessage(properties, message.getContent(), activeMQDefaultAdminName, activeMQDefaultAdminPassword);
-//        } catch (Exception e) {
-//            LOG.error("Error sending message [" + message + "] to [" + destination + "]");
-//            return false;
-//        }
-
         ActiveMQQueue activeMQQueue = new ActiveMQQueue(destination);
         sendMessage(message, activeMQQueue);
         return true;
@@ -148,7 +134,7 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
         QueueViewMBean queue = getQueue(source);
         try {
             CompositeData messageMetaData = queue.getMessage(messageId);
-            return convert(messageMetaData);
+            return convertCompositeData(messageMetaData);
         } catch (OpenDataException e) {
             LOG.error("Failed to get message with id [" + messageId + "]", e);
             return null;
@@ -187,7 +173,7 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
             try {
                 QueueViewMBean queue = getQueue(source);
                 CompositeData[] browse = queue.browse(selector);
-                messages = convert(browse);
+                messages = convertCompositeData(browse);
             } catch (Exception e) {
                 LOG.error("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
             }
@@ -195,19 +181,19 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
         return messages;
     }
 
-    protected List<JmsMessageSPI> convert(CompositeData[] browse) {
+    protected List<JmsMessageSPI> convertCompositeData(CompositeData[] browse) {
         if (browse == null) {
             return null;
         }
         List<JmsMessageSPI> result = new ArrayList<>();
         for (CompositeData compositeData : browse) {
-            result.add(convert(compositeData));
+            result.add(convertCompositeData(compositeData));
         }
         return result;
     }
 
 
-    protected JmsMessageSPI convert(CompositeData data) {
+    protected JmsMessageSPI convertCompositeData(CompositeData data) {
         JmsMessageSPI result = new JmsMessageSPI();
         result.setType((String) data.get("JMSType"));
         result.setTimestamp((Date) data.get("JMSTimestamp"));
@@ -229,9 +215,9 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
         }
 
         Collection<CompositeDataSupport> stringValues = stringProperties.values();
-        for (CompositeDataSupport stringValue : stringValues) {
-            String key = (String) stringValue.get("key");
-            String value = (String) stringValue.get("value");
+        for (CompositeDataSupport compositeDataSupport : stringValues) {
+            String key = (String) compositeDataSupport.get("key");
+            String value = (String) compositeDataSupport.get("value");
             properties.put(key, value);
         }
         result.setProperties(properties);
