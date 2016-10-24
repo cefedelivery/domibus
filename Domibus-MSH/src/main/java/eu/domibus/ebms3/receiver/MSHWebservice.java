@@ -183,7 +183,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (final EbMS3Exception e) {
             try {
                 if (!pingMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
-                    backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED_FAILURE);
+                    backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
                 }
             } catch (Exception ex) {
                 LOG.warn("could not notify backend of rejected message ", ex);
