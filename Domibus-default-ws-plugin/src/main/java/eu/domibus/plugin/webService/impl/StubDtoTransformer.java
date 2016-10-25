@@ -43,9 +43,6 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         this.generatePartyInfo(submission, result);
         this.generatePayload(submission, result);
         this.generateMessageProperties(submission, result);
-
-        //TODO: set mpc from pmode
-
         return result;
     }
 
@@ -67,8 +64,6 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
     private void generateCollaborationInfo(final Submission submission, final UserMessage result) {
         final CollaborationInfo collaborationInfo = new CollaborationInfo();
         collaborationInfo.setConversationId(submission.getConversationId());
-                /*(submission.getConversationId() != null && submission.getConversationId().trim().length() > 0)
-                        ? submission.getConversationId() : this.generateConversationId());*/
         collaborationInfo.setAction(submission.getAction());
         final AgreementRef agreementRef = new AgreementRef();
         agreementRef.setValue(submission.getAgreementRef());
@@ -85,8 +80,6 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         final MessageInfo messageInfo = new MessageInfo();
         messageInfo.setMessageId(submission.getMessageId());
         LOG.debug("MESSAGE ID " + messageInfo.getMessageId());
-              /*  (submission.getMessageId() != null && submission.getMessageId().trim().length() > 0)
-                        ? submission.getMessageId() : this.messageIdGenerator.generateMessageId());*/
         GregorianCalendar gc = new GregorianCalendar();
         messageInfo.setTimestamp(new XMLGregorianCalendarImpl(gc));
         LOG.debug("TIMESTAMP " + messageInfo.getTimestamp());
