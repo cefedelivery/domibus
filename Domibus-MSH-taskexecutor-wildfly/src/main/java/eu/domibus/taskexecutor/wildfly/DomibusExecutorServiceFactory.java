@@ -9,9 +9,14 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 /**
+ *
+ * @author Cosmin Baciu
+ * @since 3.3
+ *
  * This class is responsible for discovering a {@link ManagedExecutorService} from the JNDI tree
  * It checks first in the JNDI tree if there is a configured application executor service. If it fails to get it it falls back to the default executor.
  */
+
 public class DomibusExecutorServiceFactory implements FactoryBean<ManagedExecutorService> {
 
     private static final Log LOG = LogFactory.getLog(DomibusExecutorServiceFactory.class);

@@ -12,6 +12,10 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionException;
 
 /**
+ *
+ * @author Cosmin Baciu
+ * @since 3.3
+ *
  * {@link SchedulingTaskExecutor} implementation for WildFly
  */
 public class DomibusWildFlyTaskExecutor extends JndiLocatorSupport implements SchedulingTaskExecutor {

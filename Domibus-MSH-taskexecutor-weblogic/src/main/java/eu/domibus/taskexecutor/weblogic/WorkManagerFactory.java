@@ -9,6 +9,9 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 /**
+ * @author Cosmin Baciu
+ * @since 3.3
+ *
  * This class is responsible for discovering a {@link WorkManager} from the JNDI tree
  * It checks first in the JNDI tree if there is a configured application work manager. If it fails to get it it falls back to the default work manager.
  */

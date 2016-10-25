@@ -12,6 +12,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 /**
+ * @author Cosmin Baciu
+ * @since 3.3
+ *
  * {@link SchedulingTaskExecutor} implementation for WebLogic
  */
 public class DomibusWorkManagerTaskExecutor extends JndiLocatorSupport implements SchedulingTaskExecutor {
