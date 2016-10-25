@@ -8,6 +8,10 @@ import org.springframework.beans.factory.FactoryBean;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+/**
+ * This class is responsible for discovering a {@link WorkManager} from the JNDI tree
+ * It checks first in the JNDI tree if there is a configured application work manager. If it fails to get it it falls back to the default work manager.
+ */
 public class WorkManagerFactory implements FactoryBean<WorkManager> {
 
     private static final Log LOG = LogFactory.getLog(WorkManagerFactory.class);

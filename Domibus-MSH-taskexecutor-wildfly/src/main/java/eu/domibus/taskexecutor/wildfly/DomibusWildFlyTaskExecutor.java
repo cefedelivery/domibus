@@ -11,16 +11,22 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionException;
 
-public class DomibusWildFlyTaskExecutor
-        extends JndiLocatorSupport
-        implements SchedulingTaskExecutor {
+/**
+ * {@link SchedulingTaskExecutor} implementation for WildFly
+ */
+public class DomibusWildFlyTaskExecutor extends JndiLocatorSupport implements SchedulingTaskExecutor {
 
     protected ManagedExecutorService executorService;
 
     public void execute(Runnable task) {
-        Assert.state(this.executorService != null, "No executor service specified");
+        Assert.state(executorService != null, "No executor service specified");
+
+        if (task == null) {
+            throw new TaskRejectedException("Executor service did not accept task because it was null");
+        }
+
         try {
-            this.executorService.execute(task);
+            executorService.execute(task);
         } catch (RejectedExecutionException ex) {
             throw new TaskRejectedException("Executor service did not accept task: " + task, ex);
         }

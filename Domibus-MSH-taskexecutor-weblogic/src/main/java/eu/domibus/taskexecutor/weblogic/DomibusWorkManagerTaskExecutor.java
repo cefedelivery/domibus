@@ -11,9 +11,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
-public class DomibusWorkManagerTaskExecutor
-        extends JndiLocatorSupport
-        implements SchedulingTaskExecutor {
+/**
+ * {@link SchedulingTaskExecutor} implementation for WebLogic
+ */
+public class DomibusWorkManagerTaskExecutor extends JndiLocatorSupport implements SchedulingTaskExecutor {
 
     protected WorkManager workManager;
 
@@ -21,13 +22,17 @@ public class DomibusWorkManagerTaskExecutor
 
     @Override
     public void execute(Runnable task) {
-        Assert.state(this.workManager != null, "No WorkManager specified");
+        Assert.state(workManager != null, "No WorkManager specified");
+        if (task == null) {
+            throw new TaskRejectedException("CommonJ WorkManager did not accept task because it was null");
+        }
+
         Work work = new DomibusDelegatingWork(task);
         try {
-            if (this.workListener != null) {
-                this.workManager.schedule(work, this.workListener);
+            if (workListener != null) {
+                workManager.schedule(work, workListener);
             } else {
-                this.workManager.schedule(work);
+                workManager.schedule(work);
             }
         } catch (WorkRejectedException ex) {
             throw new TaskRejectedException("CommonJ WorkManager did not accept task: " + task, ex);

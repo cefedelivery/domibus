@@ -8,9 +8,13 @@ import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+/**
+ * This class is responsible for discovering a {@link ManagedExecutorService} from the JNDI tree
+ * It checks first in the JNDI tree if there is a configured application executor service. If it fails to get it it falls back to the default executor.
+ */
 public class DomibusExecutorServiceFactory implements FactoryBean<ManagedExecutorService> {
 
-    private static final Log LOGGER = LogFactory.getLog(DomibusExecutorServiceFactory.class);
+    private static final Log LOG = LogFactory.getLog(DomibusExecutorServiceFactory.class);
 
     public static final String DEFAULT_EXECUTOR_SERVICE = "java:jboss/ee/concurrency/executor/default";
 
@@ -21,20 +25,20 @@ public class DomibusExecutorServiceFactory implements FactoryBean<ManagedExecuto
         try {
             result = InitialContext.doLookup(jndiName);
         } catch (NamingException e) {
-            LOGGER.warn("Failed to lookup executor service: " + jndiName);
+            LOG.warn("Failed to lookup executor service: " + jndiName);
         }
         return result;
     }
 
     protected ManagedExecutorService getDefaultExecutorService() {
         ManagedExecutorService result = lookupExecutorService(DEFAULT_EXECUTOR_SERVICE);
-        LOGGER.debug("Default executor service: " + DEFAULT_EXECUTOR_SERVICE + " = " + result);
+        LOG.debug("Default executor service: " + DEFAULT_EXECUTOR_SERVICE + " = " + result);
         return result;
     }
 
     protected ManagedExecutorService getGlobalExecutorService() {
         ManagedExecutorService result = lookupExecutorService(executorServiceJndiName);
-        LOGGER.debug("Global executor service: " + executorServiceJndiName + " = " + result);
+        LOG.debug("Global executor service: " + executorServiceJndiName + " = " + result);
         return result;
     }
 
@@ -44,17 +48,17 @@ public class DomibusExecutorServiceFactory implements FactoryBean<ManagedExecuto
 
         result = getGlobalExecutorService();
         if (result != null) {
-            LOGGER.debug("Using global executor service: " + result);
+            LOG.debug("Using global executor service: " + result);
             return result;
         }
 
         result = getDefaultExecutorService();
         if (result != null) {
-            LOGGER.debug("Using global executor service: " + result);
+            LOG.debug("Using global executor service: " + result);
             return result;
         }
 
-        LOGGER.error("Failed to get executor service");
+        LOG.error("Failed to get executor service");
         return null;
     }
 
