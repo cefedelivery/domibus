@@ -28,7 +28,7 @@ public class WorkManagerFactory implements FactoryBean<WorkManager> {
         try {
             result = InitialContext.doLookup(jndiName);
         } catch (NamingException e) {
-            LOG.warn("Failed to lookup work manager: " + jndiName);
+            LOG.debug("Failed to lookup work manager: " + jndiName, e);
         }
         return result;
     }
