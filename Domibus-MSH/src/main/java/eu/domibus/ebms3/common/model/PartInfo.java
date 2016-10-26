@@ -140,57 +140,6 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
         return fileName;
     }
 
-//    @PrePersist
-//    private void storeBinary() {
-//        mime = payloadDatahandler.getContentType();
-//        if (mime == null) {
-//            mime = "application/unknown";
-//        }
-//        try {
-//            if (Storage.storageDirectory == null) {
-//
-//                binaryData = IOUtils.toByteArray(payloadDatahandler.getInputStream());
-//
-//                if(isCompressed()) {
-//                    final byte[] buffer = new byte[1024];
-//                    InputStream sourceStream = new ByteArrayInputStream(binaryData);
-//                    ByteArrayOutputStream compressedContent = new ByteArrayOutputStream();
-//                    GZIPOutputStream targetStream = new GZIPOutputStream(compressedContent);
-//                    try {
-//                        int i;
-//                        while ((i = sourceStream.read(buffer)) > 0) {
-//                            targetStream.write(buffer, 0, i);
-//                        }
-//                        sourceStream.close();
-//                        targetStream.finish();
-//                        targetStream.close();
-//                    } catch (IOException e) {
-//                        LOG.error("I/O exception during gzip compression", e);
-//                        throw e;
-//                    }
-//                    binaryData = compressedContent.toByteArray();
-//                }
-//
-//                fileName = null;
-//
-//            } else {
-//                final File attachmentStore = new File(Storage.storageDirectory, UUID.randomUUID().toString() + ".payload");
-//                fileName = attachmentStore.getAbsolutePath();
-//                OutputStream fileOutputStream = new FileOutputStream(attachmentStore);
-//
-//                if (isCompressed()) {
-//                    fileOutputStream = new GZIPOutputStream(fileOutputStream);
-//                }
-//
-//                IOUtils.copy(payloadDatahandler.getInputStream(), fileOutputStream);
-//                fileOutputStream.flush();
-//                fileOutputStream.close();
-//            }
-//        } catch (final IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-
     @PostLoad
     private void loadBinaray() {
         if (fileName != null) {
@@ -199,16 +148,6 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
             payloadDatahandler = new DataHandler(new ByteArrayDataSource(binaryData, mime));
         }
     }
-
-//    private boolean isCompressed() {
-//        for (final Property property : partProperties.getProperties()) {
-//            if (property.getName().equals(CompressionService.COMPRESSION_PROPERTY_KEY) && property.getValue().equals(CompressionService.COMPRESSION_PROPERTY_VALUE)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
 
     /**
      * This element occurs zero or more times. It refers to schema(s) that define the instance document
