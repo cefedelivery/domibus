@@ -31,6 +31,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
+import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -89,6 +90,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     @Autowired
     private MessagingDao messagingDao;
+
+    @Autowired
+    private MessagingServiceImpl messagingService;
 
     @Autowired
     private SignalMessageDao signalMessageDao;
@@ -341,41 +345,30 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
 
         try {
-            messagingDao.create(messaging);
-
-            Party to = pModeProvider.getReceiverParty(pmodeKey);
-
-            // Builds the user message log
-            UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
-                    .setMessageId(userMessage.getMessageInfo().getMessageId())
-                    .setMessageStatus(MessageStatus.RECEIVED)
-                    .setMshRole(MSHRole.RECEIVING)
-                    .setNotificationStatus(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED)
-                    .setMpc(StringUtils.isEmpty(userMessage.getMpc()) ? Mpc.DEFAULT_MPC : userMessage.getMpc())
-                    .setSendAttemptsMax(0)
-                    .setBackendName(getFinalRecipientName(userMessage))
-                    .setEndpoint(to.getEndpoint());
-            // Saves the user message log
-            userMessageLogDao.create(umlBuilder.build());
-
-        } catch (Exception exc) {
+            messagingService.storeMessage(messaging);
+        } catch (IOException exc) {
             LOG.error("Could not persist message " + exc.getMessage());
-            checkException(exc, userMessage);
-            throw exc;
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
+            ex.setMshRole(MSHRole.RECEIVING);
+            throw ex;
         }
+
+        Party to = pModeProvider.getReceiverParty(pmodeKey);
+
+        // Builds the user message log
+        UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
+                .setMessageId(userMessage.getMessageInfo().getMessageId())
+                .setMessageStatus(MessageStatus.RECEIVED)
+                .setMshRole(MSHRole.RECEIVING)
+                .setNotificationStatus(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED)
+                .setMpc(StringUtils.isEmpty(userMessage.getMpc()) ? Mpc.DEFAULT_MPC : userMessage.getMpc())
+                .setSendAttemptsMax(0)
+                .setBackendName(getFinalRecipientName(userMessage))
+                .setEndpoint(to.getEndpoint());
+        // Saves the user message log
+        userMessageLogDao.create(umlBuilder.build());
 
         return userMessage.getMessageInfo().getMessageId();
-    }
-    private void checkException(Exception exc, UserMessage userMessage) throws EbMS3Exception {
-        if( (exc instanceof ZipException) ||
-            (exc.getCause() != null && exc.getCause() instanceof ZipException) ||
-            (exc instanceof EOFException) ||
-            (exc.getCause() != null && exc.getCause() instanceof EOFException)) {
-                LOG.debug("InstanceOf ZipException or EOFException");
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
-                ex.setMshRole(MSHRole.RECEIVING);
-                throw ex;
-        }
     }
 
     private String getFinalRecipientName(UserMessage userMessage) {

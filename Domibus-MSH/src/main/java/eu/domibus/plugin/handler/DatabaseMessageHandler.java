@@ -36,6 +36,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
+import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -56,6 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.Queue;
 import javax.persistence.NoResultException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -83,6 +85,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     private MessagingDao messagingDao;
+
+    @Autowired
+    private MessagingServiceImpl messagingService;
 
     @Autowired
     private SignalMessageDao signalMessageDao;
@@ -286,7 +291,15 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             }
 
             // We do not create MessageIds for SignalMessages, as those should never be submitted via the backend
-            messagingDao.create(message);
+            try {
+                messagingService.storeMessage(message);
+            } catch (IOException exc) {
+                LOG.error("Could not persist message " + exc.getMessage());
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
+                ex.setMshRole(MSHRole.SENDING);
+                throw ex;
+            }
+
             // TODO Should we store the user message log before it is dispatched to the queue ?
             // Sends message to the proper queue
             jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, to.getEndpoint()).createMessage(), sendMessageQueue);
