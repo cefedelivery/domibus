@@ -30,7 +30,7 @@ public class DomibusExecutorServiceFactory implements FactoryBean<ManagedExecuto
         try {
             result = InitialContext.doLookup(jndiName);
         } catch (NamingException e) {
-            LOG.warn("Failed to lookup executor service: " + jndiName);
+            LOG.debug("Failed to lookup executor service: " + jndiName, e);
         }
         return result;
     }
