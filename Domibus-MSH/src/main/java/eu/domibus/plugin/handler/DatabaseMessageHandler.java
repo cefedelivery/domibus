@@ -27,6 +27,7 @@ package eu.domibus.plugin.handler;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
+import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
 import eu.domibus.common.model.configuration.Configuration;
@@ -36,6 +37,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
+import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
@@ -57,7 +59,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.Queue;
 import javax.persistence.NoResultException;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -87,7 +88,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     private MessagingDao messagingDao;
 
     @Autowired
-    private MessagingServiceImpl messagingService;
+    private MessagingService messagingService;
 
     @Autowired
     private SignalMessageDao signalMessageDao;
@@ -293,8 +294,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             // We do not create MessageIds for SignalMessages, as those should never be submitted via the backend
             try {
                 messagingService.storeMessage(message);
-            } catch (IOException exc) {
-                LOG.error("Could not persist message " + exc.getMessage());
+            } catch (CompressionException exc) {
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;

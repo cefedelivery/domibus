@@ -24,6 +24,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
@@ -31,7 +32,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
-import eu.domibus.common.services.impl.MessagingServiceImpl;
+import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -67,7 +68,6 @@ import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.*;
 import java.util.Iterator;
-import java.util.zip.ZipException;
 
 /**
  * This method is responsible for the receiving of ebMS3 messages and the sending of signal messages like receipts or ebMS3 errors in return
@@ -92,7 +92,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private MessagingDao messagingDao;
 
     @Autowired
-    private MessagingServiceImpl messagingService;
+    private MessagingService messagingService;
 
     @Autowired
     private SignalMessageDao signalMessageDao;
@@ -346,8 +346,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         try {
             messagingService.storeMessage(messaging);
-        } catch (IOException exc) {
-            LOG.error("Could not persist message " + exc.getMessage());
+        } catch (CompressionException exc) {
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
             ex.setMshRole(MSHRole.RECEIVING);
             throw ex;

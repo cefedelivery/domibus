@@ -36,7 +36,7 @@ import java.util.zip.GZIPOutputStream;
 public class MessagingServiceTest {
 
     @Tested
-    MessagingServiceImpl messagingService = new MessagingServiceImpl();
+    MessagingService messagingService = new MessagingServiceImpl();
 
     @Injectable
     MessagingDao messagingDao;
@@ -97,6 +97,34 @@ public class MessagingServiceTest {
 
     @Test
     public void testStoreValidMessageCompressed() throws IOException, JAXBException, XMLStreamException {
+        Storage.storageDirectory = new File("target/test-classes/eu/domibus/services/");
+
+        final String validHeaderFilePath = "target/test-classes/eu/domibus/services/validMessaging.xml";
+        final String validContentFilePath = "target/test-classes/eu/domibus/services/validContent.payload";
+        final Messaging validMessaging = (Messaging) unmarshall(new FileInputStream(new File(validHeaderFilePath)), Messaging.class);
+        DataHandler dh = new DataHandler(new FileDataSource(new File(validContentFilePath)));
+        ((PartInfo) (validMessaging.getUserMessage().getPayloadInfo().getPartInfo().toArray()[0])).setPayloadDatahandler(dh);
+        Property property = new Property();
+        property.setName(CompressionService.COMPRESSION_PROPERTY_KEY);
+        property.setValue(CompressionService.COMPRESSION_PROPERTY_VALUE);
+        ((PartInfo) validMessaging.getUserMessage().getPayloadInfo().getPartInfo().toArray()[0]).getPartProperties().getProperties().add(property);
+
+        messagingService.storeMessage(validMessaging);
+        Assert.assertEquals(validMessaging.getUserMessage().getPayloadInfo().getPartInfo().size(), 1);
+        PartInfo partInfo = (PartInfo) validMessaging.getUserMessage().getPayloadInfo().getPartInfo().toArray()[0];
+        byte[] result = Files.readAllBytes(Paths.get(partInfo.getFileName()));
+
+        byte[] expectedCompressedData = compress(Files.readAllBytes(Paths.get(validContentFilePath)));
+        Assert.assertEquals(new String(expectedCompressedData), new String(result));
+
+        new Verifications() {{
+            messagingDao.create(validMessaging);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void testStoreValidMessageCompressedWithStorageDirectory() throws IOException, JAXBException, XMLStreamException {
         final String validHeaderFilePath = "target/test-classes/eu/domibus/services/validMessaging.xml";
         final String validContentFilePath = "target/test-classes/eu/domibus/services/validContent.payload";
         final Messaging validMessaging = (Messaging) unmarshall(new FileInputStream(new File(validHeaderFilePath)), Messaging.class);
@@ -125,17 +153,13 @@ public class MessagingServiceTest {
             InputStream sourceStream = new ByteArrayInputStream(data);
             ByteArrayOutputStream compressedContent = new ByteArrayOutputStream();
             GZIPOutputStream targetStream = new GZIPOutputStream(compressedContent);
-            try {
-                int i;
-                while ((i = sourceStream.read(buffer)) > 0) {
-                    targetStream.write(buffer, 0, i);
-                }
-                sourceStream.close();
-                targetStream.finish();
-                targetStream.close();
-            } catch (IOException e) {
-                throw e;
+            int i;
+            while ((i = sourceStream.read(buffer)) > 0) {
+                targetStream.write(buffer, 0, i);
             }
+            sourceStream.close();
+            targetStream.finish();
+            targetStream.close();
             byte[] result = compressedContent.toByteArray();
             return result;
     }
