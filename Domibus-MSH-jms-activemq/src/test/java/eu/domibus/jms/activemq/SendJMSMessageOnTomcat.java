@@ -1,4 +1,4 @@
-package eu.domibus.plugin.jms;
+package eu.domibus.jms.activemq;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
