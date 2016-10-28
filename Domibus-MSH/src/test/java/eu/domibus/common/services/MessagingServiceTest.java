@@ -1,5 +1,8 @@
 package eu.domibus.common.services;
 
+import eu.domibus.api.xml.DefaultUnmarshallerResult;
+import eu.domibus.api.xml.UnmarshallerResult;
+import eu.domibus.api.xml.XMLUtil;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.configuration.Storage;
@@ -7,6 +10,8 @@ import eu.domibus.ebms3.common.model.CompressionService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
+import eu.domibus.messaging.MessagingUtils;
+import eu.domibus.xml.XMLUtilImpl;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
@@ -14,20 +19,18 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.xml.sax.SAXException;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Created by idragusa on 10/26/16.
@@ -52,10 +55,10 @@ public class MessagingServiceTest {
     }
 
     @Test
-    public void testStoreValidMessage() throws IOException, JAXBException, XMLStreamException {
+    public void testStoreValidMessage() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
         final String validHeaderFilePath = "target/test-classes/eu/domibus/services/validMessaging.xml";
         final String validContentFilePath = "target/test-classes/eu/domibus/services/validContent.payload";
-        final Messaging validMessaging = (Messaging) unmarshall(new FileInputStream(new File(validHeaderFilePath)), Messaging.class);
+        final Messaging validMessaging = createMessaging(new FileInputStream(new File(validHeaderFilePath)));
         DataHandler dh = new DataHandler(new FileDataSource(new File(validContentFilePath)));
         ((PartInfo) (validMessaging.getUserMessage().getPayloadInfo().getPartInfo().toArray()[0])).setPayloadDatahandler(dh);
 
@@ -73,11 +76,11 @@ public class MessagingServiceTest {
     }
 
     @Test
-    public void testStoreValidMessageToStorageDirectory() throws IOException, JAXBException, XMLStreamException {
+    public void testStoreValidMessageToStorageDirectory() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
         Storage.storageDirectory = new File("target/test-classes/eu/domibus/services/");
         final String validHeaderFilePath = "target/test-classes/eu/domibus/services/validMessaging.xml";
         final String validContentFilePath = "target/test-classes/eu/domibus/services/validContent.payload";
-        final Messaging validMessaging = (Messaging) unmarshall(new FileInputStream(new File(validHeaderFilePath)), Messaging.class);
+        final Messaging validMessaging = createMessaging(new FileInputStream(new File(validHeaderFilePath)));
         DataHandler dh = new DataHandler(new FileDataSource(new File(validContentFilePath)));
         ((PartInfo) (validMessaging.getUserMessage().getPayloadInfo().getPartInfo().toArray()[0])).setPayloadDatahandler(dh);
 
@@ -96,12 +99,12 @@ public class MessagingServiceTest {
     }
 
     @Test
-    public void testStoreValidMessageCompressed() throws IOException, JAXBException, XMLStreamException {
+    public void testStoreValidMessageCompressed() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
         Storage.storageDirectory = new File("target/test-classes/eu/domibus/services/");
 
         final String validHeaderFilePath = "target/test-classes/eu/domibus/services/validMessaging.xml";
         final String validContentFilePath = "target/test-classes/eu/domibus/services/validContent.payload";
-        final Messaging validMessaging = (Messaging) unmarshall(new FileInputStream(new File(validHeaderFilePath)), Messaging.class);
+        final Messaging validMessaging = createMessaging(new FileInputStream(new File(validHeaderFilePath)));
         DataHandler dh = new DataHandler(new FileDataSource(new File(validContentFilePath)));
         ((PartInfo) (validMessaging.getUserMessage().getPayloadInfo().getPartInfo().toArray()[0])).setPayloadDatahandler(dh);
         Property property = new Property();
@@ -114,7 +117,7 @@ public class MessagingServiceTest {
         PartInfo partInfo = (PartInfo) validMessaging.getUserMessage().getPayloadInfo().getPartInfo().toArray()[0];
         byte[] result = Files.readAllBytes(Paths.get(partInfo.getFileName()));
 
-        byte[] expectedCompressedData = compress(Files.readAllBytes(Paths.get(validContentFilePath)));
+        byte[] expectedCompressedData = MessagingUtils.compress(validContentFilePath);
         Assert.assertEquals(new String(expectedCompressedData), new String(result));
 
         new Verifications() {{
@@ -124,10 +127,10 @@ public class MessagingServiceTest {
     }
 
     @Test
-    public void testStoreValidMessageCompressedWithStorageDirectory() throws IOException, JAXBException, XMLStreamException {
+    public void testStoreValidMessageCompressedWithStorageDirectory() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
         final String validHeaderFilePath = "target/test-classes/eu/domibus/services/validMessaging.xml";
         final String validContentFilePath = "target/test-classes/eu/domibus/services/validContent.payload";
-        final Messaging validMessaging = (Messaging) unmarshall(new FileInputStream(new File(validHeaderFilePath)), Messaging.class);
+        final Messaging validMessaging = createMessaging(new FileInputStream(new File(validHeaderFilePath)));
         DataHandler dh = new DataHandler(new FileDataSource(new File(validContentFilePath)));
         ((PartInfo) (validMessaging.getUserMessage().getPayloadInfo().getPartInfo().toArray()[0])).setPayloadDatahandler(dh);
         Property property = new Property();
@@ -139,7 +142,7 @@ public class MessagingServiceTest {
         Assert.assertEquals(validMessaging.getUserMessage().getPayloadInfo().getPartInfo().size(), 1);
         PartInfo partInfo = (PartInfo) validMessaging.getUserMessage().getPayloadInfo().getPartInfo().toArray()[0];
 
-        byte[] expectedCompressedData = compress(Files.readAllBytes(Paths.get(validContentFilePath)));
+        byte[] expectedCompressedData = MessagingUtils.compress(validContentFilePath);
         Assert.assertEquals(new String(expectedCompressedData), new String(partInfo.getBinaryData()));
 
         new Verifications() {{
@@ -148,28 +151,11 @@ public class MessagingServiceTest {
         }};
     }
 
-    private byte[] compress(byte[] data) throws IOException{
-            final byte[] buffer = new byte[1024];
-            InputStream sourceStream = new ByteArrayInputStream(data);
-            ByteArrayOutputStream compressedContent = new ByteArrayOutputStream();
-            GZIPOutputStream targetStream = new GZIPOutputStream(compressedContent);
-            int i;
-            while ((i = sourceStream.read(buffer)) > 0) {
-                targetStream.write(buffer, 0, i);
-            }
-            sourceStream.close();
-            targetStream.finish();
-            targetStream.close();
-            byte[] result = compressedContent.toByteArray();
-            return result;
-    }
 
-    private static Object unmarshall (InputStream inputStream, Class type) throws XMLStreamException, JAXBException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(type);
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        Source source = new StreamSource(inputStream);
-        JAXBElement root = unmarshaller.unmarshal(source, type);
-        Object object = root.getValue();
-        return object;
+    private Messaging createMessaging (InputStream inputStream) throws XMLStreamException, JAXBException, ParserConfigurationException, SAXException {
+        XMLUtil xmlUtil = new XMLUtilImpl();
+        JAXBContext jaxbContext = JAXBContext.newInstance(Messaging.class);
+        JAXBElement root = xmlUtil.unmarshal(true, jaxbContext, inputStream, null).getResult();
+        return (Messaging) root.getValue();
     }
 }
