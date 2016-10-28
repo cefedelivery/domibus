@@ -38,7 +38,7 @@ import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
-import eu.domibus.common.services.impl.MessagingServiceImpl;
+import eu.domibus.common.validators.EbMS3MessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -217,6 +217,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             authUtils.hasUserOrAdminRole();
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
+        EbMS3MessageValidator objEbMS3MessageValidator = new EbMS3MessageValidator();
 
         try {
             final UserMessage userMessage = transformer.transformFromSubmission(messageData);
@@ -225,12 +226,14 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 userMessage.setMessageInfo(objectFactory.createMessageInfo());
             }
             String messageId = userMessage.getMessageInfo().getMessageId();
-            if (messageId == null || userMessage.getMessageInfo().getMessageId().trim().isEmpty()) {
+            if (messageId == null) {
                 messageId = messageIdGenerator.generateMessageId();
                 userMessage.getMessageInfo().setMessageId(messageId);
-            } else if (messageId.length() > 255) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "MessageId value is too long (over 255 characters)", null, null);
+            } else {
+                objEbMS3MessageValidator.validateMessageId(messageId);
+                userMessage.getMessageInfo().setMessageId(messageId);
             }
+
             String refToMessageId = userMessage.getMessageInfo().getRefToMessageId();
             if (refToMessageId != null && refToMessageId.length() > 255) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "RefToMessageId value is too long (over 255 characters)", refToMessageId, null);

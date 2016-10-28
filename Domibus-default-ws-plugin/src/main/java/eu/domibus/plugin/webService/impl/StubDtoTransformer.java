@@ -175,7 +175,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         }
         result.setConversationId(trim(collaborationInfo.getConversationId()));
 
-        result.setMessageId(trim(messaging.getMessageInfo().getMessageId()));
+        result.setMessageId(messaging.getMessageInfo().getMessageId());  //not trimming message id as non printable special characters needs to be checked.
         result.setRefToMessageId(trim(messaging.getMessageInfo().getRefToMessageId()));
 
         if (messaging.getPayloadInfo() != null) {
