@@ -1,11 +1,11 @@
-package eu.domibus.plugin.jms;
+package eu.domibus.jms.activemq;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
 import java.util.UUID;
 
-public class SendMessageOnTomcat {
+public class SendJMSMessageOnTomcat {
 
     public static void main(String[] args) {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
