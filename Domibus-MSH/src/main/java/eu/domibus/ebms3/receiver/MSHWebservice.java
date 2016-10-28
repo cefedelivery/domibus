@@ -24,6 +24,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
@@ -31,6 +32,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
+import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -64,12 +66,8 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.*;
 import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.Iterator;
-import java.util.zip.ZipException;
 
 /**
  * This method is responsible for the receiving of ebMS3 messages and the sending of signal messages like receipts or ebMS3 errors in return
@@ -92,6 +90,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     @Autowired
     private MessagingDao messagingDao;
+
+    @Autowired
+    private MessagingService messagingService;
 
     @Autowired
     private SignalMessageDao signalMessageDao;
@@ -186,7 +187,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (final EbMS3Exception e) {
             try {
                 if (!pingMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
-                    backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED_FAILURE);
+                    backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
                 }
             } catch (Exception ex) {
                 LOG.warn("could not notify backend of rejected message ", ex);
@@ -344,33 +345,27 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
 
         try {
-            messagingDao.create(messaging);
-
-            Party to = pModeProvider.getReceiverParty(pmodeKey);
-
-            // Builds the user message log
-            UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
-                    .setMessageId(userMessage.getMessageInfo().getMessageId())
-                    .setMessageStatus(MessageStatus.RECEIVED)
-                    .setMshRole(MSHRole.RECEIVING)
-                    .setNotificationStatus(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED)
-                    .setMpc(StringUtils.isEmpty(userMessage.getMpc()) ? Mpc.DEFAULT_MPC : userMessage.getMpc())
-                    .setSendAttemptsMax(0)
-                    .setBackendName(getFinalRecipientName(userMessage))
-                    .setEndpoint(to.getEndpoint());
-            // Saves the user message log
-            userMessageLogDao.create(umlBuilder.build());
-
-        } catch (Exception exc) {
-            LOG.error("Could not persist message " + exc.getMessage());
-            if (exc instanceof ZipException || (exc.getCause() != null && exc.getCause() instanceof ZipException)) {
-                LOG.debug("InstanceOf ZipException");
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
-                ex.setMshRole(MSHRole.RECEIVING);
-                throw ex;
-            }
-            throw exc;
+            messagingService.storeMessage(messaging);
+        } catch (CompressionException exc) {
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
+            ex.setMshRole(MSHRole.RECEIVING);
+            throw ex;
         }
+
+        Party to = pModeProvider.getReceiverParty(pmodeKey);
+
+        // Builds the user message log
+        UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
+                .setMessageId(userMessage.getMessageInfo().getMessageId())
+                .setMessageStatus(MessageStatus.RECEIVED)
+                .setMshRole(MSHRole.RECEIVING)
+                .setNotificationStatus(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED)
+                .setMpc(StringUtils.isEmpty(userMessage.getMpc()) ? Mpc.DEFAULT_MPC : userMessage.getMpc())
+                .setSendAttemptsMax(0)
+                .setBackendName(getFinalRecipientName(userMessage))
+                .setEndpoint(to.getEndpoint());
+        // Saves the user message log
+        userMessageLogDao.create(umlBuilder.build());
 
         return userMessage.getMessageInfo().getMessageId();
     }
