@@ -36,6 +36,10 @@
         <module>Domibus-MSH-jms-weblogic</module>
         <module>Domibus-MSH-jms-activemq</module>
         <module>Domibus-MSH-jms-wildfly</module>
+		<module>Domibus-MSH-taskexecutor-weblogic</module>
+		<module>Domibus-MSH-taskexecutor-wildfly</module>
+        <module>Domibus-MSH-taskexecutor-tomcat</module>
+
         <module>Domibus-MSH-soapui-tests</module>
         <module>Domibus-MSH-docker</module>
         <module>Domibus-plugin-api</module>
@@ -54,7 +58,7 @@
         <sonar.exclusions>
             **/validators/EbMS3MessageValidator.java, **/controller/AdminGUIController.java,
             **/discovery/PartyIndentifierResolverService.java,
-            **/quartz/**, **/target/**
+            **/quartz/**, **/target/**, **/eu/domibus/spring/SpringContextProvider.java, **/eu/domibus/taskexecutor/weblogic/DomibusDelegatingWork.java
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
         <sonar.host.url>http://158.166.148.181:9000/sonar</sonar.host.url>
@@ -72,8 +76,12 @@
     </distributionManagement>
 
     <dependencyManagement>
-
         <dependencies>
+            <dependency>
+                <groupId>org.quartz-scheduler</groupId>
+                <artifactId>quartz</artifactId>
+                <version>2.2.1</version>
+            </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>

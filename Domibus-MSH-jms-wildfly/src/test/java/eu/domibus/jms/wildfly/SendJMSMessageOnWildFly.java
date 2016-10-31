@@ -1,54 +1,33 @@
-package eu.domibus.jms.weblogic;
-
-import org.apache.commons.io.IOUtils;
-import org.junit.Test;
-import weblogic.security.Security;
+package eu.domibus.jms.wildfly;
 
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.security.auth.Subject;
-import java.io.InputStream;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.Hashtable;
 import java.util.Map;
 
-public class SendMessageOnWeblogic {
+public class SendJMSMessageOnWildFly {
 
-    private static final String PROVIDER_URL = "t3://localhost:7001";
-    private static final String USER = "admin";
-    private static final String PASSWORD = "Europa0005";
-    private static final String CONNECTION_FACTORY_JNDI = "jms/ConnectionFactory";
-    private static final String QUEUE = "jms/domibus.backend.etrustex.inQueue";
+    private static final String PROVIDER_URL = "http-remoting://localhost:8080";
+    //the user has to have the necessary roles; the security configuration is done in the WildFly profile under  <security-settings>
+    private static final String USER = "jmssender";
+    private static final String PASSWORD = "jmssender";
+    private static final String CONNECTION_FACTORY_JNDI = "jms/RemoteConnectionFactory";
+    private static final String QUEUE = "jms/domibus.backend.jms.inQueue";
 
     public static void main(String[] args) throws Exception {
-        try {
-            Security.runAs(new Subject(), new PrivilegedExceptionAction<Object>() {
-                @Override
-                public Object run()  {
-                    new SendMessageOnWeblogic().run();
-                    return null;
-                }
-            });
-        } catch (PrivilegedActionException e) {
-            throw e;
-        }
-
-
+        new SendJMSMessageOnWildFly().run();
     }
 
-    @Test
     public void run() throws RuntimeException {
         try {
             InitialContext ic = getInitialContext(PROVIDER_URL, USER, PASSWORD);
             Queue queue = (Queue) ic.lookup(QUEUE);
             QueueConnectionFactory cf = (QueueConnectionFactory) ic.lookup(CONNECTION_FACTORY_JNDI);
-            QueueConnection qc = cf.createQueueConnection();
+            QueueConnection qc = cf.createQueueConnection(USER, PASSWORD);
             QueueSession qs = qc.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
             QueueSender qsr = qs.createSender(queue);
-            InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("jms/etrustexJmsMessage.xml");
-            final String message = IOUtils.toString(resourceAsStream);
+            final String message = "my custom message";
             TextMessage textMessage = createTextMessage(qs, message, "", null);
             qsr.send(textMessage);
             ic.close();
@@ -63,7 +42,7 @@ public class SendMessageOnWeblogic {
         if (providerUrl != null) {
             Hashtable<String, String> env = new Hashtable<String, String>();
             env.put(Context.PROVIDER_URL, providerUrl);
-            env.put(Context.INITIAL_CONTEXT_FACTORY, "weblogic.jndi.WLInitialContextFactory");
+            env.put(Context.INITIAL_CONTEXT_FACTORY, "org.jboss.naming.remote.client.InitialContextFactory");
             if (userName != null) {
                 env.put(Context.SECURITY_PRINCIPAL, userName);
             }

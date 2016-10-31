@@ -22,6 +22,7 @@ package eu.domibus.plugin.handler;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
+import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
 import eu.domibus.common.model.configuration.Configuration;
@@ -31,6 +32,8 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
+import eu.domibus.common.services.MessagingService;
+import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -83,6 +86,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     private MessagingDao messagingDao;
+
+    @Autowired
+    private MessagingService messagingService;
 
     @Autowired
     private SignalMessageDao signalMessageDao;
@@ -267,8 +273,14 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             boolean compressed = compressionService.handleCompression(userMessage, legConfiguration);
             LOG.debug("Compression for message with id: " + messageId + " applied: " + compressed);
 
-            // We do not create MessageIds for SignalMessages, as those should never be submitted via the backend
-            messagingDao.create(message);
+            try {
+                messagingService.storeMessage(message);
+            } catch (CompressionException exc) {
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
+                ex.setMshRole(MSHRole.SENDING);
+                throw ex;
+            }
+
             // Sends message to the proper queue
             jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, to.getEndpoint()).createMessage(), sendMessageQueue);
             // Builds the user message log

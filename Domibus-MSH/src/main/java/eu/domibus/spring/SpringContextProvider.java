@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.domibus.common.util;
+package eu.domibus.spring;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -25,23 +25,18 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 /**
- * @author Christian Koch, Stefan Mueller
+ * @author Christian Koch, Stefan Mueller, Cosmin Baciu
  */
 @Service
-public class SpringContextHelper implements ApplicationContextAware {
+public class SpringContextProvider implements ApplicationContextAware {
 
-    private static ApplicationContext context;
+    private static ApplicationContext applicationContext;
 
     public static ApplicationContext getApplicationContext() {
-        return context;
+        return applicationContext;
     }
 
-    public void setApplicationContext(final ApplicationContext context) throws BeansException {
-        setAC(context);
+    public void setApplicationContext(ApplicationContext context) throws BeansException {
+        applicationContext = context;
     }
-
-    public static void setAC(final ApplicationContext c) {
-        context = c;
-    }
-
 }
