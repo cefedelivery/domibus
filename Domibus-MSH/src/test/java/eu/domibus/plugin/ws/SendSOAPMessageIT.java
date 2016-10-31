@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.AbstractIT;
 import eu.domibus.common.validators.XmlValidationEventHandler;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +99,7 @@ public class SendSOAPMessageIT extends AbstractIT {
     }*/
 
     @Test
+    @Ignore
     public void testSendValidMessage() throws Exception {
 
         String body = getAS4Response("blue2redMessageResponse.xml");
@@ -121,6 +123,7 @@ public class SendSOAPMessageIT extends AbstractIT {
     }
 
     @Test
+    @Ignore
     public void testSendInvalidMessage() throws Exception {
 
         try {
