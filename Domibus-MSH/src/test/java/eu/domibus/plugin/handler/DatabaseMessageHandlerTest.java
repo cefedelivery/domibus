@@ -2,12 +2,13 @@ package eu.domibus.plugin.handler;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.ErrorCode;
+import eu.domibus.common.ErrorResult;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.*;
+import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
@@ -17,12 +18,14 @@ import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.Property;
+import eu.domibus.ebms3.common.model.Service;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.DuplicateMessageException;
+import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
-import eu.domibus.plugin.webService.generated.SendMessageFault;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -37,14 +40,16 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.jms.Queue;
-import java.sql.SQLException;
+import javax.persistence.NoResultException;
+import java.io.IOException;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Federico Martini
  * @since 3.2
- *
+ * <p>
  * in the Verifications() the execution "times" is by default 1.
  */
 @RunWith(JMockit.class)
@@ -54,7 +59,7 @@ public class DatabaseMessageHandlerTest {
     private static final String BACKEND = "backend";
     private static final String DEF_PARTY_TYPE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
     private static final String STRING_TYPE = "string";
-    private static final String MESS_ID = "cf012f4c-5a31-4759-ad9c-1d12331420656@domibus.eu";
+    private static final String MESS_ID = UUID.randomUUID().toString();
     private static final String DOMIBUS_GREEN = "domibus-green";
     private static final String DOMIBUS_RED = "domibus-red";
     private static final String GREEN = "green_gw";
@@ -212,10 +217,22 @@ public class DatabaseMessageHandlerTest {
             Party confParty = new Party();
             confParty.setName(GREEN);
             conf.setParty(confParty);
+
             pModeProvider.getConfigurationDAO().read();
             result = conf;
 
-            LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+            Mpc mpc = new Mpc();
+            mpc.setName(Mpc.DEFAULT_MPC);
+
+            LegConfiguration legConfiguration = new LegConfiguration();
+            final Map<Party, Mpc> mpcMap = new HashMap<>();
+            mpcMap.put(receiver, mpc);
+            legConfiguration.setDefaultMpc(mpc);
+            legConfiguration.setErrorHandling(new ErrorHandling());
+
+            pModeProvider.getLegConfiguration(pModeKey);
+            result = legConfiguration;
+
             compressionService.handleCompression(userMessage, legConfiguration);
             result = true;
         }};
@@ -725,10 +742,281 @@ public class DatabaseMessageHandlerTest {
 
 
     @Test
-    public void testDownloadMessageOK() throws SendMessageFault, InterruptedException, SQLException {
-        //TODO
+    public void testSubmitMessageStoreNOk(@Injectable final Submission messageData) throws Exception {
+        new Expectations() {{
+
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
+
+            UserMessage userMessage = createUserMessage();
+            transformer.transformFromSubmission(messageData);
+            result = userMessage;
+
+            messageIdGenerator.generateMessageId();
+            result = MESS_ID;
+
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            result = MessageStatus.NOT_FOUND;
+
+            String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
+
+            pModeProvider.findPModeKeyForUserMessage(userMessage);
+            result = pModeKey;
+
+            Party sender = new Party();
+            sender.setName(GREEN);
+            pModeProvider.getSenderParty(pModeKey);
+            result = sender;
+
+            Party receiver = new Party();
+            receiver.setName(RED);
+            pModeProvider.getReceiverParty(pModeKey);
+            result = receiver;
+
+            Configuration conf = new Configuration();
+            Party confParty = new Party();
+            confParty.setName(GREEN);
+            conf.setParty(confParty);
+            pModeProvider.getConfigurationDAO().read();
+            result = conf;
+
+            LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+            compressionService.handleCompression(userMessage, legConfiguration);
+            result = true;
+
+            messagingService.storeMessage(new Messaging());
+            result = new CompressionException("Could not store binary data for message due to IO exception", new IOException("test compression"));
+        }};
+
+        try {
+            dmh.submit(messageData, BACKEND);
+            Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
+        } catch (MessagingProcessingException mpEx) {
+            LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
+            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0303);
+            assert (mpEx.getMessage().contains("Could not store binary data for message due to IO exception"));
+        }
+
+        new Verifications() {{
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            messageIdGenerator.generateMessageId();
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            pModeProvider.getLegConfiguration(anyString);
+            compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
+            messagingService.storeMessage(withAny(new Messaging()));
+            userMessageLogDao.create(withAny(new UserMessageLog()));
+            times = 0;
+        }};
 
     }
 
+
+    @Test
+    public void testDownloadMessageOK() throws Exception {
+
+        final UserMessage userMessage = createUserMessage();
+
+        final Submission submission = new Submission();
+        submission.setMessageId(MESS_ID);
+
+        new Expectations() {{
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4";
+
+            messagingDao.findUserMessageByMessageId(MESS_ID);
+            result = userMessage;
+
+            userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
+            result = new UserMessageLog();
+
+            pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc());
+            result = 0;
+
+            List<SignalMessage> signalMessages = new ArrayList<>();
+            SignalMessage signMsg = new SignalMessage();
+            signalMessages.add(signMsg);
+
+            signalMessageDao.findSignalMessagesByRefMessageId(MESS_ID);
+            result = signalMessages;
+
+            List<String> signalMessageIds = new ArrayList<>();
+            signalMessageIds.add("SignalA1");
+            signalMessageIds.add("SignalA2");
+            signalMessageIds.add("SignalA3");
+
+            signalMessageDao.findSignalMessageIdsByRefMessageId(MESS_ID);
+            result = signalMessageIds;
+
+            transformer.transformFromMessaging(userMessage);
+            result = submission;
+
+        }};
+
+        final Submission sub = dmh.downloadMessage(MESS_ID);
+
+        new Verifications() {{
+            authUtils.hasUserOrAdminRole();
+            userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
+            pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc());
+            signalMessageDao.findSignalMessagesByRefMessageId(MESS_ID);
+            Assert.assertNotNull(sub);
+            Assert.assertEquals(MESS_ID, sub.getMessageId());
+            Assert.assertEquals(submission, sub);
+        }};
+
+    }
+
+    @Test
+    public void testDownloadMessageAuthUserNok() throws Exception {
+
+        final UserMessage userMessage = createUserMessage();
+
+        new Expectations() {{
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
+
+            messagingDao.findUserMessageByMessageId(MESS_ID);
+            result = userMessage;
+        }};
+
+        try {
+            dmh.downloadMessage(MESS_ID);
+            Assert.fail("It should throw " + AccessDeniedException.class.getCanonicalName());
+        } catch (AccessDeniedException adEx) {
+            LOG.debug("Expected :", adEx);
+            assert (adEx.getMessage().contains("You are not allowed to handle this message. You are authorized as"));
+        }
+
+        new Verifications() {{
+            authUtils.hasUserOrAdminRole();
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            messagingDao.findUserMessageByMessageId(MESS_ID);
+        }};
+
+    }
+
+    @Test
+    public void testDownloadMessageNoMsgFound() throws Exception {
+
+        new Expectations() {{
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
+
+            messagingDao.findUserMessageByMessageId(MESS_ID);
+            result = new NoResultException("No entry found");
+        }};
+
+        try {
+            dmh.downloadMessage(MESS_ID);
+            Assert.fail("It should throw " + MessageNotFoundException.class.getCanonicalName());
+        } catch (MessageNotFoundException mnfEx) {
+            LOG.debug("Expected :", mnfEx);
+            assert (mnfEx.getMessage().contains("was not found"));
+        }
+
+        new Verifications() {{
+            authUtils.hasUserOrAdminRole();
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            messagingDao.findUserMessageByMessageId(MESS_ID);
+            userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
+            times = 0;
+        }};
+
+    }
+
+    @Test
+    public void testDownloadMessageNoLogMsgFound() throws Exception {
+
+        new Expectations() {{
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
+
+            messagingDao.findUserMessageByMessageId(MESS_ID);
+            result = new UserMessage();
+
+            userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
+            result = null;
+        }};
+
+        try {
+            dmh.downloadMessage(MESS_ID);
+            Assert.fail("It should throw " + MessageNotFoundException.class.getCanonicalName());
+        } catch (MessageNotFoundException mnfEx) {
+            LOG.debug("Expected :", mnfEx);
+            assert (mnfEx.getMessage().contains("was not found"));
+        }
+
+        new Verifications() {{
+            authUtils.hasUserOrAdminRole();
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            messagingDao.findUserMessageByMessageId(MESS_ID);
+            userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
+        }};
+
+    }
+
+    @Test
+    public void testGetMessageStatusOk() throws Exception {
+        new Expectations() {{
+
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            result = MessageStatus.ACKNOWLEDGED;
+
+        }};
+
+        final MessageStatus msgStatus = dmh.getMessageStatus(MESS_ID);
+
+        new Verifications() {{
+            authUtils.hasAdminRole();
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            msgStatus.equals(MessageStatus.ACKNOWLEDGED);
+        }};
+
+    }
+
+    @Test
+    public void testGetErrorsForMessageOk() throws Exception {
+        new Expectations() {{
+
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "MessageId value is too long (over 255 characters)", MESS_ID, null);
+            List<ErrorResult> list = new ArrayList<>();
+            list.add(new ErrorLogEntry(ex));
+
+            errorLogDao.getErrorsForMessage(MESS_ID);
+            result = list;
+
+        }};
+
+        final List<? extends ErrorResult> results = dmh.getErrorsForMessage(MESS_ID);
+
+
+        new Verifications() {{
+            authUtils.hasAdminRole();
+            errorLogDao.getErrorsForMessage(MESS_ID);
+            Assert.assertNotNull(results);
+            ErrorResult errRes = results.iterator().next();
+            Assert.assertEquals(errRes.getErrorCode(), ErrorCode.EBMS_0008);
+        }};
+
+    }
 
 }
