@@ -4,6 +4,7 @@ import mockit.Mock;
 import mockit.MockUp;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,6 +38,7 @@ public class ConstantAttemptAlgorithmTest {
     }
 
     @Test
+    @Ignore
     public void compute_TransitionToNextYear_ValidResult() {
         /*Mock System.currentTimeMillis() in order to have a fixed current date.
           The mocked date is: 2015/12/31 23:59:59
@@ -65,6 +67,7 @@ public class ConstantAttemptAlgorithmTest {
     }
 
     @Test
+    @Ignore
     public void compute_TimeInMinutesTill_31_12_3999_ExpectedResult()  {
         new SystemMockFirstOfJanuary2016();
 

@@ -61,7 +61,7 @@
             **/quartz/**, **/target/**, **/eu/domibus/spring/SpringContextProvider.java, **/eu/domibus/taskexecutor/weblogic/DomibusDelegatingWork.java
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
-        <sonar.host.url>http://158.166.148.181:9000/sonar</sonar.host.url>
+        <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar/</sonar.host.url>
     </properties>
 
     <distributionManagement>
