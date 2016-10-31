@@ -33,6 +33,8 @@ import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
+import eu.domibus.common.services.impl.CompressionService;
+import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -68,7 +70,10 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.*;
 import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.Iterator;
 
 /**

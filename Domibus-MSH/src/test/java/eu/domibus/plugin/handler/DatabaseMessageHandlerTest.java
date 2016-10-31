@@ -10,6 +10,9 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.services.MessagingService;
+import eu.domibus.common.services.impl.CompressionService;
+import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -72,6 +75,9 @@ public class DatabaseMessageHandlerTest {
 
     @Injectable
     private SubmissionAS4Transformer transformer;
+
+    @Injectable
+    private MessagingService messagingService;
 
     @Injectable
     private MessagingDao messagingDao;
@@ -224,7 +230,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
-            messagingDao.create(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()));
             userMessageLogDao.create(withAny(new UserMessageLog()));
         }};
 
@@ -282,7 +288,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
-            messagingDao.create(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()));
             userMessageLogDao.create(withAny(new UserMessageLog()));
         }};
 
@@ -317,7 +323,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingDao.create(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()));
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -357,7 +363,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingDao.create(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()));
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -420,7 +426,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingDao.create(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()));
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -478,7 +484,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingDao.create(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()));
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -543,7 +549,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingDao.create(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()));
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -608,7 +614,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             errorLogDao.create(withAny(new ErrorLogEntry()));
-            messagingDao.create(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()));
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -651,7 +657,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingDao.create(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()));
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
