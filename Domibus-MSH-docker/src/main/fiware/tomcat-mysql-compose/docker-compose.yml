@@ -3,7 +3,7 @@ version: '2'
 services:
   mysql:
     container_name: mysql
-    image: idragusa/domibus-mysql
+    image: domibus-mysql
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=domibus
@@ -13,7 +13,7 @@ services:
       - "3306"
   domibus-3.2:
     container_name: domibus-3.2
-    image: idragusa/domibus-tomcat
+    image: domibus-tomcat
     command: dockerize -wait tcp://mysql:3306 -timeout 20s
     ports:
       - "8180:8080"
