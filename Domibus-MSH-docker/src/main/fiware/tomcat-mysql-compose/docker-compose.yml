@@ -16,6 +16,6 @@ services:
     image: idragusa/domibus-tomcat
     command: dockerize -wait tcp://mysql:3306 -timeout 20s
     ports:
-      - "8080:8080"
+      - "8180:8080"
     depends_on:
       - mysql
