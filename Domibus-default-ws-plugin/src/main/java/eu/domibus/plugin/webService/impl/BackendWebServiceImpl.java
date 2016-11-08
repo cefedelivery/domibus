@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.plugin.webService.impl;
 
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
@@ -68,12 +49,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     private static final String MESSAGE_NOT_FOUND_ID = "Message not found, id [";
 
     private static final String ERROR_IS_PAYLOAD_DATA_HANDLER = "Error getting the input stream from the payload data handler";
-
-    @Autowired
-    private StubDtoTransformer messageRetrievalTransformer;
-
-    @Autowired
-    private StubDtoTransformer messageSubmissionTransformer;
 
     @Autowired
     private StubDtoTransformer defaultTransformer;
@@ -288,12 +263,12 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     @Override
     public MessageSubmissionTransformer<Messaging> getMessageSubmissionTransformer() {
-        return this.messageSubmissionTransformer;
+        return this.defaultTransformer;
     }
 
     @Override
     public MessageRetrievalTransformer<UserMessage> getMessageRetrievalTransformer() {
-        return this.messageRetrievalTransformer;
+        return this.defaultTransformer;
     }
 
     @Override
