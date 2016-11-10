@@ -108,15 +108,14 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
-        LOG.info("Searching message with id [" + messageId + "]");
-        UserMessageLog userMessageLog;
         UserMessage userMessage;
         try {
+            LOG.info("Searching message with id [" + messageId + "]");
             userMessage = messagingDao.findUserMessageByMessageId(messageId);
             // Authorization check
             validateOriginalUser(userMessage, originalUser, MessageConstants.FINAL_RECIPIENT);
 
-            userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
+            UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
             if (userMessageLog == null) {
                 throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
             }

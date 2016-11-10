@@ -42,7 +42,6 @@ import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
-import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -176,8 +175,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             }
             messaging = getMessaging(request);
             String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
-            // Verifies that the sender is really who claims to send the message and its certificate.
-            verifySender(pmodeKey, messageId);
 
             checkCharset(messaging);
             pingMessage = checkPingMessage(messaging.getUserMessage());
@@ -207,30 +204,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         return responseMessage;
     }
-
-    /**
-     * Verifies if the sender is trusted. This should block messages sent from "possible" hacked access points.
-     *
-     * @param pmodeKey
-     * @param messageId
-     * @throws EbMS3Exception
-     * @author Federico Martini
-     */
-    private void verifySender(String pmodeKey, String messageId) throws EbMS3Exception {
-        Party sendingParty = pModeProvider.getSenderParty(pmodeKey);
-        try {
-            certificateService.isTrusted(sendingParty.getName());
-            // TODO check that the KeyInfo in the message' signature contains the party id.
-            LOG.info("Sender is trusted and its certificate is valid [" + sendingParty.getName() + "]");
-        } catch (DomibusCertificateException dcEx) {
-            String msg = "Could not find and verify sender's certificate [" + sendingParty.getName() + "]";
-            LOG.fatal(msg, dcEx);
-            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, msg, messageId, dcEx);
-            ex.setMshRole(MSHRole.SENDING);
-            throw ex;
-        }
-    }
-
 
     /**
      * Required for AS4_TA_12
