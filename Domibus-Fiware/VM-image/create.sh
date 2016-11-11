@@ -2,6 +2,9 @@
 
 ######## base image: base_ubuntu_14.04 ########
 
+export JRE_HOME="/usr/java/jre1.7.0_79/"
+sudo sed -i 's/127.0.0.1 localhost/127.0.0.1 localhost.localdomain $HOSTNAME/g' /etc/hosts
+
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update -q
 
@@ -29,8 +32,6 @@ sudo wget https://ec.europa.eu/cefdigital/artifact/service/local/repositories/eD
     && sudo unzip -o -d $TOMCAT_FULL_DISTRIBUTION domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip
 sudo wget https://ec.europa.eu/cefdigital/artifact/service/local/repositories/eDelivery/content/eu/domibus/domibus-MSH/$DOMIBUS_VERSION/domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip \
     && sudo unzip -o -d $DOMIBUS_DIST domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip
-sudo wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 sudo wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
     && sudo unzip -o -d $DOMIBUS_DIST $MYSQL_CONNECTOR.zip
