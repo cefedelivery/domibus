@@ -44,7 +44,8 @@
                              userName="domibus" password="changeit">
         <!-- do not remove this! otherwise the redeliveryPolicy configured in activemq.xml will be ignored -->
         <amq:redeliveryPolicy>
-            <amq:redeliveryPolicy />
+            <amq:redeliveryPolicy queue="sendMessageQueue"
+                                  maximumRedeliveries="0"/>
         </amq:redeliveryPolicy>
     </amq:xaConnectionFactory>
 
