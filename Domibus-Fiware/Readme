@@ -1,0 +1,40 @@
+Scripts for creation of a Domibus-3.2 image on the Fiware Lab. 
+
+Desired name for the new image: Domibus-3.2
+Base image: base_ubuntu_14.04
+Required flavor: m1.medium
+Port 8080 has to be opened externally.
+
+Create script: ./create.sh
+Data: data.tgz (expected in the same folder as create.sh)
+Test script: ./test.sh
+
+The creation script:
+	- installs mysql on default port 3306
+	- creates domibus db and edelivery user
+	- creates domibus tables
+	- installs Domibus 3.2 on Tomcat 8
+	- installs certificates for "ceftestparty8gw" to connect to the Connectivity Test Platform (http://40.115.23.114:8080/domibus/services/msh)
+	- starts Domibus and waits for the service to become available
+	- uploads the pMode with parties "ceftestparty8gw" and "cefsupportgw"
+	
+The testing script performs a sanity check that the service is available on http://localhost:8080/domibus/home
+
+Data (data.tgz) contains:
+	- private key: ceftestparty8gwkeystore.jks
+	- public key: ceftestparty8gwtruststore.jks
+	- pMode file: domibus-ceftestparty8gw-pmode.xml
+
+Testing the resulted instance
+
+The instance is already configured to be able to send messages to the Connectivity Test Platform.
+
+A SoapUI project is available to help you test the sending of messages using this instance. The steps are:
+
+• open SoapUI and import the project (File->Import->browse to AS4ConnectivitySoapTest-soapui-project_gw8.xml)
+• open AS4ConnectivitySoapTest->BackendService_1_1SoapBinding->SendMessage->Request 1
+• click on the green button to send a message; the result will be a unique messageID
+• in the browser, go to http://<your_ip>:8080/domibus/home to check your message was ACKNOWLEDGED
+
+	
+	
