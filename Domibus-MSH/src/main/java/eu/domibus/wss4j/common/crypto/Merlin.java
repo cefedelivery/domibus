@@ -37,13 +37,13 @@ public class Merlin extends org.apache.wss4j.common.crypto.Merlin {
 
     private static final Log LOG = LogFactory.getLog(Merlin.class);
 
-    private TrustStoreService trustStoreService;
+    private CryptoService cryptoService;
 
     public Merlin(final Properties properties, final ClassLoader loader, final PasswordEncryptor passwordEncryptor) throws WSSecurityException, IOException {
         super(properties, loader, passwordEncryptor);
-        trustStoreService = (TrustStoreService) SpringContextProvider.getApplicationContext().getBean("trustStoreService");
-        setTrustStore(trustStoreService.getTrustStore());
-        trustStoreService.setCrypto(this);
+        cryptoService = (CryptoService) SpringContextProvider.getApplicationContext().getBean("cryptoService");
+        setTrustStore(cryptoService.getTrustStore());
+        cryptoService.setCrypto(this);
         LOG.debug("Merlin crypto successfully initialized");
     }
 

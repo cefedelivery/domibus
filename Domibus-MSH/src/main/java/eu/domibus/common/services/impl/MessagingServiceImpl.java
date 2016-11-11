@@ -1,12 +1,9 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.CompressionException;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.configuration.Storage;
-import eu.domibus.ebms3.common.model.CompressionService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
@@ -21,7 +18,8 @@ import java.util.UUID;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Created by idragusa on 10/26/16.
+ * @author Ioana Dragusanu
+ * @since 3.3
  */
 @Service
 public class MessagingServiceImpl implements MessagingService {

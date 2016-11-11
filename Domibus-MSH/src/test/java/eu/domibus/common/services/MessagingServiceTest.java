@@ -1,12 +1,10 @@
 package eu.domibus.common.services;
 
-import eu.domibus.api.xml.DefaultUnmarshallerResult;
-import eu.domibus.api.xml.UnmarshallerResult;
 import eu.domibus.api.xml.XMLUtil;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.configuration.Storage;
-import eu.domibus.ebms3.common.model.CompressionService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
@@ -29,12 +27,16 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * Created by idragusa on 10/26/16.
+ * @author Ioana Dragusanu
+ * @since 3.3
  */
 @RunWith(JMockit.class)
 public class MessagingServiceTest {

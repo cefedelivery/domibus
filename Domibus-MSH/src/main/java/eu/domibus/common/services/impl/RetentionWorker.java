@@ -17,9 +17,8 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.domibus.ebms3.common.model;
+package eu.domibus.common.services.impl;
 
-import eu.domibus.common.AuthRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import org.apache.commons.logging.Log;
@@ -29,11 +28,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.util.Collections;
 
 
 /**

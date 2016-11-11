@@ -24,6 +24,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.AttachmentDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.exception.SendMessageException;

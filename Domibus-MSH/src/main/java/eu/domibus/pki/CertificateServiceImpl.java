@@ -1,6 +1,6 @@
 package eu.domibus.pki;
 
-import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,8 @@ import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 /**
- * Created by Cosmin Baciu on 12-Jul-16.
+ * @Author Cosmin Baciu
+ * @Since 3.2
  */
 @Service
 public class CertificateServiceImpl implements CertificateService {
@@ -25,7 +26,7 @@ public class CertificateServiceImpl implements CertificateService {
     CRLService crlService;
 
     @Autowired
-    TrustStoreService trustStoreService;
+    CryptoService cryptoService;
 
     @Autowired
     @Qualifier("domibusProperties")
@@ -35,7 +36,7 @@ public class CertificateServiceImpl implements CertificateService {
     @Override
     public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
         LOG.debug("Checking certificate validation for [" + alias + "]");
-        KeyStore trustStore = trustStoreService.getTrustStore();
+        KeyStore trustStore = cryptoService.getTrustStore();
         if (trustStore == null) {
             throw new DomibusCertificateException("Error getting the truststore");
         }
@@ -46,8 +47,8 @@ public class CertificateServiceImpl implements CertificateService {
         } catch (KeyStoreException e) {
             throw new DomibusCertificateException("Error getting the certificate chain from the truststore for [" + alias + "]", e);
         }
-        if (certificateChain == null) {
-            throw new DomibusCertificateException("Could not find alias in the truststore[" + alias + "]");
+        if (certificateChain == null || certificateChain.length == 0 || certificateChain[0] == null) {
+            throw new DomibusCertificateException("Could not find alias in the truststore [" + alias + "]");
         }
 
         for (X509Certificate certificate : certificateChain) {
@@ -59,6 +60,7 @@ public class CertificateServiceImpl implements CertificateService {
 
         return true;
     }
+
 
     protected X509Certificate[] getCertificateChain(KeyStore trustStore, String alias) throws KeyStoreException {
         //TODO get the certificate chain manually based on the issued by info from the original certificate
@@ -100,6 +102,32 @@ public class CertificateServiceImpl implements CertificateService {
         }
 
         return result;
+    }
+
+    /**
+     * Verifies the existence and validity of a certificate.
+     *
+     * @Author Federico Martini
+     * @Since 3.3
+     * @param alias
+     * @return boolean
+     * @throws DomibusCertificateException
+     */
+    @Override
+    public boolean isCertificateValid(String alias) throws DomibusCertificateException {
+        LOG.debug("Verifying the certificate with alias [" + alias + "]");
+        try {
+            X509Certificate certificate = (X509Certificate) cryptoService.getCertificateFromKeystore(alias);
+            if (certificate == null) {
+                throw new DomibusCertificateException("Error: the certificate does not exist for alias[" + alias + "]");
+            }
+            if (!isCertificateValid(certificate)) {
+                throw new DomibusCertificateException("Error: the certificate is not valid anymore for alias [" + alias + "]");
+            }
+        } catch (KeyStoreException ksEx) {
+            throw new DomibusCertificateException("Error getting the certificate from keystore for alias [" + alias + "]", ksEx);
+        }
+        return true;
     }
 
 }

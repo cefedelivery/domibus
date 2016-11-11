@@ -163,14 +163,14 @@ public abstract class PModeProvider {
             leg = this.findLegName(agreementName, senderParty, receiverParty, service, action);
 
             if ((action.equals(Action.TEST_ACTION) && (!service.equals(Service.TEST_SERVICE)))) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "ebMS3 Test Service: " + Service.TEST_SERVICE + " and ebMS3 Test Action: " + Action.TEST_ACTION + " can only be used together [CORE] 5.2.2.9", null, null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Service.TEST_SERVICE + " and ebMS3 Test Action: " + Action.TEST_ACTION + " can only be used together [CORE] 5.2.2.9", userMessage.getMessageInfo().getMessageId(), null);
             }
 
             return senderParty + ":" + receiverParty + ":" + service + ":" + action + ":" + agreementName + ":" + leg;
 
-        } catch (final EbMS3Exception e) {
-            e.setRefToMessageId(userMessage.getMessageInfo().getMessageId());
-            throw e;
+        } catch (IllegalStateException ise) {
+            // It can happen if DB is clean and no pmodes are configured yet!
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "PMode could not be found. Are PModes configured in the database?", userMessage.getMessageInfo().getMessageId(), ise);
         }
     }
 
