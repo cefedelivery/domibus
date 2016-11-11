@@ -116,7 +116,7 @@ public class CryptoService {
     }
 
     // Saves the reference to the Merlin object in order to be able to refresh it afterwards whenever is needed!
-    public void setCrypto(Merlin crypto) {
+    void setCrypto(Merlin crypto) {
         this.crypto = crypto;
     }
 
