@@ -31,6 +31,9 @@ public class MessagingServiceImpl implements MessagingService {
     @Autowired
     MessagingDao messagingDao;
 
+    @Autowired
+    Storage storage;
+
     @Override
     public void storeMessage(Messaging messaging) throws CompressionException{
         if (messaging == null || messaging.getUserMessage() == null)
@@ -56,13 +59,13 @@ public class MessagingServiceImpl implements MessagingService {
             partInfo.setMime("application/unknown");
         }
         InputStream is = partInfo.getPayloadDatahandler().getInputStream();
-        if (Storage.storageDirectory == null) {
+        if (storage.getStorageDirectory() == null) {
             byte[] binaryData = getBinaryData(is, isCompressed(partInfo));
             partInfo.setBinaryData(binaryData);
             partInfo.setFileName(null);
 
         } else {
-            final File attachmentStore = new File(Storage.storageDirectory, UUID.randomUUID().toString() + ".payload");
+            final File attachmentStore = new File(storage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
             partInfo.setFileName(attachmentStore.getAbsolutePath());
             saveFileToDisk(attachmentStore, is, isCompressed(partInfo));
         }
