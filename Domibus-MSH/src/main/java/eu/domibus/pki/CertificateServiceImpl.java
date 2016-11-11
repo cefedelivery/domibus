@@ -130,19 +130,4 @@ public class CertificateServiceImpl implements CertificateService {
         return true;
     }
 
-    /**
-     * Verifies that a third party is trusted and its certificate is valid.
-     *
-     * @param alias
-     * @return boolean
-     * @throws DomibusCertificateException
-     * @Author Federico Martini
-     * @Since 3.3
-     */
-    @Override
-    public boolean isTrusted(String alias) throws DomibusCertificateException {
-        LOG.debug("Verifying trust of third party [" + alias + "]");
-        return isCertificateChainValid(alias);
-    }
-
 }

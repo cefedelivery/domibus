@@ -16,6 +16,4 @@ public interface CertificateService {
 
     boolean isCertificateValid(String alias) throws DomibusCertificateException;
 
-    boolean isTrusted(String alias) throws DomibusCertificateException;
-
 }
