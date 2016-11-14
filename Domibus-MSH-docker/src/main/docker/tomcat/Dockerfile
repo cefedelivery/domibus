@@ -19,6 +19,8 @@ RUN apt-get install -y wget
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
+ADD dockerize /usr/local/bin/dockerize
+
 COPY $TOMCAT_ZIP_URL $DOMIBUS_DIST/
 COPY $SAMPLE_CONFIGURATION_URL $DOMIBUS_DIST/
 

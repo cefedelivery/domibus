@@ -16,6 +16,7 @@ ENV CATALINA_HOME $TOMCAT_FULL_DISTRIBUTION/domibus
 RUN apt-get update
 RUN apt-get install -y wget
 RUN apt-get install unzip
+RUN apt-get install curl
 
 RUN wget https://ec.europa.eu/cefdigital/artifact/service/local/repositories/eDelivery/content/eu/domibus/domibus-MSH/$DOMIBUS_VERSION/domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip \
     && unzip -d $TOMCAT_FULL_DISTRIBUTION domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip
@@ -32,11 +33,18 @@ RUN cp -R $DOMIBUS_DIST/conf/domibus/keystores $CATALINA_HOME/conf/domibus/
 
 RUN chmod 777 $CATALINA_HOME/bin/*.sh
 RUN sed -i 's/\r$//' $CATALINA_HOME/bin/setenv.sh
-RUN sed -i 's/#export CATALINA_HOME=<YOUR_INSTALLATION_PATH>/export CATALINA_HOME=$CATALINA_HOME/g' $CATALINA_HOME/bin/setenv.sh
 RUN sed -i 's/#JAVA_OPTS/JAVA_OPTS/g' $CATALINA_HOME/bin/setenv.sh
-RUN sed -i 's/localhost:3306/mysql:3306/g' $CATALINA_HOME/conf/domibus/domibus-datasources.xml
+#RUN sed -i 's/localhost:3306/mysql:3306/g' $CATALINA_HOME/conf/domibus/domibus-datasources.xml
+
+######## Set Test Platform certificates ########
+RUN sed -i 's/gateway_truststore.jks/ceftestparty8gwtruststore.jks/g' $CATALINA_HOME/conf/domibus/domibus-security.xml
+RUN sed -i 's/gateway_keystore.jks/ceftestparty8gwkeystore.jks/g' $CATALINA_HOME/conf/domibus/domibus-security.xml
+RUN sed -i 's/blue_gw/ceftestparty8gw/g' $CATALINA_HOME/conf/domibus/domibus-security.xml
+COPY ./domibus-ceftestparty8gw-pmode.xml $DOMIBUS_DIST/conf/pmodes/
+COPY ./keystores $CATALINA_HOME/conf/domibus/
 
 EXPOSE 8080
 
 WORKDIR $CATALINA_HOME
 ENTRYPOINT ["./bin/catalina.sh", "run"]
+

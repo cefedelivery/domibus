@@ -3,7 +3,7 @@ version: '2'
 services:
   mysql:
     container_name: mysql
-    image: idragusa/domibus-mysql
+    image: domibus-mysql
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=domibus
@@ -13,9 +13,15 @@ services:
       - "3306"
   domibus-3.2:
     container_name: domibus-3.2
-    image: idragusa/domibus-tomcat
+    image: domibus-tomcat
     command: dockerize -wait tcp://mysql:3306 -timeout 20s
     ports:
       - "8080:8080"
     depends_on:
       - mysql
+
+#while ! curl --output /dev/null --silent --head --fail http://localhost:8080/domibus/home; do sleep 1 && echo -n .; done;
+
+#RUN curl -X POST -F pmode=@"$DOMIBUS_DIST/conf/pmodes/domibus-ceftestparty8gw-pmode.xml" http://localhost:8080/domibus/home/uploadPmodeFile
+
+######## Connectivity test machine IP: 40.115.23.114 ########
