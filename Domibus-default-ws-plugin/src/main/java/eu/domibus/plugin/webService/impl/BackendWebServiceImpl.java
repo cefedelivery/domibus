@@ -1,6 +1,5 @@
 package eu.domibus.plugin.webService.impl;
 
-import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
@@ -18,15 +17,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -50,9 +51,9 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     private static final String DEFAULT_MT = "text/xml";
 
-    private static final String MESSAGE_NOT_FOUND_ID = "Message not found, id [";
+    private static final String BODYLOAD = "#bodyload";
 
-    private static final String ERROR_IS_PAYLOAD_DATA_HANDLER = "Error getting the input stream from the payload data handler";
+    private static final String MESSAGE_NOT_FOUND_ID = "Message not found, id [";
 
     @Autowired
     private StubDtoTransformer defaultTransformer;
@@ -191,7 +192,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
-    public void downloadMessage(final DownloadMessageRequest downloadMessageRequest, final Holder<DownloadMessageResponse> downloadMessageResponse, final Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
+    public void downloadMessage(final DownloadMessageRequest downloadMessageRequest, Holder<DownloadMessageResponse> downloadMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
 
         UserMessage userMessage = null;
         boolean isMessageIdValued = StringUtils.isNotEmpty(downloadMessageRequest.getMessageID());
@@ -208,54 +209,63 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", createDownloadMessageFault(mnfEx));
         }
 
-        Messaging result = BackendWebServiceImpl.EBMS_OBJECT_FACTORY.createMessaging();
-        result.setUserMessage(userMessage);
-        ebMSHeaderInfo.value = result;
+        // To avoid blocking errors during the Header's response validation
+        if (StringUtils.isEmpty(userMessage.getCollaborationInfo().getAgreementRef().getValue())) {
+            userMessage.getCollaborationInfo().setAgreementRef(null);
+        }
+        Messaging messaging = BackendWebServiceImpl.EBMS_OBJECT_FACTORY.createMessaging();
+        messaging.setUserMessage(userMessage);
+        ebMSHeaderInfo.value = messaging;
         downloadMessageResponse.value = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponse();
 
-        if (isMessageIdValued && result.getUserMessage() != null) {
-            fillInfoParts(downloadMessageResponse, result);
+        if (isMessageIdValued && messaging.getUserMessage() != null) {
+            fillInfoParts(downloadMessageResponse, messaging);
         } else {
             LOG.info("Returning an empty response because the message id was empty.");
         }
     }
 
-    private void fillInfoParts(Holder<DownloadMessageResponse> downloadMessageResponse, Messaging result) throws DownloadMessageFault {
+    private void fillInfoParts(Holder<DownloadMessageResponse> downloadMessageResponse, Messaging messaging) throws DownloadMessageFault {
 
-        boolean mtomEnabled = false; // TODO get the property from WS configuration
-        for (final PartInfo partInfo : result.getUserMessage().getPayloadInfo().getPartInfo()) {
+        String msgId = messaging.getUserMessage().getMessageInfo().getMessageId();
+
+        for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
-            final PayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createPayloadType();
+            PayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createPayloadType();
             try {
-                LOG.debug("downloadMessage - payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
+                LOG.debug("payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
                 payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
-            } catch (final IOException ioEx) {
-                LOG.error(ERROR_IS_PAYLOAD_DATA_HANDLER, ioEx);
-                throw new DownloadMessageFault(ERROR_IS_PAYLOAD_DATA_HANDLER, createDownloadMessageFault(ioEx));
+            } catch (IOException ioEx) {
+                String msgToShow = "Error getting the input stream from the payload data handler for the required message [" + msgId + "]";
+                LOG.error(msgToShow, ioEx);
+                throw new DownloadMessageFault(msgToShow, createDownloadMessageFault(ioEx));
             }
-            JAXBElement<PayloadType> payloadElement = null;
             if (extPartInfo.isInBody()) {
-                extPartInfo.setHref("#bodyload");
-                payloadType.setPayloadId("#bodyload");
-                payloadElement = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponseBodyload(payloadType);
-            } else if (mtomEnabled) {
-                payloadType.setPayloadId(partInfo.getHref());
-                AnyPayloadType anyPayloadType = BackendWebServiceImpl.WEBSERVICE_OF.createAnyPayloadType();
-                //Node item = null;
-                Document xmlDoc = new DocumentImpl();
-                Element root = xmlDoc.createElement("TODO");
-                //item = xmlDoc.createElement("bookingID");
-                //item.appendChild(xmlDoc.createTextNode(payloadType.toString());
-                //root.appendChild(item);
-                xmlDoc.appendChild(root);
-                anyPayloadType.setAny(root);
-                JAXBElement<AnyPayloadType> anyPayloadTypeElement = BackendWebServiceImpl.WEBSERVICE_OF.createPayload(anyPayloadType);
-                downloadMessageResponse.value.getContent().add(anyPayloadTypeElement);
+                extPartInfo.setHref(BODYLOAD);
+                payloadType.setPayloadId(BODYLOAD);
+                JAXBElement<PayloadType> payloadElement = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponseBodyload(payloadType);
+                downloadMessageResponse.value.getContent().add(payloadElement);
             } else {
                 payloadType.setPayloadId(partInfo.getHref());
-                payloadElement = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponsePayload(payloadType);
+                AnyPayloadType anyPayloadType = BackendWebServiceImpl.WEBSERVICE_OF.createAnyPayloadType();
+                setAnyPayload(msgId, payloadType, anyPayloadType);
+                JAXBElement<AnyPayloadType> anyPayloadTypeElement = BackendWebServiceImpl.WEBSERVICE_OF.createPayload(anyPayloadType);
+                downloadMessageResponse.value.getContent().add(anyPayloadTypeElement);
             }
-            downloadMessageResponse.value.getContent().add(payloadElement);
+        }
+    }
+
+    private void setAnyPayload(String msgId, PayloadType payloadType, AnyPayloadType anyPayloadType) throws DownloadMessageFault {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document root = builder.parse(new ByteArrayInputStream(payloadType.getValue()));
+            anyPayloadType.setAny(root.getDocumentElement());
+        } catch (Exception ex) {
+            String msgToShow = "Payload bytes could not be correctly parsed for the required message [" + msgId + "]";
+            LOG.error(msgToShow, ex);
+            throw new DownloadMessageFault(msgToShow, createDownloadMessageFault(ex));
         }
     }
 
