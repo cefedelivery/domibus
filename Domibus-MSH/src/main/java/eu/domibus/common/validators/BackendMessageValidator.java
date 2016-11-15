@@ -75,6 +75,12 @@ public class BackendMessageValidator {
     }
 
 
+    /**
+     * The field - UserMessage/MessageInfo/RefToMessageId is expected to satisfy all the validations of the - UserMessage/MessageInfo/MessageId field
+     *
+     * @param refToMessageId
+     * @throws EbMS3Exception
+     */
     public void validateRefToMessageId(final String refToMessageId) throws EbMS3Exception {
 
         if (refToMessageId.length() > 255) {

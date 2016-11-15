@@ -10,7 +10,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,10 +20,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Properties;
 
 /**
- * Created by venugar on 27/10/2016.
+ * Created by venugar on 11/10/2016.
  */
 
 
@@ -35,9 +33,7 @@ public class BackendMessageValidatorTest {
 
     private static final Log LOG = LogFactory.getLog(BackendMessageValidatorTest.class);
     private static boolean initialized;
-    @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+
 
 
     @Autowired
@@ -58,16 +54,6 @@ public class BackendMessageValidatorTest {
 
 
     }
-
-    @Test
-    public void validateMessageIdFromSender() throws Exception {
-        System.out.println("HELLO WORLD!!!!!!!!!");
-
-        backendMessageValidatorObj.validateMessageId("null");
-
-        System.out.println("Property read from file:" + domibusProperties.getProperty("activeMQ.JMXURL"));
-    }
-
 
     @Test
     public void validateMessageId() throws Exception {
@@ -91,7 +77,7 @@ public class BackendMessageValidatorTest {
 
         } catch (EbMS3Exception e1) {
             LOG.error(e1);
-            Assert.fail();
+            Assert.fail("Exception was not expected in happy scenarios");
         }
          /*Happy Flow No error should occur*/
 
@@ -99,7 +85,7 @@ public class BackendMessageValidatorTest {
         try {
             String messageId2 = "\t\t346ea37f-7583-40b0-9ffc-3f4cfa88bf8b@domibus.eu\t\t";
             backendMessageValidatorObj.validateMessageId(messageId2);
-            Assert.fail();
+            Assert.fail("Expected exception EBMS_0009 was not raised!");
         } catch (EbMS3Exception e2) {
             Assert.assertEquals("EBMS_0009", e2.getErrorCode());
         }
@@ -110,7 +96,7 @@ public class BackendMessageValidatorTest {
         try {
             String messageId4 = "346ea\b37f-7583-40\u0010b0-9ffc-3f4\u007Fcfa88bf8b@d\u0001omibus.eu";
             backendMessageValidatorObj.validateMessageId(messageId4);
-            Assert.fail();
+            Assert.fail("Expected exception EBMS_0009 was not raised!");
         } catch (EbMS3Exception e2) {
             Assert.assertEquals("EBMS_0009", e2.getErrorCode());
         }
@@ -120,7 +106,7 @@ public class BackendMessageValidatorTest {
         try {
             String messageId5 = "\b\u0010\u0030\u007F\u0001";
             backendMessageValidatorObj.validateMessageId(messageId5);
-            Assert.fail();
+            Assert.fail("Expected exception EBMS_0009 was not raised!");
         } catch (EbMS3Exception e2) {
             Assert.assertEquals("EBMS_0009", e2.getErrorCode());
         }
@@ -130,7 +116,7 @@ public class BackendMessageValidatorTest {
         try {
             String messageId6 = "1234567890-123456789-01234567890/1234567890/1234567890.1234567890.123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890@domibus.eu";
             backendMessageValidatorObj.validateMessageId(messageId6);
-            Assert.fail();
+            Assert.fail("Expected exception EBMS_0008 was not raised!");
         } catch (EbMS3Exception e2) {
             Assert.assertEquals("EBMS_0008", e2.getErrorCode());
         }
@@ -140,7 +126,7 @@ public class BackendMessageValidatorTest {
         try {
             String messageId8 = null;
             backendMessageValidatorObj.validateMessageId(messageId8);
-            Assert.fail();
+            Assert.fail("Expected exception EBMS_0009 was not raised!");
         } catch (EbMS3Exception e2) {
             Assert.assertEquals("EBMS_0009", e2.getErrorCode());
         }
