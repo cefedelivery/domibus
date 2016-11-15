@@ -61,6 +61,10 @@
         <prop key="domibus.jms.internalQueue.expression">.*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*</prop>
         <prop key="activeMQ.JMXURL">service:jmx:rmi://localhost:1200/jndi/rmi://localhost:1199/jmxrmi</prop>
 
+        <!--Accepted Format for MessageId-->
+        <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
+
+
         <!-- Use the below property to customize the task executor threads count -->
         <!--<prop key="domibus.taskExecutor.threadCount">50</prop>-->
 
@@ -75,8 +79,8 @@
         <!-- To disable unsecureLogin, set this to false -->
         <!-- <prop key="domibus.auth.unsecureLoginAllowed">true</prop> -->
 
-        <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
-</util:properties>
+
+    </util:properties>
 
     <!-- Mime-Types listed in this map will not be compressed (in outgoing messages) even if compression is turned on for the given message. -->
     <util:list id="compressionBlacklist" value-type="java.lang.String">
