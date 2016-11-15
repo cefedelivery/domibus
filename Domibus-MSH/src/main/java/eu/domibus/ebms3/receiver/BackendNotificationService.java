@@ -42,6 +42,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -108,7 +110,13 @@ public class BackendNotificationService {
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void notifyOfIncomingFailure(final UserMessage userMessage) {
+        notifyOfIncoming(userMessage, NotificationType.MESSAGE_RECEIVED_FAILURE);
+    }
+
     public void notifyOfIncoming(final UserMessage userMessage, NotificationType notificationType) {
+        LOG.debug("Notify of incoming message, notificationType is " + (notificationType == null ? "null" : notificationType.name()));
         List<BackendFilter> backendFilter = backendFilterDao.findAll();
         if (backendFilter.isEmpty()) { // There is no saved backendfilter configuration. Most likely the backends have not been configured yet
             backendFilter = routingService.getBackendFilters();

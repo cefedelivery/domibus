@@ -109,7 +109,6 @@
         </xsd:simpleContent>
     </xsd:complexType>
 
-
     <xsd:complexType name="errorResultImpl">
         <xsd:sequence>
             <xsd:element minOccurs="0" name="errorCode" type="tns:errorCode"/>

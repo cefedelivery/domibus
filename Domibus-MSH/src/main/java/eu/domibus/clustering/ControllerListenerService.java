@@ -1,7 +1,7 @@
 package eu.domibus.clustering;
 
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class ControllerListenerService implements MessageListener {
     private CacheManager cacheManager;
 
     @Autowired
-    private TrustStoreService trustStoreService;
+    private CryptoService cryptoService;
 
     @Override
     @Transactional
@@ -50,7 +50,7 @@ public class ControllerListenerService implements MessageListener {
         switch (command) {
             case Command.RELOAD_PMODE:
                 pModeProvider.refresh();
-                trustStoreService.refreshTrustStore();
+                cryptoService.refreshTrustStore();
                 break;
             case Command.EVICT_CACHES:
                 Collection<String> cacheNames = cacheManager.getCacheNames();
@@ -59,7 +59,7 @@ public class ControllerListenerService implements MessageListener {
                 }
                 break;
             case Command.RELOAD_TRUSTSTORE:
-                trustStoreService.refreshTrustStore();
+                cryptoService.refreshTrustStore();
                 break;
             default:
                 LOG.error("Unknown command received: " + command);

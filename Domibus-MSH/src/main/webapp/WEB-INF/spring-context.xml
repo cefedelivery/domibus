@@ -1,39 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright 2015 e-CODEX Project
-  ~
-  ~ Licensed under the EUPL, Version 1.1 or – as soon they
-  ~ will be approved by the European Commission - subsequent
-  ~ versions of the EUPL (the "Licence");
-  ~ You may not use this work except in compliance with the
-  ~ Licence.
-  ~ You may obtain a copy of the Licence at:
-  ~ http://ec.europa.eu/idabc/eupl5
-  ~ Unless required by applicable law or agreed to in
-  ~ writing, software distributed under the Licence is
-  ~ distributed on an "AS IS" basis,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  ~ express or implied.
-  ~ See the Licence for the specific language governing
-  ~ permissions and limitations under the Licence.
-  -->
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:jms="http://www.springframework.org/schema/jms"
        xmlns="http://www.springframework.org/schema/beans"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+                           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+                           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+                           http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
+
+    <context:annotation-config/>
+    <context:component-scan base-package="eu.domibus"/>
+    <context:property-placeholder properties-ref="domibusProperties" ignore-resource-not-found="false"/>
+
+    <jms:annotation-driven/>
+
+    <tx:annotation-driven order="1" transaction-manager="transactionManager" proxy-target-class="true"/>
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+    <aop:config proxy-target-class="true">
+        <!-- all services from eu.domibus package which do not use a speicific @Transactional annotation; the implementations of the org.apache.cxf.phase.PhaseInterceptor are not taken into account due to final methods present in the CXF abstract class  -->
+        <aop:pointcut id="allMethods" expression="execution(public * eu.domibus..*(..)) and not @annotation(org.springframework.transaction.annotation.Transactional) and not within(@org.springframework.transaction.annotation.Transactional *) and not within(org.apache.cxf.phase.PhaseInterceptor+)"/>
+        <aop:advisor order="2" advice-ref="txAdvice" pointcut-ref="allMethods"/>
+    </aop:config>
+
 
     <import resource="classpath*:config/*-jms-context.xml"/>
+    <import resource="classpath*:config/*-taskexecutor-context.xml"/>
 
     <import resource="file:///${domibus.config.location}/domibus-plugins.xml"/>
     <import resource="msh-config.xml"/>
     <import resource="cxf-endpoint.xml"/>
     <import resource="spring-security.xml"/>
 
-    <context:annotation-config/>
-    <context:component-scan base-package="eu.domibus"/>
-    <context:property-placeholder properties-ref="domibusProperties" ignore-resource-not-found="false"/>
 
     <cache:annotation-driven/>
 

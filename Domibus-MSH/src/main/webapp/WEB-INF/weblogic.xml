@@ -28,6 +28,9 @@
             <package-name>org.bouncycastle.*</package-name>
             <package-name>org.apache.wss4j.*</package-name>
             <package-name>org.apache.cxf.*</package-name>
+            <package-name>org.apache.commons.io.*</package-name>
+            <package-name>org.apache.commons.lang.*</package-name>
+            <package-name>org.apache.commons.fileupload.*</package-name>
             <package-name>javax.wsdl.*</package-name>
             <package-name>org.hibernate.*</package-name>
             <package-name>org.springframework.*</package-name>

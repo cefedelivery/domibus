@@ -57,6 +57,9 @@
         <property name="after" value="org.apache.cxf.ws.policy.PolicyVerificationOutInterceptor.class"/>
     </bean>
 
+    <bean id="trustSenderInterceptor" class="eu.domibus.ebms3.receiver.TrustSenderInterceptor">
+        <property name="securityEncryptionProp" ref="trustStoreProperties"/>
+    </bean>
 
     <!--Interceptors to enable SwA encryption for Dispatch/WebServiceProvider implementations-->
     <bean id="setPolicyInInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor">
@@ -76,7 +79,6 @@
         <constructor-arg ref="cxf"/>
     </bean>
 
-
     <!--MSH Webservice endpoint-->
     <jaxws:endpoint id="msh" address="/msh">
         <jaxws:implementor>
@@ -94,17 +96,18 @@
         </jaxws:properties>
         <jaxws:inInterceptors>
             <!--<ref bean="logInbound"/>-->
+            <ref bean="trustSenderInterceptor"/>
             <ref bean="setPolicyInInterceptorServer"/>
             <ref bean="propertyValueExchangeInterceptor"/>
         </jaxws:inInterceptors>
 
-        <jaxws:handlers>
-            <bean class="eu.domibus.ebms3.receiver.FaultInHandler"/>
-        </jaxws:handlers>
-
         <jaxws:outInterceptors>
             <bean class="org.apache.cxf.jaxws.handler.SetCodeValueFaultOutInterceptor"/>
         </jaxws:outInterceptors>
+
+        <jaxws:handlers>
+            <bean class="eu.domibus.ebms3.receiver.FaultInHandler"/>
+        </jaxws:handlers>
 
     </jaxws:endpoint>
 

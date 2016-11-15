@@ -25,12 +25,12 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.2-SNAPSHOT</version>
+        <version>3.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>domibus-MSH</artifactId>
     <packaging>war</packaging>
-    <name>domibus-MSH</name>
+    <name>Domibus MSH Core</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
@@ -202,6 +202,11 @@
                     <version>${project.version}</version>
                 </dependency>
                 <dependency>
+                    <groupId>eu.domibus</groupId>
+                    <artifactId>domibus-taskexecutor-wildfly</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>org.glassfish.main.javaee-api</groupId>
                     <artifactId>javax.jws</artifactId>
                     <version>3.1.2.2</version>
@@ -304,6 +309,11 @@
                     <version>${project.version}</version>
                 </dependency>
                 <dependency>
+                    <groupId>eu.domibus</groupId>
+                    <artifactId>domibus-taskexecutor-weblogic</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>org.glassfish.main.javaee-api</groupId>
                     <artifactId>javax.jws</artifactId>
                     <version>3.1.2.2</version>
@@ -370,6 +380,11 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
+                <dependency>
+                    <groupId>eu.domibus</groupId>
+                    <artifactId>domibus-taskexecutor-tomcat</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
                 <dependency>
                     <groupId>eu.domibus</groupId>
                     <artifactId>domibus-jms-activemq</artifactId>
@@ -532,6 +547,14 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
@@ -634,7 +657,6 @@
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
-            <version>2.2.1</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
