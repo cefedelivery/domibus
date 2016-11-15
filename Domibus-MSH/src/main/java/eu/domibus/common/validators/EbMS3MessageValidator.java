@@ -144,10 +144,6 @@ public class EbMS3MessageValidator {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "MessageId value is too long (over 255 characters)", null, null);
         }
 
-        /*if (!EbMS3MessageValidator.RFC_2822.matcher(messageId).matches()) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, "element eb:Messaging/eb:UserMessage/eb:MessageId does not conform to RFC2822 [CORE 5.2.2.1]", null, null);
-        }*/
-
         //Validating for presence of non printable control characters.
         Pattern patternNoControlChar = Pattern.compile("^[\\x20-\\x7E]*$");
         Matcher m = patternNoControlChar.matcher(messageId);

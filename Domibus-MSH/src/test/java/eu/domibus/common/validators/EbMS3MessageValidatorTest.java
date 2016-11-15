@@ -5,13 +5,85 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
  * Created by venugar on 27/10/2016.
  */
+
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class EbMS3MessageValidatorTest {
 
     private static final Log LOG = LogFactory.getLog(EbMS3MessageValidatorTest.class);
+
+    /*@org.springframework.context.annotation.Configuration
+    static class ContextConfiguration {
+
+        @Bean
+        public ConfigurationDAO configurationDAO() {
+            return Mockito.mock(ConfigurationDAO.class);
+        }
+
+        @Bean
+        public EntityManagerFactory entityManagerFactory() {
+            return Mockito.mock(EntityManagerFactory.class);
+        }
+
+        @Bean
+        public JAXBContext jaxbContextConfig() throws JAXBException {
+            return JAXBContext.newInstance("eu.domibus.common.model.configuration");
+        }
+
+        @Bean
+        @Qualifier("jmsTemplateCommand")
+        public JmsOperations jmsOperations() throws JAXBException {
+            return Mockito.mock(JmsOperations.class);
+        }
+
+        @Bean
+        public XMLUtil xmlUtil() {
+            return new XMLUtilImpl();
+        }
+
+        @Bean
+        public PModeDao pModeDao() {
+            return new PModeDao();
+        }
+    }
+
+    @Autowired
+    PModeDao pModeDao;
+
+    @Autowired
+    XMLUtil xmlUtil;*/
+
+    @org.springframework.context.annotation.Configuration
+    static class ContextConfiguration {
+
+        @Bean
+        public BackendMessageValidator backendMessageValidatorObj() {
+            return new BackendMessageValidator();
+        }
+    }
+
+
+    @Autowired
+    BackendMessageValidator backendMessageValidatorObj;
+
+
+
+    @Test
+    public void validateMessageIdFromSender() throws Exception {
+        backendMessageValidatorObj.validateMessageId("null");
+    }
+
 
     @Test
     public void validateMessageId() throws Exception {
@@ -28,6 +100,13 @@ public class EbMS3MessageValidatorTest {
 
             String messageId1_2 = "APP-RESPONSE-d8d85972-64fb-4161-a1fb-996aa7a9c39c-DOCUMENT-BUNDLE";
             ebMS3MessageValidator.validateMessageId(messageId1_2);
+
+            String messageId1_3 = "<1234>";
+            ebMS3MessageValidator.validateMessageId(messageId1_3);
+
+            String messageId1_4 = "^12^3$4";
+            ebMS3MessageValidator.validateMessageId(messageId1_4);
+
         } catch (EbMS3Exception e1) {
             LOG.error(e1);
             Assert.fail();
