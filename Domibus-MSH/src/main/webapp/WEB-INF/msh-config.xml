@@ -13,7 +13,7 @@
     </bean>
 
     <bean id="messageIdGenerator"
-          class="eu.domibus.ebms3.common.model.MessageIdGenerator">
+          class="eu.domibus.common.services.impl.MessageIdGenerator">
         <property name="messageIdSuffix"
                   value="${domibus.msh.messageid.suffix}"/>
     </bean>
@@ -21,7 +21,7 @@
     <bean id="retentionWorkerJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass"
-                  value="eu.domibus.ebms3.common.model.RetentionWorker"/>
+                  value="eu.domibus.common.services.impl.RetentionWorker"/>
         <property name="durability" value="true"/>
     </bean>
 

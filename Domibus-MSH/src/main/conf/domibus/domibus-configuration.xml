@@ -75,6 +75,7 @@
         <!-- To disable unsecureLogin, set this to false -->
         <!-- <prop key="domibus.auth.unsecureLoginAllowed">true</prop> -->
 
+        <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
 </util:properties>
 
     <!-- Mime-Types listed in this map will not be compressed (in outgoing messages) even if compression is turned on for the given message. -->

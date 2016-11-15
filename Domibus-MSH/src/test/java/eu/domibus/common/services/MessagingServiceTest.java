@@ -1,12 +1,10 @@
 package eu.domibus.common.services;
 
-import eu.domibus.api.xml.DefaultUnmarshallerResult;
-import eu.domibus.api.xml.UnmarshallerResult;
 import eu.domibus.api.xml.XMLUtil;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.configuration.Storage;
-import eu.domibus.ebms3.common.model.CompressionService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
@@ -19,6 +17,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
 import javax.activation.DataHandler;
@@ -28,12 +27,16 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * Created by idragusa on 10/26/16.
+ * @author Ioana Dragusanu
+ * @since 3.3
  */
 @RunWith(JMockit.class)
 public class MessagingServiceTest {
@@ -43,6 +46,9 @@ public class MessagingServiceTest {
 
     @Injectable
     MessagingDao messagingDao;
+
+    @Autowired
+    Storage storage;
 
     @Test
     public void testStoreMessageCalls(@Injectable final Messaging messaging) throws IOException, JAXBException, XMLStreamException {
@@ -77,7 +83,7 @@ public class MessagingServiceTest {
 
     @Test
     public void testStoreValidMessageToStorageDirectory() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
-        Storage.storageDirectory = new File("target/test-classes/eu/domibus/services/");
+        storage.setStorageDirectory(new File("target/test-classes/eu/domibus/services/"));
         final String validHeaderFilePath = "target/test-classes/eu/domibus/services/validMessaging.xml";
         final String validContentFilePath = "target/test-classes/eu/domibus/services/validContent.payload";
         final Messaging validMessaging = createMessaging(new FileInputStream(new File(validHeaderFilePath)));
@@ -100,7 +106,7 @@ public class MessagingServiceTest {
 
     @Test
     public void testStoreValidMessageCompressed() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
-        Storage.storageDirectory = new File("target/test-classes/eu/domibus/services/");
+        storage.setStorageDirectory(new File("target/test-classes/eu/domibus/services/"));
 
         final String validHeaderFilePath = "target/test-classes/eu/domibus/services/validMessaging.xml";
         final String validContentFilePath = "target/test-classes/eu/domibus/services/validContent.payload";

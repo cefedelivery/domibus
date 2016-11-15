@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.wss4j.common.crypto;
 
 import eu.domibus.clustering.Command;
@@ -26,7 +7,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Scope;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Service;
@@ -41,6 +21,7 @@ import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
@@ -48,24 +29,22 @@ import java.util.Properties;
 /**
  * @author Christian Koch, Stefan Mueller, Federico Martini
  */
-@Service(value = "trustStoreService")
-@Scope(value = "singleton")
-public class TrustStoreService {
+@Service(value = "cryptoService")
+public class CryptoService {
 
-    private static final Log LOG = LogFactory.getLog(TrustStoreService.class);
-
-    //TODO remove this and use prooperty place holder
-    public static final String DOMIBUS_CONFIG_LOCATION = "domibus.config.location";
-    public static final String KEYSTORES_DEFAULT_LOCATION = "keystores";
+    private static final Log LOG = LogFactory.getLog(CryptoService.class);
 
     @Resource(name = "trustStoreProperties")
     private Properties trustStoreProperties;
 
-    private KeyStore trustStore;
+    @Resource(name = "keystoreProperties")
+    private Properties keystoreProperties;
 
     @Qualifier("jmsTemplateCommand")
     @Autowired
     private JmsOperations jmsOperations;
+
+    private KeyStore trustStore;
 
     private Merlin crypto;
 
@@ -143,7 +122,7 @@ public class TrustStoreService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateTrustStore() {
-        // Sends a message into the topic queue in order to refresh all the singleton instances of the TrustStoreService.
+        // Sends a message into the topic queue in order to refresh all the singleton instances of the CryptoService.
         jmsOperations.send(new ReloadTrustStoreMessageCreator());
     }
 
@@ -176,4 +155,28 @@ public class TrustStoreService {
             return m;
         }
     }
+
+    public Certificate getCertificateFromKeystore(String alias) throws KeyStoreException {
+        if (crypto != null) {
+            return crypto.getKeyStore().getCertificate(alias);
+        }
+        try {
+            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            String keyStoreFilename = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.file");
+            String keyStorePassword = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.keystore.password");
+            keyStore.load(new FileInputStream(keyStoreFilename), keyStorePassword.toCharArray());
+            return keyStore.getCertificate(alias);
+        } catch (Exception ex) {
+            throw new KeyStoreException(ex);
+        }
+    }
+
+    void setTrustStoreProperties(Properties trustStoreProperties) {
+        this.trustStoreProperties = trustStoreProperties;
+    }
+
+    void setKeyStoreProperties(Properties keystoreProperties) {
+        this.keystoreProperties = keystoreProperties;
+    }
+
 }

@@ -20,14 +20,21 @@ public class Storage {
 
     public static final String ATTACHMENT_STORAGE_LOCATION = "domibus.attachment.storage.location";
     private static final Log LOG = LogFactory.getLog(Storage.class);
-
-    public static File storageDirectory = null;
-
+    private File storageDirectory = null;
     @Transient
     @XmlTransient
     @Autowired
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
+
+
+    public void setStorageDirectory(File storageDirectory) {
+        this.storageDirectory = storageDirectory;
+    }
+
+    public File getStorageDirectory() {
+        return storageDirectory;
+    }
 
     @PostConstruct
     public void initFileSystemStorage() {

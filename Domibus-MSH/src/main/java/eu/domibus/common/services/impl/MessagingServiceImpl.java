@@ -1,12 +1,9 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.CompressionException;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.configuration.Storage;
-import eu.domibus.ebms3.common.model.CompressionService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
@@ -21,7 +18,8 @@ import java.util.UUID;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Created by idragusa on 10/26/16.
+ * @author Ioana Dragusanu
+ * @since 3.3
  */
 @Service
 public class MessagingServiceImpl implements MessagingService {
@@ -30,6 +28,9 @@ public class MessagingServiceImpl implements MessagingService {
 
     @Autowired
     MessagingDao messagingDao;
+
+    @Autowired
+    Storage storage;
 
     @Override
     public void storeMessage(Messaging messaging) throws CompressionException{
@@ -56,13 +57,13 @@ public class MessagingServiceImpl implements MessagingService {
             partInfo.setMime("application/unknown");
         }
         InputStream is = partInfo.getPayloadDatahandler().getInputStream();
-        if (Storage.storageDirectory == null) {
+        if (storage.getStorageDirectory() == null) {
             byte[] binaryData = getBinaryData(is, isCompressed(partInfo));
             partInfo.setBinaryData(binaryData);
             partInfo.setFileName(null);
 
         } else {
-            final File attachmentStore = new File(Storage.storageDirectory, UUID.randomUUID().toString() + ".payload");
+            final File attachmentStore = new File(storage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
             partInfo.setFileName(attachmentStore.getAbsolutePath());
             saveFileToDisk(attachmentStore, is, isCompressed(partInfo));
         }

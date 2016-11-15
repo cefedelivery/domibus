@@ -49,7 +49,7 @@ public class EbMS3Exception extends Exception {
      */
     public static final ResourceBundle DEFAULT_MESSAGES = ResourceBundle.getBundle(EbMS3Exception.RESOURCE_BUNDLE_NAME, EbMS3Exception.DEFAULT_LOCALE);
 
-    private final ErrorCode.EbMS3ErrorCode errorCode;
+    private final ErrorCode.EbMS3ErrorCode ebMS3ErrorCode;
     /**
      * "This OPTIONAL attribute provides a short description of the error that can be reported in a log, in order to facilitate readability."
      * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
@@ -67,9 +67,9 @@ public class EbMS3Exception extends Exception {
      * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
      */
     //private final String description;
-    public EbMS3Exception(final ErrorCode.EbMS3ErrorCode errorCode, final String errorDetail, final String refToMessageId, final Throwable cause) {
+    public EbMS3Exception(final ErrorCode.EbMS3ErrorCode ebMS3ErrorCode, final String errorDetail, final String refToMessageId, final Throwable cause) {
         super(cause);
-        this.errorCode = errorCode;
+        this.ebMS3ErrorCode = ebMS3ErrorCode;
         this.errorDetail = errorDetail;
         this.refToMessageId = refToMessageId;
     }
@@ -88,7 +88,7 @@ public class EbMS3Exception extends Exception {
 
     public Description getDescription(final ResourceBundle bundle) {
         final Description description = new Description();
-        description.setValue(bundle.getString(this.errorCode.getCode().name()));
+        description.setValue(bundle.getString(this.ebMS3ErrorCode.getCode().name()));
         description.setLang(bundle.getLocale().getLanguage());
 
         return description;
@@ -107,38 +107,38 @@ public class EbMS3Exception extends Exception {
     }
 
     public String getOrigin() {
-        return this.errorCode.getCode().getOrigin();
+        return this.ebMS3ErrorCode.getCode().getOrigin();
     }
 
-    public String getErrorCode() {
-        return this.errorCode.getCode().getErrorCode().name();
+    public ErrorCode.EbMS3ErrorCode getErrorCode() {
+        return ebMS3ErrorCode;
     }
 
     public ErrorCode getErrorCodeObject() {
-        return this.errorCode.getCode().getErrorCode();
+        return ebMS3ErrorCode.getCode().getErrorCode();
     }
 
     public String getShortDescription() {
-        return this.errorCode.getShortDescription();
+        return this.ebMS3ErrorCode.getShortDescription();
     }
 
     public String getSeverity() {
-        return this.errorCode.getSeverity();
+        return this.ebMS3ErrorCode.getSeverity();
     }
 
     public String getCategory() {
-        return this.errorCode.getCategory().name();
+        return this.ebMS3ErrorCode.getCategory().name();
     }
 
     public Error getFaultInfo() {
 
         final Error ebMS3Error = new Error();
 
-        ebMS3Error.setOrigin(this.errorCode.getCode().getOrigin());
-        ebMS3Error.setErrorCode(this.errorCode.getCode().getErrorCode().getErrorCodeName());
-        ebMS3Error.setSeverity(this.errorCode.getSeverity());
+        ebMS3Error.setOrigin(this.ebMS3ErrorCode.getCode().getOrigin());
+        ebMS3Error.setErrorCode(this.ebMS3ErrorCode.getCode().getErrorCode().getErrorCodeName());
+        ebMS3Error.setSeverity(this.ebMS3ErrorCode.getSeverity());
         ebMS3Error.setErrorDetail((this.errorDetail != null ? getErrorDetail() : ""));
-        ebMS3Error.setCategory(this.errorCode.getCategory().name());
+        ebMS3Error.setCategory(this.ebMS3ErrorCode.getCategory().name());
         ebMS3Error.setRefToMessageInError(this.refToMessageId);
         ebMS3Error.setShortDescription(this.getShortDescription());
         ebMS3Error.setDescription(this.getDescription());

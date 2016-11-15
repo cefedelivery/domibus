@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.domibus.ebms3.common.model;
+package eu.domibus.common.services.impl;
 
 import java.util.UUID;
 

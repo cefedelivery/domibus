@@ -33,12 +33,15 @@ import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
+import eu.domibus.common.services.impl.CompressionService;
+import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.pki.CertificateService;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -66,7 +69,10 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.*;
 import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.Iterator;
 
 /**
@@ -129,6 +135,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Autowired
     private PropertyProfileValidator propertyProfileValidator;
 
+    @Autowired
+    CertificateService certificateService;
+
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
     }
@@ -155,9 +164,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         try (StringWriter sw = new StringWriter()) {
             if (LOG.isDebugEnabled()) {
 
-                this.transformerFactory.newTransformer().transform(
-                        new DOMSource(request.getSOAPPart()),
-                        new StreamResult(sw));
+                transformerFactory.newTransformer().transform(new DOMSource(request.getSOAPPart()), new StreamResult(sw));
 
                 LOG.debug(sw.toString());
                 LOG.debug("received attachments:");
@@ -166,18 +173,18 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     LOG.debug(i.next());
                 }
             }
-            messaging = this.getMessaging(request);
+            messaging = getMessaging(request);
+            String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
 
             checkCharset(messaging);
             pingMessage = checkPingMessage(messaging.getUserMessage());
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
-
             if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
                 this.persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
                 try {
                     backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
                 } catch(SubmissionValidationException e) {
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), null, e);
+                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
                 }
             }
             responseMessage = this.generateReceipt(request, legConfiguration, messageExists);
@@ -197,7 +204,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         return responseMessage;
     }
-
 
     /**
      * Required for AS4_TA_12
@@ -336,8 +342,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
         try {
-            this.payloadProfileValidator.validate(messaging, pmodeKey);
-            this.propertyProfileValidator.validate(messaging, pmodeKey);
+            payloadProfileValidator.validate(messaging, pmodeKey);
+            propertyProfileValidator.validate(messaging, pmodeKey);
         } catch (EbMS3Exception e) {
             e.setMshRole(MSHRole.RECEIVING);
             throw e;
@@ -427,8 +433,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     private Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
         final Node messagingXml = (Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
-        final Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
+        final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
         @SuppressWarnings("unchecked") final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);
         return root.getValue();
     }
+
 }

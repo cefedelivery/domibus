@@ -20,6 +20,8 @@
 package eu.domibus.common.model.configuration;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -193,33 +195,34 @@ public class Party extends AbstractBaseEntity {
         this.endpoint = value;
     }
 
-
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Party)) return false;
-        if (!super.equals(o)) return false;
 
-        final Party party = (Party) o;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        if (endpoint != null ? !endpoint.equals(party.endpoint) : party.endpoint != null) return false;
-        if (!identifiers.equals(party.identifiers)) return false;
-        if (!name.equals(party.name)) return false;
-        if (password != null ? !password.equals(party.password) : party.password != null) return false;
-        if (userName != null ? !userName.equals(party.userName) : party.userName != null) return false;
+        Party party = (Party) o;
 
-        return true;
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(identifiers, party.identifiers)
+                .append(name, party.name)
+                .append(userName, party.userName)
+                .append(password, party.password)
+                .append(endpoint, party.endpoint)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + identifiers.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + (userName != null ? userName.hashCode() : 0);
-        result = 31 * result + (password != null ? password.hashCode() : 0);
-        result = 31 * result + (endpoint != null ? endpoint.hashCode() : 0);
-        return result;
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(identifiers)
+                .append(name)
+                .append(userName)
+                .append(password)
+                .append(endpoint)
+                .toHashCode();
     }
 
     public void init(final Configuration configuration) {
