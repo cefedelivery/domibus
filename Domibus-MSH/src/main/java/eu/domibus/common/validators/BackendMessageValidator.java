@@ -83,17 +83,20 @@ public class BackendMessageValidator {
      */
     public void validateRefToMessageId(final String refToMessageId) throws EbMS3Exception {
 
-        if (refToMessageId.length() > 255) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "RefToMessageId value is too long (over 255 characters)", refToMessageId, null);
-        }
+        //refToMessageId is an optional element and can be null
+        if (refToMessageId != null) {
+            if (refToMessageId.length() > 255) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "RefToMessageId value is too long (over 255 characters)", refToMessageId, null);
+            }
 
-        //Validating for presence of non printable control characters.
-        String messageIdPattern = domibusProperties.getProperty("domibus.sendMessage.messageIdPattern");
-        LOG.debug("MessageIdPattern Read From File :" + messageIdPattern);
-        Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
-        Matcher m = patternNoControlChar.matcher(refToMessageId);
-        if (!m.matches()) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, "element eb:Messaging/eb:UserMessage/eb:MessageInfo/eb:RefToMessageId does not conform to RFC2822 [CORE 5.2.2.1]", null, null);
+            //Validating for presence of non printable control characters.
+            String messageIdPattern = domibusProperties.getProperty("domibus.sendMessage.messageIdPattern");
+            LOG.debug("MessageIdPattern Read From File :" + messageIdPattern);
+            Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
+            Matcher m = patternNoControlChar.matcher(refToMessageId);
+            if (!m.matches()) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, "element eb:Messaging/eb:UserMessage/eb:MessageInfo/eb:RefToMessageId does not conform to RFC2822 [CORE 5.2.2.1]", null, null);
+            }
         }
     }
 }

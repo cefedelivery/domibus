@@ -14,6 +14,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
+import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -110,6 +111,9 @@ public class DatabaseMessageHandlerTest {
 
     @Injectable
     private PropertyProfileValidator propertyProfileValidator;
+
+    @Injectable
+    BackendMessageValidator backendMessageValidator;
 
     @Injectable
     AuthUtils authUtils;
