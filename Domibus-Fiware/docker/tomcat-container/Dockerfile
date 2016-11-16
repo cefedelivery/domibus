@@ -29,22 +29,35 @@ RUN wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
     && unzip -d $DOMIBUS_DIST $MYSQL_CONNECTOR.zip
 
 RUN cp $DOMIBUS_DIST/$MYSQL_CONNECTOR/$MYSQL_CONNECTOR-bin.jar $CATALINA_HOME/lib
-RUN cp -R $DOMIBUS_DIST/conf/domibus/keystores $CATALINA_HOME/conf/domibus/
 
 RUN chmod 777 $CATALINA_HOME/bin/*.sh
 RUN sed -i 's/\r$//' $CATALINA_HOME/bin/setenv.sh
+RUN sed -i 's/#export CATALINA_HOME=<YOUR_INSTALLATION_PATH>/sleep 120;/g' $CATALINA_HOME/bin/setenv.sh
 RUN sed -i 's/#JAVA_OPTS/JAVA_OPTS/g' $CATALINA_HOME/bin/setenv.sh
-#RUN sed -i 's/localhost:3306/mysql:3306/g' $CATALINA_HOME/conf/domibus/domibus-datasources.xml
+RUN sed -i 's/localhost:3306/mysql:3306/g' $CATALINA_HOME/conf/domibus/domibus-datasources.xml
 
 ######## Set Test Platform certificates ########
 RUN sed -i 's/gateway_truststore.jks/ceftestparty8gwtruststore.jks/g' $CATALINA_HOME/conf/domibus/domibus-security.xml
 RUN sed -i 's/gateway_keystore.jks/ceftestparty8gwkeystore.jks/g' $CATALINA_HOME/conf/domibus/domibus-security.xml
 RUN sed -i 's/blue_gw/ceftestparty8gw/g' $CATALINA_HOME/conf/domibus/domibus-security.xml
 COPY ./domibus-ceftestparty8gw-pmode.xml $DOMIBUS_DIST/conf/pmodes/
-COPY ./keystores $CATALINA_HOME/conf/domibus/
+RUN mkdir $CATALINA_HOME/conf/domibus/keystores
 
+RUN wget -O ceftestparty8gwtruststore.jks 'https://github.com/cefedelivery/domibus/blob/master/Domibus-MSH/src/test/resources/keystores/ceftestparty8gwtruststore.jks?raw=true'
+RUN cp ceftestparty8gwtruststore.jks $CATALINA_HOME/conf/domibus/keystores/
+
+RUN wget -O ceftestparty8gwkeystore.jks 'https://github.com/cefedelivery/domibus/blob/master/Domibus-MSH/src/test/resources/keystores/ceftestparty8gwkeystore.jks?raw=true'
+RUN cp ceftestparty8gwkeystore.jks $CATALINA_HOME/conf/domibus/keystores/
+
+RUN echo '#!/bin/bash' >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo "cd $CATALINA_HOME" >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo './bin/catalina.sh start' >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo "while ! curl --output /dev/null --silent --head --fail http://localhost:8080/domibus/home; do sleep 1 && echo -n .; done;" >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo "curl -X POST -F pmode=@\"$DOMIBUS_DIST/conf/pmodes/domibus-ceftestparty8gw-pmode.xml\" http://localhost:8080/domibus/home/uploadPmodeFile" >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo "while true ; do sleep 1 ; done;" >> $DOMIBUS_DIST/entrypoint.sh
+RUN chmod 777 $DOMIBUS_DIST/entrypoint.sh
 EXPOSE 8080
 
-WORKDIR $CATALINA_HOME
-ENTRYPOINT ["./bin/catalina.sh", "run"]
+WORKDIR $DOMIBUS_DIST
+ENTRYPOINT ["./entrypoint.sh"]
 
