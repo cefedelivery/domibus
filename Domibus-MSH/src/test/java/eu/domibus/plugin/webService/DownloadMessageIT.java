@@ -1,4 +1,4 @@
-package eu.domibus.plugin.ws;
+package eu.domibus.plugin.webService;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.AbstractIT;
@@ -95,10 +95,10 @@ public class DownloadMessageIT extends AbstractIT {
             throw dmf;
         }
         Assert.assertFalse(downloadMessageResponse.value.getContent().isEmpty());
-        JAXBElement<PayloadType> payloadElement = (JAXBElement<PayloadType>) downloadMessageResponse.value.getContent().iterator().next();
-        String payload = new String(payloadElement.getValue().getValue());
+        JAXBElement<AnyPayloadType> payloadElement = (JAXBElement<AnyPayloadType>) downloadMessageResponse.value.getContent().iterator().next();
+        String payload = new String(payloadElement.getValue().getAny().getTagName() + " " + payloadElement.getValue().getAny().getTextContent());
         LOG.info("Payload returned [" + payload + "]");
-        Assert.assertEquals(payload, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>");
+        Assert.assertEquals("hello world", payload);
     }
 
     /**
@@ -129,10 +129,10 @@ public class DownloadMessageIT extends AbstractIT {
             throw dmf;
         }
         Assert.assertFalse(downloadMessageResponse.value.getContent().isEmpty());
-        JAXBElement<PayloadType> payloadElement = (JAXBElement<PayloadType>) downloadMessageResponse.value.getContent().iterator().next();
-        String payload = new String(payloadElement.getValue().getValue());
+        JAXBElement<AnyPayloadType> payloadElement = (JAXBElement<AnyPayloadType>) downloadMessageResponse.value.getContent().iterator().next();
+        String payload = new String(payloadElement.getValue().getAny().getTagName() + " " + payloadElement.getValue().getAny().getTextContent());
         LOG.info("Payload returned [" + payload + "]");
-        Assert.assertNotEquals(payload, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        Assert.assertNotEquals(" ", payload);
     }
 
     /**
@@ -167,7 +167,7 @@ public class DownloadMessageIT extends AbstractIT {
         Assert.assertTrue(payloadElement.getName().getLocalPart().equals("bodyload"));
         String payload = new String(payloadElement.getValue().getValue());
         LOG.info("Payload returned [" + payload + "]");
-        Assert.assertEquals(payload, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>");
+        Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>", payload);
     }
 
     private void pushMessage(ActiveMQConnection connection, String messageId) throws Exception {

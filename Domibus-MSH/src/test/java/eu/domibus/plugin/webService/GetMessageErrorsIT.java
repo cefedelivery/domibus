@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.domibus.plugin.ws;
+package eu.domibus.plugin.webService;
 
 import eu.domibus.AbstractIT;
 import eu.domibus.plugin.webService.generated.BackendInterface;

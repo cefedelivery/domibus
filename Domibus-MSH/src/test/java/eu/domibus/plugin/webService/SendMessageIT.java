@@ -1,4 +1,4 @@
-package eu.domibus.plugin.ws;
+package eu.domibus.plugin.webService;
 
 import eu.domibus.AbstractSendMessageIT;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.AgreementRef;

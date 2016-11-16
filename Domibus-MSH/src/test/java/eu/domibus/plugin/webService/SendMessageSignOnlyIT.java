@@ -1,23 +1,4 @@
-package eu.domibus.plugin.ws;
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
+package eu.domibus.plugin.webService;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.AbstractSendMessageIT;
@@ -34,7 +15,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +28,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 /**
  * Created by draguio on 17/02/2016.
  */
-public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
+public class SendMessageSignOnlyIT extends AbstractSendMessageIT {
 
     private static boolean initialized;
     @Rule
@@ -59,12 +43,17 @@ public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
 
     @Before
     public void before() throws IOException {
+        // Initialize the mock objects
+        MockitoAnnotations.initMocks(this);
+        Mockito.when(nonRepudiationChecker.compareUnorderedReferenceNodeLists(Mockito.any(NodeList.class), Mockito.any(NodeList.class))).thenReturn(true);
+
         if (!initialized) {
             // The dataset is executed only once for each class
-            insertDataset("sendMessageEncryptAllDataset.sql");
+            insertDataset("sendMessageSignOnlyDataset.sql");
             initialized = true;
         }
     }
+
 
     /**
      * Test for the backend sendMessage service with payload profile enabled
@@ -86,7 +75,7 @@ public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
         Assert.assertNotNull(response);
 
         verify(postRequestedFor(urlMatching("/domibus/services/msh"))
-                .withRequestBody(containing("EncryptionMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p\""))
+                .withRequestBody(containing("DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\""))
                 .withHeader("Content-Type", notMatching("application/soap+xml")));
     }
 }
