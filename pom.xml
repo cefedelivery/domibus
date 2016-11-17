@@ -27,6 +27,7 @@
         <module>Domibus-ws-stubs</module>
         <module>Domibus-default-ws-plugin</module>
         <module>Domibus-default-jms-plugin</module>
+        <module>Domibus-MSH-fiware</module>
         <!--<module>Domibus-ActiveMQ-ThroughputLimiter</module>-->
     </modules>
     <properties>
