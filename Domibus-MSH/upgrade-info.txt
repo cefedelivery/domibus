@@ -1,3 +1,9 @@
+Domibus 3.2.1:
+               - [WebLogic only]
+                  o execute the WLST API script 3.2-to-3.2.1-WeblogicSingleServer.properties for single server deployment or 3.2-to-3.2.1-WeblogicCluster.properties for cluster deployment
+                  o enable the flag "Use Authorization Providers to Protect JMX Access" in the WebLogic console; for more info please check the Administration Guide
+               - Replace the war file
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2 (from 3.1.1):
                 Run the appropriate DB migration script.
                 Update the configuration file following these steps:
