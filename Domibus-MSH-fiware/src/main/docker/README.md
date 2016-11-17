@@ -16,10 +16,8 @@ Docker Compose allows you to link a Domibus container (running on Tomcat 8) to a
 
 Follow these steps:
 
-1. Create a directory on your system on which to work (for example, `~/fiware`).
-2. Download [docker-compose.yml](https://github.com/cefedelivery/domibus/blob/master/Domibus-MSH-docker/src/main/fiware/tomcat-mysql-compose/docker-compose.yml) inside your directory.
-	
-3. Using the command-line and within the directory you created type: `sudo docker-compose up`.
+    `cd tomcat-mysql-compose`
+    `sudo docker-compose up`
 
 After a few seconds you should have your Domibus running and listening on port `8080`.
 
@@ -30,12 +28,14 @@ Check that everything works with
 You should see the Domibus login page:
 
 	user: admin
-
 	password: 123456
 
-What you have done with this method is download images for [Domibus on Tomcat](https://hub.docker.com/r/idragusa/domibus-tomcat/) and [MySQL](https://hub.docker.com/r/idragusa/domibus-mysql/) from the public repository of images called [Docker Hub](https://hub.docker.com/). Then you have created two containers based on both images.
+What you have done with this method is download images from [Domibus on Tomcat](https://hub.docker.com/r/fiware/domibus-tomcat/)
+and [MySQL](https://hub.docker.com/r/fiware/domibus-mysql/) from the public repository of images called [Docker Hub](https://hub.docker.com/).
+Then you have created two containers based on both images.
 
-If you want to stop the scenario you have to press Control+C on the terminal where docker-compose is running. Note that you will lose any data that was being used in Domibus using this method.
+If you want to stop the scenario you have to press Control+C on the terminal where docker-compose is running.
+Note that you will lose any data that was being used in Domibus using this method.
 
 ----
 ## 2. Build a docker image
@@ -44,18 +44,23 @@ Building an image gives more control on what is happening within the Domibus con
 
 Steps:
 
-1. Download [Domibus source code](https://github.com/cefedelivery/domibus/) from Github (`git clone https://github.com/cefedelivery/domibus.git`)
-2. `cd Domibus-MSH-docker/src/main/fiware/`
-3. Modify the two dockerfiles to your liking
-4. Build new images:
+1. Modify the two dockerfiles located in tomcat/ and mysql/ folders to your liking
+2. Build new images:
 
-	`cd domibus-tomcat`
-
+	`cd tomcat`
 	`docker build -t domibus-tomcat .`
 
-The parameter `-t domibus-tomcat` in the `docker build` command gives the image a name. This name could be anything, or even include an organization like `-t org/domibus-tomcat`. This name is later used to run the container based on the image.
-5. You may also modify the provided `docker-compose.yml` file if you need so.
-4. Run Domibus using docker-compose `sudo docker-compose up`. 
+	`cd ../mysql`
+    `docker build -t domibus-mysql .`
+
+The parameter `-t domibus-tomcat` in the `docker build` command gives the image a name.
+This name could be anything, or even include an organization like `-t org/domibus-tomcat`.
+This name is later used to run the container based on the image.
+5. You also have to modify the provided `docker-compose.yml` file to use the newly created images instead
+of the public ones from docker hub.
+4. Run Domibus using docker-compose
+
+    `sudo docker-compose up`.
 
 Check that everything works with
 
@@ -64,7 +69,6 @@ Check that everything works with
 You should see the Domibus login page:
 
 	user: admin
-
 	password: 123456
 
 If you want to know more about images and the building process you can find it in [Docker's documentation](https://docs.docker.com/userguide/dockerimages/).
