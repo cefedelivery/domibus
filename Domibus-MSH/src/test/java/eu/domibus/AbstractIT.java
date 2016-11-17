@@ -14,10 +14,10 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,8 +39,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 import java.util.Collections;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -79,7 +79,7 @@ public abstract class AbstractIT {
 
     private static boolean initialized;
 
-    private static final Log LOG = LogFactory.getLog(AbstractIT.class);
+    protected static final Log LOG = LogFactory.getLog(AbstractIT.class);
 
     @Autowired
     protected DataSource dataSource;

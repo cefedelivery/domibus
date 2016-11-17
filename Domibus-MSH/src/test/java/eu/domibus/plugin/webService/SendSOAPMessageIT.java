@@ -1,4 +1,4 @@
-package eu.domibus.plugin.ws;
+package eu.domibus.plugin.webService;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.AbstractIT;

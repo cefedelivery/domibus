@@ -37,7 +37,7 @@
             <xsd:sequence>
                 <xsd:element minOccurs="0" name="bodyload" type="tns:PayloadType"/>
                 <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" type="tns:PayloadType"/>
-                <xsd:any minOccurs="0"/> <!-- Introduced to support validation and MTOM/XOP -->
+                <xsd:element maxOccurs="unbounded" minOccurs="0" ref="tns:payload"/>
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
@@ -92,6 +92,14 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
+
+    <xsd:element name="payload" type="tns:AnyPayloadType"/>
+
+    <xsd:complexType name="AnyPayloadType">
+        <xsd:sequence maxOccurs="1">
+            <xsd:any processContents="skip"/>
+        </xsd:sequence>
+    </xsd:complexType>
 
     <xsd:complexType name="PayloadType">
         <xsd:simpleContent>
