@@ -40,7 +40,7 @@ RUN sed -i 's/localhost:3306/mysql:3306/g' $CATALINA_HOME/conf/domibus/domibus-d
 RUN sed -i 's/gateway_truststore.jks/ceftestparty8gwtruststore.jks/g' $CATALINA_HOME/conf/domibus/domibus-security.xml
 RUN sed -i 's/gateway_keystore.jks/ceftestparty8gwkeystore.jks/g' $CATALINA_HOME/conf/domibus/domibus-security.xml
 RUN sed -i 's/blue_gw/ceftestparty8gw/g' $CATALINA_HOME/conf/domibus/domibus-security.xml
-COPY ./domibus-ceftestparty8gw-pmode.xml $DOMIBUS_DIST/conf/pmodes/
+COPY domibus-ceftestparty8gw-pmode.xml $DOMIBUS_DIST/conf/pmodes/
 RUN mkdir $CATALINA_HOME/conf/domibus/keystores
 
 RUN wget -O ceftestparty8gwtruststore.jks 'https://github.com/cefedelivery/domibus/blob/master/Domibus-MSH/src/test/resources/keystores/ceftestparty8gwtruststore.jks?raw=true'
