@@ -5,6 +5,10 @@ Domibus 3.3-RC1
 - During submit operation, Domibus verifies that the message is being sent by the same party as the one configured as the sending access point.
 - During MSH dispatch, Domibus verifies the validity of sender's certificate.
 - During MSH receive, Domibus verifies the trust of the sender.
+Domibus 3.2.1
+- JMX access to the JMS queues is secured
+- Force the usage of the apache commons IO library from the application
+- Possibility to load the log4j configuration from ${domibus.conf.location} for WebLogic/WildFly/Tomcat
 Domibus 3.2-FR
 - Added authentication/authorization example to the WS default plugin. Disabled by default, to assure backwards compatibility with older versions.
 - Added XSD validation of the PMODE when it is uploaded by the user.
