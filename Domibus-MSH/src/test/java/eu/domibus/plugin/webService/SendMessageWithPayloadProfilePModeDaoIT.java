@@ -1,4 +1,4 @@
-package eu.domibus.plugin.ws;
+package eu.domibus.plugin.webService;
 
 import eu.domibus.plugin.webService.generated.SendMessageFault;
 import org.junit.Before;
