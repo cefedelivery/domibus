@@ -27,6 +27,9 @@ public class Storage {
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
 
+    public Storage() {
+        storageDirectory = null;
+    }
     public Storage(File storageDirectory) {
         this.storageDirectory = storageDirectory;
     }
