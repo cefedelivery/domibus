@@ -59,6 +59,9 @@
         <!-- regular expression used for identifying the internal queues in the Admin Page -->
         <prop key="domibus.jms.internalQueue.expression">.*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*</prop>
 
+        <!--Accepted Format for MessageId-->
+        <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
+
         <!-- Enable the proxy settings only if you use a proxy -->
         <!--
         <prop key="domibus.proxy.enabled">true</prop>
