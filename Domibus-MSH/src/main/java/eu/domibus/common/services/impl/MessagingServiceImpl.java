@@ -32,6 +32,10 @@ public class MessagingServiceImpl implements MessagingService {
     @Autowired
     Storage storage;
 
+    public void setStorage(Storage storage) {
+        this.storage = storage;
+    }
+
     @Override
     public void storeMessage(Messaging messaging) throws CompressionException{
         if (messaging == null || messaging.getUserMessage() == null)
@@ -57,7 +61,7 @@ public class MessagingServiceImpl implements MessagingService {
             partInfo.setMime("application/unknown");
         }
         InputStream is = partInfo.getPayloadDatahandler().getInputStream();
-        if (storage.getStorageDirectory() == null) {
+        if (storage.getStorageDirectory() == null || storage.getStorageDirectory().getName() == null) {
             byte[] binaryData = getBinaryData(is, isCompressed(partInfo));
             partInfo.setBinaryData(binaryData);
             partInfo.setFileName(null);

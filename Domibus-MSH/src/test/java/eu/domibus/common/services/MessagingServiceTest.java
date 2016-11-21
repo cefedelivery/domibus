@@ -47,7 +47,7 @@ public class MessagingServiceTest {
     @Injectable
     MessagingDao messagingDao;
 
-    @Autowired
+    @Injectable
     Storage storage;
 
     @Test
@@ -83,7 +83,7 @@ public class MessagingServiceTest {
 
     @Test
     public void testStoreValidMessageToStorageDirectory() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
-        storage.setStorageDirectory(new File("target/test-classes/eu/domibus/services/"));
+        messagingService.setStorage(new Storage(new File("target/test-classes/eu/domibus/services/")));
         final String validHeaderFilePath = "target/test-classes/eu/domibus/services/validMessaging.xml";
         final String validContentFilePath = "target/test-classes/eu/domibus/services/validContent.payload";
         final Messaging validMessaging = createMessaging(new FileInputStream(new File(validHeaderFilePath)));
@@ -105,8 +105,8 @@ public class MessagingServiceTest {
     }
 
     @Test
-    public void testStoreValidMessageCompressed() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
-        storage.setStorageDirectory(new File("target/test-classes/eu/domibus/services/"));
+    public void testStoreValidMessageCompressedWithStorageDirectory() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
+        messagingService.setStorage(new Storage(new File("target/test-classes/eu/domibus/services/")));
 
         final String validHeaderFilePath = "target/test-classes/eu/domibus/services/validMessaging.xml";
         final String validContentFilePath = "target/test-classes/eu/domibus/services/validContent.payload";
@@ -133,7 +133,7 @@ public class MessagingServiceTest {
     }
 
     @Test
-    public void testStoreValidMessageCompressedWithStorageDirectory() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
+    public void testStoreValidMessageCompressed() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
         final String validHeaderFilePath = "target/test-classes/eu/domibus/services/validMessaging.xml";
         final String validContentFilePath = "target/test-classes/eu/domibus/services/validContent.payload";
         final Messaging validMessaging = createMessaging(new FileInputStream(new File(validHeaderFilePath)));
