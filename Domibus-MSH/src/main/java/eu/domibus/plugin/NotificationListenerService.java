@@ -24,6 +24,7 @@ import javax.jms.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Properties;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -32,18 +33,16 @@ import java.util.Enumeration;
 public class NotificationListenerService implements MessageListener, JmsListenerConfigurer, MessageLister, eu.domibus.plugin.NotificationListener {
 
     private static final Log LOG = LogFactory.getLog(NotificationListenerService.class);
-
+    @Autowired
+    AuthUtils authUtils;
     @Autowired
     @Qualifier(value = "jmsTemplateNotify")
     private JmsOperations jmsOperations;
-
     @Autowired
     @Qualifier("internalJmsListenerContainerFactory")
     private JmsListenerContainerFactory jmsListenerContainerFactory;
-
     @Autowired
-    AuthUtils authUtils;
-
+    private Properties domibusProperties;
     private Queue backendNotificationQueue;
     private BackendConnector.Mode mode;
     private BackendConnector backendConnector;
@@ -119,23 +118,40 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
     private Collection<String> browseQueue(final NotificationType notificationType, final String finalRecipient) {
         final Collection<String> result = new ArrayList<>();
+
+        final String strMaxPendingMessagesRetrieveCount = domibusProperties.getProperty("domibus.listPendingMessages.maxCount", "0");
+        final int intMaxPendingMessagesRetrieveCount = Integer.parseInt(strMaxPendingMessagesRetrieveCount);
+        LOG.debug("maxPendingMessagesRetrieveCount:" + intMaxPendingMessagesRetrieveCount);
+
         jmsOperations.browse(backendNotificationQueue, new BrowserCallback<Void>() {
             @Override
             public Void doInJms(final Session session, final QueueBrowser browser) throws JMSException {
-                final Enumeration browserEnumeration = browser.getEnumeration();
-                while (browserEnumeration.hasMoreElements()) {
-                    final Message message = (Message) browserEnumeration.nextElement();
-                    if (notificationType.name().equals(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE))) {
-                        if (finalRecipient == null ||
-                                (finalRecipient != null && finalRecipient.equals(message.getStringProperty(MessageConstants.FINAL_RECIPIENT)))) {
-                            result.add(message.getStringProperty(MessageConstants.MESSAGE_ID));
-                        }
-                    }
-                }
-                return null;
+                return getPendingMessages(notificationType, browser, finalRecipient, result, intMaxPendingMessagesRetrieveCount);
             }
         });
         return result;
+    }
+
+    Void getPendingMessages(NotificationType notificationType, QueueBrowser browser, String finalRecipient, Collection<String> result, int intMaxPendingMessagesRetrieveCount) throws JMSException {
+        final Enumeration browserEnumeration = browser.getEnumeration();
+        int countOfMessagesIncluded = 0;
+
+        System.out.println("Here At point 1");
+
+        while (browserEnumeration.hasMoreElements()) {
+            final Message message = (Message) browserEnumeration.nextElement();
+            if (notificationType.name().equals(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE))) {
+                if (finalRecipient == null || (finalRecipient != null && finalRecipient.equals(message.getStringProperty(MessageConstants.FINAL_RECIPIENT)))) {
+                    result.add(message.getStringProperty(MessageConstants.MESSAGE_ID));
+                    countOfMessagesIncluded++;
+                    System.out.println("At point 2: " + message.getStringProperty(MessageConstants.MESSAGE_ID));
+                    if ((intMaxPendingMessagesRetrieveCount != 0) && (countOfMessagesIncluded >= intMaxPendingMessagesRetrieveCount)) {
+                        break;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     @Override

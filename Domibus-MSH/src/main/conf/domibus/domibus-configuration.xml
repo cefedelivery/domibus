@@ -64,6 +64,9 @@
         <!--Accepted Format for MessageId-->
         <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
 
+        <!--Maximum number of pending messages to be listed -->
+        <prop key="domibus.listPendingMessages.maxCount">500</prop>
+
 
         <!-- Use the below property to customize the task executor threads count -->
         <!--<prop key="domibus.taskExecutor.threadCount">50</prop>-->
