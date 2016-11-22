@@ -99,7 +99,6 @@ public class SendSOAPMessageIT extends AbstractIT {
     }*/
 
     @Test
-    @Ignore
     public void testSendValidMessage() throws Exception {
 
         String body = getAS4Response("blue2redMessageResponse.xml");
@@ -123,7 +122,6 @@ public class SendSOAPMessageIT extends AbstractIT {
     }
 
     @Test
-    @Ignore
     public void testSendInvalidMessage() throws Exception {
 
         try {
