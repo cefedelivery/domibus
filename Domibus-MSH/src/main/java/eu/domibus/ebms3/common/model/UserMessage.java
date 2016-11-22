@@ -22,6 +22,7 @@ package eu.domibus.ebms3.common.model;
 import eu.domibus.common.model.configuration.Mpc;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -257,14 +258,14 @@ public class UserMessage extends AbstractBaseEntity {
 
     @Override
     public String toString() {
-        return "UserMessage{" +
-                "messageInfo=" + messageInfo +
-                ", partyInfo=" + partyInfo +
-                ", collaborationInfo=" + collaborationInfo +
-                ", messageProperties=" + messageProperties +
-                ", payloadInfo=" + payloadInfo +
-                ", mpc='" + mpc + '\'' +
-                '}';
+        return new ToStringBuilder(this)
+                .append("messageInfo", messageInfo)
+                .append("partyInfo", partyInfo)
+                .append("collaborationInfo", collaborationInfo)
+                .append("messageProperties", messageProperties)
+                .append("payloadInfo", payloadInfo)
+                .append("mpc", mpc)
+                .toString();
     }
 
 }

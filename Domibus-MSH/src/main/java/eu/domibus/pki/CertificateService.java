@@ -1,10 +1,10 @@
 package eu.domibus.pki;
 
-import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
 /**
- * Created by Cosmin Baciu on 12-Jul-16.
+ * @Author Cosmin Baciu
+ * @Since 3.2
  */
 public interface CertificateService {
 
@@ -13,4 +13,7 @@ public interface CertificateService {
     boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException;
 
     boolean isCertificateChainValid(String alias) throws DomibusCertificateException;
+
+    boolean isCertificateValid(String alias) throws DomibusCertificateException;
+
 }

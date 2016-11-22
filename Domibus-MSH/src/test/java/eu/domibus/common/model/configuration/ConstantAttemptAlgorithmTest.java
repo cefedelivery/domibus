@@ -4,7 +4,7 @@ import mockit.Mock;
 import mockit.MockUp;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 
 @RunWith(JMockit.class)
@@ -22,6 +23,11 @@ public class ConstantAttemptAlgorithmTest {
     private static final long SYSTEM_DATE_IN_MILLIS_FIRST_OF_JANUARY_2016 = 1451602800000L;
     private static final int MINUTES_FROM_01_01_2016_TO_31_12_3999 = 1043483039;
 
+
+    @Before
+    public void setTimeZone() {
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT+1"));
+    }
     @Test
     public void compute_NegativeMaxAttempts_ReturnNull() {
         Assert.assertNull(retryStrategy.getAlgorithm().compute(new Date(), -1, 20));
@@ -38,7 +44,6 @@ public class ConstantAttemptAlgorithmTest {
     }
 
     @Test
-    @Ignore
     public void compute_TransitionToNextYear_ValidResult() {
         /*Mock System.currentTimeMillis() in order to have a fixed current date.
           The mocked date is: 2015/12/31 23:59:59
@@ -67,7 +72,6 @@ public class ConstantAttemptAlgorithmTest {
     }
 
     @Test
-    @Ignore
     public void compute_TimeInMinutesTill_31_12_3999_ExpectedResult()  {
         new SystemMockFirstOfJanuary2016();
 

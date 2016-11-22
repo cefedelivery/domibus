@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  mysql:
+    container_name: mysql
+    image: fiware/domibus-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=domibus
+      - MYSQL_USER=edelivery
+      - MYSQL_PASSWORD=edelivery
+    expose:
+      - "3306"
+  domibus-3.2:
+    container_name: domibus-3.2
+    image: fiware/domibus-tomcat
+    command: dockerize -wait tcp://mysql:3306 -timeout 20s
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql

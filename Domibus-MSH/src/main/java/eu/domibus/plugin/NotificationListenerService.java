@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.plugin;
 
 import eu.domibus.common.AuthRole;
@@ -104,7 +85,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
         }
     }
 
-    public final Collection<String> listPendingMessages() {
+    public Collection<String> listPendingMessages() {
         if(!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
 
@@ -115,11 +96,11 @@ public class NotificationListenerService implements MessageListener, JmsListener
         return getQueueElements(NotificationType.MESSAGE_RECEIVED, originalUser);
     }
 
-    public final Collection<String> listSendFailureMessages() {
+    public Collection<String> listSendFailureMessages() {
         return getQueueElements(NotificationType.MESSAGE_SEND_FAILURE);
     }
 
-    public final Collection<String> listReceiveFailureMessages() {
+    public Collection<String> listReceiveFailureMessages() {
         return getQueueElements(NotificationType.MESSAGE_RECEIVED_FAILURE);
     }
 

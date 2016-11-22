@@ -28,6 +28,7 @@ import eu.domibus.common.ErrorCode;
  * @author Christian Koch, Stefan Mueller
  */
 public class MessagingProcessingException extends Exception {
+
     private ErrorCode ebms3ErrorCode = ErrorCode.EBMS_0004; //init to "other"
 
     public MessagingProcessingException(String message) {
@@ -50,15 +51,14 @@ public class MessagingProcessingException extends Exception {
     }
 
     /**
-     * @return a corrsponding ebMS3 error code
+     * @return a corresponding ebMS3 error code
      */
     public ErrorCode getEbms3ErrorCode() {
         return ebms3ErrorCode;
     }
 
     /**
-     *
-     * @param ebms3ErrorCode a corrsponding ebMS3 error code
+     * @param ebms3ErrorCode a corresponding ebMS3 error code
      */
     public void setEbms3ErrorCode(ErrorCode ebms3ErrorCode) {
         this.ebms3ErrorCode = ebms3ErrorCode;

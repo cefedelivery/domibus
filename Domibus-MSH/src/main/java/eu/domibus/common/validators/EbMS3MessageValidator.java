@@ -20,8 +20,8 @@
 package eu.domibus.common.validators;
 
 import eu.domibus.common.ErrorCode;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -104,4 +104,6 @@ public class EbMS3MessageValidator {
 
 
     }
+
+
 }
