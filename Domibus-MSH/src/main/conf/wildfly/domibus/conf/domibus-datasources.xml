@@ -48,6 +48,9 @@
     <bean id="domibusJDBC-XADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jdbc/cipaeDeliveryDs"/>
     </bean>
+    <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
+    </bean>
 
     <bean id="entityManagerFactory" primary="true"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">

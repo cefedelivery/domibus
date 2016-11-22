@@ -95,6 +95,12 @@
             <value>select 1</value>
         </property>
     </bean>
+    <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/domibus"/>
+        <property name="username" value="edelivery"/>
+        <property name="password" value="edelivery"/>
+    </bean>
 
     <bean id="entityManagerFactory" primary="true"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
