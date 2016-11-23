@@ -97,6 +97,18 @@ public class NotificationListenerServiceTest {
 
     protected void loadTestInputMessages(Vector<Message> testInputVector) throws JMSException, NullPointerException {
 
+        Message message11 = new ActiveMQMessage();
+        message11.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_SEND_SUCCESS.name());
+        message11.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
+        message11.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a346710@domibus.eu");
+        testInputVector.add(message11);
+
+        Message message12 = new ActiveMQMessage();
+        message12.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
+        message12.setStringProperty((MessageConstants.FINAL_RECIPIENT), "ANOTHER_FINAL_RECIPIENT");
+        message12.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a346710@domibus.eu");
+        testInputVector.add(message12);
+
         Message message1 = new ActiveMQMessage();
         message1.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
         message1.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
@@ -156,7 +168,6 @@ public class NotificationListenerServiceTest {
         message10.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
         message10.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a346710@domibus.eu");
         testInputVector.add(message10);
-
     }
 
 
