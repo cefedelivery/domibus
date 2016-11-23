@@ -98,7 +98,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     private PropertyProfileValidator propertyProfileValidator;
 
     @Autowired
-    private BackendMessageValidator backendMessageValidatorObj;
+    private BackendMessageValidator backendMessageValidator;
 
     @Autowired
     AuthUtils authUtils;
@@ -217,13 +217,13 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 messageId = messageIdGenerator.generateMessageId();
                 messageInfo.setMessageId(messageId);
             } else {
-                backendMessageValidatorObj.validateMessageId(messageId);
+                backendMessageValidator.validateMessageId(messageId);
                 userMessage.getMessageInfo().setMessageId(messageId);
             }
 
             String refToMessageId = messageInfo.getRefToMessageId();
             if (refToMessageId != null) {
-                backendMessageValidatorObj.validateRefToMessageId(refToMessageId);
+                backendMessageValidator.validateRefToMessageId(refToMessageId);
             }
             // handle if the messageId is unique. This should only fail if the ID is set from the outside
             if (!MessageStatus.NOT_FOUND.equals(userMessageLogDao.getMessageStatus(messageId))) {

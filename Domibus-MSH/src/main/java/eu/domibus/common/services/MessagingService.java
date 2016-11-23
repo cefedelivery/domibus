@@ -2,6 +2,7 @@ package eu.domibus.common.services;
 
 
 import eu.domibus.common.exception.CompressionException;
+import eu.domibus.configuration.Storage;
 import eu.domibus.ebms3.common.model.Messaging;
 
 
@@ -10,6 +11,7 @@ import eu.domibus.ebms3.common.model.Messaging;
  * @since 3.3
  */
 public interface MessagingService {
-
     void storeMessage(Messaging messaging) throws CompressionException;
+
+    void setStorage(Storage storage);
 }
