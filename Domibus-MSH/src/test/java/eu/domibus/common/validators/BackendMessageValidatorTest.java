@@ -1,19 +1,28 @@
 package eu.domibus.common.validators;
 
 import eu.domibus.common.exception.EbMS3Exception;
+import mockit.Expectations;
 import mockit.Injectable;
+import mockit.Tested;
+import mockit.integration.junit4.JMockit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 /**
@@ -21,30 +30,29 @@ import java.util.Properties;
  */
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:spring-context.xml")
+@RunWith(JMockit.class)
 public class BackendMessageValidatorTest {
 
     private static final Log LOG = LogFactory.getLog(BackendMessageValidatorTest.class);
+    protected static final String MESSAGEID_FORMAT_KEY = "domibus.sendMessage.messageIdPattern";
+    private static final String DOMIBUS_CONFIGURATION_FILE = "domibus-configuration.xml";
     private static boolean initialized;
-
-    @Autowired
-    BackendMessageValidator backendMessageValidatorObj;
 
     @Injectable
     Properties domibusProperties;
 
-    @BeforeClass
-    public static void init() throws IOException {
-        if (!initialized) {
-            System.setProperty("domibus.config.location", new File("target/test-classes").getAbsolutePath());
-            initialized = true;
-        }
+    @Tested
+    BackendMessageValidator backendMessageValidatorObj;
 
-    }
 
     @Test
     public void validateMessageId() throws Exception {
+
+        new Expectations() {{
+            domibusProperties.getProperty(MESSAGEID_FORMAT_KEY);
+            result = loadMessageIdFormatFromConfigurationFile();
+
+        }};
 
         /*Happy Flow No error should occur*/
         try {
@@ -126,6 +134,12 @@ public class BackendMessageValidatorTest {
     @Test
     public void validateRefToMessageId() throws Exception {
 
+        new Expectations() {{
+            domibusProperties.getProperty(MESSAGEID_FORMAT_KEY);
+            result = loadMessageIdFormatFromConfigurationFile();
+
+        }};
+
         /*Happy Flow No error should occur*/
         try {
             String refTomessageId1 = "1234567890-123456789-01234567890/1234567890/`~!@#$%^&*()-_=+\\|,<.>/?;:'\"|\\[{]}.567890.1234567890-1234567890?1234567890#1234567890!1234567890$1234567890%1234567890|12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012";
@@ -192,8 +206,7 @@ public class BackendMessageValidatorTest {
 
         /*Message id should not be null*/
         try {
-            String refTomessageId8 = null;
-            backendMessageValidatorObj.validateRefToMessageId(refTomessageId8);
+            backendMessageValidatorObj.validateRefToMessageId(null);
 
         } catch (EbMS3Exception e2) {
             Assert.fail("RefToMessageId is an optional element and null should be handled!");
@@ -202,4 +215,65 @@ public class BackendMessageValidatorTest {
 
     }
 
+    @Test
+    public void testConfigurationNotSpecified() {
+
+        new Expectations() {{
+            domibusProperties.getProperty(MESSAGEID_FORMAT_KEY);
+            result = null;
+        }};
+
+        /*If the domibus-configuration file does not have the message id format, then message id pattern validation must be skipped. No exception expected*/
+        try {
+            String refTomessageId1 = "1234567890-123456789-01234567890/1234567890/`~!@#$%^&*()-_=+\\|,<.>/?;:'\"|\\[{]}.567890.1234567890-1234567890?1234567890#1234567890!1234567890$1234567890%1234567890|12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012";
+            backendMessageValidatorObj.validateMessageId(refTomessageId1);
+
+            String refTomessageId1_1 = "40b0-9ffc-3f4cfa88bf8b@domibus.eu";
+            backendMessageValidatorObj.validateRefToMessageId(refTomessageId1_1);
+
+        } catch (Exception e1) {
+            LOG.error(e1);
+            Assert.fail("When MessageId pattern configuration is not specified, then skip the format validation and no exception is expected!!");
+        }
+    }
+
+
+    protected String loadMessageIdFormatFromConfigurationFile() throws URISyntaxException, IOException, ParserConfigurationException, SAXException {
+        MessageIdFormatRetriever messageIdFormatRetriever = new MessageIdFormatRetriever();
+        if (messageIdFormatRetriever.getMessageIdFormat() == null) {
+            File f = new File(getClass().getClassLoader().getResource(DOMIBUS_CONFIGURATION_FILE).toURI());
+            InputSource is = new InputSource(new FileInputStream(f));
+            SAXParserFactory spf = SAXParserFactory.newInstance();
+            spf.setNamespaceAware(true);
+            SAXParser saxParser = spf.newSAXParser();
+            XMLReader xmlReader = saxParser.getXMLReader();
+            xmlReader.setContentHandler(messageIdFormatRetriever);
+            xmlReader.parse(is);
+        }
+        return messageIdFormatRetriever.getMessageIdFormat();
+    }
+}
+
+class MessageIdFormatRetriever extends DefaultHandler {
+
+    private static final String PROP_KEY = "prop";
+    private boolean bHasMessageIdFormat;
+    private static String MessageIdFormat;
+
+    public void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws SAXException {
+        if (PROP_KEY.equalsIgnoreCase(qName) && BackendMessageValidatorTest.MESSAGEID_FORMAT_KEY.equalsIgnoreCase(atts.getValue("key"))) {
+            bHasMessageIdFormat = true;
+        }
+    }
+
+    public void characters(char[] ch, int start, int length) throws SAXException {
+        if (bHasMessageIdFormat) {
+            MessageIdFormat = new String(ch, start, length);
+            bHasMessageIdFormat = false;
+        }
+    }
+
+    public String getMessageIdFormat() {
+        return MessageIdFormat;
+    }
 }

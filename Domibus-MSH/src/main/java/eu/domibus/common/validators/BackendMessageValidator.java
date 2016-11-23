@@ -2,6 +2,7 @@ package eu.domibus.common.validators;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,11 +68,14 @@ public class BackendMessageValidator {
         //Validating for presence of non printable control characters.
         String messageIdPattern = domibusProperties.getProperty("domibus.sendMessage.messageIdPattern");
         LOG.debug("MessageIdPattern Read From File :" + messageIdPattern);
-        Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
-        Matcher m = patternNoControlChar.matcher(messageId);
-        if (!m.matches()) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, "element eb:Messaging/eb:UserMessage/eb:MessageId does not conform to RFC2822 [CORE 5.2.2.1]", null, null);
+        if (StringUtils.isNotBlank(messageIdPattern)) {
+            Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
+            Matcher m = patternNoControlChar.matcher(messageId);
+            if (!m.matches()) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, "element eb:Messaging/eb:UserMessage/eb:MessageId does not conform to RFC2822 [CORE 5.2.2.1]", null, null);
+            }
         }
+
     }
 
 
@@ -92,10 +96,12 @@ public class BackendMessageValidator {
             //Validating for presence of non printable control characters.
             String messageIdPattern = domibusProperties.getProperty("domibus.sendMessage.messageIdPattern");
             LOG.debug("MessageIdPattern Read From File :" + messageIdPattern);
-            Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
-            Matcher m = patternNoControlChar.matcher(refToMessageId);
-            if (!m.matches()) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, "element eb:Messaging/eb:UserMessage/eb:MessageInfo/eb:RefToMessageId does not conform to RFC2822 [CORE 5.2.2.1]", null, null);
+            if (StringUtils.isNotBlank(messageIdPattern)) {
+                Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
+                Matcher m = patternNoControlChar.matcher(refToMessageId);
+                if (!m.matches()) {
+                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, "element eb:Messaging/eb:UserMessage/eb:MessageInfo/eb:RefToMessageId does not conform to RFC2822 [CORE 5.2.2.1]", null, null);
+                }
             }
         }
     }
