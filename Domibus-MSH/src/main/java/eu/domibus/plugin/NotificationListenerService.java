@@ -36,15 +36,19 @@ public class NotificationListenerService implements MessageListener, JmsListener
     private static final String PROP_LIST_PENDING_MESSAGES_MAXCOUNT = "domibus.listPendingMessages.maxCount";
 
     @Autowired
-    AuthUtils authUtils;
-    @Autowired
     @Qualifier(value = "jmsTemplateNotify")
     private JmsOperations jmsOperations;
+
     @Autowired
     @Qualifier("internalJmsListenerContainerFactory")
     private JmsListenerContainerFactory jmsListenerContainerFactory;
+
+    @Autowired
+    AuthUtils authUtils;
+
     @Autowired
     private Properties domibusProperties;
+
     private Queue backendNotificationQueue;
     private BackendConnector.Mode mode;
     private BackendConnector backendConnector;
