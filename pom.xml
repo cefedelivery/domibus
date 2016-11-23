@@ -22,7 +22,6 @@
         <module>Domibus-MSH-taskexecutor-tomcat</module>
         <module>Domibus-MSH-soapui-tests</module>
         <module>Domibus-MSH-docker</module>
-        <module>Domibus-MSH-fiware</module>
         <module>Domibus-plugin-api</module>
         <module>Domibus-ws-stubs</module>
         <module>Domibus-default-ws-plugin</module>
