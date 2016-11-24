@@ -178,7 +178,7 @@
     </wsdl:binding>
     <wsdl:service name="BackendService_1_1">
         <wsdl:port binding="tns:BackendService_1_1SoapBinding" name="BACKEND_PORT">
-            <soap12:address location="http://localhost:8580/domibus/services/backend"/>
+            <soap12:address location="http://localhost:8123/domibus/services/backend"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

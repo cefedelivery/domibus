@@ -44,7 +44,7 @@ public class SendSOAPMessageIT extends AbstractIT {
     protected static final QName BACKEND_PORT = new QName("http://org.ecodex.backend/1_1/", "BACKEND_PORT");
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8580);
+    public WireMockRule wireMockRule = new WireMockRule(8123);
 
     @Autowired
     private MessageFactory messageFactory; // defined in the spring-context.xml
