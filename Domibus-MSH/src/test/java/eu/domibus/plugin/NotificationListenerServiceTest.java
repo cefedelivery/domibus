@@ -20,19 +20,20 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.QueueBrowser;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Properties;
-import java.util.Vector;
+import java.util.*;
 
 /**
- * Created by venugar on 16/11/2016.
+ * @author venugar
+ * @since 3.3
  */
 
 @RunWith(JMockit.class)
 public class NotificationListenerServiceTest {
 
     private static final Log LOG = LogFactory.getLog(NotificationListenerServiceTest.class);
+
+    private static final String TEST_FINAL_RECIPIENT = "TEST_FINAL_RECIPIENT1";
+    private static final String TEST_FINAL_RECIPIENT2 = "ANOTHER_FINAL_RECIPIENT";
 
     @Injectable
     private Queue queue;
@@ -59,115 +60,63 @@ public class NotificationListenerServiceTest {
     @Test
     public void testAddToListFromQueueHappyFlow(final @Injectable QueueBrowser queueBrowser) throws JMSException {
         mode = BackendConnector.Mode.PULL;
-
-        final Vector<Message> testInputVector = new Vector<>(10);
-        loadTestInputMessages(testInputVector);
+        final Enumeration<Message> enumeration = generateTestInputEnumeration();
 
         new Expectations() {{
             queueBrowser.getEnumeration();
-            result = testInputVector.elements();
+            result = enumeration;
 
         }};
 
         Collection<String> result1 = new ArrayList<String>();
-        objNotificationListenerService.listFromQueue(NotificationType.MESSAGE_RECEIVED, queueBrowser, "TEST_FINAL_RECIPIENT", result1, 5);
+        result1.addAll(objNotificationListenerService.listFromQueue(NotificationType.MESSAGE_RECEIVED, queueBrowser, TEST_FINAL_RECIPIENT, 5));
         Assert.assertEquals(5, result1.size());
-
     }
 
     @Test
     public void testAddToListFromQueueMissingConfiguration(final @Injectable QueueBrowser queueBrowser) throws JMSException {
         mode = BackendConnector.Mode.PULL;
-
-        final Vector<Message> testInputVector = new Vector<>(10);
-        loadTestInputMessages(testInputVector);
+        final Enumeration en = generateTestInputEnumeration();
 
         new Expectations() {{
             queueBrowser.getEnumeration();
-            result = testInputVector.elements();
+            result = en;
 
         }};
 
         /*Expected scenario when max pending messages configuration is not specified*/
         Collection<String> result3 = new ArrayList<String>();
-        objNotificationListenerService.listFromQueue(NotificationType.MESSAGE_RECEIVED, queueBrowser, "TEST_FINAL_RECIPIENT", result3, 0);
+        result3.addAll(objNotificationListenerService.listFromQueue(NotificationType.MESSAGE_RECEIVED, queueBrowser, TEST_FINAL_RECIPIENT, 0));
         Assert.assertEquals(10, result3.size());
     }
 
+    protected Enumeration<Message> generateTestInputEnumeration() throws JMSException, NullPointerException {
 
-    protected void loadTestInputMessages(Vector<Message> testInputVector) throws JMSException, NullPointerException {
+        List<Message> testInputList = new ArrayList<>(12);
 
-        Message message11 = new ActiveMQMessage();
-        message11.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_SEND_SUCCESS.name());
-        message11.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
-        message11.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a346710@domibus.eu");
-        testInputVector.add(message11);
+        testInputList.add(generateTestMessage(NotificationType.MESSAGE_SEND_SUCCESS, TEST_FINAL_RECIPIENT, "ID1"));
+        testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT2, "ID2"));
+        testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT, "ID3"));
+        testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT, "ID4"));
+        testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT, "ID5"));
+        testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT, "ID6"));
+        testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT, "ID7"));
+        testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT, "ID8"));
+        testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT, "ID9"));
+        testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT, "ID10"));
+        testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT, "ID11"));
+        testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT, "ID12"));
 
-        Message message12 = new ActiveMQMessage();
-        message12.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
-        message12.setStringProperty((MessageConstants.FINAL_RECIPIENT), "ANOTHER_FINAL_RECIPIENT");
-        message12.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a346710@domibus.eu");
-        testInputVector.add(message12);
+        return Collections.enumeration(testInputList);
+    }
 
-        Message message1 = new ActiveMQMessage();
-        message1.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
-        message1.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
-        message1.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a34671@domibus.eu");
-        testInputVector.add(message1);
+    public Message generateTestMessage(NotificationType notificationType, String recipient, String messageid) throws JMSException {
+        Message message = new ActiveMQMessage();
+        message.setStringProperty(MessageConstants.NOTIFICATION_TYPE, notificationType.name());
+        message.setStringProperty((MessageConstants.FINAL_RECIPIENT), recipient);
+        message.setStringProperty((MessageConstants.MESSAGE_ID), messageid);
 
-        Message message2 = new ActiveMQMessage();
-        message2.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
-        message2.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
-        message2.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a34672@domibus.eu");
-        testInputVector.add(message2);
-
-        Message message3 = new ActiveMQMessage();
-        message3.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
-        message3.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
-        message3.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a34673@domibus.eu");
-        testInputVector.add(message3);
-
-        Message message4 = new ActiveMQMessage();
-        message4.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
-        message4.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
-        message4.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a34674@domibus.eu");
-        testInputVector.add(message4);
-
-        Message message5 = new ActiveMQMessage();
-        message5.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
-        message5.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
-        message5.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a34675@domibus.eu");
-        testInputVector.add(message5);
-
-        Message message6 = new ActiveMQMessage();
-        message6.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
-        message6.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
-        message6.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a34676@domibus.eu");
-        testInputVector.add(message6);
-
-        Message message7 = new ActiveMQMessage();
-        message7.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
-        message7.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
-        message7.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a34677@domibus.eu");
-        testInputVector.add(message7);
-
-        Message message8 = new ActiveMQMessage();
-        message8.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
-        message8.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
-        message8.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a34678@domibus.eu");
-        testInputVector.add(message8);
-
-        Message message9 = new ActiveMQMessage();
-        message9.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
-        message9.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
-        message9.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu");
-        testInputVector.add(message9);
-
-        Message message10 = new ActiveMQMessage();
-        message10.setStringProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
-        message10.setStringProperty((MessageConstants.FINAL_RECIPIENT), "TEST_FINAL_RECIPIENT");
-        message10.setStringProperty((MessageConstants.MESSAGE_ID), "2809cef6-240f-4792-bec1-7cb300a346710@domibus.eu");
-        testInputVector.add(message10);
+        return message;
     }
 
 

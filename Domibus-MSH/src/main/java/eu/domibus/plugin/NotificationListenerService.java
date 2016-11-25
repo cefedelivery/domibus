@@ -33,7 +33,7 @@ import java.util.Properties;
 public class NotificationListenerService implements MessageListener, JmsListenerConfigurer, MessageLister, eu.domibus.plugin.NotificationListener {
 
     private static final Log LOG = LogFactory.getLog(NotificationListenerService.class);
-    private static final String PROP_LIST_PENDING_MESSAGES_MAXCOUNT = "domibus.listPendingMessages.maxCount";
+    protected static final String PROP_LIST_PENDING_MESSAGES_MAXCOUNT = "domibus.listPendingMessages.maxCount";
 
     @Autowired
     @Qualifier(value = "jmsTemplateNotify")
@@ -132,15 +132,17 @@ public class NotificationListenerService implements MessageListener, JmsListener
         jmsOperations.browse(backendNotificationQueue, new BrowserCallback<Void>() {
             @Override
             public Void doInJms(final Session session, final QueueBrowser browser) throws JMSException {
-                return listFromQueue(notificationType, browser, finalRecipient, result, intMaxPendingMessagesRetrieveCount);
+                result.addAll(listFromQueue(notificationType, browser, finalRecipient, intMaxPendingMessagesRetrieveCount));
+                return null;
             }
         });
         return result;
     }
 
-    protected Void listFromQueue(NotificationType notificationType, QueueBrowser browser, String finalRecipient, Collection<String> result, int intMaxPendingMessagesRetrieveCount) throws JMSException {
+    protected Collection<String> listFromQueue(NotificationType notificationType, QueueBrowser browser, String finalRecipient, int intMaxPendingMessagesRetrieveCount) throws JMSException {
         final Enumeration browserEnumeration = browser.getEnumeration();
         int countOfMessagesIncluded = 0;
+        Collection<String> result = new ArrayList<>();
         while (browserEnumeration.hasMoreElements()) {
             final Message message = (Message) browserEnumeration.nextElement();
             if (notificationType.name().equals(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE))) {
@@ -155,7 +157,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
                 }
             }
         }
-        return null;
+        return result;
     }
 
     @Override
