@@ -125,7 +125,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     private Collection<String> browseQueue(final NotificationType notificationType, final String finalRecipient) {
         final Collection<String> result = new ArrayList<>();
 
-        final String strMaxPendingMessagesRetrieveCount = domibusProperties.getProperty(PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "0");
+        final String strMaxPendingMessagesRetrieveCount = domibusProperties.getProperty(PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
         final int intMaxPendingMessagesRetrieveCount = Integer.parseInt(strMaxPendingMessagesRetrieveCount);
         LOG.debug("maxPendingMessagesRetrieveCount:" + intMaxPendingMessagesRetrieveCount);
 
