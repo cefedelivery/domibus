@@ -20,28 +20,28 @@
 <!-- Security Policy cache configuration -->
 <ehcache>
     <cache name="policyCache"
-           maxBytesLocalHeap="5m"
-           timeToLiveSeconds="3600"
+           maxBytesLocalHeap="50m"
+           timeToLiveSeconds="360"
            overflowToDisk="false" >
     </cache>
-    <cache name="backendFilterCache"
-           maxBytesLocalHeap="5m"
-           timeToLiveSeconds="3600"
+    <!--<cache name="backendFilterCache"
+           maxBytesLocalHeap="50m"
+           timeToLiveSeconds="360"
            overflowToDisk="false">
-    </cache>
+    </cache>-->
     <cache name="tlsCache"
-           maxBytesLocalHeap="5m"
-           timeToLiveSeconds="3600"
+           maxBytesLocalHeap="50m"
+           timeToLiveSeconds="360"
            overflowToDisk="false">
     </cache>
     <cache name="certValidationByAlias"
-           maxBytesLocalHeap="5m"
-           timeToLiveSeconds="3600"
+           maxBytesLocalHeap="50m"
+           timeToLiveSeconds="360"
            overflowToDisk="false">
     </cache>
     <cache name="crlByCert"
-           maxBytesLocalHeap="5m"
-           timeToLiveSeconds="3600"
+           maxBytesLocalHeap="50m"
+           timeToLiveSeconds="360"
            overflowToDisk="false">
     </cache>
 </ehcache>

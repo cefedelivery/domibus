@@ -21,9 +21,9 @@ package eu.domibus.plugin.routing;
 
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,15 +35,21 @@ import java.util.List;
 @Service
 public class RoutingService {
 
+    private final static Log LOG = LogFactory.getLog(RoutingService.class);
+
     @Autowired
     private BackendFilterDao backendFilterDao;
 
     @Autowired
     private List<NotificationListener> notificationListeners;
 
-    @Cacheable(value = "backendFilterCache")
+    //@Cacheable(value = "backendFilterCache")
     public List<BackendFilter> getBackendFilters() {
+        LOG.debug("Reading all filters from DB");
         final List<BackendFilter> filters = backendFilterDao.findAll();
+        if (filters.isEmpty()) {
+            LOG.info("Filters from DB are empty");
+        }
         final List<NotificationListener> backendsTemp = new ArrayList<>(notificationListeners);
         for (final BackendFilter filter : filters) {
             boolean filterExists = false;
@@ -62,11 +68,17 @@ public class RoutingService {
             final BackendFilter filter = new BackendFilter();
             filter.setBackendName(backend.getBackendName());
             filters.add(filter);
+            LOG.debug("Added filter from the plugin configuration [" + filter.getBackendName() + "]");
+        }
+        if (filters.isEmpty()) {
+            LOG.warn("Filters are empty!");
+        } else {
+            LOG.debug("Filters are: " + filters);
         }
         return filters;
     }
 
-    @CacheEvict(value = "backendFilterCache", allEntries = true)
+    //@CacheEvict(value = "backendFilterCache", allEntries = true)
     public void updateBackendFilters(final List<BackendFilter> filters) {
         backendFilterDao.update(filters);
     }

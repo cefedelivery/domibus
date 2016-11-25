@@ -21,6 +21,7 @@ package eu.domibus.plugin.routing;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import eu.domibus.ebms3.common.model.UserMessage;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -129,4 +130,14 @@ public class RoutingCriteria extends AbstractBaseEntity implements IRoutingCrite
         return name;
     }
 
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("name", name)
+                .append("expression", expression)
+/*                .append("patternHashMap", patternHashMap)
+                .append("tooltip", tooltip)
+                .append("inputPattern", inputPattern)*/
+                .toString();
+    }
 }
