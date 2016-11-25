@@ -16,6 +16,7 @@ import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
+import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -95,6 +96,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     private PropertyProfileValidator propertyProfileValidator;
+
+    @Autowired
+    private BackendMessageValidator backendMessageValidator;
 
     @Autowired
     AuthUtils authUtils;
@@ -209,15 +213,17 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             // MessageInfo is always initialized in the get method
             MessageInfo messageInfo = userMessage.getMessageInfo();
             String messageId = messageInfo.getMessageId();
-            if (messageId == null || messageId.trim().isEmpty()) {
+            if (messageId == null) {
                 messageId = messageIdGenerator.generateMessageId();
                 messageInfo.setMessageId(messageId);
-            } else if (messageId.length() > 255) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "MessageId value is too long (over 255 characters)", null, null);
+            } else {
+                backendMessageValidator.validateMessageId(messageId);
+                userMessage.getMessageInfo().setMessageId(messageId);
             }
+
             String refToMessageId = messageInfo.getRefToMessageId();
-            if (refToMessageId != null && refToMessageId.length() > 255) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "RefToMessageId value is too long (over 255 characters)", refToMessageId, null);
+            if (refToMessageId != null) {
+                backendMessageValidator.validateRefToMessageId(refToMessageId);
             }
             // handle if the messageId is unique. This should only fail if the ID is set from the outside
             if (!MessageStatus.NOT_FOUND.equals(userMessageLogDao.getMessageStatus(messageId))) {

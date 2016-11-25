@@ -14,6 +14,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
+import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -112,6 +113,9 @@ public class DatabaseMessageHandlerTest {
     private PropertyProfileValidator propertyProfileValidator;
 
     @Injectable
+    BackendMessageValidator backendMessageValidator;
+
+    @Injectable
     AuthUtils authUtils;
 
 
@@ -174,12 +178,6 @@ public class DatabaseMessageHandlerTest {
         userMessage.setPayloadInfo(payloadInfo);
         return userMessage;
     }
-
-/*    private Configuration readConf() throws Exception {
-        InputStream is = getClass().getClassLoader().getResourceAsStream("SamplePModes/domibus-configuration-valid_green.xml");
-        Unmarshaller unMar = JAXBContext.newInstance("eu.domibus.common.model.configuration").createUnmarshaller();
-        return (Configuration) unMar.unmarshal(new XmlStreamReader(is));
-    }*/
 
     @Test
     public void testSubmitMessageGreen2RedOk(@Injectable final Submission messageData) throws Exception {
@@ -316,10 +314,13 @@ public class DatabaseMessageHandlerTest {
         new Expectations() {{
 
             UserMessage userMessage = new UserMessage();
-            userMessage.getMessageInfo().setMessageId("abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656@domibus.eu");
+            String messageId = "abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656@domibus.eu";
+            userMessage.getMessageInfo().setMessageId(messageId);
             transformer.transformFromSubmission(messageData);
             result = userMessage;
 
+            backendMessageValidator.validateMessageId(messageId);
+            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "MessageId value is too long (over 255 characters)", null, null);
         }};
 
         try {
@@ -327,7 +328,7 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
-            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0008);
+            assertEquals(ErrorCode.EBMS_0008, mpEx.getEbms3ErrorCode());
         }
 
         new Verifications() {{
@@ -354,13 +355,16 @@ public class DatabaseMessageHandlerTest {
         new Expectations() {{
 
             UserMessage userMessage = new UserMessage();
-            userMessage.getMessageInfo().setRefToMessageId("abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656@domibus.eu");
+            String refToMessageId = "abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656abc012f4c-5a31-4759-ad9c-1d12331420656@domibus.eu";
+            userMessage.getMessageInfo().setRefToMessageId(refToMessageId);
             transformer.transformFromSubmission(messageData);
             result = userMessage;
 
             messageIdGenerator.generateMessageId();
             result = MESS_ID;
 
+            backendMessageValidator.validateRefToMessageId(refToMessageId);
+            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "RefToMessageId value is too long (over 255 characters)", refToMessageId, null);
         }};
 
         try {
@@ -368,7 +372,7 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
-            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0008);
+            assertEquals(ErrorCode.EBMS_0008, mpEx.getEbms3ErrorCode());
         }
 
         new Verifications() {{

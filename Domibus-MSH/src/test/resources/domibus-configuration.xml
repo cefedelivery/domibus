@@ -59,6 +59,9 @@
         <prop key="activeMQ.JMXURL">service:jmx:rmi://localhost:1198/jndi/rmi://localhost:1199/jmxrmi</prop>
         <prop key="domibus.attachment.storage.location">#{ systemProperties['storage.location']!= null?systemProperties['storage.location'] : '' }</prop>
 
+        <!--Accepted Format for MessageId-->
+        <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
+
         <!-- Enable the proxy settings only if you use a proxy -->
 
         <prop key="domibus.proxy.enabled">false</prop>
@@ -69,6 +72,7 @@
         <prop key="domibus.proxy.nonProxyHosts"></prop>
 
         <prop key="domibus.auth.unsecureLoginAllowed">true</prop>
+
 
     </util:properties>
 
