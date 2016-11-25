@@ -3,6 +3,7 @@ package eu.domibus.common.dao;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.UserMessageLog;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Repository;
@@ -48,7 +49,13 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
     public UserMessageLog findByMessageId(String messageId) {
         TypedQuery<UserMessageLog> query = em.createNamedQuery("UserMessageLog.findByMessageId", UserMessageLog.class);
         query.setParameter("MESSAGE_ID", messageId);
-        return query.getSingleResult();
+
+        UserMessageLog userMessageLog = query.getSingleResult();
+        if (!StringUtils.equals(messageId, userMessageLog.getMessageId())) {
+            //Simulating the behavior of TypedQuery.getSingleResult() when no data is found so that existing code does not break
+            throw new NoResultException("The message id queried :" + messageId + " failed in case sensitive match check with database!");
+        }
+        return userMessageLog;
     }
 
     public UserMessageLog findByMessageId(String messageId, MSHRole mshRole) {
@@ -56,12 +63,18 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         query.setParameter("MESSAGE_ID", messageId);
         query.setParameter("MSH_ROLE", mshRole);
 
+        UserMessageLog userMessageLog;
         try {
-            return query.getSingleResult();
+            userMessageLog = query.getSingleResult();
+            if (!StringUtils.equals(messageId, userMessageLog.getMessageId())) {
+                //Simulating the behavior of TypedQuery.getSingleResult() when no data is found so that existing code does not break
+                throw new NoResultException("The message id queried :" + messageId + " failed in case sensitive match check with database!");
+            }
         } catch (NoResultException nrEx) {
             LOG.debug("Query UserMessageLog.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]", nrEx);
-            return null;
+            userMessageLog = null;
         }
+        return userMessageLog;
     }
 
     public Long countMessages(HashMap<String, Object> filters) {

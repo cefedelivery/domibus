@@ -2,6 +2,7 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.model.logging.SignalMessageLog;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Repository;
@@ -31,7 +32,13 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
     public SignalMessageLog findByMessageId(String messageId) {
         TypedQuery<SignalMessageLog> query = em.createNamedQuery("SignalMessageLog.findByMessageId", SignalMessageLog.class);
         query.setParameter("MESSAGE_ID", messageId);
-        return query.getSingleResult();
+
+        SignalMessageLog signalMessageLog = query.getSingleResult();
+        if (!StringUtils.equals(messageId, signalMessageLog.getMessageId())) {
+            //Simulating the behavior of TypedQuery.getSingleResult() when no data is found so that existing code does not break
+            throw new NoResultException("The message id queried :" + messageId + " failed in case sensitive match check with database!");
+        }
+        return signalMessageLog;
     }
 
     public SignalMessageLog findByMessageId(String messageId, MSHRole mshRole) {
@@ -39,12 +46,18 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         query.setParameter("MESSAGE_ID", messageId);
         query.setParameter("MSH_ROLE", mshRole);
 
+        SignalMessageLog signalMessageLog;
         try {
-            return query.getSingleResult();
+            signalMessageLog = query.getSingleResult();
+            if (!StringUtils.equals(messageId, signalMessageLog.getMessageId())) {
+                //Simulating the behavior of TypedQuery.getSingleResult() when no data is found so that existing code does not break
+                throw new NoResultException("The message id queried :" + messageId + " failed in case sensitive match check with database!");
+            }
         } catch (NoResultException nrEx) {
             LOG.debug("Query SignalMessageLog.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]", nrEx);
-            return null;
+            signalMessageLog = null;
         }
+        return signalMessageLog;
     }
 
     public Long countMessages(HashMap<String, Object> filters) {
