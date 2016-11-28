@@ -149,6 +149,20 @@
                         <password>sa</password>
                     </security>
                 </datasource>
+                <datasource jndi-name="java:/jdbc/cipaeDeliveryNonXADs" pool-name="eDeliveryMysqlNonXADS" enabled="true" use-ccm="true">
+                    <connection-url>jdbc:mysql://localhost:3306/domibus</connection-url>
+                    <driver-class>com.mysql.jdbc.Driver</driver-class>
+                    <driver>mysql</driver>
+                    <security>
+                        <user-name>domibus</user-name>
+                        <password>domibus</password>
+                    </security>
+                    <validation>
+                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
+                        <background-validation>true</background-validation>
+                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
+                    </validation>
+                </datasource>
                 <xa-datasource jndi-name="java:/jdbc/cipaeDeliveryDs" pool-name="eDeliveryMysqlXADS" enabled="true" use-ccm="true">
                     <xa-datasource-property name="ServerName">
                         localhost

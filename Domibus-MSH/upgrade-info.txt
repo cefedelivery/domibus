@@ -1,6 +1,31 @@
+Domibus 3.3-RC1:
+               - [Tomcat only] in file conf/domibus/domibus-datasources.xml add the following bean(please adapt the values for username and password properties according to your database schema):
+                   o for MySQL:
+                       <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+                           <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+                           <property name="url" value="jdbc:mysql://localhost:3306/domibus"/>
+                           <property name="username" value="edelivery"/>
+                           <property name="password" value="edelivery"/>
+                       </bean>
+                   o for Oracle:
+                       <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+                          <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+                          <property name="url" value="jdbc:mysql://localhost:3306/domibus"/>
+                          <property name="username" value="edelivery"/>
+                          <property name="password" value="edelivery"/>
+                       </bean>
+                - [WebLogic only]
+                   o execute the WLST API script(from conf/domibus/scripts/upgrades) 3.2.1-to-3.3-RC1-WeblogicSingleServer.properties for single server deployment or 3.2.1-to-3.3-RC1-WeblogicCluster.properties for cluster deployment
+                   o in file conf/domibus/domibus-datasources.xml add the following bean:
+                         <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+                            <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
+                        </bean>
+                - [WildFly only]
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2.1:
                - [WebLogic only]
-                  o execute the WLST API script 3.2-to-3.2.1-WeblogicSingleServer.properties for single server deployment or 3.2-to-3.2.1-WeblogicCluster.properties for cluster deployment
+                  o execute the WLST API script(from conf/domibus/scripts/upgrades) 3.2-to-3.2.1-WeblogicSingleServer.properties for single server deployment or 3.2-to-3.2.1-WeblogicCluster.properties for cluster deployment
                   o In the WebLogic console, in the page "Home >Summary of Security Realms >myrealm",  enable the flag "Use Authorization Providers to Protect JMX Access" flag; for more info please check the Administration Guide
                   o In the WebLogic console, in the page "Home >Summary of JDBC Data Sources >cipaeDeliveryDs", tab "Configuration/Connection Pool/Advanced"
                     enable the "Test Connections On Reserve" flag and add "SQL SELECT 1 FROM DUAL" in the "Test Table Name"
