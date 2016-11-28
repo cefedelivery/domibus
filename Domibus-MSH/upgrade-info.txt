@@ -1,3 +1,10 @@
+Domibus 3.3-RC1 (from 3.2.*)
+               Update the configuration file following these steps:
+               -  in file "\domibus\conf\domibus\domibus-configuration.xml":
+                    o   add   <prop key="domibus.listPendingMessages.maxCount">500</prop>
+                    o   add   <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2.1:
                - [WebLogic only]
                   o execute the WLST API script 3.2-to-3.2.1-WeblogicSingleServer.properties for single server deployment or 3.2-to-3.2.1-WeblogicCluster.properties for cluster deployment
