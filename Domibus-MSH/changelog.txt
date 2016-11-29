@@ -9,6 +9,7 @@ Domibus 3.3-RC1
 - Domibus MSH sendMessage verifies that - if MessageId and RefToMessageId is specified by backend client, then it should contain only printable ASCII characters.
 - Validation on MessageId and RefToMessageId can be bypassed by removing the key "domibus.sendMessage.messageIdPattern" from configuration file.
 - Message Id is made case sensitive, so Domibus MSH sendMessage can accept ids with both cases
+- Result set of ListPendingMessages operation limited by a new configuration property - domibus.listPendingMessages.maxCount
 Domibus 3.2.1
 - JMX access to the JMS queues is secured
 - Force the usage of the apache commons IO library from the application
