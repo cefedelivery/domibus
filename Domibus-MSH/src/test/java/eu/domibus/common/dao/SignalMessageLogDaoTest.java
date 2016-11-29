@@ -65,6 +65,26 @@ public class SignalMessageLogDaoTest {
     }
 
     @Test
+    public void testFindByMessageId_NullCheck(final @Injectable TypedQuery<SignalMessageLog> query) {
+
+        final SignalMessageLog dbSignalMessageLog = new SignalMessageLog();
+        dbSignalMessageLog.setMessageId(null);
+
+        new Expectations() {{
+            query.getSingleResult();
+            result = dbSignalMessageLog;
+        }};
+
+        try {
+            SignalMessageLog resultSignalMessageLog = signalMessageLogDao.findByMessageId(null);
+            Assert.assertNotNull("SignalMessageLog is expected to be empty, Not null.", resultSignalMessageLog);
+            Assert.assertNull(resultSignalMessageLog.getMessageId());
+        } catch (Exception e) {
+            Assert.fail("No exception was expected. Nulls should be handled!");
+        }
+    }
+
+    @Test
     public void testFindByMessageIdandMSH_IdMatch(final @Injectable TypedQuery<SignalMessageLog> query) {
 
         final String searchMessageId = "MESSAGE_ID1234";
@@ -99,7 +119,23 @@ public class SignalMessageLogDaoTest {
             SignalMessageLog resultSignalMessageLog = signalMessageLogDao.findByMessageId(searchMessageId, MSHRole.RECEIVING);
             Assert.assertNull(resultSignalMessageLog);
         } catch (Exception e) {
-            Assert.assertTrue("Expecting NoResultException:", e instanceof NoResultException);
+            Assert.fail("Expected null in result of operation with no exception!!");
+        }
+    }
+
+    @Test
+    public void testFindByMessageIdandMSH_NullCheck(final @Injectable TypedQuery<SignalMessageLog> query) {
+
+        new Expectations() {{
+            query.getSingleResult();
+            result = null;
+        }};
+
+        try {
+            SignalMessageLog resultSignalMessageLog = signalMessageLogDao.findByMessageId(null, MSHRole.RECEIVING);
+            Assert.assertNull(resultSignalMessageLog);
+        } catch (Exception e) {
+            Assert.fail("Expected null in result of operation with no exception!!");
         }
     }
 }

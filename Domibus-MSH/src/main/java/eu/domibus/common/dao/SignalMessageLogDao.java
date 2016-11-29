@@ -34,10 +34,7 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         query.setParameter("MESSAGE_ID", messageId);
 
         SignalMessageLog signalMessageLog = query.getSingleResult();
-        if (!StringUtils.equals(messageId, signalMessageLog.getMessageId())) {
-            //Simulating the behavior of TypedQuery.getSingleResult() when no data is found so that existing code does not break
-            throw new NoResultException("The message id queried :" + messageId + " failed in case sensitive match check with database!");
-        }
+        verifyMessageIdCaseSensitiveMatch(messageId, signalMessageLog);
         return signalMessageLog;
     }
 
@@ -49,15 +46,20 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         SignalMessageLog signalMessageLog;
         try {
             signalMessageLog = query.getSingleResult();
-            if (!StringUtils.equals(messageId, signalMessageLog.getMessageId())) {
-                //Simulating the behavior of TypedQuery.getSingleResult() when no data is found so that existing code does not break
-                throw new NoResultException("The message id queried :" + messageId + " failed in case sensitive match check with database!");
-            }
+            verifyMessageIdCaseSensitiveMatch(messageId, signalMessageLog);
         } catch (NoResultException nrEx) {
             LOG.debug("Query SignalMessageLog.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]", nrEx);
             signalMessageLog = null;
         }
         return signalMessageLog;
+    }
+
+    protected void verifyMessageIdCaseSensitiveMatch(String searchMessageId, SignalMessageLog dbSignalMessageLog) {
+        if (null != dbSignalMessageLog && !StringUtils.equals(searchMessageId, dbSignalMessageLog.getMessageId())) {
+            //Simulating the behavior of TypedQuery.getSingleResult() when no data is found so that existing code does not break
+            LOG.debug("The message id in search input [" + searchMessageId + "] and the message id retrieved from database [" + dbSignalMessageLog.getMessageId() + "] failed in case sensitive check!");
+            throw new NoResultException("The message id in search input [" + searchMessageId + "] and the message id retrieved from database [" + dbSignalMessageLog.getMessageId() + "] failed in case sensitive check!");
+        }
     }
 
     public Long countMessages(HashMap<String, Object> filters) {

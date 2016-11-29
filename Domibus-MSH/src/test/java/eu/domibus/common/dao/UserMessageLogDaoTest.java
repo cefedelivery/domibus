@@ -85,6 +85,26 @@ public class UserMessageLogDaoTest {
     }
 
     @Test
+    public void testFindByMessageId_NullCheck(final @Injectable TypedQuery<UserMessageLog> query) {
+
+        final UserMessageLog dbUserMessageLog = new UserMessageLog();
+        dbUserMessageLog.setMessageId(null);
+
+        new Expectations() {{
+            query.getSingleResult();
+            result = dbUserMessageLog;
+        }};
+
+        try {
+            UserMessageLog resultUserMessageLog = userMessageLogDao.findByMessageId(null);
+            Assert.assertNotNull("UserMessageLog is expected to be empty, Not null.", resultUserMessageLog);
+            Assert.assertNull(resultUserMessageLog.getMessageId());
+        } catch (Exception e) {
+            Assert.fail("No exception was expected. Nulls should be handled!");
+        }
+    }
+
+    @Test
     public void testGetMessageStatus_IDMismatch(final @Injectable TypedQuery<UserMessageLog> query) {
 
         final String searchMessageID = "MESSAGE_ID1234";
@@ -135,4 +155,23 @@ public class UserMessageLogDaoTest {
         UserMessageLog resultUserMessageLog = userMessageLogDao.findByMessageId(searchMessageID, MSHRole.RECEIVING);
         Assert.assertNull(resultUserMessageLog);
     }
+
+
+    @Test
+    public void testFindByMessageIdandMSH_NullCheck(final @Injectable TypedQuery<UserMessageLog> query) {
+
+        new Expectations() {{
+            query.getSingleResult();
+            result = null;
+        }};
+
+        try {
+            UserMessageLog resultUserMessageLog = userMessageLogDao.findByMessageId(null, null);
+            Assert.assertNull(resultUserMessageLog);
+        } catch (Exception e) {
+
+            Assert.fail("No exception was expected. Nulls should be handled!");
+        }
+    }
+
 }
