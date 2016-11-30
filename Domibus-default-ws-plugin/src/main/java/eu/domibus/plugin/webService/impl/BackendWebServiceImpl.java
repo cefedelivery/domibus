@@ -86,7 +86,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             BackendWebServiceImpl.LOG.debug("Looking for payload: " + href);
             for (final PayloadType payload : sendRequest.getPayload()) {
                 BackendWebServiceImpl.LOG.debug("comparing with payload id: " + payload.getPayloadId());
-                if (payload.getPayloadId().equals(href)) {
+                if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
                     this.copyPartProperties(payload, extendedPartInfo);
                     extendedPartInfo.setInBody(false);
                     LOG.debug("sendMessage - payload Content Type: " + payload.getContentType());
@@ -101,7 +101,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                     throw new SendMessageFault("No Payload or Bodyload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
                 }
                 // It can only be in body load, href MAY be null!
-                if (href == null && bodyload.getPayloadId() == null || href != null && href.equals(bodyload.getPayloadId())) {
+                if (href == null && bodyload.getPayloadId() == null || href != null && StringUtils.equalsIgnoreCase(href, bodyload.getPayloadId())) {
                     this.copyPartProperties(bodyload, extendedPartInfo);
                     extendedPartInfo.setInBody(true);
                     LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
