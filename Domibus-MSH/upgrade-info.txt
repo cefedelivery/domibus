@@ -81,6 +81,8 @@ Domibus 3.2 (from 3.1.1):
 
                 - [Tomcat only] in file conf/domibus/persistence.xml, add to the <persistence-unit> tag:
                                 <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
+
+                - [Tomcat only] the file conf/domibus/internal/activemq.xml file has to be replaced and re-configured according to your environment (transportConnector uri, authenticationUser, redeliveryPolicy).
                 - [WebLogic only]
                         o execute the WLST API script 3.1.1-to-3.2-WeblogicSingleServer.properties for single server deployment or 3.1.1-to-3.2-WeblogicCluster.properties for cluster deployment
                         o Update all the queues in the WebLogic console except jms/domibus.internal.dispatch.queue; for each queue go to the queue "Configuration" tab, the "Delivery Failure" sub-tab, and modify the following:
