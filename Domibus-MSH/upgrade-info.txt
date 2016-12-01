@@ -81,6 +81,18 @@ Domibus 3.2 (from 3.1.1):
 
                 - [Tomcat only] in file conf/domibus/persistence.xml, add to the <persistence-unit> tag:
                                 <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
+                - [WebLogic only]
+                        o execute the WLST API script 3.1.1-to-3.2-WeblogicSingleServer.properties for single server deployment or 3.1.1-to-3.2-WeblogicCluster.properties for cluster deployment
+                        o Update all the queues in the WebLogic console except jms/domibus.internal.dispatch.queue; for each queue go to the queue "Configuration" tab, the "Delivery Failure" sub-tab, and modify the following:
+                           - Redelivery Delay Override to 300000
+                           - Redelivery Limit to 10
+                           - Expiration Policy to Redirect
+                           - Error Destination to DomibusDLQ
+                        o Go to the jms/domibus.internal.dispatch.queue "Configuration" tab, the "Delivery Failure" sub-tab, and modify the following:
+                           - Redelivery Delay Override to 1000
+                           - Redelivery Limit to 0
+                           - Expiration Policy to Redirect
+                           - Error Destination to DomibusDLQ
 
                 If you are using samples keystores, please update them since they are expiring on the 26th of October 2016.
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
