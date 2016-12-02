@@ -22,7 +22,6 @@ package eu.domibus.plugin;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.exception.exception.TransformationException;
-import eu.domibus.plugin.validation.exception.ValidationException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
