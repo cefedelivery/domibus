@@ -1,10 +1,7 @@
 package eu.domibus.plugin.webService;
 
 import eu.domibus.AbstractSendMessageIT;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.AgreementRef;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.CollaborationInfo;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Service;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.SendMessageFault;
 import eu.domibus.plugin.webService.generated.SendRequest;
@@ -37,19 +34,21 @@ public class SendMessageCaseInsensitiveIT extends AbstractSendMessageIT {
 
     /**
      * Sample example of a test for the backend sendMessage service.
-     * The message components are case insensitive from the PMode data
+     * The message components should be case insensitive from the PMode data
      *
      * @throws SendMessageFault
      * @throws InterruptedException
      */
     @Test
-    public void testSendMessageOK() throws SendMessageFault, InterruptedException, SQLException {
+    public void testSendMessageOK() throws SendMessageFault, SQLException, InterruptedException {
 
         String payloadHref = "SBDH-ORDER";
         SendRequest sendRequest = createSendRequest(payloadHref);
-        Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
-        // Must use tc3 and TC3Leg1
+        super.prepareSendMessage("validAS4Response.xml");
+
+        Messaging ebMSHeaderInfo = new Messaging();
+        UserMessage userMessage = new UserMessage();
         CollaborationInfo collaborationInfo = new CollaborationInfo();
         collaborationInfo.setAction("TC3LEG1");
         AgreementRef agreementRef = new AgreementRef();
@@ -59,9 +58,41 @@ public class SendMessageCaseInsensitiveIT extends AbstractSendMessageIT {
         service.setValue("BDX:NOPROCESS");
         service.setType("TC3");
         collaborationInfo.setService(service);
-        ebMSHeaderInfo.getUserMessage().setCollaborationInfo(collaborationInfo);
-
-        super.prepareSendMessage("validAS4Response.xml");
+        userMessage.setCollaborationInfo(collaborationInfo);
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.getProperty().add(createProperty("originalSender", "URN:OASIS:NAMES:TC:EBCORE:PARTYID-TYPE:UNREGISTERED:C1", STRING_TYPE));
+        messageProperties.getProperty().add(createProperty("finalRecipient", "URN:OASIS:NAMES:TC:EBCORE:PARTYID-TYPE:UNREGISTERED:C41", STRING_TYPE));
+        userMessage.setMessageProperties(messageProperties);
+        PartyInfo partyInfo = new PartyInfo();
+        From from = new From();
+        from.setRole("HTTP://DOCS.OASIS-OPEN.ORG/EBXML-MSG/EBMS/V3.0/NS/CORE/200704/INITIATOR");
+        PartyId sender = new PartyId();
+        sender.setValue("URN:OASIS:NAMES:TC:EBCORE:PARTYID-TYPE:UNREGISTERED:DOMIBUS-BLUE");
+        from.setPartyId(sender);
+        partyInfo.setFrom(from);
+        To to = new To();
+        to.setRole("HTTP://DOCS.OASIS-OPEN.ORG/EBXML-MSG/EBMS/V3.0/NS/CORE/200704/RESPONDER");
+        PartyId receiver = new PartyId();
+        receiver.setValue("URN:OASIS:NAMES:TC:EBCORE:PARTYID-TYPE:UNREGISTERED:DOMIBUS-RED");
+        to.setPartyId(receiver);
+        partyInfo.setTo(to);
+        userMessage.setPartyInfo(partyInfo);
+        PayloadInfo payloadInfo = new PayloadInfo();
+        PartInfo partInfo = new PartInfo();
+        Description description = new Description();
+        description.setValue("e-sens-sbdh-order");
+        description.setLang("en-US");
+        partInfo.setHref(payloadHref);
+        String mimeType = "TEXT/XML";
+        if (mimeType != null) {
+            PartProperties partProperties = new PartProperties();
+            partProperties.getProperty().add(createProperty(mimeType, "MimeType", STRING_TYPE));
+            partInfo.setPartProperties(partProperties);
+        }
+        partInfo.setDescription(description);
+        payloadInfo.getPartInfo().add(partInfo);
+        userMessage.setPayloadInfo(payloadInfo);
+        ebMSHeaderInfo.setUserMessage(userMessage);
 
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
