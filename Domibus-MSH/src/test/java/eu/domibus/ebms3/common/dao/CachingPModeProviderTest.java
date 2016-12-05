@@ -2,7 +2,9 @@ package eu.domibus.ebms3.common.dao;
 
 import eu.domibus.api.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.ebms3.common.model.PartyId;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -21,6 +23,8 @@ import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -154,6 +158,43 @@ public class CachingPModeProviderTest {
         List<String> result = cachingPModeProvider.getMpcURIList();
         Assert.assertEquals(URI2, result.get(0));
         Assert.assertEquals(URI1, result.get(1));
+    }
+
+    @Test
+    public void testFindPartyName() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception {
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        new Expectations() {{
+            cachingPModeProvider.getConfiguration().getBusinessProcesses().getParties();
+            result = configuration.getBusinessProcesses().getParties();
+        }};
+
+        Collection<PartyId> partyIdCollection = new ArrayList<>();
+        PartyId partyId1 = new PartyId();
+        partyId1.setValue("EmptyTestParty");
+        partyId1.setType("ABC><123");
+        partyIdCollection.add(partyId1);
+
+        try {
+            cachingPModeProvider.findPartyName(partyIdCollection);
+            Assert.fail("Expected EbMS3Exception due to invalid URI character present!!");
+        } catch (Exception e) {
+            Assert.assertTrue("Expected EbMS3Exception", e instanceof EbMS3Exception);
+        }
+    }
+
+    @Test
+    public void testRefresh() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        new Expectations() {{
+            cachingPModeProvider.configurationDAO.configurationExists();
+            result = true;
+
+            cachingPModeProvider.configurationDAO.readEager();
+            result = configuration;
+        }};
+
+        cachingPModeProvider.refresh();
+        Assert.assertEquals(configuration, cachingPModeProvider.getConfiguration());
     }
 
 }
