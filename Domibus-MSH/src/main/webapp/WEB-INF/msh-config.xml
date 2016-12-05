@@ -57,8 +57,8 @@
         <property name="transactionManager" ref="transactionManager"/>
         <property name="quartzProperties">
             <props>
-                <prop key="org.quartz.jobStore.misfireThreshold">6000000</prop>
-                <prop key="org.quartz.jobStore.driverDelegateClass">org.quartz.impl.jdbcjobstore.StdJDBCDelegate</prop>
+                <prop key="org.quartz.jobStore.misfireThreshold">60000</prop>
+                <prop key="org.quartz.jobStore.driverDelegateClass">org.quartz.impl.jdbcjobstore.oracle.weblogic.WebLogicOracleDelegate</prop>
 
                 <prop key="org.quartz.jobStore.isClustered">${domibus.deployment.clustered}</prop>
                 <prop key="org.quartz.jobStore.clusterCheckinInterval">20000</prop>
