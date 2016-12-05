@@ -62,6 +62,9 @@
         <!--Accepted Format for MessageId-->
         <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
 
+        <!--Maximum number of pending messages to be listed -->
+        <prop key="domibus.listPendingMessages.maxCount">500</prop>
+
         <!-- Enable the proxy settings only if you use a proxy -->
         <!--
         <prop key="domibus.proxy.enabled">true</prop>
