@@ -13,7 +13,9 @@ ENV DOMIBUS_DIST /usr/local/domibusDist
 ENV TOMCAT_FULL_DISTRIBUTION /usr/local/tomcat
 ENV CATALINA_HOME $TOMCAT_FULL_DISTRIBUTION/domibus
 
-ENV BUILD_NUMBER 30
+ARG BUILD_NUMBER
+ENV BUILD_NUMBER ${BUILD_NUMBER:-0}
+
 ENV BAMBOO_SHARE http://edelquality.westeurope.cloudapp.azure.com:8080/artifact/CE-DD/shared/build-$BUILD_NUMBER/Domibus/
 
 ARG PORT
