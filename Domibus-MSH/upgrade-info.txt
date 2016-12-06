@@ -1,4 +1,7 @@
 Domibus 3.3-RC1:
+               -  in file "\domibus\conf\domibus\domibus-configuration.xml":
+                    o   add   <prop key="domibus.listPendingMessages.maxCount">500</prop>
+                    o   add   <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
                - [Tomcat only] in file conf/domibus/domibus-datasources.xml add the following bean(please adapt the values for for host, port, username and password properties according to your database schema):
                    o for MySQL:
                        <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">

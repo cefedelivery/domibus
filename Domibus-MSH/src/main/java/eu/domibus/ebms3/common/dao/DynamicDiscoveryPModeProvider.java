@@ -29,6 +29,7 @@ import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,8 +100,8 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         for (final Process process : this.dynamicReceiverProcesses) {
             if (process.isDynamicInitiator() || process.getInitiatorParties().contains(this.getConfiguration().getParty())) {
                 for (final LegConfiguration legConfiguration : process.getLegs()) {
-                    if (legConfiguration.getService().getValue().equals(userMessage.getCollaborationInfo().getService().getValue()) &&
-                            legConfiguration.getAction().getValue().equals(userMessage.getCollaborationInfo().getAction())) {
+                    if (StringUtils.equalsIgnoreCase(legConfiguration.getService().getValue(), userMessage.getCollaborationInfo().getService().getValue()) &&
+                            StringUtils.equalsIgnoreCase(legConfiguration.getAction().getValue(), userMessage.getCollaborationInfo().getAction())) {
                         candidates.add(process);
                     }
                 }
@@ -141,7 +142,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         //check if party is available in cache
         Party configurationToParty = null;
         for (final Party party : getConfiguration().getBusinessProcesses().getParties()) {
-            if (party.getName().equals(cn)) {
+            if (StringUtils.equalsIgnoreCase(party.getName(), cn)) {
                 configurationToParty = party;
             }
         }
@@ -161,7 +162,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         for (final Process candidate : candidates) {
             boolean partyFound = false;
             for (final Party party : candidate.getResponderParties()) {
-                if (configurationToParty.getName().equals(party.getName())) {
+                if (StringUtils.equalsIgnoreCase(configurationToParty.getName(), party.getName())) {
                     partyFound = true;
                     break;
                 }
@@ -178,7 +179,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         LOG.debug("DN is: " + dn);
         final LdapName ln = new LdapName(dn);
         for (final Rdn rdn : ln.getRdns()) {
-            if (rdn.getType().equalsIgnoreCase("CN")) {
+            if (StringUtils.equalsIgnoreCase(rdn.getType(), "CN")) {
                 LOG.debug("CN is: " + rdn.getValue());
                 return rdn.getValue().toString();
             }

@@ -7,6 +7,8 @@ Domibus 3.3-RC1
 - Domibus MSH sendMessage would trim the leading and trailing whitespaces in all the request fields.
 - Domibus MSH sendMessage verifies that - if MessageId and RefToMessageId is specified by backend client, then it should contain only printable ASCII characters.
 - Validation on MessageId and RefToMessageId can be bypassed by removing the key "domibus.sendMessage.messageIdPattern" from configuration file.
+- Result set of ListPendingMessages operation limited by a new configuration property - domibus.listPendingMessages.maxCount
+- While submitting the message, validation comparisons with the PMode data are made case insensitive.
 Domibus 3.2.1
 - JMX access to the JMS queues is secured
 - Force the usage of the apache commons IO library from the application
