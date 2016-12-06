@@ -1,4 +1,4 @@
-Domibus 3.3-RC1:
+Domibus 3.3-RC1 (from 3.2.1):
                -  in file "\domibus\conf\domibus\domibus-configuration.xml":
                     o   add   <prop key="domibus.listPendingMessages.maxCount">500</prop>
                     o   add   <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
