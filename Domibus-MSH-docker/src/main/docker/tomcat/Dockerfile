@@ -18,9 +18,6 @@ ENV BUILD_NUMBER ${BUILD_NUMBER:-0}
 
 ENV BAMBOO_SHARE http://edelquality.westeurope.cloudapp.azure.com:8080/artifact/CE-DD/shared/build-$BUILD_NUMBER/Domibus/
 
-ARG PORT
-ENV PORT ${PORT:-8080}
-
 ARG PARTY
 ENV PARTY ${PARTY:-blue}
 ENV PMODE_NAME "domibus-gw-sample-pmode-$PARTY.xml"
@@ -53,8 +50,8 @@ RUN chmod 777 $CATALINA_HOME/bin/*.sh
 RUN sed -i 's/\r$//' $CATALINA_HOME/bin/setenv.sh
 RUN sed -i 's/#export CATALINA_HOME=<YOUR_INSTALLATION_PATH>/sleep 120;/g' $CATALINA_HOME/bin/setenv.sh
 RUN sed -i 's/#JAVA_OPTS/JAVA_OPTS/g' $CATALINA_HOME/bin/setenv.sh
-RUN sed -i 's/<blue_hostname>:8080/localhost:8080/g' $DOMIBUS_DIST/conf/pmodes/$PMODE_NAME
-RUN sed -i 's/<red_hostname>:8080/localhost:9080/g' $DOMIBUS_DIST/conf/pmodes/$PMODE_NAME
+RUN sed -i 's/<blue_hostname>:8080/domibusblue:8080/g' $DOMIBUS_DIST/conf/pmodes/$PMODE_NAME
+RUN sed -i 's/<red_hostname>:8080/domibusred:8080/g' $DOMIBUS_DIST/conf/pmodes/$PMODE_NAME
 RUN sed -i "s/localhost:3306/mysql$PARTY:3306/g" $CATALINA_HOME/conf/domibus/domibus-datasources.xml
 RUN echo "s/localhost:3306/mysql$PARTY:3306/g"
 
