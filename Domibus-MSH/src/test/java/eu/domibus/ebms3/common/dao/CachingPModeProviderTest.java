@@ -37,8 +37,8 @@ public class CachingPModeProviderTest {
     private static final Log LOG = LogFactory.getLog(CachingPModeProviderTest.class);
 
     private static final String VALID_PMODE_CONFIG_URI = "SamplePModes/domibus-configuration-valid.xml";
-    private static final String URI1 = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMpc";
-    private static final String URI2 = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/anotherMpc";
+    private static final String DEFAULT_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMpc";
+    private static final String ANOTHER_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/anotherMpc";
     private static final String DEFAULTMPC = "defaultMpc";
     private static final String ANOTHERMPC = "anotherMpc";
     private static final String NONEXISTANTMPC = "NonExistantMpc";
@@ -156,8 +156,8 @@ public class CachingPModeProviderTest {
         }};
 
         List<String> result = cachingPModeProvider.getMpcURIList();
-        Assert.assertEquals(URI2, result.get(0));
-        Assert.assertEquals(URI1, result.get(1));
+        Assert.assertTrue("URI list should contain DefaultMpc URI", result.contains(DEFAULT_MPC_URI));
+        Assert.assertTrue("URI list should contain AnotherMpc URI", result.contains(ANOTHER_MPC_URI));
     }
 
     @Test
