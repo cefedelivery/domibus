@@ -3,6 +3,8 @@ package eu.domibus.plugin.webService;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.AbstractIT;
 import eu.domibus.common.validators.XmlValidationEventHandler;
+import eu.domibus.plugin.webService.generated.BackendInterface;
+import eu.domibus.plugin.webService.generated.BackendService11;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -38,29 +40,15 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
  */
 public class SendSOAPMessageIT extends AbstractIT {
 
-    protected static final URL WSDL_LOCATION;
-
     protected static final QName SERVICE = new QName("http://org.ecodex.backend/1_1/", "BackendService_1_1");
     protected static final QName BACKEND_PORT = new QName("http://org.ecodex.backend/1_1/", "BACKEND_PORT");
+    protected static final String BINDING_ID = "http://www.w3.org/2003/05/soap/bindings/HTTP/";
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8123);
+    public WireMockRule wireMockRule = new WireMockRule(SERVICE_PORT);
 
     @Autowired
     private MessageFactory messageFactory; // defined in the spring-context.xml
-
-    static {
-        Locale.setDefault(Locale.ENGLISH);
-        URL url = SendSOAPMessageIT.class.getResource("schemas/BackendService_1_1.wsdl");
-        if (url == null) {
-            url = SendSOAPMessageIT.class.getClassLoader().getResource("schemas/BackendService_1_1.wsdl");
-        }
-        if (url == null) {
-            Logger.getLogger(SendSOAPMessageIT.class.getName()).log(Level.SEVERE, "Can not initialize the default wsdl from {0}", "schemas/BackendService_1_1.wsdl");
-            assert false;
-        }
-        WSDL_LOCATION = url;
-    }
 
    /*  This is starting Jetty and deploys domibus war but it throws java.lang.OutOfMemoryError: PermGen space.
 
@@ -111,7 +99,11 @@ public class SendSOAPMessageIT extends AbstractIT {
         InputStream is = getClass().getClassLoader().getResourceAsStream("dataset/as4/blue2redGoodMessage.xml");
         validateXml(is);
 
-        Service jaxwsService = Service.create(WSDL_LOCATION, SERVICE);
+        BackendService11 backendService = new BackendService11();
+
+
+        Service jaxwsService = Service.create(SERVICE);
+        jaxwsService.addPort(BACKEND_PORT, BINDING_ID, BACKEND_SERVICE_ENDPOINT);
         Dispatch<SOAPMessage> dispatcher = jaxwsService.createDispatch(BACKEND_PORT, SOAPMessage.class, Service.Mode.MESSAGE);
         is = getClass().getClassLoader().getResourceAsStream("dataset/as4/blue2redGoodMessage.xml");
         SOAPMessage reqMsg = messageFactory.createMessage(null, is);

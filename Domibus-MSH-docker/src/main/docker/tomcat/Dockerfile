@@ -1,8 +1,9 @@
 FROM java:7-jre
 
-MAINTAINER Cosmin Baciu <cosmin.baciu@ext.ec.europa.eu>, Ioana Dragusnau <idragusa@gmail.com>
+MAINTAINER CEF eDelivery <CEF-EDELIVERY-SUPPORT@ec.europa.eu>
 
-ENV DOMIBUS_VERSION 3.3-SNAPSHOT
+ARG DOMIBUS_VERSION
+ENV DOMIBUS_VERSION ${DOMIBUS_VERSION:-3.3-SNAPSHOT}
 
 ENV TOMCAT_MAJOR 8
 ENV TOMCAT_VERSION 8.0.24
@@ -13,10 +14,10 @@ ENV DOMIBUS_DIST /usr/local/domibusDist
 ENV TOMCAT_FULL_DISTRIBUTION /usr/local/tomcat
 ENV CATALINA_HOME $TOMCAT_FULL_DISTRIBUTION/domibus
 
-ARG BUILD_NUMBER
-ENV BUILD_NUMBER ${BUILD_NUMBER:-0}
+ARG ARTIFACTS_REPOSITORY
+ENV ARTIFACTS_REPOSITORY ${ARTIFACTS_REPOSITORY}
 
-ENV BAMBOO_SHARE http://edelquality.westeurope.cloudapp.azure.com:8080/artifact/CE-DD/shared/build-$BUILD_NUMBER/Domibus/
+#ENV BAMBOO_SHARE http://edelquality.westeurope.cloudapp.azure.com:8080/artifact/CE-DD/shared/build-$BUILD_NUMBER/Domibus/
 
 ARG PARTY
 ENV PARTY ${PARTY:-blue}
@@ -30,9 +31,9 @@ RUN apt-get install -y wget
 RUN apt-get install unzip
 RUN apt-get install curl
 
-RUN wget $BAMBOO_SHARE/domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip \
+RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip \
     && unzip -d $TOMCAT_FULL_DISTRIBUTION domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip
-RUN wget $BAMBOO_SHARE/domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip \
+RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip \
     && unzip -d $DOMIBUS_DIST domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz

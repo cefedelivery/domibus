@@ -26,7 +26,7 @@ public class PendingMessagesListIT extends AbstractIT {
     private static boolean initialized;
     private static ConnectionFactory connectionFactory;
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8090);
+    public WireMockRule wireMockRule = new WireMockRule(SERVICE_PORT);
     @Autowired
     BackendInterface backendWebService;
 
