@@ -10,6 +10,8 @@ services:
       - MYSQL_PASSWORD=edelivery
     expose:
       - "3306"
+    ports:
+      - "3304:3306"
   mysqlred:
     container_name: mysqlred
     image: domibus/mysql:development
@@ -21,6 +23,8 @@ services:
       - MYSQL_PASSWORD=edelivery
     expose:
       - "3306"
+    ports:
+      - "3305:3306"
   domibusblue:
     container_name: domibusblue
     image: domibus/tomcat/blue:development

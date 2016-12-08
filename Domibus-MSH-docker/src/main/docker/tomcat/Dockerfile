@@ -5,6 +5,17 @@ MAINTAINER CEF eDelivery <CEF-EDELIVERY-SUPPORT@ec.europa.eu>
 ARG DOMIBUS_VERSION
 ENV DOMIBUS_VERSION ${DOMIBUS_VERSION:-3.3-SNAPSHOT}
 
+####### BAMBOO_SHARE http://edelquality.westeurope.cloudapp.azure.com:8080/artifact/CE-DD/shared/build-$BUILD_NUMBER/Domibus/
+ARG ARTIFACTS_REPOSITORY
+ENV ARTIFACTS_REPOSITORY ${ARTIFACTS_REPOSITORY}
+
+ARG PARTY
+ENV PARTY ${PARTY:-blue}
+ENV PMODE_NAME "domibus-gw-sample-pmode-$PARTY.xml"
+
+RUN echo $PARTY
+RUN echo $PMODE_NAME
+
 ENV TOMCAT_MAJOR 8
 ENV TOMCAT_VERSION 8.0.24
 ENV DOCKERIZE_VERSION v0.2.0
@@ -13,18 +24,6 @@ ENV MYSQL_CONNECTOR mysql-connector-java-5.1.40
 ENV DOMIBUS_DIST /usr/local/domibusDist
 ENV TOMCAT_FULL_DISTRIBUTION /usr/local/tomcat
 ENV CATALINA_HOME $TOMCAT_FULL_DISTRIBUTION/domibus
-
-ARG ARTIFACTS_REPOSITORY
-ENV ARTIFACTS_REPOSITORY ${ARTIFACTS_REPOSITORY}
-
-#ENV BAMBOO_SHARE http://edelquality.westeurope.cloudapp.azure.com:8080/artifact/CE-DD/shared/build-$BUILD_NUMBER/Domibus/
-
-ARG PARTY
-ENV PARTY ${PARTY:-blue}
-ENV PMODE_NAME "domibus-gw-sample-pmode-$PARTY.xml"
-
-RUN echo $PARTY
-RUN echo $PMODE_NAME
 
 RUN apt-get update
 RUN apt-get install -y wget
@@ -55,7 +54,6 @@ RUN sed -i 's/<blue_hostname>:8080/domibusblue:8080/g' $DOMIBUS_DIST/conf/pmodes
 RUN sed -i 's/<red_hostname>:8080/domibusred:8080/g' $DOMIBUS_DIST/conf/pmodes/$PMODE_NAME
 RUN sed -i "s/localhost:3306/mysql$PARTY:3306/g" $CATALINA_HOME/conf/domibus/domibus-datasources.xml
 RUN echo "s/localhost:3306/mysql$PARTY:3306/g"
-
 
 ######## Set Test Platform certificates ########
 RUN mkdir $CATALINA_HOME/conf/domibus/keystores
