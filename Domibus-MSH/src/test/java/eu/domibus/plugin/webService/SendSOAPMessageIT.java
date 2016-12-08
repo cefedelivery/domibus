@@ -3,10 +3,7 @@ package eu.domibus.plugin.webService;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.AbstractIT;
 import eu.domibus.common.validators.XmlValidationEventHandler;
-import eu.domibus.plugin.webService.generated.BackendInterface;
-import eu.domibus.plugin.webService.generated.BackendService11;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +22,6 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
 import java.io.InputStream;
-import java.net.URL;
-import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -98,9 +91,6 @@ public class SendSOAPMessageIT extends AbstractIT {
 
         InputStream is = getClass().getClassLoader().getResourceAsStream("dataset/as4/blue2redGoodMessage.xml");
         validateXml(is);
-
-        BackendService11 backendService = new BackendService11();
-
 
         Service jaxwsService = Service.create(SERVICE);
         jaxwsService.addPort(BACKEND_PORT, BINDING_ID, BACKEND_SERVICE_ENDPOINT);
