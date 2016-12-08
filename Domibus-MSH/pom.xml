@@ -976,17 +976,17 @@
                 <executions>
 
                     <execution>
-                        <id>generate-mysql-script-full-3.3</id>
+                        <id>generate-mysql-script-full-3.3.0</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>updateSQL</goal>
                         </goals>
                         <configuration>
                             <changeLogFile>
-                                src/main/resources/db/changelog-3.3.xml
+                                src/main/resources/db/changelog-3.3.0.xml
                             </changeLogFile>
                             <url>
-                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.3.mysql
+                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.3.0.mysql
                             </url>
                             <migrationSqlOutputFile>
                                 ${project.build.directory}/sql-scripts/mysql5innoDb-3.3.ddl
@@ -994,17 +994,17 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-oracle-script-full-3.3</id>
+                        <id>generate-oracle-script-full-3.3.0</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>updateSQL</goal>
                         </goals>
                         <configuration>
                             <changeLogFile>
-                                src/main/resources/db/changelog-3.3.xml
+                                src/main/resources/db/changelog-3.3.0.xml
                             </changeLogFile>
                             <url>
-                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.3.oracle
+                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.3.0.oracle
                             </url>
                             <migrationSqlOutputFile>
                                 ${project.build.directory}/sql-scripts/oracle10g-3.3.ddl
@@ -1012,17 +1012,17 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-mysql-script-delta-3.3</id>
+                        <id>generate-mysql-script-delta-3.3.0</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>updateSQL</goal>
                         </goals>
                         <configuration>
                             <changeLogFile>
-                                src/main/resources/db/changelog-3.3-delta.xml
+                                src/main/resources/db/changelog-3.3.0-delta.xml
                             </changeLogFile>
                             <url>
-                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.3-delta.mysql
+                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.3.0-delta.mysql
                             </url>
                             <migrationSqlOutputFile>
                                 ${project.build.directory}/sql-scripts/mysql5innoDb-3.2-to-3.3-migration.ddl
@@ -1030,17 +1030,17 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-oracle-script-delta-3.3</id>
+                        <id>generate-oracle-script-delta-3.3.0</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>updateSQL</goal>
                         </goals>
                         <configuration>
                             <changeLogFile>
-                                src/main/resources/db/changelog-3.3-delta.xml
+                                src/main/resources/db/changelog-3.3.0-delta.xml
                             </changeLogFile>
                             <url>
-                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.3-delta.oracle
+                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.3.0-delta.oracle
                             </url>
                             <migrationSqlOutputFile>
                                 ${project.build.directory}/sql-scripts/oracle10g-3.2-to-3.3-migration.ddl
