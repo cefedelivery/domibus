@@ -12,6 +12,7 @@
     <bean id="taskExecutor" class="org.springframework.scheduling.quartz.SimpleThreadPoolTaskExecutor">
         <property name="threadCount" value="${domibus.taskExecutor.threadCount:50}"/>
     </bean>
+    <alias name="taskExecutor" alias="quartzTaskExecutor"/>
 </beans>
 
 

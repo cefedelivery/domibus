@@ -21,7 +21,7 @@ public class DomibusQuartzThreadExecutorTest {
     @Test
     public void testExecute(final @Injectable Thread thread, final @Injectable TaskExecutor taskExecutor, @Mocked SpringContextProvider springContextProvider) throws Exception {
         new Expectations() {{
-            SpringContextProvider.getApplicationContext().getBean("taskExecutor", TaskExecutor.class);
+            SpringContextProvider.getApplicationContext().getBean("quartzTaskExecutor", TaskExecutor.class);
             result = taskExecutor;
         }};
 
