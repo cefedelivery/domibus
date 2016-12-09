@@ -24,8 +24,8 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -48,7 +48,7 @@ import static org.springframework.util.StringUtils.hasLength;
 @Repository
 public class MessagingDao extends BasicDao<Messaging> {
 
-    private static final Log LOG = LogFactory.getLog(MessagingDao.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MessagingDao.class);
 
     public MessagingDao() {
         super(Messaging.class);

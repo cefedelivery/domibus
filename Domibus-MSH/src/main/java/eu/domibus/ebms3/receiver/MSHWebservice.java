@@ -44,8 +44,8 @@ import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,7 +89,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     public static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
 
-    private static final Log LOG = LogFactory.getLog(MSHWebservice.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MSHWebservice.class);
 
     @Autowired
     private BackendNotificationService backendNotificationService;
@@ -170,7 +170,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 LOG.debug("received attachments:");
                 final Iterator i = request.getAttachments();
                 while (i.hasNext()) {
-                    LOG.debug(i.next());
+                    LOG.debug("attachment: "+i.next());
                 }
             }
             messaging = getMessaging(request);

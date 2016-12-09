@@ -25,8 +25,8 @@ import no.difi.vefa.edelivery.lookup.LookupClientBuilder;
 import no.difi.vefa.edelivery.lookup.api.LookupException;
 import no.difi.vefa.edelivery.lookup.locator.BusdoxLocator;
 import no.difi.vefa.edelivery.lookup.model.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -39,7 +39,7 @@ import java.util.Properties;
 public class DynamicDiscoveryService {
 
     public static final String SMLZONE_KEY = "domibus.smlzone";
-    private static final Log LOG = LogFactory.getLog(DynamicDiscoveryService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DynamicDiscoveryService.class);
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
 
@@ -72,7 +72,6 @@ public class DynamicDiscoveryService {
         } catch (final LookupException e) {
             throw new ConfigurationException("Receiver does not support reception of " + documentId + " for process " + processId + " using the AS4 Protocol", e);
         } catch (final no.difi.vefa.edelivery.lookup.api.SecurityException e) {
-            LOG.error(e);
             throw new ConfigurationException("Could not fetch metadata from SMP", e);
         }
     }

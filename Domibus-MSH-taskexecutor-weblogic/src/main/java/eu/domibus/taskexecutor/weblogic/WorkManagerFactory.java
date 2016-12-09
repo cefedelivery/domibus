@@ -1,8 +1,8 @@
 package eu.domibus.taskexecutor.weblogic;
 
 import commonj.work.WorkManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 
 import javax.naming.InitialContext;
@@ -17,7 +17,7 @@ import javax.naming.NamingException;
  */
 public class WorkManagerFactory implements FactoryBean<WorkManager> {
 
-    private static final Log LOG = LogFactory.getLog(WorkManagerFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WorkManagerFactory.class);
 
     public static final String DEFAULT_WORK_MANAGER = "java:comp/env/wm/default";
 

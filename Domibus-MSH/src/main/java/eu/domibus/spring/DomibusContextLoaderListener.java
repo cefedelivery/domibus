@@ -3,8 +3,8 @@ package eu.domibus.spring;
 import eu.domibus.plugin.classloader.PluginClassLoader;
 import eu.domibus.property.PropertyResolverBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoaderListener;
 
 import javax.servlet.ServletContext;
@@ -17,7 +17,7 @@ import java.net.MalformedURLException;
  */
 public class DomibusContextLoaderListener extends ContextLoaderListener {
 
-    private static final Log LOG = LogFactory.getLog(DomibusContextLoaderListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DomibusContextLoaderListener.class);
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {

@@ -5,8 +5,8 @@ import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 @RunWith(JMockit.class)
 public class XMLUtilImplTest {
 
-    private static final Log LOG = LogFactory.getLog(XMLUtilImplTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XMLUtilImplTest.class);
 
     @Tested
     XMLUtilImpl xmlUtil;

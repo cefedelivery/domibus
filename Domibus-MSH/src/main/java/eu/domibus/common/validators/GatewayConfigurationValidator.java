@@ -2,8 +2,8 @@ package eu.domibus.common.validators;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -19,7 +19,7 @@ import java.util.Properties;
  */
 public class GatewayConfigurationValidator {
 
-    private static final Log LOG = LogFactory.getLog(GatewayConfigurationValidator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GatewayConfigurationValidator.class);
 
     private static final String BLUE_GW_ALIAS = "blue_gw";
 
@@ -47,7 +47,6 @@ public class GatewayConfigurationValidator {
             ks = KeyStore.getInstance(KeyStore.getDefaultType());
         } catch (KeyStoreException e) {
             LOG.warn("Failed to get keystore instance! " + e.getMessage());
-            LOG.debug(e);
             return;
         }
 
@@ -55,7 +54,6 @@ public class GatewayConfigurationValidator {
             ks.load(new FileInputStream(trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file")), trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
         } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
             LOG.warn("Failed to load certificates! " + e.getMessage());
-            LOG.debug(e);
             warnOutput("CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
         }
         try {
@@ -65,7 +63,6 @@ public class GatewayConfigurationValidator {
 
         } catch (KeyStoreException e) {
             LOG.warn("Failed to load certificates! " + e.getMessage());
-            LOG.debug(e);
             warnOutput("CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
         }
     }

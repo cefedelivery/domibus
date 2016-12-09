@@ -5,8 +5,8 @@ import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +33,7 @@ import java.util.Properties;
 @RunWith(JMockit.class)
 public class BackendMessageValidatorTest {
 
-    private static final Log LOG = LogFactory.getLog(BackendMessageValidatorTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BackendMessageValidatorTest.class);
 
     private static final String DOMIBUS_CONFIGURATION_FILE = "domibus-configuration.xml";
 
@@ -71,7 +71,6 @@ public class BackendMessageValidatorTest {
             backendMessageValidatorObj.validateMessageId(messageId1_4);
 
         } catch (EbMS3Exception e1) {
-            LOG.error(e1);
             Assert.fail("Exception was not expected in happy scenarios");
         }
          /*Happy Flow No error should occur*/
@@ -157,7 +156,6 @@ public class BackendMessageValidatorTest {
             backendMessageValidatorObj.validateRefToMessageId(refTomessageId1_4);
 
         } catch (EbMS3Exception e1) {
-            LOG.error(e1);
             Assert.fail("Exception was not expected in happy scenarios");
         }
          /*Happy Flow No error should occur*/
@@ -231,7 +229,6 @@ public class BackendMessageValidatorTest {
             backendMessageValidatorObj.validateRefToMessageId(refTomessageId1_1);
 
         } catch (Exception e1) {
-            LOG.error(e1);
             Assert.fail("When MessageId pattern configuration is not specified, then skip the format validation and no exception is expected!!");
         }
     }

@@ -26,8 +26,8 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.ebms3.common.model.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.wss4j.dom.WSConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,7 +52,7 @@ import java.util.Iterator;
  */
 @Service
 public class ReliabilityChecker {
-    private static final Log LOG = LogFactory.getLog(ReliabilityChecker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReliabilityChecker.class);
     private static final String XPATH_EXPRESSION_STRING = "/*/*/*[local-name() = 'Reference']/@URI  | /*/*/*[local-name() = 'Reference']/*[local-name() = 'DigestValue']";
     private static final XPath xPath = XPathFactory.newInstance().newXPath();
     @Autowired

@@ -5,8 +5,8 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.task.TaskRejectedException;
@@ -25,7 +25,7 @@ import static org.junit.Assert.fail;
 @RunWith(JMockit.class)
 public class DomibusWildFlyTaskExecutorTest {
 
-    private static final Log LOG = LogFactory.getLog(DomibusWildFlyTaskExecutorTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DomibusWildFlyTaskExecutorTest.class);
 
     @Tested
     DomibusWildFlyTaskExecutor domibusWildFlyTaskExecutor;

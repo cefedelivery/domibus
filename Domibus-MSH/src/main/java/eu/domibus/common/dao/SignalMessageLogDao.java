@@ -2,8 +2,8 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.model.logging.SignalMessageLog;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
@@ -22,7 +22,7 @@ import java.util.List;
 @Repository
 public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
 
-    private static final Log LOG = LogFactory.getLog(SignalMessageLogDao.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SignalMessageLogDao.class);
 
     public SignalMessageLogDao() {
         super(SignalMessageLog.class);

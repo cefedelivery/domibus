@@ -1,8 +1,8 @@
 package eu.domibus.wss4j.common.crypto;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 @DirtiesContext
 public class CryptoServiceTest {
 
-    private static final Log LOG = LogFactory.getLog(CryptoServiceTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CryptoServiceTest.class);
 
     private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/wss4j/common/crypto/CryptoServiceTest/";
 

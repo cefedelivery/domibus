@@ -24,8 +24,8 @@
  */
 package eu.domibus.common.xmladapter;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -53,7 +53,7 @@ import java.util.List;
  */
 public class ToStringAdapter extends XmlAdapter<Node, List<String>> {
 
-    private static final Log LOG = LogFactory.getLog(ToStringAdapter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ToStringAdapter.class);
 
     private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
     private final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();

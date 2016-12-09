@@ -1,8 +1,8 @@
 package eu.domibus.common.validators;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.ValidationEvent;
@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class XmlValidationEventHandler implements ValidationEventHandler {
 
-    private static final Log LOG = LogFactory.getLog(XmlValidationEventHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XmlValidationEventHandler.class);
 
     protected List<String> errors = new ArrayList<>();
 

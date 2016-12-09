@@ -10,8 +10,8 @@ import org.apache.activemq.broker.jmx.BrokerViewMBean;
 import org.apache.activemq.broker.jmx.QueueViewMBean;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
@@ -32,7 +32,7 @@ import java.util.*;
 @Component
 public class JMSManagerActiveMQ implements JMSManagerSPI {
 
-    private static final Log LOG = LogFactory.getLog(JMSManagerActiveMQ.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JMSManagerActiveMQ.class);
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
 

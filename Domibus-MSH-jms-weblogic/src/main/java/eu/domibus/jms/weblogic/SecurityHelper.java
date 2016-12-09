@@ -1,7 +1,7 @@
 package eu.domibus.jms.weblogic;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import weblogic.security.internal.SerializedSystemIni;
 import weblogic.security.internal.encryption.ClearOrEncryptedService;
@@ -19,7 +19,7 @@ public class SecurityHelper {
 	private static final String SERVER_NAME_PROPERTY = "weblogic.Name";
 	private static final String BOOT_IDENTITY_FILE_PROPERTY = "weblogic.system.BootIdentityFile";
 
-	private static final Log LOG = LogFactory.getLog(SecurityHelper.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SecurityHelper.class);
 
 	public Map<String, String> getBootIdentity() {
 		Map<String, String> bootIdentity = new HashMap<String, String>();

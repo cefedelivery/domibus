@@ -30,8 +30,8 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.PolicyFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
@@ -63,7 +63,7 @@ public class MSHDispatcher {
 
     public static final String PMODE_KEY_CONTEXT_PROPERTY = "PMODE_KEY_CONTEXT_PROPERTY";
     public static final String ASYMMETRIC_SIG_ALGO_PROPERTY = "ASYMMETRIC_SIG_ALGO_PROPERTY";
-    private static final Log LOG = LogFactory.getLog(MSHDispatcher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MSHDispatcher.class);
 
     @Autowired
     private PolicyFactory policyFactory;

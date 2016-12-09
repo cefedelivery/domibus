@@ -3,8 +3,8 @@ package eu.domibus.ebms3.sender;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -20,7 +20,7 @@ import javax.xml.xpath.XPathFactory;
  */
 @Service
 public class NonRepudiationChecker {
-    private static final Log LOG = LogFactory.getLog(NonRepudiationChecker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NonRepudiationChecker.class);
     private static final String XPATH_EXPRESSION_STRING = "/*/*/*[local-name() = 'Reference']/@URI  | /*/*/*[local-name() = 'Reference']/*[local-name() = 'DigestValue']";
     private static final XPath xPath = XPathFactory.newInstance().newXPath();
 

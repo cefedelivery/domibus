@@ -31,8 +31,8 @@ import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
@@ -61,7 +61,7 @@ import java.util.List;
  */
 public abstract class PModeProvider {
 
-    private static final Log LOG = LogFactory.getLog(PModeProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PModeProvider.class);
 
     public static final String SCHEMAS_DIR = "schemas/";
     public static final String DOMIBUS_PMODE_XSD = "domibus-pmode.xsd";

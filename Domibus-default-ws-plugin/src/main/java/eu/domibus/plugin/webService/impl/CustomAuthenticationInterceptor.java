@@ -5,8 +5,8 @@ import eu.domibus.plugin.webService.security.BasicAuthentication;
 import eu.domibus.plugin.webService.security.BlueCoatClientCertificateAuthentication;
 import eu.domibus.plugin.webService.security.CustomAuthenticationProvider;
 import eu.domibus.plugin.webService.security.X509CertificateAuthentication;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 @Component(value="customAuthenticationInterceptor")
 public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Message> {
 
-    private static final Log LOG = LogFactory.getLog(CustomAuthenticationInterceptor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CustomAuthenticationInterceptor.class);
     private static final String BASIC_HEADER_KEY = "Authorization";
 
     private static final String CLIENT_CERT_ATTRIBUTE_KEY = "javax.servlet.request.X509Certificate";

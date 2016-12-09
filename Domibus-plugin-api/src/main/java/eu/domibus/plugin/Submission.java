@@ -19,8 +19,8 @@
 
 package eu.domibus.plugin;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import javax.activation.DataHandler;
@@ -39,7 +39,7 @@ import java.util.*;
  */
 public class Submission {
 
-    private static final Log LOG = LogFactory.getLog(Submission.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Submission.class);
 
     private final Set<Submission.Party> fromParties = new HashSet<>();
     private final Set<Submission.Party> toParties = new HashSet<>();

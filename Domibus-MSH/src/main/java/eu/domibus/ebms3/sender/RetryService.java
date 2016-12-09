@@ -29,8 +29,8 @@ import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.ebms3.common.model.DispatchMessageCreator;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.messaging.MessageConstants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.BrowserCallback;
@@ -50,7 +50,7 @@ import java.util.Properties;
 @Service
 public class RetryService {
     public static final String TIMEOUT_TOLERANCE = "domibus.msh.retry.tolerance";
-    private static final Log LOG = LogFactory.getLog(RetryService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RetryService.class);
     @Autowired
     private BackendNotificationService backendNotificationService;
 

@@ -3,8 +3,8 @@ package eu.domibus.messaging.jms;
 import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.api.regex.RegexUtil;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ import java.util.Properties;
 @Component
 public class JMSDestinationHelperImpl implements JMSDestinationHelper {
 
-    private static final Log LOG = LogFactory.getLog(JMSDestinationHelperImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JMSDestinationHelperImpl.class);
 
     private static final String DEFAULT_INTERNAL_QUEUE_EXPRESSION = ".*domibus\\.(internal|DLQ|backend\\.jms|notification\\.jms|notification\\.webservice|notification\\.kerkovi).*";
     private static final String INTERNALQUEUE_EXPRESSION = "domibus.jms.internalQueue.expression";

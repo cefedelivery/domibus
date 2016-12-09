@@ -4,8 +4,8 @@ import eu.domibus.common.validators.XmlValidationEventHandler;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import eu.domibus.plugin.validation.SubmissionValidator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 
 import javax.xml.XMLConstants;
@@ -21,7 +21,7 @@ import java.util.Set;
  */
 public class SchemaPayloadSubmissionValidator implements SubmissionValidator {
 
-    protected static final Log LOG = LogFactory.getLog(SchemaPayloadSubmissionValidator.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(SchemaPayloadSubmissionValidator.class);
 
     protected JAXBContext jaxbContext;
     protected Resource schema;

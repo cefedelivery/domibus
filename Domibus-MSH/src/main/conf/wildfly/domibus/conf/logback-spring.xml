@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/domibus.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>domibus-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each file should be at most 100MB, keep 60 days worth of history, but at most 20GB -->
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{ISO8601} %5p %c{1}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>%d{ISO8601} %5p %c{1}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--  In order to enable logging of request/responses please change the loglevel to INFO -->
+    <logger name="org.apache.cxf" level="WARN"/>
+
+    <root level="INFO">
+        <appender-ref ref="file"/>
+        <appender-ref ref="stdout"/>
+    </root>
+</configuration>

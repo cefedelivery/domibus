@@ -7,8 +7,8 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ import java.util.Set;
 @RunWith(JMockit.class)
 public class SchemaPayloadSubmissionValidatorTest {
 
-    private static final Log LOG = LogFactory.getLog(SchemaPayloadSubmissionValidator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SchemaPayloadSubmissionValidator.class);
 
     @Injectable
     JAXBContext jaxbContext;

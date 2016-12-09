@@ -1,8 +1,8 @@
 package eu.domibus.jms.weblogic;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +33,7 @@ public class JMXHelper {
     private static final String DOMIBUS_JMX_USER_PROP = "domibus.jmx.user";
     private static final String DOMIBUS_JMX_PASSWORD_PROP = "domibus.jmx.password";
 
-    private static final Log LOG = LogFactory.getLog(JMXHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JMXHelper.class);
 
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;

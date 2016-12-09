@@ -3,8 +3,8 @@ package eu.domibus.common.dao;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.logging.MessageLog;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -20,7 +20,7 @@ import java.util.*;
  */
 public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
 
-    private static final Log LOG = LogFactory.getLog(MessageLog.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MessageLog.class);
 
     public MessageLogDao(final Class<F> type) {
 

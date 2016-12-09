@@ -28,8 +28,8 @@ import eu.domibus.ebms3.common.handler.AbstractFaultHandler;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.pmode.exception.NoMatchingPModeFoundException;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.cxf.ws.policy.PolicyException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ import java.util.Set;
  * @author Christian Koch, Stefan Mueller
  */
 public class FaultInHandler extends AbstractFaultHandler {
-    private static final Log LOG = LogFactory.getLog(FaultInHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FaultInHandler.class);
 
     @Autowired
     private EbMS3MessageBuilder messageBuilder;

@@ -3,8 +3,8 @@ package eu.domibus.wss4j.common.crypto;
 import eu.domibus.clustering.Command;
 import eu.domibus.common.exception.ConfigurationException;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
@@ -32,7 +32,7 @@ import java.util.Properties;
 @Service(value = "cryptoService")
 public class CryptoService {
 
-    private static final Log LOG = LogFactory.getLog(CryptoService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CryptoService.class);
 
     @Resource(name = "trustStoreProperties")
     private Properties trustStoreProperties;
