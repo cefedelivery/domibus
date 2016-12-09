@@ -2,7 +2,6 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.model.logging.SignalMessageLog;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Repository;
@@ -32,10 +31,7 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
     public SignalMessageLog findByMessageId(String messageId) {
         TypedQuery<SignalMessageLog> query = em.createNamedQuery("SignalMessageLog.findByMessageId", SignalMessageLog.class);
         query.setParameter("MESSAGE_ID", messageId);
-
-        SignalMessageLog signalMessageLog = query.getSingleResult();
-        verifyMessageIdCaseSensitiveMatch(messageId, signalMessageLog);
-        return signalMessageLog;
+        return query.getSingleResult();
     }
 
     public SignalMessageLog findByMessageId(String messageId, MSHRole mshRole) {
@@ -43,22 +39,11 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         query.setParameter("MESSAGE_ID", messageId);
         query.setParameter("MSH_ROLE", mshRole);
 
-        SignalMessageLog signalMessageLog;
         try {
-            signalMessageLog = query.getSingleResult();
-            verifyMessageIdCaseSensitiveMatch(messageId, signalMessageLog);
+            return query.getSingleResult();
         } catch (NoResultException nrEx) {
             LOG.debug("Query SignalMessageLog.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]", nrEx);
-            signalMessageLog = null;
-        }
-        return signalMessageLog;
-    }
-
-    protected void verifyMessageIdCaseSensitiveMatch(String searchMessageId, SignalMessageLog dbSignalMessageLog) {
-        if (null != dbSignalMessageLog && !StringUtils.equals(searchMessageId, dbSignalMessageLog.getMessageId())) {
-            //Simulating the behavior of TypedQuery.getSingleResult() when no data is found so that existing code does not break
-            LOG.debug("The message id in search input [" + searchMessageId + "] and the message id retrieved from database [" + dbSignalMessageLog.getMessageId() + "] failed in case sensitive check!");
-            throw new NoResultException("The message id in search input [" + searchMessageId + "] and the message id retrieved from database [" + dbSignalMessageLog.getMessageId() + "] failed in case sensitive check!");
+            return null;
         }
     }
 
