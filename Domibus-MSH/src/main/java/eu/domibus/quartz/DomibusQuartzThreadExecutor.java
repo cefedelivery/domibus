@@ -12,7 +12,7 @@ public class DomibusQuartzThreadExecutor implements ThreadExecutor {
 
     public void execute(Thread thread) {
         LOG.debug("Executing Quartz thread " + thread);
-        TaskExecutor taskExecutor = SpringContextProvider.getApplicationContext().getBean("taskExecutor", TaskExecutor.class);
+        TaskExecutor taskExecutor = SpringContextProvider.getApplicationContext().getBean("quartzTaskExecutor", TaskExecutor.class);
         taskExecutor.execute(thread);
     }
 

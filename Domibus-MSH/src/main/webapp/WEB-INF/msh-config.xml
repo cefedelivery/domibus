@@ -49,32 +49,22 @@
     <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="taskExecutor" ref="taskExecutor"/>
         <property name="autoStartup" value="true"/>
-        <property name="applicationContextSchedulerContextKey"
-                  value="applicationContext"/>
+        <property name="applicationContextSchedulerContextKey" value="applicationContext"/>
         <property name="waitForJobsToCompleteOnShutdown" value="true"/>
         <property name="overwriteExistingJobs" value="true"/>
-        <property name="dataSource">
-            <ref bean="domibusJDBC-XADataSource"/>
-        </property>
-        <property name="transactionManager">
-            <ref bean="transactionManager"/>
-        </property>
+        <property name="dataSource" ref="domibusJDBC-XADataSource"/>
+        <property name="nonTransactionalDataSource" ref="domibusJDBC-nonXADataSource"/>
+        <property name="transactionManager" ref="transactionManager"/>
         <property name="quartzProperties">
             <props>
-                <prop key="org.quartz.jobStore.misfireThreshold">6000000</prop>
-                <prop key="org.quartz.jobStore.driverDelegateClass">
-                    org.quartz.impl.jdbcjobstore.StdJDBCDelegate
-                </prop>
+                <prop key="org.quartz.jobStore.misfireThreshold">60000</prop>
+                <prop key="org.quartz.jobStore.driverDelegateClass">org.quartz.impl.jdbcjobstore.StdJDBCDelegate</prop>
 
                 <prop key="org.quartz.jobStore.isClustered">${domibus.deployment.clustered}</prop>
-                <prop key="org.quartz.jobStore.clusterCheckinInterval">20000
-                </prop>
+                <prop key="org.quartz.jobStore.clusterCheckinInterval">20000</prop>
 
                 <prop key="org.quartz.jobStore.useProperties">false</prop>
-
-                <prop key="org.quartz.scheduler.instanceName">
-                    SgsClusteredScheduler
-                </prop>
+                <prop key="org.quartz.scheduler.instanceName">SgsClusteredScheduler</prop>
                 <prop key="org.quartz.scheduler.instanceId">AUTO</prop>
                 <prop key="org.quartz.scheduler.jmx.export">true</prop>
                 <prop key="org.quartz.threadExecutor.class">eu.domibus.quartz.DomibusQuartzThreadExecutor</prop>

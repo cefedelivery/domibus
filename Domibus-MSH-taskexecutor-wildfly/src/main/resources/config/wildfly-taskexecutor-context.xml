@@ -12,9 +12,15 @@
     <bean id="domibusExecutorService" class="eu.domibus.taskexecutor.wildfly.DomibusExecutorServiceFactory">
         <property name="executorServiceJndiName" value="java:jboss/ee/concurrency/executor/DomibusExecutorService"/>
     </bean>
+    <bean id="quartzExecutorService" class="eu.domibus.taskexecutor.wildfly.DomibusExecutorServiceFactory">
+        <property name="executorServiceJndiName" value="java:jboss/ee/concurrency/executor/QuartzExecutorService"/>
+    </bean>
 
     <bean id="taskExecutor" class="eu.domibus.taskexecutor.wildfly.DomibusWildFlyTaskExecutor">
         <property name="executorService" ref="domibusExecutorService"/>
+    </bean>
+    <bean id="quartzTaskExecutor" class="eu.domibus.taskexecutor.wildfly.DomibusWildFlyTaskExecutor">
+        <property name="executorService" ref="quartzExecutorService"/>
     </bean>
 </beans>
 

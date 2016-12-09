@@ -1,7 +1,6 @@
 Domibus 3.3-RC1
-- Quartz integration with managed threads in WebLogic and WildFly
 - Spring services are always executing within a transaction even if there is no specific @Transactional annotation present
-- Quartz integration with managed threads in WebLogic and WildFly.
+- Quartz integration with managed threads in WebLogic and WildFly
 - During submit operation, Domibus verifies that the message is being sent by the same party as the one configured as the sending access point.
 - During MSH dispatch, Domibus verifies the validity of sender's certificate.
 - During MSH receive, Domibus verifies the trust of the sender.
