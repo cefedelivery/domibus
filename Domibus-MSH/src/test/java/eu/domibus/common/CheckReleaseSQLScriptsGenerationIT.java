@@ -64,6 +64,10 @@ public class CheckReleaseSQLScriptsGenerationIT {
 
         Assert.assertTrue("Oracle Release version DDLs should be present in " + sqlScriptsDirectory.getAbsolutePath(), checkPresenceOfFile(ORACLE_DDL_PREFIX, domibusArtifactVersionNoSnapshot, RELEASE_DDL_SUFFIX, sqlScriptsDirectory));
         Assert.assertTrue("Oracle Migration DDLs for release should be present in " + sqlScriptsDirectory.getAbsolutePath(), checkPresenceOfFile(ORACLE_DDL_PREFIX, domibusArtifactVersionNoSnapshot, MIGRATION_DDL_SUFFIX, sqlScriptsDirectory));
+        if (!StringUtils.endsWith(domibusArtifactVersionNoSnapshot, ".0")) {
+            Assert.assertFalse("Oracle Release DDLs should NOT end with .0 in " + sqlScriptsDirectory.getAbsolutePath(), checkPresenceOfFile(ORACLE_DDL_PREFIX, domibusArtifactVersionNoSnapshot + ".0", RELEASE_DDL_SUFFIX, sqlScriptsDirectory));
+            Assert.assertFalse("Oracle Migration DDLs should NOT end with .0 in " + sqlScriptsDirectory.getAbsolutePath(), checkPresenceOfFile(ORACLE_DDL_PREFIX, domibusArtifactVersionNoSnapshot + ".0", MIGRATION_DDL_SUFFIX, sqlScriptsDirectory));
+        }
     }
 
     protected void checkPresenceOfMySQLDDLs_ForRelease(String domibusArtifactVersion, File sqlScriptsDirectory) throws IOException {
@@ -74,6 +78,10 @@ public class CheckReleaseSQLScriptsGenerationIT {
 
         Assert.assertTrue("MySQL Release version DDLs should be present in " + sqlScriptsDirectory.getAbsolutePath(), checkPresenceOfFile(MYSQL_DDL_PREFIX, domibusArtifactVersionNoSnapshot, RELEASE_DDL_SUFFIX, sqlScriptsDirectory));
         Assert.assertTrue("MySQL Migration DDLs for release should be present in " + sqlScriptsDirectory.getAbsolutePath(), checkPresenceOfFile(MYSQL_DDL_PREFIX, domibusArtifactVersionNoSnapshot, MIGRATION_DDL_SUFFIX, sqlScriptsDirectory));
+        if (!StringUtils.endsWith(domibusArtifactVersionNoSnapshot, ".0")) {
+            Assert.assertFalse("MySQL Release DDLs should NOT end with .0 in " + sqlScriptsDirectory.getAbsolutePath(), checkPresenceOfFile(MYSQL_DDL_PREFIX, domibusArtifactVersionNoSnapshot + ".0", RELEASE_DDL_SUFFIX, sqlScriptsDirectory));
+            Assert.assertFalse("MySQL Migration DDLs should NOT end with .0 in " + sqlScriptsDirectory.getAbsolutePath(), checkPresenceOfFile(MYSQL_DDL_PREFIX, domibusArtifactVersionNoSnapshot + ".0", MIGRATION_DDL_SUFFIX, sqlScriptsDirectory));
+        }
     }
 
     protected void preVerifications(String domibusArtifactVersion, File sqlScriptsDirectory) {
