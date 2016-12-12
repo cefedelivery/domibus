@@ -85,6 +85,8 @@ Domibus 3.3-RC1 (from 3.2.1):
                          <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
                             <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
                          </bean>
+               - [MySQL only] For all installations of MySQL execute the SQL commands in the file mysql5innoDb-3.2-to-3.3-migration.ddl
+                              For each Domibus MySQL schema present execute the command:  alter schema <domibus_schema_name> default charset=utf8 collate=utf8_bin;
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2.1:
                - [WebLogic only]
