@@ -187,7 +187,12 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
         }
         List<JmsMessageSPI> result = new ArrayList<>();
         for (CompositeData compositeData : browse) {
-            result.add(convertCompositeData(compositeData));
+            try {
+                final JmsMessageSPI jmsMessageSPI = convertCompositeData(compositeData);
+                result.add(jmsMessageSPI);
+            } catch (Exception e) {
+                LOG.error("Error converting message [" + compositeData + "]", e);
+            }
         }
         return result;
     }
@@ -198,7 +203,10 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
         result.setType((String) data.get("JMSType"));
         result.setTimestamp((Date) data.get("JMSTimestamp"));
         result.setId((String) data.get("JMSMessageID"));
-        result.setContent((String) data.get("Text"));
+        if(data.containsKey("Text")) {
+            result.setContent((String) data.get("Text"));
+        }
+
         Map stringProperties = (Map) data.get("StringProperties");
 
         Map<String, Object> properties = new HashMap<>();

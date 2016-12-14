@@ -254,16 +254,25 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
 
 
         if (allMessageMetaData != null) {
-            for (CompositeData messageMetaData : allMessageMetaData) {
-                JmsMessageSPI message = convertMessage(messageMetaData);
-                String messageId = message.getId();
-                CompositeData messageDataDetails = (CompositeData) mbsc.invoke(destination, "getMessage", new Object[]{messageCursor, messageId}, new String[]{
-                        String.class.getName(), String.class.getName()});
-                message = convertMessage(messageDataDetails);
-                messages.add(message);
+            for (CompositeData compositeData : allMessageMetaData) {
+                try {
+                    JmsMessageSPI message = getJmsMessageSPI(destination, mbsc, messageCursor, compositeData);
+                    messages.add(message);
+                } catch (Exception e) {
+                    LOG.error("Error converting message [" + compositeData + "]", e);
+                }
             }
         }
         return messages;
+    }
+
+    private JmsMessageSPI getJmsMessageSPI(ObjectName destination, MBeanServerConnection mbsc, String messageCursor, CompositeData messageMetaData) throws Exception {
+        JmsMessageSPI message = convertMessage(messageMetaData);
+        String messageId = message.getId();
+        CompositeData messageDataDetails = (CompositeData) mbsc.invoke(destination, "getMessage", new Object[]{messageCursor, messageId}, new String[]{
+                String.class.getName(), String.class.getName()});
+        message = convertMessage(messageDataDetails);
+        return message;
     }
 
     protected JMSDestinationSPI getJMSDestinationSPI(String name) {
@@ -364,7 +373,11 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         List<Element> properties = getChildElements(propertiesRoot, "property");
         for (Element property : properties) {
             String key = property.getAttribute("name");
-            String value = getFirstChildElement(property).getTextContent();
+            final Element firstChildElement = getFirstChildElement(property);
+            String value = null;
+            if(firstChildElement != null) {
+                value = firstChildElement.getTextContent();
+            }
             message.getProperties().put(key, value);
         }
         Element jmsBody = getChildElement(root, "Body");

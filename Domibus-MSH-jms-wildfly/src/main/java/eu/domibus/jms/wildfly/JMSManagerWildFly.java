@@ -220,8 +220,9 @@ public class JMSManagerWildFly implements JMSManagerSPI {
                 List<JmsMessageSPI> result = new ArrayList<>();
                 Enumeration enumeration = browser.getEnumeration();
                 while (enumeration.hasMoreElements()) {
-                    TextMessage textMessage = (TextMessage) enumeration.nextElement();
+                    TextMessage textMessage = null;
                     try {
+                        textMessage = (TextMessage) enumeration.nextElement();
                         result.add(convert(textMessage));
                     } catch (Exception e) {
                         LOG.error("Error converting message [" + textMessage + "]", e);
@@ -231,8 +232,6 @@ public class JMSManagerWildFly implements JMSManagerSPI {
                 return result;
             }
         });
-//        Map<String, Object>[] maps = queue.listMessages(selector);
-//        return convert(maps);
     }
 
     protected JmsMessageSPI convert(TextMessage textMessage) throws JMSException {
