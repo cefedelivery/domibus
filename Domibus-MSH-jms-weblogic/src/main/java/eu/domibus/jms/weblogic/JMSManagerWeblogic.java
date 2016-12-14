@@ -6,7 +6,6 @@ import eu.domibus.jms.spi.JMSManagerSPI;
 import eu.domibus.jms.spi.JmsMessageSPI;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,9 +89,8 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
                             destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
                             destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
                         }
-                        Long numberOfMessages = (Long) mbsc.getAttribute(jmsDestination, "MessagesCurrentCount");
 
-                        destination.setNumberOfMessages(numberOfMessages);
+                        destination.setNumberOfMessages(getMessagesTotalCount(mbsc, jmsDestination));
                         destinationMap.put(destination.getName(), destination);
                     }
                 }
@@ -101,6 +99,21 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
             LOG.error("Failed to build JMS destination map", e);
         }
         return destinationMap;
+    }
+
+    protected Long getMessagesTotalCount(MBeanServerConnection mbsc, ObjectName jmsDestination) throws AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
+        Long result = 0L;
+
+        Long messagesCurrentCount = (Long) mbsc.getAttribute(jmsDestination, "MessagesCurrentCount");
+        if(messagesCurrentCount != null) {
+            result += messagesCurrentCount;
+        }
+        Long messagesPendingCount = (Long) mbsc.getAttribute(jmsDestination, "MessagesPendingCount");
+        if(messagesPendingCount != null) {
+            result += messagesPendingCount;
+        }
+
+        return result;
     }
 
     protected String getQueueName(String destinationName) {
