@@ -229,6 +229,9 @@ public class JMSManagerActiveMQTest {
                 data.get("JMSMessageID");
                 result = jmsId1;
 
+                data.containsKey("Text");
+                result = true;
+
                 data.get("Text");
                 result = textMessage;
 
@@ -258,6 +261,7 @@ public class JMSManagerActiveMQTest {
             }
         };
 
+
         JmsMessageSPI jmsMessageSPI = jmsManagerActiveMQ.convertCompositeData(data);
 
         assertEquals(jmsMessageSPI.getType(), jmsType);
@@ -279,6 +283,26 @@ public class JMSManagerActiveMQTest {
 
         new Expectations(jmsManagerActiveMQ) {{
             jmsManagerActiveMQ.convertCompositeData(data1);
+            result = jmsMessageSPI1;
+        }};
+
+        final List<JmsMessageSPI> jmsMessageSPIs = jmsManagerActiveMQ.convertCompositeData(compositeDatas);
+        assertNotNull(jmsMessageSPIs);
+        assertEquals(jmsMessageSPIs.size(), 1);
+        assertEquals(jmsMessageSPIs.iterator().next(), jmsMessageSPI1);
+    }
+
+    @Test
+    public void testConvertCompositeDataArrayWhenAMessageCannotBeConverted(final @Injectable CompositeData data1,
+                                                                           final @Injectable CompositeData data2,
+                                              final @Injectable JmsMessageSPI jmsMessageSPI1) throws Exception {
+        CompositeData[] compositeDatas = new CompositeData[]{data1, data2};
+
+        new Expectations(jmsManagerActiveMQ) {{
+            jmsManagerActiveMQ.convertCompositeData(data1);
+            result = new RuntimeException("Simulating a message conversion error");
+
+            jmsManagerActiveMQ.convertCompositeData(data2);
             result = jmsMessageSPI1;
         }};
 
