@@ -31,7 +31,7 @@ public class JMXHelper {
 
     private static final String ADMIN_URL_PROPERTY = "weblogic.management.server";
     private static final String DOMIBUS_JMX_USER_PROP = "domibus.jmx.user";
-    private static final String DOMIBUS_JMX_PASSWORD_PROP = "domibus.jmx.password";
+    private static final String DOMIBUS_JMX_PASSWD_PROP = "domibus.jmx.password";
 
     private static final Log LOG = LogFactory.getLog(JMXHelper.class);
 
@@ -113,7 +113,7 @@ public class JMXHelper {
             LOG.info("The property [" + DOMIBUS_JMX_USER_PROP + "] is not configured. Using the configuration from boot.properties ");
             return securityHelper.getBootIdentity();
         }
-        final String jmxPassword = domibusProperties.getProperty(DOMIBUS_JMX_PASSWORD_PROP);
+        final String jmxPassword = domibusProperties.getProperty(DOMIBUS_JMX_PASSWD_PROP);
         Map<String, String> credentialsMap = new HashMap<>();
         credentialsMap.put("username", jmxUser);
         credentialsMap.put("password", jmxPassword);
