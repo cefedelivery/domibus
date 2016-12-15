@@ -197,6 +197,10 @@ class Domibus
         else{
             messageID=findReturnedMessageID();
         }
+		
+		if(bonusTime){
+            waitMax=500000;
+        }
         openConnection();
         if(SMSH){
             while(((messageStatus!=SMSH)&&(waitMax>0))||(wait)){
@@ -204,7 +208,8 @@ class Domibus
                 if(waitMax>0){
                     waitMax=waitMax-interval;
                 }
-                //log.info "WAIT: "+waitMax;
+				log.info "maxNumberAttempts-numberAttempts: "+maxNumberAttempts+"-"+numberAttempts;
+                log.info "WAIT: "+waitMax;
                 sqlBlue.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = ${messageID}"){
                     messageStatus=it.MESSAGE_STATUS;
                     numberAttempts=it.SEND_ATTEMPTS;
@@ -222,9 +227,6 @@ class Domibus
             assert(messageStatus.toLowerCase()==SMSH.toLowerCase()),"Error:waitForStatus: Message in the sender side has status "+messageStatus+" instead of "+SMSH+".";
         }
         waitMax=10000;
-        if(bonusTime){
-            waitMax=500000;
-        }
         messageStatus="INIT";
         if(RMSH){
             while((messageStatus!=RMSH)&&(waitMax>0)){
@@ -279,33 +281,35 @@ class Domibus
             proc.waitFor();
         }
         assert((!errorCatcher)&&(proc!=null)),"Error:startMSH: Error while trying to stop the MSH.";
-        sleep(2000);
+        sleep(5000);
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Clean all the messages from the DB
     def cleanDatabaseAll(){
         openConnection();
-        sqlBlue.execute "delete from TB_RECEIPT_DATA"; sqlBlue.execute "delete from TB_RECEIPT";
+		sqlBlue.execute "delete from TB_RECEIPT_DATA";	
         sqlBlue.execute "delete from TB_PROPERTY";
         sqlBlue.execute "delete from TB_PART_INFO";
         sqlBlue.execute "delete from TB_PARTY_ID";
-        sqlBlue.execute "delete from TB_PARTY_ID";
+        //sqlBlue.execute "delete from TB_PARTY_ID";
         sqlBlue.execute "delete from TB_MESSAGING";
         sqlBlue.execute "delete from TB_ERROR";
         sqlBlue.execute "delete from TB_USER_MESSAGE";
         sqlBlue.execute "delete from TB_SIGNAL_MESSAGE";
+		sqlBlue.execute "delete from TB_RECEIPT";
         sqlBlue.execute "delete from TB_MESSAGE_INFO";
         sqlBlue.execute "delete from TB_MESSAGE_LOG";
+		
         sqlRed.execute "delete from TB_RECEIPT_DATA";
-        sqlRed.execute "delete from TB_RECEIPT";
         sqlRed.execute "delete from TB_PROPERTY";
         sqlRed.execute "delete from TB_PART_INFO";
         sqlRed.execute "delete from TB_PARTY_ID";
-        sqlRed.execute "delete from TB_PARTY_ID";
+        //sqlRed.execute "delete from TB_PARTY_ID";
         sqlRed.execute "delete from TB_MESSAGING";
         sqlRed.execute "delete from TB_ERROR";
         sqlRed.execute "delete from TB_USER_MESSAGE";
         sqlRed.execute "delete from TB_SIGNAL_MESSAGE";
+		sqlRed.execute "delete from TB_RECEIPT";
         sqlRed.execute "delete from TB_MESSAGE_INFO";
         sqlRed.execute "delete from TB_MESSAGE_LOG";
         closeConnection();
@@ -324,10 +328,11 @@ class Domibus
         sqlBlue.execute "delete from TB_MESSAGING where (SIGNAL_MESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))) OR (USER_MESSAGE_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})))";
         sqlBlue.execute "delete from TB_ERROR where SIGNALMESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
         sqlBlue.execute "delete from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})";
-        sqlBlue.execute "delete from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})";
-        sqlBlue.execute "delete from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}";
+        sqlBlue.execute "delete from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where ((MESSAGE_ID = ${messageID}) OR (REF_TO_MESSAGE_ID = ${messageID})))";
+        sqlBlue.execute "delete from TB_MESSAGE_INFO where ((MESSAGE_ID = ${messageID}) OR (REF_TO_MESSAGE_ID = ${messageID}))";
         sqlBlue.execute "delete from TB_MESSAGE_LOG where MESSAGE_ID = ${messageID}";
-        sqlRed.execute "delete from TB_RECEIPT_DATA where RECEIPT_ID IN (select ID_PK from TB_RECEIPT where ID_PK IN(select receipt_ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})))";
+		
+        sqlRed.execute "delete from TB_RECEIPT_DATA where RECEIPT_ID IN (select ID_PK from TB_RECEIPT where ID_PK IN(select receipt_ID_PK from TB_SIGNAL_message where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})))";
         sqlRed.execute "delete from TB_RECEIPT where ID_PK IN(select receipt_ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
         sqlRed.execute "delete from TB_PROPERTY where MESSAGEPROPERTIES_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
         sqlRed.execute "delete from TB_PROPERTY where PARTPROPERTIES_ID IN (select ID_PK from TB_PART_INFO where PAYLOADINFO_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})))";
@@ -337,8 +342,8 @@ class Domibus
         sqlRed.execute "delete from TB_MESSAGING where (SIGNAL_MESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))) OR (USER_MESSAGE_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})))";
         sqlRed.execute "delete from TB_ERROR where SIGNALMESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
         sqlRed.execute "delete from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})";
-        sqlRed.execute "delete from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})";
-        sqlRed.execute "delete from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}";
+        sqlRed.execute "delete from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where ((MESSAGE_ID = ${messageID}) OR (REF_TO_MESSAGE_ID = ${messageID})))";
+        sqlRed.execute "delete from TB_MESSAGE_INFO where ((MESSAGE_ID = ${messageID}) OR (REF_TO_MESSAGE_ID = ${messageID}))";
         sqlRed.execute "delete from TB_MESSAGE_LOG where MESSAGE_ID = ${messageID}";
         closeConnection();
     }

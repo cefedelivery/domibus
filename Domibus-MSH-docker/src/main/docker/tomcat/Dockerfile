@@ -9,6 +9,9 @@ ENV DOMIBUS_VERSION ${DOMIBUS_VERSION:-3.3-SNAPSHOT}
 ARG ARTIFACTS_REPOSITORY
 ENV ARTIFACTS_REPOSITORY ${ARTIFACTS_REPOSITORY}
 
+ARG SOURCE_CODE
+ENV SOURCE_CODE ${SOURCE_CODE}
+
 ARG PARTY
 ENV PARTY ${PARTY:-blue}
 ENV PMODE_NAME "domibus-gw-sample-pmode-$PARTY.xml"
@@ -30,13 +33,18 @@ RUN apt-get install -y wget
 RUN apt-get install unzip
 RUN apt-get install curl
 
-RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip \
+RUN cp $SOURCE_CODE/domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip \
     && unzip -d $TOMCAT_FULL_DISTRIBUTION domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip
-RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip \
+RUN cp $SOURCE_CODE/domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip \
     && unzip -d $DOMIBUS_DIST domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip
+
+#RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip \
+#    && unzip -d $TOMCAT_FULL_DISTRIBUTION domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip
+#RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip \
+#    && unzip -d $DOMIBUS_DIST domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip
+
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-
 RUN wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
     && unzip -d $DOMIBUS_DIST $MYSQL_CONNECTOR.zip
 

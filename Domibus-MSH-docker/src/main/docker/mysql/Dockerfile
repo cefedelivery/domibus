@@ -11,6 +11,10 @@ ENV DOMIBUS_VERSION ${DOMIBUS_VERSION:-3.3-SNAPSHOT}
 ARG ARTIFACTS_REPOSITORY
 ENV ARTIFACTS_REPOSITORY ${ARTIFACTS_REPOSITORY}
 
+#/Users/idragusa/work/cef_git/domibus/Domibus-MSH
+ARG SOURCE_CODE
+ENV SOURCE_CODE ${SOURCE_CODE}
+
 ENV SQL_SCRIPTS_URL ./domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip
 ENV SQL_SCRIPTS_HOME /usr/local/domibusSql
 
@@ -18,8 +22,11 @@ RUN apt-get update
 RUN apt-get install -y wget
 RUN apt-get install unzip
 
-RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip \
+RUN cp $SOURCE_CODE/target/domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip . \
     && unzip  -d $SQL_SCRIPTS_HOME domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip
+
+#RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip \
+#    && unzip  -d $SQL_SCRIPTS_HOME domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip
 
 RUN cp $SQL_SCRIPTS_HOME/sql-scripts/mysql5innoDb-$SQLSCRIPTS_VERSION.ddl /docker-entrypoint-initdb.d/mysql5innoDb-$SQLSCRIPTS_VERSION.sql
 
