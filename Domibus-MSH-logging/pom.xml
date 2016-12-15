@@ -10,9 +10,9 @@
         <artifactId>domibus</artifactId>
         <version>3.3-SNAPSHOT</version>
     </parent>
-    <artifactId>domibus-api</artifactId>
+    <artifactId>domibus-logging</artifactId>
     <packaging>jar</packaging>
-	<name>Domibus MSH API</name>
+	<name>Domibus MSH Logging</name>
 
     <build>
         <plugins>
@@ -25,18 +25,20 @@
 
     <dependencies>
         <dependency>
-            <groupId>eu.domibus</groupId>
-            <artifactId>domibus-logging</artifactId>
-            <version>${project.version}</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-ext</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
+        </dependency>        
     </dependencies>
 </project>

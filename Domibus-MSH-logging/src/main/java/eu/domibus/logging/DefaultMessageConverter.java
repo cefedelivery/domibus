@@ -1,0 +1,33 @@
+package eu.domibus.logging;
+
+import eu.domibus.logging.api.MessageCode;
+import eu.domibus.logging.api.MessageConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+
+import java.util.Arrays;
+
+/**
+ * @author Cosmin Baciu
+ */
+public class DefaultMessageConverter implements MessageConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMessageConverter.class);
+
+    @Override
+    public String getMessage(Marker marker, MessageCode messageCode, Object... args) {
+        String message = null;
+        try {
+            message = String.format(messageCode.getMessage(), (Object[]) args);
+        } catch (final Throwable throwable) {
+            LOGGER.debug("Could not format the code [" + messageCode.getCode() + "]: message [" + messageCode.getMessage() + "] and arguments [" + Arrays.asList(args) + "]");
+            message = messageCode.getMessage();
+        }
+        if (marker != null) {
+            return "[" + marker + " - " + messageCode.getCode() + "] " + message;
+        } else {
+            return "[" + messageCode.getCode() + "] " + message;
+        }
+    }
+}
