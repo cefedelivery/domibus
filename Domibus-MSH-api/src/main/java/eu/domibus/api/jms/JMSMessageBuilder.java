@@ -23,13 +23,13 @@ public class JMSMessageBuilder {
         return this;
     }
 
-    public JMSMessageBuilder type(String content) {
+    public JMSMessageBuilder content(String content) {
         jmsMessage.setContent(content);
         return this;
     }
 
-    public JMSMessageBuilder type(Date type) {
-        jmsMessage.setTimestamp(type);
+    public JMSMessageBuilder timestamp(Date timestamp) {
+        jmsMessage.setTimestamp(timestamp);
         return this;
     }
 
