@@ -1,8 +1,8 @@
 package eu.domibus.ebms3.security.util;
 
 import eu.domibus.common.AuthRole;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.interceptor.security.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +21,7 @@ import java.util.Properties;
 @Component(value = "authUtils")
 public class AuthUtils {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AuthUtils.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuthUtils.class);
 
     private static final String UNSECURE_LOGIN_ALLOWED = "domibus.auth.unsecureLoginAllowed";
 

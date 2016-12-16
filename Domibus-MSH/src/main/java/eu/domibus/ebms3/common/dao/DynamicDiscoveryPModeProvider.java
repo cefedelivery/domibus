@@ -30,8 +30,8 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +51,7 @@ import java.util.HashSet;
  */
 public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DynamicDiscoveryPModeProvider.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryPModeProvider.class);
     @Autowired
     protected CryptoService cryptoService;
     @Autowired

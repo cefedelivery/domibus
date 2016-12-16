@@ -1,8 +1,8 @@
 package eu.domibus.plugin.webService.dao;
 
 import eu.domibus.plugin.webService.entity.AbstractBaseEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +18,7 @@ import java.util.Collection;
  */
 
 public abstract class BasicDao<T extends AbstractBaseEntity> {
-    protected static final Logger LOG = LoggerFactory.getLogger(BasicDao.class);
+    protected static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BasicDao.class);
     private final Class<T> typeOfT;
 
     @PersistenceContext

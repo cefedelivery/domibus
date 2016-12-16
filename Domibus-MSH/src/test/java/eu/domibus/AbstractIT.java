@@ -8,8 +8,8 @@ import eu.domibus.common.NotificationType;
 import eu.domibus.configuration.Storage;
 import eu.domibus.messaging.MessageConstants;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -79,7 +79,7 @@ public abstract class AbstractIT {
 
     private static boolean initialized;
 
-    protected static final Logger LOG = LoggerFactory.getLogger(AbstractIT.class);
+    protected static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractIT.class);
 
     @Autowired
     protected DataSource dataSource;

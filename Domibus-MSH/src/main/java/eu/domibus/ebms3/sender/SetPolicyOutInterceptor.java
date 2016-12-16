@@ -25,8 +25,8 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.ebms3.common.model.PolicyFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.attachment.AttachmentImpl;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -59,7 +59,7 @@ import java.util.Iterator;
  * @since 3.0
  */
 public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
-    private static final Logger LOG = LoggerFactory.getLogger(SetPolicyOutInterceptor.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SetPolicyOutInterceptor.class);
 
     @Autowired
     private PModeProvider pModeProvider;

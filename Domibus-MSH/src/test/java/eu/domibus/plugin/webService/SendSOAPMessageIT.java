@@ -3,6 +3,8 @@ package eu.domibus.plugin.webService;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.AbstractIT;
 import eu.domibus.common.validators.XmlValidationEventHandler;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,8 +26,6 @@ import javax.xml.ws.Service;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -55,7 +55,7 @@ public class SendSOAPMessageIT extends AbstractIT {
             url = SendSOAPMessageIT.class.getClassLoader().getResource("schemas/BackendService_1_1.wsdl");
         }
         if (url == null) {
-            Logger.getLogger(SendSOAPMessageIT.class.getName()).log(Level.SEVERE, "Can not initialize the default wsdl from {0}", "schemas/BackendService_1_1.wsdl");
+            DomibusLoggerFactory.getLogger(SendSOAPMessageIT.class.getName()).error("Can not initialize the default wsdl from {0}", "schemas/BackendService_1_1.wsdl");
             assert false;
         }
         WSDL_LOCATION = url;

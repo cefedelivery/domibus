@@ -19,8 +19,8 @@
 
 package eu.domibus.ebms3.sender;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.jsse.TLSClientParametersConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -38,7 +38,7 @@ import java.nio.file.Paths;
 public class TLSReader {
     public static final String CLIENTAUTHENTICATION_XML = "clientauthentication.xml";
 
-    private static final Logger LOG = LoggerFactory.getLogger(TLSReader.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TLSReader.class);
 
     @Cacheable("tlsCache")
     public TLSClientParameters getTlsClientParameters() {

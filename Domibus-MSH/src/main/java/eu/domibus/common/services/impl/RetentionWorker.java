@@ -21,8 +21,8 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.ebms3.security.util.AuthUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -37,7 +37,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 public class RetentionWorker extends QuartzJobBean {
 
 
-    private static final Logger LOG = LoggerFactory.getLogger(RetentionWorker.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RetentionWorker.class);
 
 
     @Autowired

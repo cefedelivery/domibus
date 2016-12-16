@@ -1,8 +1,8 @@
 package eu.domibus.common.util;
 
 import mockit.integration.junit4.JMockit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertNotEquals;
 @RunWith(JMockit.class)
 public class DomibusPropertiesServiceTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DomibusPropertiesServiceTest.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusPropertiesServiceTest.class);
 
     @Test
     public void testDisplayVersion() throws Exception {

@@ -9,8 +9,8 @@ import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +26,7 @@ import static org.springframework.util.StringUtils.hasLength;
  */
 public class CachingPModeProvider extends PModeProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CachingPModeProvider.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CachingPModeProvider.class);
 
     //Dont access directly, use getter instead
     private Configuration configuration;

@@ -33,8 +33,8 @@ import eu.domibus.ebms3.common.model.DelayedDispatchMessageCreator;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.messaging.MessageConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -59,7 +59,7 @@ import javax.xml.ws.soap.SOAPFaultException;
 @Service(value = "messageSenderService")
 public class MessageSender implements MessageListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MessageSender.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageSender.class);
 
     private final String UNRECOVERABLE_ERROR_RETRY = "domibus.dispatch.ebms.error.unrecoverable.retry";
 

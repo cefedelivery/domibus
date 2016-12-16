@@ -34,8 +34,8 @@ import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.common.model.SignalMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -52,7 +52,7 @@ import javax.xml.soap.SOAPMessage;
 @Service
 public class ResponseHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(ResponseHandler.class);
+    private static final DomibusLogger logger = DomibusLoggerFactory.getLogger(ResponseHandler.class);
 
     @Autowired
     @Qualifier("jaxbContextEBMS")

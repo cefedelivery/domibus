@@ -1,8 +1,8 @@
 package eu.domibus.pki;
 
 import eu.domibus.wss4j.common.crypto.CryptoService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
@@ -20,7 +20,7 @@ import java.util.Properties;
 @Service
 public class CertificateServiceImpl implements CertificateService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CertificateServiceImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CertificateServiceImpl.class);
 
     @Autowired
     CRLService crlService;

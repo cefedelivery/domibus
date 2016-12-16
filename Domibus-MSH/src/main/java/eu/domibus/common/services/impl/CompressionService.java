@@ -9,8 +9,8 @@ import eu.domibus.ebms3.common.model.CompressionMimeTypeBlacklist;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +30,7 @@ import java.io.OutputStream;
 public class CompressionService {
     public static final String COMPRESSION_PROPERTY_KEY = "CompressionType";
     public static final String COMPRESSION_PROPERTY_VALUE = "application/gzip";
-    private static final Logger LOG = LoggerFactory.getLogger(CompressionService.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CompressionService.class);
     @Autowired
     private CompressionMimeTypeBlacklist blacklist;
 

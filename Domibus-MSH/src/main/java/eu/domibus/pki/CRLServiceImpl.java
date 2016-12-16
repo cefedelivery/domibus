@@ -1,7 +1,7 @@
 package eu.domibus.pki;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 public class CRLServiceImpl implements CRLService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CRLServiceImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CRLServiceImpl.class);
 
     @Autowired
     protected CRLUtil crlUtil;

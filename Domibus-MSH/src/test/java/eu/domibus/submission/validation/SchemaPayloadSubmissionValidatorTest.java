@@ -7,8 +7,8 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ import java.util.Set;
 @RunWith(JMockit.class)
 public class SchemaPayloadSubmissionValidatorTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SchemaPayloadSubmissionValidator.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SchemaPayloadSubmissionValidator.class);
 
     @Injectable
     JAXBContext jaxbContext;

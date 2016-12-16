@@ -7,8 +7,8 @@ import eu.domibus.jms.spi.JmsMessageSPI;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.hornetq.api.jms.management.JMSQueueControl;
 import org.hornetq.api.jms.management.JMSServerControl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ import java.util.*;
 @Component
 public class JMSManagerWildFly implements JMSManagerSPI {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JMSManagerWildFly.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMSManagerWildFly.class);
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
     private static final String PROPERTY_JNDI_NAME = "Jndi";

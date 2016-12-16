@@ -3,8 +3,8 @@ package eu.domibus.common.dao;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.UserMessageLog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
@@ -26,7 +26,7 @@ import java.util.List;
 @Repository
 public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UserMessageLogDao.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageLogDao.class);
 
     public UserMessageLogDao() {
         super(UserMessageLog.class);

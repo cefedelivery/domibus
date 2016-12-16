@@ -5,8 +5,8 @@ import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +33,7 @@ import java.util.Properties;
 @RunWith(JMockit.class)
 public class BackendMessageValidatorTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BackendMessageValidatorTest.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendMessageValidatorTest.class);
 
     private static final String DOMIBUS_CONFIGURATION_FILE = "domibus-configuration.xml";
 

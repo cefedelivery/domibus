@@ -5,8 +5,8 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.util.JsonUtil;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,7 +30,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @Controller
 public class JmsMonitoringController {
 
-    private final static Logger LOG = LoggerFactory.getLogger(JmsMonitoringController.class);
+    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(JmsMonitoringController.class);
 
     @Autowired
     JMSManager jmsManager;

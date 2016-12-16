@@ -24,8 +24,8 @@ import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.handler.AbstractFaultHandler;
 import eu.domibus.ebms3.common.model.Messaging;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.xml.namespace.QName;
@@ -41,7 +41,7 @@ import java.util.Set;
  */
 public class FaultOutHandler extends AbstractFaultHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FaultOutHandler.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FaultOutHandler.class);
 
     @Autowired
     private ErrorLogDao errorLogDao;

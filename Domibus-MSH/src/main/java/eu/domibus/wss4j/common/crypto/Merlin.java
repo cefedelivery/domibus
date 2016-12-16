@@ -20,8 +20,8 @@
 package eu.domibus.wss4j.common.crypto;
 
 import eu.domibus.spring.SpringContextProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.wss4j.common.crypto.PasswordEncryptor;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -35,7 +35,7 @@ import java.util.Properties;
 @Configurable
 public class Merlin extends org.apache.wss4j.common.crypto.Merlin {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Merlin.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(Merlin.class);
 
     private CryptoService cryptoService;
 

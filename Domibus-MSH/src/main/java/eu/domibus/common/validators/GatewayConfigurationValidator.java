@@ -2,8 +2,8 @@ package eu.domibus.common.validators;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -19,7 +19,7 @@ import java.util.Properties;
  */
 public class GatewayConfigurationValidator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GatewayConfigurationValidator.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(GatewayConfigurationValidator.class);
 
     private static final String BLUE_GW_ALIAS = "blue_gw";
 

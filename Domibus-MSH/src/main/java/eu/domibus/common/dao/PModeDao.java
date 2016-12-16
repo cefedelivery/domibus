@@ -25,8 +25,8 @@ import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
@@ -43,7 +43,7 @@ import java.util.List;
 @Transactional
 public class PModeDao extends PModeProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PModeDao.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeDao.class);
 
 
     @Override

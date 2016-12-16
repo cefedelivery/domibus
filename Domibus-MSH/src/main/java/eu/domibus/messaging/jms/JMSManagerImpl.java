@@ -6,8 +6,8 @@ import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.jms.spi.JMSDestinationSPI;
 import eu.domibus.jms.spi.JMSManagerSPI;
 import eu.domibus.jms.spi.JmsMessageSPI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +25,7 @@ import java.util.Map;
 @Transactional
 public class JMSManagerImpl implements JMSManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JMSManagerImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMSManagerImpl.class);
 
     @Autowired
     JMSManagerSPI jmsManagerSPI;

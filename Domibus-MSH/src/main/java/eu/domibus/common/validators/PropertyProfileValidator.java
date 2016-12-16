@@ -25,8 +25,8 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Property;
 import eu.domibus.common.model.configuration.PropertySet;
 import eu.domibus.ebms3.common.model.Messaging;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +42,7 @@ import java.util.Set;
 
 @Service
 public class PropertyProfileValidator {
-    private static final Logger LOG = LoggerFactory.getLogger(PropertyProfileValidator.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PropertyProfileValidator.class);
 
     @Autowired
     private PModeProvider pModeProvider;

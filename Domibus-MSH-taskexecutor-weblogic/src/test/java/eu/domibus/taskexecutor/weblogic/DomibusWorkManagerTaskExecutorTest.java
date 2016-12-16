@@ -9,8 +9,8 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.task.TaskRejectedException;
@@ -29,7 +29,7 @@ import static org.junit.Assert.fail;
 @RunWith(JMockit.class)
 public class DomibusWorkManagerTaskExecutorTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DomibusWorkManagerTaskExecutorTest.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusWorkManagerTaskExecutorTest.class);
 
     @Tested
     DomibusWorkManagerTaskExecutor domibusWorkManagerTaskExecutor;

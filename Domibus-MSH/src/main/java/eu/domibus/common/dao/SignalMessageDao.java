@@ -20,8 +20,8 @@
 package eu.domibus.common.dao;
 
 import eu.domibus.ebms3.common.model.SignalMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +38,7 @@ import java.util.List;
 @Repository
 public class SignalMessageDao extends BasicDao<SignalMessage> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SignalMessageDao.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SignalMessageDao.class);
 
     public SignalMessageDao() {
         super(SignalMessage.class);

@@ -21,8 +21,8 @@ package eu.domibus.submission;
 
 import eu.domibus.plugin.BackendConnector;
 import eu.domibus.plugin.NotificationListenerService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -36,7 +36,7 @@ import java.util.Properties;
 
 public class WeblogicNotificationListenerService extends NotificationListenerService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(WeblogicNotificationListenerService.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(WeblogicNotificationListenerService.class);
 
     @Autowired
     @Qualifier("domibusProperties")

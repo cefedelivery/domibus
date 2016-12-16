@@ -28,8 +28,8 @@ import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.sender.MSHDispatcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.attachment.AttachmentDataSource;
 import org.apache.cxf.binding.soap.HeaderUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -77,7 +77,7 @@ import java.util.Set;
  */
 public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SetPolicyInInterceptor.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SetPolicyInInterceptor.class);
     private JAXBContext jaxbContext;
     @Autowired
     private PModeProvider pModeProvider;

@@ -2,8 +2,8 @@ package eu.domibus.ebms3.common.handler;
 
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -23,7 +23,7 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
  * @since 3.0
  */
 public abstract class AbstractFaultHandler implements SOAPHandler<SOAPMessageContext> {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractFaultHandler.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractFaultHandler.class);
 
     @Qualifier("jaxbContextEBMS")
     @Autowired

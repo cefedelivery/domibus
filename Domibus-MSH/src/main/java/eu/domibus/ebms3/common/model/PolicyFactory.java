@@ -20,8 +20,8 @@
 package eu.domibus.ebms3.common.model;
 
 import eu.domibus.common.exception.ConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.neethi.Policy;
@@ -40,7 +40,7 @@ import java.io.IOException;
 @Service
 public class PolicyFactory {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PolicyFactory.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PolicyFactory.class);
 
     @Cacheable("policyCache")
     public Policy parsePolicy(final String location) throws ConfigurationException {

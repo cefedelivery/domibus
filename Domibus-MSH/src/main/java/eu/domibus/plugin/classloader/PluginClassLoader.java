@@ -1,7 +1,7 @@
 package eu.domibus.plugin.classloader;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class PluginClassLoader extends URLClassLoader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PluginClassLoader.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginClassLoader.class);
 
     public PluginClassLoader(File file, ClassLoader parent) throws MalformedURLException {
         super(discoverPlugins(file), parent);

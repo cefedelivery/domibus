@@ -7,8 +7,8 @@ import eu.domibus.jms.spi.JmsMessageSPI;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Component;
@@ -35,7 +35,7 @@ import java.util.*;
 @Component
 public class JMSManagerWeblogic implements JMSManagerSPI {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JMSManagerWeblogic.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMSManagerWeblogic.class);
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
     private static final String PROPERTY_JNDI_NAME = "Jndi";

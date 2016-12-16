@@ -2,8 +2,8 @@ package eu.domibus.util;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -28,7 +28,7 @@ import java.util.Properties;
 @Service
 public class HttpUtilImpl implements HttpUtil {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HttpUtilImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(HttpUtilImpl.class);
 
     @Autowired
     @Qualifier("domibusProperties")
