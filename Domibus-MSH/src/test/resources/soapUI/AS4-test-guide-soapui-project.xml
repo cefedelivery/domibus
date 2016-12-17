@@ -622,18 +622,18 @@
                <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
             </con:settings>
             <con:encoding>UTF-8</con:encoding>
-            <con:endpoint>http://localhost:9080/domibus/services/backend</con:endpoint>
+            <con:endpoint>${#Project#localUrl}/domibus/services/backend</con:endpoint>
             <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
    <soap:Header>
       <ns:Messaging>
          <ns:UserMessage>
             <ns:PartyInfo>
                <ns:From>
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
                   <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
                </ns:From>
                <ns:To>
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
                   <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
                </ns:To>
             </ns:PartyInfo>
@@ -733,7 +733,7 @@
 
    <con:testStep type="delay" name="waitConditional" id="a357409c-309d-4f30-bb64-53917cf27cf4">
       <con:settings/>
-      <con:config><delay>5000</delay></con:config>
+      <con:config><delay>10000</delay></con:config>
    </con:testStep>
    <con:testStep type="request" name="checkIfMessageIsAvailable" id="0da2589e-1520-4448-87d5-6bca71a09688">
       <con:settings/>

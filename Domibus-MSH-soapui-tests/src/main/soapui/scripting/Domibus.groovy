@@ -197,7 +197,7 @@ class Domibus
         else{
             messageID=findReturnedMessageID();
         }
-		
+        log.info "messageID: " + messageID
 		if(bonusTime){
             waitMax=500000;
         }
@@ -210,7 +210,7 @@ class Domibus
                 }
 				log.info "maxNumberAttempts-numberAttempts: "+maxNumberAttempts+"-"+numberAttempts;
                 log.info "WAIT: "+waitMax;
-                sqlBlue.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = ${messageID}"){
+                sqlBlue.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
                     messageStatus=it.MESSAGE_STATUS;
                     numberAttempts=it.SEND_ATTEMPTS;
                 }
@@ -223,7 +223,7 @@ class Domibus
                     }
                 }
             }
-            assert(messageStatus!="INIT"),"Error:waitForStatus: Message "+messageID+" is not present in the sender side.";
+            assert(messageStatus!="INIT"),"Error:waitForStatus: Message "+messageID+" is not present in the sender side."+messageStatus;
             assert(messageStatus.toLowerCase()==SMSH.toLowerCase()),"Error:waitForStatus: Message in the sender side has status "+messageStatus+" instead of "+SMSH+".";
         }
         waitMax=10000;
@@ -232,7 +232,7 @@ class Domibus
             while((messageStatus!=RMSH)&&(waitMax>0)){
                 sleep(interval);
                 waitMax=waitMax-interval;
-                sqlRed.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = ${messageID}"){
+                sqlRed.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
                     messageStatus=it.MESSAGE_STATUS;
                 }
             }

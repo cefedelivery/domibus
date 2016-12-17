@@ -52,9 +52,7 @@
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
                     <testSuite>Web Service Submission</testSuite>
-                    <!--<testCase>Dom000-Clean Database</testCase>-->
-                    <!--<testCase>Dom001-Submit Message-Basic Flow</testCase>-->
-                    <!--<testCase>Dom011-Submit message-Exceptional flow-Data-Message ID-Maximum length</testCase>-->
+                    <!--<testCase>Dom118-Submit message-Data-AgreementRefId-Value</testCase>-->
                     <projectProperties>
                         <value>localUrl=http://localhost:8080</value>
                         <value>remoteUrl=http://localhost:9080</value>
