@@ -38,26 +38,34 @@ public class DomibusLogger extends CategoryLogger {
         securityWarn(key, null, args);
     }
 
-    public void securityWarn(DomibusMessageCode key, Throwable t, Object... args) {
-        warn(SECURITY_MARKER, key, args);
+    protected void markerWarn(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
+        warn(marker, key, args);
 
         if (t != null) {
-            final String message = formatMessage(SECURITY_MARKER, key, args);
+            final String message = formatMessage(marker, key, args);
             warn(message, t);
         }
+    }
+
+    public void securityWarn(DomibusMessageCode key, Throwable t, Object... args) {
+        markerWarn(SECURITY_MARKER, key, t, args);
     }
 
     public void securityError(DomibusMessageCode key, Object... args) {
         securityError(key, null, args);
     }
 
-    public void securityError(DomibusMessageCode key, Throwable t, Object... args) {
-        error(SECURITY_MARKER, key, args);
+    protected void markerError(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
+        error(marker, key, args);
 
         if (t != null) {
-            final String message = formatMessage(SECURITY_MARKER, key, args);
+            final String message = formatMessage(marker, key, args);
             error(message, t);
         }
+    }
+
+    public void securityError(DomibusMessageCode key, Throwable t, Object... args) {
+        markerError(SECURITY_MARKER, key, t, args);
     }
 
 

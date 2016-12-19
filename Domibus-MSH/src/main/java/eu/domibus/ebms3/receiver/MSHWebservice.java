@@ -89,7 +89,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     public static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHWebservice.class);
+    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(MSHWebservice.class);
 
     @Autowired
     private BackendNotificationService backendNotificationService;
@@ -154,7 +154,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             pmodeKey = (String) request.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
         } catch (final SOAPException soapEx) {
             //this error should never occur because pmode handling is done inside the in-interceptorchain
-            LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
+            LOGGER.error("Cannot find PModeKey property for incoming Message", soapEx);
             assert false;
         }
 
@@ -162,15 +162,15 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         Messaging messaging = null;
         boolean pingMessage = false;
         try (StringWriter sw = new StringWriter()) {
-            if (LOG.isDebugEnabled()) {
+            if (LOGGER.isDebugEnabled()) {
 
                 transformerFactory.newTransformer().transform(new DOMSource(request.getSOAPPart()), new StreamResult(sw));
 
-                LOG.debug(sw.toString());
-                LOG.debug("received attachments:");
+                LOGGER.debug(sw.toString());
+                LOGGER.debug("received attachments:");
                 final Iterator i = request.getAttachments();
                 while (i.hasNext()) {
-                    LOG.debug("attachment: "+i.next());
+                    LOGGER.debug("attachment: "+i.next());
                 }
             }
             messaging = getMessaging(request);
@@ -197,7 +197,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
                 }
             } catch (Exception ex) {
-                LOG.warn("could not notify backend of rejected message ", ex);
+                LOGGER.warn("could not notify backend of rejected message ", ex);
             }
             throw new WebServiceException(e);
         }
@@ -267,7 +267,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
 
         if (ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())) {
-            LOG.debug("Checking reliability for incoming message");
+            LOGGER.debug("Checking reliability for incoming message");
             try {
                 responseMessage = messageFactory.createMessage();
                 InputStream generateAS4ReceiptStream = this.getClass().getClassLoader().getResourceAsStream(XSLT_GENERATE_AS4_RECEIPT_XSL);
@@ -317,7 +317,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             // Saves an entry of the signal message log
             signalMessageLogDao.create(smlBuilder.build());
         } catch (JAXBException | SOAPException ex) {
-            LOG.error("Unable to save the SignalMessage due to error: ", ex);
+            LOGGER.error("Unable to save the SignalMessage due to error: ", ex);
         }
 
     }
@@ -348,7 +348,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             e.setMshRole(MSHRole.RECEIVING);
             throw e;
         }
-        LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
+        LOGGER.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
 
         try {
             messagingService.storeMessage(messaging);
@@ -389,7 +389,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         boolean bodyloadFound = false;
         for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
             final String cid = partInfo.getHref();
-            LOG.debug("looking for attachment with cid: " + cid);
+            LOGGER.debug("looking for attachment with cid: " + cid);
             boolean payloadFound = false;
             if (cid == null || cid.isEmpty() || cid.startsWith("#")) {
                 if (bodyloadFound) {
@@ -416,7 +416,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 attachmentPart = attachmentIterator.next();
                 //remove square brackets from cid for further processing
                 attachmentPart.setContentId(AttachmentUtil.cleanContentId(attachmentPart.getContentId()));
-                LOG.debug("comparing with: " + attachmentPart.getContentId());
+                LOGGER.debug("comparing with: " + attachmentPart.getContentId());
                 if (attachmentPart.getContentId().equals(AttachmentUtil.cleanContentId(cid))) {
                     partInfo.setPayloadDatahandler(attachmentPart.getDataHandler());
                     partInfo.setInBody(false);
