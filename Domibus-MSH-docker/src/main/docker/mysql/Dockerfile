@@ -15,7 +15,7 @@ ENV SQL_SCRIPTS_HOME /usr/local/domibusSql
 
 RUN apt-get update
 RUN apt-get install -y wget
-RUN apt-get install unzip
+RUN apt-get install -y unzip
 
 COPY ./domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip .
 RUN unzip  -d $SQL_SCRIPTS_HOME domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip

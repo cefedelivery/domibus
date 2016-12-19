@@ -32,8 +32,8 @@ ENV CATALINA_HOME $TOMCAT_FULL_DISTRIBUTION/domibus
 
 RUN apt-get update
 RUN apt-get install -y wget
-RUN apt-get install unzip
-RUN apt-get install curl
+RUN apt-get install -y unzip
+RUN apt-get install -y curl
 
 COPY ./domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip .
 RUN unzip  -d $TOMCAT_FULL_DISTRIBUTION domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip
