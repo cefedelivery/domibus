@@ -47,7 +47,7 @@
 
         <projectFile>${project.basedir}/src/test/resources/soapUI/AS4-test-guide-soapui-project.xml</projectFile>
         <soapui.root.folder>${project.basedir}/src/test</soapui.root.folder>
-        <soapui.localUrl>http://localhost:8080</soapui.localUrl>
+        <soapui.localUrl>http://localhost:8180</soapui.localUrl>
         <soapui.remoteUrl>http://localhost:9080</soapui.remoteUrl>
     </properties>
 

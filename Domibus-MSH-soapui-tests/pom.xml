@@ -54,7 +54,7 @@
                     <testSuite>Web Service Submission</testSuite>
                     <!--<testCase>Dom118-Submit message-Data-AgreementRefId-Value</testCase>-->
                     <projectProperties>
-                        <value>localUrl=http://localhost:8080</value>
+                        <value>localUrl=http://localhost:8180</value>
                         <value>remoteUrl=http://localhost:9080</value>
                         <value>driver=com.mysql.jdbc.Driver</value>
                         <value>jdbcUrl1=jdbc:mysql://127.0.0.1:3304/domibus</value>
