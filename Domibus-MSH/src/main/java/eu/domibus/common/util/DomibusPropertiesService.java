@@ -21,7 +21,11 @@ public class DomibusPropertiesService {
 
     private static Properties domibusProps = new Properties();
 
-    DomibusPropertiesService() {
+    public DomibusPropertiesService() {
+        init();
+    }
+
+    public void init() {
         try {
             InputStream is = getClass().getClassLoader().getResourceAsStream("domibus.properties");
             if (is == null) {

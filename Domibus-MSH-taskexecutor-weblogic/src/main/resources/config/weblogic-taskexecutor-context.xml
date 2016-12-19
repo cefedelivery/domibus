@@ -12,9 +12,15 @@
     <bean id="domibusWorkManager" class="eu.domibus.taskexecutor.weblogic.WorkManagerFactory">
         <property name="workManagerJndiName" value="java:comp/env/DomibusWorkManager"/>
     </bean>
+    <bean id="quartzWorkManager" class="eu.domibus.taskexecutor.weblogic.WorkManagerFactory">
+        <property name="workManagerJndiName" value="java:comp/env/QuartzWorkManager"/>
+    </bean>
 
     <bean id="taskExecutor" class="eu.domibus.taskexecutor.weblogic.DomibusWorkManagerTaskExecutor">
         <property name="workManager" ref="domibusWorkManager"/>
+    </bean>
+    <bean id="quartzTaskExecutor" class="eu.domibus.taskexecutor.weblogic.DomibusWorkManagerTaskExecutor">
+        <property name="workManager" ref="quartzWorkManager"/>
     </bean>
 </beans>
 

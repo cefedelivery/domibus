@@ -20,13 +20,14 @@
 package eu.domibus.common.validators;
 
 import eu.domibus.common.ErrorCode;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Payload;
 import eu.domibus.common.model.configuration.PayloadProfile;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +57,7 @@ public class PayloadProfileValidator {
             Payload profiled = null;
             final String cid = (partInfo.getHref() == null ? "" : partInfo.getHref());
             for (final Payload p : modifiableProfileList) {
-                if (p.getCid().equals(cid)) {
+                if (StringUtils.equalsIgnoreCase(p.getCid(), cid)) {
                     profiled = p;
                     break;
                 }
@@ -76,7 +77,7 @@ public class PayloadProfileValidator {
             if (mime == null) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling for this exchange requires all message parts to declare a MimeType property" + partInfo.getHref(), messaging.getUserMessage().getMessageInfo().getMessageId(), null);
             }
-            if ((!profiled.getMimeType().equalsIgnoreCase(mime)) ||
+            if ((!StringUtils.equalsIgnoreCase(profiled.getMimeType(), mime)) ||
                     (partInfo.isInBody() != profiled.isInBody()))//|| (profiled.getMaxSize() > 0 && profiled.getMaxSize() < partInfo.getBinaryData().length)) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling error: expected: " + profiled + ", got " + partInfo, messaging.getUserMessage().getMessageInfo().getMessageId(), null);
         } //FIXME: size handling not possible with datahandlers
