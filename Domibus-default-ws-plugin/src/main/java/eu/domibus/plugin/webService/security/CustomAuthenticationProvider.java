@@ -1,13 +1,17 @@
 package eu.domibus.plugin.webService.security;
 
 import eu.domibus.common.AuthRole;
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
+import eu.domibus.security.AuthenticationException;
 import eu.domibus.plugin.webService.common.util.HashUtil;
 import eu.domibus.plugin.webService.dao.AuthenticationDAO;
 import eu.domibus.plugin.webService.entity.AuthenticationEntry;
 import eu.domibus.plugin.webService.impl.CustomAuthenticationInterceptor;
 import eu.domibus.plugin.webService.service.IBlueCoatCertificateService;
 import eu.domibus.plugin.webService.service.IX509CertificateService;
+import eu.domibus.security.BasicAuthentication;
+import eu.domibus.security.BlueCoatClientCertificateAuthentication;
+import eu.domibus.security.CertificateDetails;
+import eu.domibus.security.X509CertificateAuthentication;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package eu.domibus.plugin.webService.security;
+package eu.domibus.security;
 
 import eu.domibus.common.AuthRole;
 import org.apache.commons.logging.Log;

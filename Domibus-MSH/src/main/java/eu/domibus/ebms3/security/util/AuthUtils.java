@@ -77,4 +77,8 @@ public class AuthUtils {
                         Collections.singleton(new SimpleGrantedAuthority(authRole.name()))));
     }
 
+    public String getUsername() {
+        //TODO
+        return null;
+    }
 }

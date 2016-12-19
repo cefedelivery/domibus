@@ -1,7 +1,7 @@
 package eu.domibus.plugin.webService.service.impl;
 
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
-import eu.domibus.plugin.webService.security.CertificateDetails;
+import eu.domibus.security.AuthenticationException;
+import eu.domibus.security.CertificateDetails;
 import eu.domibus.plugin.webService.service.IBlueCoatCertificateService;
 import org.springframework.stereotype.Component;
 

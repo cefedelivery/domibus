@@ -1,6 +1,6 @@
 package eu.domibus.plugin.webService.service;
 
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
+import eu.domibus.security.AuthenticationException;
 
 import java.security.cert.X509Certificate;
 import java.util.List;

@@ -1,6 +1,8 @@
 package eu.domibus.plugin.webService.security;
 
 import eu.domibus.plugin.webService.common.util.Constant;
+import eu.domibus.security.BlueCoatClientCertificateAuthentication;
+import eu.domibus.security.CertificateDetails;
 import org.junit.Assert;
 import org.junit.Test;
 

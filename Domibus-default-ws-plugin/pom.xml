@@ -36,7 +36,6 @@
 
     <properties>
         <cxf.version>3.1.7</cxf.version>
-        <spring.security.version>3.2.0.RELEASE</spring.security.version>
         <spring.version>4.2.2.RELEASE</spring.version>
     </properties>
 
@@ -131,19 +130,16 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>${spring.security.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
-            <version>${spring.security.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
-            <version>${spring.security.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

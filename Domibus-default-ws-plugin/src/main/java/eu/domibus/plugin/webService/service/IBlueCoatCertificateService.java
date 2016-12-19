@@ -1,7 +1,7 @@
 package eu.domibus.plugin.webService.service;
 
-import eu.domibus.plugin.webService.security.CertificateDetails;
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
+import eu.domibus.security.CertificateDetails;
+import eu.domibus.security.AuthenticationException;
 
 /**
  * Created by feriaad on 18/06/2015.

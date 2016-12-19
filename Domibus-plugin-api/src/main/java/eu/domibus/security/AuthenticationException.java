@@ -1,4 +1,4 @@
-package eu.domibus.plugin.webService.common.exception;
+package eu.domibus.security;
 
 public class AuthenticationException extends RuntimeException {
 

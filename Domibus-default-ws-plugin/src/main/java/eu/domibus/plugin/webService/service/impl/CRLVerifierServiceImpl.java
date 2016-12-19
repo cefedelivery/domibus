@@ -1,6 +1,6 @@
 package eu.domibus.plugin.webService.service.impl;
 
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
+import eu.domibus.security.AuthenticationException;
 import eu.domibus.plugin.webService.service.ICRLVerifierService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;

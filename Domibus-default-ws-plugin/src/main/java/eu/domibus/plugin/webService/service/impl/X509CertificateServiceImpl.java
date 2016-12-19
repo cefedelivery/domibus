@@ -1,6 +1,6 @@
 package eu.domibus.plugin.webService.service.impl;
 
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
+import eu.domibus.security.AuthenticationException;
 import eu.domibus.plugin.webService.service.ICRLVerifierService;
 import eu.domibus.plugin.webService.service.IX509CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;

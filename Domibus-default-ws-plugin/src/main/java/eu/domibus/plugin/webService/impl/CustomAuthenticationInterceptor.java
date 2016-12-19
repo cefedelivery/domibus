@@ -1,10 +1,10 @@
 package eu.domibus.plugin.webService.impl;
 
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
-import eu.domibus.plugin.webService.security.BasicAuthentication;
-import eu.domibus.plugin.webService.security.BlueCoatClientCertificateAuthentication;
+import eu.domibus.security.AuthenticationException;
+import eu.domibus.security.BasicAuthentication;
+import eu.domibus.security.BlueCoatClientCertificateAuthentication;
 import eu.domibus.plugin.webService.security.CustomAuthenticationProvider;
-import eu.domibus.plugin.webService.security.X509CertificateAuthentication;
+import eu.domibus.security.X509CertificateAuthentication;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
