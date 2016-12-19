@@ -1,6 +1,7 @@
 Domibus 3.2.2
 - Fixed the notifications sent by the JMS plugin
 - Changed the default JMX password for WebLogic
+- Solved issue related to CXF attachment temp file leakage (for payloads over 200Mb).
 Domibus 3.2.1
 - JMX access to the JMS queues is secured
 - Force the usage of the apache commons IO library from the application
