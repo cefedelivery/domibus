@@ -22,6 +22,10 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * @author Cosmin Baciu
+ * @since 3.2
+ */
 @Component
 public class JMXHelper {
 
