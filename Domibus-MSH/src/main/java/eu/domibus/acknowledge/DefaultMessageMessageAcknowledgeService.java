@@ -1,13 +1,14 @@
 package eu.domibus.acknowledge;
 
+import eu.domibus.api.acknowledge.MessageAcknowledgeException;
+import eu.domibus.api.acknowledge.MessageAcknowledgeService;
+import eu.domibus.api.domain.MessageAcknowledge;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.ebms3.common.model.MessageAcknowledge;
+import eu.domibus.ebms3.common.model.MessageAcknowledgeEntity;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
-import eu.domibus.service.acknowledge.MessageAcknowledgeException;
-import eu.domibus.service.acknowledge.MessageAcknowledgeService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.NoResultException;
+import java.util.List;
 
 /**
  * @author baciu
@@ -41,20 +43,19 @@ public class DefaultMessageMessageAcknowledgeService implements MessageAcknowled
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         String username = authUtils.getUsername();
 
-        final MessageAcknowledge existingMessageAcknowledge = messageAcknowledgeDao.findByCriteria(messageId, username, originalUser);
-        if (existingMessageAcknowledge != null) {
+        final MessageAcknowledgeEntity existingMessageAcknowledgeEntity = messageAcknowledgeDao.findByCriteria(messageId, username, originalUser);
+        if (existingMessageAcknowledgeEntity != null) {
             throw new MessageAcknowledgeException("Message acknoledge already existing for messageId [" + messageId + "] , user [" + username + "], originalUser [" + originalUser + "]");
         }
 
-        MessageAcknowledge messageAcknowledge = new MessageAcknowledge();
+        MessageAcknowledgeEntity messageAcknowledgeEntity = new MessageAcknowledgeEntity();
         //fill details
-        messageAcknowledgeDao.create(messageAcknowledge);
+        messageAcknowledgeDao.create(messageAcknowledgeEntity);
     }
 
     @Override
-    public boolean isMessageAcknowledged(String messageId) {
-        //TODO
-        return false;
+    public List<MessageAcknowledge> getMessagesAcknowledged(String messageId) {
+        return null;
     }
 
     protected void checkAcknowledgeRights(String messageId) {

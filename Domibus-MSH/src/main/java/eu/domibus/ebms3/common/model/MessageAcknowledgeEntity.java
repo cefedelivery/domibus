@@ -11,7 +11,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "TB_MESSAGE_ACKNOWLEDGE")
-public class MessageAcknowledge extends AbstractBaseEntity {
+public class MessageAcknowledgeEntity extends AbstractBaseEntity {
 
     @Column(name = "MESSAGE_ID")
     protected String messageId;

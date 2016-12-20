@@ -12,6 +12,7 @@
     <modules>
         <module>Domibus-MSH</module>
         <module>Domibus-MSH-api</module>
+        <module>Domibus-MSH-ext-impl</module>
         <module>Domibus-MSH-jms-spi</module>
         <module>Domibus-MSH-jms-spi-helper</module>
         <module>Domibus-MSH-jms-weblogic</module>
@@ -67,6 +68,11 @@
                 <artifactId>spring-security-core</artifactId>
                 <version>${spring.security.version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>

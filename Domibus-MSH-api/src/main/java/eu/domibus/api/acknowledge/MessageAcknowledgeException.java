@@ -1,4 +1,4 @@
-package eu.domibus.service.acknowledge;
+package eu.domibus.api.acknowledge;
 
 /**
  * @author baciu
