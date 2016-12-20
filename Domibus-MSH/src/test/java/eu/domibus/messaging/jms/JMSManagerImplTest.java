@@ -17,7 +17,8 @@ import javax.jms.Queue;
 import java.util.*;
 
 /**
- * Created by Cosmin Baciu on 02-Sep-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 @RunWith(JMockit.class)
 public class JMSManagerImplTest {

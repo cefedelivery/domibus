@@ -10,7 +10,8 @@ import javax.jms.TextMessage;
 import java.util.Map;
 
 /**
- * Created by Cosmin Baciu on 17-Aug-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 public class JmsMessageCreator implements MessageCreator {
 

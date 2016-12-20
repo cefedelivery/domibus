@@ -30,7 +30,8 @@ import java.io.StringReader;
 import java.util.*;
 
 /**
- * Created by Cosmin Baciu on 17-Aug-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 @Component
 public class InternalJMSManagerWeblogic implements InternalJMSManager {

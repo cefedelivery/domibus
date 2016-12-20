@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Cosmin Baciu
+ * @since 3.2
  */
 @RunWith(JMockit.class)
 public class JMSManagerActiveMQTest {

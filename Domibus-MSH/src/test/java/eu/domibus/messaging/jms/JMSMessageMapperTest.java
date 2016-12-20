@@ -14,7 +14,8 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Created by Cosmin Baciu on 02-Sep-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 @RunWith(JMockit.class)
 public class JMSMessageMapperTest {
