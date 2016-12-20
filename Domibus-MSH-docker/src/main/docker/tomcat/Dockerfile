@@ -5,7 +5,7 @@ MAINTAINER CEF eDelivery <CEF-EDELIVERY-SUPPORT@ec.europa.eu>
 ARG DEBIAN_FRONTEND=noninteractive
 
 ARG DOMIBUS_VERSION
-ENV DOMIBUS_VERSION ${DOMIBUS_VERSION:-3.3-SNAPSHOT}
+ENV DOMIBUS_VERSION ${DOMIBUS_VERSION}
 
 ####### BAMBOO_SHARE http://edelquality.westeurope.cloudapp.azure.com:8080/artifact/CE-DD/shared/build-$BUILD_NUMBER/Domibus/
 ARG ARTIFACTS_REPOSITORY
@@ -72,7 +72,7 @@ RUN cp doNothingPolicy.xml $CATALINA_HOME/conf/domibus/policies/
 RUN echo '#!/bin/bash' >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo "cd $CATALINA_HOME" >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo './bin/catalina.sh start' >> $DOMIBUS_DIST/entrypoint.sh
-RUN echo "while ! curl --output /dev/null --silent --head --fail http://localhost:8080/domibus/home; do sleep 1 && echo -n .; done;" >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo "i=0; until [ $i -eq 100 ] || [ curl --output /dev/null --silent --head --fail http://localhost:8080/domibus/home ]; do sleep \$((i++)) && echo -n .; done;" >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo "curl -X POST -F pmode=@\"$DOMIBUS_DIST/conf/pmodes/$PMODE_NAME\" http://localhost:8080/domibus/home/uploadPmodeFile" >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo "while true ; do sleep 1 ; done;" >> $DOMIBUS_DIST/entrypoint.sh
 RUN chmod 777 $DOMIBUS_DIST/entrypoint.sh
