@@ -1,8 +1,8 @@
 package eu.domibus.jms.weblogic;
 
 import eu.domibus.api.jms.JMSDestinationHelper;
-import eu.domibus.jms.spi.JMSDestinationSPI;
-import eu.domibus.jms.spi.JmsMessageSPI;
+import eu.domibus.jms.spi.InternalJMSDestination;
+import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
 public class JMSManagerWeblogicTest {
 
     @Tested
-    JMSManagerWeblogic jmsManagerWeblogic;
+    InternalJMSManagerWeblogic jmsManagerWeblogic;
 
     @Injectable
     JMXHelper jmxHelper;
@@ -60,7 +60,7 @@ public class JMSManagerWeblogicTest {
                                                final @Injectable MBeanServerConnection mbsc,
                                                final @Injectable CompositeData data1,
                                                final @Injectable CompositeData data2,
-                                               final @Injectable JmsMessageSPI jmsMessageSPI1) throws Exception {
+                                               final @Injectable InternalJmsMessage internalJmsMessage1) throws Exception {
         final String selector = "";
         final CompositeData[] compositeDatas = new CompositeData[]{data1, data2};
 
@@ -75,17 +75,17 @@ public class JMSManagerWeblogicTest {
                     new Integer(2)}), withAny(new String[]{String.class.getName(), Long.class.getName(), Integer.class.getName()}));
             result = compositeDatas;
 
-            jmsManagerWeblogic.getJmsMessageSPI(destination, mbsc, anyString, data1);
+            jmsManagerWeblogic.getInternalJmsMessage(destination, mbsc, anyString, data1);
             result = new RuntimeException("Simulating a message conversion error");
 
-            jmsManagerWeblogic.getJmsMessageSPI(destination, mbsc, anyString, data2);
-            result = jmsMessageSPI1;
+            jmsManagerWeblogic.getInternalJmsMessage(destination, mbsc, anyString, data2);
+            result = internalJmsMessage1;
         }};
 
-        final List<JmsMessageSPI> jmsMessageSPIs = jmsManagerWeblogic.getMessagesFromDestination(destination, selector);
-        assertNotNull(jmsMessageSPIs);
-        assertEquals(jmsMessageSPIs.size(), 1);
-        assertEquals(jmsMessageSPIs.iterator().next(), jmsMessageSPI1);
+        final List<InternalJmsMessage> internalJmsMessages = jmsManagerWeblogic.getMessagesFromDestination(destination, selector);
+        assertNotNull(internalJmsMessages);
+        assertEquals(internalJmsMessages.size(), 1);
+        assertEquals(internalJmsMessages.iterator().next(), internalJmsMessage1);
     }
 
     @Test
@@ -189,16 +189,16 @@ public class JMSManagerWeblogicTest {
 
         }};
 
-        final Map<String, JMSDestinationSPI> destinations = jmsManagerWeblogic.getDestinations();
+        final Map<String, InternalJMSDestination> destinations = jmsManagerWeblogic.getDestinations();
         assertNotNull(destinations);
         assertEquals(destinations.size(), 1);
-        final JMSDestinationSPI jmsDestinationSPI = destinations.get(queueName);
-        assertNotNull(jmsDestinationSPI);
+        final InternalJMSDestination internalJmsDestination = destinations.get(queueName);
+        assertNotNull(internalJmsDestination);
 
-        assertEquals(jmsDestinationSPI.getName(), queueName);
-        assertEquals(jmsDestinationSPI.getProperty("ObjectName"), jmsDestination);
-        assertEquals(jmsDestinationSPI.getProperty("Jndi"), "jndi/myqueue");
-        assertEquals(jmsDestinationSPI.getNumberOfMessages(), 2L);
+        assertEquals(internalJmsDestination.getName(), queueName);
+        assertEquals(internalJmsDestination.getProperty("ObjectName"), jmsDestination);
+        assertEquals(internalJmsDestination.getProperty("Jndi"), "jndi/myqueue");
+        assertEquals(internalJmsDestination.getNumberOfMessages(), 2L);
 
     }
 
@@ -213,22 +213,22 @@ public class JMSManagerWeblogicTest {
 
         }};
 
-        JmsMessageSPI jmsMessageSPI = jmsManagerWeblogic.convertMessage(data);
+        InternalJmsMessage internalJmsMessage = jmsManagerWeblogic.convertMessage(data);
 
-        assertEquals(jmsMessageSPI.getTimestamp().getTime(), 1481721027366L);
-        assertEquals(jmsMessageSPI.getId(), "ID:<704506.1481721027366.0>");
-        assertEquals(jmsMessageSPI.getContent(), "mycontent");
-        assertEquals(jmsMessageSPI.getType(), "myJMSType");
+        assertEquals(internalJmsMessage.getTimestamp().getTime(), 1481721027366L);
+        assertEquals(internalJmsMessage.getId(), "ID:<704506.1481721027366.0>");
+        assertEquals(internalJmsMessage.getContent(), "mycontent");
+        assertEquals(internalJmsMessage.getType(), "myJMSType");
 
-        Map<String, Object> properties = jmsMessageSPI.getProperties();
+        Map<String, Object> properties = internalJmsMessage.getProperties();
         assertEquals(properties.get("JMSType"), "myJMSType");
         assertEquals(properties.get("originalQueue"), "DomibusErrorNotifyProducerQueue");
     }
 
     @Test
-    public void testGetMessages(final @Injectable JMSDestinationSPI jmsDestinationSPI,
+    public void testGetMessages(final @Injectable InternalJMSDestination internalJmsDestination,
                                 final @Mocked ObjectName destination,
-                                final @Injectable List<JmsMessageSPI> messageSPIs) throws Exception {
+                                final @Injectable List<InternalJmsMessage> messageSPIs) throws Exception {
         final String source = "myqueue";
         final String jmsType = "message";
         final Date fromDate = new Date();
@@ -236,16 +236,16 @@ public class JMSManagerWeblogicTest {
         final String selectorClause = "mytype = 'message'";
 
         new Expectations(jmsManagerWeblogic) {{
-            jmsManagerWeblogic.getJMSDestinationSPI(source);
-            result = jmsDestinationSPI;
+            jmsManagerWeblogic.getInternalJMSDestination(source);
+            result = internalJmsDestination;
 
-            jmsDestinationSPI.getType();
+            internalJmsDestination.getType();
             result = "Queue";
 
             jmsSelectorUtil.getSelector(withAny(new HashMap<String, Object>()));
             result = null;
 
-            jmsDestinationSPI.getProperty("ObjectName");
+            internalJmsDestination.getProperty("ObjectName");
             result = destination;
 
             jmsManagerWeblogic.getMessagesFromDestination(destination, anyString);
@@ -253,7 +253,7 @@ public class JMSManagerWeblogicTest {
         }};
 
 
-        List<JmsMessageSPI> messages = jmsManagerWeblogic.getMessages(source, jmsType, fromDate, toDate, selectorClause);
+        List<InternalJmsMessage> messages = jmsManagerWeblogic.getMessages(source, jmsType, fromDate, toDate, selectorClause);
         assertEquals(messages, messageSPIs);
 
         new Verifications() {{
@@ -268,19 +268,19 @@ public class JMSManagerWeblogicTest {
     }
 
     @Test
-    public void testGetMessage(final @Injectable JMSDestinationSPI jmsDestinationSPI,
+    public void testGetMessage(final @Injectable InternalJMSDestination internalJmsDestination,
                                final @Injectable ObjectName destination) throws Exception {
         final String myqueue = "myqueue";
         final String messageId = "id1";
 
         new Expectations(jmsManagerWeblogic) {{
-            jmsManagerWeblogic.getJMSDestinationSPI(myqueue);
-            result = jmsDestinationSPI;
+            jmsManagerWeblogic.getInternalJMSDestination(myqueue);
+            result = internalJmsDestination;
 
-            jmsDestinationSPI.getType();
+            internalJmsDestination.getType();
             result = "Queue";
 
-            jmsDestinationSPI.getProperty("ObjectName");
+            internalJmsDestination.getProperty("ObjectName");
             result = destination;
 
             jmsManagerWeblogic.getMessageFromDestination(withAny(destination), anyString);
@@ -301,8 +301,8 @@ public class JMSManagerWeblogicTest {
     }
 
     @Test
-    public void testMoveMessages(final @Injectable JMSDestinationSPI jmsDestinationSPISource,
-                                 final @Injectable JMSDestinationSPI jmsDestinationSPIDestination,
+    public void testMoveMessages(final @Injectable InternalJMSDestination internalJmsDestinationSource,
+                                 final @Injectable InternalJMSDestination internalJmsDestinationSPIDestination,
                                  final @Injectable ObjectName sourceObjectName,
                                  final @Injectable ObjectName destinationObjectName) throws Exception {
 
@@ -311,16 +311,16 @@ public class JMSManagerWeblogicTest {
         final String[] messageIds = new String[]{"1"};
 
         new Expectations(jmsManagerWeblogic) {{
-            jmsManagerWeblogic.getJMSDestinationSPI(sourceQueue);
-            result = jmsDestinationSPISource;
+            jmsManagerWeblogic.getInternalJMSDestination(sourceQueue);
+            result = internalJmsDestinationSource;
 
-            jmsManagerWeblogic.getJMSDestinationSPI(destinationQueue);
-            result = jmsDestinationSPIDestination;
+            jmsManagerWeblogic.getInternalJMSDestination(destinationQueue);
+            result = internalJmsDestinationSPIDestination;
 
-            jmsDestinationSPISource.getProperty("ObjectName");
+            internalJmsDestinationSource.getProperty("ObjectName");
             result = sourceObjectName;
 
-            jmsDestinationSPIDestination.getProperty("ObjectName");
+            internalJmsDestinationSPIDestination.getProperty("ObjectName");
             result = destinationObjectName;
 
             jmsManagerWeblogic.moveMessages(sourceObjectName, destinationObjectName, anyString);
@@ -345,17 +345,17 @@ public class JMSManagerWeblogicTest {
     }
 
     @Test
-    public void testDeleteMessages(final @Injectable JMSDestinationSPI jmsDestinationSPISource,
+    public void testDeleteMessages(final @Injectable InternalJMSDestination internalJmsDestinationSource,
                                    final @Injectable ObjectName sourceObjectName) throws Exception {
 
         final String sourceQueue = "sourceQueue";
         final String[] messageIds = new String[]{"1"};
 
         new Expectations(jmsManagerWeblogic) {{
-            jmsManagerWeblogic.getJMSDestinationSPI(sourceQueue);
-            result = jmsDestinationSPISource;
+            jmsManagerWeblogic.getInternalJMSDestination(sourceQueue);
+            result = internalJmsDestinationSource;
 
-            jmsDestinationSPISource.getProperty("ObjectName");
+            internalJmsDestinationSource.getProperty("ObjectName");
             result = sourceObjectName;
 
             jmsManagerWeblogic.deleteMessages(sourceObjectName, anyString);
@@ -379,18 +379,18 @@ public class JMSManagerWeblogicTest {
     }
 
     @Test
-    public void testSendMessage(final @Injectable JmsMessageSPI jmsMessageSPI,
-                                final @Injectable JMSDestinationSPI jmsDestinationSPI,
+    public void testSendMessage(final @Injectable InternalJmsMessage internalJmsMessage,
+                                final @Injectable InternalJMSDestination internalJmsDestination,
                                 final @Mocked javax.jms.Queue jmsDestination) throws Exception {
 
         final String destinationQueue = "destinationQueue";
         final String jndi = "jndiqueue";
 
         new Expectations(jmsManagerWeblogic) {{
-            jmsManagerWeblogic.getJMSDestinationSPI(destinationQueue);
-            result = jmsDestinationSPI;
+            jmsManagerWeblogic.getInternalJMSDestination(destinationQueue);
+            result = internalJmsDestination;
 
-            jmsDestinationSPI.getProperty("Jndi");
+            internalJmsDestination.getProperty("Jndi");
             result = jndi;
 
             new MockUp<InitialContext>() {
@@ -400,17 +400,17 @@ public class JMSManagerWeblogicTest {
                 }
             };
 
-            jmsManagerWeblogic.sendMessage(jmsMessageSPI, jmsDestination);
+            jmsManagerWeblogic.sendMessage(internalJmsMessage, jmsDestination);
         }};
 
-        jmsManagerWeblogic.sendMessage(jmsMessageSPI, destinationQueue);
+        jmsManagerWeblogic.sendMessage(internalJmsMessage, destinationQueue);
 
         new Verifications() {{
-            JmsMessageSPI capturedJmsMessageSPI = null;
+            InternalJmsMessage capturedInternalJmsMessage = null;
             javax.jms.Queue capturedQueue = null;
 
-            jmsManagerWeblogic.sendMessage(capturedJmsMessageSPI = withCapture(), capturedQueue = withCapture());
-            assertTrue(capturedJmsMessageSPI == jmsMessageSPI);
+            jmsManagerWeblogic.sendMessage(capturedInternalJmsMessage = withCapture(), capturedQueue = withCapture());
+            assertTrue(capturedInternalJmsMessage == internalJmsMessage);
             assertTrue(capturedQueue == jmsDestination);
         }};
     }

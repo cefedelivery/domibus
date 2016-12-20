@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * Created by Cosmin Baciu on 17-Aug-16.
  */
-public class JmsMessageSPI {
+public class InternalJmsMessage {
 	protected String id;
 	protected String type;
 	protected String content;

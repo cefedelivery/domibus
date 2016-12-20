@@ -2,17 +2,9 @@ package eu.domibus.messaging;
 
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.NotificationType;
-import eu.domibus.jms.spi.JmsMessageSPI;
-import eu.domibus.messaging.jms.JMSMessageMapper;
-import mockit.Expectations;
-import mockit.Tested;
-import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 

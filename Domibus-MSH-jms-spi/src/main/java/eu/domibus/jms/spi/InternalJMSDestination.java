@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Created by Cosmin Baciu on 17-Aug-16.
  */
-public class JMSDestinationSPI {
+public class InternalJMSDestination {
     public final static String QUEUE_TYPE = "Queue";
     public final static String TOPIC_TYPE = "Topic"; 
 

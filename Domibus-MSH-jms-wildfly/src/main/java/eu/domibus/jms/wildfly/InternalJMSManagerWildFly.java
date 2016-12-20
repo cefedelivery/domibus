@@ -1,9 +1,9 @@
 package eu.domibus.jms.wildfly;
 
 import eu.domibus.api.jms.JMSDestinationHelper;
-import eu.domibus.jms.spi.JMSDestinationSPI;
-import eu.domibus.jms.spi.JMSManagerSPI;
-import eu.domibus.jms.spi.JmsMessageSPI;
+import eu.domibus.jms.spi.InternalJMSDestination;
+import eu.domibus.jms.spi.InternalJMSManager;
+import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import org.apache.commons.lang.StringUtils;
@@ -34,9 +34,9 @@ import java.util.*;
  * Created by Cosmin Baciu on 17-Aug-16.
  */
 @Component
-public class JMSManagerWildFly implements JMSManagerSPI {
+public class InternalJMSManagerWildFly implements InternalJMSManager {
 
-    private static final Log LOG = LogFactory.getLog(JMSManagerWildFly.class);
+    private static final Log LOG = LogFactory.getLog(InternalJMSManagerWildFly.class);
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
     private static final String PROPERTY_JNDI_NAME = "Jndi";
@@ -60,21 +60,21 @@ public class JMSManagerWildFly implements JMSManagerSPI {
     JMSSelectorUtil jmsSelectorUtil;
 
     @Override
-    public Map<String, JMSDestinationSPI> getDestinations() {
-        Map<String, JMSDestinationSPI> destinationMap = new TreeMap<>();
+    public Map<String, InternalJMSDestination> getDestinations() {
+        Map<String, InternalJMSDestination> destinationMap = new TreeMap<>();
 
         try {
             Map<String, ObjectName> queueMap = getQueueMap();
             for (ObjectName objectName : queueMap.values()) {
                 JMSQueueControl jmsQueueControl = MBeanServerInvocationHandler.newProxyInstance(mBeanServer, objectName, JMSQueueControl.class, false);
-                JMSDestinationSPI jmsDestinationSPI = new JMSDestinationSPI();
-                jmsDestinationSPI.setName(jmsQueueControl.getName());
-                jmsDestinationSPI.setType(JMSDestinationSPI.QUEUE_TYPE);
-                jmsDestinationSPI.setNumberOfMessages(jmsQueueControl.getMessageCount());
-                jmsDestinationSPI.setProperty(PROPERTY_OBJECT_NAME, objectName);
-                jmsDestinationSPI.setProperty(PROPERTY_JNDI_NAME, jmsQueueControl.getAddress());
-                jmsDestinationSPI.setInternal(jmsDestinationHelper.isInternal(jmsQueueControl.getAddress()));
-                destinationMap.put(jmsQueueControl.getName(), jmsDestinationSPI);
+                InternalJMSDestination internalJmsDestination = new InternalJMSDestination();
+                internalJmsDestination.setName(jmsQueueControl.getName());
+                internalJmsDestination.setType(InternalJMSDestination.QUEUE_TYPE);
+                internalJmsDestination.setNumberOfMessages(jmsQueueControl.getMessageCount());
+                internalJmsDestination.setProperty(PROPERTY_OBJECT_NAME, objectName);
+                internalJmsDestination.setProperty(PROPERTY_JNDI_NAME, jmsQueueControl.getAddress());
+                internalJmsDestination.setInternal(jmsDestinationHelper.isInternal(jmsQueueControl.getAddress()));
+                destinationMap.put(jmsQueueControl.getName(), internalJmsDestination);
             }
         } catch (Exception e) {
             LOG.error("Failed to build JMS destination map", e);
@@ -115,9 +115,9 @@ public class JMSManagerWildFly implements JMSManagerSPI {
     }
 
     @Override
-    public boolean sendMessage(JmsMessageSPI message, String destination) {
-        JMSDestinationSPI jmsDestinationSPI = getDestinations().get(destination);
-        if (jmsDestinationSPI == null) {
+    public boolean sendMessage(InternalJmsMessage message, String destination) {
+        InternalJMSDestination internalJmsDestination = getDestinations().get(destination);
+        if (internalJmsDestination == null) {
             LOG.warn("Destination [" + destination + "] does not exists");
             return false;
         }
@@ -134,19 +134,19 @@ public class JMSManagerWildFly implements JMSManagerSPI {
     }
 
     @Override
-    public void sendMessage(JmsMessageSPI message, javax.jms.Queue destination) {
+    public void sendMessage(InternalJmsMessage message, javax.jms.Queue destination) {
         jmsOperations.send(destination, new JmsMessageCreator(message));
     }
 
     protected javax.jms.Queue getQueue(String queueName) throws NamingException {
-        JMSDestinationSPI jmsDestinationSPI = getDestinations().get(queueName);
-        String destinationJndi = getJndiName(jmsDestinationSPI);
+        InternalJMSDestination internalJmsDestination = getDestinations().get(queueName);
+        String destinationJndi = getJndiName(internalJmsDestination);
         LOG.debug("Found JNDI [" + destinationJndi + "] for destination [" + queueName + "]");
         return InitialContext.doLookup(destinationJndi);
     }
 
-    protected String getJndiName(JMSDestinationSPI jmsDestinationSPI) {
-        String destinationJndi = jmsDestinationSPI.getProperty(PROPERTY_JNDI_NAME);
+    protected String getJndiName(InternalJMSDestination internalJmsDestination) {
+        String destinationJndi = internalJmsDestination.getProperty(PROPERTY_JNDI_NAME);
         return "java:/" + StringUtils.replace(destinationJndi, ".", "/");
     }
 
@@ -163,10 +163,10 @@ public class JMSManagerWildFly implements JMSManagerSPI {
     }
 
     @Override
-    public JmsMessageSPI getMessage(String source, String messageId) {
+    public InternalJmsMessage getMessage(String source, String messageId) {
         String selector = jmsSelectorUtil.getSelector(messageId);
 
-        List<JmsMessageSPI> messages = null;
+        List<InternalJmsMessage> messages = null;
         try {
             messages = getMessagesFromDestination(source, selector);
         } catch (Exception e) {
@@ -182,8 +182,8 @@ public class JMSManagerWildFly implements JMSManagerSPI {
 
 
     @Override
-    public List<JmsMessageSPI> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
-        List<JmsMessageSPI> messages = new ArrayList<>();
+    public List<InternalJmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
+        List<InternalJmsMessage> messages = new ArrayList<>();
         if (StringUtils.isEmpty(source)) {
             return messages;
         }
@@ -211,13 +211,13 @@ public class JMSManagerWildFly implements JMSManagerSPI {
         return messages;
     }
 
-    private List<JmsMessageSPI> getMessagesFromDestination(String destination, String selector) throws Exception {
+    private List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws Exception {
 //        JMSQueueControl queue = getQueueControl(destination);
         javax.jms.Queue queue = getQueue(destination);
-        return jmsOperations.browseSelected(queue, selector, new BrowserCallback<List<JmsMessageSPI>>() {
+        return jmsOperations.browseSelected(queue, selector, new BrowserCallback<List<InternalJmsMessage>>() {
             @Override
-            public List<JmsMessageSPI> doInJms(Session session, QueueBrowser browser) throws JMSException {
-                List<JmsMessageSPI> result = new ArrayList<>();
+            public List<InternalJmsMessage> doInJms(Session session, QueueBrowser browser) throws JMSException {
+                List<InternalJmsMessage> result = new ArrayList<>();
                 Enumeration enumeration = browser.getEnumeration();
                 while (enumeration.hasMoreElements()) {
                     TextMessage textMessage = null;
@@ -234,8 +234,8 @@ public class JMSManagerWildFly implements JMSManagerSPI {
         });
     }
 
-    protected JmsMessageSPI convert(TextMessage textMessage) throws JMSException {
-        JmsMessageSPI result = new JmsMessageSPI();
+    protected InternalJmsMessage convert(TextMessage textMessage) throws JMSException {
+        InternalJmsMessage result = new InternalJmsMessage();
         result.setContent(textMessage.getText());
         result.setId(textMessage.getJMSMessageID());
         result.setTimestamp(new Date(textMessage.getJMSTimestamp()));
@@ -254,19 +254,19 @@ public class JMSManagerWildFly implements JMSManagerSPI {
         return result;
     }
 
-    protected List<JmsMessageSPI> convert(Map<String, Object>[] maps) {
+    protected List<InternalJmsMessage> convert(Map<String, Object>[] maps) {
         if (maps == null) {
             return null;
         }
-        List<JmsMessageSPI> result = new ArrayList<>();
+        List<InternalJmsMessage> result = new ArrayList<>();
         for (Map<String, Object> map : maps) {
             result.add(convert(map));
         }
         return result;
     }
 
-    protected JmsMessageSPI convert(Map<String, Object> map) {
-        JmsMessageSPI result = new JmsMessageSPI();
+    protected InternalJmsMessage convert(Map<String, Object> map) {
+        InternalJmsMessage result = new InternalJmsMessage();
 
         result.setType((String) map.get("JMSType"));
         Long jmsTimestamp = (Long) map.get("JMSTimestamp");

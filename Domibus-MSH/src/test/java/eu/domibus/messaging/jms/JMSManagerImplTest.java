@@ -1,12 +1,9 @@
 package eu.domibus.messaging.jms;
 
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.jms.spi.JMSDestinationSPI;
-import eu.domibus.jms.spi.JMSManagerSPI;
-import eu.domibus.jms.spi.JmsMessageSPI;
-import eu.domibus.messaging.jms.JMSDestinationMapper;
-import eu.domibus.messaging.jms.JMSManagerImpl;
-import eu.domibus.messaging.jms.JMSMessageMapper;
+import eu.domibus.jms.spi.InternalJMSDestination;
+import eu.domibus.jms.spi.InternalJMSManager;
+import eu.domibus.jms.spi.InternalJmsMessage;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -29,7 +26,7 @@ public class JMSManagerImplTest {
     JMSManagerImpl jmsManager;
 
     @Injectable
-    JMSManagerSPI jmsManagerSPI;
+    InternalJMSManager internalJmsManager;
 
     @Injectable
     JMSDestinationMapper jmsDestinationMapper;
@@ -39,10 +36,10 @@ public class JMSManagerImplTest {
 
     @Test
     public void testGetDestinations() throws Exception {
-        final Map<String, JMSDestinationSPI> destinations = new HashMap<>();
+        final Map<String, InternalJMSDestination> destinations = new HashMap<>();
 
         new Expectations() {{
-            jmsManagerSPI.getDestinations();
+            internalJmsManager.getDestinations();
             result = destinations;
         }};
 
@@ -58,17 +55,17 @@ public class JMSManagerImplTest {
     public void testGetMessage() throws Exception {
         final String source = "source";
         final String messageId = "messageId";
-        final JmsMessageSPI jmsMessageSPI = new JmsMessageSPI();
+        final InternalJmsMessage internalJmsMessage = new InternalJmsMessage();
 
         new Expectations() {{
-            jmsManagerSPI.getMessage(source, messageId);
-            result = jmsMessageSPI;
+            internalJmsManager.getMessage(source, messageId);
+            result = internalJmsMessage;
         }};
 
         jmsManager.getMessage(source, messageId);
 
         new Verifications() {{
-            jmsMessageMapper.convert(jmsMessageSPI);
+            jmsMessageMapper.convert(internalJmsMessage);
             times = 1;
         }};
     }
@@ -81,24 +78,24 @@ public class JMSManagerImplTest {
         final Date toDate = new Date();
         final String selector = "myselector";
         final String messageId = "messageId";
-        final List<JmsMessageSPI> jmsMessageSPI = new ArrayList<>();
+        final List<InternalJmsMessage> internalJmsMessage = new ArrayList<>();
 
         new Expectations() {{
-            jmsManagerSPI.getMessages(source, jmsType, fromDate, toDate, selector);
-            result = jmsMessageSPI;
+            internalJmsManager.getMessages(source, jmsType, fromDate, toDate, selector);
+            result = internalJmsMessage;
         }};
 
         jmsManager.getMessages(source, jmsType, fromDate, toDate, selector);
 
         new Verifications() {{
-            jmsMessageMapper.convert(jmsMessageSPI);
+            jmsMessageMapper.convert(internalJmsMessage);
         }};
     }
 
     @Test
     public void testSendMessageToQueue() throws Exception {
         final JmsMessage message = new JmsMessage();
-        final JmsMessageSPI messageSPI = new JmsMessageSPI();
+        final InternalJmsMessage messageSPI = new InternalJmsMessage();
 
         new Expectations() {{
             jmsMessageMapper.convert(message);
@@ -111,7 +108,7 @@ public class JMSManagerImplTest {
             jmsMessageMapper.convert(message);
             times = 1;
 
-            jmsManagerSPI.sendMessage(messageSPI, "myqueue");
+            internalJmsManager.sendMessage(messageSPI, "myqueue");
 
             Assert.assertEquals(message.getProperty(JmsMessage.PROPERTY_ORIGINAL_QUEUE), "myqueue");
         }};
@@ -120,7 +117,7 @@ public class JMSManagerImplTest {
     @Test
     public void testSendMessageToJmsQueue(@Injectable final Queue queue) throws Exception {
         final JmsMessage message = new JmsMessage();
-        final JmsMessageSPI messageSPI = new JmsMessageSPI();
+        final InternalJmsMessage messageSPI = new InternalJmsMessage();
 
 
         new Expectations() {{
@@ -137,7 +134,7 @@ public class JMSManagerImplTest {
             jmsMessageMapper.convert(message);
             times = 1;
 
-            jmsManagerSPI.sendMessage(messageSPI, queue);
+            internalJmsManager.sendMessage(messageSPI, queue);
 
             Assert.assertEquals(message.getProperty(JmsMessage.PROPERTY_ORIGINAL_QUEUE), "myqueue");
         }};
@@ -151,7 +148,7 @@ public class JMSManagerImplTest {
         jmsManager.deleteMessages(source, messageIds);
 
         new Verifications() {{
-            jmsManagerSPI.deleteMessages(source, messageIds);
+            internalJmsManager.deleteMessages(source, messageIds);
         }};
     }
 
@@ -164,7 +161,7 @@ public class JMSManagerImplTest {
         jmsManager.moveMessages(source, destination, messageIds);
 
         new Verifications() {{
-            jmsManagerSPI.moveMessages(source, destination, messageIds);
+            internalJmsManager.moveMessages(source, destination, messageIds);
         }};
     }
 }

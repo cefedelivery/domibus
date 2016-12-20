@@ -1,8 +1,7 @@
 package eu.domibus.messaging.jms;
 
 import eu.domibus.api.jms.JMSDestination;
-import eu.domibus.jms.spi.JMSDestinationSPI;
-import eu.domibus.messaging.jms.JMSDestinationMapper;
+import eu.domibus.jms.spi.InternalJMSDestination;
 import mockit.Expectations;
 import mockit.Tested;
 import mockit.Verifications;
@@ -26,13 +25,13 @@ public class JMSDestinationMapperTest {
 
     @Test
     public void testConvertJMSDestinationMap() throws Exception {
-        Map<String, JMSDestinationSPI> destinations = new HashMap<>();
-        final JMSDestinationSPI jmsDestinationSPI = new JMSDestinationSPI();
+        Map<String, InternalJMSDestination> destinations = new HashMap<>();
+        final InternalJMSDestination internalJmsDestination = new InternalJMSDestination();
         final JMSDestination jmsDestination = new JMSDestination();
-        destinations.put("destinationkey", jmsDestinationSPI);
+        destinations.put("destinationkey", internalJmsDestination);
 
         new Expectations(destinationMapper) {{
-            destinationMapper.convert(jmsDestinationSPI);
+            destinationMapper.convert(internalJmsDestination);
             result = jmsDestination;
         }};
 
@@ -41,23 +40,23 @@ public class JMSDestinationMapperTest {
 
         new Verifications() {{
             // Verifies an expected invocation:
-            destinationMapper.convert(jmsDestinationSPI);
+            destinationMapper.convert(internalJmsDestination);
             times = 1;
         }};
     }
 
     @Test
     public void testConvertJMSDestination() throws Exception {
-        JMSDestinationSPI jmsDestinationSPI = new JMSDestinationSPI();
-        jmsDestinationSPI.setType("myType");
-        jmsDestinationSPI.setName("myName");
-        jmsDestinationSPI.setNumberOfMessages(2);
-        jmsDestinationSPI.setInternal(true);
+        InternalJMSDestination internalJmsDestination = new InternalJMSDestination();
+        internalJmsDestination.setType("myType");
+        internalJmsDestination.setName("myName");
+        internalJmsDestination.setNumberOfMessages(2);
+        internalJmsDestination.setInternal(true);
         Map<String, Object> messageProperties = new HashMap<>();
         messageProperties.put("mykey", "myvalue");
-        jmsDestinationSPI.setProperties(messageProperties);
+        internalJmsDestination.setProperties(messageProperties);
 
-        JMSDestination convert = destinationMapper.convert(jmsDestinationSPI);
+        JMSDestination convert = destinationMapper.convert(internalJmsDestination);
         assertEquals(convert.getType(), "myType");
         assertEquals(convert.getName(), "myName");
         assertEquals(convert.getNumberOfMessages(), 2);

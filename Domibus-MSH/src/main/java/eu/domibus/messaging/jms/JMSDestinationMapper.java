@@ -1,7 +1,7 @@
 package eu.domibus.messaging.jms;
 
 import eu.domibus.api.jms.JMSDestination;
-import eu.domibus.jms.spi.JMSDestinationSPI;
+import eu.domibus.jms.spi.InternalJMSDestination;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -13,21 +13,21 @@ import java.util.Map;
 @Component
 public class JMSDestinationMapper {
 
-    public Map<String, JMSDestination> convert(Map<String, JMSDestinationSPI> destinations) {
+    public Map<String, JMSDestination> convert(Map<String, InternalJMSDestination> destinations) {
         Map<String, JMSDestination> result = new HashMap<>();
-        for (Map.Entry<String, JMSDestinationSPI> spiEntry : destinations.entrySet()) {
+        for (Map.Entry<String, InternalJMSDestination> spiEntry : destinations.entrySet()) {
             result.put(spiEntry.getKey(), convert(spiEntry.getValue()));
         }
         return result;
     }
 
-    public JMSDestination convert(JMSDestinationSPI jmsDestinationSPI) {
+    public JMSDestination convert(InternalJMSDestination internalJmsDestination) {
         JMSDestination result = new JMSDestination();
-        result.setType(jmsDestinationSPI.getType());
-        result.setName(jmsDestinationSPI.getName());
-        result.setNumberOfMessages(jmsDestinationSPI.getNumberOfMessages());
-        result.setInternal(jmsDestinationSPI.isInternal());
-        result.setProperties(jmsDestinationSPI.getProperties());
+        result.setType(internalJmsDestination.getType());
+        result.setName(internalJmsDestination.getName());
+        result.setNumberOfMessages(internalJmsDestination.getNumberOfMessages());
+        result.setInternal(internalJmsDestination.isInternal());
+        result.setProperties(internalJmsDestination.getProperties());
         return result;
     }
 }

@@ -1,7 +1,7 @@
 package eu.domibus.messaging.jms;
 
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.jms.spi.JmsMessageSPI;
+import eu.domibus.jms.spi.InternalJmsMessage;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,8 +13,8 @@ import java.util.List;
 @Component
 public class JMSMessageMapper {
 
-    public JmsMessageSPI convert(JmsMessage message) {
-        JmsMessageSPI result = new JmsMessageSPI();
+    public InternalJmsMessage convert(JmsMessage message) {
+        InternalJmsMessage result = new InternalJmsMessage();
         result.setId(message.getId());
         result.setContent(message.getContent());
         result.setTimestamp(message.getTimestamp());
@@ -23,7 +23,7 @@ public class JMSMessageMapper {
         return result;
     }
 
-    public JmsMessage convert(JmsMessageSPI message) {
+    public JmsMessage convert(InternalJmsMessage message) {
         JmsMessage result = new JmsMessage();
         result.setId(message.getId());
         result.setContent(message.getContent());
@@ -33,10 +33,10 @@ public class JMSMessageMapper {
         return result;
     }
 
-    public List<JmsMessage> convert(List<JmsMessageSPI> messagesSPI) {
+    public List<JmsMessage> convert(List<InternalJmsMessage> messagesSPI) {
         List<JmsMessage> result = new ArrayList<>();
-        for (JmsMessageSPI jmsMessageSPI : messagesSPI) {
-            result.add(convert(jmsMessageSPI));
+        for (InternalJmsMessage internalJmsMessage : messagesSPI) {
+            result.add(convert(internalJmsMessage));
         }
         return result;
     }
