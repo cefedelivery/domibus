@@ -65,6 +65,10 @@ public class AttachmentCleanupInterceptor extends AbstractPhaseInterceptor<Messa
     }
 
     private void cleanRequestAttachment(Attachment attachment) throws IOException {
+
+        if (attachment == null || attachment.getDataHandler() == null || attachment.getDataHandler().getDataSource() == null)
+            return;
+
         DataSource ds = attachment.getDataHandler().getDataSource();
         if (ds instanceof AttachmentDataSource) {
             InputStream is = ds.getInputStream();
