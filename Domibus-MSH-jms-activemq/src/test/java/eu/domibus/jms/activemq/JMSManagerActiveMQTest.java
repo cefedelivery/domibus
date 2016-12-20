@@ -220,19 +220,16 @@ public class JMSManagerActiveMQTest {
 
         new Expectations(jmsManagerActiveMQ) {
             {
-                data.get("JMSType");
+                jmsManagerActiveMQ.getCompositeValue(data, "JMSType");
                 result = jmsType;
 
-                data.get("JMSTimestamp");
+                jmsManagerActiveMQ.getCompositeValue(data, "JMSTimestamp");
                 result = jmsTimestamp;
 
-                data.get("JMSMessageID");
+                jmsManagerActiveMQ.getCompositeValue(data, "JMSMessageID");
                 result = jmsId1;
 
-                data.containsKey("Text");
-                result = true;
-
-                data.get("Text");
+                jmsManagerActiveMQ.getCompositeValue(data, "Text");
                 result = textMessage;
 
                 Set<String> allPropertyNames = new HashSet<>();
