@@ -51,6 +51,12 @@ public class DefaultMessageMessageAcknowledgeService implements MessageAcknowled
         messageAcknowledgeDao.create(messageAcknowledge);
     }
 
+    @Override
+    public boolean isMessageAcknowledged(String messageId) {
+        //TODO
+        return false;
+    }
+
     protected void checkAcknowledgeRights(String messageId) {
         if (!authUtils.isUnsecureLoginAllowed()) {
             //if security is enabled just check that the user is authenticated
@@ -103,8 +109,5 @@ public class DefaultMessageMessageAcknowledgeService implements MessageAcknowled
         return originalUser;
     }
 
-    @Override
-    public boolean isMessageAcknowledged(String messageId) {
-        return false;
-    }
+
 }
