@@ -107,26 +107,25 @@ public class BackendFilter extends AbstractBaseEntity implements Comparable<Back
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (o instanceof BackendFilter) {
-            return false; // this also returns false when o == null
-        }
-        if (this == o) {
-            return true;
-        }
-        BackendFilter other = (BackendFilter) o;
-        EqualsBuilder equalsBuilder = new EqualsBuilder();
-        equalsBuilder.appendSuper(super.equals(other));
-        equalsBuilder.append(this.index, other.index);
-        return equalsBuilder.isEquals();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BackendFilter that = (BackendFilter) o;
+
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(index, that.index)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        HashCodeBuilder hashBuilder = new HashCodeBuilder();
-        hashBuilder.appendSuper(super.hashCode());
-        hashBuilder.append(this.index);
-        return hashBuilder.hashCode();
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(index)
+                .toHashCode();
     }
 
 }

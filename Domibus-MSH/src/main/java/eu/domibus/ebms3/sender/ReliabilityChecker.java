@@ -53,13 +53,14 @@ import java.util.Iterator;
 @Service
 public class ReliabilityChecker {
     private static final Log LOG = LogFactory.getLog(ReliabilityChecker.class);
-    private static final String XPATH_EXPRESSION_STRING = "/*/*/*[local-name() = 'Reference']/@URI  | /*/*/*[local-name() = 'Reference']/*[local-name() = 'DigestValue']";
-    private static final XPath xPath = XPathFactory.newInstance().newXPath();
+
     @Autowired
     @Qualifier("jaxbContextEBMS")
     JAXBContext jaxbContext;
+
     @Autowired
     private NonRepudiationChecker nonRepudiationChecker;
+
     @Autowired
     private PModeProvider pModeProvider;
 
@@ -97,7 +98,7 @@ public class ReliabilityChecker {
                         final UserMessage userMessage = this.jaxbContext.createUnmarshaller().unmarshal(new StreamSource(new ByteArrayInputStream(contentOfReceiptString.getBytes())), UserMessage.class).getValue();
 
                         final UserMessage userMessageInRequest = this.jaxbContext.createUnmarshaller().unmarshal((Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue().getUserMessage();
-                        if(!userMessage.equals(userMessageInRequest)) {
+                        if (!userMessage.equals(userMessageInRequest)) {
                             ReliabilityChecker.LOG.warn("Reliability check failed, the user message in the request does not match the user message in the response.");
                             return CheckResult.FAIL;
                         }

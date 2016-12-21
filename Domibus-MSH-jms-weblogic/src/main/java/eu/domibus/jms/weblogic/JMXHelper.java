@@ -35,7 +35,7 @@ public class JMXHelper {
 
     private static final String ADMIN_URL_PROPERTY = "weblogic.management.server";
     private static final String DOMIBUS_JMX_USER_PROP = "domibus.jmx.user";
-    private static final String DOMIBUS_JMX_PASSWD_PROP = "domibus.jmx.password";
+    private static final String DOMIBUS_JMX_PWD_PROP = "domibus.jmx.password";
 
     private static final Log LOG = LogFactory.getLog(JMXHelper.class);
 
@@ -67,7 +67,6 @@ public class JMXHelper {
      * @return MBeanServerConnection or <code>null</code> if connection failed.
      */
     public MBeanServerConnection getDomainRuntimeMBeanServerConnection() {
-        MBeanServerConnection mbsc = null;
         try {
             String adminUrl = System.getProperty(ADMIN_URL_PROPERTY);
             if (adminUrl == null) {
@@ -104,11 +103,11 @@ public class JMXHelper {
             ctx.put(Context.SECURITY_CREDENTIALS, password);
             ctx.put(JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES, "weblogic.management.remote");
             JMXConnector connector = JMXConnectorFactory.connect(serviceURL, ctx);
-            mbsc = connector.getMBeanServerConnection();
+            MBeanServerConnection mbsc = connector.getMBeanServerConnection();
+            return mbsc;
         } catch (Exception e) {
-            LOG.error("Failed to connect to domain runtime mbean server", e);
+            throw new RuntimeException("Failed to connect to domain runtime mbean server", e);
         }
-        return mbsc;
     }
 
     protected Map<String, String> getJMSCredentials() {
@@ -117,7 +116,7 @@ public class JMXHelper {
             LOG.info("The property [" + DOMIBUS_JMX_USER_PROP + "] is not configured. Using the configuration from boot.properties ");
             return securityHelper.getBootIdentity();
         }
-        final String jmxPassword = domibusProperties.getProperty(DOMIBUS_JMX_PASSWD_PROP);
+        final String jmxPassword = domibusProperties.getProperty(DOMIBUS_JMX_PWD_PROP);
         Map<String, String> credentialsMap = new HashMap<>();
         credentialsMap.put("username", jmxUser);
         credentialsMap.put("password", jmxPassword);

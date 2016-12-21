@@ -176,7 +176,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             int deleted = deleteMessages(destination, jmsSelectorUtil.getSelector(messageIds));
             return deleted == messageIds.length;
         } catch (Exception e) {
-            LOG.error("Failed to delete messages from source [" + source + "]:" + messageIds , e);
+            LOG.error("Failed to delete messages from source [" + source + "]:" + messageIds, e);
             return false;
         }
     }
@@ -307,7 +307,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             int moved = moveMessages(fromDestination, toDestination, jmsSelectorUtil.getSelector(messageIds));
             return moved == messageIds.length;
         } catch (Exception e) {
-            LOG.error("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds , e);
+            LOG.error("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds, e);
             return false;
         }
     }
@@ -347,7 +347,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             String key = property.getAttribute("name");
             final Element firstChildElement = getFirstChildElement(property);
             String value = null;
-            if(firstChildElement != null) {
+            if (firstChildElement != null) {
                 value = firstChildElement.getTextContent();
             }
             message.getProperties().put(key, value);
@@ -378,8 +378,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         localName = localName.substring(localName.indexOf(":") + 1);
                     }
                 }
-                String ns = child.getNamespaceURI();
-                if (localName.equals(name)) {
+                if (StringUtils.equals(localName, name)) {
                     return child;
                 }
             }
@@ -399,8 +398,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         localName = localName.substring(localName.indexOf(":") + 1);
                     }
                 }
-                String ns = child.getNamespaceURI();
-                if (localName.equals(name)) {
+                if (StringUtils.equals(localName, name)) {
                     childElements.add(child);
                 }
             }

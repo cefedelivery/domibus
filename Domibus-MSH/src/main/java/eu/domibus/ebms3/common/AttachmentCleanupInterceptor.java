@@ -58,7 +58,7 @@ public class AttachmentCleanupInterceptor extends AbstractPhaseInterceptor<Messa
                 try {
                     cleanRequestAttachment(attachment);
                 } catch (IOException e) {
-                    LOG.error("Could not close the input stream of this attachment [" + attachment.getId() + "]");
+                    LOG.error("Could not close the input stream of this attachment [" + attachment.getId() + "]", e);
                 }
             }
         }

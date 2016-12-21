@@ -67,13 +67,6 @@ public class SecurityHelper {
 		return bootIdentity;
 	}
 
-	public String encrypt(String clear) {
-		EncryptionService es = SerializedSystemIni.getEncryptionService();
-		ClearOrEncryptedService ces = new ClearOrEncryptedService(es);
-		String encrypted = ces.encrypt(clear);
-		return encrypted;
-	}
-
 	public String decrypt(String encrypted) {
 		EncryptionService es = SerializedSystemIni.getEncryptionService();
 		ClearOrEncryptedService ces = new ClearOrEncryptedService(es);

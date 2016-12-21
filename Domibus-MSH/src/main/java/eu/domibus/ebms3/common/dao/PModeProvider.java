@@ -137,8 +137,7 @@ public abstract class PModeProvider {
             LOG.error("Error unmarshalling the PMode", e);
             throw new XmlProcessingException("Error unmarshalling the PMode: " + e.getMessage(), e);
         }
-        if (unmarshallerResult == null
-                || configuration == null) {
+        if (configuration == null) {
             throw new XmlProcessingException("Error unmarshalling the PMode: could not process the PMode file");
         }
         return unmarshallerResult;
