@@ -72,7 +72,7 @@ RUN cp doNothingPolicy.xml $CATALINA_HOME/conf/domibus/policies/
 RUN echo '#!/bin/bash' >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo "cd $CATALINA_HOME" >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo './bin/catalina.sh start' >> $DOMIBUS_DIST/entrypoint.sh
-RUN echo "i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:8080/domibus/home; do sleep $((i++)) && echo -n . && if [ $i -eq 100 ]; then break; fi ; done" >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo "i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:8080/domibus/home; do sleep \$((i++)) && echo -n . && if [ \$i -eq 100 ]; then break; fi ; done" >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo "curl -X POST -F pmode=@\"$DOMIBUS_DIST/conf/pmodes/$PMODE_NAME\" http://localhost:8080/domibus/home/uploadPmodeFile" >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo "while true ; do sleep 1 ; done;" >> $DOMIBUS_DIST/entrypoint.sh
 RUN chmod 777 $DOMIBUS_DIST/entrypoint.sh
