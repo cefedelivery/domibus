@@ -26,8 +26,8 @@ cd $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/tomcat-mysql-c2-c3-compose
 sudo docker-compose up -d
 
 cd $SOURCE_CODE/
-i=0; until [ $i -eq 4 ] || [ curl --output /dev/null --silent --head --fail http://localhost:8180/domibus/home ]; do sleep $((i++)) && echo -n .; done;
-i=0; until [ $i -eq 4 ] || [ curl --output /dev/null --silent --head --fail http://localhost:9080/domibus/home ]; do sleep $((i++)) && echo -n .; done;
+i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:8180/domibus/home; do sleep $((i++)) && echo -n . && if [ $i -eq 100 ]; then break; fi ;   done
+i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:9080/domibus/home; do sleep $((i++)) && echo -n . && if [ $i -eq 100 ]; then break; fi ;   done
 mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
 
 cd $SOURCE_CODE/../Domibus-MSH-soapui-tests
