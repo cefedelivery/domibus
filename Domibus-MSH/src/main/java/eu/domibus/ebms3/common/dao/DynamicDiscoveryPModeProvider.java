@@ -21,14 +21,13 @@ package eu.domibus.ebms3.common.dao;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.Identifier;
-import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +41,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Proof of concept and not production ready!
@@ -56,6 +56,9 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     @Autowired
     private DynamicDiscoveryService dynamicDiscoveryService;
     protected Collection<eu.domibus.common.model.configuration.Process> dynamicReceiverProcesses;
+
+    protected static final String URN_TYPE_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
+    protected static final String URN_TYPE_NAME ="partyTypeUrn";
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
@@ -99,8 +102,8 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         for (final Process process : this.dynamicReceiverProcesses) {
             if (process.isDynamicInitiator() || process.getInitiatorParties().contains(this.getConfiguration().getParty())) {
                 for (final LegConfiguration legConfiguration : process.getLegs()) {
-                    if (legConfiguration.getService().getValue().equals(userMessage.getCollaborationInfo().getService().getValue()) &&
-                            legConfiguration.getAction().getValue().equals(userMessage.getCollaborationInfo().getAction())) {
+                    if (StringUtils.equalsIgnoreCase(legConfiguration.getService().getValue(), userMessage.getCollaborationInfo().getService().getValue()) &&
+                            StringUtils.equalsIgnoreCase(legConfiguration.getAction().getValue(), userMessage.getCollaborationInfo().getAction())) {
                         candidates.add(process);
                     }
                 }
@@ -132,7 +135,9 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         //set toPartyId in UserMessage
         final PartyId receiverParty = new PartyId();
         receiverParty.setValue(cn);
+        receiverParty.setType(URN_TYPE_VALUE);
 
+        userMessage.getPartyInfo().getTo().getPartyId().clear();
         userMessage.getPartyInfo().getTo().getPartyId().add(receiverParty);
 
         //add certificate to Truststore
@@ -141,18 +146,29 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         //check if party is available in cache
         Party configurationToParty = null;
         for (final Party party : getConfiguration().getBusinessProcesses().getParties()) {
-            if (party.getName().equals(cn)) {
+            if (StringUtils.equalsIgnoreCase(party.getName(), cn)) {
                 configurationToParty = party;
             }
         }
 
+
         //if party is not already there, create a new one and add it to configuration
         if (configurationToParty == null) {
+            PartyIdType partyIdType = new PartyIdType();
+            partyIdType.setName(URN_TYPE_NAME);
+            partyIdType.setValue(URN_TYPE_VALUE);
+            Set<PartyIdType> partyIdTypes = getConfiguration().getBusinessProcesses().getPartyIdTypes();
+            if(partyIdTypes ==null) {
+                partyIdTypes = new HashSet<>();
+            }
+            partyIdTypes.add(partyIdType);
             configurationToParty = new Party();
             configurationToParty.setName(cn);
             final Identifier toPartyIdentifier = new Identifier();
             //PartyIdType is empty
             toPartyIdentifier.setPartyId(cn);
+            toPartyIdentifier.setPartyIdType(partyIdType);
+
             configurationToParty.getIdentifiers().add(toPartyIdentifier);
             configurationToParty.setEndpoint(endpoint.getAddress());
             this.getConfiguration().getBusinessProcesses().getParties().add(configurationToParty);
@@ -161,7 +177,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         for (final Process candidate : candidates) {
             boolean partyFound = false;
             for (final Party party : candidate.getResponderParties()) {
-                if (configurationToParty.getName().equals(party.getName())) {
+                if (StringUtils.equalsIgnoreCase(configurationToParty.getName(), party.getName())) {
                     partyFound = true;
                     break;
                 }
@@ -178,7 +194,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         LOG.debug("DN is: " + dn);
         final LdapName ln = new LdapName(dn);
         for (final Rdn rdn : ln.getRdns()) {
-            if (rdn.getType().equalsIgnoreCase("CN")) {
+            if (StringUtils.equalsIgnoreCase(rdn.getType(), "CN")) {
                 LOG.debug("CN is: " + rdn.getValue());
                 return rdn.getValue().toString();
             }
