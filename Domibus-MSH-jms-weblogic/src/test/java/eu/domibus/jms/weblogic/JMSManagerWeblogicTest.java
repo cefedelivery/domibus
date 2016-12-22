@@ -37,6 +37,9 @@ public class JMSManagerWeblogicTest {
     JMXHelper jmxHelper;
 
     @Injectable
+    JMXTemplate jmxTemplate;
+
+    @Injectable
     private JmsOperations jmsSender;
 
     @Injectable
@@ -65,9 +68,6 @@ public class JMSManagerWeblogicTest {
         final CompositeData[] compositeDatas = new CompositeData[]{data1, data2};
 
         new Expectations(jmsManagerWeblogic) {{
-            jmxHelper.getDomainRuntimeMBeanServerConnection();
-            result = mbsc;
-
             mbsc.invoke(destination, "getCursorSize", withAny(new Object[]{""}), withAny(new String[]{String.class.getName()}));
             result = 2L;
 
@@ -82,7 +82,7 @@ public class JMSManagerWeblogicTest {
             result = internalJmsMessage1;
         }};
 
-        final List<InternalJmsMessage> internalJmsMessages = jmsManagerWeblogic.getMessagesFromDestination(destination, selector);
+        final List<InternalJmsMessage> internalJmsMessages = jmsManagerWeblogic.doGetMessagesFromDestination(mbsc, selector, destination);
         assertNotNull(internalJmsMessages);
         assertEquals(internalJmsMessages.size(), 1);
         assertEquals(internalJmsMessages.iterator().next(), internalJmsMessage1);
@@ -157,9 +157,6 @@ public class JMSManagerWeblogicTest {
 
 
         new Expectations(jmsManagerWeblogic) {{
-            jmxHelper.getDomainRuntimeMBeanServerConnection();
-            result = mbsc;
-
             ObjectName drs = jmxHelper.getDomainRuntimeService();
             result = drs;
 
@@ -189,7 +186,7 @@ public class JMSManagerWeblogicTest {
 
         }};
 
-        final Map<String, InternalJMSDestination> destinations = jmsManagerWeblogic.getDestinations();
+        final Map<String, InternalJMSDestination> destinations = jmsManagerWeblogic.doGetDestinations(mbsc);
         assertNotNull(destinations);
         assertEquals(destinations.size(), 1);
         final InternalJMSDestination internalJmsDestination = destinations.get(queueName);
@@ -365,7 +362,7 @@ public class JMSManagerWeblogicTest {
             result = "myselector";
         }};
 
-        final boolean deleteMessages = jmsManagerWeblogic.deleteMessages(sourceQueue, messageIds);
+        jmsManagerWeblogic.deleteMessages(sourceQueue, messageIds);
 
         new Verifications() {{
             ObjectName capturedSource = null;
@@ -373,7 +370,6 @@ public class JMSManagerWeblogicTest {
 
             jmsManagerWeblogic.deleteMessages(capturedSource = withCapture(), capturedSelector = withCapture());
             assertTrue(capturedSource == sourceObjectName);
-            assertTrue(deleteMessages);
             assertEquals(capturedSelector, "myselector");
         }};
     }

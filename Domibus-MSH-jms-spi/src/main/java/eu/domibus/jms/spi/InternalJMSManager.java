@@ -13,13 +13,13 @@ public interface InternalJMSManager {
 
     Map<String, InternalJMSDestination> getDestinations();
 
-    boolean sendMessage(InternalJmsMessage message, String destination);
+    void sendMessage(InternalJmsMessage message, String destination);
 
     void sendMessage(InternalJmsMessage message, Queue destination);
 
-    boolean deleteMessages(String source, String[] messageIds);
+    void deleteMessages(String source, String[] messageIds);
 
-    boolean moveMessages(String source, String destination, String[] messageIds);
+    void moveMessages(String source, String destination, String[] messageIds);
 
     InternalJmsMessage getMessage(String source, String messageId);
 

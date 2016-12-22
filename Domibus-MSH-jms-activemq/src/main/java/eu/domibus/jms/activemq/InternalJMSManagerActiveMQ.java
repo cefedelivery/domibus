@@ -3,6 +3,7 @@ package eu.domibus.jms.activemq;
 import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSManager;
+import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
@@ -66,11 +67,10 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
                 InternalJMSDestination internalJmsDestination = createInternalJmsDestination(name, queueMbean);
                 destinationMap.put(queueMbean.getName(), internalJmsDestination);
             }
+            return destinationMap;
         } catch (Exception e) {
-            LOG.error("Error getting destinations", e);
+            throw new InternalJMSException("Error getting destinations", e);
         }
-
-        return destinationMap;
     }
 
     protected InternalJMSDestination createInternalJmsDestination(ObjectName name, QueueViewMBean queueMbean) {
@@ -107,10 +107,9 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     }
 
     @Override
-    public boolean sendMessage(InternalJmsMessage message, String destination) {
+    public void sendMessage(InternalJmsMessage message, String destination) {
         ActiveMQQueue activeMQQueue = new ActiveMQQueue(destination);
         sendMessage(message, activeMQQueue);
-        return true;
     }
 
     @Override
@@ -119,41 +118,36 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     }
 
     @Override
-    public boolean deleteMessages(String source, String[] messageIds) {
-        QueueViewMBean queue = getQueue(source);
+    public void deleteMessages(String source, String[] messageIds) {
         try {
-            int deleted = queue.removeMatchingMessages(jmsSelectorUtil.getSelector(messageIds));
-            return deleted == messageIds.length;
+            QueueViewMBean queue = getQueue(source);
+            queue.removeMatchingMessages(jmsSelectorUtil.getSelector(messageIds));
         } catch (Exception e) {
-            LOG.error("Failed to delete messages from source [" + source + "]:" + messageIds, e);
-            return false;
+            throw new InternalJMSException("Failed to delete messages from source [" + source + "]:" + messageIds, e);
         }
     }
 
     @Override
     public InternalJmsMessage getMessage(String source, String messageId) {
-        QueueViewMBean queue = getQueue(source);
         try {
+            QueueViewMBean queue = getQueue(source);
             CompositeData messageMetaData = queue.getMessage(messageId);
             return convertCompositeData(messageMetaData);
         } catch (OpenDataException e) {
-            LOG.error("Failed to get message with id [" + messageId + "]", e);
-            return null;
+            throw new InternalJMSException("Failed to get message with id [" + messageId + "]", e);
         }
     }
 
 
     @Override
     public List<InternalJmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
-        List<InternalJmsMessage> messages = new ArrayList<>();
         if (source == null) {
-            return messages;
+            throw new InternalJMSException("Source has not been specified");
         }
 
         InternalJMSDestination selectedDestination = getDestinations().get(source);
         if (selectedDestination == null) {
-            LOG.debug("Could not find destination for [" + source + "]");
-            return messages;
+            throw new InternalJMSException("Could not find destination for [" + source + "]");
         }
         String destinationType = selectedDestination.getType();
         if ("Queue".equals(destinationType)) {
@@ -174,12 +168,14 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
             try {
                 QueueViewMBean queue = getQueue(source);
                 CompositeData[] browse = queue.browse(selector);
-                messages = convertCompositeData(browse);
+                List<InternalJmsMessage> messages = convertCompositeData(browse);
+                return messages;
             } catch (Exception e) {
-                LOG.error("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
+                throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
             }
         }
-        return messages;
+        throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
+
     }
 
     protected List<InternalJmsMessage> convertCompositeData(CompositeData[] browse) {
@@ -243,14 +239,12 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     }
 
     @Override
-    public boolean moveMessages(String source, String destination, String[] messageIds) {
-        QueueViewMBean queue = getQueue(source);
+    public void moveMessages(String source, String destination, String[] messageIds) {
         try {
-            int moved = queue.moveMatchingMessagesTo(jmsSelectorUtil.getSelector(messageIds), destination);
-            return moved == messageIds.length;
+            QueueViewMBean queue = getQueue(source);
+            queue.moveMatchingMessagesTo(jmsSelectorUtil.getSelector(messageIds), destination);
         } catch (Exception e) {
-            LOG.error("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds, e);
-            return false;
+            throw new InternalJMSException("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds, e);
         }
     }
 }
