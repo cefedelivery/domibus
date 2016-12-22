@@ -1,6 +1,5 @@
 package eu.domibus.ext.impl.v1.resource;
 
-import eu.domibus.api.acknowledge.MessageAcknowledgeService;
 import eu.domibus.ext.api.v1.domain.MessageAcknowledgeExt;
 import eu.domibus.ext.api.v1.service.MessageAcknowledgeServiceExt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,7 @@ public class MessageAcknowledgeResource {
     //the CustomAuthenticationInterceptor will be applied to this REST resource and it will perform the authentication
 
     @Autowired
-    MessageAcknowledgeServiceExt messageAcknowledgeServiceExt;
+    protected MessageAcknowledgeServiceExt messageAcknowledgeServiceExt;
 
     @RequestMapping(value = "/{messageId}", method = RequestMethod.PUT, produces = "application/json")
     public void acknowledgeMessage(@PathVariable String messageId) {
