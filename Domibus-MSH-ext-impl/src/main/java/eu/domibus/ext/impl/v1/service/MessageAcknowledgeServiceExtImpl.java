@@ -1,5 +1,6 @@
 package eu.domibus.ext.impl.v1.service;
 
+import eu.domibus.api.acknowledge.MessageAcknowledgeException;
 import eu.domibus.api.acknowledge.MessageAcknowledgeService;
 import eu.domibus.api.domain.MessageAcknowledge;
 import eu.domibus.ext.api.v1.domain.MessageAcknowledgeExt;
@@ -25,7 +26,12 @@ public class MessageAcknowledgeServiceExtImpl implements MessageAcknowledgeServi
 
     @Override
     public void acknowledgeMessage(String messageId) throws MessageAcknowledgeExceptionExt {
-        messageAcknowledgeService.acknowledgeMessage(messageId);
+        try {
+            messageAcknowledgeService.acknowledgeMessage(messageId);
+        } catch (MessageAcknowledgeException e) {
+            throw new MessageAcknowledgeExceptionExt(e);
+        }
+
     }
 
     @Override
