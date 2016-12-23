@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import weblogic.messaging.runtime.MessageInfo;
 
 import javax.annotation.Resource;
@@ -26,6 +27,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
@@ -208,7 +210,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         throw new InternalJMSException("Unknown destination type [" + destinationType + "]");
     }
 
-    protected InternalJmsMessage getMessageFromDestination(ObjectName destination, String messageId) throws Exception {
+    protected InternalJmsMessage getMessageFromDestination(ObjectName destination, String messageId)  {
         List<InternalJmsMessage> messages = getMessagesFromDestination(destination, jmsSelectorUtil.getSelector(messageId));
         if (!messages.isEmpty()) {
             return messages.get(0);
@@ -216,7 +218,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return null;
     }
 
-    protected List<InternalJmsMessage> getMessagesFromDestination(final ObjectName destination, final String selectorString) throws Exception {
+    protected List<InternalJmsMessage> getMessagesFromDestination(final ObjectName destination, final String selectorString) {
         return jmxTemplate.query(
                 new JMXOperation() {
                     @Override
@@ -267,7 +269,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         }
     }
 
-    protected InternalJmsMessage getInternalJmsMessage(ObjectName destination, MBeanServerConnection mbsc, String messageCursor, CompositeData messageMetaData) throws Exception {
+    protected InternalJmsMessage getInternalJmsMessage(ObjectName destination, MBeanServerConnection mbsc, String messageCursor, CompositeData messageMetaData) throws ParserConfigurationException, SAXException, IOException, MBeanException, InstanceNotFoundException, ReflectionException {
         InternalJmsMessage message = convertMessage(messageMetaData);
         String messageId = message.getId();
         CompositeData messageDataDetails = (CompositeData) mbsc.invoke(destination, "getMessage", new Object[]{messageCursor, messageId}, new String[]{
@@ -373,7 +375,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         }
     }
 
-    public InternalJmsMessage convertMessage(CompositeData messageData) throws Exception {
+    protected InternalJmsMessage convertMessage(CompositeData messageData) throws IOException, SAXException, ParserConfigurationException {
         InternalJmsMessage message = new InternalJmsMessage();
         String xmlMessage = String.valueOf(messageData.get("MessageXMLText"));
         Document xmlDocument = parseXML(xmlMessage);
@@ -412,7 +414,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return message;
     }
 
-    public Document parseXML(String xml) throws Exception {
+    protected Document parseXML(String xml) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         factory.setNamespaceAware(true);
@@ -420,7 +422,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return builder.parse(is);
     }
 
-    public Element getChildElement(Element parent, String name) {
+    protected Element getChildElement(Element parent, String name) {
         for (int i = 0; i < parent.getChildNodes().getLength(); i++) {
             if (parent.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE) {
                 Element child = (Element) parent.getChildNodes().item(i);
@@ -439,7 +441,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return null;
     }
 
-    public List<Element> getChildElements(Element parent, String name) {
+    protected List<Element> getChildElements(Element parent, String name) {
         List<Element> childElements = new ArrayList<Element>();
         for (int i = 0; i < parent.getChildNodes().getLength(); i++) {
             if (parent.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE) {
@@ -459,7 +461,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return childElements;
     }
 
-    public Element getFirstChildElement(Element parent) {
+    protected Element getFirstChildElement(Element parent) {
         for (int i = 0; i < parent.getChildNodes().getLength(); i++) {
             if (parent.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE) {
                 Element child = (Element) parent.getChildNodes().item(i);
