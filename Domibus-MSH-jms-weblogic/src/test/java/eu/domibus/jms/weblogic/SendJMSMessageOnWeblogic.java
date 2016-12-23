@@ -38,7 +38,7 @@ public class SendJMSMessageOnWeblogic {
 
     }
 
-    @Test
+//    @Test
     public void run() throws RuntimeException {
         try {
             InitialContext ic = getInitialContext(PROVIDER_URL, USER, PASSWORD);

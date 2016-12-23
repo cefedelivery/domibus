@@ -132,28 +132,32 @@ public class MessageSender implements MessageListener {
         } catch (final EbMS3Exception e) {
             this.handleEbms3Exception(e, messageId);
         } finally {
-            switch (reliabilityCheckSuccessful) {
-                case OK:
-                    switch (isOk) {
-                        case OK:
-                            userMessageLogDao.setMessageAsAcknowledged(messageId);
-                            break;
-                        case WARNING:
-                            userMessageLogDao.setMessageAsAckWithWarnings(messageId);
-                            break;
-                        default:
-                            assert false;
-                    }
-                    backendNotificationService.notifyOfSendSuccess(messageId);
-                    userMessageLogDao.setAsNotified(messageId);
-                    messagingDao.clearPayloadData(messageId);
-                    break;
-                case WAITING_FOR_CALLBACK:
-                    userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
-                    break;
-                case FAIL:
-                    updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
-            }
+            handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+        }
+    }
+
+    private void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+        switch (reliabilityCheckSuccessful) {
+            case OK:
+                switch (isOk) {
+                    case OK:
+                        userMessageLogDao.setMessageAsAcknowledged(messageId);
+                        break;
+                    case WARNING:
+                        userMessageLogDao.setMessageAsAckWithWarnings(messageId);
+                        break;
+                    default:
+                        assert false;
+                }
+                backendNotificationService.notifyOfSendSuccess(messageId);
+                userMessageLogDao.setAsNotified(messageId);
+                messagingDao.clearPayloadData(messageId);
+                break;
+            case WAITING_FOR_CALLBACK:
+                userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
+                break;
+            case FAIL:
+                updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
         }
     }
 

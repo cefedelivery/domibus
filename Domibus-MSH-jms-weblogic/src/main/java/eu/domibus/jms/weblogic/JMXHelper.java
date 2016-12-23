@@ -1,5 +1,6 @@
 package eu.domibus.jms.weblogic;
 
+import eu.domibus.jms.spi.InternalJMSException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,6 +18,7 @@ import javax.management.remote.JMXServiceURL;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -35,7 +37,7 @@ public class JMXHelper {
 
     private static final String ADMIN_URL_PROPERTY = "weblogic.management.server";
     private static final String DOMIBUS_JMX_USER_PROP = "domibus.jmx.user";
-    private static final String DOMIBUS_JMX_PASSWD_PROP = "domibus.jmx.password";
+    private static final String DOMIBUS_JMX_PWD_PROP = "domibus.jmx.password";
 
     private static final Log LOG = LogFactory.getLog(JMXHelper.class);
 
@@ -45,29 +47,20 @@ public class JMXHelper {
     @Autowired
     SecurityHelper securityHelper;
 
-    /**
-     * Locally lookup domain runtime bean server. This will only work if we are already on an admin server.
-     *
-     * @return MBeanServer or <code>null</code> if not found
-     */
     public MBeanServer getDomainRuntimeMBeanServer() {
-        MBeanServer mbeanServer = null;
         try {
             InitialContext ic = new InitialContext();
-            mbeanServer = (MBeanServer) ic.lookup(LOCAL_DOMAIN_RUNTIME_MBEANSERVER_JNDI);
+            return (MBeanServer) ic.lookup(LOCAL_DOMAIN_RUNTIME_MBEANSERVER_JNDI);
         } catch (NamingException e) {
-            LOG.error("Failed to find domain runtime mbean server locally", e);
+            throw new InternalJMSException("Failed to find domain runtime mbean server locally", e);
         }
-        return mbeanServer;
     }
 
     /**
      * Remotely connect to domain runtime mbean server. Try to find url, username and password using system properties.
      *
-     * @return MBeanServerConnection or <code>null</code> if connection failed.
      */
-    public MBeanServerConnection getDomainRuntimeMBeanServerConnection() {
-        MBeanServerConnection mbsc = null;
+    public JMXConnector getJMXConnector() {
         try {
             String adminUrl = System.getProperty(ADMIN_URL_PROPERTY);
             if (adminUrl == null) {
@@ -104,11 +97,18 @@ public class JMXHelper {
             ctx.put(Context.SECURITY_CREDENTIALS, password);
             ctx.put(JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES, "weblogic.management.remote");
             JMXConnector connector = JMXConnectorFactory.connect(serviceURL, ctx);
-            mbsc = connector.getMBeanServerConnection();
+            return connector;
         } catch (Exception e) {
-            LOG.error("Failed to connect to domain runtime mbean server", e);
+            throw new InternalJMSException("JMXConnector failed to connect", e);
         }
-        return mbsc;
+    }
+
+    public MBeanServerConnection getDomainRuntimeMBeanServerConnection(JMXConnector connector) {
+        try {
+            return connector.getMBeanServerConnection();
+        } catch (IOException e) {
+            throw new InternalJMSException("Failed to get the mbean server connection", e);
+        }
     }
 
     protected Map<String, String> getJMSCredentials() {
@@ -117,7 +117,7 @@ public class JMXHelper {
             LOG.info("The property [" + DOMIBUS_JMX_USER_PROP + "] is not configured. Using the configuration from boot.properties ");
             return securityHelper.getBootIdentity();
         }
-        final String jmxPassword = domibusProperties.getProperty(DOMIBUS_JMX_PASSWD_PROP);
+        final String jmxPassword = domibusProperties.getProperty(DOMIBUS_JMX_PWD_PROP);
         Map<String, String> credentialsMap = new HashMap<>();
         credentialsMap.put("username", jmxUser);
         credentialsMap.put("password", jmxPassword);
@@ -125,13 +125,11 @@ public class JMXHelper {
     }
 
     public ObjectName getDomainRuntimeService() {
-        ObjectName drs = null;
         try {
-            drs = new ObjectName(DOMAIN_RUNTIME_SERVICE_OBJECTNAME);
+            return new ObjectName(DOMAIN_RUNTIME_SERVICE_OBJECTNAME);
         } catch (MalformedObjectNameException e) {
-            LOG.error("Failed to get domain runtime mbean service object name", e);
+            throw new InternalJMSException("Failed to get domain runtime mbean service object name", e);
         }
-        return drs;
     }
 
 }

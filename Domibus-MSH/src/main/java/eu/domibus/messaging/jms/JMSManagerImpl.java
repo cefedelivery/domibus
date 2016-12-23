@@ -57,10 +57,10 @@ public class JMSManagerImpl implements JMSManager {
 
 
     @Override
-    public boolean sendMessageToQueue(JmsMessage message, String destination) {
+    public void sendMessageToQueue(JmsMessage message, String destination) {
         message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination);
         InternalJmsMessage internalJmsMessage = jmsMessageMapper.convert(message);
-        return internalJmsManager.sendMessage(internalJmsMessage, destination);
+        internalJmsManager.sendMessage(internalJmsMessage, destination);
     }
 
     @Override
@@ -75,12 +75,12 @@ public class JMSManagerImpl implements JMSManager {
     }
 
     @Override
-    public boolean deleteMessages(String source, String[] messageIds) {
-        return internalJmsManager.deleteMessages(source, messageIds);
+    public void deleteMessages(String source, String[] messageIds) {
+        internalJmsManager.deleteMessages(source, messageIds);
     }
 
     @Override
-    public boolean moveMessages(String source, String destination, String[] messageIds) {
-        return internalJmsManager.moveMessages(source, destination, messageIds);
+    public void moveMessages(String source, String destination, String[] messageIds) {
+        internalJmsManager.moveMessages(source, destination, messageIds);
     }
 }
