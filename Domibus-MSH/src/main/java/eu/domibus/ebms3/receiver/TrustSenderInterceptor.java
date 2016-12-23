@@ -103,7 +103,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         }
     }
 
-    private Element getSecurityHeader(SoapMessage msg) throws Exception {
+    private Element getSecurityHeader(SoapMessage msg) throws SOAPException, WSSecurityException {
 
         SOAPMessage doc = msg.getContent(SOAPMessage.class);
         return WSSecurityUtil.getSecurityHeader(doc.getSOAPHeader(), null, true);
@@ -155,7 +155,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
 
-    private X509Certificate getCertificateFromKeyInfo(CXFRequestData data, Element securityHeader) throws Exception {
+    private X509Certificate getCertificateFromKeyInfo(CXFRequestData data, Element securityHeader) throws WSSecurityException {
 
         X509Certificate[] certs;
 

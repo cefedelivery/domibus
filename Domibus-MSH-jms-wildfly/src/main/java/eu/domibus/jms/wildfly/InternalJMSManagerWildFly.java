@@ -201,7 +201,7 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
         }
     }
 
-    private List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws Exception {
+    private List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws NamingException {
         javax.jms.Queue queue = getQueue(destination);
         return jmsOperations.browseSelected(queue, selector, new BrowserCallback<List<InternalJmsMessage>>() {
             @Override
