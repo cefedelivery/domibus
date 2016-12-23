@@ -64,9 +64,11 @@ public class JmsMonitoringController {
         model.addObject("fromDate", df.format(from));
         model.addObject("toDate", df.format(to));
 
-        List<JmsMessage> messages = jmsManager.getMessages(source, jmsType, from, to, selector);
+        if(StringUtils.isNotEmpty(source)) {
+            List<JmsMessage> messages = jmsManager.getMessages(source, jmsType, from, to, selector);
+            model.addObject("messages", messages);
+        }
 
-        model.addObject("messages", messages);
         model.setViewName("jmsmonitoring");
         return model;
     }
