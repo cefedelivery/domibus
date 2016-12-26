@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Cosmin Baciu
+ * @since 3.3
  */
 public class DomibusLoggerFactory {
 

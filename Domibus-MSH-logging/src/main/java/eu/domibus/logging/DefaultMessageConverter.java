@@ -10,6 +10,7 @@ import java.util.Arrays;
 
 /**
  * @author Cosmin Baciu
+ * @since 3.3
  */
 public class DefaultMessageConverter implements MessageConverter {
 

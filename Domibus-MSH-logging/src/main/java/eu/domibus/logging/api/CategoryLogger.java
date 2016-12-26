@@ -12,6 +12,7 @@ import java.util.Set;
 
 /**
  * @author Cosmin Baciu
+ * @since 3.3
  */
 public class CategoryLogger extends LoggerWrapper implements Logger {
 

@@ -8,6 +8,7 @@ import org.slf4j.MarkerFactory;
 
 /**
  * @author Cosmin Baciu
+ * @since 3.3
  */
 public class DomibusLogger extends CategoryLogger {
 
@@ -20,6 +21,34 @@ public class DomibusLogger extends CategoryLogger {
 
     public DomibusLogger(Logger logger) {
         this(logger, new DefaultMessageConverter());
+    }
+
+    public void businessTrace(DomibusMessageCode key, Object... args) {
+        trace(BUSINESS_MARKER, key, args);
+    }
+
+    public void businessDebug(DomibusMessageCode key, Object... args) {
+        debug(BUSINESS_MARKER, key, args);
+    }
+
+    public void businessInfo(DomibusMessageCode key, Object... args) {
+        info(BUSINESS_MARKER, key, args);
+    }
+
+    public void businessWarn(DomibusMessageCode key, Object... args) {
+        businessWarn(key, null, args);
+    }
+
+    public void businessWarn(DomibusMessageCode key, Throwable t, Object... args) {
+        markerWarn(BUSINESS_MARKER, key, t, args);
+    }
+
+    public void businessError(DomibusMessageCode key, Object... args) {
+        businessError(key, null, args);
+    }
+
+    public void businessError(DomibusMessageCode key, Throwable t, Object... args) {
+        markerError(BUSINESS_MARKER, key, t, args);
     }
 
     public void securityTrace(DomibusMessageCode key, Object... args) {
@@ -38,6 +67,18 @@ public class DomibusLogger extends CategoryLogger {
         securityWarn(key, null, args);
     }
 
+    public void securityWarn(DomibusMessageCode key, Throwable t, Object... args) {
+        markerWarn(SECURITY_MARKER, key, t, args);
+    }
+
+    public void securityError(DomibusMessageCode key, Object... args) {
+        securityError(key, null, args);
+    }
+
+    public void securityError(DomibusMessageCode key, Throwable t, Object... args) {
+        markerError(SECURITY_MARKER, key, t, args);
+    }
+
     protected void markerWarn(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
         warn(marker, key, args);
 
@@ -47,14 +88,6 @@ public class DomibusLogger extends CategoryLogger {
         }
     }
 
-    public void securityWarn(DomibusMessageCode key, Throwable t, Object... args) {
-        markerWarn(SECURITY_MARKER, key, t, args);
-    }
-
-    public void securityError(DomibusMessageCode key, Object... args) {
-        securityError(key, null, args);
-    }
-
     protected void markerError(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
         error(marker, key, args);
 
@@ -62,10 +95,6 @@ public class DomibusLogger extends CategoryLogger {
             final String message = formatMessage(marker, key, args);
             error(message, t);
         }
-    }
-
-    public void securityError(DomibusMessageCode key, Throwable t, Object... args) {
-        markerError(SECURITY_MARKER, key, t, args);
     }
 
 

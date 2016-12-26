@@ -40,6 +40,7 @@ import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.plugin.validation.SubmissionValidationException;
@@ -161,6 +162,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
         Messaging messaging = null;
         boolean pingMessage = false;
+
+        String messageId = null;
         try (StringWriter sw = new StringWriter()) {
             if (LOGGER.isDebugEnabled()) {
 
@@ -174,7 +177,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 }
             }
             messaging = getMessaging(request);
-            String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
+            messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
 
             checkCharset(messaging);
             pingMessage = checkPingMessage(messaging.getUserMessage());
@@ -184,20 +187,23 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 try {
                     backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
                 } catch(SubmissionValidationException e) {
+                    LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
                 }
             }
             responseMessage = this.generateReceipt(request, legConfiguration, messageExists);
-
+            LOGGER.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
         } catch (TransformerException | SOAPException | JAXBException | IOException e) {
+            LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIVE_FAILED, messageId);
             throw new RuntimeException(e);
         } catch (final EbMS3Exception e) {
             try {
                 if (!pingMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
+                    LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIVE_FAILED, e, messageId);
                     backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
                 }
             } catch (Exception ex) {
-                LOGGER.warn("could not notify backend of rejected message ", ex);
+                LOGGER.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex,  messageId);
             }
             throw new WebServiceException(e);
         }
@@ -215,6 +221,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             for (final Property property : partInfo.getPartProperties().getProperties()) {
                 if (Property.CHARSET.equals(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
+                    LOGGER.businessError(DomibusMessageCode.BUS_CHARSET_INVALID, property.getValue(), messaging.getUserMessage().getMessageInfo().getMessageId());
                     EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, property.getValue() + " is not a valid Charset", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
                     ex.setMshRole(MSHRole.RECEIVING);
                     throw ex;

@@ -4,6 +4,7 @@ import org.slf4j.Marker;
 
 /**
  * @author Cosmin Baciu
+ * @since 3.3
  */
 public interface MessageConverter {
 
