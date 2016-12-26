@@ -194,12 +194,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             responseMessage = this.generateReceipt(request, legConfiguration, messageExists);
             LOGGER.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
         } catch (TransformerException | SOAPException | JAXBException | IOException e) {
-            LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIVE_FAILED, messageId);
             throw new RuntimeException(e);
         } catch (final EbMS3Exception e) {
             try {
                 if (!pingMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
-                    LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIVE_FAILED, e, messageId);
                     backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
                 }
             } catch (Exception ex) {
@@ -221,7 +219,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             for (final Property property : partInfo.getPartProperties().getProperties()) {
                 if (Property.CHARSET.equals(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
-                    LOGGER.businessError(DomibusMessageCode.BUS_CHARSET_INVALID, property.getValue(), messaging.getUserMessage().getMessageInfo().getMessageId());
+                    LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_CHARSET_INVALID, property.getValue(), messaging.getUserMessage().getMessageInfo().getMessageId());
                     EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, property.getValue() + " is not a valid Charset", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
                     ex.setMshRole(MSHRole.RECEIVING);
                     throw ex;
@@ -360,6 +358,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         try {
             messagingService.storeMessage(messaging);
         } catch (CompressionException exc) {
+            LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_GENERAL_COMPRESSION_FAILURE, userMessage.getMessageInfo().getMessageId());
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
             ex.setMshRole(MSHRole.RECEIVING);
             throw ex;

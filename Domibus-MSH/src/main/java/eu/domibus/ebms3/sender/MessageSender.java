@@ -32,9 +32,9 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.DelayedDispatchMessageCreator;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.messaging.MessageConstants;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -127,7 +127,9 @@ public class MessageSender implements MessageListener {
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 this.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
-            } else LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
+            } else {
+                LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
+            }
 
         } catch (final EbMS3Exception e) {
             this.handleEbms3Exception(e, messageId);

@@ -30,6 +30,7 @@ import eu.domibus.ebms3.pmode.exception.NoMatchingPModeFoundException;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.cxf.ws.policy.PolicyException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,7 +141,7 @@ public class FaultInHandler extends AbstractFaultHandler {
 
         final Messaging messaging = this.extractMessaging(soapMessageWithEbMS3Error);
 
-        FaultInHandler.LOG.debug("An error occurred while receiving a message with ebMS3 messageId: " + messaging.getSignalMessage().getMessageInfo().getMessageId() + ". Please check the database for more detailed information.", ebMS3Exception);
+        LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIVE_FAILED, ebMS3Exception, messaging.getSignalMessage().getMessageInfo().getMessageId());
 
         this.errorLogDao.create(ErrorLogEntry.parse(messaging, MSHRole.RECEIVING));
     }

@@ -21,10 +21,10 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReplyPattern;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -111,7 +111,7 @@ public class ReliabilityChecker {
                     final Iterator<Element> elementIterator = response.getSOAPHeader().getChildElements(new QName(WSConstants.WSSE_NS, WSConstants.WSSE_LN));
 
                     if (!elementIterator.hasNext()) {
-                        LOG.businessError(DomibusMessageCode.BUS_RECEIPT_INVALID_WITH_NO_SECURITY_HEADER, messageId);
+                        LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_INVALID_WITH_NO_SECURITY_HEADER, messageId);
                         EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: No security header found", null, null);
                         ex.setMshRole(MSHRole.SENDING);
                         ex.setSignalMessageId(messageId);
@@ -120,7 +120,7 @@ public class ReliabilityChecker {
                     final Element securityHeaderResponse = elementIterator.next();
 
                     if (elementIterator.hasNext()) {
-                        LOG.businessError(DomibusMessageCode.BUS_RECEIPT_INVALID_WITH_MULTIPLE_SECURITY_HEADERS, messageId);
+                        LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_INVALID_WITH_MULTIPLE_SECURITY_HEADERS, messageId);
                         EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: Multiple security headers found", null, null);
                         ex.setMshRole(MSHRole.SENDING);
                         ex.setSignalMessageId(messageId);
@@ -141,7 +141,7 @@ public class ReliabilityChecker {
                         }
                     }
                     if (!signatureFound) {
-                        LOG.businessError(DomibusMessageCode.BUS_RECEIPT_INVALID_WITH_MESSAGING_NOT_SIGNED, messageId);
+                        LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_INVALID_WITH_MESSAGING_NOT_SIGNED, messageId);
                         EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: eb:Messaging not signed", null, null);
                         ex.setMshRole(MSHRole.SENDING);
                         ex.setSignalMessageId(messageId);
@@ -152,16 +152,15 @@ public class ReliabilityChecker {
                     final NodeList referencesFromNonRepudiationInformation = nonRepudiationChecker.getNonRepudiationNodeList(response.getSOAPHeader().getElementsByTagNameNS(NonRepudiationConstants.NS_NRR, NonRepudiationConstants.NRR_LN).item(0));
 
                     if (!nonRepudiationChecker.compareUnorderedReferenceNodeLists(referencesFromSecurityHeader, referencesFromNonRepudiationInformation)) {
-                        LOG.businessError(DomibusMessageCode.BUS_RECEIPT_INVALID_NOT_MATCHING_THE_MESSAGE, messageId);
+                        LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_INVALID_NOT_MATCHING_THE_MESSAGE, messageId);
                         EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: non repudiation information and request message do not match", null, null);
                         ex.setMshRole(MSHRole.SENDING);
                         ex.setSignalMessageId(messageId);
                         throw ex;
                     }
 
-                    LOG.businessInfo(DomibusMessageCode.BUS_RECEIPT_CHECK_SUCCESSFUL, messageId);
+                    LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_CHECK_SUCCESSFUL, messageId);
                     return CheckResult.OK;
-
                 } catch (final JAXBException e) {
                     ReliabilityChecker.LOG.error("", e);
                 } catch (final SOAPException e) {
@@ -169,7 +168,7 @@ public class ReliabilityChecker {
                 }
 
             } else {
-                LOG.businessError(DomibusMessageCode.BUS_RECEIPT_INVALID_EMPTY, messageId);
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_INVALID_EMPTY, messageId);
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "There is no content inside the receipt element received by the responding gateway", null, null);
                 ex.setMshRole(MSHRole.SENDING);
                 ex.setSignalMessageId(messageId);
@@ -177,7 +176,7 @@ public class ReliabilityChecker {
             }
 
         }
-        LOG.businessError(DomibusMessageCode.BUS_RECEIPT_GENERAL_ERROR, messageId);
+        LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERAL_ERROR, messageId);
         return CheckResult.FAIL;
 
     }

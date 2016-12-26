@@ -22,6 +22,7 @@ import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.DuplicateMessageException;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
@@ -263,6 +264,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             try {
                 messagingService.storeMessage(message);
             } catch (CompressionException exc) {
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_GENERAL_COMPRESSION_FAILURE, userMessage.getMessageInfo().getMessageId());
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
@@ -286,8 +288,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             return userMessage.getMessageInfo().getMessageId();
 
         } catch (final EbMS3Exception ebms3Ex) {
-            errorLogDao.create(new ErrorLogEntry(ebms3Ex));
             LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", ebms3Ex);
+            errorLogDao.create(new ErrorLogEntry(ebms3Ex));
             throw MessagingExceptionFactory.transform(ebms3Ex);
         }
     }

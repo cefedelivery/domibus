@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.common.dao;
 
 import eu.domibus.common.ErrorCode;
@@ -27,12 +8,14 @@ import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -95,14 +78,19 @@ public class PModeDao extends PModeProvider {
     }
 
     protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
+        LOG.debug("Finding leg name using agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]",
+                agreementName, senderParty, receiverParty, service, action);
         String namedQuery;
         if (agreementName.equals(OPTIONAL_AND_EMPTY)) {
             namedQuery = "LegConfiguration.findForPartiesAndAgreementsOAE";
         } else {
             namedQuery = "LegConfiguration.findForPartiesAndAgreements";
         }
+        LOG.debug("Using named query [{}]", namedQuery);
+
         Query candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
         if (!agreementName.equals(OPTIONAL_AND_EMPTY)) {
+            LOG.debug("Setting agreement [{}]", OPTIONAL_AND_EMPTY);
             candidatesQuery.setParameter("AGREEMENT", agreementName);
         }
         candidatesQuery.setParameter("SENDER_PARTY", senderParty);
@@ -112,11 +100,13 @@ public class PModeDao extends PModeProvider {
         if (candidates == null || candidates.isEmpty()) {
             // To be removed when the backward compatibility will be finally broken!
             namedQuery = "LegConfiguration.findForPartiesAndAgreementEmpty";
+            LOG.debug("No candidates found, using namedQuery to find candidates [{}]", namedQuery);
             candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
             candidatesQuery.setParameter("SENDER_PARTY", senderParty);
             candidatesQuery.setParameter("RECEIVER_PARTY", receiverParty);
             candidates = candidatesQuery.getResultList();
             if (candidates == null || candidates.isEmpty()) {
+                LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, agreementName, senderParty, receiverParty, service, action);
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
             }
         }
@@ -131,9 +121,9 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            PModeDao.LOG.info("", e);
+            LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, e, agreementName, senderParty, receiverParty, service, action);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
     }
 
     protected String findAgreement(final AgreementRef agreementRef) throws EbMS3Exception {
@@ -148,9 +138,9 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            PModeDao.LOG.info("No matching agreement found", e);
+            LOG.businessError(DomibusMessageCode.BUS_MESSAGE_AGREEMENT_NOT_FOUND, e, agreementRef);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreement found", null, null);
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreement found", null, null);
     }
 
     protected String findActionName(final String action) throws EbMS3Exception {
@@ -163,7 +153,7 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            PModeDao.LOG.info("No matching action found", e);
+            LOG.businessError(DomibusMessageCode.BUS_MESSAGE_ACTION_NOT_FOUND, e, action);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching action found", null, null);
         }
     }
@@ -189,7 +179,7 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            PModeDao.LOG.info("No matching service found", e);
+            LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SERVICE_FOUND, e);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching service found", null, null);
         }
     }
@@ -197,6 +187,7 @@ public class PModeDao extends PModeProvider {
     protected String findPartyName(final Collection<PartyId> partyIds) throws EbMS3Exception {
         Identifier identifier;
         for (final PartyId partyId : partyIds) {
+            LOG.debug("Trying to find party [" + partyId + "]");
             try {
                 String type = partyId.getType();
                 if (type == null || type.isEmpty()) { //PartyId must be an URI
@@ -213,14 +204,16 @@ public class PModeDao extends PModeProvider {
                 identifierQuery.setParameter("PARTY_ID", partyId.getValue());
                 identifierQuery.setParameter("PARTY_ID_TYPE", type);
                 identifier = identifierQuery.getSingleResult();
+                LOG.debug("Found identifier [" + identifier + "]");
                 final TypedQuery<String> query = this.entityManager.createNamedQuery("Party.findPartyByIdentifier", String.class);
                 query.setParameter("PARTY_IDENTIFIER", identifier);
 
                 return query.getSingleResult();
             } catch (final NoResultException e) {
-                PModeDao.LOG.debug("", e); // Its ok to not know all identifiers, we just have to know one
+                LOG.debug("", e); // Its ok to not know all identifiers, we just have to know one
             }
         }
+        LOG.businessError(DomibusMessageCode.BUS_PARTY_ID_NOT_FOUND, partyIds);
         throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "No matching party found", null, null);
     }
 
@@ -239,7 +232,7 @@ public class PModeDao extends PModeProvider {
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            PModeDao.LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of 0 for downloaded messages.");
+            LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of 0 for downloaded messages.");
             return 0;
         }
 
@@ -255,7 +248,7 @@ public class PModeDao extends PModeProvider {
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            PModeDao.LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of 0 for downloaded messages.");
+            LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of 0 for downloaded messages.");
             return 0;
         }
 
@@ -271,7 +264,7 @@ public class PModeDao extends PModeProvider {
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            PModeDao.LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of -1 for undownloaded messages.");
+            LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of -1 for undownloaded messages.");
             return 0;
         }
 
@@ -287,7 +280,7 @@ public class PModeDao extends PModeProvider {
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            PModeDao.LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of -1 for undownloaded messages.");
+            LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of -1 for undownloaded messages.");
             return 0;
         }
 
