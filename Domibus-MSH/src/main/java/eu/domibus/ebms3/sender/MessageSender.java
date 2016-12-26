@@ -34,6 +34,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.MessageConstants;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +103,7 @@ public class MessageSender implements MessageListener {
 
 
     private void sendUserMessage(final String messageId) {
+        LOG.debug("Sending message");
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
         // Assuming that everything goes fine
         ResponseHandler.CheckResult isOk = ResponseHandler.CheckResult.OK;
@@ -149,6 +151,7 @@ public class MessageSender implements MessageListener {
                     backendNotificationService.notifyOfSendSuccess(messageId);
                     userMessageLogDao.setAsNotified(messageId);
                     messagingDao.clearPayloadData(messageId);
+                    LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS);
                     break;
                 case WAITING_FOR_CALLBACK:
                     userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
@@ -169,17 +172,18 @@ public class MessageSender implements MessageListener {
         exceptionToHandle.setRefToMessageId(messageId);
         if (!exceptionToHandle.isRecoverable() && !Boolean.parseBoolean(System.getProperty(UNRECOVERABLE_ERROR_RETRY))) {
             userMessageLogDao.setMessageAsAcknowledged(messageId);
-            // TODO Shouldn't clear the payload data here ?
+            // The payload data is cleared after the send max attempts has been reached or when the message send time has expired
         }
 
         exceptionToHandle.setMshRole(MSHRole.SENDING);
-        LOG.error("Error for message with ID [" + messageId + "]", exceptionToHandle);
+        LOG.error("Error sending message with ID [" + messageId + "]", exceptionToHandle);
         this.errorLogDao.create(new ErrorLogEntry(exceptionToHandle));
-        //TODO: notify backends of error
+        // The backends are notified that an error occurred in the UpdateRetryLoggingService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void onMessage(final Message message) {
+        LOG.debug("Processing message [{}]", message);
         Long delay = null;
         String messageId = null;
         try {
@@ -192,7 +196,7 @@ public class MessageSender implements MessageListener {
         } catch (final NumberFormatException nfe) {
             //This is ok, no delay has been set
         } catch (final JMSException e) {
-            LOG.error("", e);
+            LOG.error("Error processing message", e);
         }
         sendUserMessage(messageId);
     }

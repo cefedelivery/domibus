@@ -30,10 +30,14 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_MESSAGE_AGREEMENT_NOT_FOUND("BUS-019", "Message agreement not found for value [{}]"),
     BUS_PARTY_ID_FOUND("BUS-020", "Party id found for value [{}]"),
     BUS_PARTY_ID_NOT_FOUND("BUS-021", "Party id not found for value [{}]"),
-    BUS_MESSAGE_SERVICE_FOUND("BUS-020", "Message service found for value [{}]"),
-    BUS_MESSAGE_SERVICE_NOT_FOUND("BUS-021", "Message service not found for value [{}]"),
-    BUS_LEG_NAME_FOUND("BUS-022", "Leg name found found for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
-    BUS_LEG_NAME_NOT_FOUND("BUS-023", "Leg name not found found for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
+    BUS_PARTY_ID_INVALID_URI("BUS-022", "Party [{}] is not a valid URI [CORE] 5.2.2.3"),
+    BUS_MESSAGE_SERVICE_FOUND("BUS-023", "Message service found for value [{}]"),
+    BUS_MESSAGE_SERVICE_NOT_FOUND("BUS-024", "Message service not found for value [{}]"),
+    BUS_MESSAGE_SERVICE_INVALID_URI("BUS-025", "Message service [{}] is not a valid URI [CORE] 5.2.2.8"),
+    BUS_LEG_NAME_FOUND("BUS-026", "Leg name found found for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
+    BUS_LEG_NAME_NOT_FOUND("BUS-027", "Leg name not found found for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
+    BUS_MESSAGE_SEND_SUCCESS("BUS-028", "Message sent successfully"),
+    BUS_MESSAGE_SEND_FAILURE("BUS-029", "Message send failure"),
 
     SEC_CONNECTION_ATTEMPT("SEC-001", "TODO");
 

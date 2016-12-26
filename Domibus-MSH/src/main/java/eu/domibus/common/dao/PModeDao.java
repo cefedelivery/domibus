@@ -15,7 +15,6 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -168,6 +167,7 @@ public class PModeDao extends PModeProvider {
                 query = entityManager.createNamedQuery("Service.findWithoutType", String.class);
                 query.setParameter("SERVICE", value);
             } catch (final IllegalArgumentException e) {
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SERVICE_INVALID_URI, value);
                 final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Service " + value + " is not a valid URI [CORE] 5.2.2.8", null, e);
                 throw ex;
             }
@@ -196,6 +196,7 @@ public class PModeDao extends PModeProvider {
                         URI.create(partyId.getValue()); //if not an URI an IllegalArgumentException will be thrown
                         type = "";
                     } catch (final IllegalArgumentException e) {
+                        LOG.businessError(DomibusMessageCode.BUS_PARTY_ID_INVALID_URI, partyId.getValue());
                         final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "PartyId " + partyId.getValue() + " is not a valid URI [CORE] 5.2.2.3", null, e);
                         throw ex;
                     }
