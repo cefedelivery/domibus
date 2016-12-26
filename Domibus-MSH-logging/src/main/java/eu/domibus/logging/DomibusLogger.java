@@ -15,7 +15,7 @@ public class DomibusLogger extends CategoryLogger {
     public static final Marker SECURITY_MARKER = MarkerFactory.getMarker("SECURITY");
 
     public DomibusLogger(Logger logger, MessageConverter messageConverter) {
-        super(logger, messageConverter, "domibus_");
+        super(logger, messageConverter, "d_");
     }
 
     public DomibusLogger(Logger logger) {
