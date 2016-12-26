@@ -20,7 +20,7 @@ import java.io.File;
 public class LogbackLoggingConfigurator implements LoggingConfigurator {
 
     private static final String DOMIBUS_CONFIG_LOCATION = "domibus.config.location";
-    private static final String DEFAULT_LOGBACK_FILE_NAME = "logback-spring.xml";
+    private static final String DEFAULT_LOGBACK_FILE_NAME = "logback.xml";
     private static final String LOGBACK_CONFIGURATION_FILE_PARAM = "logback.configurationFile";
 
     private static final Logger LOG = LoggerFactory.getLogger(LogbackLoggingConfigurator.class);
