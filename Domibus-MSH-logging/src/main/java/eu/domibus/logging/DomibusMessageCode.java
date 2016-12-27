@@ -40,12 +40,21 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_MESSAGE_SEND_FAILURE("BUS-029", "Message send failure"),
 
     SEC_SECURITY_POLICY_OUTGOING_NOT_FOUND("SEC-001", "Security policy [{}] was not found for outgoing message"),
-    SEC_SECURITY_POLICY_OUTGOING_USE("SEC-002", "Security policy [{}] was used for outgoing message"),
-    SEC_SECURITY_ALGORITHM_OUTGOING_USE("SEC-003", "Security algorithm [{}] was used for outgoing message"),
-    SEC_SECURITY_ALGORITHM_INCOMING_USE("SEC-004", "Security algorithm [{}] was used for incoming message"),
-    SEC_SECURITY_USER_OUTGOING_USE("SEC-005", "Security encryption username [{}] was used for outgoing message"),
+    SEC_SECURITY_POLICY_OUTGOING_USE("SEC-002", "Security policy [{}] is used for outgoing message"),
+    SEC_SECURITY_ALGORITHM_OUTGOING_USE("SEC-003", "Security algorithm [{}] is used for outgoing message"),
+    SEC_SECURITY_ALGORITHM_INCOMING_USE("SEC-004", "Security algorithm [{}] is used for incoming message"),
+    SEC_SECURITY_USER_OUTGOING_USE("SEC-005", "Security encryption username [{}] is used for outgoing message"),
     SEC_SECURITY_POLICY_INCOMING_NOT_FOUND("SEC-006", "Security policy [{}] for incoming message  was not found"),
-    SEC_SECURITY_POLICY_INCOMING_USE("SEC-007", "Security policy [{}] for incoming message was used");
+    SEC_SECURITY_POLICY_INCOMING_USE("SEC-007", "Security policy [{}] for incoming message is used"),
+    SEC_UNSECURED_LOGIN_ALLOWED("SEC-008", "Unsecure login is allowed, no authentication will be performed"),
+    SEC_BASIC_AUTHENTICATION_USE("SEC-009", "Basic authentication is used"),
+    SEC_X509CERTIFICATE_AUTHENTICATION_USE("SEC-010", "X509Certificate authentication is used"),
+    SEC_BLUE_COAT_AUTHENTICATION_USE("SEC-011", "Blue coat authentication is used"),
+    SEC_CONNECTION_ATTEMPT("SEC-012", "The host [{}] attempted to access [{}]"),
+    SEC_AUTHORIZED_ACCESS("SEC-013", "The host [{}] has been granted access to [{}] with roles [{}]"),
+    SEC_UNAUTHORIZED_ACCESS("SEC-014", "The host [{}] has been refused access to [{}]"),
+    SEC_CERTIFICATE_EXPIRED("SEC-015", "Certificate is not valid at the current date [{}]. Certificate valid from [{}] to [{}]"),
+    SEC_CERTIFICATE_NOT_YET_VALID("SEC-016", "Certificate is not yet valid at the current date [{}]. Certificate valid from [{}] to [{}]");
 
 
     String code;
