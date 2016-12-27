@@ -77,7 +77,7 @@ public class ResponseHandler {
         try {
             messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) response.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
         } catch (JAXBException | SOAPException ex) {
-            logger.error("Unable to read message due to error: ", ex);
+            logger.error("Error while un-marshalling message", ex);
             return CheckResult.UNMARSHALL_ERROR;
         }
 

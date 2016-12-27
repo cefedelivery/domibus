@@ -24,22 +24,29 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE_MISSING_MIME_TYPE("BUS-013", "No mime type found for payload with cid [{}]"),
     BUS_MESSAGE_PAYLOAD_GENERAL_COMPRESSION_FAILURE("BUS-014", "Could not store binary data"),
     BUS_MESSAGE_PAYLOAD_DECOMPRESSION_FAILURE_MISSING_MIME_TYPE("BUS-015", "No mime type found for payload with cid [{}]"),
-    BUS_MESSAGE_ACTION_FOUND("BUS-016", "Message action found for value [{}]"),
+    BUS_MESSAGE_ACTION_FOUND("BUS-016", "Message action [{}] found for value [{}]"),
     BUS_MESSAGE_ACTION_NOT_FOUND("BUS-017", "Message action not found for value [{}]"),
-    BUS_MESSAGE_AGREEMENT_FOUND("BUS-018", "Message agreement found for value [{}]"),
+    BUS_MESSAGE_AGREEMENT_FOUND("BUS-018", "Message agreement [{}] found for value [{}]"),
     BUS_MESSAGE_AGREEMENT_NOT_FOUND("BUS-019", "Message agreement not found for value [{}]"),
-    BUS_PARTY_ID_FOUND("BUS-020", "Party id found for value [{}]"),
+    BUS_PARTY_ID_FOUND("BUS-020", "Party id [{}] found for value [{}]"),
     BUS_PARTY_ID_NOT_FOUND("BUS-021", "Party id not found for value [{}]"),
     BUS_PARTY_ID_INVALID_URI("BUS-022", "Party [{}] is not a valid URI [CORE] 5.2.2.3"),
-    BUS_MESSAGE_SERVICE_FOUND("BUS-023", "Message service found for value [{}]"),
+    BUS_MESSAGE_SERVICE_FOUND("BUS-023", "Message service [{}] found for value [{}]"),
     BUS_MESSAGE_SERVICE_NOT_FOUND("BUS-024", "Message service not found for value [{}]"),
     BUS_MESSAGE_SERVICE_INVALID_URI("BUS-025", "Message service [{}] is not a valid URI [CORE] 5.2.2.8"),
-    BUS_LEG_NAME_FOUND("BUS-026", "Leg name found found for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
+    BUS_LEG_NAME_FOUND("BUS-026", "Leg name found [{}] for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
     BUS_LEG_NAME_NOT_FOUND("BUS-027", "Leg name not found found for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
     BUS_MESSAGE_SEND_SUCCESS("BUS-028", "Message sent successfully"),
     BUS_MESSAGE_SEND_FAILURE("BUS-029", "Message send failure"),
 
-    SEC_CONNECTION_ATTEMPT("SEC-001", "TODO");
+    SEC_SECURITY_POLICY_OUTGOING_NOT_FOUND("SEC-001", "Security policy [{}] was not found for outgoing message"),
+    SEC_SECURITY_POLICY_OUTGOING_USE("SEC-002", "Security policy [{}] was used for outgoing message"),
+    SEC_SECURITY_ALGORITHM_OUTGOING_USE("SEC-003", "Security algorithm [{}] was used for outgoing message"),
+    SEC_SECURITY_ALGORITHM_INCOMING_USE("SEC-004", "Security algorithm [{}] was used for incoming message"),
+    SEC_SECURITY_USER_OUTGOING_USE("SEC-005", "Security encryption username [{}] was used for outgoing message"),
+    SEC_SECURITY_POLICY_INCOMING_NOT_FOUND("SEC-006", "Security policy [{}] for incoming message  was not found"),
+    SEC_SECURITY_POLICY_INCOMING_USE("SEC-007", "Security policy [{}] for incoming message was used");
+
 
     String code;
     String message;

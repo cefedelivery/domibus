@@ -19,8 +19,7 @@
         <file>${catalina.home}/logs/domibus.log</file>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SECURITY</marker>
-                <marker>BUSINESS</marker>
+                <marker>LOGGED_MARKER</marker>
             </evaluator>
             <onMismatch>NEUTRAL</onMismatch>
             <onMatch>DENY</onMatch>

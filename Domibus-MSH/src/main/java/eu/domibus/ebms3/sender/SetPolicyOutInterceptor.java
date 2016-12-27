@@ -27,6 +27,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.ebms3.common.model.PolicyFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.apache.cxf.attachment.AttachmentImpl;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -92,16 +93,19 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
 
         message.put(SecurityConstants.USE_ATTACHMENT_ENCRYPTION_CONTENT_ONLY_TRANSFORM, true);
 
-        message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm());
-        message.put(SecurityConstants.ENCRYPT_USERNAME, this.pModeProvider.getReceiverParty(pModeKey).getName());
+        final String securityAlgorithm = legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
+        message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
+        LOG.securityInfo(DomibusMessageCode.SEC_SECURITY_ALGORITHM_OUTGOING_USE, securityAlgorithm);
+        final String encryptionUsername = pModeProvider.getReceiverParty(pModeKey).getName();
+        message.put(SecurityConstants.ENCRYPT_USERNAME, encryptionUsername);
+        LOG.securityInfo(DomibusMessageCode.SEC_SECURITY_USER_OUTGOING_USE, encryptionUsername);
 
         try {
-
-            final Policy policy = policyFactory.parsePolicy("policies/" + pModeProvider.getLegConfiguration(pModeKey).getSecurity().getPolicy());
-
+            final Policy policy = policyFactory.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+            LOG.securityInfo(DomibusMessageCode.SEC_SECURITY_POLICY_OUTGOING_USE, legConfiguration.getSecurity().getPolicy());
             message.put(PolicyConstants.POLICY_OVERRIDE, policy);
         } catch (final ConfigurationException e) {
-            SetPolicyOutInterceptor.LOG.error("", e);
+            LOG.securityError(DomibusMessageCode.SEC_SECURITY_POLICY_OUTGOING_NOT_FOUND, e, legConfiguration.getSecurity().getPolicy());
             throw new Fault(new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Could not find policy file " + System.getProperty("domibus.config.location") + "/" + this.pModeProvider.getLegConfiguration(pModeKey).getSecurity(), null, null));
         }
 
