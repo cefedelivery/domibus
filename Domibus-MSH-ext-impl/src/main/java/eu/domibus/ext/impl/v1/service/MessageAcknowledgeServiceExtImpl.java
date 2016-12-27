@@ -26,12 +26,7 @@ public class MessageAcknowledgeServiceExtImpl implements MessageAcknowledgeServi
 
     @Override
     public void acknowledgeMessage(String messageId) throws MessageAcknowledgeExceptionExt {
-        try {
-            messageAcknowledgeService.acknowledgeMessage(messageId);
-        } catch (MessageAcknowledgeException e) {
-            throw new MessageAcknowledgeExceptionExt(e);
-        }
-
+        messageAcknowledgeService.acknowledgeMessage(messageId);
     }
 
     @Override
