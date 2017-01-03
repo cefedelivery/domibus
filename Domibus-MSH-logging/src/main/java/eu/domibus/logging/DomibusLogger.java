@@ -18,7 +18,7 @@ public class DomibusLogger extends CategoryLogger {
     private static final Marker LOGGED_MARKER = MarkerFactory.getMarker("LOGGED_MARKER");
 
     public DomibusLogger(Logger logger, MessageConverter messageConverter) {
-        super(logger, messageConverter, "d_");
+        super(logger, DomibusLogger.class.getName(),messageConverter, "d_");
     }
 
     public DomibusLogger(Logger logger) {
@@ -93,7 +93,7 @@ public class DomibusLogger extends CategoryLogger {
     protected void markerError(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
         if (t != null) {
             final String message = formatMessage(marker, key, args);
-            error(message, t);
+            logError(null, message, t, args);
             marker.add(LOGGED_MARKER);
         }
 

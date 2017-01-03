@@ -16,18 +16,18 @@ import java.util.Set;
  */
 public class CategoryLogger extends LoggerWrapper implements Logger {
 
-    private static final String FQCN = CategoryLogger.class.getName();
-
     protected MessageConverter messageConverter;
     protected String mdcPropertyPrefix;
+    protected String fqcn;
 
-    public CategoryLogger(Logger logger, MessageConverter messageConverter, String mdcPropertyPrefix) {
+    public CategoryLogger(Logger logger, String fqcn, MessageConverter messageConverter, String mdcPropertyPrefix) {
         super(logger, LoggerWrapper.class.getName());
         if (messageConverter == null) {
             throw new IllegalArgumentException("MessageConverter cannot be null");
         }
         this.messageConverter = messageConverter;
         this.mdcPropertyPrefix = mdcPropertyPrefix;
+        this.fqcn = fqcn;
     }
 
     public void trace(Marker marker, MessageCode key, Object... args) {
@@ -37,7 +37,7 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         String translatedMsg = formatMessage(marker, key, args);
 
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, FQCN, LocationAwareLogger.TRACE_INT, translatedMsg, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.TRACE_INT, translatedMsg, args, null);
         } else {
             logger.trace(marker, translatedMsg, args);
         }
@@ -50,7 +50,7 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         String translatedMsg = formatMessage(marker, key, args);
 
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, FQCN, LocationAwareLogger.DEBUG_INT, translatedMsg, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.DEBUG_INT, translatedMsg, args, null);
         } else {
             logger.debug(marker, translatedMsg, args);
         }
@@ -63,7 +63,7 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         String translatedMsg = formatMessage(marker, key, args);
 
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, FQCN, LocationAwareLogger.INFO_INT, translatedMsg, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.INFO_INT, translatedMsg, args, null);
         } else {
             logger.info(marker, translatedMsg, args);
         }
@@ -76,7 +76,7 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         String translatedMsg = formatMessage(marker, key, args);
 
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, FQCN, LocationAwareLogger.WARN_INT, translatedMsg, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.WARN_INT, translatedMsg, args, null);
         } else {
             logger.warn(marker, translatedMsg, args);
         }
@@ -88,23 +88,14 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         }
         String translatedMsg = formatMessage(marker, key, args);
 
-        if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, FQCN, LocationAwareLogger.ERROR_INT, translatedMsg, args, null);
-        } else {
-            logger.error(marker, translatedMsg, args);
-        }
+        logError(marker, translatedMsg, null, args);
     }
 
-    public void error(Marker marker, MessageCode key, Throwable t, Object... args) {
-        if (!logger.isErrorEnabled()) {
-            return;
-        }
-        String translatedMsg = formatMessage(marker, key, args);
-
+    protected void logError(Marker marker, String message, Throwable t, Object[] args) {
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, FQCN, LocationAwareLogger.ERROR_INT, translatedMsg, args, t);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.ERROR_INT, message, args, t);
         } else {
-            logger.error(marker, translatedMsg, t);
+            logger.error(marker, message, args);
         }
     }
 

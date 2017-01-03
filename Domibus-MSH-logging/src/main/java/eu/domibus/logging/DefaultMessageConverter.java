@@ -5,6 +5,7 @@ import eu.domibus.logging.api.MessageConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
+import org.slf4j.helpers.MessageFormatter;
 
 import java.util.Arrays;
 
@@ -20,7 +21,7 @@ public class DefaultMessageConverter implements MessageConverter {
     public String getMessage(Marker marker, MessageCode messageCode, Object... args) {
         String message = null;
         try {
-            message = String.format(messageCode.getMessage(), (Object[]) args);
+            message = MessageFormatter.arrayFormat(messageCode.getMessage(), args).getMessage();
         } catch (final Throwable throwable) {
             LOGGER.debug("Could not format the code [" + messageCode.getCode() + "]: message [" + messageCode.getMessage() + "] and arguments [" + Arrays.asList(args) + "]");
             message = messageCode.getMessage();
