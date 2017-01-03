@@ -111,7 +111,7 @@ public class LogbackLoggingConfiguratorTest {
     public void testGetDefaultLogbackConfigurationFileWithConfiguredDomibusLocation(@Mocked System mock) throws Exception {
         new Expectations(logbackLoggingConfigurator) {{
             System.getProperty(anyString);
-            result = "/user/mylogback-spring.xml";
+            result = "/user/mylogback.xml";
         }};
 
         logbackLoggingConfigurator.getDefaultLogbackConfigurationFile();
@@ -121,7 +121,7 @@ public class LogbackLoggingConfiguratorTest {
             logbackLoggingConfigurator.getLogFileLocation(fileLocation = withCapture(), anyString);
             times = 1;
 
-            Assert.assertEquals("/user/mylogback-spring.xml", fileLocation);
+            Assert.assertEquals("/user/mylogback.xml", fileLocation);
         }};
     }
 

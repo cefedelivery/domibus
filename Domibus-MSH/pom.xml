@@ -352,7 +352,7 @@
         <profile>
             <id>tomcat-mysql</id>
             <properties>
-                <filesToExclude>logback-spring.xml</filesToExclude>
+                <filesToExclude>logback.xml</filesToExclude>
                 <domibus.classifier>tomcat</domibus.classifier>
                 <tomcat.version>8.0.24</tomcat.version>
             </properties>

@@ -78,10 +78,10 @@
         </file>
         <file>
             <source>
-                ${project.basedir}/src/main/conf/domibus/logback-spring.xml
+                ${project.basedir}/src/main/conf/domibus/logback.xml
             </source>
             <outputDirectory>/</outputDirectory>
-            <destName>logback-spring.xml</destName>
+            <destName>logback.xml</destName>
             <filtered>false</filtered>
         </file>
         <file>
