@@ -52,9 +52,6 @@ public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Me
 
         LOGGER.debug("Intercepted request for " + httpRequest.getPathInfo());
 
-        //reset the user to anonymous
-        LOGGER.putMDC(DomibusLogger.MDC_USER, "anonymous");
-
         /* id domibus allows unsecure login, do not authenticate anymore, just go on */
         if ("true".equals(domibusProperties.getProperty(UNSECURE_LOGIN_ALLOWED, "true"))) {
             LOGGER.businessInfo(DomibusMessageCode.SEC_UNSECURED_LOGIN_ALLOWED);
@@ -122,13 +119,12 @@ public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Me
             throw new AuthenticationException("Error while authenticating " + authentication.getName(), exc);
         }
 
-        LOGGER.putMDC(DomibusLogger.MDC_USER, authenticationResult.getName());
-
         if (authenticationResult.isAuthenticated()) {
             LOGGER.securityInfo(DomibusMessageCode.SEC_AUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL(), authenticationResult.getAuthorities());
             LOGGER.debug("Request authenticated. Storing the authentication result in the security context");
             LOGGER.debug("Authentication result: " + authenticationResult);
             SecurityContextHolder.getContext().setAuthentication(authenticationResult);
+            LOGGER.putMDC(DomibusLogger.MDC_USER, authenticationResult.getName());
         } else {
             LOGGER.securityInfo(DomibusMessageCode.SEC_UNAUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
             LOGGER.debug("Unauthorize access for " + httpRequest.getRemoteHost() + " " + httpRequest.getRequestURL());

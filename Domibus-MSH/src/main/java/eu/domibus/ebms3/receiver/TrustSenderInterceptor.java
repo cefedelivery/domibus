@@ -89,7 +89,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
             throw ebMS3Ex;
         } catch (Exception ex) {
-            LOG.debug("Blocking error", ex);
+            LOG.error("Error while verifying parties trust", ex);
             throw new Fault(ex);
         }
     }

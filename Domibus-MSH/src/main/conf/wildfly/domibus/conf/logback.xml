@@ -74,7 +74,6 @@
     </appender>
 
     <logger name="eu.domibus" level="INFO">
-        <appender-ref ref="file"/>
         <appender-ref ref="security_file"/>
         <appender-ref ref="business_file"/>
     </logger>
