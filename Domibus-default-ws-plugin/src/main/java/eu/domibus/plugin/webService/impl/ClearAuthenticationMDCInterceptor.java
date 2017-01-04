@@ -30,7 +30,7 @@ public class ClearAuthenticationMDCInterceptor extends AbstractPhaseInterceptor<
     }
 
     private void clearAuthenticationMDC() {
-        LOGGER.info("Clearing MDC user");
         LOGGER.removeMDC(DomibusLogger.MDC_USER);
+        LOGGER.info("Cleared MDC property [{}]", LOGGER.translateMDCKey(DomibusLogger.MDC_USER));
     }
 }

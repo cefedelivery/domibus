@@ -88,7 +88,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Messaging messaging = null;
         String policyName = null;
-
+        String messageId = null;
 
         try {
             IOUtils.copy(inputStream, byteArrayOutputStream); //FIXME: do not copy the whole byte[], use SequenceInputstream instead
@@ -102,6 +102,11 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             //message.setContent(XMLStreamReader.class, XMLInputFactory.newInstance().createXMLStreamReader(message.getContent(InputStream.class)));
             final Node messagingNode = soapEnvelope.getElementsByTagNameNS(ObjectFactory._Messaging_QNAME.getNamespaceURI(), ObjectFactory._Messaging_QNAME.getLocalPart()).item(0);
             messaging = ((JAXBElement<Messaging>) this.jaxbContext.createUnmarshaller().unmarshal(messagingNode)).getValue();
+            messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
+
+            //set the messageId in the MDC context
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+
             final String pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(messaging.getUserMessage()); // FIXME: This does not work for signalmessages
             final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
@@ -112,11 +117,8 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             message.put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
             message.getExchange().put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
             //FIXME: Consistent way! If properties are added to the exchange you will have access via PhaseInterceptorChain
-            final String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
-            message.getExchange().put(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY, messageId);
 
-            //set the messageId in the MDC context
-            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+            message.getExchange().put(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY, messageId);
 
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want
             message.getExchange().put(PolicyConstants.POLICY_OVERRIDE, policy);

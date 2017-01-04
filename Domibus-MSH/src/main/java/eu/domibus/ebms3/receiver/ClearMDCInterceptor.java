@@ -30,7 +30,7 @@ public class ClearMDCInterceptor extends AbstractPhaseInterceptor<Message> {
     }
 
     private void clearMDC() {
-        LOGGER.info("Clearing MDC messageId");
         LOGGER.removeMDC(DomibusLogger.MDC_MESSAGE_ID);
+        LOGGER.info("Cleared MDC property [{}]", LOGGER.translateMDCKey(DomibusLogger.MDC_MESSAGE_ID));
     }
 }

@@ -264,7 +264,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             try {
                 messagingService.storeMessage(message);
             } catch (CompressionException exc) {
-                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_GENERAL_COMPRESSION_FAILURE, userMessage.getMessageInfo().getMessageId());
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, userMessage.getMessageInfo().getMessageId());
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
