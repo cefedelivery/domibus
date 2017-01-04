@@ -120,7 +120,6 @@ public class BackendNotificationService {
                 }
             }
             if (matches) {
-                LOG.info("Notify backend " + filter.getBackendName() + " of message [" + userMessage.getMessageInfo().getMessageId() + "]");
                 validateAndNotify(userMessage, filter.getBackendName(), notificationType);
                 return;
             }
@@ -170,16 +169,18 @@ public class BackendNotificationService {
     }
 
     protected void validateAndNotify(UserMessage userMessage, String backendName, NotificationType notificationType) {
+        LOG.info("Notifying backend [{}] of message [{}] and notification type [{}]", backendName, userMessage.getMessageInfo().getMessageId(), notificationType);
+
         validateSubmission(userMessage, backendName, notificationType);
         String finalRecipient = getFinalRecipient(userMessage);
         notify(userMessage.getMessageInfo().getMessageId(), backendName, notificationType, finalRecipient);
     }
 
-        protected void notify(String messageId, String backendName, NotificationType notificationType) {
-            notify(messageId, backendName, notificationType, null);
-        }
+    protected void notify(String messageId, String backendName, NotificationType notificationType) {
+        notify(messageId, backendName, notificationType, null);
+    }
 
-        protected void notify(String messageId, String backendName, NotificationType notificationType, String finalRecipient) {
+    protected void notify(String messageId, String backendName, NotificationType notificationType, String finalRecipient) {
         NotificationListener notificationListener = getNotificationListener(backendName);
         if (notificationListener == null) {
             LOG.debug("No notification listeners found for backend [" + backendName + "]");

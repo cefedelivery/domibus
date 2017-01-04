@@ -97,11 +97,13 @@ public class CompressionService {
     public boolean handleDecompression(final UserMessage ebmsMessage, final LegConfiguration legConfigForMessage) throws EbMS3Exception {
         //if compression is not necessary return false
         if (!legConfigForMessage.isCompressPayloads()) {
+            LOG.info("Decompression is not performed: leg compressPayloads parameter is false");
             return false;
         }
 
         for (final PartInfo partInfo : ebmsMessage.getPayloadInfo().getPartInfo()) {
             if (partInfo.isInBody()) {
+                LOG.info("Decompression is not performed: partInfo is in body");
                 continue;
             }
 
@@ -118,6 +120,7 @@ public class CompressionService {
             }
 
             if (!payloadCompressed) {
+                LOG.debug("Decompression is not needed: payload is not compressed");
                 continue;
             }
 
@@ -133,7 +136,7 @@ public class CompressionService {
                 throw ex;
             }
             partInfo.setPayloadDatahandler(new DataHandler(new DecompressionDataSource(partInfo.getPayloadDatahandler().getDataSource(), mimeType)));
-            CompressionService.LOG.debug("Payload with cid: " + partInfo.getHref() + " and mime type: " + mimeType + " will be decompressed");
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION, partInfo.getHref());
         }
         return true;
     }

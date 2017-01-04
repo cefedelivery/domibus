@@ -7,6 +7,7 @@ import eu.domibus.configuration.Storage;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
+import eu.domibus.logging.DomibusMessageCode;
 import org.apache.commons.io.IOUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -24,7 +25,7 @@ import java.util.zip.GZIPOutputStream;
 @Service
 public class MessagingServiceImpl implements MessagingService {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingServiceImpl.class);
+    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(MessagingServiceImpl.class);
 
     @Autowired
     MessagingDao messagingDao;
@@ -46,6 +47,7 @@ public class MessagingServiceImpl implements MessagingService {
                 try {
                     storeBinary(partInfo);
                 } catch (IOException exc) {
+                    LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, partInfo.getHref());
                     CompressionException ex = new CompressionException("Could not store binary data for message " + exc.getMessage(), exc);
                     throw ex;
                 }
@@ -61,15 +63,21 @@ public class MessagingServiceImpl implements MessagingService {
             partInfo.setMime("application/unknown");
         }
         InputStream is = partInfo.getPayloadDatahandler().getInputStream();
+        final boolean compressed = isCompressed(partInfo);
+
         if (storage.getStorageDirectory() == null || storage.getStorageDirectory().getName() == null) {
-            byte[] binaryData = getBinaryData(is, isCompressed(partInfo));
+            byte[] binaryData = getBinaryData(is, compressed);
             partInfo.setBinaryData(binaryData);
             partInfo.setFileName(null);
 
         } else {
             final File attachmentStore = new File(storage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
             partInfo.setFileName(attachmentStore.getAbsolutePath());
-            saveFileToDisk(attachmentStore, is, isCompressed(partInfo));
+            saveFileToDisk(attachmentStore, is, compressed);
+        }
+
+        if(compressed) {
+            LOGGER.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION, partInfo.getHref());
         }
     }
 

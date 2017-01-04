@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.common.ErrorCode;
@@ -108,6 +89,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         Messaging messaging = null;
         String policyName = null;
 
+
         try {
             IOUtils.copy(inputStream, byteArrayOutputStream); //FIXME: do not copy the whole byte[], use SequenceInputstream instead
             final byte[] data = byteArrayOutputStream.toByteArray();
@@ -128,10 +110,14 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             LOG.securityInfo(DomibusMessageCode.SEC_SECURITY_POLICY_INCOMING_USE, policyName);
 
             message.put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
-            //FIXME: Test!!!!
             message.getExchange().put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
             //FIXME: Consistent way! If properties are added to the exchange you will have access via PhaseInterceptorChain
-            message.getExchange().put(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY, messaging.getUserMessage().getMessageInfo().getMessageId());
+            final String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
+            message.getExchange().put(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY, messageId);
+
+            //set the messageId in the MDC context
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want
             message.getExchange().put(PolicyConstants.POLICY_OVERRIDE, policy);
             message.put(PolicyConstants.POLICY_OVERRIDE, policy);
@@ -147,7 +133,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             throw new Fault(e);
         } catch (IOException | ParserConfigurationException | SAXException | JAXBException e) {
             LOG.securityError(DomibusMessageCode.SEC_SECURITY_POLICY_INCOMING_NOT_FOUND, e, policyName); // Those errors are not expected
-            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messaging.getUserMessage().getMessageInfo().getMessageId() : "unknown", e);
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messageId : "unknown", e);
             ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ex);
         }
