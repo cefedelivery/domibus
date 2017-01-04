@@ -12,6 +12,9 @@ import org.slf4j.MarkerFactory;
  */
 public class DomibusLogger extends CategoryLogger {
 
+    public static final String MDC_USER = "user";
+    public static final String MDC_MESSAGE_ID = "messageId";
+
     public static final Marker BUSINESS_MARKER = MarkerFactory.getMarker("BUSINESS");
     public static final Marker SECURITY_MARKER = MarkerFactory.getMarker("SECURITY");
 
