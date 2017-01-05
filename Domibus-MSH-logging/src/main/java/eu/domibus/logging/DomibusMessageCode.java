@@ -53,6 +53,8 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_MESSAGE_PERSISTED("BUS-042", "Message persisted"),
     BUS_MESSAGE_RECEIPT_GENERATED("BUS-043", "Message receipt generated with nonRepudiation value [{}]"),
     BUS_MESSAGE_RECEIPT_FAILURE("BUS-044", "Message receipt generation failure"),
+    BUS_MESSAGE_STATUS_UPDATE("BUS-045", "Message status updated to [{}]"),
+    BUS_MESSAGE_PAYLOAD_DATA_CLEARED("BUS-046", "Payload data for user message [{}] have been cleared"),
 
     SEC_SECURITY_POLICY_OUTGOING_NOT_FOUND("SEC-001", "Security policy [{}] was not found for outgoing message"),
     SEC_SECURITY_POLICY_OUTGOING_USE("SEC-002", "Security policy [{}] is used for outgoing message"),

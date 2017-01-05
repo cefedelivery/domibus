@@ -183,9 +183,10 @@ public class BackendNotificationService {
     protected void notify(String messageId, String backendName, NotificationType notificationType, String finalRecipient) {
         NotificationListener notificationListener = getNotificationListener(backendName);
         if (notificationListener == null) {
-            LOG.debug("No notification listeners found for backend [" + backendName + "]");
+            LOG.warn("No notification listeners found for backend [" + backendName + "]");
             return;
         }
+        LOG.info("Notifying backend [{}] for message [{}] with notificationType [{}] and finalRecipient [{}]", backendName, messageId, notificationType, finalRecipient);
         jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, finalRecipient).createMessage(), notificationListener.getBackendNotificationQueue());
 //        jmsOperations.send(notificationListener.getBackendNotificationQueue(), new NotifyMessageCreator(messageId, notificationType));
     }

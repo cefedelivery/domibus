@@ -103,7 +103,7 @@ public class MessageSender implements MessageListener {
 
 
     private void sendUserMessage(final String messageId) {
-        LOG.debug("Sending message");
+        LOG.info("Sending message");
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
         // Assuming that everything goes fine
         ResponseHandler.CheckResult isOk = ResponseHandler.CheckResult.OK;
@@ -114,9 +114,10 @@ public class MessageSender implements MessageListener {
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         try {
             pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
-            legConfiguration = this.pModeProvider.getLegConfiguration(pModeKey);
+            LOG.debug("PMode key found : " + pModeKey);
+            legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+            LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
 
-            LOG.debug("PMode found : " + pModeKey);
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             final SOAPMessage response = mshDispatcher.dispatch(soapMessage, pModeKey);
             isOk = responseHandler.handle(response);
@@ -198,7 +199,14 @@ public class MessageSender implements MessageListener {
         } catch (final JMSException e) {
             LOG.error("Error processing message", e);
         }
-        sendUserMessage(messageId);
+
+        try {
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+            sendUserMessage(messageId);
+        } finally {
+            LOG.removeMDC(DomibusLogger.MDC_MESSAGE_ID);
+        }
+
     }
 
 }

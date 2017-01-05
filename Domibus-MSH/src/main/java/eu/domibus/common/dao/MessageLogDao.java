@@ -5,6 +5,7 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -61,7 +62,7 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
             default:
         }
         super.update(messageLog);
-        LOG.debug(messageLog.getClass().getSimpleName() + " status updated to [" + messageStatus + "]");
+        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_STATUS_UPDATE, messageStatus);
     }
 
     public MessageStatus getMessageStatus(String messageId) {
