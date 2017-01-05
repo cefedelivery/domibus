@@ -76,17 +76,17 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
 
         final String securityAlgorithm = legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
         message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
-        LOG.securityInfo(DomibusMessageCode.SEC_SECURITY_ALGORITHM_OUTGOING_USE, securityAlgorithm);
+        LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_ALGORITHM_OUTGOING_USE, securityAlgorithm);
         final String encryptionUsername = pModeProvider.getReceiverParty(pModeKey).getName();
         message.put(SecurityConstants.ENCRYPT_USERNAME, encryptionUsername);
-        LOG.securityInfo(DomibusMessageCode.SEC_SECURITY_USER_OUTGOING_USE, encryptionUsername);
+        LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_USER_OUTGOING_USE, encryptionUsername);
 
         try {
             final Policy policy = policyFactory.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
-            LOG.securityInfo(DomibusMessageCode.SEC_SECURITY_POLICY_OUTGOING_USE, legConfiguration.getSecurity().getPolicy());
+            LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_OUTGOING_USE, legConfiguration.getSecurity().getPolicy());
             message.put(PolicyConstants.POLICY_OVERRIDE, policy);
         } catch (final ConfigurationException e) {
-            LOG.securityError(DomibusMessageCode.SEC_SECURITY_POLICY_OUTGOING_NOT_FOUND, e, legConfiguration.getSecurity().getPolicy());
+            LOG.businessError(DomibusMessageCode.BUS_SECURITY_POLICY_OUTGOING_NOT_FOUND, e, legConfiguration.getSecurity().getPolicy());
             throw new Fault(new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Could not find policy file " + System.getProperty("domibus.config.location") + "/" + this.pModeProvider.getLegConfiguration(pModeKey).getSecurity(), null, null));
         }
 
