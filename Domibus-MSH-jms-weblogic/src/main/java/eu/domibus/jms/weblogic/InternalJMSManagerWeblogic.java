@@ -100,9 +100,8 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                             destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
                             destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
                         }
-                        Long numberOfMessages = (Long) mbsc.getAttribute(jmsDestination, "MessagesCurrentCount");
 
-                        destination.setNumberOfMessages(numberOfMessages);
+                        destination.setNumberOfMessages(getMessagesTotalCount(mbsc, jmsDestination));
                         destinationMap.put(destination.getName(), destination);
                     }
                 }
@@ -112,6 +111,21 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             throw new InternalJMSException("Failed to build JMS destination map", e);
         }
 
+    }
+
+    protected Long getMessagesTotalCount(MBeanServerConnection mbsc, ObjectName jmsDestination) throws AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
+        Long result = 0L;
+
+        Long messagesCurrentCount = (Long) mbsc.getAttribute(jmsDestination, "MessagesCurrentCount");
+        if(messagesCurrentCount != null) {
+            result += messagesCurrentCount;
+        }
+        Long messagesPendingCount = (Long) mbsc.getAttribute(jmsDestination, "MessagesPendingCount");
+        if(messagesPendingCount != null) {
+            result += messagesPendingCount;
+        }
+
+        return result;
     }
 
     protected String getQueueName(String destinationName) {
