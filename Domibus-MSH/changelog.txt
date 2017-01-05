@@ -1,4 +1,5 @@
 Domibus 3.3-RC1
+- Fixed the search of the JMS messages for WebLogic(for JMS messages having property with null values) and Tomcat(for JMS messages with no "Text" property)
 - Spring services are always executing within a transaction even if there is no specific @Transactional annotation present
 - Quartz integration with managed threads in WebLogic and WildFly
 - During submit operation, Domibus verifies that the message is being sent by the same party as the one configured as the sending access point.
@@ -10,6 +11,8 @@ Domibus 3.3-RC1
 - MySQL installation of Domibus database is set to have collation of 'UTF8_BIN' to make DB level string comparison (in SQLs) case sensitive. This will enable support for case sensitive message ids.
 - Result set of ListPendingMessages operation limited by a new configuration property - domibus.listPendingMessages.maxCount
 - While submitting the message, validation comparisons with the PMode data are made case insensitive.
+Domibus 3.2.2
+- Solved issue related to CXF attachment temp file leakage (for payloads over 200Mb).
 Domibus 3.2.1
 - JMX access to the JMS queues is secured
 - Force the usage of the apache commons IO library from the application

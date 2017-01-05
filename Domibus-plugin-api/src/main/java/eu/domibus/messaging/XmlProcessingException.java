@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public class XmlProcessingException extends MessagingProcessingException {
 
-    protected Set<String> errors = new LinkedHashSet<>();
+    private Set<String> errors = new LinkedHashSet<>();
 
     public XmlProcessingException(Throwable cause) {
         super(cause);

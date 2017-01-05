@@ -32,7 +32,7 @@ public class SendMessageSignOnlyIT extends AbstractSendMessageIT {
 
     private static boolean initialized;
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8090);
+    public WireMockRule wireMockRule = new WireMockRule(SERVICE_PORT);
     @Autowired
     BackendInterface backendWebService;
     @Mock

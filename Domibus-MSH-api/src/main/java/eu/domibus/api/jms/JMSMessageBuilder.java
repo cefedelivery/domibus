@@ -4,7 +4,8 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * Created by Cosmin Baciu on 02-Sep-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 public class JMSMessageBuilder {
 
@@ -23,13 +24,13 @@ public class JMSMessageBuilder {
         return this;
     }
 
-    public JMSMessageBuilder type(String content) {
+    public JMSMessageBuilder content(String content) {
         jmsMessage.setContent(content);
         return this;
     }
 
-    public JMSMessageBuilder type(Date type) {
-        jmsMessage.setTimestamp(type);
+    public JMSMessageBuilder timestamp(Date timestamp) {
+        jmsMessage.setTimestamp(timestamp);
         return this;
     }
 

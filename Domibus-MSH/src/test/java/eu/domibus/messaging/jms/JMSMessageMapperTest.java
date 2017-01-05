@@ -1,8 +1,7 @@
 package eu.domibus.messaging.jms;
 
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.jms.spi.JmsMessageSPI;
-import eu.domibus.messaging.jms.JMSMessageMapper;
+import eu.domibus.jms.spi.InternalJmsMessage;
 import mockit.Expectations;
 import mockit.Tested;
 import mockit.Verifications;
@@ -15,7 +14,8 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Created by Cosmin Baciu on 02-Sep-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 @RunWith(JMockit.class)
 public class JMSMessageMapperTest {
@@ -25,13 +25,13 @@ public class JMSMessageMapperTest {
 
     @Test
     public void testConvertJMSMessageSPIList() throws Exception {
-        List<JmsMessageSPI> messagesSPIList = new ArrayList<>();
-        final JmsMessageSPI jmsMessageSPI = new JmsMessageSPI();
+        List<InternalJmsMessage> messagesSPIList = new ArrayList<>();
+        final InternalJmsMessage internalJmsMessage = new InternalJmsMessage();
         final JmsMessage jmsMessage = new JmsMessage();
-        messagesSPIList.add(jmsMessageSPI);
+        messagesSPIList.add(internalJmsMessage);
 
         new Expectations(jmsMessageMapper) {{
-            jmsMessageMapper.convert(jmsMessageSPI);
+            jmsMessageMapper.convert(internalJmsMessage);
             result = jmsMessage;
         }};
 
@@ -40,24 +40,24 @@ public class JMSMessageMapperTest {
 
         new Verifications() {{
             // Verifies an expected invocation:
-            jmsMessageMapper.convert(jmsMessageSPI);
+            jmsMessageMapper.convert(internalJmsMessage);
             times = 1;
         }};
     }
 
     @Test
     public void testConvertJmsMessageSPI() throws Exception {
-        JmsMessageSPI jmsMessageSPI = new JmsMessageSPI();
-        jmsMessageSPI.setType("myType");
-        jmsMessageSPI.setId("myid");
-        jmsMessageSPI.setContent("mycontent");
+        InternalJmsMessage internalJmsMessage = new InternalJmsMessage();
+        internalJmsMessage.setType("myType");
+        internalJmsMessage.setId("myid");
+        internalJmsMessage.setContent("mycontent");
         Date date = new Date();
-        jmsMessageSPI.setTimestamp(date);
+        internalJmsMessage.setTimestamp(date);
         Map<String, Object> messageProperties = new HashMap<>();
         messageProperties.put("mykey", "myvalue");
-        jmsMessageSPI.setProperties(messageProperties);
+        internalJmsMessage.setProperties(messageProperties);
 
-        JmsMessage convert = jmsMessageMapper.convert(jmsMessageSPI);
+        JmsMessage convert = jmsMessageMapper.convert(internalJmsMessage);
         assertEquals(convert.getType(), "myType");
         assertEquals(convert.getId(), "myid");
         assertEquals(convert.getContent(), "mycontent");
@@ -78,7 +78,7 @@ public class JMSMessageMapperTest {
         messageProperties.put("mykey", "myvalue");
         jmsMessage.setProperties(messageProperties);
 
-        JmsMessageSPI convert = jmsMessageMapper.convert(jmsMessage);
+        InternalJmsMessage convert = jmsMessageMapper.convert(jmsMessage);
         assertEquals(convert.getType(), "myType");
         assertEquals(convert.getId(), "myid");
         assertEquals(convert.getContent(), "mycontent");

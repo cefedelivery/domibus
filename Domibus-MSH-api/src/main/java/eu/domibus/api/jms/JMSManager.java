@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Cosmin Baciu on 17-Aug-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 public interface JMSManager {
 
@@ -16,12 +17,11 @@ public interface JMSManager {
 
     List<JmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selector);
 
-    //TODO throw exception instead of returning boolean
-    boolean sendMessageToQueue(JmsMessage message, String destination);
+    void sendMessageToQueue(JmsMessage message, String destination);
 
     void sendMessageToQueue(JmsMessage message, Queue destination);
 
-    boolean deleteMessages(String source, String[] messageIds);
+    void deleteMessages(String source, String[] messageIds);
 
-    boolean moveMessages(String source, String destination, String[] messageIds);
+    void moveMessages(String source, String destination, String[] messageIds);
 }

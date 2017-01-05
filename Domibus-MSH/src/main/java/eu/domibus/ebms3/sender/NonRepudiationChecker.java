@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.*;
 
 
 /**
@@ -22,12 +19,13 @@ import javax.xml.xpath.XPathFactory;
 public class NonRepudiationChecker {
     private static final Log LOG = LogFactory.getLog(NonRepudiationChecker.class);
     private static final String XPATH_EXPRESSION_STRING = "/*/*/*[local-name() = 'Reference']/@URI  | /*/*/*[local-name() = 'Reference']/*[local-name() = 'DigestValue']";
-    private static final XPath xPath = XPathFactory.newInstance().newXPath();
+    private final XPath xPath = XPathFactory.newInstance().newXPath();
 
     public NodeList getNonRepudiationNodeList(final Node securityInfo) throws EbMS3Exception {
         NodeList nodes = null;
         try {
-            nodes = (NodeList) NonRepudiationChecker.xPath.evaluate(NonRepudiationChecker.XPATH_EXPRESSION_STRING, securityInfo, XPathConstants.NODESET);
+            //TODO optimize this by creating an XPathExpression using a specified expression String and re-use it
+            nodes = (NodeList) xPath.evaluate(NonRepudiationChecker.XPATH_EXPRESSION_STRING, securityInfo, XPathConstants.NODESET);
         } catch (final XPathExpressionException e) {
             assert false;
             // due to the fact that we use a static expression this can never occur.

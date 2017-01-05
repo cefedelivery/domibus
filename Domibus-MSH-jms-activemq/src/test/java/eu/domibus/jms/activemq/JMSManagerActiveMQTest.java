@@ -1,8 +1,8 @@
 package eu.domibus.jms.activemq;
 
 import eu.domibus.api.jms.JMSDestinationHelper;
-import eu.domibus.jms.spi.JMSDestinationSPI;
-import eu.domibus.jms.spi.JmsMessageSPI;
+import eu.domibus.jms.spi.InternalJMSDestination;
+import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -23,12 +23,13 @@ import static org.junit.Assert.*;
 
 /**
  * @author Cosmin Baciu
+ * @since 3.2
  */
 @RunWith(JMockit.class)
 public class JMSManagerActiveMQTest {
 
     @Tested
-    JMSManagerActiveMQ jmsManagerActiveMQ;
+    InternalJMSManagerActiveMQ jmsManagerActiveMQ;
 
     @Injectable
     MBeanServerConnection mBeanServerConnection;
@@ -50,8 +51,8 @@ public class JMSManagerActiveMQTest {
                                     final @Mocked ObjectName objectName2,
                                     final @Injectable QueueViewMBean queueMbean1,
                                     final @Injectable QueueViewMBean queueMbean2,
-                                    final @Injectable JMSDestinationSPI jmsDestinationSPI1,
-                                    final @Injectable JMSDestinationSPI jmsDestinationSPI2) throws Exception {
+                                    final @Injectable InternalJMSDestination internalJmsDestination1,
+                                    final @Injectable InternalJMSDestination internalJmsDestination2) throws Exception {
         final Map<String, ObjectName> objectNameMap = new HashMap<>();
         objectNameMap.put("queue1", objectName1);
         objectNameMap.put("queue2", objectName2);
@@ -65,11 +66,11 @@ public class JMSManagerActiveMQTest {
             jmsManagerActiveMQ.getQueue(objectName2);
             result = queueMbean2;
 
-            jmsManagerActiveMQ.createJmsDestinationSPI(objectName1, queueMbean1);
-            result = jmsDestinationSPI1;
+            jmsManagerActiveMQ.createInternalJmsDestination(objectName1, queueMbean1);
+            result = internalJmsDestination1;
 
-            jmsManagerActiveMQ.createJmsDestinationSPI(objectName2, queueMbean2);
-            result = jmsDestinationSPI2;
+            jmsManagerActiveMQ.createInternalJmsDestination(objectName2, queueMbean2);
+            result = internalJmsDestination2;
 
             queueMbean1.getName();
             result = "queueMbean1";
@@ -78,12 +79,12 @@ public class JMSManagerActiveMQTest {
             result = "queueMbean2";
         }};
 
-        Map<String, JMSDestinationSPI> destinations = jmsManagerActiveMQ.getDestinations();
+        Map<String, InternalJMSDestination> destinations = jmsManagerActiveMQ.getDestinations();
         assertNotNull(destinations);
         assertEquals(destinations.size(), 2);
 
-        assertEquals(destinations.get("queueMbean1"), jmsDestinationSPI1);
-        assertEquals(destinations.get("queueMbean2"), jmsDestinationSPI2);
+        assertEquals(destinations.get("queueMbean1"), internalJmsDestination1);
+        assertEquals(destinations.get("queueMbean2"), internalJmsDestination2);
     }
 
     @Test
@@ -99,12 +100,12 @@ public class JMSManagerActiveMQTest {
             result = true;
         }};
 
-        JMSDestinationSPI jmsDestinationSPI = jmsManagerActiveMQ.createJmsDestinationSPI(objectName, queueMbean);
-        assertEquals(jmsDestinationSPI.getName(), queueMbean.getName());
-        assertEquals(jmsDestinationSPI.isInternal(), jmsDestinationHelper.isInternal(queueMbean.getName()));
-        assertEquals(jmsDestinationSPI.getType(), JMSDestinationSPI.QUEUE_TYPE);
-        assertEquals(jmsDestinationSPI.getNumberOfMessages(), queueMbean.getQueueSize());
-        assertEquals(jmsDestinationSPI.getProperty("ObjectName"), objectName);
+        InternalJMSDestination internalJmsDestination = jmsManagerActiveMQ.createInternalJmsDestination(objectName, queueMbean);
+        assertEquals(internalJmsDestination.getName(), queueMbean.getName());
+        assertEquals(internalJmsDestination.isInternal(), jmsDestinationHelper.isInternal(queueMbean.getName()));
+        assertEquals(internalJmsDestination.getType(), InternalJMSDestination.QUEUE_TYPE);
+        assertEquals(internalJmsDestination.getNumberOfMessages(), queueMbean.getQueueSize());
+        assertEquals(internalJmsDestination.getProperty("ObjectName"), objectName);
     }
 
     @Test
@@ -158,11 +159,11 @@ public class JMSManagerActiveMQTest {
     }
 
     @Test
-    public void testGetMessages(final @Injectable JMSDestinationSPI selectedDestination,
+    public void testGetMessages(final @Injectable InternalJMSDestination selectedDestination,
                                 final @Injectable QueueViewMBean queueMbean,
                                 final @Injectable CompositeData[] compositeDatas,
-                                final @Injectable Map<String, JMSDestinationSPI> destinationMap,
-                                final @Injectable List<JmsMessageSPI> messageSPIs) throws Exception {
+                                final @Injectable Map<String, InternalJMSDestination> destinationMap,
+                                final @Injectable List<InternalJmsMessage> messageSPIs) throws Exception {
         final String source = "myqueue";
         final String jmsType = "message";
         final Date fromDate = new Date();
@@ -190,7 +191,7 @@ public class JMSManagerActiveMQTest {
         }};
 
 
-        List<JmsMessageSPI> messages = jmsManagerActiveMQ.getMessages(source, jmsType, fromDate, toDate, selectorClause);
+        List<InternalJmsMessage> messages = jmsManagerActiveMQ.getMessages(source, jmsType, fromDate, toDate, selectorClause);
         assertEquals(messages, messageSPIs);
 
         new Verifications() {{
@@ -220,16 +221,16 @@ public class JMSManagerActiveMQTest {
 
         new Expectations(jmsManagerActiveMQ) {
             {
-                data.get("JMSType");
+                jmsManagerActiveMQ.getCompositeValue(data, "JMSType");
                 result = jmsType;
 
-                data.get("JMSTimestamp");
+                jmsManagerActiveMQ.getCompositeValue(data, "JMSTimestamp");
                 result = jmsTimestamp;
 
-                data.get("JMSMessageID");
+                jmsManagerActiveMQ.getCompositeValue(data, "JMSMessageID");
                 result = jmsId1;
 
-                data.get("Text");
+                jmsManagerActiveMQ.getCompositeValue(data, "Text");
                 result = textMessage;
 
                 Set<String> allPropertyNames = new HashSet<>();
@@ -258,14 +259,15 @@ public class JMSManagerActiveMQTest {
             }
         };
 
-        JmsMessageSPI jmsMessageSPI = jmsManagerActiveMQ.convertCompositeData(data);
 
-        assertEquals(jmsMessageSPI.getType(), jmsType);
-        assertEquals(jmsMessageSPI.getTimestamp(), jmsTimestamp);
-        assertEquals(jmsMessageSPI.getId(), jmsId1);
-        assertEquals(jmsMessageSPI.getContent(), textMessage);
+        InternalJmsMessage internalJmsMessage = jmsManagerActiveMQ.convertCompositeData(data);
 
-        Map<String, Object> properties = jmsMessageSPI.getProperties();
+        assertEquals(internalJmsMessage.getType(), jmsType);
+        assertEquals(internalJmsMessage.getTimestamp(), jmsTimestamp);
+        assertEquals(internalJmsMessage.getId(), jmsId1);
+        assertEquals(internalJmsMessage.getContent(), textMessage);
+
+        Map<String, Object> properties = internalJmsMessage.getProperties();
         assertEquals(properties.size(), 3);
         assertEquals(properties.get("key1"), "value1");
         assertEquals(properties.get("key2"), "value2");
@@ -274,18 +276,38 @@ public class JMSManagerActiveMQTest {
 
     @Test
     public void testConvertCompositeDataArray(final @Injectable CompositeData data1,
-                                              final @Injectable JmsMessageSPI jmsMessageSPI1) throws Exception {
+                                              final @Injectable InternalJmsMessage internalJmsMessage1) throws Exception {
         CompositeData[] compositeDatas = new CompositeData[]{data1};
 
         new Expectations(jmsManagerActiveMQ) {{
             jmsManagerActiveMQ.convertCompositeData(data1);
-            result = jmsMessageSPI1;
+            result = internalJmsMessage1;
         }};
 
-        final List<JmsMessageSPI> jmsMessageSPIs = jmsManagerActiveMQ.convertCompositeData(compositeDatas);
-        assertNotNull(jmsMessageSPIs);
-        assertEquals(jmsMessageSPIs.size(), 1);
-        assertEquals(jmsMessageSPIs.iterator().next(), jmsMessageSPI1);
+        final List<InternalJmsMessage> internalJmsMessages = jmsManagerActiveMQ.convertCompositeData(compositeDatas);
+        assertNotNull(internalJmsMessages);
+        assertEquals(internalJmsMessages.size(), 1);
+        assertEquals(internalJmsMessages.iterator().next(), internalJmsMessage1);
+    }
+
+    @Test
+    public void testConvertCompositeDataArrayWhenAMessageCannotBeConverted(final @Injectable CompositeData data1,
+                                                                           final @Injectable CompositeData data2,
+                                              final @Injectable InternalJmsMessage internalJmsMessage1) throws Exception {
+        CompositeData[] compositeDatas = new CompositeData[]{data1, data2};
+
+        new Expectations(jmsManagerActiveMQ) {{
+            jmsManagerActiveMQ.convertCompositeData(data1);
+            result = new RuntimeException("Simulating a message conversion error");
+
+            jmsManagerActiveMQ.convertCompositeData(data2);
+            result = internalJmsMessage1;
+        }};
+
+        final List<InternalJmsMessage> internalJmsMessages = jmsManagerActiveMQ.convertCompositeData(compositeDatas);
+        assertNotNull(internalJmsMessages);
+        assertEquals(internalJmsMessages.size(), 1);
+        assertEquals(internalJmsMessages.iterator().next(), internalJmsMessage1);
     }
 
     @Test

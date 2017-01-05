@@ -56,6 +56,7 @@ public class JMSDestination {
         this.numberOfMessages = numberOfMessages;
     }
 
+    @Override
     public String toString() {
         return name;
     }

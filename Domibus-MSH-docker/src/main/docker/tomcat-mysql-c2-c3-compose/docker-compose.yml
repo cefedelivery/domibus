@@ -1,8 +1,20 @@
 version: '2'
 services:
-  mysqlC2:
-    container_name: mysqlC2
-    image: domibus/mysql:3.1.1
+  mysqlblue:
+    container_name: mysqlblue
+    image: domibus/mysql:development
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=domibus
+      - MYSQL_USER=edelivery
+      - MYSQL_PASSWORD=edelivery
+    expose:
+      - "3306"
+    ports:
+      - "3304:3306"
+  mysqlred:
+    container_name: mysqlred
+    image: domibus/mysql:development
     command: --lower-case-table-names=1
     environment:
       - MYSQL_ROOT_PASSWORD=123456
@@ -11,36 +23,27 @@ services:
       - MYSQL_PASSWORD=edelivery
     expose:
       - "3306"
-  mysqlC3:
-    container_name: mysqlC3
-    image: domibus/mysql:3.1.1
-    command: --lower-case-table-names=1
+    ports:
+      - "3305:3306"
+  domibusblue:
+    container_name: domibusblue
+    image: domibus/tomcat/blue:development
     environment:
-      - MYSQL_ROOT_PASSWORD=123456
-      - MYSQL_DATABASE=domibus
-      - MYSQL_USER=edelivery
-      - MYSQL_PASSWORD=edelivery
-    expose:
-      - "3306"
-  domibusC2:
-    container_name: domibusC2
-    image: domibus:3.1.1
-    environment:
-      - dbServerName=mysqlC2
+      - dbServerName=mysqlblue
       - dbServerPort=3306
     command: dockerize -wait tcp://$dbServerName:$dbServerPort -timeout 20s
     ports:
       - "8080:8080"
     depends_on:
-      - mysqlC2
-  domibusC3:
-      container_name: domibusC3
-      image: domibus:3.1.1
+      - mysqlblue
+  domibusred:
+      container_name: domibusred
+      image: domibus/tomcat/red:development
       environment:
-        - dbServerName=mysqlC3
+        - dbServerName=mysqlred
         - dbServerPort=3306
       command: dockerize -wait tcp://$dbServerName:$dbServerPort -timeout 20s
       ports:
         - "9080:8080"
       depends_on:
-        - mysqlC3
+        - mysqlred

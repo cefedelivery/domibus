@@ -1,9 +1,10 @@
 package eu.domibus.jms.activemq;
 
 import eu.domibus.api.jms.JMSDestinationHelper;
-import eu.domibus.jms.spi.JMSDestinationSPI;
-import eu.domibus.jms.spi.JMSManagerSPI;
-import eu.domibus.jms.spi.JmsMessageSPI;
+import eu.domibus.jms.spi.InternalJMSDestination;
+import eu.domibus.jms.spi.InternalJMSManager;
+import eu.domibus.jms.spi.InternalJMSException;
+import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import org.apache.activemq.broker.jmx.BrokerViewMBean;
@@ -27,12 +28,13 @@ import javax.management.openmbean.OpenDataException;
 import java.util.*;
 
 /**
- * Created by Cosmin Baciu on 17-Aug-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 @Component
-public class JMSManagerActiveMQ implements JMSManagerSPI {
+public class InternalJMSManagerActiveMQ implements InternalJMSManager {
 
-    private static final Log LOG = LogFactory.getLog(JMSManagerActiveMQ.class);
+    private static final Log LOG = LogFactory.getLog(InternalJMSManagerActiveMQ.class);
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
 
@@ -55,31 +57,30 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
     JMSSelectorUtil jmsSelectorUtil;
 
     @Override
-    public Map<String, JMSDestinationSPI> getDestinations() {
-        Map<String, JMSDestinationSPI> destinationMap = new TreeMap<>();
+    public Map<String, InternalJMSDestination> getDestinations() {
+        Map<String, InternalJMSDestination> destinationMap = new TreeMap<>();
 
         try {
             //build the destinationMap every time in order to get up to date statistics
             for (ObjectName name : getQueueMap().values()) {
                 QueueViewMBean queueMbean = getQueue(name);
-                JMSDestinationSPI jmsDestinationSPI = createJmsDestinationSPI(name, queueMbean);
-                destinationMap.put(queueMbean.getName(), jmsDestinationSPI);
+                InternalJMSDestination internalJmsDestination = createInternalJmsDestination(name, queueMbean);
+                destinationMap.put(queueMbean.getName(), internalJmsDestination);
             }
+            return destinationMap;
         } catch (Exception e) {
-            LOG.error("Error getting destinations", e);
+            throw new InternalJMSException("Error getting destinations", e);
         }
-
-        return destinationMap;
     }
 
-    protected JMSDestinationSPI createJmsDestinationSPI(ObjectName name, QueueViewMBean queueMbean) {
-        JMSDestinationSPI jmsDestinationSPI = new JMSDestinationSPI();
-        jmsDestinationSPI.setName(queueMbean.getName());
-        jmsDestinationSPI.setInternal(jmsDestinationHelper.isInternal(queueMbean.getName()));
-        jmsDestinationSPI.setType(JMSDestinationSPI.QUEUE_TYPE);
-        jmsDestinationSPI.setNumberOfMessages(queueMbean.getQueueSize());
-        jmsDestinationSPI.setProperty(PROPERTY_OBJECT_NAME, name);
-        return jmsDestinationSPI;
+    protected InternalJMSDestination createInternalJmsDestination(ObjectName name, QueueViewMBean queueMbean) {
+        InternalJMSDestination internalJmsDestination = new InternalJMSDestination();
+        internalJmsDestination.setName(queueMbean.getName());
+        internalJmsDestination.setInternal(jmsDestinationHelper.isInternal(queueMbean.getName()));
+        internalJmsDestination.setType(InternalJMSDestination.QUEUE_TYPE);
+        internalJmsDestination.setNumberOfMessages(queueMbean.getQueueSize());
+        internalJmsDestination.setProperty(PROPERTY_OBJECT_NAME, name);
+        return internalJmsDestination;
     }
 
     protected QueueViewMBean getQueue(ObjectName objectName) {
@@ -106,53 +107,47 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
     }
 
     @Override
-    public boolean sendMessage(JmsMessageSPI message, String destination) {
+    public void sendMessage(InternalJmsMessage message, String destination) {
         ActiveMQQueue activeMQQueue = new ActiveMQQueue(destination);
         sendMessage(message, activeMQQueue);
-        return true;
     }
 
     @Override
-    public void sendMessage(JmsMessageSPI message, javax.jms.Queue destination) {
+    public void sendMessage(InternalJmsMessage message, javax.jms.Queue destination) {
         jmsOperations.send(destination, new JmsMessageCreator(message));
     }
 
     @Override
-    public boolean deleteMessages(String source, String[] messageIds) {
-        QueueViewMBean queue = getQueue(source);
+    public void deleteMessages(String source, String[] messageIds) {
         try {
-            int deleted = queue.removeMatchingMessages(jmsSelectorUtil.getSelector(messageIds));
-            return deleted == messageIds.length;
+            QueueViewMBean queue = getQueue(source);
+            queue.removeMatchingMessages(jmsSelectorUtil.getSelector(messageIds));
         } catch (Exception e) {
-            LOG.error("Failed to delete messages from source [" + source + "]:" + messageIds, e);
-            return false;
+            throw new InternalJMSException("Failed to delete messages from source [" + source + "]:" + messageIds, e);
         }
     }
 
     @Override
-    public JmsMessageSPI getMessage(String source, String messageId) {
-        QueueViewMBean queue = getQueue(source);
+    public InternalJmsMessage getMessage(String source, String messageId) {
         try {
+            QueueViewMBean queue = getQueue(source);
             CompositeData messageMetaData = queue.getMessage(messageId);
             return convertCompositeData(messageMetaData);
         } catch (OpenDataException e) {
-            LOG.error("Failed to get message with id [" + messageId + "]", e);
-            return null;
+            throw new InternalJMSException("Failed to get message with id [" + messageId + "]", e);
         }
     }
 
 
     @Override
-    public List<JmsMessageSPI> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
-        List<JmsMessageSPI> messages = new ArrayList<>();
+    public List<InternalJmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
         if (source == null) {
-            return messages;
+            throw new InternalJMSException("Source has not been specified");
         }
 
-        JMSDestinationSPI selectedDestination = getDestinations().get(source);
+        InternalJMSDestination selectedDestination = getDestinations().get(source);
         if (selectedDestination == null) {
-            LOG.debug("Could not find destination for [" + source + "]");
-            return messages;
+            throw new InternalJMSException("Could not find destination for [" + source + "]");
         }
         String destinationType = selectedDestination.getType();
         if ("Queue".equals(destinationType)) {
@@ -173,32 +168,51 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
             try {
                 QueueViewMBean queue = getQueue(source);
                 CompositeData[] browse = queue.browse(selector);
-                messages = convertCompositeData(browse);
+                List<InternalJmsMessage> messages = convertCompositeData(browse);
+                return messages;
             } catch (Exception e) {
-                LOG.error("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
+                throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
             }
         }
-        return messages;
+        throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
+
     }
 
-    protected List<JmsMessageSPI> convertCompositeData(CompositeData[] browse) {
+    protected List<InternalJmsMessage> convertCompositeData(CompositeData[] browse) {
         if (browse == null) {
             return null;
         }
-        List<JmsMessageSPI> result = new ArrayList<>();
+        List<InternalJmsMessage> result = new ArrayList<>();
         for (CompositeData compositeData : browse) {
-            result.add(convertCompositeData(compositeData));
+            try {
+                final InternalJmsMessage internalJmsMessage = convertCompositeData(compositeData);
+                result.add(internalJmsMessage);
+            } catch (Exception e) {
+                LOG.error("Error converting message [" + compositeData + "]", e);
+            }
         }
         return result;
     }
 
+    protected <T> T getCompositeValue(CompositeData data, String name) {
+        if (data.containsKey(name)) {
+            return (T) data.get(name);
+        }
+        return null;
+    }
 
-    protected JmsMessageSPI convertCompositeData(CompositeData data) {
-        JmsMessageSPI result = new JmsMessageSPI();
-        result.setType((String) data.get("JMSType"));
-        result.setTimestamp((Date) data.get("JMSTimestamp"));
-        result.setId((String) data.get("JMSMessageID"));
-        result.setContent((String) data.get("Text"));
+
+    protected InternalJmsMessage convertCompositeData(CompositeData data) {
+        InternalJmsMessage result = new InternalJmsMessage();
+        String jmsType = getCompositeValue(data, "JMSType");
+        result.setType(jmsType);
+        Date jmsTimestamp = getCompositeValue(data, "JMSTimestamp");
+        result.setTimestamp(jmsTimestamp);
+        String jmsMessageId = getCompositeValue(data, "JMSMessageID");
+        result.setId(jmsMessageId);
+        String textValue = getCompositeValue(data, "Text");
+        result.setContent(textValue);
+
         Map stringProperties = (Map) data.get("StringProperties");
 
         Map<String, Object> properties = new HashMap<>();
@@ -225,14 +239,12 @@ public class JMSManagerActiveMQ implements JMSManagerSPI {
     }
 
     @Override
-    public boolean moveMessages(String source, String destination, String[] messageIds) {
-        QueueViewMBean queue = getQueue(source);
+    public void moveMessages(String source, String destination, String[] messageIds) {
         try {
-            int moved = queue.moveMatchingMessagesTo(jmsSelectorUtil.getSelector(messageIds), destination);
-            return moved == messageIds.length;
+            QueueViewMBean queue = getQueue(source);
+            queue.moveMatchingMessagesTo(jmsSelectorUtil.getSelector(messageIds), destination);
         } catch (Exception e) {
-            LOG.error("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds, e);
-            return false;
+            throw new InternalJMSException("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds, e);
         }
     }
 }
