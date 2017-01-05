@@ -1,4 +1,6 @@
 Domibus 3.3-RC1
+- Migrated the logging framework to SLF4J and Logback
+- Domibus uses 3 logs files: domibus.log, domibus-business.log and domibus.security.log
 - Spring services are always executing within a transaction even if there is no specific @Transactional annotation present
 - Quartz integration with managed threads in WebLogic and WildFly
 - During submit operation, Domibus verifies that the message is being sent by the same party as the one configured as the sending access point.
