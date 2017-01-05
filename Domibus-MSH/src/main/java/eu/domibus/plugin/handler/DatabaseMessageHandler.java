@@ -31,6 +31,7 @@ import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.AccessDeniedException;
@@ -198,7 +199,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Override
     @Transactional
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
-
+        if(StringUtils.isNotEmpty(messageData.getMessageId())) {
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());
+        }
         if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasUserOrAdminRole();
         }
@@ -217,10 +220,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             if (messageId == null) {
                 messageId = messageIdGenerator.generateMessageId();
                 messageInfo.setMessageId(messageId);
+                LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
             } else {
                 backendMessageValidator.validateMessageId(messageId);
                 userMessage.getMessageInfo().setMessageId(messageId);
             }
+
 
             String refToMessageId = messageInfo.getRefToMessageId();
             if (refToMessageId != null) {

@@ -2,6 +2,8 @@ package eu.domibus.plugin;
 
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.messaging.PModeMismatchException;
@@ -24,6 +26,8 @@ import java.util.List;
  * @author Christian Koch, Stefan Mueller
  */
 public abstract class AbstractBackendConnector<U, T> implements BackendConnector<U, T> {
+
+    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(AbstractBackendConnector.class);
 
     private final String name;
     @Autowired
@@ -48,11 +52,14 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     @Transactional(noRollbackFor = {IllegalArgumentException.class, IllegalStateException.class})
     public String submit(final U message) throws MessagingProcessingException {
         try {
-            return this.messageSubmitter.submit(this.getMessageSubmissionTransformer().transformToSubmission(message), this.getName());
+            final Submission messageData = getMessageSubmissionTransformer().transformToSubmission(message);
+            return this.messageSubmitter.submit(messageData, this.getName());
         } catch (IllegalArgumentException iaEx) {
             throw new TransformationException(iaEx);
         } catch (IllegalStateException ise) {
             throw new PModeMismatchException(ise);
+        } finally {
+            LOGGER.removeMDC(DomibusLogger.MDC_MESSAGE_ID);
         }
     }
 

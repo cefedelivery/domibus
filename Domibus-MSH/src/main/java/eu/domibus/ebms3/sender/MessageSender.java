@@ -103,7 +103,7 @@ public class MessageSender implements MessageListener {
 
 
     private void sendUserMessage(final String messageId) {
-        LOG.info("Sending message");
+        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
         // Assuming that everything goes fine
         ResponseHandler.CheckResult isOk = ResponseHandler.CheckResult.OK;
