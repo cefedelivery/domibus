@@ -30,7 +30,7 @@ public class DownloadMessageIT extends AbstractIT {
     protected static ConnectionFactory connectionFactory;
     private static boolean initialized;
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8090);
+    public WireMockRule wireMockRule = new WireMockRule(SERVICE_PORT);
     @Autowired
     BackendInterface backendWebService;
 

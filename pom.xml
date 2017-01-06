@@ -44,8 +44,10 @@
             **/quartz/**, **/target/**, **/eu/domibus/spring/SpringContextProvider.java, **/eu/domibus/taskexecutor/weblogic/DomibusDelegatingWork.java
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
-        <sonar.host.url>http://158.166.148.181:9000/sonar</sonar.host.url>
         <aspectj.version>1.8.9</aspectj.version>
+        <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar/</sonar.host.url>
+        <!--   Enable the proxy when running sonar from within the EC network -->
+        <!--<sonar.web.javaAdditionalOpts>-Dhttp.proxyHost=158.169.9.13 -Dhttp.proxyPort=8012 -Dhttp.proxyUser=theuser -Dhttp.proxyPassword=thepassword -Dhttps.proxyHost=158.169.9.13 -Dhttps.proxyPort=8012 -Dhttps.proxyUser=theuser -Dhttps.proxyPassword=thepassword -Dhttps.nonProxyHosts=localhost -Dhttp.nonProxyHosts=localhost</sonar.web.javaAdditionalOpts>-->
         <slf4j.version>1.7.21</slf4j.version>
         <logback.version>1.1.8</logback.version>
         <httpclient.version>4.5.2</httpclient.version>
@@ -64,6 +66,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>commons-configuration</groupId>
+                <artifactId>commons-configuration</artifactId>
+                <version>1.10</version>
+            </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>

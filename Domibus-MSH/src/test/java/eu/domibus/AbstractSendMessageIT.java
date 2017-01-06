@@ -37,7 +37,7 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
     public static final String BOOLEAN_TYPE = "boolean";
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8090);
+    public WireMockRule wireMockRule = new WireMockRule(SERVICE_PORT);
     @Autowired
     BackendInterface backendWebService;
     @Mock

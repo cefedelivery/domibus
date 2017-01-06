@@ -10,6 +10,7 @@ import org.springframework.web.context.ContextLoaderListener;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 /**
@@ -18,6 +19,8 @@ import java.net.MalformedURLException;
 public class DomibusContextLoaderListener extends ContextLoaderListener {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusContextLoaderListener.class);
+
+    PluginClassLoader pluginClassLoader = null;
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -29,7 +32,6 @@ public class DomibusContextLoaderListener extends ContextLoaderListener {
         String resolvedPluginsLocation = PropertyResolverBuilder.create().build().getResolvedProperty(pluginsLocation);
         LOG.info("Resolved plugins location [" + pluginsLocation + "] to [" + resolvedPluginsLocation + "]");
 
-        ClassLoader pluginClassLoader = null;
         try {
             pluginClassLoader = new PluginClassLoader(new File(resolvedPluginsLocation), Thread.currentThread().getContextClassLoader());
         } catch (MalformedURLException e) {
@@ -42,6 +44,13 @@ public class DomibusContextLoaderListener extends ContextLoaderListener {
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         super.contextDestroyed(servletContextEvent);
-    }
 
+        if (pluginClassLoader != null) {
+            try {
+                pluginClassLoader.close();
+            } catch (IOException e) {
+                LOG.warn("Error closing PluginClassLoader", e);
+            }
+        }
+    }
 }

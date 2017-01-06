@@ -1,11 +1,14 @@
 package eu.domibus.api.jms;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Cosmin Baciu on 17-Aug-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 public class JmsMessage {
 
@@ -86,4 +89,14 @@ public class JmsMessage {
         this.properties = properties;
     }
 
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("type", type)
+                .append("content", content)
+                .append("timestamp", timestamp)
+                .append("properties", properties)
+                .toString();
+    }
 }

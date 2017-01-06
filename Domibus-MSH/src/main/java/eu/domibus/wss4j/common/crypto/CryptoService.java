@@ -72,7 +72,7 @@ public class CryptoService {
         try {
             containsAlias = getTrustStore().containsAlias(alias);
         } catch (final KeyStoreException e) {
-            throw new RuntimeException("This should never happen", e);
+            throw new ConfigurationException("Error while trying to get the alias from the truststore. This should never happen", e);
         }
         if (containsAlias && !overwrite) {
             return false;

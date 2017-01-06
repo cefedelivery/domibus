@@ -12,7 +12,8 @@ import javax.annotation.Resource;
 import java.util.Properties;
 
 /**
- * Created by Cosmin Baciu on 31-Aug-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 @Component
 public class JMSDestinationHelperImpl implements JMSDestinationHelper {

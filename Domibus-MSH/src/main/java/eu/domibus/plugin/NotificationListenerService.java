@@ -6,6 +6,7 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
+import org.apache.commons.lang.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +65,8 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
     @Transactional
     public void onMessage(final Message message) {
-        if(!authUtils.isUnsecureLoginAllowed())
-            authUtils.setAuthenticationToSecurityContext("notif","notif", AuthRole.ROLE_ADMIN);
+        if (!authUtils.isUnsecureLoginAllowed())
+            authUtils.setAuthenticationToSecurityContext("notif", "notif", AuthRole.ROLE_ADMIN);
 
         try {
             final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
@@ -91,7 +92,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     }
 
     public Collection<String> listPendingMessages() {
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
 
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
@@ -146,7 +147,8 @@ public class NotificationListenerService implements MessageListener, JmsListener
         while (browserEnumeration.hasMoreElements()) {
             final Message message = (Message) browserEnumeration.nextElement();
             if (notificationType.name().equals(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE))) {
-                if (finalRecipient == null || (finalRecipient != null && finalRecipient.equals(message.getStringProperty(MessageConstants.FINAL_RECIPIENT)))) {
+                if (finalRecipient == null
+                        || (StringUtils.equals(finalRecipient, message.getStringProperty(MessageConstants.FINAL_RECIPIENT)))) {
                     String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
                     result.add(messageId);
                     countOfMessagesIncluded++;
@@ -163,7 +165,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public void removeFromPending(final String messageId) throws MessageNotFoundException {
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
 
         if (this.mode == BackendConnector.Mode.PUSH) {

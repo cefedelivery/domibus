@@ -195,10 +195,10 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public void downloadMessage(final DownloadMessageRequest downloadMessageRequest, Holder<DownloadMessageResponse> downloadMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
 
         UserMessage userMessage = null;
-        boolean isMessageIdValued = StringUtils.isNotEmpty(downloadMessageRequest.getMessageID());
+        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(downloadMessageRequest.getMessageID());
 
         try {
-            if (isMessageIdValued) {
+            if (isMessageIdNotEmpty) {
                 userMessage = downloadMessage(downloadMessageRequest.getMessageID(), null);
             }
         } catch (final MessageNotFoundException mnfEx) {
@@ -207,6 +207,11 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             }
             LOG.error(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]");
             throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", createDownloadMessageFault(mnfEx));
+        }
+
+        if(userMessage == null) {
+            LOG.error(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]");
+            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", createFault("UserMessage not found"));
         }
 
         // To avoid blocking errors during the Header's response validation
@@ -218,7 +223,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         ebMSHeaderInfo.value = messaging;
         downloadMessageResponse.value = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponse();
 
-        if (isMessageIdValued && messaging.getUserMessage() != null) {
+        if (isMessageIdNotEmpty) {
             fillInfoParts(downloadMessageResponse, messaging);
         } else {
             LOG.info("Returning an empty response because the message id was empty.");
@@ -276,7 +281,16 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             MessagingProcessingException mpEx = (MessagingProcessingException) ex;
             detail.setCode(mpEx.getEbms3ErrorCode().getErrorCodeName());
             detail.setMessage(mpEx.getMessage());
-        } else detail.setMessage(ex.getMessage());
+        } else {
+            detail.setMessage(ex.getMessage());
+        }
+        return detail;
+    }
+
+    private FaultDetail createFault(String message) {
+        FaultDetail detail = WEBSERVICE_OF.createFaultDetail();
+        detail.setCode(eu.domibus.common.ErrorCode.EBMS_0004.getErrorCodeName());
+        detail.setMessage(message);
         return detail;
     }
 

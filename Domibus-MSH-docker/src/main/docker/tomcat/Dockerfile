@@ -1,39 +1,73 @@
 FROM java:7-jre
 
-MAINTAINER Cosmin Baciu <cosmin.baciu@ext.ec.europa.eu>
+MAINTAINER CEF eDelivery <CEF-EDELIVERY-SUPPORT@ec.europa.eu>
+
+ARG DOMIBUS_VERSION
+ENV DOMIBUS_VERSION ${DOMIBUS_VERSION:-3.3-SNAPSHOT}
+
+####### BAMBOO_SHARE http://edelquality.westeurope.cloudapp.azure.com:8080/artifact/CE-DD/shared/build-$BUILD_NUMBER/Domibus/
+ARG ARTIFACTS_REPOSITORY
+ENV ARTIFACTS_REPOSITORY ${ARTIFACTS_REPOSITORY}
+
+ARG PARTY
+ENV PARTY ${PARTY:-blue}
+ENV PMODE_NAME "domibus-gw-sample-pmode-$PARTY.xml"
+
+RUN echo $PARTY
+RUN echo $PMODE_NAME
 
 ENV TOMCAT_MAJOR 8
 ENV TOMCAT_VERSION 8.0.24
 ENV DOCKERIZE_VERSION v0.2.0
-ENV TOMCAT_ZIP_URL ./domibus-tomcat-full.zip
 
-ENV SAMPLE_CONFIGURATION_URL ./domibus-sample-configuration-and-testing.zip
-ENV MYSQL_CONNECTOR_URL ./mysql-connector-java-5.1.38-bin.jar
-
+ENV MYSQL_CONNECTOR mysql-connector-java-5.1.40
 ENV DOMIBUS_DIST /usr/local/domibusDist
 ENV TOMCAT_FULL_DISTRIBUTION /usr/local/tomcat
 ENV CATALINA_HOME $TOMCAT_FULL_DISTRIBUTION/domibus
 
 RUN apt-get update
 RUN apt-get install -y wget
+RUN apt-get install unzip
+RUN apt-get install curl
+
+RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip \
+    && unzip -d $TOMCAT_FULL_DISTRIBUTION domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip
+RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip \
+    && unzip -d $DOMIBUS_DIST domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-COPY $TOMCAT_ZIP_URL $DOMIBUS_DIST/
-COPY $SAMPLE_CONFIGURATION_URL $DOMIBUS_DIST/
+RUN wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
+    && unzip -d $DOMIBUS_DIST $MYSQL_CONNECTOR.zip
 
-RUN unzip $DOMIBUS_DIST/domibus-tomcat-full.zip -d $TOMCAT_FULL_DISTRIBUTION/
-RUN unzip -j $DOMIBUS_DIST/domibus-sample-configuration-and-testing.zip conf/domibus/keystores/\* -d $CATALINA_HOME/conf/domibus/keystores
-COPY $MYSQL_CONNECTOR_URL $CATALINA_HOME/lib/
+RUN cp $DOMIBUS_DIST/$MYSQL_CONNECTOR/$MYSQL_CONNECTOR-bin.jar $CATALINA_HOME/lib
 
+RUN echo "s/blue_gw/${PARTY}_gw/g"
+
+RUN sed -i "s/blue_gw/${PARTY}_gw/g" $CATALINA_HOME/conf/domibus/domibus-security.xml
 
 RUN chmod 777 $CATALINA_HOME/bin/*.sh
-
-RUN sed -i 's/#export CATALINA_HOME=<YOUR_INSTALLATION_PATH>/export CATALINA_HOME=$CATALINA_HOME/g' $CATALINA_HOME/bin/setenv.sh
+RUN sed -i 's/\r$//' $CATALINA_HOME/bin/setenv.sh
+RUN sed -i 's/#export CATALINA_HOME=<YOUR_INSTALLATION_PATH>/sleep 120;/g' $CATALINA_HOME/bin/setenv.sh
 RUN sed -i 's/#JAVA_OPTS/JAVA_OPTS/g' $CATALINA_HOME/bin/setenv.sh
+RUN sed -i 's/<blue_hostname>:8080/domibusblue:8080/g' $DOMIBUS_DIST/conf/pmodes/$PMODE_NAME
+RUN sed -i 's/<red_hostname>:8080/domibusred:8080/g' $DOMIBUS_DIST/conf/pmodes/$PMODE_NAME
+RUN sed -i "s/localhost:3306/mysql$PARTY:3306/g" $CATALINA_HOME/conf/domibus/domibus-datasources.xml
+RUN echo "s/localhost:3306/mysql$PARTY:3306/g"
 
+######## Set Test Platform certificates ########
+RUN mkdir $CATALINA_HOME/conf/domibus/keystores
+RUN cp $DOMIBUS_DIST/conf/domibus/keystores/* $CATALINA_HOME/conf/domibus/keystores/
+
+RUN echo '#!/bin/bash' >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo "cd $CATALINA_HOME" >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo './bin/catalina.sh start' >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo "while ! curl --output /dev/null --silent --head --fail http://localhost:8080/domibus/home; do sleep 1 && echo -n .; done;" >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo "curl -X POST -F pmode=@\"$DOMIBUS_DIST/conf/pmodes/$PMODE_NAME\" http://localhost:8080/domibus/home/uploadPmodeFile" >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo "while true ; do sleep 1 ; done;" >> $DOMIBUS_DIST/entrypoint.sh
+RUN chmod 777 $DOMIBUS_DIST/entrypoint.sh
 EXPOSE 8080
 
+WORKDIR $DOMIBUS_DIST
+ENTRYPOINT ["./entrypoint.sh"]
 
-WORKDIR $CATALINA_HOME
-ENTRYPOINT ["./bin/catalina.sh", "run"]

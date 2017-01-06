@@ -137,29 +137,33 @@ public class MessageSender implements MessageListener {
         } catch (final EbMS3Exception e) {
             this.handleEbms3Exception(e, messageId);
         } finally {
-            switch (reliabilityCheckSuccessful) {
-                case OK:
-                    switch (isOk) {
-                        case OK:
-                            userMessageLogDao.setMessageAsAcknowledged(messageId);
-                            break;
-                        case WARNING:
-                            userMessageLogDao.setMessageAsAckWithWarnings(messageId);
-                            break;
-                        default:
-                            assert false;
-                    }
-                    backendNotificationService.notifyOfSendSuccess(messageId);
-                    userMessageLogDao.setAsNotified(messageId);
-                    messagingDao.clearPayloadData(messageId);
-                    LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS);
-                    break;
-                case WAITING_FOR_CALLBACK:
-                    userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
-                    break;
-                case FAIL:
-                    updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
-            }
+            handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+        }
+    }
+
+    private void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+        switch (reliabilityCheckSuccessful) {
+            case OK:
+                switch (isOk) {
+                    case OK:
+                        userMessageLogDao.setMessageAsAcknowledged(messageId);
+                        break;
+                    case WARNING:
+                        userMessageLogDao.setMessageAsAckWithWarnings(messageId);
+                        break;
+                    default:
+                        assert false;
+                }
+                backendNotificationService.notifyOfSendSuccess(messageId);
+                userMessageLogDao.setAsNotified(messageId);
+                messagingDao.clearPayloadData(messageId);
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS);
+                break;
+            case WAITING_FOR_CALLBACK:
+                userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
+                break;
+            case FAIL:
+                updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
         }
     }
 
@@ -173,7 +177,7 @@ public class MessageSender implements MessageListener {
         exceptionToHandle.setRefToMessageId(messageId);
         if (!exceptionToHandle.isRecoverable() && !Boolean.parseBoolean(System.getProperty(UNRECOVERABLE_ERROR_RETRY))) {
             userMessageLogDao.setMessageAsAcknowledged(messageId);
-            // The payload data is cleared after the send max attempts has been reached or when the message send time has expired
+            // TODO Shouldn't clear the payload data here ?
         }
 
         exceptionToHandle.setMshRole(MSHRole.SENDING);

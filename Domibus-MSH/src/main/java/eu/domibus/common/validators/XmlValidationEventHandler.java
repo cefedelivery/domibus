@@ -50,8 +50,7 @@ public class XmlValidationEventHandler implements ValidationEventHandler {
                 retVal = true; // continue after fatal errors because we want to show all errors together
                 break;
             default:
-                assert false :
-                        severity = "UNRECOGNIZED_SEVERITY";
+                severity = "UNRECOGNIZED_SEVERITY";
         }
 
         String location = getLocation(event);
