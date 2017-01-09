@@ -60,7 +60,7 @@
         <!-- regular expression used for identifying the internal queues in the Admin Page -->
         <prop key="domibus.jms.internalQueue.expression">.*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*</prop>
         <prop key="domibus.jmx.user">jmsManager</prop>
-        <prop key="domibus.jmx.password">jmsManager1</prop>
+        <prop key="domibus.jmx.password">jms_Manager1</prop>
 
         <!-- Enable the proxy settings only if you use a proxy -->
         <!--
