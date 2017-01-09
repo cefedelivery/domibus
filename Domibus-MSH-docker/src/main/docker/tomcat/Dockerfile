@@ -2,12 +2,17 @@ FROM java:7-jre
 
 MAINTAINER CEF eDelivery <CEF-EDELIVERY-SUPPORT@ec.europa.eu>
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 ARG DOMIBUS_VERSION
-ENV DOMIBUS_VERSION ${DOMIBUS_VERSION:-3.3-SNAPSHOT}
+ENV DOMIBUS_VERSION ${DOMIBUS_VERSION}
 
 ####### BAMBOO_SHARE http://edelquality.westeurope.cloudapp.azure.com:8080/artifact/CE-DD/shared/build-$BUILD_NUMBER/Domibus/
 ARG ARTIFACTS_REPOSITORY
 ENV ARTIFACTS_REPOSITORY ${ARTIFACTS_REPOSITORY}
+
+ARG SOURCE_CODE
+ENV SOURCE_CODE ${SOURCE_CODE}
 
 ARG PARTY
 ENV PARTY ${PARTY:-blue}
@@ -27,16 +32,19 @@ ENV CATALINA_HOME $TOMCAT_FULL_DISTRIBUTION/domibus
 
 RUN apt-get update
 RUN apt-get install -y wget
-RUN apt-get install unzip
-RUN apt-get install curl
+RUN apt-get install -y unzip
+RUN apt-get install -y curl
 
-RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip \
-    && unzip -d $TOMCAT_FULL_DISTRIBUTION domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip
-RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip \
-    && unzip -d $DOMIBUS_DIST domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip
+COPY ./domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip .
+RUN unzip  -d $TOMCAT_FULL_DISTRIBUTION domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip
+
+COPY ./domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip .
+RUN unzip -d $DOMIBUS_DIST domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip
+
+COPY ./policies .
+
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-
 RUN wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
     && unzip -d $DOMIBUS_DIST $MYSQL_CONNECTOR.zip
 
@@ -58,11 +66,13 @@ RUN echo "s/localhost:3306/mysql$PARTY:3306/g"
 ######## Set Test Platform certificates ########
 RUN mkdir $CATALINA_HOME/conf/domibus/keystores
 RUN cp $DOMIBUS_DIST/conf/domibus/keystores/* $CATALINA_HOME/conf/domibus/keystores/
+RUN cp signOnly.xml $CATALINA_HOME/conf/domibus/policies/
+RUN cp doNothingPolicy.xml $CATALINA_HOME/conf/domibus/policies/
 
 RUN echo '#!/bin/bash' >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo "cd $CATALINA_HOME" >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo './bin/catalina.sh start' >> $DOMIBUS_DIST/entrypoint.sh
-RUN echo "while ! curl --output /dev/null --silent --head --fail http://localhost:8080/domibus/home; do sleep 1 && echo -n .; done;" >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo "while ! curl --output /dev/null --silent --head --fail http://localhost:8080/domibus/home; do sleep 1 && echo -n . ; done" >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo "curl -X POST -F pmode=@\"$DOMIBUS_DIST/conf/pmodes/$PMODE_NAME\" http://localhost:8080/domibus/home/uploadPmodeFile" >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo "while true ; do sleep 1 ; done;" >> $DOMIBUS_DIST/entrypoint.sh
 RUN chmod 777 $DOMIBUS_DIST/entrypoint.sh

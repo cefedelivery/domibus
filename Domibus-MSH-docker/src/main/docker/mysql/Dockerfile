@@ -2,25 +2,23 @@ FROM mysql:5.7
 
 MAINTAINER CEF eDelivery <CEF-EDELIVERY-SUPPORT@ec.europa.eu>
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 ARG SQLSCRIPTS_VERSION
-ENV SQLSCRIPTS_VERSION ${SQLSCRIPTS_VERSION:-3.3}
+ENV SQLSCRIPTS_VERSION ${SQLSCRIPTS_VERSION}
 
 ARG DOMIBUS_VERSION
-ENV DOMIBUS_VERSION ${DOMIBUS_VERSION:-3.3-SNAPSHOT}
-
-ARG ARTIFACTS_REPOSITORY
-ENV ARTIFACTS_REPOSITORY ${ARTIFACTS_REPOSITORY}
+ENV DOMIBUS_VERSION ${DOMIBUS_VERSION}
 
 ENV SQL_SCRIPTS_URL ./domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip
 ENV SQL_SCRIPTS_HOME /usr/local/domibusSql
 
 RUN apt-get update
 RUN apt-get install -y wget
-RUN apt-get install unzip
+RUN apt-get install -y unzip
 
-RUN wget $ARTIFACTS_REPOSITORY/domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip \
-    && unzip  -d $SQL_SCRIPTS_HOME domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip
-
+COPY ./domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip .
+RUN unzip  -d $SQL_SCRIPTS_HOME domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip
 RUN cp $SQL_SCRIPTS_HOME/sql-scripts/mysql5innoDb-$SQLSCRIPTS_VERSION.ddl /docker-entrypoint-initdb.d/mysql5innoDb-$SQLSCRIPTS_VERSION.sql
 
 EXPOSE 3306
