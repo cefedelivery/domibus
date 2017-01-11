@@ -127,7 +127,6 @@ public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Me
             LOG.putMDC(DomibusLogger.MDC_USER, authenticationResult.getName());
         } else {
             LOG.securityInfo(DomibusMessageCode.SEC_UNAUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
-            LOG.debug("Unauthorize access for " + httpRequest.getRemoteHost() + " " + httpRequest.getRequestURL());
             throw new AuthenticationException("The certificate is not valid or is not present or the basic authentication credentials are invalid");
         }
     }

@@ -97,13 +97,13 @@ public class CompressionService {
     public boolean handleDecompression(final UserMessage ebmsMessage, final LegConfiguration legConfigForMessage) throws EbMS3Exception {
         //if compression is not necessary return false
         if (!legConfigForMessage.isCompressPayloads()) {
-            LOG.info("Decompression is not performed: leg compressPayloads parameter is false");
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION_NOT_ENABLED);
             return false;
         }
 
         for (final PartInfo partInfo : ebmsMessage.getPayloadInfo().getPartInfo()) {
             if (partInfo.isInBody()) {
-                LOG.info("Decompression is not performed: partInfo is in body");
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION_PART_INFO_IN_BODY, partInfo.getHref());
                 continue;
             }
 
