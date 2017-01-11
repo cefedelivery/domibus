@@ -47,7 +47,6 @@
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-logging</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

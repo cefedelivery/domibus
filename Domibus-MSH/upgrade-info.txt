@@ -7,6 +7,16 @@ Domibus 3.3-RC1 (from 3.2.1):
                             <artifactId>commons-logging</artifactId>
                             <scope>provided</scope>
                         </dependency>
+                   o add the following dependency:
+                         <dependency>
+                            <groupId>eu.domibus</groupId>
+                            <artifactId>domibus-logging</artifactId>
+                        </dependency>
+               - in the custom plugin module source code replace all declarations of the logger:
+                   o Before
+                      eg: private static final Log LOG = LogFactory.getLog(BackendWebServiceImpl.class);
+                   o Before
+                      eg: private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendWebServiceImpl.class);
                - in the location "\conf\domibus" delete the log4j.properties file and copy the logback.xml distributed in the domibus configuration specific to each server
                - in file "\conf\domibus\plugins\config\ws-plugin.xml" locate the following section and add the interceptors:
                     <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">

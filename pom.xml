@@ -51,6 +51,7 @@
         <slf4j.version>1.7.21</slf4j.version>
         <logback.version>1.1.8</logback.version>
         <httpclient.version>4.5.2</httpclient.version>
+        <commons-configuration.version>1.10</commons-configuration.version>
     </properties>
 
     <distributionManagement>
@@ -67,9 +68,14 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>eu.domibus</groupId>
+                <artifactId>domibus-logging</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>commons-configuration</groupId>
                 <artifactId>commons-configuration</artifactId>
-                <version>1.10</version>
+                <version>${commons-configuration.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
