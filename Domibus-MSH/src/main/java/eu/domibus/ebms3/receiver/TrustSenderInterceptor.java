@@ -115,8 +115,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         return contents.get(0);
     }
 
-    private X509Certificate getSenderCertificate(SoapMessage msg) throws Exception {
-
+    private X509Certificate getSenderCertificate(SoapMessage msg)  {
         boolean utWithCallbacks = MessageUtils.getContextualBoolean(msg, "ws-security.validate.token", true);
         super.translateProperties(msg);
         CXFRequestData requestData = new CXFRequestData();
