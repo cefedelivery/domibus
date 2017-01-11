@@ -33,7 +33,7 @@ services:
       - dbServerPort=3306
     command: dockerize -wait tcp://$dbServerName:$dbServerPort -timeout 20s
     ports:
-      - "8080:8080"
+      - "8180:8080"
     depends_on:
       - mysqlblue
   domibusred:
