@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component(value = "clearAuthenticationMDCInterceptor")
 public class ClearAuthenticationMDCInterceptor extends AbstractPhaseInterceptor<Message> {
 
-    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(ClearAuthenticationMDCInterceptor.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ClearAuthenticationMDCInterceptor.class);
 
     public ClearAuthenticationMDCInterceptor() {
         super(Phase.SETUP_ENDING);
@@ -19,18 +19,18 @@ public class ClearAuthenticationMDCInterceptor extends AbstractPhaseInterceptor<
 
     @Override
     public void handleMessage(Message message) throws Fault {
-        LOGGER.debug("handleMessage");
+        LOG.debug("handleMessage");
         clearAuthenticationMDC();
     }
 
     @Override
     public void handleFault(Message message) {
-        LOGGER.debug("handleFault");
+        LOG.debug("handleFault");
         clearAuthenticationMDC();
     }
 
     private void clearAuthenticationMDC() {
-        LOGGER.removeMDC(DomibusLogger.MDC_USER);
-        LOGGER.info("Cleared MDC property [{}]", LOGGER.translateMDCKey(DomibusLogger.MDC_USER));
+        LOG.removeMDC(DomibusLogger.MDC_USER);
+        LOG.info("Cleared MDC property [{}]", LOG.translateMDCKey(DomibusLogger.MDC_USER));
     }
 }

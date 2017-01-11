@@ -26,7 +26,7 @@ import java.util.List;
 @Service
 public class PayloadProfileValidator {
 
-    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(PayloadProfileValidator.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PayloadProfileValidator.class);
 
     @Autowired
     private PModeProvider pModeProvider;
@@ -36,7 +36,7 @@ public class PayloadProfileValidator {
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
         final PayloadProfile profile = legConfiguration.getPayloadProfile();
         if (profile == null) {
-            LOGGER.businessInfo(DomibusMessageCode.BUS_PAYLOAD_PROFILE_VALIDATION_SKIP, legConfiguration.getName());
+            LOG.businessInfo(DomibusMessageCode.BUS_PAYLOAD_PROFILE_VALIDATION_SKIP, legConfiguration.getName());
             // no profile means everything is valid
             return;
         }
@@ -53,7 +53,7 @@ public class PayloadProfileValidator {
                 }
             }
             if (profiled == null) {
-                LOGGER.businessError(DomibusMessageCode.BUS_PAYLOAD_WITH_CID_MISSING, cid);
+                LOG.businessError(DomibusMessageCode.BUS_PAYLOAD_WITH_CID_MISSING, cid);
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling for this exchange does not include a payload with CID: " + cid, messaging.getUserMessage().getMessageInfo().getMessageId(), null);
             }
             modifiableProfileList.remove(profiled);
@@ -66,7 +66,7 @@ public class PayloadProfileValidator {
                 }
             }
             if (mime == null) {
-                LOGGER.businessError(DomibusMessageCode.BUS_PAYLOAD_WITH_MIME_TYPE_MISSING, partInfo.getHref());
+                LOG.businessError(DomibusMessageCode.BUS_PAYLOAD_WITH_MIME_TYPE_MISSING, partInfo.getHref());
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling for this exchange requires all message parts to declare a MimeType property" + partInfo.getHref(), messaging.getUserMessage().getMessageInfo().getMessageId(), null);
             }
             if ((!StringUtils.equalsIgnoreCase(profiled.getMimeType(), mime)) ||
@@ -81,12 +81,12 @@ public class PayloadProfileValidator {
     }*/
         for (final Payload payload : modifiableProfileList) {
             if (payload.isRequired()) {
-                LOGGER.businessError(DomibusMessageCode.BUS_PAYLOAD_MISSING, payload);
+                LOG.businessError(DomibusMessageCode.BUS_PAYLOAD_MISSING, payload);
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling error, missing payload:" + payload, messaging.getUserMessage().getMessageInfo().getMessageId(), null);
 
             }
         }
 
-        LOGGER.businessInfo(DomibusMessageCode.BUS_PAYLOAD_PROFILE_VALIDATION, profile.getName());
+        LOG.businessInfo(DomibusMessageCode.BUS_PAYLOAD_PROFILE_VALIDATION, profile.getName());
     }
 }

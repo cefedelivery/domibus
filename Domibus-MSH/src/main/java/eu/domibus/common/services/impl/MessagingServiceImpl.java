@@ -25,7 +25,7 @@ import java.util.zip.GZIPOutputStream;
 @Service
 public class MessagingServiceImpl implements MessagingService {
 
-    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(MessagingServiceImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingServiceImpl.class);
 
     @Autowired
     MessagingDao messagingDao;
@@ -47,7 +47,7 @@ public class MessagingServiceImpl implements MessagingService {
                 try {
                     storeBinary(partInfo);
                 } catch (IOException exc) {
-                    LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, partInfo.getHref());
+                    LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, partInfo.getHref());
                     CompressionException ex = new CompressionException("Could not store binary data for message " + exc.getMessage(), exc);
                     throw ex;
                 }
@@ -77,7 +77,7 @@ public class MessagingServiceImpl implements MessagingService {
         }
 
         if(compressed) {
-            LOGGER.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION, partInfo.getHref());
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION, partInfo.getHref());
         }
     }
 

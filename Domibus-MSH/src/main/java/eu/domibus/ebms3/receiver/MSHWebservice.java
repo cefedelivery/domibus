@@ -71,7 +71,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     public static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
 
-    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(MSHWebservice.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHWebservice.class);
 
     @Autowired
     private BackendNotificationService backendNotificationService;
@@ -127,7 +127,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Override
     @Transactional
     public SOAPMessage invoke(final SOAPMessage request) {
-        LOGGER.info("Receiving message");
+        LOG.info("Receiving message");
 
         final SOAPMessage responseMessage;
 
@@ -137,11 +137,11 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             pmodeKey = (String) request.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
         } catch (final SOAPException soapEx) {
             //this error should never occur because pmode handling is done inside the in-interceptorchain
-            LOGGER.error("Cannot find PModeKey property for incoming Message", soapEx);
+            LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
             assert false;
         }
 
-        LOGGER.info("Using pmodeKey {}", pmodeKey);
+        LOG.info("Using pmodeKey {}", pmodeKey);
 
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
         Messaging messaging = null;
@@ -149,15 +149,15 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         String messageId = null;
         try (StringWriter sw = new StringWriter()) {
-            if (LOGGER.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
 
                 transformerFactory.newTransformer().transform(new DOMSource(request.getSOAPPart()), new StreamResult(sw));
 
-                LOGGER.debug(sw.toString());
-                LOGGER.debug("received attachments:");
+                LOG.debug(sw.toString());
+                LOG.debug("received attachments:");
                 final Iterator i = request.getAttachments();
                 while (i.hasNext()) {
-                    LOGGER.debug("attachment: "+i.next());
+                    LOG.debug("attachment: "+i.next());
                 }
             }
             messaging = getMessaging(request);
@@ -166,18 +166,18 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             checkCharset(messaging);
             pingMessage = checkPingMessage(messaging.getUserMessage());
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
-            LOGGER.debug("Message duplication status:{}", messageExists);
+            LOG.debug("Message duplication status:{}", messageExists);
             if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
                 persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
                 try {
                     backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
                 } catch(SubmissionValidationException e) {
-                    LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
+                    LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
                 }
             }
             responseMessage = generateReceipt(request, legConfiguration, messageExists);
-            LOGGER.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
         } catch (TransformerException | SOAPException | JAXBException | IOException e) {
             throw new RuntimeException(e);
         } catch (final EbMS3Exception e) {
@@ -186,7 +186,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
                 }
             } catch (Exception ex) {
-                LOGGER.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex,  messageId);
+                LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex,  messageId);
             }
             throw new WebServiceException(e);
         }
@@ -201,11 +201,11 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @throws EbMS3Exception
      */
     private void checkCharset(final Messaging messaging) throws EbMS3Exception {
-        LOGGER.info("Checking charset for attachments");
+        LOG.info("Checking charset for attachments");
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             for (final Property property : partInfo.getPartProperties().getProperties()) {
                 if (Property.CHARSET.equals(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
-                    LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_CHARSET_INVALID, property.getValue(), messaging.getUserMessage().getMessageInfo().getMessageId());
+                    LOG.businessError(DomibusMessageCode.BUS_MESSAGE_CHARSET_INVALID, property.getValue(), messaging.getUserMessage().getMessageInfo().getMessageId());
                     EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, property.getValue() + " is not a valid Charset", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
                     ex.setMshRole(MSHRole.RECEIVING);
                     throw ex;
@@ -221,7 +221,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @return result of duplicate handle
      */
     private Boolean checkDuplicate(final Messaging messaging) {
-        LOGGER.debug("Checking for duplicate messages");
+        LOG.debug("Checking for duplicate messages");
         return userMessageLogDao.findByMessageId(messaging.getUserMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
     }
 
@@ -233,7 +233,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @return result of ping service and action handle
      */
     private Boolean checkPingMessage(final UserMessage message) {
-        LOGGER.debug("Checking if it is a ping message");
+        LOG.debug("Checking if it is a ping message");
         return eu.domibus.common.model.configuration.Service.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
                 && eu.domibus.common.model.configuration.Action.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
 
@@ -255,12 +255,12 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         assert legConfiguration != null;
 
         if (legConfiguration.getReliability() == null) {
-            LOGGER.warn("No reliability found for leg [{}]", legConfiguration.getName());
+            LOG.warn("No reliability found for leg [{}]", legConfiguration.getName());
             return responseMessage;
         }
 
         if (ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())) {
-            LOGGER.info("Generating receipt for incoming message");
+            LOG.info("Generating receipt for incoming message");
             try {
                 responseMessage = messageFactory.createMessage();
                 InputStream generateAS4ReceiptStream = this.getClass().getClassLoader().getResourceAsStream(XSLT_GENERATE_AS4_RECEIPT_XSL);
@@ -276,14 +276,14 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 responseMessage.getSOAPPart().setContent(new DOMSource(domResult.getNode()));
                 saveResponse(responseMessage);
 
-                LOGGER.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, legConfiguration.getReliability().isNonRepudiation());
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, legConfiguration.getReliability().isNonRepudiation());
             } catch (TransformerConfigurationException | SOAPException e) {
-                LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
                 // this cannot happen
                 assert false;
                 throw new RuntimeException(e);
             } catch (final TransformerException e) {
-                LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0201, "Could not generate Receipt. Check security header and non-repudiation settings", null, e);
                 ex.setMshRole(MSHRole.RECEIVING);
                 throw ex;
@@ -313,7 +313,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             // Saves an entry of the signal message log
             signalMessageLogDao.create(smlBuilder.build());
         } catch (JAXBException | SOAPException ex) {
-            LOGGER.error("Unable to save the SignalMessage due to error: ", ex);
+            LOG.error("Unable to save the SignalMessage due to error: ", ex);
         }
 
     }
@@ -331,13 +331,13 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      */
     //TODO: improve error handling
     private String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging) throws SOAPException, JAXBException, TransformerException, EbMS3Exception {
-        LOGGER.info("Persisting received message");
+        LOG.info("Persisting received message");
         UserMessage userMessage = messaging.getUserMessage();
 
         handlePayloads(request, userMessage);
 
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
-        LOGGER.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
+        LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
         try {
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
@@ -369,7 +369,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         // Saves the user message log
         userMessageLogDao.create(umlBuilder.build());
 
-        LOGGER.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
+        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
 
         return userMessage.getMessageInfo().getMessageId();
     }
@@ -387,16 +387,16 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         boolean bodyloadFound = false;
         for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
             final String cid = partInfo.getHref();
-            LOGGER.debug("looking for attachment with cid: " + cid);
+            LOG.debug("looking for attachment with cid: " + cid);
             boolean payloadFound = false;
             if (cid == null || cid.isEmpty() || cid.startsWith("#")) {
                 if (bodyloadFound) {
-                    LOGGER.businessError(DomibusMessageCode.BUS_MULTIPLE_PART_INFO_REFERENCING_SOAP_BODY);
+                    LOG.businessError(DomibusMessageCode.BUS_MULTIPLE_PART_INFO_REFERENCING_SOAP_BODY);
                     EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "More than one Partinfo referencing the soap body found", userMessage.getMessageInfo().getMessageId(), null);
                     ex.setMshRole(MSHRole.RECEIVING);
                     throw ex;
                 }
-                LOGGER.info("Using soap body payload");
+                LOG.info("Using soap body payload");
                 bodyloadFound = true;
                 payloadFound = true;
                 partInfo.setInBody(true);
@@ -416,7 +416,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 attachmentPart = attachmentIterator.next();
                 //remove square brackets from cid for further processing
                 attachmentPart.setContentId(AttachmentUtil.cleanContentId(attachmentPart.getContentId()));
-                LOGGER.debug("comparing with: " + attachmentPart.getContentId());
+                LOG.debug("comparing with: " + attachmentPart.getContentId());
                 if (attachmentPart.getContentId().equals(AttachmentUtil.cleanContentId(cid))) {
                     partInfo.setPayloadDatahandler(attachmentPart.getDataHandler());
                     partInfo.setInBody(false);
@@ -424,7 +424,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 }
             }
             if (!payloadFound) {
-                LOGGER.businessError(DomibusMessageCode.BUS_MESSAGE_ATTACHMENT_NOT_FOUND, cid);
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_ATTACHMENT_NOT_FOUND, cid);
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0011, "No Attachment found for cid: " + cid + " of message: " + userMessage.getMessageInfo().getMessageId(), userMessage.getMessageInfo().getMessageId(), null);
                 ex.setMshRole(MSHRole.RECEIVING);
                 throw ex;
@@ -433,7 +433,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     }
 
     private Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
-        LOGGER.debug("Unmarshalling the Messaging instance from the request");
+        LOG.debug("Unmarshalling the Messaging instance from the request");
         final Node messagingXml = (Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
         final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
         @SuppressWarnings("unchecked") final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);

@@ -15,7 +15,7 @@ import java.util.Arrays;
  */
 public class DefaultMessageConverter implements MessageConverter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMessageConverter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultMessageConverter.class);
 
     @Override
     public String getMessage(Marker marker, MessageCode messageCode, Object... args) {
@@ -23,7 +23,7 @@ public class DefaultMessageConverter implements MessageConverter {
         try {
             message = MessageFormatter.arrayFormat(messageCode.getMessage(), args).getMessage();
         } catch (final Throwable throwable) {
-            LOGGER.debug("Could not format the code [" + messageCode.getCode() + "]: message [" + messageCode.getMessage() + "] and arguments [" + Arrays.asList(args) + "]");
+            LOG.debug("Could not format the code [" + messageCode.getCode() + "]: message [" + messageCode.getMessage() + "] and arguments [" + Arrays.asList(args) + "]");
             message = messageCode.getMessage();
         }
         if (marker != null) {

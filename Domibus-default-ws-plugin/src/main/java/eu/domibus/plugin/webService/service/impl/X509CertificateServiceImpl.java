@@ -21,7 +21,7 @@ import java.util.Locale;
 @Service
 public class X509CertificateServiceImpl implements IX509CertificateService {
 
-    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(X509CertificateServiceImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(X509CertificateServiceImpl.class);
 
     private static final Locale LOCALE = Locale.US;
 
@@ -37,10 +37,10 @@ public class X509CertificateServiceImpl implements IX509CertificateService {
                 try {
                     cert.checkValidity();
                 } catch (CertificateExpiredException exc) {
-                    LOGGER.businessError(DomibusMessageCode.BUS_CERTIFICATE_EXPIRED, df.format(today), df.format(cert.getNotBefore().getTime()), df.format(cert.getNotAfter().getTime()));
+                    LOG.businessError(DomibusMessageCode.BUS_CERTIFICATE_EXPIRED, df.format(today), df.format(cert.getNotBefore().getTime()), df.format(cert.getNotAfter().getTime()));
                     throw new AuthenticationException("Certificate expired", exc);
                 } catch (CertificateNotYetValidException exc) {
-                    LOGGER.businessError(DomibusMessageCode.BUS_CERTIFICATE_NOT_YET_VALID, df.format(today), df.format(cert.getNotBefore().getTime()), df.format(cert.getNotAfter().getTime()));
+                    LOG.businessError(DomibusMessageCode.BUS_CERTIFICATE_NOT_YET_VALID, df.format(today), df.format(cert.getNotBefore().getTime()), df.format(cert.getNotAfter().getTime()));
                     throw new AuthenticationException("Certificate not yet valid",  exc);
                 }
                 crlVerifierService.verifyCertificateCRLs(cert);

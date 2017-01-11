@@ -25,7 +25,7 @@ import java.util.Set;
 
 @Service
 public class PropertyProfileValidator {
-    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(PropertyProfileValidator.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PropertyProfileValidator.class);
 
     @Autowired
     private PModeProvider pModeProvider;
@@ -35,7 +35,7 @@ public class PropertyProfileValidator {
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
         final PropertySet propSet = legConfiguration.getPropertySet();
         if (propSet == null) {
-            LOGGER.businessInfo(DomibusMessageCode.BUS_PROPERTY_PROFILE_VALIDATION_SKIP, legConfiguration.getName());
+            LOG.businessInfo(DomibusMessageCode.BUS_PROPERTY_PROFILE_VALIDATION_SKIP, legConfiguration.getName());
             // no profile means everything is valid
             return;
         }
@@ -54,7 +54,7 @@ public class PropertyProfileValidator {
             }
             modifiablePropertyList.remove(profiled);
             if (profiled == null) {
-                LOGGER.businessError(DomibusMessageCode.BUS_PROPERTY_MISSING, property.getName());
+                LOG.businessError(DomibusMessageCode.BUS_PROPERTY_MISSING, property.getName());
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Property profiling for this exchange does not include a property named [" + property.getName() + "]", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
             }
 
@@ -74,18 +74,18 @@ public class PropertyProfileValidator {
                     }
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Property profiling for this exchange requires a BOOLEAN datatype for property named: " + property.getName() + ", but got " + property.getValue(), messaging.getUserMessage().getMessageInfo().getMessageId(), null);
                 default:
-                    PropertyProfileValidator.LOGGER.warn("Validation for Datatype " + profiled.getDatatype() + " not possible. This type is not known by the validator. The value will be accepted unchecked");
+                    PropertyProfileValidator.LOG.warn("Validation for Datatype " + profiled.getDatatype() + " not possible. This type is not known by the validator. The value will be accepted unchecked");
             }
 
 
         }
         for (final Property property : modifiablePropertyList) {
             if (property.isRequired()) {
-                LOGGER.businessError(DomibusMessageCode.BUS_PROPERTY_MISSING, property.getName());
+                LOG.businessError(DomibusMessageCode.BUS_PROPERTY_MISSING, property.getName());
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Required property missing [" + property.getName() + "]", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
             }
         }
 
-        LOGGER.businessInfo(DomibusMessageCode.BUS_PROPERTY_PROFILE_VALIDATION, propSet.getName());
+        LOG.businessInfo(DomibusMessageCode.BUS_PROPERTY_PROFILE_VALIDATION, propSet.getName());
     }
 }

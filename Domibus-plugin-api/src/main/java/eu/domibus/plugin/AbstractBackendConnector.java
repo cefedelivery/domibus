@@ -27,7 +27,7 @@ import java.util.List;
  */
 public abstract class AbstractBackendConnector<U, T> implements BackendConnector<U, T> {
 
-    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(AbstractBackendConnector.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractBackendConnector.class);
 
     private final String name;
     @Autowired
@@ -59,7 +59,7 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
         } catch (IllegalStateException ise) {
             throw new PModeMismatchException(ise);
         } finally {
-            LOGGER.removeMDC(DomibusLogger.MDC_MESSAGE_ID);
+            LOG.removeMDC(DomibusLogger.MDC_MESSAGE_ID);
         }
     }
 
