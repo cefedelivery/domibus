@@ -1,5 +1,6 @@
 package eu.domibus.logging;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.runner.RunWith;
@@ -21,6 +22,9 @@ public class LogbackLoggingConfiguratorTest {
 
     @Tested
     LogbackLoggingConfigurator logbackLoggingConfigurator;
+
+    @Injectable
+    DomibusConfigurationService domibusConfigurationService;
 
     @Test
     public void testConfigureLoggingWithCustomFile(@Mocked System mock) throws Exception {
@@ -110,7 +114,7 @@ public class LogbackLoggingConfiguratorTest {
     @Test
     public void testGetDefaultLogbackConfigurationFileWithConfiguredDomibusLocation(@Mocked System mock) throws Exception {
         new Expectations(logbackLoggingConfigurator) {{
-            System.getProperty(anyString);
+            domibusConfigurationService.getConfigLocation();
             result = "/user/mylogback.xml";
         }};
 
@@ -128,7 +132,7 @@ public class LogbackLoggingConfiguratorTest {
     @Test
     public void testGetDefaultLogbackFilePathWithMissingDomibusLocation(@Mocked System mock, final @Capturing Logger log) throws Exception {
         new Expectations(logbackLoggingConfigurator) {{
-            System.getProperty(anyString);
+            domibusConfigurationService.getConfigLocation();
             result = null;
         }};
 
