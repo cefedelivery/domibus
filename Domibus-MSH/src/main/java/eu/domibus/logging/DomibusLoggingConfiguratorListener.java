@@ -1,5 +1,6 @@
 package eu.domibus.logging;
 
+import eu.domibus.configuration.DefaultDomibusConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,10 +19,12 @@ public class DomibusLoggingConfiguratorListener implements ServletContextListene
     public void contextInitialized(ServletContextEvent sce) {
         try {
             LogbackLoggingConfigurator logbackLoggingConfigurator = new LogbackLoggingConfigurator();
+            //at this stage Spring is not yet initialized so we need to perform manually the injection of the configuration service
+            logbackLoggingConfigurator.setDomibusConfigurationService(new DefaultDomibusConfigurationService());
             logbackLoggingConfigurator.configureLogging();
         } catch (Exception e) {
             //logging configuration problems should not prevent the application to startup
-            LOG.warn("Error occured while configuring logging", e);
+            LOG.warn("Error occurred while configuring logging", e);
         }
     }
 

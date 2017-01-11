@@ -19,10 +19,12 @@
 
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.jsse.TLSClientParametersConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -40,19 +42,23 @@ public class TLSReader {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TLSReader.class);
 
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
+
     @Cacheable("tlsCache")
     public TLSClientParameters getTlsClientParameters() {
         byte[] encoded = new byte[0];
         String config = "";
         try {
-            encoded = Files.readAllBytes(Paths.get(System.getProperty("domibus.config.location"), CLIENTAUTHENTICATION_XML));
+            encoded = Files.readAllBytes(Paths.get(domibusConfigurationService.getConfigLocation(), CLIENTAUTHENTICATION_XML));
             config = new String(encoded, "UTF-8");
-            config = config.replaceAll("\\Q${domibus.config.location}\\E", System.getProperty("domibus.config.location").replace('\\', '/'));
+            //TODO this replacement should be extracted into a service method
+            config = config.replaceAll("\\Q${domibus.config.location}\\E", domibusConfigurationService.getConfigLocation().replace('\\', '/'));
 
             return (TLSClientParameters) TLSClientParametersConfig.createTLSClientParameters(config);
 
         } catch (final FileNotFoundException fnfEx) {
-            LOG.warn("No tls configuration file " + System.getProperty("domibus.config.location") + CLIENTAUTHENTICATION_XML + " found. Mutual authentication will not be supported.");
+            LOG.warn("No tls configuration file " + domibusConfigurationService.getConfigLocation() + CLIENTAUTHENTICATION_XML + " found. Mutual authentication will not be supported.");
             LOG.debug("", fnfEx);
             return null;
         } catch (IOException | RuntimeException ex) {

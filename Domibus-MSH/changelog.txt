@@ -1,7 +1,7 @@
 Domibus 3.3-RC1
 - JMS monitoring: fixed the computation of the total number of messages in the queue for WebLogic
 - Migrated the logging framework to SLF4J and Logback
-- Domibus uses 3 logs files: domibus.log, domibus-business.log and domibus.security.log
+- Domibus uses 3 logs files: domibus.log, domibus-business.log and domibus-security.log
 - Fixed the search of the JMS messages for WebLogic(for JMS messages having property with null values) and Tomcat(for JMS messages with no "Text" property)
 - Spring services are always executing within a transaction even if there is no specific @Transactional annotation present
 - Quartz integration with managed threads in WebLogic and WildFly

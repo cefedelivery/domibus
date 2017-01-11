@@ -66,7 +66,6 @@ public abstract class PModeProvider {
 
     public static final String SCHEMAS_DIR = "schemas/";
     public static final String DOMIBUS_PMODE_XSD = "domibus-pmode.xsd";
-    public static final String DOMIBUS_CONFIG_LOCATION = "domibus.config.location";
 
     protected static final String OPTIONAL_AND_EMPTY = "OAE";
 

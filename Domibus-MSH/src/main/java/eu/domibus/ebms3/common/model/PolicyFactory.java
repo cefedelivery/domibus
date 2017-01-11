@@ -19,12 +19,14 @@
 
 package eu.domibus.ebms3.common.model;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.neethi.Policy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
@@ -42,11 +44,14 @@ public class PolicyFactory {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PolicyFactory.class);
 
+    @Autowired
+    DomibusConfigurationService domibusConfigurationService;
+
     @Cacheable("policyCache")
     public Policy parsePolicy(final String location) throws ConfigurationException {
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
         try {
-            return pb.getPolicy(new FileInputStream(new File(System.getProperty("domibus.config.location"), location)));
+            return pb.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation(), location)));
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new ConfigurationException(e);
         }
