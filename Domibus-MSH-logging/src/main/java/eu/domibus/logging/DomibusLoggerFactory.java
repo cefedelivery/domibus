@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
  */
 public class DomibusLoggerFactory {
 
+    private DomibusLoggerFactory() {}
+
     public static DomibusLogger getLogger(String name) {
         return new DomibusLogger(LoggerFactory.getLogger(name));
     }

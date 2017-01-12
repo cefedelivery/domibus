@@ -3,8 +3,11 @@ package eu.domibus.logging;
 import eu.domibus.logging.api.CategoryLogger;
 import eu.domibus.logging.api.MessageConverter;
 import org.slf4j.Logger;
+import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
+
+import java.util.Map;
 
 
 /**
@@ -106,5 +109,7 @@ public class DomibusLogger extends CategoryLogger {
         error(marker, key, args);
     }
 
-
+    public Map<String, String> getCopyOfContextMap() {
+        return MDC.getCopyOfContextMap();
+    }
 }

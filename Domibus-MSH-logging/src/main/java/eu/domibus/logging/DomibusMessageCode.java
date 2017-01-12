@@ -66,7 +66,6 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_SECURITY_POLICY_INCOMING_NOT_FOUND("BUS-055", "Security policy [{}] for incoming message  was not found"),
     BUS_SECURITY_POLICY_INCOMING_USE("BUS-056", "Security policy [{}] for incoming message is used"),
 
-
     SEC_UNSECURED_LOGIN_ALLOWED("SEC-001", "Unsecure login is allowed, no authentication will be performed"),
     SEC_BASIC_AUTHENTICATION_USE("SEC-002", "Basic authentication is used"),
     SEC_X509CERTIFICATE_AUTHENTICATION_USE("SEC-003", "X509Certificate authentication is used"),
@@ -76,7 +75,6 @@ public enum DomibusMessageCode implements MessageCode {
     SEC_UNAUTHORIZED_ACCESS("SEC-007", "The host [{}] has been refused access to [{}]"),
     SEC_CERTIFICATE_EXPIRED("SEC-008", "Certificate is not valid at the current date [{}]. Certificate valid from [{}] to [{}]"),
     SEC_CERTIFICATE_NOT_YET_VALID("SEC-009", "Certificate is not yet valid at the current date [{}]. Certificate valid from [{}] to [{}]");
-
 
     String code;
     String message;

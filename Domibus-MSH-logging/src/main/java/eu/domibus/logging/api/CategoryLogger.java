@@ -114,6 +114,10 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         MDC.remove(getMDCKey(key));
     }
 
+    public String getMDC(String key) {
+        return MDC.get(getMDCKey(key));
+    }
+
     public String getMDCKey(String key) {
         String keyValue = key;
         if(StringUtils.isNotEmpty(mdcPropertyPrefix)) {
