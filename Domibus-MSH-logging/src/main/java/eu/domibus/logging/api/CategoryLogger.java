@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * A custom SLF4J logger specialized in logging using message codes.
+ * It uses custom {@link MDC} methods in order to add a prefix to each MDC key in order to differentiate the Domibus key from keys used by third parties
+ *
  * @author Cosmin Baciu
  * @since 3.3
  */
@@ -34,12 +37,12 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         if (!logger.isTraceEnabled()) {
             return;
         }
-        String translatedMsg = formatMessage(marker, key, args);
+        String formattedMessage = formatMessage(marker, key, args);
 
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.TRACE_INT, translatedMsg, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.TRACE_INT, formattedMessage, args, null);
         } else {
-            logger.trace(marker, translatedMsg, args);
+            logger.trace(marker, formattedMessage, args);
         }
     }
 
@@ -47,12 +50,12 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         if (!logger.isDebugEnabled()) {
             return;
         }
-        String translatedMsg = formatMessage(marker, key, args);
+        String formattedMessage = formatMessage(marker, key, args);
 
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.DEBUG_INT, translatedMsg, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.DEBUG_INT, formattedMessage, args, null);
         } else {
-            logger.debug(marker, translatedMsg, args);
+            logger.debug(marker, formattedMessage, args);
         }
     }
 
@@ -60,12 +63,12 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         if (!logger.isInfoEnabled()) {
             return;
         }
-        String translatedMsg = formatMessage(marker, key, args);
+        String formattedMessage = formatMessage(marker, key, args);
 
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.INFO_INT, translatedMsg, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.INFO_INT, formattedMessage, args, null);
         } else {
-            logger.info(marker, translatedMsg, args);
+            logger.info(marker, formattedMessage, args);
         }
     }
 
@@ -73,12 +76,12 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         if (!logger.isWarnEnabled()) {
             return;
         }
-        String translatedMsg = formatMessage(marker, key, args);
+        String formattedMessage = formatMessage(marker, key, args);
 
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.WARN_INT, translatedMsg, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.WARN_INT, formattedMessage, args, null);
         } else {
-            logger.warn(marker, translatedMsg, args);
+            logger.warn(marker, formattedMessage, args);
         }
     }
 
@@ -86,9 +89,9 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         if (!logger.isErrorEnabled()) {
             return;
         }
-        String translatedMsg = formatMessage(marker, key, args);
+        String formattedMessage = formatMessage(marker, key, args);
 
-        logError(marker, translatedMsg, null, args);
+        logError(marker, formattedMessage, null, args);
     }
 
     protected void logError(Marker marker, String message, Throwable t, Object[] args) {
@@ -104,14 +107,14 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
     }
 
     public void putMDC(String key, String val) {
-        MDC.put(translateMDCKey(key), val);
+        MDC.put(getMDCKey(key), val);
     }
 
     public void removeMDC(String key) {
-        MDC.remove(translateMDCKey(key));
+        MDC.remove(getMDCKey(key));
     }
 
-    public String translateMDCKey(String key) {
+    public String getMDCKey(String key) {
         String keyValue = key;
         if(StringUtils.isNotEmpty(mdcPropertyPrefix)) {
             keyValue = mdcPropertyPrefix + keyValue;

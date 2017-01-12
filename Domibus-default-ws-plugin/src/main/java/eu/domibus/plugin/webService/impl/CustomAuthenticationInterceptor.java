@@ -54,7 +54,7 @@ public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Me
 
         /* id domibus allows unsecure login, do not authenticate anymore, just go on */
         if ("true".equals(domibusProperties.getProperty(UNSECURE_LOGIN_ALLOWED, "true"))) {
-            LOG.businessInfo(DomibusMessageCode.SEC_UNSECURED_LOGIN_ALLOWED);
+            LOG.securityInfo(DomibusMessageCode.SEC_UNSECURED_LOGIN_ALLOWED);
             return;
         }
 

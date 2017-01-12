@@ -6,7 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
+
 /**
+ * A custom SLF4J logger specialized in logging using business and security events using specific Domibus message codes
+ *
  * @author Cosmin Baciu
  * @since 3.3
  */

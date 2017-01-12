@@ -8,6 +8,9 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.springframework.stereotype.Component;
 
+/**
+ * CXF interceptor that clears the authenticated user from the MDC context after the execution of the web service
+ */
 @Component(value = "clearAuthenticationMDCInterceptor")
 public class ClearAuthenticationMDCInterceptor extends AbstractPhaseInterceptor<Message> {
 
@@ -31,6 +34,6 @@ public class ClearAuthenticationMDCInterceptor extends AbstractPhaseInterceptor<
 
     private void clearAuthenticationMDC() {
         LOG.removeMDC(DomibusLogger.MDC_USER);
-        LOG.info("Cleared MDC property [{}]", LOG.translateMDCKey(DomibusLogger.MDC_USER));
+        LOG.info("Cleared MDC property [{}]", LOG.getMDCKey(DomibusLogger.MDC_USER));
     }
 }
