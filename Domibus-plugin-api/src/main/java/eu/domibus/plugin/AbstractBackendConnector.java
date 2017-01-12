@@ -58,8 +58,6 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
             throw new TransformationException(iaEx);
         } catch (IllegalStateException ise) {
             throw new PModeMismatchException(ise);
-        } finally {
-            LOG.removeMDC(DomibusLogger.MDC_MESSAGE_ID);
         }
     }
 

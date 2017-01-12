@@ -23,6 +23,7 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.DuplicateMessageException;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
@@ -198,6 +199,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     @Transactional
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
         if(StringUtils.isNotEmpty(messageData.getMessageId())) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());

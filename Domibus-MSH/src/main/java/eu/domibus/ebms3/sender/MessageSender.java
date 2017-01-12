@@ -35,6 +35,7 @@ import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -187,12 +188,14 @@ public class MessageSender implements MessageListener {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void onMessage(final Message message) {
         LOG.debug("Processing message [{}]", message);
         Long delay = null;
         String messageId = null;
         try {
             messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
             delay = message.getLongProperty(MessageConstants.DELAY);
             if (delay > 0) {
                 jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, message.getStringProperty(MessageConstants.ENDPOINT), delay).createMessage(), sendMessageQueue);
@@ -203,14 +206,7 @@ public class MessageSender implements MessageListener {
         } catch (final JMSException e) {
             LOG.error("Error processing message", e);
         }
-
-        try {
-            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
-            sendUserMessage(messageId);
-        } finally {
-            LOG.removeMDC(DomibusLogger.MDC_MESSAGE_ID);
-        }
-
+        sendUserMessage(messageId);
     }
 
 }
