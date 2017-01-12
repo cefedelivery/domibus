@@ -68,6 +68,10 @@
         <!--Maximum number of pending messages to be listed -->
         <prop key="domibus.listPendingMessages.maxCount">500</prop>
 
+        <!--Timeout values for communication between the access points -->
+        <prop key="domibus.dispatcher.connectionTimeout">120000</prop>
+        <prop key="domibus.dispatcher.receiveTimeout">120000</prop>
+
         <!-- Enable the proxy settings only if you use a proxy -->
         <!--
         <prop key="domibus.proxy.enabled">true</prop>

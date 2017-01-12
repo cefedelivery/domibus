@@ -133,8 +133,10 @@ public class MSHDispatcher {
         final HTTPConduit httpConduit = (HTTPConduit) client.getConduit();
         final HTTPClientPolicy httpClientPolicy = httpConduit.getClient();
         httpConduit.setClient(httpClientPolicy);
-        httpClientPolicy.setConnectionTimeout(120000); // TODO should be a configurable parameter
-        httpClientPolicy.setReceiveTimeout(120000);  // TODO should be a configurable parameter
+        int connectionTimeout = Integer.parseInt(domibusProperties.getProperty("domibus.dispatcher.connectionTimeout", "120000"));
+        int receiveTimeout = Integer.parseInt(domibusProperties.getProperty("domibus.dispatcher.receiveTimeout", "120000"));
+        httpClientPolicy.setConnectionTimeout(connectionTimeout);
+        httpClientPolicy.setReceiveTimeout(receiveTimeout);
         final TLSClientParameters params = tlsReader.getTlsClientParameters();
         if (params != null && endpoint.startsWith("https://")) {
             httpConduit.setTlsClientParameters(params);
