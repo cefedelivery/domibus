@@ -22,7 +22,7 @@ public class DefaultMessageConverter implements MessageConverter {
         String message = null;
         try {
             message = MessageFormatter.arrayFormat(messageCode.getMessage(), args).getMessage();
-        } catch (final Throwable throwable) {
+        } catch (Exception throwable) {
             LOG.debug("Could not format the code [" + messageCode.getCode() + "]: message [" + messageCode.getMessage() + "] and arguments [" + Arrays.asList(args) + "]");
             message = messageCode.getMessage();
         }
