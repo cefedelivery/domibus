@@ -55,10 +55,6 @@
     </context-param>
 
     <context-param>
-        <param-name>log4jFileName</param-name>
-        <param-value>log4j.properties</param-value>
-    </context-param>
-    <context-param>
         <param-name>pluginsLocation</param-name>
         <param-value>${domibus.config.location}/plugins/lib</param-value>
     </context-param>

@@ -8,8 +8,8 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.apache.activemq.command.ActiveMQMessage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +30,7 @@ import java.util.*;
 @RunWith(JMockit.class)
 public class NotificationListenerServiceTest {
 
-    private static final Log LOG = LogFactory.getLog(NotificationListenerServiceTest.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(NotificationListenerServiceTest.class);
 
     private static final String TEST_FINAL_RECIPIENT = "TEST_FINAL_RECIPIENT1";
     private static final String TEST_FINAL_RECIPIENT2 = "ANOTHER_FINAL_RECIPIENT";

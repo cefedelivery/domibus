@@ -96,9 +96,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <scope>provided</scope>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-logging</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

@@ -3,8 +3,8 @@ package eu.domibus.common.validators;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 @Service
 public class BackendMessageValidator {
 
-    private static final Log LOG = LogFactory.getLog(BackendMessageValidator.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendMessageValidator.class);
 
     protected static final String KEY_MESSAGEID_PATTERN = "domibus.sendMessage.messageIdPattern";
 

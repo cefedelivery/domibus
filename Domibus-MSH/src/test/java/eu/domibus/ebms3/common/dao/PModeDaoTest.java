@@ -8,8 +8,8 @@ import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.xml.XMLUtilImpl;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +40,7 @@ import static org.mockito.Mockito.never;
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class PModeDaoTest {
 
-    private static final Log LOG = LogFactory.getLog(PModeDaoTest.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeDaoTest.class);
 
 
     @org.springframework.context.annotation.Configuration

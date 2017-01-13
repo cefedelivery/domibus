@@ -20,6 +20,7 @@
 
     <jms:annotation-driven/>
 
+
     <tx:annotation-driven order="1" transaction-manager="transactionManager" proxy-target-class="true"/>
     <tx:advice id="txAdvice" transaction-manager="transactionManager">
         <tx:attributes>
@@ -31,6 +32,7 @@
         <aop:pointcut id="allMethods" expression="execution(public * eu.domibus..*(..)) and not @annotation(org.springframework.transaction.annotation.Transactional) and not within(@org.springframework.transaction.annotation.Transactional *) and not within(org.apache.cxf.phase.PhaseInterceptor+)"/>
         <aop:advisor order="2" advice-ref="txAdvice" pointcut-ref="allMethods"/>
     </aop:config>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
 
 
     <import resource="classpath*:config/*-jms-context.xml"/>

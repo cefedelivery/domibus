@@ -24,8 +24,9 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -48,7 +49,7 @@ import static org.springframework.util.StringUtils.hasLength;
 @Repository
 public class MessagingDao extends BasicDao<Messaging> {
 
-    private static final Log LOG = LogFactory.getLog(MessagingDao.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingDao.class);
 
     public MessagingDao() {
         super(Messaging.class);
@@ -112,7 +113,7 @@ public class MessagingDao extends BasicDao<Messaging> {
             emptyQuery.setParameter("PARTINFOS", databasePayloads);
             emptyQuery.executeUpdate();
         }
-        LOG.debug("Payload data for user message [" + messageId + "] have been cleared");
+        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DATA_CLEARED, messageId);
     }
 
 }

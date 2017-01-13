@@ -28,8 +28,8 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.exception.SendMessageException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -53,7 +53,7 @@ import java.util.Locale;
 @Service
 public class EbMS3MessageBuilder {
 
-    private static final Log LOG = LogFactory.getLog(EbMS3MessageBuilder.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(EbMS3MessageBuilder.class);
     private final ObjectFactory ebMS3Of = new ObjectFactory();
     @Autowired
     private MessageFactory messageFactory;

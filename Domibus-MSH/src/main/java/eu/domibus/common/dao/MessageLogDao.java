@@ -3,8 +3,9 @@ package eu.domibus.common.dao;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.logging.MessageLog;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -20,7 +21,7 @@ import java.util.*;
  */
 public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
 
-    private static final Log LOG = LogFactory.getLog(MessageLog.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageLog.class);
 
     public MessageLogDao(final Class<F> type) {
 
@@ -61,7 +62,7 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
             default:
         }
         super.update(messageLog);
-        LOG.debug(messageLog.getClass().getSimpleName() + " status updated to [" + messageStatus + "]");
+        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_STATUS_UPDATE, messageStatus);
     }
 
     public MessageStatus getMessageStatus(String messageId) {

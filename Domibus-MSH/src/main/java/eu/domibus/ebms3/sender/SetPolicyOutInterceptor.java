@@ -1,32 +1,15 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.ebms3.common.model.PolicyFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.apache.cxf.attachment.AttachmentImpl;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -59,13 +42,16 @@ import java.util.Iterator;
  * @since 3.0
  */
 public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
-    private static final Log LOG = LogFactory.getLog(SetPolicyOutInterceptor.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SetPolicyOutInterceptor.class);
 
     @Autowired
     private PModeProvider pModeProvider;
 
     @Autowired
     private PolicyFactory policyFactory;
+
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
 
 
     public SetPolicyOutInterceptor() {
@@ -83,7 +69,7 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
-
+        LOG.debug("SetPolicyOutInterceptor");
 
         final String pModeKey = (String) message.getContextualProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
         message.getInterceptorChain().add(new SetPolicyOutInterceptor.PrepareAttachmentInterceptor());
@@ -92,17 +78,20 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
 
         message.put(SecurityConstants.USE_ATTACHMENT_ENCRYPTION_CONTENT_ONLY_TRANSFORM, true);
 
-        message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm());
-        message.put(SecurityConstants.ENCRYPT_USERNAME, this.pModeProvider.getReceiverParty(pModeKey).getName());
+        final String securityAlgorithm = legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
+        message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
+        LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_ALGORITHM_OUTGOING_USE, securityAlgorithm);
+        final String encryptionUsername = pModeProvider.getReceiverParty(pModeKey).getName();
+        message.put(SecurityConstants.ENCRYPT_USERNAME, encryptionUsername);
+        LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_USER_OUTGOING_USE, encryptionUsername);
 
         try {
-
-            final Policy policy = policyFactory.parsePolicy("policies/" + pModeProvider.getLegConfiguration(pModeKey).getSecurity().getPolicy());
-
+            final Policy policy = policyFactory.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+            LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_OUTGOING_USE, legConfiguration.getSecurity().getPolicy());
             message.put(PolicyConstants.POLICY_OVERRIDE, policy);
         } catch (final ConfigurationException e) {
-            SetPolicyOutInterceptor.LOG.error("", e);
-            throw new Fault(new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Could not find policy file " + System.getProperty("domibus.config.location") + "/" + this.pModeProvider.getLegConfiguration(pModeKey).getSecurity(), null, null));
+            LOG.businessError(DomibusMessageCode.BUS_SECURITY_POLICY_OUTGOING_NOT_FOUND, e, legConfiguration.getSecurity().getPolicy());
+            throw new Fault(new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Could not find policy file " + domibusConfigurationService.getConfigLocation() + "/" + this.pModeProvider.getLegConfiguration(pModeKey).getSecurity(), null, null));
         }
 
     }

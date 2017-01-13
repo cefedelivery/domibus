@@ -27,6 +27,8 @@
             <module name="org.bouncycastle" />
             <module name="org.apache.cxf" />
             <module name="org.apache.cxf.impl" />
+            <module name="org.slf4j" />
+            <module name="org.slf4j.impl" />
         </exclusions>
 
 

@@ -1,7 +1,7 @@
 package eu.domibus.configuration;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import java.util.Properties;
 public class Storage {
 
     public static final String ATTACHMENT_STORAGE_LOCATION = "domibus.attachment.storage.location";
-    private static final Log LOG = LogFactory.getLog(Storage.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(Storage.class);
     private File storageDirectory = null;
     @Transient
     @XmlTransient

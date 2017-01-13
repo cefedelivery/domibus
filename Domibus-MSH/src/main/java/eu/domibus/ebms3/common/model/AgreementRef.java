@@ -20,6 +20,8 @@
 
 package eu.domibus.ebms3.common.model;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.xml.bind.annotation.*;
@@ -141,5 +143,14 @@ public class AgreementRef {
         result = 31 * result + (this.type != null ? this.type.hashCode() : 0);
         result = 31 * result + (this.pmode != null ? this.pmode.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("value", value)
+                .append("type", type)
+                .append("pmode", pmode)
+                .toString();
     }
 }

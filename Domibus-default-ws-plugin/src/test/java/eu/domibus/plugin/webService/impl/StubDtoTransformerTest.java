@@ -5,8 +5,8 @@ import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.webService.generated.PayloadType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ import java.util.GregorianCalendar;
 
 
 public class StubDtoTransformerTest {
-    private static final Log LOG = LogFactory.getLog(StubDtoTransformerTest.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(StubDtoTransformerTest.class);
 
     private static final String MIME_TYPE = "MimeType";
     private static final String DEFAULT_MT = "text/xml";

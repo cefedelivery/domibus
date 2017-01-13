@@ -21,13 +21,14 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReplyPattern;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.apache.wss4j.dom.WSConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,7 +53,7 @@ import java.util.Iterator;
  */
 @Service
 public class ReliabilityChecker {
-    private static final Log LOG = LogFactory.getLog(ReliabilityChecker.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ReliabilityChecker.class);
 
     @Autowired
     @Qualifier("jaxbContextEBMS")
@@ -67,20 +68,21 @@ public class ReliabilityChecker {
     public CheckResult check(final SOAPMessage request, final SOAPMessage response, final String pmodeKey) throws EbMS3Exception {
 
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
+        String messageId = null;
 
         if (legConfiguration.getReliability() != null && ReplyPattern.CALLBACK.equals(legConfiguration.getReliability().getReplyPattern())) {
-            ReliabilityChecker.LOG.debug("Reply pattern is waiting for callback, setting message status to WAITING_FOR_CALLBACK.");
+            LOG.debug("Reply pattern is waiting for callback, setting message status to WAITING_FOR_CALLBACK.");
             return CheckResult.WAITING_FOR_CALLBACK;
         }
 
         if (legConfiguration.getReliability() != null && ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())) {
-            ReliabilityChecker.LOG.debug("Checking reliability for outgoing message");
+            LOG.debug("Checking reliability for outgoing message");
             final Messaging messaging;
 
             try {
                 messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) response.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
             } catch (JAXBException | SOAPException e) {
-                ReliabilityChecker.LOG.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
                 return CheckResult.FAIL;
             }
 
@@ -89,6 +91,7 @@ public class ReliabilityChecker {
             //ReceiptionAwareness or NRR found but not expected? report if configuration=true //TODO: make configurable in domibus.properties
 
             //SignalMessage with Receipt expected
+            messageId = getMessageId(signalMessage);
             if (signalMessage.getReceipt() != null && signalMessage.getReceipt().getAny().size() == 1) {
 
                 final String contentOfReceiptString = signalMessage.getReceipt().getAny().get(0);
@@ -109,17 +112,19 @@ public class ReliabilityChecker {
                     final Iterator<Element> elementIterator = response.getSOAPHeader().getChildElements(new QName(WSConstants.WSSE_NS, WSConstants.WSSE_LN));
 
                     if (!elementIterator.hasNext()) {
+                        LOG.businessError(DomibusMessageCode.BUS_RELIABILITY_INVALID_WITH_NO_SECURITY_HEADER, messageId);
                         EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: No security header found", null, null);
                         ex.setMshRole(MSHRole.SENDING);
-                        ex.setSignalMessageId(signalMessage.getMessageInfo().getMessageId());
+                        ex.setSignalMessageId(messageId);
                         throw ex;
                     }
                     final Element securityHeaderResponse = elementIterator.next();
 
                     if (elementIterator.hasNext()) {
+                        LOG.businessError(DomibusMessageCode.BUS_RELIABILITY_INVALID_WITH_MULTIPLE_SECURITY_HEADERS, messageId);
                         EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: Multiple security headers found", null, null);
                         ex.setMshRole(MSHRole.SENDING);
-                        ex.setSignalMessageId(signalMessage.getMessageInfo().getMessageId());
+                        ex.setSignalMessageId(messageId);
                         throw ex;
                     }
 
@@ -137,9 +142,10 @@ public class ReliabilityChecker {
                         }
                     }
                     if (!signatureFound) {
+                        LOG.businessError(DomibusMessageCode.BUS_RELIABILITY_INVALID_WITH_MESSAGING_NOT_SIGNED, messageId);
                         EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: eb:Messaging not signed", null, null);
                         ex.setMshRole(MSHRole.SENDING);
-                        ex.setSignalMessageId(signalMessage.getMessageInfo().getMessageId());
+                        ex.setSignalMessageId(messageId);
                         throw ex;
                     }
 
@@ -147,15 +153,15 @@ public class ReliabilityChecker {
                     final NodeList referencesFromNonRepudiationInformation = nonRepudiationChecker.getNonRepudiationNodeList(response.getSOAPHeader().getElementsByTagNameNS(NonRepudiationConstants.NS_NRR, NonRepudiationConstants.NRR_LN).item(0));
 
                     if (!nonRepudiationChecker.compareUnorderedReferenceNodeLists(referencesFromSecurityHeader, referencesFromNonRepudiationInformation)) {
-
+                        LOG.businessError(DomibusMessageCode.BUS_RELIABILITY_INVALID_NOT_MATCHING_THE_MESSAGE, messageId);
                         EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: non repudiation information and request message do not match", null, null);
                         ex.setMshRole(MSHRole.SENDING);
-                        ex.setSignalMessageId(signalMessage.getMessageInfo().getMessageId());
+                        ex.setSignalMessageId(messageId);
                         throw ex;
                     }
 
+                    LOG.businessInfo(DomibusMessageCode.BUS_RELIABILITY_SUCCESSFUL, messageId);
                     return CheckResult.OK;
-
                 } catch (final JAXBException e) {
                     ReliabilityChecker.LOG.error("", e);
                 } catch (final SOAPException e) {
@@ -163,16 +169,24 @@ public class ReliabilityChecker {
                 }
 
             } else {
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "There is no content inside the receipt element received by the responding gateway", null, null);
+                LOG.businessError(DomibusMessageCode.BUS_RELIABILITY_RECEIPT_INVALID_EMPTY, messageId);
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "There is no content inside the receipt element received by the responding gateway", messageId, null);
                 ex.setMshRole(MSHRole.SENDING);
-                ex.setSignalMessageId(signalMessage.getMessageInfo().getMessageId());
+                ex.setSignalMessageId(messageId);
                 throw ex;
             }
 
         }
-        ReliabilityChecker.LOG.warn("Reliability check failed, check your configuration.");
+        LOG.businessError(DomibusMessageCode.BUS_RELIABILITY_GENERAL_ERROR, messageId);
         return CheckResult.FAIL;
 
+    }
+
+    protected String getMessageId(SignalMessage signalMessage) {
+        if(signalMessage == null || signalMessage.getMessageInfo() == null) {
+            return null;
+        }
+        return signalMessage.getMessageInfo().getMessageId();
     }
 
     /**

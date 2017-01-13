@@ -8,8 +8,8 @@ import eu.domibus.plugin.webService.entity.AuthenticationEntry;
 import eu.domibus.plugin.webService.impl.CustomAuthenticationInterceptor;
 import eu.domibus.plugin.webService.service.IBlueCoatCertificateService;
 import eu.domibus.plugin.webService.service.IX509CertificateService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -28,7 +28,7 @@ import java.util.List;
 @Component(value="customAuthenticationProvider")
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-    private static final Log LOG = LogFactory.getLog(CustomAuthenticationInterceptor.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationInterceptor.class);
 
     @Autowired
     private AuthenticationDAO authenticationDAO;

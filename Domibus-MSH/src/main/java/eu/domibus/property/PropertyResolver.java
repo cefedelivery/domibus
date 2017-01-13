@@ -1,7 +1,7 @@
 package eu.domibus.property;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.common.util.StringUtils;
 
 import java.util.Properties;
@@ -11,7 +11,7 @@ import java.util.Properties;
  */
 public class PropertyResolver {
 
-    private static final Log LOG = LogFactory.getLog(PropertyResolver.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PropertyResolver.class);
 
     private static final String START_DELIMITER = "{";
     private static final String END_DELIMITER = "}";

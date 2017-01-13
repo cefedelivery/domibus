@@ -23,8 +23,8 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.w3c.dom.Node;
@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
  * @author Christian Koch, Stefan Mueller
  */
 public class EbMS3MessageValidator {
-    private static final Log LOG = LogFactory.getLog(EbMS3MessageValidator.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(EbMS3MessageValidator.class);
     private static final String RFC2822_PATTERN_STRING = "^[-!#$%&'*+/0-9=?A-Z^_a-z{|}~](\\.?[-!#$%&'*+/0-9=?A-Z^_a-z{|}~])*@[a-zA-Z](-?[a-zA-Z0-9])*(\\.[a-zA-Z](-?[a-zA-Z0-9])*)+$";
     private static final Pattern RFC_2822 = Pattern.compile(EbMS3MessageValidator.RFC2822_PATTERN_STRING);
 

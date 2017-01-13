@@ -32,9 +32,11 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.DelayedDispatchMessageCreator;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -59,7 +61,7 @@ import javax.xml.ws.soap.SOAPFaultException;
 @Service(value = "messageSenderService")
 public class MessageSender implements MessageListener {
 
-    private static final Log LOG = LogFactory.getLog(MessageSender.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageSender.class);
 
     private final String UNRECOVERABLE_ERROR_RETRY = "domibus.dispatch.ebms.error.unrecoverable.retry";
 
@@ -102,6 +104,7 @@ public class MessageSender implements MessageListener {
 
 
     private void sendUserMessage(final String messageId) {
+        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
         // Assuming that everything goes fine
         ResponseHandler.CheckResult isOk = ResponseHandler.CheckResult.OK;
@@ -112,9 +115,10 @@ public class MessageSender implements MessageListener {
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         try {
             pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
-            legConfiguration = this.pModeProvider.getLegConfiguration(pModeKey);
+            LOG.debug("PMode key found : " + pModeKey);
+            legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+            LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
 
-            LOG.debug("PMode found : " + pModeKey);
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             final SOAPMessage response = mshDispatcher.dispatch(soapMessage, pModeKey);
             isOk = responseHandler.handle(response);
@@ -127,7 +131,9 @@ public class MessageSender implements MessageListener {
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 this.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
-            } else LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
+            } else {
+                LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
+            }
 
         } catch (final EbMS3Exception e) {
             this.handleEbms3Exception(e, messageId);
@@ -152,6 +158,7 @@ public class MessageSender implements MessageListener {
                 backendNotificationService.notifyOfSendSuccess(messageId);
                 userMessageLogDao.setAsNotified(messageId);
                 messagingDao.clearPayloadData(messageId);
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS);
                 break;
             case WAITING_FOR_CALLBACK:
                 userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
@@ -175,17 +182,20 @@ public class MessageSender implements MessageListener {
         }
 
         exceptionToHandle.setMshRole(MSHRole.SENDING);
-        LOG.error("Error for message with ID [" + messageId + "]", exceptionToHandle);
+        LOG.error("Error sending message with ID [" + messageId + "]", exceptionToHandle);
         this.errorLogDao.create(new ErrorLogEntry(exceptionToHandle));
-        //TODO: notify backends of error
+        // The backends are notified that an error occurred in the UpdateRetryLoggingService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void onMessage(final Message message) {
+        LOG.debug("Processing message [{}]", message);
         Long delay = null;
         String messageId = null;
         try {
             messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
             delay = message.getLongProperty(MessageConstants.DELAY);
             if (delay > 0) {
                 jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, message.getStringProperty(MessageConstants.ENDPOINT), delay).createMessage(), sendMessageQueue);
@@ -194,7 +204,7 @@ public class MessageSender implements MessageListener {
         } catch (final NumberFormatException nfe) {
             //This is ok, no delay has been set
         } catch (final JMSException e) {
-            LOG.error("", e);
+            LOG.error("Error processing message", e);
         }
         sendUserMessage(messageId);
     }

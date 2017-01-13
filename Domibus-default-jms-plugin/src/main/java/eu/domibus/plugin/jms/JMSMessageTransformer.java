@@ -30,8 +30,8 @@ import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 
 import javax.activation.DataHandler;
 import javax.activation.URLDataSource;
@@ -59,7 +59,7 @@ import static org.apache.commons.lang.StringUtils.trim;
 public class JMSMessageTransformer
         implements MessageRetrievalTransformer<MapMessage>, MessageSubmissionTransformer<MapMessage> {
 
-    private static final Log LOG = LogFactory.getLog(JMSMessageTransformer.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMSMessageTransformer.class);
 
     /**
      * The default properties to be used

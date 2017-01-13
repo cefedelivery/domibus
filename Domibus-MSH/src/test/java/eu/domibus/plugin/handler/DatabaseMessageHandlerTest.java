@@ -32,8 +32,8 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +56,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(JMockit.class)
 public class DatabaseMessageHandlerTest {
 
-    private static final Log LOG = LogFactory.getLog(DatabaseMessageHandlerTest.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DatabaseMessageHandlerTest.class);
     private static final String BACKEND = "backend";
     private static final String DEF_PARTY_TYPE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
     private static final String STRING_TYPE = "string";

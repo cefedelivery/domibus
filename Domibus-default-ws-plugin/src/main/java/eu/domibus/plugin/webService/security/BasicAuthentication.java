@@ -1,8 +1,8 @@
 package eu.domibus.plugin.webService.security;
 
 import eu.domibus.common.AuthRole;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class BasicAuthentication implements Authentication {
 
-    private static final Log LOG = LogFactory.getLog(BasicAuthentication.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BasicAuthentication.class);
 
 	private boolean authenticated;
 	private String user = null;
