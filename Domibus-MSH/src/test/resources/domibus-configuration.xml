@@ -59,6 +59,12 @@
         <prop key="activeMQ.JMXURL">service:jmx:rmi://localhost:1198/jndi/rmi://localhost:1199/jmxrmi</prop>
         <prop key="domibus.attachment.storage.location">#{ systemProperties['storage.location']!= null?systemProperties['storage.location'] : '' }</prop>
 
+        <!--Timeout values for communication between the access points -->
+        <!--ConnectionTimeOut - Specifies the amount of time, in milliseconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite.-->
+        <prop key="domibus.dispatcher.connectionTimeout">240000</prop>
+        <!--ReceiveTimeout - Specifies the amount of time, in milliseconds, that the consumer will wait for a response before it times out. 0 is infinite.-->
+        <prop key="domibus.dispatcher.receiveTimeout">240000</prop>
+
         <!-- Enable the proxy settings only if you use a proxy -->
 
         <prop key="domibus.proxy.enabled">false</prop>

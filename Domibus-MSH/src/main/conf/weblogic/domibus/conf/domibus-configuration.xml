@@ -62,6 +62,12 @@
         <prop key="domibus.jmx.user">jmsManager</prop>
         <prop key="domibus.jmx.password">jms_Manager1</prop>
 
+        <!--Timeout values for communication between the access points -->
+        <!--ConnectionTimeOut - Specifies the amount of time, in milliseconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite.-->
+        <prop key="domibus.dispatcher.connectionTimeout">240000</prop>
+        <!--ReceiveTimeout - Specifies the amount of time, in milliseconds, that the consumer will wait for a response before it times out. 0 is infinite.-->
+        <prop key="domibus.dispatcher.receiveTimeout">240000</prop>
+
         <!-- Enable the proxy settings only if you use a proxy -->
         <!--
         <prop key="domibus.proxy.enabled">true</prop>
