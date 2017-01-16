@@ -25,8 +25,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -60,7 +60,7 @@ import java.util.zip.GZIPOutputStream;
 @Table(name = "TB_PART_INFO")
 public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo> {
 
-    private static final Log LOG = LogFactory.getLog(PartInfo.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PartInfo.class);
 
     @XmlElement(name = "Schema")
     @Embedded

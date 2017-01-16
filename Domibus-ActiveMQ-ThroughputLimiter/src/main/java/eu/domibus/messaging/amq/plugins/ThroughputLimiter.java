@@ -31,8 +31,8 @@ import org.apache.activemq.command.MessageDispatch;
 import org.apache.activemq.store.PList;
 import org.apache.activemq.store.PListEntry;
 import org.apache.activemq.util.ByteSequence;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 
 import javax.jms.JMSException;
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class ThroughputLimiter extends BrokerFilter {
 
     public static final String MESSAGE_ID_SEPERATOR = "~";
     public static final String DELAY_PLIST_KEY = "DELAYED_MESSAGES";
-    private static final Logger LOG = LoggerFactory.getLogger(ThroughputLimiter.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ThroughputLimiter.class);
     private final ThroughputFilter filter;
     private final String plistName;
     private long resendDelay;

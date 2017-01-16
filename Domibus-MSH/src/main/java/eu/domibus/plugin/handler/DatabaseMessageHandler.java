@@ -22,14 +22,17 @@ import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.DuplicateMessageException;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.AccessDeniedException;
@@ -50,7 +53,7 @@ import java.util.Map;
 @Service
 public class DatabaseMessageHandler implements MessageSubmitter<Submission>, MessageRetriever<Submission> {
 
-    private static final Log LOG = LogFactory.getLog(DatabaseMessageHandler.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DatabaseMessageHandler.class);
 
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
@@ -196,8 +199,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     @Transactional
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
-
+        if(StringUtils.isNotEmpty(messageData.getMessageId())) {
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());
+        }
+        LOG.info("Preparing to submit message");
         if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasUserOrAdminRole();
         }
@@ -220,6 +227,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 backendMessageValidator.validateMessageId(messageId);
                 userMessage.getMessageInfo().setMessageId(messageId);
             }
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageInfo.getMessageId());
 
             String refToMessageId = messageInfo.getRefToMessageId();
             if (refToMessageId != null) {
@@ -263,6 +271,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             try {
                 messagingService.storeMessage(message);
             } catch (CompressionException exc) {
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, userMessage.getMessageInfo().getMessageId());
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
@@ -282,12 +291,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                     .setEndpoint(to.getEndpoint());
 
             userMessageLogDao.create(umlBuilder.build());
-
+            LOG.info("Message submitted");
             return userMessage.getMessageInfo().getMessageId();
 
         } catch (final EbMS3Exception ebms3Ex) {
-            errorLogDao.create(new ErrorLogEntry(ebms3Ex));
             LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", ebms3Ex);
+            errorLogDao.create(new ErrorLogEntry(ebms3Ex));
             throw MessagingExceptionFactory.transform(ebms3Ex);
         }
     }

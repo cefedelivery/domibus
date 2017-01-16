@@ -5,8 +5,8 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.sender.MSHDispatcher;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.binding.soap.SoapFault;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.SoapVersion;
@@ -47,7 +47,7 @@ import java.util.Properties;
  */
 public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
-    private static final Log LOG = LogFactory.getLog(TrustSenderInterceptor.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TrustSenderInterceptor.class);
 
     public static final QName KEYINFO = new QName("http://www.w3.org/2000/09/xmldsig#", "KeyInfo");
 
@@ -89,7 +89,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
             throw ebMS3Ex;
         } catch (Exception ex) {
-            LOG.debug("Blocking error", ex);
+            LOG.error("Error while verifying parties trust", ex);
             throw new Fault(ex);
         }
     }

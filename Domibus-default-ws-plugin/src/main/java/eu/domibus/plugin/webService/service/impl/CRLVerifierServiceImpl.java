@@ -3,8 +3,8 @@ package eu.domibus.plugin.webService.service.impl;
 import eu.domibus.plugin.webService.common.exception.AuthenticationException;
 import eu.domibus.plugin.webService.service.ICRLVerifierService;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERIA5String;
@@ -50,7 +50,7 @@ import java.util.List;
 @Service
 public class CRLVerifierServiceImpl implements ICRLVerifierService {
 
-    private static final Log LOG = LogFactory.getLog(CRLVerifierServiceImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CRLVerifierServiceImpl.class);
 
 
     /**

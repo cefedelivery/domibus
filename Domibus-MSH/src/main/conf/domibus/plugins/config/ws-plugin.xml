@@ -65,6 +65,12 @@
         <jaxws:inInterceptors>
             <ref bean="customAuthenticationInterceptor"/>
         </jaxws:inInterceptors>
+        <jaxws:outInterceptors>
+            <ref bean="clearAuthenticationMDCInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="clearAuthenticationMDCInterceptor"/>
+        </jaxws:outFaultInterceptors>
 
     </jaxws:endpoint>
 

@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.common.services.impl;
 
 import eu.domibus.common.DecompressionDataSource;
@@ -28,8 +9,9 @@ import eu.domibus.ebms3.common.model.CompressionMimeTypeBlacklist;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +31,7 @@ import java.io.OutputStream;
 public class CompressionService {
     public static final String COMPRESSION_PROPERTY_KEY = "CompressionType";
     public static final String COMPRESSION_PROPERTY_VALUE = "application/gzip";
-    private static final Log LOG = LogFactory.getLog(CompressionService.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CompressionService.class);
     @Autowired
     private CompressionMimeTypeBlacklist blacklist;
 
@@ -82,6 +64,7 @@ public class CompressionService {
             }
 
             if (mimeType == null || mimeType.isEmpty()) {
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE_MISSING_MIME_TYPE, partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId());
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId(), null);
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
@@ -114,11 +97,13 @@ public class CompressionService {
     public boolean handleDecompression(final UserMessage ebmsMessage, final LegConfiguration legConfigForMessage) throws EbMS3Exception {
         //if compression is not necessary return false
         if (!legConfigForMessage.isCompressPayloads()) {
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION_NOT_ENABLED);
             return false;
         }
 
         for (final PartInfo partInfo : ebmsMessage.getPayloadInfo().getPartInfo()) {
             if (partInfo.isInBody()) {
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION_PART_INFO_IN_BODY, partInfo.getHref());
                 continue;
             }
 
@@ -135,6 +120,7 @@ public class CompressionService {
             }
 
             if (!payloadCompressed) {
+                LOG.debug("Decompression is not needed: payload is not compressed");
                 continue;
             }
 
@@ -144,12 +130,13 @@ public class CompressionService {
             partInfo.getPartProperties().getProperties().remove(compressionProperty);
 
             if (mimeType == null) {
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION_FAILURE_MISSING_MIME_TYPE, partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId());
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId(), null);
                 ex.setMshRole(MSHRole.RECEIVING);
                 throw ex;
             }
             partInfo.setPayloadDatahandler(new DataHandler(new DecompressionDataSource(partInfo.getPayloadDatahandler().getDataSource(), mimeType)));
-            CompressionService.LOG.debug("Payload with cid: " + partInfo.getHref() + " and mime type: " + mimeType + " will be decompressed");
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION, partInfo.getHref());
         }
         return true;
     }

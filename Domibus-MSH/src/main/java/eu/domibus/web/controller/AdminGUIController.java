@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.web.controller;
 
 import eu.domibus.common.ErrorCode;
@@ -34,8 +15,8 @@ import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.*;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
@@ -61,7 +42,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @Controller
 public class AdminGUIController {
 
-    private final static Log LOG = LogFactory.getLog(AdminGUIController.class);
+    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(AdminGUIController.class);
 
     @Autowired
     private MessagesLogService messagesLogService;
@@ -152,7 +133,7 @@ public class AdminGUIController {
         if (page <= pages) {
             model.addObject("table", messageLogEntries);
         }
-        model.addObject("title", "Domibus - Messages Log: ");
+        model.addObject("title", "Domibus - Messages DomibusLogger: ");
         model.addObject("messagestatusvalues", MessageStatus.values());
         model.addObject("notificationstatusvalues", NotificationStatus.values());
         model.addObject("mshrolevalues", MSHRole.values());
@@ -219,7 +200,7 @@ public class AdminGUIController {
         if (page <= pages) {
             model.addObject("table", eld.findPaged(size * (page - 1), size, column, asc, filters));
         }
-        model.addObject("title", "Domibus - Error Log:");
+        model.addObject("title", "Domibus - Error DomibusLogger:");
         model.setViewName("errorlog");
         model.addObject("mshrolevalues", MSHRole.values());
         model.addObject("errorcodevalues", ErrorCode.values());

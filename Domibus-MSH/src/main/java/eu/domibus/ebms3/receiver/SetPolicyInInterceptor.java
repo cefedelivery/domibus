@@ -1,24 +1,6 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -28,8 +10,9 @@ import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.sender.MSHDispatcher;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.apache.cxf.attachment.AttachmentDataSource;
 import org.apache.cxf.binding.soap.HeaderUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -77,10 +60,14 @@ import java.util.Set;
  */
 public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
-    private static final Log LOG = LogFactory.getLog(SetPolicyInInterceptor.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SetPolicyInInterceptor.class);
     private JAXBContext jaxbContext;
+
     @Autowired
     private PModeProvider pModeProvider;
+
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
 
     public SetPolicyInInterceptor() {
         super(Phase.RECEIVE);
@@ -105,6 +92,9 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         final InputStream inputStream = message.getContent(InputStream.class);
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Messaging messaging = null;
+        String policyName = null;
+        String messageId = null;
+
         try {
             IOUtils.copy(inputStream, byteArrayOutputStream); //FIXME: do not copy the whole byte[], use SequenceInputstream instead
             final byte[] data = byteArrayOutputStream.toByteArray();
@@ -117,29 +107,40 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             //message.setContent(XMLStreamReader.class, XMLInputFactory.newInstance().createXMLStreamReader(message.getContent(InputStream.class)));
             final Node messagingNode = soapEnvelope.getElementsByTagNameNS(ObjectFactory._Messaging_QNAME.getNamespaceURI(), ObjectFactory._Messaging_QNAME.getLocalPart()).item(0);
             messaging = ((JAXBElement<Messaging>) this.jaxbContext.createUnmarshaller().unmarshal(messagingNode)).getValue();
+            messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
+
+            //set the messageId in the MDC context
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+
             final String pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(messaging.getUserMessage()); // FIXME: This does not work for signalmessages
             final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
-            final Policy policy = builder.getPolicy(new FileInputStream(new File(System.getProperty("domibus.config.location") + File.separator + "policies", legConfiguration.getSecurity().getPolicy())));
+            policyName = legConfiguration.getSecurity().getPolicy();
+            final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));
+            LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
+
             message.put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
-            //FIXME: Test!!!!
             message.getExchange().put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
             //FIXME: Consistent way! If properties are added to the exchange you will have access via PhaseInterceptorChain
-            message.getExchange().put(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY, messaging.getUserMessage().getMessageInfo().getMessageId());
+
+            message.getExchange().put(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY, messageId);
+
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want
             message.getExchange().put(PolicyConstants.POLICY_OVERRIDE, policy);
             message.put(PolicyConstants.POLICY_OVERRIDE, policy);
             message.getInterceptorChain().add(new SetPolicyInInterceptor.CheckEBMSHeaderInterceptor());
             message.getInterceptorChain().add(new SetPolicyInInterceptor.SOAPMessageBuilderInterceptor());
-            message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm());
-            message.getExchange().put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm());
+            final String securityAlgorithm = legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
+            message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
+            message.getExchange().put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
+            LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_ALGORITHM_INCOMING_USE, securityAlgorithm);
 
         } catch (EbMS3Exception e) {
             SetPolicyInInterceptor.LOG.debug("", e); // Those errors are expected (no PMode found, therefore DEBUG)
             throw new Fault(e);
         } catch (IOException | ParserConfigurationException | SAXException | JAXBException e) {
-            SetPolicyInInterceptor.LOG.error("", e); // Those errors are not expected
-            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messaging.getUserMessage().getMessageInfo().getMessageId() : "unknown", e);
+            LOG.businessError(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_NOT_FOUND, e, policyName); // Those errors are not expected
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messageId : "unknown", e);
             ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ex);
         }

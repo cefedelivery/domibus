@@ -29,10 +29,11 @@ import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
@@ -61,11 +62,10 @@ import java.util.List;
  */
 public abstract class PModeProvider {
 
-    private static final Log LOG = LogFactory.getLog(PModeProvider.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeProvider.class);
 
     public static final String SCHEMAS_DIR = "schemas/";
     public static final String DOMIBUS_PMODE_XSD = "domibus-pmode.xsd";
-    public static final String DOMIBUS_CONFIG_LOCATION = "domibus.config.location";
 
     protected static final String OPTIONAL_AND_EMPTY = "OAE";
 
@@ -154,18 +154,26 @@ public abstract class PModeProvider {
         final String leg;
 
         try {
-            agreementName = this.findAgreement(userMessage.getCollaborationInfo().getAgreementRef());
-            senderParty = this.findPartyName(userMessage.getPartyInfo().getFrom().getPartyId());
-            receiverParty = this.findPartyName(userMessage.getPartyInfo().getTo().getPartyId());
-            service = this.findServiceName(userMessage.getCollaborationInfo().getService());
-            action = this.findActionName(userMessage.getCollaborationInfo().getAction());
-            leg = this.findLegName(agreementName, senderParty, receiverParty, service, action);
+            agreementName = findAgreement(userMessage.getCollaborationInfo().getAgreementRef());
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_AGREEMENT_FOUND, agreementName, userMessage.getCollaborationInfo().getAgreementRef());
+            senderParty = findPartyName(userMessage.getPartyInfo().getFrom().getPartyId());
+            LOG.businessInfo(DomibusMessageCode.BUS_PARTY_ID_FOUND, senderParty, userMessage.getPartyInfo().getFrom().getPartyId());
+            receiverParty = findPartyName(userMessage.getPartyInfo().getTo().getPartyId());
+            LOG.businessInfo(DomibusMessageCode.BUS_PARTY_ID_FOUND, receiverParty, userMessage.getPartyInfo().getTo().getPartyId());
+            service = findServiceName(userMessage.getCollaborationInfo().getService());
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SERVICE_FOUND, service, userMessage.getCollaborationInfo().getService());
+            action = findActionName(userMessage.getCollaborationInfo().getAction());
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_ACTION_FOUND, action, userMessage.getCollaborationInfo().getAction());
+            leg = findLegName(agreementName, senderParty, receiverParty, service, action);
+            LOG.businessInfo(DomibusMessageCode.BUS_LEG_NAME_FOUND, leg, agreementName, senderParty, receiverParty, service, action);
 
             if ((action.equals(Action.TEST_ACTION) && (!service.equals(Service.TEST_SERVICE)))) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Service.TEST_SERVICE + " and ebMS3 Test Action: " + Action.TEST_ACTION + " can only be used together [CORE] 5.2.2.9", userMessage.getMessageInfo().getMessageId(), null);
             }
 
-            return senderParty + ":" + receiverParty + ":" + service + ":" + action + ":" + agreementName + ":" + leg;
+            final String pmodeKey = senderParty + ":" + receiverParty + ":" + service + ":" + action + ":" + agreementName + ":" + leg;
+            LOG.debug("Found pmodeKey [{}] for message [{}]", pmodeKey, userMessage);
+            return pmodeKey;
 
         } catch (IllegalStateException ise) {
             // It can happen if DB is clean and no pmodes are configured yet!

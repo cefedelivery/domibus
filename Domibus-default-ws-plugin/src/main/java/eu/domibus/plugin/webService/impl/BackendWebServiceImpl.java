@@ -11,8 +11,8 @@ import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.webService.generated.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +41,7 @@ import java.util.*;
 @BindingType(SOAPBinding.SOAP12HTTP_BINDING)
 public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, UserMessage> implements BackendInterface {
 
-    private static final Log LOG = LogFactory.getLog(BackendWebServiceImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendWebServiceImpl.class);
 
     private static final eu.domibus.plugin.webService.generated.ObjectFactory WEBSERVICE_OF = new eu.domibus.plugin.webService.generated.ObjectFactory();
 
@@ -66,8 +66,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public SendResponse sendMessage(final SendRequest sendRequest, final Messaging ebMSHeaderInfo) throws SendMessageFault {
-
-        BackendWebServiceImpl.LOG.debug("Transforming incoming message");
+        LOG.info("Received message");
 
         final PayloadType bodyload = sendRequest.getBodyload();
 
@@ -124,7 +123,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             BackendWebServiceImpl.LOG.error("Message submission failed", mpEx);
             throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
         }
-        BackendWebServiceImpl.LOG.debug("Received message from backend to send, assigning messageID" + messageId);
+        LOG.info("Received message from backend to send, assigning messageID" + messageId);
         final SendResponse response = BackendWebServiceImpl.WEBSERVICE_OF.createSendResponse();
         response.getMessageID().add(messageId);
         return response;

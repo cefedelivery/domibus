@@ -19,6 +19,8 @@
 
 package eu.domibus.ebms3.common.model;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -118,5 +120,13 @@ public class PartyId extends AbstractBaseEntity implements Comparable<PartyId> {
     @Override
     public int compareTo(final PartyId o) {
         return this.hashCode() - o.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("value", value)
+                .append("type", type)
+                .toString();
     }
 }

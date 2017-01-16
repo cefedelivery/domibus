@@ -19,8 +19,8 @@
 
 package eu.domibus.ebms3.sender;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.interceptor.Fault;
@@ -33,7 +33,7 @@ import org.apache.cxf.ws.security.SecurityConstants;
  */
 public class SetSignatureAlgorithmInInterceptor extends AbstractSoapInterceptor {
 
-    private static final Log LOG = LogFactory.getLog(SetSignatureAlgorithmInInterceptor.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SetSignatureAlgorithmInInterceptor.class);
 
     public SetSignatureAlgorithmInInterceptor() {
         super(Phase.RECEIVE);

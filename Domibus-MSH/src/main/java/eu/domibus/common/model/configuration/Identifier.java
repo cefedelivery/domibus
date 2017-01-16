@@ -20,6 +20,7 @@
 package eu.domibus.common.model.configuration;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -129,5 +130,14 @@ public class Identifier extends AbstractBaseEntity {
         int result = super.hashCode();
         result = 31 * result + this.partyId.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("partyId", partyId)
+                .append("partyIdTypeXml", partyIdTypeXml)
+                .append("partyIdType", partyIdType)
+                .toString();
     }
 }

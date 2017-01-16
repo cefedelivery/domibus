@@ -3,8 +3,8 @@ package eu.domibus.submission;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -19,7 +19,7 @@ import java.util.List;
 @Component
 public class SubmissionValidatorListProviderImpl implements SubmissionValidatorListProvider, ApplicationContextAware {
 
-    private static final Log LOG = LogFactory.getLog(SubmissionValidatorListProviderImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SubmissionValidatorListProviderImpl.class);
 
     protected ApplicationContext applicationContext;
 

@@ -1,7 +1,7 @@
 package eu.domibus.taskexecutor.wildfly;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 
 import javax.enterprise.concurrent.ManagedExecutorService;
@@ -19,7 +19,7 @@ import javax.naming.NamingException;
 
 public class DomibusExecutorServiceFactory implements FactoryBean<ManagedExecutorService> {
 
-    private static final Log LOG = LogFactory.getLog(DomibusExecutorServiceFactory.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusExecutorServiceFactory.class);
 
     public static final String DEFAULT_EXECUTOR_SERVICE = "java:jboss/ee/concurrency/executor/default";
 

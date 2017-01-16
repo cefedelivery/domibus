@@ -1,5 +1,7 @@
 Domibus 3.3-RC1
 - JMS monitoring: fixed the computation of the total number of messages in the queue for WebLogic
+- Migrated the logging framework to SLF4J and Logback
+- Domibus uses 3 logs files: domibus.log, domibus-business.log and domibus-security.log
 - Fixed the search of the JMS messages for WebLogic(for JMS messages having property with null values) and Tomcat(for JMS messages with no "Text" property)
 - Spring services are always executing within a transaction even if there is no specific @Transactional annotation present
 - Quartz integration with managed threads in WebLogic and WildFly
@@ -17,7 +19,7 @@ Domibus 3.2.2
 Domibus 3.2.1
 - JMX access to the JMS queues is secured
 - Force the usage of the apache commons IO library from the application
-- Possibility to load the log4j configuration from ${domibus.conf.location} for WebLogic/WildFly/Tomcat
+- Possibility to load the logging configuration file from ${domibus.conf.location} for WebLogic/WildFly/Tomcat
 Domibus 3.2-FR
 - Added authentication/authorization example to the WS default plugin. Disabled by default, to assure backwards compatibility with older versions.
 - Added XSD validation of the PMODE when it is uploaded by the user.

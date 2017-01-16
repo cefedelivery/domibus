@@ -6,8 +6,8 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(JMockit.class)
 public class WorkManagerFactoryTest {
 
-    private static final Log LOG = LogFactory.getLog(WorkManagerFactoryTest.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(WorkManagerFactoryTest.class);
 
     @Tested
     WorkManagerFactory workManagerFactory;
