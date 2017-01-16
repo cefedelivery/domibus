@@ -2,14 +2,14 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.ErrorCode;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.ebms3.common.model.PolicyFactory;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.pki.PolicyService;
 import org.apache.cxf.attachment.AttachmentImpl;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -48,7 +48,7 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
     private PModeProvider pModeProvider;
 
     @Autowired
-    private PolicyFactory policyFactory;
+    private PolicyService policyService;
 
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
@@ -86,7 +86,7 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
         LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_USER_OUTGOING_USE, encryptionUsername);
 
         try {
-            final Policy policy = policyFactory.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+            final Policy policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
             LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_OUTGOING_USE, legConfiguration.getSecurity().getPolicy());
             message.put(PolicyConstants.POLICY_OVERRIDE, policy);
         } catch (final ConfigurationException e) {

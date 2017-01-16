@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.domibus.ebms3.common.model;
+package eu.domibus.pki;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.exception.ConfigurationException;
@@ -37,16 +37,26 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
- * @author Christian Koch, Stefan Mueller
+ * @author Arun Raj
+ * @since 3.3
  */
 @Service
-public class PolicyFactory {
+public class PolicyServiceImpl implements PolicyService {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PolicyFactory.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PolicyServiceImpl.class);
 
     @Autowired
     DomibusConfigurationService domibusConfigurationService;
 
+
+    /**
+     * To retrieve the domibus security policy xml from the specified location and create the Security Policy object.
+     *
+     * @param location
+     * @return
+     * @throws ConfigurationException
+     */
+    @Override
     @Cacheable("policyCache")
     public Policy parsePolicy(final String location) throws ConfigurationException {
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
@@ -57,5 +67,25 @@ public class PolicyFactory {
         }
     }
 
+    /**
+     * Checks whether the security policy specified is a No Signature - No security policy.
+     * If null is provided, a no security policy is assumed.
+     * A no security policy would be used to avoid certificate validation.
+     *
+     * @param policy
+     * @return boolean
+     */
+    @Override
+    public boolean isNoSecurityPolicy(Policy policy) {
 
+        if (null == policy) {
+            LOG.warn("Security policy provided is null! Assuming no security policy - no signature is specified!");
+            return true;
+        } else if (policy.isEmpty()) {
+            LOG.debug("Policy components are empty! No security policy specified!");
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
