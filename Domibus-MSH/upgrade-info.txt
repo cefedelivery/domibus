@@ -33,6 +33,8 @@ Domibus 3.3-RC1 (from 3.2.1):
                - in file "\conf\domibus\domibus-configuration.xml":
                     o   add   <prop key="domibus.listPendingMessages.maxCount">500</prop>
                     o   add   <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
+                    o   add   <prop key="domibus.dispatcher.connectionTimeout">240000</prop>
+                    o   add   <prop key="domibus.dispatcher.receiveTimeout">240000</prop>
                - [Tomcat only] in file "\conf\domibus\domibus-datasources.xml" add the following bean(please adapt the values for for host, port, username and password properties according to your database schema):
                    o for MySQL:
                        <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
