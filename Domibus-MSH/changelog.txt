@@ -14,6 +14,7 @@ Domibus 3.3-RC1
 - MySQL installation of Domibus database is set to have collation of 'UTF8_BIN' to make DB level string comparison (in SQLs) case sensitive. This will enable support for case sensitive message ids.
 - Result set of ListPendingMessages operation limited by a new configuration property - domibus.listPendingMessages.maxCount
 - While submitting the message, validation comparisons with the PMode data are made case insensitive.
+- New configuration properties added for ConnectionTimeout and ReceiveTimeout for connection between access points.
 Domibus 3.2.2
 - Solved issue related to CXF attachment temp file leakage (for payloads over 200Mb).
 Domibus 3.2.1
