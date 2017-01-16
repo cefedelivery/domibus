@@ -2,6 +2,7 @@ package eu.domibus.logging.api;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.ext.LoggerWrapper;
@@ -18,6 +19,8 @@ import java.util.Set;
  * @since 3.3
  */
 public class CategoryLogger extends LoggerWrapper implements Logger {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CategoryLogger.class);
 
     protected MessageConverter messageConverter;
     protected String mdcPropertyPrefix;
@@ -52,11 +55,19 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         }
         String formattedMessage = formatMessage(marker, key, args);
 
+        logDebug(marker, formattedMessage, args);
+    }
+
+    protected void logDebug(Marker marker, String message, Object... args) {
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.DEBUG_INT, formattedMessage, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.DEBUG_INT, message, args, null);
         } else {
-            logger.debug(marker, formattedMessage, args);
+            logger.debug(marker, message, args);
         }
+    }
+
+    protected void logDebug(String message, Object... args) {
+        logDebug(null, message, args);
     }
 
     public void info(Marker marker, MessageCode key, Object... args) {
@@ -107,11 +118,15 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
     }
 
     public void putMDC(String key, String val) {
-        MDC.put(getMDCKey(key), val);
+        final String mdcKey = getMDCKey(key);
+        MDC.put(mdcKey, val);
+        LOG.debug("Added key [{}] with value [{}] to MDC", mdcKey, val);
     }
 
     public void removeMDC(String key) {
-        MDC.remove(getMDCKey(key));
+        final String mdcKey = getMDCKey(key);
+        MDC.remove(mdcKey);
+        LOG.debug("Removed key [{}] from MDC", mdcKey);
     }
 
     public String getMDC(String key) {
@@ -120,30 +135,34 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
 
     public String getMDCKey(String key) {
         String keyValue = key;
-        if(StringUtils.isNotEmpty(mdcPropertyPrefix)) {
+        if (StringUtils.isNotEmpty(mdcPropertyPrefix)) {
             keyValue = mdcPropertyPrefix + keyValue;
         }
         return keyValue;
     }
 
     public void clearCustomKeys() {
-        if(mdcPropertyPrefix == null) {
+        if (mdcPropertyPrefix == null) {
+            LOG.debug("No custom keys defined: mdcPropertyPrefix is empty");
             return;
         }
 
         final Map<String, String> copyOfContextMap = MDC.getCopyOfContextMap();
-        if(copyOfContextMap == null) {
+        if (copyOfContextMap == null) {
+            LOG.debug("No MDC keys to clear");
             return;
         }
         final Set<String> keySet = copyOfContextMap.keySet();
         for (String key : keySet) {
-            if(StringUtils.startsWith(key, mdcPropertyPrefix)) {
+            if (StringUtils.startsWith(key, mdcPropertyPrefix)) {
                 MDC.remove(key);
+                LOG.debug("Removed key [{}] from MDC", key);
             }
         }
     }
 
     public void clearAll() {
         MDC.clear();
+        LOG.debug("Cleared MDC");
     }
 }

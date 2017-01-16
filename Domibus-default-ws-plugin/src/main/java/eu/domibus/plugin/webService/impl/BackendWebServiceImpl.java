@@ -66,8 +66,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public SendResponse sendMessage(final SendRequest sendRequest, final Messaging ebMSHeaderInfo) throws SendMessageFault {
-
-        BackendWebServiceImpl.LOG.debug("Transforming incoming message");
+        LOG.info("Received message");
 
         final PayloadType bodyload = sendRequest.getBodyload();
 
@@ -124,7 +123,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             BackendWebServiceImpl.LOG.error("Message submission failed", mpEx);
             throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
         }
-        BackendWebServiceImpl.LOG.debug("Received message from backend to send, assigning messageID" + messageId);
+        LOG.info("Received message from backend to send, assigning messageID" + messageId);
         final SendResponse response = BackendWebServiceImpl.WEBSERVICE_OF.createSendResponse();
         response.getMessageID().add(messageId);
         return response;

@@ -204,6 +204,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         if(StringUtils.isNotEmpty(messageData.getMessageId())) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());
         }
+        LOG.info("Preparing to submit message");
         if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasUserOrAdminRole();
         }
@@ -222,12 +223,11 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             if (messageId == null) {
                 messageId = messageIdGenerator.generateMessageId();
                 messageInfo.setMessageId(messageId);
-                LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
             } else {
                 backendMessageValidator.validateMessageId(messageId);
                 userMessage.getMessageInfo().setMessageId(messageId);
             }
-
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageInfo.getMessageId());
 
             String refToMessageId = messageInfo.getRefToMessageId();
             if (refToMessageId != null) {
@@ -291,7 +291,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                     .setEndpoint(to.getEndpoint());
 
             userMessageLogDao.create(umlBuilder.build());
-
+            LOG.info("Message submitted");
             return userMessage.getMessageInfo().getMessageId();
 
         } catch (final EbMS3Exception ebms3Ex) {

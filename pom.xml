@@ -71,6 +71,7 @@
                 <groupId>eu.domibus</groupId>
                 <artifactId>domibus-logging</artifactId>
                 <version>${project.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>commons-configuration</groupId>
