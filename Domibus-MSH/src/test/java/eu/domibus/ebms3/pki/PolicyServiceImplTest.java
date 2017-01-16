@@ -1,6 +1,8 @@
 package eu.domibus.ebms3.pki;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.PolicyServiceImpl;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -18,6 +20,7 @@ import org.junit.runner.RunWith;
 @RunWith(JMockit.class)
 public class PolicyServiceImplTest {
 
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PolicyServiceImplTest.class);
     private static final String TEST_RESOURCES_DIR = "./src/test/resources";
     @Injectable
     DomibusConfigurationService domibusConfigurationService;
@@ -45,6 +48,7 @@ public class PolicyServiceImplTest {
             doNothingPolicy = policyService.parsePolicy("policies/doNothingPolicy.xml");
         } catch (Exception e) {
             Assert.fail("No exception was expected while loading the security policy!!");
+            LOG.error("No exception was expected while loading the security policy!!", e);
         }
         boolean result2 = policyService.isNoSecurityPolicy(doNothingPolicy);
         Assert.assertTrue(result2 == true);
@@ -62,6 +66,7 @@ public class PolicyServiceImplTest {
             signOnlyPolicy = policyService.parsePolicy("policies/signOnly.xml");
         } catch (Exception e) {
             Assert.fail("No exception was expected while loading the security policy!!");
+            LOG.error("No exception was expected while loading the security policy!!", e);
         }
         boolean result3 = policyService.isNoSecurityPolicy(signOnlyPolicy);
         Assert.assertTrue(result3 == false);
