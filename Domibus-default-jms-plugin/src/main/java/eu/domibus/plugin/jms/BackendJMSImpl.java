@@ -104,6 +104,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             final String jmsCorrelationID = map.getJMSCorrelationID();
             final String messageType = map.getStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY);
 
+            LOG.info("Received message [" + messageID + "]");
+
             if (!MESSAGE_TYPE_SUBMIT.equals(messageType)) {
                 String wrongMessageTypeMessage = getWrongMessageTypeErrorMessage(messageID, jmsCorrelationID, messageType);
                 LOG.error(wrongMessageTypeMessage);
@@ -120,6 +122,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             }
 
             sendReplyMessage(messageID, errorMessage, jmsCorrelationID);
+
+            LOG.info("Submitted message [" + messageID + "]");
         } catch (Exception e) {
             LOG.error("Exception occurred while receiving message", e);
             throw new RuntimeException("Exception occurred while receiving message", e);
