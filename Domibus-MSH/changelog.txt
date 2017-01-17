@@ -1,4 +1,5 @@
 Domibus 3.2.2
+- Fixed the notifications sent by the JMS plugin
 - Changed the default JMX password for WebLogic
 Domibus 3.2.1
 - JMX access to the JMS queues is secured
