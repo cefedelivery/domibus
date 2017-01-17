@@ -127,8 +127,7 @@ public class MSHDispatcher {
         }
 
         final String endpoint = receiverParty.getEndpoint();
-        final javax.xml.ws.Service service = getWSService(endpoint);
-        final Dispatch<SOAPMessage> dispatch = service.createDispatch(PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
+        final Dispatch<SOAPMessage> dispatch = createWSServiceDispatcher(endpoint);//service.createDispatch(PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
         dispatch.getRequestContext().put(PolicyConstants.POLICY_OVERRIDE, policy);
         dispatch.getRequestContext().put(ASYMMETRIC_SIG_ALGO_PROPERTY, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm());
         dispatch.getRequestContext().put(PMODE_KEY_CONTEXT_PROPERTY, pModeKey);
@@ -157,7 +156,6 @@ public class MSHDispatcher {
         } else {
             LOG.info("No proxy configured");
         }
-
         try {
             result = dispatch.invoke(soapMessage);
         } catch (final WebServiceException e) {
@@ -168,10 +166,11 @@ public class MSHDispatcher {
         return result;
     }
 
-    protected javax.xml.ws.Service getWSService(String endpoint) {
+    protected Dispatch<SOAPMessage> createWSServiceDispatcher(String endpoint) {
         final javax.xml.ws.Service service = javax.xml.ws.Service.create(SERVICE_NAME);
         service.addPort(PORT_NAME, SOAPBinding.SOAP12HTTP_BINDING, endpoint);
-        return service;
+        final Dispatch<SOAPMessage> dispatch = service.createDispatch(PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
+        return dispatch;
     }
 
     private void configureProxy(final HTTPClientPolicy httpClientPolicy, HTTPConduit httpConduit) {
