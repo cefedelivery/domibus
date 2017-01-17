@@ -74,7 +74,8 @@ public enum DomibusMessageCode implements MessageCode {
     SEC_AUTHORIZED_ACCESS("SEC-006", "The host [{}] has been granted access to [{}] with roles [{}]"),
     SEC_UNAUTHORIZED_ACCESS("SEC-007", "The host [{}] has been refused access to [{}]"),
     SEC_CERTIFICATE_EXPIRED("SEC-008", "Certificate is not valid at the current date [{}]. Certificate valid from [{}] to [{}]"),
-    SEC_CERTIFICATE_NOT_YET_VALID("SEC-009", "Certificate is not yet valid at the current date [{}]. Certificate valid from [{}] to [{}]");
+    SEC_CERTIFICATE_NOT_YET_VALID("SEC-009", "Certificate is not yet valid at the current date [{}]. Certificate valid from [{}] to [{}]"),
+    SEC_NO_SECURITY_POLICY_USED("SEC-010", "No security policy (intended for testing alone) is used. Security certificate validations will be bypassed!");
 
     String code;
     String message;

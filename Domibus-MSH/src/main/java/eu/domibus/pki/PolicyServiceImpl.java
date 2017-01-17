@@ -23,6 +23,7 @@ import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.neethi.Policy;
@@ -79,10 +80,10 @@ public class PolicyServiceImpl implements PolicyService {
     public boolean isNoSecurityPolicy(Policy policy) {
 
         if (null == policy) {
-            LOG.warn("Security policy provided is null! Assuming no security policy - no signature is specified!");
+            LOG.securityWarn(DomibusMessageCode.SEC_NO_SECURITY_POLICY_USED, "Security policy provided is null! Assuming no security policy - no signature is specified!");
             return true;
         } else if (policy.isEmpty()) {
-            LOG.debug("Policy components are empty! No security policy specified!");
+            LOG.securityWarn(DomibusMessageCode.SEC_NO_SECURITY_POLICY_USED, "Policy components are empty! No security policy specified!");
             return true;
         } else {
             return false;

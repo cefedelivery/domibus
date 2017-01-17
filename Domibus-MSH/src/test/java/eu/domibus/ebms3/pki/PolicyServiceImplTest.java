@@ -43,13 +43,7 @@ public class PolicyServiceImplTest {
             result = TEST_RESOURCES_DIR;
         }};
 
-        Policy doNothingPolicy = null;
-        try {
-            doNothingPolicy = policyService.parsePolicy("policies/doNothingPolicy.xml");
-        } catch (Exception e) {
-            Assert.fail("No exception was expected while loading the security policy!!");
-            LOG.error("No exception was expected while loading the security policy!!", e);
-        }
+        Policy doNothingPolicy = policyService.parsePolicy("policies/doNothingPolicy.xml");
         boolean result2 = policyService.isNoSecurityPolicy(doNothingPolicy);
         Assert.assertTrue(result2 == true);
     }
@@ -61,13 +55,7 @@ public class PolicyServiceImplTest {
             result = TEST_RESOURCES_DIR;
         }};
 
-        Policy signOnlyPolicy = null;
-        try {
-            signOnlyPolicy = policyService.parsePolicy("policies/signOnly.xml");
-        } catch (Exception e) {
-            Assert.fail("No exception was expected while loading the security policy!!");
-            LOG.error("No exception was expected while loading the security policy!!", e);
-        }
+        Policy signOnlyPolicy = policyService.parsePolicy("policies/signOnly.xml");
         boolean result3 = policyService.isNoSecurityPolicy(signOnlyPolicy);
         Assert.assertTrue(result3 == false);
     }
