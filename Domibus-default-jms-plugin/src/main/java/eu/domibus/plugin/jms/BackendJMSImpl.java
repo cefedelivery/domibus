@@ -100,11 +100,11 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Transactional
     public void receiveMessage(final MapMessage map) {
         try {
-            final String messageID = map.getStringProperty(MESSAGE_ID);
+            String messageID = map.getStringProperty(MESSAGE_ID);
             final String jmsCorrelationID = map.getJMSCorrelationID();
             final String messageType = map.getStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY);
 
-            LOG.info("Received message [" + messageID + "]");
+            LOG.info("Received message with messageId [" + messageID + "], jmsCorrelationID [" + jmsCorrelationID + "]");
 
             if (!MESSAGE_TYPE_SUBMIT.equals(messageType)) {
                 String wrongMessageTypeMessage = getWrongMessageTypeErrorMessage(messageID, jmsCorrelationID, messageType);
@@ -115,18 +115,19 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
             String errorMessage = null;
             try {
-                submit(map);
+                //in case the messageID is not sent by the user it will be generated
+                messageID = submit(map);
             } catch (final MessagingProcessingException e) {
-                LOG.error("Exception occurred receiving message [" + messageID + "]", e);
-                errorMessage = e.getMessage() + "\nError Code: " + (e.getEbms3ErrorCode() != null ? e.getEbms3ErrorCode().getErrorCodeName() : " not set");
+                LOG.error("Exception occurred receiving message [" + messageID + "], jmsCorrelationID [" + jmsCorrelationID + "]", e);
+                errorMessage = e.getMessage() + ": Error Code: " + (e.getEbms3ErrorCode() != null ? e.getEbms3ErrorCode().getErrorCodeName() : " not set");
             }
 
             sendReplyMessage(messageID, errorMessage, jmsCorrelationID);
 
-            LOG.info("Submitted message [" + messageID + "]");
+            LOG.info("Submitted message with messageId [" + messageID + "], jmsCorrelationID [" + jmsCorrelationID + "]");
         } catch (Exception e) {
-            LOG.error("Exception occurred while receiving message", e);
-            throw new RuntimeException("Exception occurred while receiving message", e);
+            LOG.error("Exception occurred while receiving message [" + map + "]" , e);
+            throw new RuntimeException("Exception occurred while receiving message [" + map + "]", e);
         }
     }
 
