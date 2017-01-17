@@ -92,7 +92,7 @@ public class MSHDispatcher {
         Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
         Policy policy;
         try {
-            policy = policyService.parsePolicy("policies/" + pModeProvider.getLegConfiguration(pModeKey).getSecurity().getPolicy());
+            policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
         } catch (final ConfigurationException e) {
 
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
