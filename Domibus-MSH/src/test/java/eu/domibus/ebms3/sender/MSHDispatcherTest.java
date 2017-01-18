@@ -1,11 +1,14 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.common.ErrorCode;
+import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.pki.CertificateService;
+import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -16,10 +19,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.BusFactory;
+import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.neethi.Policy;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
@@ -29,6 +34,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.ws.WebServiceException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -86,6 +92,9 @@ public class MSHDispatcherTest {
     @Injectable
     HTTPConduit httpConduit;
 
+    @Injectable
+    TLSClientParameters tlsClientParameters;
+
     @Tested
     MSHDispatcher mshDispatcher;
 
@@ -93,10 +102,11 @@ public class MSHDispatcherTest {
     public void testDispatch_DoNothingSecurityPolicy(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
         System.setProperty("domibus.config.location", new File(".").getAbsolutePath() + "/src/test/resources");
 
+        //"blue_gw:red_gw:noSecService:noSecAction:OAE:pushNoSecnoSecAction";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
                 append(NO_SEC_SERVICE).append(COLON_SEPARATOR).append(NO_SEC_ACTION).append(COLON_SEPARATOR).append("OAE").append(COLON_SEPARATOR).
                 append(LEG_NO_SECNO_SEC_ACTION).toString();
-        //"blue_gw:red_gw:noSecService:noSecAction:OAE:pushNoSecnoSecAction";
+
 
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
         final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, LEG_NO_SECNO_SEC_ACTION);
@@ -155,6 +165,398 @@ public class MSHDispatcherTest {
 
     }
 
+    @Test
+    public void testDispatch_tc1Process(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
+        System.setProperty("domibus.config.location", new File(".").getAbsolutePath() + "/src/test/resources");
+
+        //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+        final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
+                append("testService1").append(COLON_SEPARATOR).append("tc1Action").append(COLON_SEPARATOR).append("OAE").append(COLON_SEPARATOR).
+                append("pushTestcase1tc1Action").toString();
+
+
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, "pushTestcase1tc1Action");
+        final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
+        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File("./src/test/resources", "policies/signOnly.xml")));
+        //replace receiver end point as https: to enable setting TLS client params.
+        final Party receiverParty = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
+        final String endPoint = receiverParty.getEndpoint().replace("http:", "https:");
+        receiverParty.setEndpoint(endPoint);
+        final Map requestContextMap = new HashMap();
+
+        new Expectations(mshDispatcher) {{
+            pModeProvider.getLegConfiguration(pModeKey);
+            result = legConfiguration;
+
+            pModeProvider.getSenderParty(pModeKey);
+            result = getPartyFromConfiguration(configuration, SENDER_BLUE_GW);
+
+            pModeProvider.getReceiverParty(pModeKey);
+            result = receiverParty;
+
+            policyService.parsePolicy(withSubstring("signOnly"));
+            result = doNothingPolicy;
+
+            policyService.isNoSecurityPolicy(doNothingPolicy);
+            result = false;
+
+            certificateService.isCertificateValid(anyString);
+            result = true;
+
+            certificateService.isCertificateValidationEnabled();
+            result = true;
+
+            certificateService.isCertificateChainValid(anyString);
+            result = false;
+
+            mshDispatcher.createWSServiceDispatcher(endPoint);
+            result = dispatch;
+
+            dispatch.getRequestContext();
+            result = requestContextMap;
+
+            dispatch.getClient();
+            result = client;
+
+            client.getConduit();
+            result = httpConduit;
+
+            domibusProperties.getProperty(withSubstring("connectionTimeout"), "120000");
+            result = "120";
+
+            domibusProperties.getProperty(withSubstring("receiveTimeout"), "120000");
+            result = "120";
+
+            tlsReader.getTlsClientParameters();
+            result = tlsClientParameters;
+
+            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            result = "true";
+
+            domibusProperties.getProperty("domibus.proxy.http.host");
+            result = "1.2.3.4";
+
+            domibusProperties.getProperty("domibus.proxy.http.port");
+            result = "1234";
+
+            domibusProperties.getProperty("domibus.proxy.user");
+            result = "test";
+
+            domibusProperties.getProperty("domibus.proxy.password");
+            result = "test";
+
+            domibusProperties.getProperty("domibus.proxy.nonProxyHosts");
+            result = "5.6.7.8";
+        }};
+
+        mshDispatcher.dispatch(requestSoapMessage, pModeKey);
+
+        new Verifications() {{
+            dispatch.invoke(requestSoapMessage);
+        }};
+    }
+
+    @Test
+    public void testDispatch_SecurityPolicyException(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
+        System.setProperty("domibus.config.location", new File(".").getAbsolutePath() + "/src/test/resources");
+
+        //"blue_gw:red_gw:noSecService:noSecAction:OAE:pushNoSecnoSecAction";
+        final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
+                append(NO_SEC_SERVICE).append(COLON_SEPARATOR).append(NO_SEC_ACTION).append(COLON_SEPARATOR).append("OAE").append(COLON_SEPARATOR).
+                append(LEG_NO_SECNO_SEC_ACTION).toString();
+
+
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, LEG_NO_SECNO_SEC_ACTION);
+
+        new Expectations(mshDispatcher) {{
+
+            pModeProvider.getLegConfiguration(pModeKey);
+            result = legConfiguration;
+
+            pModeProvider.getSenderParty(pModeKey);
+            result = getPartyFromConfiguration(configuration, SENDER_BLUE_GW);
+
+            pModeProvider.getReceiverParty(pModeKey);
+            result = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
+
+            policyService.parsePolicy(withSubstring("doNothingPolicy"));
+            result = new ConfigurationException();
+        }};
+
+        try {
+            mshDispatcher.dispatch(requestSoapMessage, pModeKey);
+            Assert.fail("Expected no policy exception");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof eu.domibus.common.exception.EbMS3Exception);
+            Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0010, ((EbMS3Exception) e).getErrorCode());
+        }
+    }
+
+    @Test
+    public void testDispatch_SenderCertificateException(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
+        System.setProperty("domibus.config.location", new File(".").getAbsolutePath() + "/src/test/resources");
+
+        //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+        final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
+                append("testService1").append(COLON_SEPARATOR).append("tc1Action").append(COLON_SEPARATOR).append("OAE").append(COLON_SEPARATOR).
+                append("pushTestcase1tc1Action").toString();
+
+
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, "pushTestcase1tc1Action");
+        final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
+        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File("./src/test/resources", "policies/signOnly.xml")));
+        //replace receiver end point as https: to enable setting TLS client params.
+
+        new Expectations(mshDispatcher) {{
+            pModeProvider.getLegConfiguration(pModeKey);
+            result = legConfiguration;
+
+            pModeProvider.getSenderParty(pModeKey);
+            result = getPartyFromConfiguration(configuration, SENDER_BLUE_GW);
+
+            pModeProvider.getReceiverParty(pModeKey);
+            result = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
+
+            policyService.parsePolicy(withSubstring("signOnly"));
+            result = doNothingPolicy;
+
+            policyService.isNoSecurityPolicy(doNothingPolicy);
+            result = false;
+
+            certificateService.isCertificateValid(anyString);
+            result = new DomibusCertificateException();
+
+        }};
+
+        try {
+            mshDispatcher.dispatch(requestSoapMessage, pModeKey);
+            Assert.fail("Expected Domibus Certificate exception to be raised!");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof eu.domibus.common.exception.EbMS3Exception);
+            Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0101, ((EbMS3Exception) e).getErrorCode());
+        }
+    }
+
+    /**
+     * Even if receiver certificate chain validation raises exception, message sending should proceed.
+     *
+     * @param requestSoapMessage
+     * @param responseSoapMessage
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws IllegalAccessException
+     * @throws JAXBException
+     * @throws EbMS3Exception
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     */
+    @Test
+    public void testDispatch_ReceiverCertificateException(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
+        System.setProperty("domibus.config.location", new File(".").getAbsolutePath() + "/src/test/resources");
+
+        //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+        final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
+                append("testService1").append(COLON_SEPARATOR).append("tc1Action").append(COLON_SEPARATOR).append("OAE").append(COLON_SEPARATOR).
+                append("pushTestcase1tc1Action").toString();
+
+
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, "pushTestcase1tc1Action");
+        final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
+        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File("./src/test/resources", "policies/signOnly.xml")));
+        //replace receiver end point as https: to enable setting TLS client params.
+        final Party receiverParty = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
+        final String endPoint = receiverParty.getEndpoint().replace("http:", "https:");
+        receiverParty.setEndpoint(endPoint);
+        final Map requestContextMap = new HashMap();
+
+        new Expectations(mshDispatcher) {{
+            pModeProvider.getLegConfiguration(pModeKey);
+            result = legConfiguration;
+
+            pModeProvider.getSenderParty(pModeKey);
+            result = getPartyFromConfiguration(configuration, SENDER_BLUE_GW);
+
+            pModeProvider.getReceiverParty(pModeKey);
+            result = receiverParty;
+
+            policyService.parsePolicy(withSubstring("signOnly"));
+            result = doNothingPolicy;
+
+            policyService.isNoSecurityPolicy(doNothingPolicy);
+            result = false;
+
+            certificateService.isCertificateValid(anyString);
+            result = true;
+
+            certificateService.isCertificateValidationEnabled();
+            result = true;
+
+            certificateService.isCertificateChainValid(anyString);
+            result = new Exception();
+
+            mshDispatcher.createWSServiceDispatcher(endPoint);
+            result = dispatch;
+
+            dispatch.getRequestContext();
+            result = requestContextMap;
+
+            dispatch.getClient();
+            result = client;
+
+            client.getConduit();
+            result = httpConduit;
+
+            domibusProperties.getProperty(withSubstring("connectionTimeout"), "120000");
+            result = "120";
+
+            domibusProperties.getProperty(withSubstring("receiveTimeout"), "120000");
+            result = "120";
+
+            tlsReader.getTlsClientParameters();
+            result = tlsClientParameters;
+
+            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            result = "true";
+
+            domibusProperties.getProperty("domibus.proxy.http.host");
+            result = "1.2.3.4";
+
+            domibusProperties.getProperty("domibus.proxy.http.port");
+            result = "1234";
+
+            domibusProperties.getProperty("domibus.proxy.user");
+            result = "test";
+
+            domibusProperties.getProperty("domibus.proxy.password");
+            result = "test";
+
+            domibusProperties.getProperty("domibus.proxy.nonProxyHosts");
+            result = "5.6.7.8";
+        }};
+
+        mshDispatcher.dispatch(requestSoapMessage, pModeKey);
+
+        new Verifications() {{
+            dispatch.invoke(requestSoapMessage);
+        }};
+    }
+
+    @Test
+    public void testDispatch_ExceptionDuringDispatch(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
+        System.setProperty("domibus.config.location", new File(".").getAbsolutePath() + "/src/test/resources");
+
+        //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+        final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
+                append("testService1").append(COLON_SEPARATOR).append("tc1Action").append(COLON_SEPARATOR).append("OAE").append(COLON_SEPARATOR).
+                append("pushTestcase1tc1Action").toString();
+
+
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, "pushTestcase1tc1Action");
+        final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
+        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File("./src/test/resources", "policies/signOnly.xml")));
+        //replace receiver end point as https: to enable setting TLS client params.
+        final Party receiverParty = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
+        final String endPoint = receiverParty.getEndpoint().replace("http:", "https:");
+        receiverParty.setEndpoint(endPoint);
+        final Map requestContextMap = new HashMap();
+
+        new Expectations(mshDispatcher) {{
+            pModeProvider.getLegConfiguration(pModeKey);
+            result = legConfiguration;
+
+            pModeProvider.getSenderParty(pModeKey);
+            result = getPartyFromConfiguration(configuration, SENDER_BLUE_GW);
+
+            pModeProvider.getReceiverParty(pModeKey);
+            result = receiverParty;
+
+            policyService.parsePolicy(withSubstring("signOnly"));
+            result = doNothingPolicy;
+
+            policyService.isNoSecurityPolicy(doNothingPolicy);
+            result = false;
+
+            certificateService.isCertificateValid(anyString);
+            result = true;
+
+            certificateService.isCertificateValidationEnabled();
+            result = true;
+
+            certificateService.isCertificateChainValid(anyString);
+            result = false;
+
+            mshDispatcher.createWSServiceDispatcher(endPoint);
+            result = dispatch;
+
+            dispatch.getRequestContext();
+            result = requestContextMap;
+
+            dispatch.getClient();
+            result = client;
+
+            client.getConduit();
+            result = httpConduit;
+
+            domibusProperties.getProperty(withSubstring("connectionTimeout"), "120000");
+            result = "120";
+
+            domibusProperties.getProperty(withSubstring("receiveTimeout"), "120000");
+            result = "120";
+
+            tlsReader.getTlsClientParameters();
+            result = tlsClientParameters;
+
+            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            result = "true";
+
+            domibusProperties.getProperty("domibus.proxy.http.host");
+            result = "1.2.3.4";
+
+            domibusProperties.getProperty("domibus.proxy.http.port");
+            result = "1234";
+
+            domibusProperties.getProperty("domibus.proxy.user");
+            result = "test";
+
+            domibusProperties.getProperty("domibus.proxy.password");
+            result = "test";
+
+            domibusProperties.getProperty("domibus.proxy.nonProxyHosts");
+            result = "5.6.7.8";
+
+            dispatch.invoke(requestSoapMessage);
+            result = new WebServiceException();
+        }};
+
+        try {
+            mshDispatcher.dispatch(requestSoapMessage, pModeKey);
+            Assert.fail("Webservice Exception was expected");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof EbMS3Exception);
+            Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0005, ((EbMS3Exception) e).getErrorCode());
+        }
+
+        new Verifications() {{
+            dispatch.invoke(requestSoapMessage);
+        }};
+    }
+
+    @Test
+    public void testCreateWSServiceDispatcher() {
+
+        try {
+            mshDispatcher.createWSServiceDispatcher("TestEndPoint");
+        } catch (Exception e) {
+            Assert.fail("No exception was expected!");
+        }
+    }
+
     private Party getPartyFromConfiguration(Configuration configuration, String partyName) {
         Party result = null;
         for (Party party : configuration.getBusinessProcesses().getParties()) {
@@ -174,7 +576,6 @@ public class MSHDispatcherTest {
         }
         return result;
     }
-
 
     public Configuration loadSamplePModeConfiguration(String samplePModeFileRelativeURI) throws JAXBException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         LOG.debug("Inside sample PMode configuration");

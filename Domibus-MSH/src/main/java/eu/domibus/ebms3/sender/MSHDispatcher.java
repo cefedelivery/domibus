@@ -149,7 +149,6 @@ public class MSHDispatcher {
 
         String useProxy = domibusProperties.getProperty("domibus.proxy.enabled", "false");
         Boolean useProxyBool = Boolean.parseBoolean(useProxy);
-
         if (useProxyBool) {
             LOG.info("Usage of Proxy required");
             configureProxy(httpClientPolicy, httpConduit);
