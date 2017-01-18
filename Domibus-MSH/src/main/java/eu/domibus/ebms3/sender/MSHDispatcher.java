@@ -27,11 +27,11 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.PolicyFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
+import eu.domibus.pki.PolicyService;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
@@ -63,10 +63,13 @@ public class MSHDispatcher {
 
     public static final String PMODE_KEY_CONTEXT_PROPERTY = "PMODE_KEY_CONTEXT_PROPERTY";
     public static final String ASYMMETRIC_SIG_ALGO_PROPERTY = "ASYMMETRIC_SIG_ALGO_PROPERTY";
+    public static final QName SERVICE_NAME = new QName("http://domibus.eu", "msh-dispatch-service");
+    public static final QName PORT_NAME = new QName("http://domibus.eu", "msh-dispatch");
+
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHDispatcher.class);
 
     @Autowired
-    private PolicyFactory policyFactory;
+    PolicyService policyService;
 
     @Autowired
     private TLSReader tlsReader;
@@ -84,48 +87,47 @@ public class MSHDispatcher {
     @Transactional(propagation = Propagation.MANDATORY)
     public SOAPMessage dispatch(final SOAPMessage soapMessage, final String pModeKey) throws EbMS3Exception {
 
-        final QName serviceName = new QName("http://domibus.eu", "msh-dispatch-service");
-        final QName portName = new QName("http://domibus.eu", "msh-dispatch");
-        final javax.xml.ws.Service service = javax.xml.ws.Service.create(serviceName);
-
-        // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
+        final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
         Party sendingParty = pModeProvider.getSenderParty(pModeKey);
-        try {
-            certificateService.isCertificateValid(sendingParty.getName());
-            LOG.info("Sender certificate exists and is valid [" + sendingParty.getName() + "]");
-        } catch (DomibusCertificateException dcEx) {
-            String msg = "Could not find and verify sender's certificate [" + sendingParty.getName() + "]";
-            LOG.error(msg, dcEx);
-            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, msg, null, dcEx);
-            ex.setMshRole(MSHRole.SENDING);
-            throw ex;
-        }
-        // Verifies the validity of receiver's certificate.
         Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
-        if(certificateService.isCertificateValidationEnabled()) {
-            try {
-                boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
-                if (!certificateChainValid) {
-                    warnOutput("Certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
-                }
-            } catch (Exception e) {
-                LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
-            }
-        }
-
-        final String endpoint = receiverParty.getEndpoint();
-        service.addPort(portName, SOAPBinding.SOAP12HTTP_BINDING, endpoint);
-        final Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
         Policy policy;
         try {
-            policy = policyFactory.parsePolicy("policies/" + pModeProvider.getLegConfiguration(pModeKey).getSecurity().getPolicy());
+            policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
         } catch (final ConfigurationException e) {
 
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
             ex.setMshRole(MSHRole.SENDING);
             throw ex;
         }
-        final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+
+        if (!policyService.isNoSecurityPolicy(policy)) {
+            // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
+            try {
+                certificateService.isCertificateValid(sendingParty.getName());
+                LOG.info("Sender certificate exists and is valid [" + sendingParty.getName() + "]");
+            } catch (DomibusCertificateException dcEx) {
+                String msg = "Could not find and verify sender's certificate [" + sendingParty.getName() + "]";
+                LOG.error(msg, dcEx);
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, msg, null, dcEx);
+                ex.setMshRole(MSHRole.SENDING);
+                throw ex;
+            }
+
+            // Verifies the validity of receiver's certificate.
+            if (certificateService.isCertificateValidationEnabled()) {
+                try {
+                    boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
+                    if (!certificateChainValid) {
+                        warnOutput("Certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
+                }
+            }
+        }
+
+        final String endpoint = receiverParty.getEndpoint();
+        final Dispatch<SOAPMessage> dispatch = createWSServiceDispatcher(endpoint);//service.createDispatch(PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
         dispatch.getRequestContext().put(PolicyConstants.POLICY_OVERRIDE, policy);
         dispatch.getRequestContext().put(ASYMMETRIC_SIG_ALGO_PROPERTY, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm());
         dispatch.getRequestContext().put(PMODE_KEY_CONTEXT_PROPERTY, pModeKey);
@@ -154,7 +156,6 @@ public class MSHDispatcher {
         } else {
             LOG.info("No proxy configured");
         }
-
         try {
             result = dispatch.invoke(soapMessage);
         } catch (final WebServiceException e) {
@@ -163,6 +164,13 @@ public class MSHDispatcher {
             throw ex;
         }
         return result;
+    }
+
+    protected Dispatch<SOAPMessage> createWSServiceDispatcher(String endpoint) {
+        final javax.xml.ws.Service service = javax.xml.ws.Service.create(SERVICE_NAME);
+        service.addPort(PORT_NAME, SOAPBinding.SOAP12HTTP_BINDING, endpoint);
+        final Dispatch<SOAPMessage> dispatch = service.createDispatch(PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
+        return dispatch;
     }
 
     private void configureProxy(final HTTPClientPolicy httpClientPolicy, HTTPConduit httpConduit) {

@@ -15,6 +15,7 @@ Domibus 3.3-RC1
 - Result set of ListPendingMessages operation limited by a new configuration property - domibus.listPendingMessages.maxCount
 - While submitting the message, validation comparisons with the PMode data are made case insensitive.
 - New configuration properties added for ConnectionTimeout and ReceiveTimeout for connection between access points.
+- Provision added to support DoNothing security policy (no security, no encryption) by checking security policy specified has no child elements.
 Domibus 3.2.2
 - Solved issue related to CXF attachment temp file leakage (for payloads over 200Mb).
 Domibus 3.2.1
