@@ -135,15 +135,18 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         try {
             //FIXME: use a consistent way of property exchange between JAXWS and CXF message model. This: PropertyExchangeInterceptor
             pmodeKey = (String) request.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
+            System.out.println("At point 1");
         } catch (final SOAPException soapEx) {
             //this error should never occur because pmode handling is done inside the in-interceptorchain
             LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
+            System.out.println("At point 2");
             assert false;
         }
 
         LOG.info("Using pmodeKey {}", pmodeKey);
 
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
+        System.out.println("At point 3");
         Messaging messaging = null;
         boolean pingMessage = false;
 
@@ -152,6 +155,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             if (LOG.isDebugEnabled()) {
 
                 transformerFactory.newTransformer().transform(new DOMSource(request.getSOAPPart()), new StreamResult(sw));
+                System.out.println("At point 4");
 
                 LOG.debug(sw.toString());
                 LOG.debug("received attachments:");
@@ -160,37 +164,53 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     LOG.debug("attachment: "+i.next());
                 }
             }
+            System.out.println("At point 5");
             messaging = getMessaging(request);
+            System.out.println("At point 7");
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
-
+            System.out.println("At point 8");
             checkCharset(messaging);
+            System.out.println("At point 10");
             pingMessage = checkPingMessage(messaging.getUserMessage());
+            System.out.println("At point 12");
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
             LOG.debug("Message duplication status:{}", messageExists);
+            System.out.println("At point 14");
             if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
+                System.out.println("At point 15");
                 persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
+                System.out.println("At point 38");
                 try {
+                    System.out.println("At point 39");
                     backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+                    System.out.println("At point 40");
                 } catch(SubmissionValidationException e) {
+                    System.out.println("At point 41");
                     LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
                 }
             }
+            System.out.println("At point 42");
             responseMessage = generateReceipt(request, legConfiguration, messageExists);
+            System.out.println("At point 43");
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
         } catch (TransformerException | SOAPException | JAXBException | IOException e) {
+            System.out.println("At point 44");
             throw new RuntimeException(e);
         } catch (final EbMS3Exception e) {
+            System.out.println("At point 45");
             try {
                 if (!pingMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
+                    System.out.println("At point 46");
                     backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
                 }
             } catch (Exception ex) {
+                System.out.println("At point 47");
                 LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex,  messageId);
             }
             throw new WebServiceException(e);
         }
-
+        System.out.println("At point 48");
         return responseMessage;
     }
 
@@ -202,6 +222,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      */
     private void checkCharset(final Messaging messaging) throws EbMS3Exception {
         LOG.info("Checking charset for attachments");
+        System.out.println("At point 9");
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             for (final Property property : partInfo.getPartProperties().getProperties()) {
                 if (Property.CHARSET.equals(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
@@ -221,6 +242,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @return result of duplicate handle
      */
     private Boolean checkDuplicate(final Messaging messaging) {
+        System.out.println("At point 13");
         LOG.debug("Checking for duplicate messages");
         return userMessageLogDao.findByMessageId(messaging.getUserMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
     }
@@ -233,6 +255,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @return result of ping service and action handle
      */
     private Boolean checkPingMessage(final UserMessage message) {
+        System.out.println("At point 11");
         LOG.debug("Checking if it is a ping message");
         return eu.domibus.common.model.configuration.Service.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
                 && eu.domibus.common.model.configuration.Action.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
@@ -248,7 +271,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @return the response message to the incoming request message
      * @throws EbMS3Exception if generation of receipt was not successful
      */
-    private SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate) throws EbMS3Exception {
+    protected SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate) throws EbMS3Exception {
 
         SOAPMessage responseMessage = null;
 
@@ -333,29 +356,35 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging) throws SOAPException, JAXBException, TransformerException, EbMS3Exception {
         LOG.info("Persisting received message");
         UserMessage userMessage = messaging.getUserMessage();
-
+        System.out.println("At point 16");
         handlePayloads(request, userMessage);
-
+        System.out.println("At point 26");
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
+        System.out.println("At point 27");
         LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
         try {
             payloadProfileValidator.validate(messaging, pmodeKey);
+            System.out.println("At point 28");
             propertyProfileValidator.validate(messaging, pmodeKey);
+            System.out.println("At point 29");
         } catch (EbMS3Exception e) {
             e.setMshRole(MSHRole.RECEIVING);
+            System.out.println("At point 30");
             throw e;
         }
-
+        System.out.println("At point 31");
         try {
             messagingService.storeMessage(messaging);
+            System.out.println("At point 32");
         } catch (CompressionException exc) {
+            System.out.println("At point 33");
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
             ex.setMshRole(MSHRole.RECEIVING);
             throw ex;
         }
-
+        System.out.println("At point 34");
         Party to = pModeProvider.getReceiverParty(pmodeKey);
-
+        System.out.println("At point 35");
         // Builds the user message log
         UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
                 .setMessageId(userMessage.getMessageInfo().getMessageId())
@@ -367,8 +396,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 .setBackendName(getFinalRecipientName(userMessage))
                 .setEndpoint(to.getEndpoint());
         // Saves the user message log
+        System.out.println("At point 36");
         userMessageLogDao.create(umlBuilder.build());
-
+        System.out.println("At point 37");
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
 
         return userMessage.getMessageInfo().getMessageId();
@@ -385,17 +415,22 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     private void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
         boolean bodyloadFound = false;
+        System.out.println("At point 17");
         for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
+            System.out.println("At point 18");
             final String cid = partInfo.getHref();
             LOG.debug("looking for attachment with cid: " + cid);
             boolean payloadFound = false;
             if (cid == null || cid.isEmpty() || cid.startsWith("#")) {
+                System.out.println("At point 19");
                 if (bodyloadFound) {
+                    System.out.println("At point 20");
                     LOG.businessError(DomibusMessageCode.BUS_MULTIPLE_PART_INFO_REFERENCING_SOAP_BODY);
                     EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "More than one Partinfo referencing the soap body found", userMessage.getMessageInfo().getMessageId(), null);
                     ex.setMshRole(MSHRole.RECEIVING);
                     throw ex;
                 }
+                System.out.println("At point 21");
                 LOG.info("Using soap body payload");
                 bodyloadFound = true;
                 payloadFound = true;
@@ -408,11 +443,12 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 transformer.transform(source, result);
                 partInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(out.toByteArray(), "text/xml")));
             }
+            System.out.println("At point 22");
             @SuppressWarnings("unchecked") final
             Iterator<AttachmentPart> attachmentIterator = request.getAttachments();
             AttachmentPart attachmentPart;
             while (attachmentIterator.hasNext() && !payloadFound) {
-
+                System.out.println("At point 23");
                 attachmentPart = attachmentIterator.next();
                 //remove square brackets from cid for further processing
                 attachmentPart.setContentId(AttachmentUtil.cleanContentId(attachmentPart.getContentId()));
@@ -423,7 +459,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     payloadFound = true;
                 }
             }
+            System.out.println("At point 24");
             if (!payloadFound) {
+                System.out.println("At point 25");
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_ATTACHMENT_NOT_FOUND, cid);
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0011, "No Attachment found for cid: " + cid + " of message: " + userMessage.getMessageInfo().getMessageId(), userMessage.getMessageInfo().getMessageId(), null);
                 ex.setMshRole(MSHRole.RECEIVING);
@@ -432,7 +470,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
     }
 
-    private Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
+    protected Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
+        System.out.println("At point 6");
         LOG.debug("Unmarshalling the Messaging instance from the request");
         final Node messagingXml = (Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
         final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
