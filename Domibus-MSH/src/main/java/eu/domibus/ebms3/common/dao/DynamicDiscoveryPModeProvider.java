@@ -136,7 +136,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
         String typeName = null;
         String typeValue = type;
-        if(type == null) {
+        if (type == null) {
             typeName = URN_TYPE_NAME;
             typeValue = URN_TYPE_VALUE;
         }
@@ -144,15 +144,15 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         PartyIdType configurationType = null;
         for (final PartyIdType t : partyIdTypes) {
             if (StringUtils.equalsIgnoreCase(t.getValue(), typeValue)
-                    && (typeName != null && StringUtils.equalsIgnoreCase(t.getName(), typeName))) {
+                    && (typeName == null || StringUtils.equalsIgnoreCase(t.getName(), typeName))) {
                 configurationType = t;
             }
         }
         // add to partyIdType list
-        if(configurationType == null) {
+        if (configurationType == null) {
             configurationType = new PartyIdType();
-            configurationType.setName(typeName);
-            configurationType.setValue(typeValue != null ? typeValue : typeName);
+            configurationType.setName(typeName != null ? typeName : typeValue);
+            configurationType.setValue(typeValue);
             partyIdTypes.add(configurationType);
             this.getConfiguration().getBusinessProcesses().setPartyIdTypes(partyIdTypes);
         }
@@ -166,7 +166,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         }
 
         // remove party and add it with latest values for address and type
-        if(configurationParty != null) {
+        if (configurationParty != null) {
             getConfiguration().getBusinessProcesses().getParties().remove(configurationParty);
         }
 
@@ -179,9 +179,12 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         // hack
         newConfigurationParty.setEndpoint("http://localhost:8180/domibus/services/msh");//endpoint.getAddress());
         //if(endpoint != null) {
-            //configurationParty.setEndpoint(endpoint.getAddress());
+        //newConfigurationParty.setEndpoint(endpoint.getAddress());
+        //} else {
+            //newConfigurationParty.setEndpoint(configurationParty.getEndpoint() == null ? "":configurationParty.getEndpoint());
         //}
 
+        getConfiguration().getBusinessProcesses().getParties().add(newConfigurationParty);
         return newConfigurationParty;
     }
 
