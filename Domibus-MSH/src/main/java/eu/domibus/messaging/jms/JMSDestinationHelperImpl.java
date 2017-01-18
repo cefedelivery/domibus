@@ -1,7 +1,7 @@
 package eu.domibus.messaging.jms;
 
 import eu.domibus.api.jms.JMSDestinationHelper;
-import eu.domibus.api.regex.RegexUtil;
+import eu.domibus.api.util.RegexUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

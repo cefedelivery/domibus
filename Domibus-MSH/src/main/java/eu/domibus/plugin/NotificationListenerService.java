@@ -24,10 +24,9 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
+import eu.domibus.plugin.delegate.BackendConnectorDelegate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
@@ -39,7 +38,6 @@ import org.springframework.jms.core.JmsOperations;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ClassUtils;
 
 import javax.jms.*;
 import java.util.ArrayList;
@@ -63,7 +61,10 @@ public class NotificationListenerService implements MessageListener, JmsListener
     private JmsListenerContainerFactory jmsListenerContainerFactory;
 
     @Autowired
-    AuthUtils authUtils;
+    private AuthUtils authUtils;
+
+    @Autowired
+    private BackendConnectorDelegate backendConnectorDelegate;
 
     private Queue backendNotificationQueue;
     private BackendConnector.Mode mode;
@@ -83,7 +84,6 @@ public class NotificationListenerService implements MessageListener, JmsListener
         if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.setAuthenticationToSecurityContext("notif", "notif", AuthRole.ROLE_ADMIN);
         }
-
 
         try {
             final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
@@ -111,59 +111,24 @@ public class NotificationListenerService implements MessageListener, JmsListener
         }
     }
 
-    protected boolean isNewMessageReceiveFailureDefined() throws Exception {
-        final String targetClassName = getTargetObject(backendConnector);
-        final Class<?> pluginImplementationClass = Thread.currentThread().getContextClassLoader().loadClass(targetClassName);
-        boolean isNewMessageReceiveFailureDefined = true;
-        try {
-            pluginImplementationClass.getDeclaredMethod("messageReceiveFailed", MessageReceiveFailureEvent.class);
-        } catch (NoSuchMethodException e) {
-            LOG.debug("New messageReceiveFailed(MessageReceiveFailureEvent.class) is not defined");
-            isNewMessageReceiveFailureDefined = false;
-        }
 
-        return isNewMessageReceiveFailureDefined;
-    }
-
-    protected String getTargetObject(Object proxy) throws Exception {
-        if (AopUtils.isJdkDynamicProxy(proxy)) {
-            return ((Advised) proxy).getTargetSource().getTarget().getClass().getCanonicalName();
-        } else if (AopUtils.isCglibProxy(proxy)) {
-            return ClassUtils.getUserClass(proxy).getCanonicalName();
-        } else {
-            return proxy.getClass().getCanonicalName();
-        }
-    }
-
-    //TODO move this method to a delegate service
     protected void doMessageReceiveFailure(final Message message) throws JMSException {
-        boolean newMessageReceiveFailureDefined = false;
-        try {
-            newMessageReceiveFailureDefined = isNewMessageReceiveFailureDefined();
-        } catch (Exception e) {
-            LOG.warn("Could not determine which variant of messageReceiveFailure method should be called");
-        }
+        MessageReceiveFailureEvent event = new MessageReceiveFailureEvent();
         final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
-        if (newMessageReceiveFailureDefined) {
-            LOG.info("Calling messageReceiveFailed method");
-            MessageReceiveFailureEvent event = new MessageReceiveFailureEvent();
-            event.setMessageId(messageId);
-            final String errorCode = message.getStringProperty(MessageConstants.ERROR_CODE);
-            final String errorDetail = message.getStringProperty(MessageConstants.ERROR_DETAIL);
-            ErrorResultImpl errorResult = new ErrorResultImpl();
-            try {
-                errorResult.setErrorCode(ErrorCode.findBy(errorCode));
-            } catch (IllegalArgumentException e) {
-                LOG.warn("Could not find error code for [" + errorCode + "]");
-            }
-            errorResult.setErrorDetail(errorDetail);
-            errorResult.setMessageInErrorId(messageId);
-            event.setErrorResult(errorResult);
-            backendConnector.messageReceiveFailed(event);
-        } else {
-            LOG.info("Calling deprecated messageReceiveFailed method");
-            backendConnector.messageReceiveFailed(messageId, message.getStringProperty(MessageConstants.ENDPOINT));
+        event.setMessageId(messageId);
+        final String errorCode = message.getStringProperty(MessageConstants.ERROR_CODE);
+        final String errorDetail = message.getStringProperty(MessageConstants.ERROR_DETAIL);
+        ErrorResultImpl errorResult = new ErrorResultImpl();
+        try {
+            errorResult.setErrorCode(ErrorCode.findBy(errorCode));
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Could not find error code for [" + errorCode + "]");
         }
+        errorResult.setErrorDetail(errorDetail);
+        errorResult.setMessageInErrorId(messageId);
+        event.setErrorResult(errorResult);
+        event.setEndpoint(message.getStringProperty(MessageConstants.ENDPOINT));
+        backendConnectorDelegate.messageReceiveFailed(backendConnector, event);
     }
 
     public final Collection<String> listPendingMessages() {
