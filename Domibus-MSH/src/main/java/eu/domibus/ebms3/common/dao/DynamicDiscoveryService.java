@@ -27,6 +27,7 @@ import no.difi.vefa.edelivery.lookup.locator.BusdoxLocator;
 import no.difi.vefa.edelivery.lookup.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -43,6 +44,7 @@ public class DynamicDiscoveryService {
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
 
+    @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
     public Endpoint lookupInformation(final String receiverId, final String receiverIdType, final String documentId, final String processId, final String processIdType) {
 
         final String smlInfo = domibusProperties.getProperty(SMLZONE_KEY);

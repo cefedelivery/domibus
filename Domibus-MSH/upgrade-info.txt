@@ -1,4 +1,10 @@
 Domibus 3.2.1:
+               - add the following lines to conf/domibus/internal/ehcache.xml
+                   	<cache name="lookupInfo"
+                          maxBytesLocalHeap="5m"
+                          timeToLiveSeconds="3600"
+                          overflowToDisk="false">
+                    </cache>
                - [WebLogic only]
                   o execute the WLST API script 3.2-to-3.2.1-WeblogicSingleServer.properties for single server deployment or 3.2-to-3.2.1-WeblogicCluster.properties for cluster deployment
                   o In the WebLogic console, in the page "Home >Summary of Security Realms >myrealm",  enable the flag "Use Authorization Providers to Protect JMX Access" flag; for more info please check the Administration Guide

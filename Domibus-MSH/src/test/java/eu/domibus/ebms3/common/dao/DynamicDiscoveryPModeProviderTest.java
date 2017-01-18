@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
@@ -7,6 +8,7 @@ import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import no.difi.vefa.edelivery.lookup.model.ProcessIdentifier;
@@ -183,7 +185,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
         UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(null, null, null, null, null, UUID.randomUUID().toString());
 
-        classUnderTest.doDynamicThings(userMessage);
+        classUnderTest.doDynamicDiscovery(userMessage, MSHRole.SENDING);
     }
 
     @Test
@@ -203,7 +205,7 @@ public class DynamicDiscoveryPModeProviderTest {
         UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UUID.randomUUID().toString());
 
 
-        dynamicDiscoveryPModeProvider.doDynamicThings(userMessage);
+        dynamicDiscoveryPModeProvider.doDynamicDiscovery(userMessage, MSHRole.SENDING);
         Party expectedParty = new Party();
         expectedParty.setName(EXPECTED_COMMON_NAME);
         expectedParty.setEndpoint(ADDRESS);
@@ -269,6 +271,10 @@ public class DynamicDiscoveryPModeProviderTest {
 
         userMessageToBuild.setCollaborationInfo(collaborationInfo);
 
+        Property property = new Property();
+        property.setName(MessageConstants.FINAL_RECIPIENT);
+        property.setValue(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE);
+        property.setType((UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE));
 
         PartyId partyId = ebmsObjectFactory.createPartyId();
         partyId.setValue(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE);
@@ -281,6 +287,9 @@ public class DynamicDiscoveryPModeProviderTest {
         partyInfo.setTo(to);
 
         userMessageToBuild.setPartyInfo(partyInfo);
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.getProperty().add(property);
+        userMessageToBuild.setMessageProperties(messageProperties);
 
         return userMessageToBuild;
     }

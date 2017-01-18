@@ -23,6 +23,7 @@ import eu.domibus.api.xml.UnmarshallerResult;
 import eu.domibus.api.xml.XMLUtil;
 import eu.domibus.clustering.Command;
 import eu.domibus.common.ErrorCode;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
@@ -145,7 +146,7 @@ public abstract class PModeProvider {
     }
 
     @Transactional(propagation = Propagation.REQUIRED, noRollbackFor = IllegalStateException.class)
-    public String findPModeKeyForUserMessage(final UserMessage userMessage) throws EbMS3Exception {
+    public String findPModeKeyForUserMessage(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
 
         final String agreementName;
         final String senderParty;
