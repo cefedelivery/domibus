@@ -164,7 +164,6 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
                 break;
             }
         }
-
         // remove party and add it with latest values for address and type
         if (configurationParty != null) {
             getConfiguration().getBusinessProcesses().getParties().remove(configurationParty);
@@ -176,13 +175,11 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         Party newConfigurationParty = new Party();
         newConfigurationParty.setName(partyIdentifier.getPartyId());
         newConfigurationParty.getIdentifiers().add(partyIdentifier);
-        // hack
-        newConfigurationParty.setEndpoint("http://localhost:8180/domibus/services/msh");//endpoint.getAddress());
-        //if(endpoint != null) {
-        //newConfigurationParty.setEndpoint(endpoint.getAddress());
-        //} else {
-            //newConfigurationParty.setEndpoint(configurationParty.getEndpoint() == null ? "":configurationParty.getEndpoint());
-        //}
+        if(endpoint != null) {
+            newConfigurationParty.setEndpoint(endpoint);
+        } else {
+            newConfigurationParty.setEndpoint(configurationParty.getEndpoint() == null ? "":configurationParty.getEndpoint());
+        }
 
         getConfiguration().getBusinessProcesses().getParties().add(newConfigurationParty);
         return newConfigurationParty;
@@ -233,9 +230,6 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         } catch (final InvalidNameException e) {
             LOG.error("Error while extracting CommonName from certificate", e);
         }
-        // hack
-        cn = "red_gw";
-
         //set toPartyId in UserMessage
         final PartyId receiverParty = new PartyId();
         receiverParty.setValue(cn);
@@ -244,12 +238,8 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         userMessage.getPartyInfo().getTo().getPartyId().clear();
         userMessage.getPartyInfo().getTo().getPartyId().add(receiverParty);
 
-        // hack
-        X509Certificate red_cert = getRedCert();
-
         //add certificate to Truststore
-        //trustStoreService.addCertificate(endpoint.getCertificate(), cn, true);
-        trustStoreService.addCertificate(red_cert, cn, true);
+        trustStoreService.addCertificate(endpoint.getCertificate(), cn, true);
     }
 
     protected Endpoint lookupByFinalRecipient(UserMessage userMessage) throws EbMS3Exception {
@@ -306,9 +296,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
                 return rdn.getValue().toString();
             }
         }
-
         throw new IllegalArgumentException("The certificate does not contain a common name (CN): " + certificate.getSubjectDN().getName());
-
     }
 
     @Override
@@ -330,20 +318,4 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         }
         return null;
     }
-
-    //hack
-    private X509Certificate getRedCert() {
-
-        try {
-            final KeyStore red_ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            String red_filename = "/Users/idragusa/_setup/3.2.2/domibus-MSH-3.2-SNAPSHOT-tomcat-full/domibus_c3/conf/domibus/keystores_sample/gateway_truststore.jks";
-            char[] red_password = "test123".toCharArray();
-            red_ks.load(new FileInputStream(red_filename), red_password);
-            KeyStore.TrustedCertificateEntry keyEnt = (KeyStore.TrustedCertificateEntry)red_ks.getEntry("red_gw", null);
-            X509Certificate red_cert = (X509Certificate)keyEnt.getTrustedCertificate();
-            return red_cert;
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | UnrecoverableEntryException e) {
-            return null;
-        }
-     }
 }
