@@ -106,6 +106,11 @@
             <filtered>false</filtered>
         </file>
         <file>
+            <source>${project.basedir}/src/main/conf/domibus/policies/eDeliveryPolicy_CA.xml</source>
+            <outputDirectory>domibus/conf/domibus/policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
             <source>${project.basedir}/src/main/conf/domibus/policies/eSensPolicy.xml</source>
             <outputDirectory>domibus/conf/domibus/policies</outputDirectory>
             <filtered>false</filtered>
