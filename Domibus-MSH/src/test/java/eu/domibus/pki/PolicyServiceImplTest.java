@@ -1,9 +1,9 @@
-package eu.domibus.ebms3.pki;
+package eu.domibus.pki;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.pki.PolicyServiceImpl;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -58,6 +58,16 @@ public class PolicyServiceImplTest {
         Policy signOnlyPolicy = policyService.parsePolicy("policies/signOnly.xml");
         boolean result3 = policyService.isNoSecurityPolicy(signOnlyPolicy);
         Assert.assertTrue(result3 == false);
+    }
+
+    @Test
+    public void testParsePolicyException() {
+
+        try {
+            policyService.parsePolicy("NonExistentFileLocation");
+        } catch (Exception e) {
+            Assert.assertTrue("Expecting ConfigurationException", e instanceof ConfigurationException);
+        }
     }
 
 }
