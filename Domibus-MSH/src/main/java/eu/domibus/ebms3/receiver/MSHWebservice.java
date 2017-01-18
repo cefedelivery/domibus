@@ -174,8 +174,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
                 this.persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
                 try {
-                    backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
-                } catch(SubmissionValidationException e) {
+                    backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
+                } catch (SubmissionValidationException e) {
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), null, e);
                 }
             }
@@ -186,7 +186,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (final EbMS3Exception e) {
             try {
                 if (!pingMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
-                    backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED_FAILURE);
+                    backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), createErrorResult(e));
                 }
             } catch (Exception ex) {
                 LOG.warn("could not notify backend of rejected message ", ex);
@@ -197,6 +197,19 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return responseMessage;
     }
 
+    private ErrorResult createErrorResult(EbMS3Exception ebm3Exception) {
+        ErrorResultImpl result = new ErrorResultImpl();
+        result.setMshRole(MSHRole.RECEIVING);
+        result.setMessageInErrorId(ebm3Exception.getRefToMessageId());
+        try {
+            result.setErrorCode(ErrorCode.findBy(ebm3Exception.getErrorCode()));
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Could not find error code for [" + ebm3Exception.getErrorCode() + "]");
+        }
+        result.setErrorDetail(ebm3Exception.getErrorDetail());
+        return result;
+    }
+
 
     /**
      * Required for AS4_TA_12
@@ -205,15 +218,15 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @throws EbMS3Exception
      */
     private void checkCharset(final Messaging messaging) throws EbMS3Exception {
-        for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
-            for (final Property property : partInfo.getPartProperties().getProperties()) {
-                if (Property.CHARSET.equals(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
-                    EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, property.getValue() + " is not a valid Charset", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
+//        for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
+//            for (final Property property : partInfo.getPartProperties().getProperties()) {
+//                if (Property.CHARSET.equals(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
+                    EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, " is not a valid Charset", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
                     ex.setMshRole(MSHRole.RECEIVING);
                     throw ex;
-                }
-            }
-        }
+//                }
+//            }
+//        }
     }
 
     /**

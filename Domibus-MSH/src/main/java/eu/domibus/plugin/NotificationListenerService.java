@@ -19,14 +19,15 @@
 
 package eu.domibus.plugin;
 
-import eu.domibus.common.AuthRole;
-import eu.domibus.common.NotificationType;
+import eu.domibus.common.*;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
@@ -38,6 +39,7 @@ import org.springframework.jms.core.JmsOperations;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ClassUtils;
 
 import javax.jms.*;
 import java.util.ArrayList;
@@ -78,12 +80,17 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
     @Transactional
     public void onMessage(final Message message) {
-        if(!authUtils.isUnsecureLoginAllowed())
-            authUtils.setAuthenticationToSecurityContext("notif","notif", AuthRole.ROLE_ADMIN);
+        if (!authUtils.isUnsecureLoginAllowed()) {
+            authUtils.setAuthenticationToSecurityContext("notif", "notif", AuthRole.ROLE_ADMIN);
+        }
+
 
         try {
             final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
             final NotificationType notificationType = NotificationType.valueOf(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE));
+
+            LOG.info("Received message with messageId [" + messageId + "] and notification type [" + notificationType + "]");
+
             switch (notificationType) {
                 case MESSAGE_RECEIVED:
                     backendConnector.deliverMessage(messageId);
@@ -95,7 +102,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
                     backendConnector.messageSendSuccess(messageId);
                     break;
                 case MESSAGE_RECEIVED_FAILURE:
-                    backendConnector.messageReceiveFailed(messageId, message.getStringProperty(MessageConstants.ENDPOINT));
+                    doMessageReceiveFailure(message);
 
             }
         } catch (Exception e) {
@@ -104,8 +111,63 @@ public class NotificationListenerService implements MessageListener, JmsListener
         }
     }
 
+    protected boolean isNewMessageReceiveFailureDefined() throws Exception {
+        final String targetClassName = getTargetObject(backendConnector);
+        final Class<?> pluginImplementationClass = Thread.currentThread().getContextClassLoader().loadClass(targetClassName);
+        boolean isNewMessageReceiveFailureDefined = true;
+        try {
+            pluginImplementationClass.getDeclaredMethod("messageReceiveFailed", MessageReceiveFailureEvent.class);
+        } catch (NoSuchMethodException e) {
+            LOG.debug("New messageReceiveFailed(MessageReceiveFailureEvent.class) is not defined");
+            isNewMessageReceiveFailureDefined = false;
+        }
+
+        return isNewMessageReceiveFailureDefined;
+    }
+
+    protected String getTargetObject(Object proxy) throws Exception {
+        if (AopUtils.isJdkDynamicProxy(proxy)) {
+            return ((Advised) proxy).getTargetSource().getTarget().getClass().getCanonicalName();
+        } else if (AopUtils.isCglibProxy(proxy)) {
+            return ClassUtils.getUserClass(proxy).getCanonicalName();
+        } else {
+            return proxy.getClass().getCanonicalName();
+        }
+    }
+
+    //TODO move this method to a delegate service
+    protected void doMessageReceiveFailure(final Message message) throws JMSException {
+        boolean newMessageReceiveFailureDefined = false;
+        try {
+            newMessageReceiveFailureDefined = isNewMessageReceiveFailureDefined();
+        } catch (Exception e) {
+            LOG.warn("Could not determine which variant of messageReceiveFailure method should be called");
+        }
+        final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+        if (newMessageReceiveFailureDefined) {
+            LOG.info("Calling messageReceiveFailed method");
+            MessageReceiveFailureEvent event = new MessageReceiveFailureEvent();
+            event.setMessageId(messageId);
+            final String errorCode = message.getStringProperty(MessageConstants.ERROR_CODE);
+            final String errorDetail = message.getStringProperty(MessageConstants.ERROR_DETAIL);
+            ErrorResultImpl errorResult = new ErrorResultImpl();
+            try {
+                errorResult.setErrorCode(ErrorCode.findBy(errorCode));
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Could not find error code for [" + errorCode + "]");
+            }
+            errorResult.setErrorDetail(errorDetail);
+            errorResult.setMessageInErrorId(messageId);
+            event.setErrorResult(errorResult);
+            backendConnector.messageReceiveFailed(event);
+        } else {
+            LOG.info("Calling deprecated messageReceiveFailed method");
+            backendConnector.messageReceiveFailed(messageId, message.getStringProperty(MessageConstants.ENDPOINT));
+        }
+    }
+
     public final Collection<String> listPendingMessages() {
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
 
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
@@ -160,7 +222,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public void removeFromPending(final String messageId) throws MessageNotFoundException {
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
 
         if (this.mode == BackendConnector.Mode.PUSH) {

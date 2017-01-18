@@ -1,25 +1,7 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.plugin;
 
 import eu.domibus.common.ErrorResult;
+import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
@@ -29,6 +11,8 @@ import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +27,8 @@ import java.util.List;
  * @author Christian Koch, Stefan Mueller
  */
 public abstract class AbstractBackendConnector<U, T> implements BackendConnector<U, T> {
+
+    private static final Log LOG = LogFactory.getLog(AbstractBackendConnector.class);
 
     private final String name;
     @Autowired
@@ -76,6 +62,7 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     }
 
 
+
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public final T downloadMessage(final String messageId, final T target) throws MessageNotFoundException {
@@ -95,12 +82,26 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
         return this.messageRetriever.getMessageStatus(messageId);
     }
 
-
     @Override
     public final List<ErrorResult> getErrorsForMessage(final String messageId) {
         return new ArrayList<>(this.messageRetriever.getErrorsForMessage(messageId));
     }
 
+    /**
+     * @deprecated Since 3.2.2 this method is deprecated. Use {@link #messageReceiveFailed(MessageReceiveFailureEvent)}
+     * @param messageId the Id of the failed message
+     * @param ednpoint  the endpoint that tried to send the message or null if unknown
+     */
+    @Override
+    @Deprecated
+    public void messageReceiveFailed(String messageId, String ednpoint) {
+        throw new UnsupportedOperationException("Method [messageReceiveFailed(String messageId, String endpoint)] is deprecated");
+    }
+
+    @Override
+    public void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent) {
+        throw new UnsupportedOperationException("Plugins using " + Mode.PUSH.name() + " must implement this method");
+    }
 
     @Override
     public void deliverMessage(final String messageId) {

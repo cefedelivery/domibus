@@ -20,6 +20,7 @@
 package eu.domibus.plugin;
 
 import eu.domibus.common.ErrorResult;
+import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
@@ -110,6 +111,10 @@ public interface BackendConnector<U, T> {
     String getName();
 
     /**
+     * @deprecated Since 3.2.2 this method is deprecated. Use {@link #messageReceiveFailed(MessageReceiveFailureEvent)}
+     *
+
+    /**
      * This method gets called when an incoming message associated with a Mode.PUSH plugin and an associated
      * PMode[1].errorHandling.Report.ProcessErrorNotifyConsumer=true is rejected by the MSH. The error details
      * are provided by #getErrorsForMessage
@@ -117,7 +122,14 @@ public interface BackendConnector<U, T> {
      * @param messageId the Id of the failed message
      * @param ednpoint  the endpoint that tried to send the message or null if unknown
      */
+    @Deprecated
     void messageReceiveFailed(String messageId, String ednpoint);
+
+    /**
+     * This method gets called when an incoming message is rejected by the MSH
+     * @param messageReceiveFailureEvent event containing details about the message receive failure event
+     */
+    void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent);
 
     /**
      * This method gets called when an outgoing message associated with a Mode.PUSH plugin and an associated
