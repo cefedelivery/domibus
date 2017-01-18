@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.common.*;
@@ -202,7 +183,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         result.setMshRole(MSHRole.RECEIVING);
         result.setMessageInErrorId(ebm3Exception.getRefToMessageId());
         try {
-            result.setErrorCode(ErrorCode.findBy(ebm3Exception.getErrorCode()));
+            result.setErrorCode(ebm3Exception.getErrorCodeObject());
         } catch (IllegalArgumentException e) {
             LOG.warn("Could not find error code for [" + ebm3Exception.getErrorCode() + "]");
         }
@@ -224,7 +205,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, " is not a valid Charset", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
                     ex.setMshRole(MSHRole.RECEIVING);
                     throw ex;
-                }
+    }
             }
         }
     }
