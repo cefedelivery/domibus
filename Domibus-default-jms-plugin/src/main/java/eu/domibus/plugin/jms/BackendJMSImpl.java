@@ -129,12 +129,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     }
 
     @Override
-    public void messageReceiveFailed(final String messageId, final String endpoint) {
-        List<ErrorResult> errors = super.getErrorsForMessage(messageId);
-        errorNotifyConsumerTemplate.send(new ErrorMessageCreator(errors.get(errors.size() - 1), endpoint, NotificationType.MESSAGE_RECEIVED_FAILURE));
-    }
-
-    @Override
     public void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent) {
         errorNotifyConsumerTemplate.send(
                 new ErrorMessageCreator(messageReceiveFailureEvent.getErrorResult(),
