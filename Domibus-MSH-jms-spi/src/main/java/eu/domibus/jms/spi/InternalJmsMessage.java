@@ -3,9 +3,10 @@ package eu.domibus.jms.spi;
 import java.util.*;
 
 /**
- * Created by Cosmin Baciu on 17-Aug-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
-public class JmsMessageSPI {
+public class InternalJmsMessage {
 	protected String id;
 	protected String type;
 	protected String content;
