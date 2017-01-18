@@ -205,7 +205,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, " is not a valid Charset", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
                     ex.setMshRole(MSHRole.RECEIVING);
                     throw ex;
-    }
+                }
             }
         }
     }
