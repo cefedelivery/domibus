@@ -53,6 +53,7 @@ import java.util.Properties;
 public class MSHDispatcherTest {
 
     private static final Log LOG = LogFactory.getLog(MSHDispatcherTest.class);
+    private static final String TEST_RESOURCES_DIR = "./src/test/resources";
     private static final String VALID_PMODE_CONFIG_URI = "SamplePModes/domibus-configuration-valid.xml";
     private static final String COLON_SEPARATOR = ":";
     private static final String SENDER_BLUE_GW = "blue_gw";
@@ -60,7 +61,10 @@ public class MSHDispatcherTest {
     private static final String NO_SEC_SERVICE = "noSecService";
     private static final String NO_SEC_ACTION = "noSecAction";
     private static final String LEG_NO_SECNO_SEC_ACTION = "pushNoSecnoSecAction";
-
+    private static final String TEST_SERVICE1 = "testService1";
+    private static final String TC1ACTION = "tc1Action";
+    private static final String OAE = "OAE";
+    private static final String PUSH_TESTCASE1_TC1ACTION = "pushTestcase1tc1Action";
 
     @Injectable
     PolicyService policyService;
@@ -100,18 +104,18 @@ public class MSHDispatcherTest {
 
     @Test
     public void testDispatch_DoNothingSecurityPolicy(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
-        System.setProperty("domibus.config.location", new File(".").getAbsolutePath() + "/src/test/resources");
+        System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:noSecService:noSecAction:OAE:pushNoSecnoSecAction";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
-                append(NO_SEC_SERVICE).append(COLON_SEPARATOR).append(NO_SEC_ACTION).append(COLON_SEPARATOR).append("OAE").append(COLON_SEPARATOR).
+                append(NO_SEC_SERVICE).append(COLON_SEPARATOR).append(NO_SEC_ACTION).append(COLON_SEPARATOR).append(OAE).append(COLON_SEPARATOR).
                 append(LEG_NO_SECNO_SEC_ACTION).toString();
 
 
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
         final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, LEG_NO_SECNO_SEC_ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File("./src/test/resources", "policies/doNothingPolicy.xml")));
+        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/doNothingPolicy.xml")));
         final String endPoint = getPartyFromConfiguration(configuration, RECEIVER_RED_GW).getEndpoint();
         final Map requestContextMap = new HashMap();
 
@@ -167,18 +171,18 @@ public class MSHDispatcherTest {
 
     @Test
     public void testDispatch_tc1Process(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
-        System.setProperty("domibus.config.location", new File(".").getAbsolutePath() + "/src/test/resources");
+        System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
-                append("testService1").append(COLON_SEPARATOR).append("tc1Action").append(COLON_SEPARATOR).append("OAE").append(COLON_SEPARATOR).
-                append("pushTestcase1tc1Action").toString();
+                append(TEST_SERVICE1).append(COLON_SEPARATOR).append(TC1ACTION).append(COLON_SEPARATOR).append(OAE).append(COLON_SEPARATOR).
+                append(PUSH_TESTCASE1_TC1ACTION).toString();
 
 
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, "pushTestcase1tc1Action");
+        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File("./src/test/resources", "policies/signOnly.xml")));
+        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
         //replace receiver end point as https: to enable setting TLS client params.
         final Party receiverParty = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
         final String endPoint = receiverParty.getEndpoint().replace("http:", "https:");
@@ -259,11 +263,11 @@ public class MSHDispatcherTest {
 
     @Test
     public void testDispatch_SecurityPolicyException(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
-        System.setProperty("domibus.config.location", new File(".").getAbsolutePath() + "/src/test/resources");
+        System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:noSecService:noSecAction:OAE:pushNoSecnoSecAction";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
-                append(NO_SEC_SERVICE).append(COLON_SEPARATOR).append(NO_SEC_ACTION).append(COLON_SEPARATOR).append("OAE").append(COLON_SEPARATOR).
+                append(NO_SEC_SERVICE).append(COLON_SEPARATOR).append(NO_SEC_ACTION).append(COLON_SEPARATOR).append(OAE).append(COLON_SEPARATOR).
                 append(LEG_NO_SECNO_SEC_ACTION).toString();
 
 
@@ -296,18 +300,18 @@ public class MSHDispatcherTest {
 
     @Test
     public void testDispatch_SenderCertificateException(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
-        System.setProperty("domibus.config.location", new File(".").getAbsolutePath() + "/src/test/resources");
+        System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
-                append("testService1").append(COLON_SEPARATOR).append("tc1Action").append(COLON_SEPARATOR).append("OAE").append(COLON_SEPARATOR).
-                append("pushTestcase1tc1Action").toString();
+                append(TEST_SERVICE1).append(COLON_SEPARATOR).append(TC1ACTION).append(COLON_SEPARATOR).append(OAE).append(COLON_SEPARATOR).
+                append(PUSH_TESTCASE1_TC1ACTION).toString();
 
 
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, "pushTestcase1tc1Action");
+        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File("./src/test/resources", "policies/signOnly.xml")));
+        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
         //replace receiver end point as https: to enable setting TLS client params.
 
         new Expectations(mshDispatcher) {{
@@ -356,18 +360,18 @@ public class MSHDispatcherTest {
      */
     @Test
     public void testDispatch_ReceiverCertificateException(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
-        System.setProperty("domibus.config.location", new File(".").getAbsolutePath() + "/src/test/resources");
+        System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
-                append("testService1").append(COLON_SEPARATOR).append("tc1Action").append(COLON_SEPARATOR).append("OAE").append(COLON_SEPARATOR).
-                append("pushTestcase1tc1Action").toString();
+                append(TEST_SERVICE1).append(COLON_SEPARATOR).append(TC1ACTION).append(COLON_SEPARATOR).append(OAE).append(COLON_SEPARATOR).
+                append(PUSH_TESTCASE1_TC1ACTION).toString();
 
 
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, "pushTestcase1tc1Action");
+        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File("./src/test/resources", "policies/signOnly.xml")));
+        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
         //replace receiver end point as https: to enable setting TLS client params.
         final Party receiverParty = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
         final String endPoint = receiverParty.getEndpoint().replace("http:", "https:");
@@ -448,18 +452,18 @@ public class MSHDispatcherTest {
 
     @Test
     public void testDispatch_ExceptionDuringDispatch(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
-        System.setProperty("domibus.config.location", new File(".").getAbsolutePath() + "/src/test/resources");
+        System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
-                append("testService1").append(COLON_SEPARATOR).append("tc1Action").append(COLON_SEPARATOR).append("OAE").append(COLON_SEPARATOR).
-                append("pushTestcase1tc1Action").toString();
+                append(TEST_SERVICE1).append(COLON_SEPARATOR).append(TC1ACTION).append(COLON_SEPARATOR).append(OAE).append(COLON_SEPARATOR).
+                append(PUSH_TESTCASE1_TC1ACTION).toString();
 
 
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, "pushTestcase1tc1Action");
+        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File("./src/test/resources", "policies/signOnly.xml")));
+        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
         //replace receiver end point as https: to enable setting TLS client params.
         final Party receiverParty = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
         final String endPoint = receiverParty.getEndpoint().replace("http:", "https:");
