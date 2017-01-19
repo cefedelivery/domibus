@@ -220,7 +220,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @param messaging
      * @throws EbMS3Exception
      */
-    private void checkCharset(final Messaging messaging) throws EbMS3Exception {
+    protected void checkCharset(final Messaging messaging) throws EbMS3Exception {
         LOG.info("Checking charset for attachments");
         System.out.println("At point 9");
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
@@ -277,8 +277,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         assert legConfiguration != null;
 
+        System.out.println("At point 101");
         if (legConfiguration.getReliability() == null) {
             LOG.warn("No reliability found for leg [{}]", legConfiguration.getName());
+            System.out.println("At point 102");
             return responseMessage;
         }
 
@@ -286,19 +288,29 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             LOG.info("Generating receipt for incoming message");
             try {
                 responseMessage = messageFactory.createMessage();
+                System.out.println("At point 103");
                 InputStream generateAS4ReceiptStream = this.getClass().getClassLoader().getResourceAsStream(XSLT_GENERATE_AS4_RECEIPT_XSL);
+                System.out.println("At point 104");
                 Source messageToReceiptTransform = new StreamSource(generateAS4ReceiptStream);
+                System.out.println("At point 105");
                 final Transformer transformer = this.transformerFactory.newTransformer(messageToReceiptTransform);
+                System.out.println("At point 106");
                 final Source requestMessage = request.getSOAPPart().getContent();
+                System.out.println("At point 107");
                 transformer.setParameter("messageid", this.messageIdGenerator.generateMessageId());
+                System.out.println("At point 108");
                 transformer.setParameter("timestamp", this.timestampDateFormatter.generateTimestamp());
+                System.out.println("At point 109");
                 transformer.setParameter("nonRepudiation", Boolean.toString(legConfiguration.getReliability().isNonRepudiation()));
+                System.out.println("At point 110");
 
                 final DOMResult domResult = new DOMResult();
                 transformer.transform(requestMessage, domResult);
+                System.out.println("At point 111");
                 responseMessage.getSOAPPart().setContent(new DOMSource(domResult.getNode()));
+                System.out.println("At point 112");
                 saveResponse(responseMessage);
-
+                System.out.println("At point 123");
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, legConfiguration.getReliability().isNonRepudiation());
             } catch (TransformerConfigurationException | SOAPException e) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
@@ -315,17 +327,25 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return responseMessage;
     }
 
-    private void saveResponse(final SOAPMessage responseMessage) {
+    protected void saveResponse(final SOAPMessage responseMessage) {
         try {
+            System.out.println("At point 113");
             Messaging messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
+            System.out.println("At point 114");
             final SignalMessage signalMessage = messaging.getSignalMessage();
+            System.out.println("At point 115");
             // Stores the signal message
             signalMessageDao.create(signalMessage);
+            System.out.println("At point 116");
             // Updating the reference to the signal message
             Messaging sentMessage = messagingDao.findMessageByMessageId(messaging.getSignalMessage().getMessageInfo().getRefToMessageId());
+            System.out.println("At point 117");
             if (sentMessage != null) {
+                System.out.println("At point 118");
                 sentMessage.setSignalMessage(signalMessage);
+                System.out.println("At point 119");
                 messagingDao.update(sentMessage);
+                System.out.println("At point 120");
             }
             // Builds the signal message log
             SignalMessageLogBuilder smlBuilder = SignalMessageLogBuilder.create()
@@ -333,8 +353,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     .setMessageStatus(MessageStatus.SEND_IN_PROGRESS)
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(NotificationStatus.NOT_REQUIRED);
+            System.out.println("At point 121");
             // Saves an entry of the signal message log
             signalMessageLogDao.create(smlBuilder.build());
+            System.out.println("At point 122");
         } catch (JAXBException | SOAPException ex) {
             LOG.error("Unable to save the SignalMessage due to error: ", ex);
         }
@@ -353,7 +375,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @throws EbMS3Exception
      */
     //TODO: improve error handling
-    private String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging) throws SOAPException, JAXBException, TransformerException, EbMS3Exception {
+    protected String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging) throws SOAPException, JAXBException, TransformerException, EbMS3Exception {
         LOG.info("Persisting received message");
         UserMessage userMessage = messaging.getUserMessage();
         System.out.println("At point 16");
@@ -413,7 +435,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return null;
     }
 
-    private void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
+    protected void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
         boolean bodyloadFound = false;
         System.out.println("At point 17");
         for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
@@ -435,13 +457,19 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 bodyloadFound = true;
                 payloadFound = true;
                 partInfo.setInBody(true);
+                System.out.println("At point 21.0");
                 final Node bodyContent = (((Node) request.getSOAPBody().getChildElements().next()));
+                System.out.println("At point 21.1");
                 final Source source = new DOMSource(bodyContent);
+                System.out.println("At point 21.2");
                 final ByteArrayOutputStream out = new ByteArrayOutputStream();
                 final Result result = new StreamResult(out);
                 final Transformer transformer = this.transformerFactory.newTransformer();
+                System.out.println("At point 21.3");
                 transformer.transform(source, result);
+                System.out.println("At point 21.4");
                 partInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(out.toByteArray(), "text/xml")));
+                System.out.println("At point 21.5");
             }
             System.out.println("At point 22");
             @SuppressWarnings("unchecked") final
