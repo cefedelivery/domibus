@@ -1,17 +1,20 @@
-Domibus 3.2.1:
-               - add the following lines to conf/domibus/internal/ehcache.xml
+Domibus 3.2.2:
+               - Replace the war file and ws-plugin jar file
+               - Add the following lines to conf/domibus/internal/ehcache.xml
                    	<cache name="lookupInfo"
                           maxBytesLocalHeap="5m"
                           timeToLiveSeconds="3600"
                           overflowToDisk="false">
                     </cache>
-               - to use the Dynamic Discovery copy conf/domibus/policies/eDeliveryPolicy_CA.xml to conf/domibus/policies
+               - To use the Dynamic Discovery copy conf/domibus/policies/eDeliveryPolicy_CA.xml to conf/domibus/policies
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Domibus 3.2.1:
                - [WebLogic only]
                   o execute the WLST API script 3.2-to-3.2.1-WeblogicSingleServer.properties for single server deployment or 3.2-to-3.2.1-WeblogicCluster.properties for cluster deployment
                   o In the WebLogic console, in the page "Home >Summary of Security Realms >myrealm",  enable the flag "Use Authorization Providers to Protect JMX Access" flag; for more info please check the Administration Guide
                   o In the WebLogic console, in the page "Home >Summary of JDBC Data Sources >cipaeDeliveryDs", tab "Configuration/Connection Pool/Advanced"
                     enable the "Test Connections On Reserve" flag and add "SQL SELECT 1 FROM DUAL" in the "Test Table Name"
-               - Replace the war file and ws-plugin jar file
+               - Replace the war file
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2 (from 3.1.1):
                 Run the appropriate DB migration script.

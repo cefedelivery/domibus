@@ -34,7 +34,13 @@ import javax.annotation.Resource;
 import java.util.Properties;
 
 /**
- * @author Christian Koch, Stefan Mueller
+ * Service to query the SMP to extract the required information about the unknown receiver AP.
+ * The SMP Lookup is done using an SMP Client software, with the following input:
+ *       The End Receiver Participant ID (C4)
+ *       The Document ID
+ *       The Process ID
+ *
+ * Upon a successful lookup, the result contains the endpoint address and also othe public certificate of the receiver.
  */
 @Service
 public class DynamicDiscoveryService {

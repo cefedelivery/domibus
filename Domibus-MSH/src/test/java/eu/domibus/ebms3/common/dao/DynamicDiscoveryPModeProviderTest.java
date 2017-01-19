@@ -7,6 +7,7 @@ import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.pki.CertificateService;
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import no.difi.vefa.edelivery.lookup.model.ProcessIdentifier;
@@ -85,6 +86,8 @@ public class DynamicDiscoveryPModeProviderTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
+    @InjectMocks
+    CertificateService certificateService;
 
     @InjectMocks
     private DynamicDiscoveryPModeProvider dynamicDiscoveryPModeProvider;
@@ -192,7 +195,7 @@ public class DynamicDiscoveryPModeProviderTest {
         X509Certificate testData = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE);
         assertNotNull(testData);
 
-        String result = dynamicDiscoveryPModeProvider.extractCommonName(testData);
+        String result = certificateService.extractCommonName(testData);
 
         assertEquals(EXPECTED_COMMON_NAME, result);
     }
@@ -204,7 +207,7 @@ public class DynamicDiscoveryPModeProviderTest {
         X509Certificate testData = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_NOT_AVAILABLE);
         assertNotNull(testData);
 
-        dynamicDiscoveryPModeProvider.extractCommonName(testData);
+        certificateService.extractCommonName(testData);
     }
 
 

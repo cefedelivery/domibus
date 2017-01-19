@@ -1,5 +1,6 @@
 package eu.domibus.pki;
 
+import javax.naming.InvalidNameException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
@@ -13,4 +14,6 @@ public interface CertificateService {
     boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException;
 
     boolean isCertificateChainValid(String alias) throws DomibusCertificateException;
+
+    String extractCommonName(final X509Certificate certificate) throws InvalidNameException;
 }

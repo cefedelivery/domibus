@@ -1,6 +1,7 @@
 package eu.domibus.pki;
 
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
@@ -101,5 +105,21 @@ public class CertificateServiceImpl implements CertificateService {
 
         return result;
     }
+
+    @Override
+    public String extractCommonName(final X509Certificate certificate) throws InvalidNameException {
+
+        final String dn = certificate.getSubjectDN().getName();
+        LOG.debug("DN is: " + dn);
+        final LdapName ln = new LdapName(dn);
+        for (final Rdn rdn : ln.getRdns()) {
+            if (StringUtils.equalsIgnoreCase(rdn.getType(), "CN")) {
+                LOG.debug("CN is: " + rdn.getValue());
+                return rdn.getValue().toString();
+            }
+        }
+        throw new IllegalArgumentException("The certificate does not contain a common name (CN): " + certificate.getSubjectDN().getName());
+    }
+
 
 }

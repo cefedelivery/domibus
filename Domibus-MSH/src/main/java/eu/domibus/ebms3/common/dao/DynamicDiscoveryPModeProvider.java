@@ -9,6 +9,7 @@ import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.pki.CertificateService;
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import org.apache.commons.lang.StringUtils;
@@ -19,26 +20,30 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-/* Dynamic Discovery of the corresponding receiving AP for responder parties not configured in the pMode
+/* This class is used for dynamic discovery of the parties participating in a message exchange.
  *
+ * Dynamic discovery is activated when the pMode is configured with a dynamic
+ * process (PMode.Initiator is not set and/or PMode.Responder is not set)
  *
-*/
-
+ * The receiver of the message must be able to accept messages from previously unknown senders.
+ * This requires the receiver to have one or more P-Modes configured for all registrations ii has in the SMP.
+ * Therefore for each SMP Endpoint registration of the receiver with the type attribute set to 'bdxr-transport-ebms3-as4-v1p0'
+ * there MUST exist a P-Mode that can handle a message with the following attributes:
+ *      Service = ancestor::ServiceMetadata/ServiceInformation/Processlist/Process/ProcessIdentifier
+ *      Service/@type = ancestor::ServiceMetadata/ServiceInformation/Processlist/Process/ProcessIdentifier/@scheme
+ *      Action = ancestor::ServiceMetadata/ServiceInformation/DocumentIdentifier
+ *
+ * The sender must be able to send messages to unknown receivers. This requires that the sender performs a lookup to find
+ * out the receivers details (partyId, type, endpoint address, public certificate - to encrypt the message).
+ *
+ * The sender may not register, it can send a message to a registered receiver even if he (the sender) is not registered.
+ * Therefore, on the receiver there is no lookup for the sender. The message is accepted based on the root CA as long as the process matches.
+ */
 public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
     private static final Log LOG = LogFactory.getLog(DynamicDiscoveryPModeProvider.class);
@@ -46,11 +51,14 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     protected TrustStoreService trustStoreService;
     @Autowired
     private DynamicDiscoveryService dynamicDiscoveryService;
+
+    @Autowired
+    protected CertificateService certificateService;
     protected Collection<eu.domibus.common.model.configuration.Process> dynamicReceiverProcesses;
     protected Collection<eu.domibus.common.model.configuration.Process> dynamicInitiatorProcesses;
 
+    // default type in e-SENS
     protected static final String URN_TYPE_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
-    protected static final String URN_TYPE_NAME ="partyTypeUrn";
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
@@ -60,8 +68,14 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         dynamicInitiatorProcesses = findDynamicSenderProcesses();
     }
 
-    Collection<eu.domibus.common.model.configuration.Process> findDynamicReceiverProcesses() {
-        final Collection<eu.domibus.common.model.configuration.Process> result = new ArrayList<eu.domibus.common.model.configuration.Process>();
+    @Override
+    public void refresh(){
+        super.refresh();
+        this.init();
+    }
+
+    protected Collection<eu.domibus.common.model.configuration.Process> findDynamicReceiverProcesses() {
+        final Collection<eu.domibus.common.model.configuration.Process> result = new ArrayList<>();
         for (final eu.domibus.common.model.configuration.Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
             if (process.isDynamicResponder() && (process.isDynamicInitiator() || process.getInitiatorParties().contains(getConfiguration().getParty()))) {
                 if (!process.getInitiatorParties().contains(getConfiguration().getParty())) {
@@ -73,8 +87,8 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         return result;
     }
 
-    Collection<eu.domibus.common.model.configuration.Process> findDynamicSenderProcesses() {
-        final Collection<eu.domibus.common.model.configuration.Process> result = new ArrayList<eu.domibus.common.model.configuration.Process>();
+    protected Collection<eu.domibus.common.model.configuration.Process> findDynamicSenderProcesses() {
+        final Collection<eu.domibus.common.model.configuration.Process> result = new ArrayList<>();
         for (final eu.domibus.common.model.configuration.Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
             if (process.isDynamicInitiator() && (process.isDynamicResponder() || process.getResponderParties().contains(getConfiguration().getParty()))) {
                 if (!process.getResponderParties().contains(getConfiguration().getParty())) {
@@ -86,13 +100,16 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         return result;
     }
 
+    /* In case the static configuration doesn't match, update the
+     * pMode using the dynamic discovery process and try again
+     */
     @Override
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
     public String findPModeKeyForUserMessage(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
         try {
             return super.findPModeKeyForUserMessage(userMessage, mshRole);
         } catch (final EbMS3Exception e) {
-            LOG.debug("Do dynamic: ", e);
+            LOG.info("Start the dynamic discovery process", e);
             doDynamicDiscovery(userMessage, mshRole);
 
         }
@@ -102,61 +119,66 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     void doDynamicDiscovery(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
         Collection<eu.domibus.common.model.configuration.Process> candidates = findCandidateProcesses(userMessage, mshRole);
 
-        if (candidates.isEmpty()) {
+        if (candidates == null || candidates.isEmpty()) {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "No matching dynamic discovery processes found for message.", userMessage.getMessageInfo().getMessageId(), null);
         }
 
+        LOG.info("Found " + candidates.size() + " dynamic discovery candidates. MSHRole: " + mshRole);
+
         if(MSHRole.RECEIVING.equals(mshRole)) {
-            PartyId fromPartyId = userMessage.getPartyInfo().getFrom().getPartyId().iterator().next();
-            Party configurationParty = buildConfigurationParty(fromPartyId.getValue(), fromPartyId.getType(), null);
+            PartyId fromPartyId = getFromPartyId(userMessage);
+            Party configurationParty = updateConfigurationParty(fromPartyId.getValue(), fromPartyId.getType(), null);
             updateInitiatorPartiesInPmode(candidates, configurationParty);
 
         } else {//MSHRole.SENDING
             Endpoint endpoint = lookupByFinalRecipient(userMessage);
             updateToParty(userMessage, endpoint);
-            PartyId toPartyId = userMessage.getPartyInfo().getTo().getPartyId().iterator().next();
-            Party configurationParty = buildConfigurationParty(toPartyId.getValue(), null, endpoint.getAddress());
+            PartyId toPartyId = getToPartyId(userMessage);
+            Party configurationParty = updateConfigurationParty(toPartyId.getValue(), toPartyId.getType(), endpoint.getAddress());
             updateResponderPartiesInPmode(candidates, configurationParty);
         }
-
-        //TODO move this to debug
-        String dump = new GsonBuilder().setPrettyPrinting().create().toJson(getConfiguration());
-        LOG.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  PMODE  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        LOG.info(dump);
-        LOG.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  END PMODE  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-
     }
 
-    protected Party buildConfigurationParty(String name, String type, String endpoint) {
-
-        Set<PartyIdType> partyIdTypes = getConfiguration().getBusinessProcesses().getPartyIdTypes();
-        if (partyIdTypes == null) {
-            partyIdTypes = new HashSet<>();
+    protected PartyId getToPartyId(UserMessage userMessage) throws EbMS3Exception {
+        PartyId to = null;
+        if(userMessage != null &&
+                userMessage.getPartyInfo() != null &&
+                userMessage.getPartyInfo().getTo() != null &&
+                userMessage.getPartyInfo().getTo().getPartyId() != null &&
+                userMessage.getPartyInfo().getTo().getPartyId().iterator() != null &&
+                userMessage.getPartyInfo().getTo().getPartyId().iterator().hasNext()) {
+            to = userMessage.getPartyInfo().getTo().getPartyId().iterator().next();
+        }
+        if (to == null) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Invalid To party identifier", null, null);
         }
 
-        String typeName = null;
-        String typeValue = type;
-        if (type == null) {
-            typeName = URN_TYPE_NAME;
-            typeValue = URN_TYPE_VALUE;
+        return to;
+    }
+
+    protected PartyId getFromPartyId(UserMessage userMessage) throws EbMS3Exception {
+        PartyId from = null;
+        if(userMessage != null &&
+                userMessage.getPartyInfo() != null &&
+                userMessage.getPartyInfo().getFrom() != null &&
+                userMessage.getPartyInfo().getFrom().getPartyId() != null &&
+                userMessage.getPartyInfo().getFrom().getPartyId().iterator() != null &&
+                userMessage.getPartyInfo().getFrom().getPartyId().iterator().hasNext()) {
+            from = userMessage.getPartyInfo().getFrom().getPartyId().iterator().next();
+        }
+        if (from == null) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Invalid To party identifier", null, null);
         }
 
-        PartyIdType configurationType = null;
-        for (final PartyIdType t : partyIdTypes) {
-            if (StringUtils.equalsIgnoreCase(t.getValue(), typeValue)
-                    && (typeName == null || StringUtils.equalsIgnoreCase(t.getName(), typeName))) {
-                configurationType = t;
-            }
-        }
-        // add to partyIdType list
-        if (configurationType == null) {
-            configurationType = new PartyIdType();
-            configurationType.setName(typeName != null ? typeName : typeValue);
-            configurationType.setValue(typeValue);
-            partyIdTypes.add(configurationType);
-            this.getConfiguration().getBusinessProcesses().setPartyIdTypes(partyIdTypes);
-        }
+        return from;
+    }
 
+    protected synchronized Party updateConfigurationParty(String name, String type, String endpoint) {
+        LOG.info("Update the configuration party with: " + name + " " + type + " " + endpoint);
+        // update the list of party types
+        PartyIdType configurationType = updateConfigurationType(type);
+
+        // search if the party exists in the pMode
         Party configurationParty = null;
         for (final Party party : getConfiguration().getBusinessProcesses().getParties()) {
             if (StringUtils.equalsIgnoreCase(party.getName(), name)) {
@@ -164,28 +186,56 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
                 break;
             }
         }
-        // remove party and add it with latest values for address and type
+
+        // remove party if exists to add it with latest values for address and type
         if (configurationParty != null) {
             getConfiguration().getBusinessProcesses().getParties().remove(configurationParty);
         }
 
-        final Identifier partyIdentifier = new Identifier();
-        partyIdentifier.setPartyId(name);
-        partyIdentifier.setPartyIdType(configurationType);
-        Party newConfigurationParty = new Party();
-        newConfigurationParty.setName(partyIdentifier.getPartyId());
-        newConfigurationParty.getIdentifiers().add(partyIdentifier);
-        if(endpoint != null) {
-            newConfigurationParty.setEndpoint(endpoint);
-        } else {
-            newConfigurationParty.setEndpoint(configurationParty.getEndpoint() == null ? "":configurationParty.getEndpoint());
-        }
-
+        // set the new endpoint if exists, otherwise copy the old one if exists
+        String newEndpoint = endpoint != null ? endpoint: (configurationParty.getEndpoint() == null ? "" : configurationParty.getEndpoint());
+        LOG.debug("New endpoint is " + newEndpoint);
+        Party newConfigurationParty = buildNewConfigurationParty(name, configurationType, newEndpoint);
         getConfiguration().getBusinessProcesses().getParties().add(newConfigurationParty);
         return newConfigurationParty;
     }
 
-    protected void updateResponderPartiesInPmode(Collection<eu.domibus.common.model.configuration.Process> candidates, Party configurationParty) {
+    protected Party buildNewConfigurationParty(String name, PartyIdType configurationType, String endpoint) {
+        Party newConfigurationParty = new Party();
+        final Identifier partyIdentifier = new Identifier();
+        partyIdentifier.setPartyId(name);
+        partyIdentifier.setPartyIdType(configurationType);
+
+        newConfigurationParty.setName(partyIdentifier.getPartyId());
+        newConfigurationParty.getIdentifiers().add(partyIdentifier);
+        newConfigurationParty.setEndpoint(endpoint);
+        return newConfigurationParty;
+    }
+
+    protected PartyIdType updateConfigurationType(String type) {
+        Set<PartyIdType> partyIdTypes = getConfiguration().getBusinessProcesses().getPartyIdTypes();
+        if (partyIdTypes == null) {
+            partyIdTypes = new HashSet<>();
+        }
+
+        PartyIdType configurationType = null;
+        for (final PartyIdType t : partyIdTypes) {
+            if (StringUtils.equalsIgnoreCase(t.getValue(), type)) {
+                configurationType = t;
+            }
+        }
+        // add to partyIdType list
+        if (configurationType == null) {
+            configurationType = new PartyIdType();
+            configurationType.setName(type);
+            configurationType.setValue(type);
+            partyIdTypes.add(configurationType);
+            this.getConfiguration().getBusinessProcesses().setPartyIdTypes(partyIdTypes);
+        }
+        return configurationType;
+    }
+
+    protected synchronized void updateResponderPartiesInPmode(Collection<eu.domibus.common.model.configuration.Process> candidates, Party configurationParty) {
 
         this.getConfiguration().getBusinessProcesses().getParties().add(configurationParty);
 
@@ -203,7 +253,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         }
     }
 
-    protected void updateInitiatorPartiesInPmode(Collection<eu.domibus.common.model.configuration.Process> candidates, Party configurationParty) {
+    protected synchronized void updateInitiatorPartiesInPmode(Collection<eu.domibus.common.model.configuration.Process> candidates, Party configurationParty) {
 
         this.getConfiguration().getBusinessProcesses().getParties().add(configurationParty);
 
@@ -221,14 +271,15 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         }
     }
 
-    protected void updateToParty(UserMessage userMessage, final Endpoint endpoint) {
+    protected void updateToParty(UserMessage userMessage, final Endpoint endpoint) throws EbMS3Exception{
 
         String cn = null;
         try {
             //parse certificate for common name = toPartyId
-            cn = extractCommonName(endpoint.getCertificate());
+            cn = certificateService.extractCommonName(endpoint.getCertificate());
         } catch (final InvalidNameException e) {
             LOG.error("Error while extracting CommonName from certificate", e);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Error while extracting CommonName from certificate", null, e);
         }
         //set toPartyId in UserMessage
         final PartyId receiverParty = new PartyId();
@@ -247,9 +298,9 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         if(finalRecipient == null) {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Dynamic discovery processes found for message but finalRecipient information is missing in messageProperties.", userMessage.getMessageInfo().getMessageId(), null);
         }
-        LOG.info("finalRecipient: " + finalRecipient.getName() + " " + finalRecipient.getType() + " " +finalRecipient.getValue());
+        LOG.info("Perform lookup by finalRecipient: " + finalRecipient.getName() + " " + finalRecipient.getType() + " " +finalRecipient.getValue());
 
-        //lookup sml/smp
+        //lookup sml/smp - result is cached
         final Endpoint endpoint = dynamicDiscoveryService.lookupInformation(finalRecipient.getValue(),
                 finalRecipient.getType(),
                 userMessage.getCollaborationInfo().getAction(),
@@ -259,7 +310,9 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         return endpoint;
     }
 
-
+    /*
+     * Check all dynamic processes to find candidates for dynamic discovery lookup.
+     */
     protected Collection<eu.domibus.common.model.configuration.Process> findCandidateProcesses(UserMessage userMessage, final MSHRole mshRole) {
         Collection<eu.domibus.common.model.configuration.Process> candidates = new HashSet<>();
         Collection<eu.domibus.common.model.configuration.Process> processes = MSHRole.SENDING.equals(mshRole) ? dynamicReceiverProcesses : dynamicInitiatorProcesses;
@@ -274,35 +327,19 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
                 }
             }
         }
+
         return candidates;
     }
 
+    /*
+     * On the receiving, the initiator is unknown, on the sending side the responder is unknown.
+     */
     protected boolean matchProcess(final Process process, MSHRole mshRole) {
         if(MSHRole.RECEIVING.equals(mshRole)) {
             return process.isDynamicInitiator() || process.getInitiatorParties().contains(this.getConfiguration().getParty());
         } else { // MSHRole.SENDING
             return process.isDynamicResponder() || process.getResponderParties().contains(this.getConfiguration().getParty());
         }
-    }
-
-    protected String extractCommonName(final X509Certificate certificate) throws InvalidNameException {
-
-        final String dn = certificate.getSubjectDN().getName();
-        LOG.debug("DN is: " + dn);
-        final LdapName ln = new LdapName(dn);
-        for (final Rdn rdn : ln.getRdns()) {
-            if (StringUtils.equalsIgnoreCase(rdn.getType(), "CN")) {
-                LOG.debug("CN is: " + rdn.getValue());
-                return rdn.getValue().toString();
-            }
-        }
-        throw new IllegalArgumentException("The certificate does not contain a common name (CN): " + certificate.getSubjectDN().getName());
-    }
-
-    @Override
-    public void refresh(){
-        super.refresh();
-        this.init();
     }
 
     protected Property getFinalRecipient(UserMessage userMessage) {
