@@ -1,4 +1,5 @@
 Domibus 3.2.2
+- Deprecated the method "void messageReceiveFailed(String messageId, String ednpoint)" from the BackendConnector interface and added a new method "void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent)"
 - Changed the default JMX password for WebLogic
 - Fixed the search of the JMS messages for WebLogic(for JMS messages having property with null values) and Tomcat(for JMS messages with no "Text" property)
 Domibus 3.2.1
