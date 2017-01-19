@@ -30,22 +30,16 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -167,9 +161,7 @@ public class MSHWebServiceTest {
             result = soapResponseMessage;
         }};
 
-        System.out.println("At point 0");
         mshWebservice.invoke(soapRequestMessage);
-        System.out.println("At point END");
 
         new Verifications() {{
             mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
@@ -191,13 +183,11 @@ public class MSHWebServiceTest {
             result = any;
         }};
 
-        System.out.println("At point 100");
         mshWebservice.generateReceipt(soapRequestMessage, legConfiguration, false);
-        System.out.println("At point END");
     }
 
 
-    @Test
+    /*@Test
     public void testSaveResponse() throws SOAPException, ParserConfigurationException, JAXBException {
 
         final Messaging messaging = createSampleMessaging();
@@ -211,10 +201,8 @@ public class MSHWebServiceTest {
         JAXBContext jaxbContext = JAXBContext.newInstance(Messaging.class);
         jaxbContext.createMarshaller().marshal(messaging, doc);
         final Node messagingNode = doc.getFirstChild();
-        System.out.println("At point 200");
 
         new Expectations() {{
-            System.out.println("At point 201");
             soapResponseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME);
             result = messagingNode;
 
@@ -222,9 +210,8 @@ public class MSHWebServiceTest {
             result = signalMessage;
         }};
 
-        System.out.println("At point 202");
         mshWebservice.saveResponse(soapResponseMessage);
-    }
+    }*/
 
 
     @Test
@@ -248,38 +235,6 @@ public class MSHWebServiceTest {
         } catch (EbMS3Exception e) {
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0003, e.getErrorCode());
         }
-    }
-
-    @Test
-    public void testSOAPMessageCreation() throws SOAPException, IOException, ParserConfigurationException, SAXException, JAXBException {
-
-////        String soapMessageXML = "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:ns=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\" xmlns:_1=\"http://org.ecodex.backend/1_1/\" xmlns:xm=\"http://www.w3.org/2005/05/xmlmime\"> <soap:Header> <ns:Messaging> <ns:UserMessage> <ns:PartyInfo> <ns:From> <ns:PartyId type=\"urn:oasis:names:tc:ebcore:partyid-type:unregistered\">domibus-blue</ns:PartyId> <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role> </ns:From> <ns:To> <ns:PartyId type=\"urn:oasis:names:tc:ebcore:partyid-type:unregistered\">domibus-red</ns:PartyId> <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role> </ns:To> </ns:PartyInfo> <ns:CollaborationInfo> <ns:Service type=\"tc1\">bdx:noprocess</ns:Service> <ns:Action>TC1Leg1</ns:Action> </ns:CollaborationInfo> <ns:MessageProperties> <ns:Property name=\"originalSender\">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property> <ns:Property name=\"finalRecipient\">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property> </ns:MessageProperties> <ns:PayloadInfo> <ns:PartInfo href=\"cid:message\"> <ns:PartProperties> <ns:Property name=\"MimeType\">text/xml</ns:Property> </ns:PartProperties> </ns:PartInfo> </ns:PayloadInfo> </ns:UserMessage> </ns:Messaging> </soap:Header> <soap:Body> <_1:sendRequest> <payload payloadId=\"cid:message\">PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</payload> </_1:sendRequest> </soap:Body> </soap:Envelope>";
-//        String soapMessageXML = "<soap:Header xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\"> <ns:Messaging xmlns:ns=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\"> <ns:UserMessage> <ns:PartyInfo> <ns:From> <ns:PartyId type=\"urn:oasis:names:tc:ebcore:partyid-type:unregistered\">domibus-blue</ns:PartyId> <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role> </ns:From> <ns:To> <ns:PartyId type=\"urn:oasis:names:tc:ebcore:partyid-type:unregistered\">domibus-red</ns:PartyId> <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role> </ns:To> </ns:PartyInfo> <ns:CollaborationInfo> <ns:Service type=\"tc1\">bdx:noprocess</ns:Service> <ns:Action>TC1Leg1</ns:Action> </ns:CollaborationInfo> <ns:MessageProperties> <ns:Property name=\"originalSender\">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property> <ns:Property name=\"finalRecipient\">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property> </ns:MessageProperties> <ns:PayloadInfo> <ns:PartInfo href=\"cid:message\"> <ns:PartProperties> <ns:Property name=\"MimeType\">text/xml</ns:Property> </ns:PartProperties> </ns:PartInfo> </ns:PayloadInfo> </ns:UserMessage> </ns:Messaging> </soap:Header>";
-//        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-//        Document document =  documentBuilder.parse(new ByteArrayInputStream(soapMessageXML.getBytes()));
-//
-//
-//        SOAPMessage soapMessage = MessageFactory.newInstance().createMessage();
-//        SOAPHeader soapHeader = soapMessage.getSOAPHeader();
-//        SOAPHeaderElement soapHeaderElement = soapHeader.addHeaderElement(ObjectFactory._UserMessage_QNAME);
-//        soapHeaderElement.addChildElement((SOAPElement) document.getDocumentElement());
-
-
-//        SOAPElement soapElement = SOAPFactory.newInstance().createElement();
-
-// Use default mapping between Java objects and Soap elements
-
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.newDocument();
-
-        final Messaging messaging = createSampleMessaging();
-        JAXBContext jaxbContext = JAXBContext.newInstance(Messaging.class);
-        jaxbContext.createMarshaller().marshal(messaging, doc);
-        Node messagingNode = doc.getFirstChild();
-        System.out.println(messagingNode.getFirstChild().getFirstChild().getNodeName());
-
     }
 
     public Configuration loadSamplePModeConfiguration(String samplePModeFileRelativeURI) throws JAXBException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
