@@ -7,7 +7,7 @@ import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.messaging.MessageConstants;
-import eu.domibus.pki.CertificateService;
+import eu.domibus.pki.CertificateServiceImpl;
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import no.difi.vefa.edelivery.lookup.model.ProcessIdentifier;
@@ -38,7 +38,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -86,8 +85,8 @@ public class DynamicDiscoveryPModeProviderTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    @InjectMocks
-    CertificateService certificateService;
+    @Spy
+    private CertificateServiceImpl certificateService;
 
     @InjectMocks
     private DynamicDiscoveryPModeProvider dynamicDiscoveryPModeProvider;
