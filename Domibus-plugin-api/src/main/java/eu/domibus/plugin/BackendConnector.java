@@ -113,8 +113,6 @@ public interface BackendConnector<U, T> {
     /**
      * @deprecated Since 3.2.2 this method is deprecated. Use {@link #messageReceiveFailed(MessageReceiveFailureEvent)}
      *
-
-    /**
      * This method gets called when an incoming message associated with a Mode.PUSH plugin and an associated
      * PMode[1].errorHandling.Report.ProcessErrorNotifyConsumer=true is rejected by the MSH. The error details
      * are provided by #getErrorsForMessage
