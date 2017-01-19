@@ -19,12 +19,12 @@
 
 package eu.domibus.plugin;
 
-import eu.domibus.common.AuthRole;
-import eu.domibus.common.NotificationType;
+import eu.domibus.common.*;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
+import eu.domibus.plugin.delegate.BackendConnectorDelegate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +61,10 @@ public class NotificationListenerService implements MessageListener, JmsListener
     private JmsListenerContainerFactory jmsListenerContainerFactory;
 
     @Autowired
-    AuthUtils authUtils;
+    private AuthUtils authUtils;
+
+    @Autowired
+    private BackendConnectorDelegate backendConnectorDelegate;
 
     private Queue backendNotificationQueue;
     private BackendConnector.Mode mode;
@@ -78,12 +81,16 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
     @Transactional
     public void onMessage(final Message message) {
-        if(!authUtils.isUnsecureLoginAllowed())
-            authUtils.setAuthenticationToSecurityContext("notif","notif", AuthRole.ROLE_ADMIN);
+        if (!authUtils.isUnsecureLoginAllowed()) {
+            authUtils.setAuthenticationToSecurityContext("notif", "notif", AuthRole.ROLE_ADMIN);
+        }
 
         try {
             final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
             final NotificationType notificationType = NotificationType.valueOf(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE));
+
+            LOG.info("Received message with messageId [" + messageId + "] and notification type [" + notificationType + "]");
+
             switch (notificationType) {
                 case MESSAGE_RECEIVED:
                     backendConnector.deliverMessage(messageId);
@@ -95,7 +102,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
                     backendConnector.messageSendSuccess(messageId);
                     break;
                 case MESSAGE_RECEIVED_FAILURE:
-                    backendConnector.messageReceiveFailed(messageId, message.getStringProperty(MessageConstants.ENDPOINT));
+                    doMessageReceiveFailure(message);
 
             }
         } catch (Exception e) {
@@ -104,8 +111,28 @@ public class NotificationListenerService implements MessageListener, JmsListener
         }
     }
 
+
+    protected void doMessageReceiveFailure(final Message message) throws JMSException {
+        MessageReceiveFailureEvent event = new MessageReceiveFailureEvent();
+        final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+        event.setMessageId(messageId);
+        final String errorCode = message.getStringProperty(MessageConstants.ERROR_CODE);
+        final String errorDetail = message.getStringProperty(MessageConstants.ERROR_DETAIL);
+        ErrorResultImpl errorResult = new ErrorResultImpl();
+        try {
+            errorResult.setErrorCode(ErrorCode.findBy(errorCode));
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Could not find error code for [" + errorCode + "]");
+        }
+        errorResult.setErrorDetail(errorDetail);
+        errorResult.setMessageInErrorId(messageId);
+        event.setErrorResult(errorResult);
+        event.setEndpoint(message.getStringProperty(MessageConstants.ENDPOINT));
+        backendConnectorDelegate.messageReceiveFailed(backendConnector, event);
+    }
+
     public final Collection<String> listPendingMessages() {
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
 
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
@@ -160,7 +187,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public void removeFromPending(final String messageId) throws MessageNotFoundException {
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
 
         if (this.mode == BackendConnector.Mode.PUSH) {

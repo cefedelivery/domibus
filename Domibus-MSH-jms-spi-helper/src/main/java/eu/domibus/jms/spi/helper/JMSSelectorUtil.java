@@ -3,7 +3,8 @@ package eu.domibus.jms.spi.helper;
 import java.util.Map;
 
 /**
- * Created by Cosmin Baciu on 05-Sep-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 public interface JMSSelectorUtil {
 

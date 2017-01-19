@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.common.*;
@@ -174,8 +155,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
                 this.persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
                 try {
-                    backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
-                } catch(SubmissionValidationException e) {
+                    backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
+                } catch (SubmissionValidationException e) {
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), null, e);
                 }
             }
@@ -186,7 +167,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (final EbMS3Exception e) {
             try {
                 if (!pingMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
-                    backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED_FAILURE);
+                    backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), createErrorResult(e));
                 }
             } catch (Exception ex) {
                 LOG.warn("could not notify backend of rejected message ", ex);
@@ -195,6 +176,19 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
 
         return responseMessage;
+    }
+
+    private ErrorResult createErrorResult(EbMS3Exception ebm3Exception) {
+        ErrorResultImpl result = new ErrorResultImpl();
+        result.setMshRole(MSHRole.RECEIVING);
+        result.setMessageInErrorId(ebm3Exception.getRefToMessageId());
+        try {
+            result.setErrorCode(ebm3Exception.getErrorCodeObject());
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Could not find error code for [" + ebm3Exception.getErrorCode() + "]");
+        }
+        result.setErrorDetail(ebm3Exception.getErrorDetail());
+        return result;
     }
 
 

@@ -1,7 +1,7 @@
 package eu.domibus.messaging.jms;
 
 import eu.domibus.api.jms.JMSDestinationHelper;
-import eu.domibus.api.regex.RegexUtil;
+import eu.domibus.api.util.RegexUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,7 +12,8 @@ import javax.annotation.Resource;
 import java.util.Properties;
 
 /**
- * Created by Cosmin Baciu on 31-Aug-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 @Component
 public class JMSDestinationHelperImpl implements JMSDestinationHelper {
