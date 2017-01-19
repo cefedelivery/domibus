@@ -57,6 +57,9 @@ import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 @Rollback
 public abstract class AbstractIT {
 
+    protected static final int SERVICE_PORT = 8090;
+    protected static final String BACKEND_SERVICE_ENDPOINT = "http://localhost:" + SERVICE_PORT + "/domibus/services/backend";
+
     public enum Mode {DATABASE, FILESYSTEM}
 
     protected static final String WS_NOT_QUEUE = "domibus.notification.webservice";
