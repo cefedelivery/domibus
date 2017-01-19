@@ -4,8 +4,6 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.common.model.configuration.Identifier;
-import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.messaging.MessageConstants;
@@ -186,34 +184,6 @@ public class DynamicDiscoveryPModeProviderTest {
         UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(null, null, null, null, null, UUID.randomUUID().toString());
 
         classUnderTest.doDynamicDiscovery(userMessage, MSHRole.SENDING);
-    }
-
-    @Test
-    public void testDoDynamicThings_DynamicDiscoveryEnabled_NewPartyAddedToCandidates() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + DYNAMIC_DISCOVERY_ENABLED));
-        assertTrue(initializeConfiguration(testData));
-
-        doReturn(testData).when(configurationDAO).readEager();
-        doReturn(true).when(configurationDAO).configurationExists();
-        dynamicDiscoveryPModeProvider.dynamicReceiverProcesses = dynamicDiscoveryPModeProvider.findDynamicReceiverProcesses();
-
-        Endpoint testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, ADDRESS, ALIAS_CN_AVAILABLE);
-        doReturn(testDataEndpoint).when(dynamicDiscoveryService).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
-
-        doReturn(true).when(trustStoreService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
-
-        UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UUID.randomUUID().toString());
-
-
-        dynamicDiscoveryPModeProvider.doDynamicDiscovery(userMessage, MSHRole.SENDING);
-        Party expectedParty = new Party();
-        expectedParty.setName(EXPECTED_COMMON_NAME);
-        expectedParty.setEndpoint(ADDRESS);
-        Identifier expectedIdentifier = new Identifier();
-        expectedIdentifier.setPartyId(EXPECTED_COMMON_NAME);
-        expectedParty.getIdentifiers().add(expectedIdentifier);
-
-        assertTrue(dynamicDiscoveryPModeProvider.getConfiguration().getBusinessProcesses().getParties().contains(expectedParty));
     }
 
     @Test
