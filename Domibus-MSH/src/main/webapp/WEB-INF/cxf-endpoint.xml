@@ -38,7 +38,11 @@
         </cxf:inInterceptors>
         <cxf:outInterceptors>
             <ref bean="logOutbound" />
+            <ref bean="attachmentCleanupInterceptor"/>
         </cxf:outInterceptors>
+        <cxf:outFaultInterceptors>
+            <ref bean="attachmentCleanupInterceptor"/>
+        </cxf:outFaultInterceptors>
         <cxf:features>
             <cxf:logging />
         </cxf:features>
@@ -68,8 +72,9 @@
 
     <bean id="propertyValueExchangeInterceptor" class="eu.domibus.ebms3.receiver.PropertyValueExchangeInterceptor"/>
 
-    <bean id="setPolicyOutInterceptor" class="eu.domibus.ebms3.sender.SetPolicyOutInterceptor">
-    </bean>
+    <bean id="setPolicyOutInterceptor" class="eu.domibus.ebms3.sender.SetPolicyOutInterceptor"/>
+
+    <bean id="attachmentCleanupInterceptor" class="eu.domibus.ebms3.common.AttachmentCleanupInterceptor"/>
 
     <!-- DomibusAlgorithmSuiteLoader -->
     <bean id="algorithmSuiteLoader" class="eu.domibus.ebms3.security.custom.DomibusAlgorithmSuiteLoader">
