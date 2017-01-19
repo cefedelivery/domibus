@@ -40,8 +40,10 @@ import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.Session;
+import java.text.MessageFormat;
 import java.util.List;
 
+import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
 
 /**
@@ -99,28 +101,45 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Transactional
     public void receiveMessage(final MapMessage map) {
         try {
-            String errorMessage = null;
-            String messageID = null;
+            String messageID = map.getStringProperty(MESSAGE_ID);
+            final String jmsCorrelationID = map.getJMSCorrelationID();
+            final String messageType = map.getStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY);
 
-            if (MESSAGE_TYPE_SUBMIT.equals(map.getStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY))) {
-                try {
-                    messageID = this.submit(map);
-                } catch (final MessagingProcessingException e) {
-                    BackendJMSImpl.LOG.error("Exception occurred: ", e);
-                    errorMessage = e.getMessage() + "\nError Code: " + (e.getEbms3ErrorCode() != null ? e.getEbms3ErrorCode().getErrorCodeName() : " not set");
-                }
-            } else {
-                errorMessage = "Illegal messageType: " + map.getStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY) +
-                        "on message with JMSCorrelationId:" + map.getJMSCorrelationID() + ". Only " + MESSAGE_TYPE_SUBMIT + " messages are accepted on this queue";
-                LOG.error(errorMessage);
+            LOG.info("Received message with messageId [" + messageID + "], jmsCorrelationID [" + jmsCorrelationID + "]");
+
+            if (!MESSAGE_TYPE_SUBMIT.equals(messageType)) {
+                String wrongMessageTypeMessage = getWrongMessageTypeErrorMessage(messageID, jmsCorrelationID, messageType);
+                LOG.error(wrongMessageTypeMessage);
+                sendReplyMessage(messageID, wrongMessageTypeMessage, jmsCorrelationID);
+                return;
             }
-            final MessageCreator replyMessageCreator = new ReplyMessageCreator(messageID, errorMessage, map.getJMSCorrelationID());
-            replyJmsTemplate.send(replyMessageCreator);
 
+            String errorMessage = null;
+            try {
+                //in case the messageID is not sent by the user it will be generated
+                messageID = submit(map);
+            } catch (final MessagingProcessingException e) {
+                LOG.error("Exception occurred receiving message [" + messageID + "], jmsCorrelationID [" + jmsCorrelationID + "]", e);
+                errorMessage = e.getMessage() + ": Error Code: " + (e.getEbms3ErrorCode() != null ? e.getEbms3ErrorCode().getErrorCodeName() : " not set");
+            }
+
+            sendReplyMessage(messageID, errorMessage, jmsCorrelationID);
+
+            LOG.info("Submitted message with messageId [" + messageID + "], jmsCorrelationID [" + jmsCorrelationID + "]");
         } catch (Exception e) {
-            LOG.error("Exception occurred while receiving message", e);
-            throw new RuntimeException("Exception occurred while receiving message", e);
+            LOG.error("Exception occurred while receiving message [" + map + "]" , e);
+            throw new RuntimeException("Exception occurred while receiving message [" + map + "]", e);
         }
+    }
+
+    protected String getWrongMessageTypeErrorMessage(String messageID, String jmsCorrelationID, String messageType) {
+        return MessageFormat.format("Illegal messageType [{0}] on message with JMSCorrelationId [{1}] and messageId [{2}]. Only [{3}] messages are accepted on this queue",
+                            messageType, jmsCorrelationID, messageID, MESSAGE_TYPE_SUBMIT);
+    }
+
+    protected void sendReplyMessage(final String messageId, final String errorMessage, final String correlationId) {
+        final MessageCreator replyMessageCreator = new ReplyMessageCreator(messageId, errorMessage, correlationId);
+        replyJmsTemplate.send(replyMessageCreator);
     }
 
     @Override

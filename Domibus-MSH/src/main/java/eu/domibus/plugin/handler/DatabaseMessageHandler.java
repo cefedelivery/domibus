@@ -223,7 +223,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 messageId = messageIdGenerator.generateMessageId();
                 userMessage.getMessageInfo().setMessageId(messageId);
             } else if (messageId.length() > 255) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "MessageId value is too long (over 255 characters)", null, null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "MessageId value is too long (over 255 characters)", messageId, null);
             }
             String refToMessageId = userMessage.getMessageInfo().getRefToMessageId();
             if (refToMessageId != null && refToMessageId.length() > 255) {
@@ -243,7 +243,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             try {
                 pmodeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
             } catch (IllegalStateException e) { //if no pmodes are configured
-                LOG.debug(e);
                 throw new PModeMismatchException("PMode could not be found. Are PModes configured in the database?");
             }
 
@@ -307,6 +306,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
         } catch (final EbMS3Exception e) {
             LOG.error("Error submitting to backendName :" + backendName, e);
+            //TODO revise the way how we handle the exceptions here; the exception factory below should be removed
             throw MessagingExceptionFactory.transform(e);
         }
     }
