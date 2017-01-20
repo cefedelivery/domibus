@@ -11,6 +11,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
@@ -42,9 +43,8 @@ import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMResult;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -325,8 +325,118 @@ public class MSHWebServiceTest {
         } catch (Exception e) {
             Assert.fail("No exception was expected with valid configuration input !!!");
         }
+
+        new Verifications() {{
+            mshWebservice.saveResponse(withAny(soapResponseMessage));
+            times = 1;
+        }};
     }
 
+    @Test
+    public void testGenerateReceipt_NoReliability(@Injectable final LegConfiguration legConfiguration) {
+        new Expectations(mshWebservice) {{
+            legConfiguration.getReliability();
+            result = null;
+        }};
+
+        try {
+            mshWebservice.generateReceipt(soapRequestMessage, legConfiguration, false);
+        } catch (Exception e) {
+            Assert.fail("No exception was expected with valid configuration input !!!");
+        }
+
+        new Verifications() {{
+            //verify that saveResponse is not invoked
+            mshWebservice.saveResponse(withAny(soapResponseMessage));
+            times = 0;
+        }};
+    }
+
+    @Test
+    public void testGenerateReceipt_NoResponse(@Injectable final LegConfiguration legConfiguration) {
+        new Expectations(mshWebservice) {{
+            legConfiguration.getReliability();
+            result = "AS4Reliability";
+
+            legConfiguration.getReliability().getReplyPattern();
+            result = ReplyPattern.CALLBACK;
+        }};
+
+        try {
+            mshWebservice.generateReceipt(soapRequestMessage, legConfiguration, false);
+        } catch (Exception e) {
+            Assert.fail("No exception was expected with valid configuration input !!!");
+        }
+
+        new Verifications() {{
+            mshWebservice.saveResponse(withAny(soapResponseMessage));
+            times = 0;
+        }};
+    }
+
+
+    @Test
+    public void testGenerateReceipt_TransformException(@Injectable final LegConfiguration legConfiguration, @Injectable final Source messageToReceiptTransform, @Injectable final Transformer transformer, @Injectable final DOMResult domResult) throws SOAPException, TransformerException {
+        new Expectations(mshWebservice) {{
+            legConfiguration.getReliability();
+            result = "AS4Reliability";
+
+            legConfiguration.getReliability().getReplyPattern();
+            result = ReplyPattern.RESPONSE;
+
+            messageFactory.createMessage();
+            result = soapResponseMessage;
+
+            transformerFactory.newTransformer(withAny(messageToReceiptTransform));
+            result = transformer;
+
+            transformer.transform(withAny(messageToReceiptTransform), withAny(domResult));
+            result = new TransformerException("TEST Transformer Exception");
+        }};
+
+        try {
+            mshWebservice.generateReceipt(soapRequestMessage, legConfiguration, false);
+            Assert.fail("Expected Transformer exception to be raised !!!");
+        } catch (EbMS3Exception e) {
+            Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0201, e.getErrorCode());
+        }
+
+        new Verifications() {{
+            mshWebservice.saveResponse(withAny(soapResponseMessage));
+            times = 0;
+        }};
+    }
+
+
+        /*@Test
+    public void testSaveResponse() throws SOAPException, ParserConfigurationException, JAXBException {
+
+        final Messaging messaging = createSampleMessaging();
+        final SignalMessage signalMessage = new SignalMessage();
+        messaging.setSignalMessage(signalMessage);
+
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document doc = db.newDocument();
+        JAXBContext jaxbContext = JAXBContext.newInstance(Messaging.class);
+        jaxbContext.createMarshaller().marshal(messaging, doc);
+        final Node messagingNode = doc.getFirstChild();
+
+        new Expectations() {{
+            soapResponseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME);
+            result = messagingNode;
+
+            messaging.getSignalMessage();
+            result = signalMessage;
+        }};
+
+        mshWebservice.saveResponse(soapResponseMessage);
+    }*/
+
+    /*//TODO persistReceivedMessage UT*/
+
+    /*//TODO getFinalRecipientName  UT*/
 
     @Test
     public void test_HandlePayLoads_HappyFlowUsingCID(@Injectable final UserMessage userMessage, @Injectable final AttachmentPart attachmentPart1, @Injectable final AttachmentPart attachmentPart2) {
@@ -456,7 +566,6 @@ public class MSHWebServiceTest {
         }
     }
 
-
     @Test
     public void test_HandlePayLoads_NoPayloadFound(@Injectable final UserMessage userMessage, @Injectable final AttachmentPart attachmentPart1, @Injectable final AttachmentPart attachmentPart2) {
 
@@ -501,34 +610,10 @@ public class MSHWebServiceTest {
 
     }
 
+    /*TODO getMessaging UT*/
 
 
 
-    /*@Test
-    public void testSaveResponse() throws SOAPException, ParserConfigurationException, JAXBException {
-
-        final Messaging messaging = createSampleMessaging();
-        final SignalMessage signalMessage = new SignalMessage();
-        messaging.setSignalMessage(signalMessage);
-
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.newDocument();
-        JAXBContext jaxbContext = JAXBContext.newInstance(Messaging.class);
-        jaxbContext.createMarshaller().marshal(messaging, doc);
-        final Node messagingNode = doc.getFirstChild();
-
-        new Expectations() {{
-            soapResponseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME);
-            result = messagingNode;
-
-            messaging.getSignalMessage();
-            result = signalMessage;
-        }};
-
-        mshWebservice.saveResponse(soapResponseMessage);
-    }*/
 
     public Configuration loadSamplePModeConfiguration(String samplePModeFileRelativeURI) throws JAXBException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         LOG.debug("Inside sample PMode configuration");
@@ -543,7 +628,6 @@ public class MSHWebServiceTest {
 
         return configuration;
     }
-
 
     public LegConfiguration getLegFromConfiguration(Configuration configuration, String legName) {
         LegConfiguration result = null;
@@ -564,7 +648,6 @@ public class MSHWebServiceTest {
         }
         return result;
     }
-
 
     protected Messaging createSampleMessaging() {
         Messaging messaging = new ObjectFactory().createMessaging();
