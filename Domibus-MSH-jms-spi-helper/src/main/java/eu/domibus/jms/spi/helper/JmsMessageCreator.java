@@ -1,6 +1,6 @@
 package eu.domibus.jms.spi.helper;
 
-import eu.domibus.jms.spi.JmsMessageSPI;
+import eu.domibus.jms.spi.InternalJmsMessage;
 import org.springframework.jms.core.MessageCreator;
 
 import javax.jms.JMSException;
@@ -10,25 +10,26 @@ import javax.jms.TextMessage;
 import java.util.Map;
 
 /**
- * Created by Cosmin Baciu on 17-Aug-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 public class JmsMessageCreator implements MessageCreator {
 
-    private final JmsMessageSPI jmsMessageSPI;
+    private final InternalJmsMessage internalJmsMessage;
 
-    public JmsMessageCreator(JmsMessageSPI message) {
-        this.jmsMessageSPI = message;
+    public JmsMessageCreator(InternalJmsMessage message) {
+        this.internalJmsMessage = message;
     }
 
     @Override
     public Message createMessage(Session session) throws JMSException {
         TextMessage result = session.createTextMessage();
 
-        result.setText(jmsMessageSPI.getContent());
-        if (jmsMessageSPI.getType() != null) {
-            result.setJMSType(jmsMessageSPI.getType());
+        result.setText(internalJmsMessage.getContent());
+        if (internalJmsMessage.getType() != null) {
+            result.setJMSType(internalJmsMessage.getType());
         }
-        Map<String, Object> customProperties = jmsMessageSPI.getCustomProperties();
+        Map<String, Object> customProperties = internalJmsMessage.getCustomProperties();
         if (!customProperties.isEmpty()) {
             for (String pName : customProperties.keySet()) {
                 Object pValue = customProperties.get(pName);

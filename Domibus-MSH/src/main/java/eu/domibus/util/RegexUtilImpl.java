@@ -1,6 +1,6 @@
-package eu.domibus.regex;
+package eu.domibus.util;
 
-import eu.domibus.api.regex.RegexUtil;
+import eu.domibus.api.util.RegexUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -9,7 +9,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by Cosmin Baciu on 31-Aug-16.
+ * @author  Cosmin Baciu
+ * @since 3.2
  */
 @Component
 public class RegexUtilImpl implements RegexUtil {

@@ -1,7 +1,6 @@
 package eu.domibus.messaging.jms;
 
-import eu.domibus.api.regex.RegexUtil;
-import eu.domibus.messaging.jms.JMSDestinationHelperImpl;
+import eu.domibus.api.util.RegexUtil;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -13,7 +12,8 @@ import org.junit.runner.RunWith;
 import java.util.Properties;
 
 /**
- * Created by Cosmin Baciu on 02-Sep-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 @RunWith(JMockit.class)
 public class JMSDestinationHelperImplTest {

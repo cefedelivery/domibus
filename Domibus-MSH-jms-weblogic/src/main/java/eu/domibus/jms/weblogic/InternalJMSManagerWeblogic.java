@@ -1,9 +1,9 @@
 package eu.domibus.jms.weblogic;
 
 import eu.domibus.api.jms.JMSDestinationHelper;
-import eu.domibus.jms.spi.JMSDestinationSPI;
-import eu.domibus.jms.spi.JMSManagerSPI;
-import eu.domibus.jms.spi.JmsMessageSPI;
+import eu.domibus.jms.spi.InternalJMSDestination;
+import eu.domibus.jms.spi.InternalJMSManager;
+import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import org.apache.commons.lang.StringUtils;
@@ -30,12 +30,13 @@ import java.io.StringReader;
 import java.util.*;
 
 /**
- * Created by Cosmin Baciu on 17-Aug-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 @Component
-public class JMSManagerWeblogic implements JMSManagerSPI {
+public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
-    private static final Log LOG = LogFactory.getLog(JMSManagerWeblogic.class);
+    private static final Log LOG = LogFactory.getLog(InternalJMSManagerWeblogic.class);
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
     private static final String PROPERTY_JNDI_NAME = "Jndi";
@@ -56,28 +57,22 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
     JMSSelectorUtil jmsSelectorUtil;
 
     @Override
-    public Map<String, JMSDestinationSPI> getDestinations() {
-        Map<String, JMSDestinationSPI> destinationMap = new TreeMap<String, JMSDestinationSPI>();
+    public Map<String, InternalJMSDestination> getDestinations() {
+        Map<String, InternalJMSDestination> destinationMap = new TreeMap<String, InternalJMSDestination>();
         try {
             MBeanServerConnection mbsc = jmxHelper.getDomainRuntimeMBeanServerConnection();
             ObjectName drs = jmxHelper.getDomainRuntimeService();
-            ObjectName config = (ObjectName) mbsc.getAttribute(drs, "DomainConfiguration");
             ObjectName[] servers = (ObjectName[]) mbsc.getAttribute(drs, "ServerRuntimes");
             for (ObjectName server : servers) {
                 LOG.debug("Server " + server);
-                String serverAddress = (String) mbsc.getAttribute(server, "ListenAddress");
-                if (serverAddress.contains("/")) {
-                    serverAddress = serverAddress.substring(0, serverAddress.indexOf("/"));
-                }
-                Integer serverPort = (Integer) mbsc.getAttribute(server, "ListenPort");
-                ObjectName jms = (ObjectName) mbsc.getAttribute(server, "JMSRuntime");
-                ObjectName[] jmsServers = (ObjectName[]) mbsc.getAttribute(jms, "JMSServers");
+                ObjectName jmsRuntime = (ObjectName) mbsc.getAttribute(server, "JMSRuntime");
+                ObjectName[] jmsServers = (ObjectName[]) mbsc.getAttribute(jmsRuntime, "JMSServers");
                 for (ObjectName jmsServer : jmsServers) {
                     LOG.debug("JMS Server " + jmsServer);
                     ObjectName[] jmsDestinations = (ObjectName[]) mbsc.getAttribute(jmsServer, "Destinations");
                     for (ObjectName jmsDestination : jmsDestinations) {
                         LOG.debug("JMS Destination " + jmsDestination);
-                        JMSDestinationSPI destination = new JMSDestinationSPI();
+                        InternalJMSDestination destination = new InternalJMSDestination();
                         String destinationFQName = (String) mbsc.getAttribute(jmsDestination, "Name");
                         String destinationName = getQueueName(destinationFQName);
                         destination.setName(destinationName);
@@ -147,37 +142,17 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         return queueMap;
     }
 
-    protected Map<String, ObjectName> getTopicMap(MBeanServerConnection mbsc) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException,
-            ReflectionException, IOException {
-        if (topicMap != null) {
-            return topicMap;
-        }
-        topicMap = new HashMap<String, ObjectName>();
-        ObjectName drs = jmxHelper.getDomainRuntimeService();
-        ObjectName config = (ObjectName) mbsc.getAttribute(drs, "DomainConfiguration");
-        ObjectName[] configJmsSystemResources = (ObjectName[]) mbsc.getAttribute(config, "JMSSystemResources");
-        for (ObjectName configJmsSystemResource : configJmsSystemResources) {
-            ObjectName configJmsResource = (ObjectName) mbsc.getAttribute(configJmsSystemResource, "JMSResource");
-            ObjectName[] configTopics = (ObjectName[]) mbsc.getAttribute(configJmsResource, "Topics");
-            for (ObjectName configTopic : configTopics) {
-                String configTopicName = (String) mbsc.getAttribute(configTopic, "Name");
-                topicMap.put(configTopicName, configTopic);
-            }
-        }
-        return topicMap;
-    }
-
     @Override
-    public boolean sendMessage(JmsMessageSPI message, String destination) {
-        JMSDestinationSPI jmsDestinationSPI = getJMSDestinationSPI(destination);
-        if (jmsDestinationSPI == null) {
+    public boolean sendMessage(InternalJmsMessage message, String destination) {
+        InternalJMSDestination internalJmsDestination = getInternalJMSDestination(destination);
+        if (internalJmsDestination == null) {
             LOG.warn("Destination [" + destination + "] does not exists");
             return false;
         }
 
         javax.jms.Queue jmsDestination = null;
         try {
-            String destinationJndi = jmsDestinationSPI.getProperty(PROPERTY_JNDI_NAME);
+            String destinationJndi = internalJmsDestination.getProperty(PROPERTY_JNDI_NAME);
             LOG.debug("Found JNDI [" + destinationJndi + "] for destination [" + destination + "]");
             jmsDestination = InitialContext.doLookup(destinationJndi);
         } catch (NamingException e) {
@@ -189,13 +164,13 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
     }
 
     @Override
-    public void sendMessage(JmsMessageSPI message, javax.jms.Queue destination) {
+    public void sendMessage(InternalJmsMessage message, javax.jms.Queue destination) {
         jmsOperations.send(destination, new JmsMessageCreator(message));
     }
 
     @Override
     public boolean deleteMessages(String source, String[] messageIds) {
-        JMSDestinationSPI selectedDestination = getJMSDestinationSPI(source);
+        InternalJMSDestination selectedDestination = getInternalJMSDestination(source);
         try {
             ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
             int deleted = deleteMessages(destination, jmsSelectorUtil.getSelector(messageIds));
@@ -207,13 +182,13 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
     }
 
     @Override
-    public JmsMessageSPI getMessage(String source, String messageId) {
-        JMSDestinationSPI selectedDestination = getJMSDestinationSPI(source);
-        if (selectedDestination != null) {
-            String destinationType = selectedDestination.getType();
+    public InternalJmsMessage getMessage(String source, String messageId) {
+        InternalJMSDestination internalJmsDestination = getInternalJMSDestination(source);
+        if (internalJmsDestination != null) {
+            String destinationType = internalJmsDestination.getType();
             if ("Queue".equals(destinationType)) {
                 try {
-                    ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
+                    ObjectName destination = internalJmsDestination.getProperty(PROPERTY_OBJECT_NAME);
                     return getMessageFromDestination(destination, messageId);
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
@@ -223,16 +198,16 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         return null;
     }
 
-    private JmsMessageSPI getMessageFromDestination(ObjectName destination, String messageId) throws Exception {
-        List<JmsMessageSPI> messages = getMessagesFromDestination(destination, jmsSelectorUtil.getSelector(messageId));
+    protected InternalJmsMessage getMessageFromDestination(ObjectName destination, String messageId) throws Exception {
+        List<InternalJmsMessage> messages = getMessagesFromDestination(destination, jmsSelectorUtil.getSelector(messageId));
         if (!messages.isEmpty()) {
             return messages.get(0);
         }
         return null;
     }
 
-    private List<JmsMessageSPI> getMessagesFromDestination(ObjectName destination, String selector) throws Exception {
-        List<JmsMessageSPI> messages = new ArrayList<JmsMessageSPI>();
+    protected List<InternalJmsMessage> getMessagesFromDestination(ObjectName destination, String selector) throws Exception {
+        List<InternalJmsMessage> messages = new ArrayList<InternalJmsMessage>();
         MBeanServerConnection mbsc = jmxHelper.getDomainRuntimeMBeanServerConnection();
         if (selector == null) {
             selector = "true";
@@ -254,31 +229,40 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
 
 
         if (allMessageMetaData != null) {
-            for (CompositeData messageMetaData : allMessageMetaData) {
-                JmsMessageSPI message = convertMessage(messageMetaData);
-                String messageId = message.getId();
-                CompositeData messageDataDetails = (CompositeData) mbsc.invoke(destination, "getMessage", new Object[]{messageCursor, messageId}, new String[]{
-                        String.class.getName(), String.class.getName()});
-                message = convertMessage(messageDataDetails);
-                messages.add(message);
+            for (CompositeData compositeData : allMessageMetaData) {
+                try {
+                    InternalJmsMessage message = getInternalJmsMessage(destination, mbsc, messageCursor, compositeData);
+                    messages.add(message);
+                } catch (Exception e) {
+                    LOG.error("Error converting message [" + compositeData + "]", e);
+                }
             }
         }
         return messages;
     }
 
-    protected JMSDestinationSPI getJMSDestinationSPI(String name) {
+    protected InternalJmsMessage getInternalJmsMessage(ObjectName destination, MBeanServerConnection mbsc, String messageCursor, CompositeData messageMetaData) throws Exception {
+        InternalJmsMessage message = convertMessage(messageMetaData);
+        String messageId = message.getId();
+        CompositeData messageDataDetails = (CompositeData) mbsc.invoke(destination, "getMessage", new Object[]{messageCursor, messageId}, new String[]{
+                String.class.getName(), String.class.getName()});
+        message = convertMessage(messageDataDetails);
+        return message;
+    }
+
+    protected InternalJMSDestination getInternalJMSDestination(String name) {
         String queueName = getQueueName(name);
         return getDestinations().get(queueName);
     }
 
     @Override
-    public List<JmsMessageSPI> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
-        List<JmsMessageSPI> messages = new ArrayList<>();
+    public List<InternalJmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
+        List<InternalJmsMessage> messages = new ArrayList<>();
         if (source == null) {
             return messages;
         }
 
-        JMSDestinationSPI selectedDestination = getJMSDestinationSPI(source);
+        InternalJMSDestination selectedDestination = getInternalJMSDestination(source);
         if (selectedDestination != null) {
             String destinationType = selectedDestination.getType();
             if ("Queue".equals(destinationType)) {
@@ -307,19 +291,16 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         return messages;
     }
 
-    private int deleteMessages(ObjectName destination, String selector) throws Exception {
+    protected int deleteMessages(ObjectName destination, String selector) throws Exception {
         MBeanServerConnection mbsc = jmxHelper.getDomainRuntimeMBeanServerConnection();
         Integer deleted = (Integer) mbsc.invoke(destination, "deleteMessages", new Object[]{selector}, new String[]{String.class.getName()});
         return deleted;
     }
 
-
-
-
     @Override
     public boolean moveMessages(String source, String destination, String[] messageIds) {
-        JMSDestinationSPI from = getJMSDestinationSPI(source);
-        JMSDestinationSPI to = getJMSDestinationSPI(destination);
+        InternalJMSDestination from = getInternalJMSDestination(source);
+        InternalJMSDestination to = getInternalJMSDestination(destination);
         try {
             ObjectName fromDestination = from.getProperty(PROPERTY_OBJECT_NAME);
             ObjectName toDestination = to.getProperty(PROPERTY_OBJECT_NAME);
@@ -331,7 +312,7 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         }
     }
 
-    private int moveMessages(ObjectName from, ObjectName to, String selector) throws Exception {
+    protected int moveMessages(ObjectName from, ObjectName to, String selector) throws Exception {
         MBeanServerConnection mbsc = jmxHelper.getDomainRuntimeMBeanServerConnection();
         CompositeData toDestinationInfo = (CompositeData) mbsc.getAttribute(to, "DestinationInfo");
         Integer moved = (Integer) mbsc.invoke(from, "moveMessages", new Object[]{selector, toDestinationInfo}, new String[]{String.class.getName(),
@@ -339,8 +320,8 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         return moved;
     }
 
-    public JmsMessageSPI convertMessage(CompositeData messageData) throws Exception {
-        JmsMessageSPI message = new JmsMessageSPI();
+    public InternalJmsMessage convertMessage(CompositeData messageData) throws Exception {
+        InternalJmsMessage message = new InternalJmsMessage();
         String xmlMessage = String.valueOf(messageData.get("MessageXMLText"));
         Document xmlDocument = parseXML(xmlMessage);
         String ns = "http://www.bea.com/WLS/JMS/Message";
@@ -364,12 +345,16 @@ public class JMSManagerWeblogic implements JMSManagerSPI {
         List<Element> properties = getChildElements(propertiesRoot, "property");
         for (Element property : properties) {
             String key = property.getAttribute("name");
-            String value = getFirstChildElement(property).getTextContent();
+            final Element firstChildElement = getFirstChildElement(property);
+            String value = null;
+            if(firstChildElement != null) {
+                value = firstChildElement.getTextContent();
+            }
             message.getProperties().put(key, value);
         }
         Element jmsBody = getChildElement(root, "Body");
         if (jmsBody != null) {
-            message.setContent(jmsBody.getTextContent());
+            message.setContent(StringUtils.trim(jmsBody.getTextContent()));
         }
         return message;
     }

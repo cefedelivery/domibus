@@ -1,7 +1,8 @@
-package eu.domibus.api.regex;
+package eu.domibus.api.util;
 
 /**
- * Created by Cosmin Baciu on 31-Aug-16.
+ * @author  Cosmin Baciu
+ * @since 3.2
  */
 public interface RegexUtil {
 

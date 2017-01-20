@@ -13,6 +13,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Cosmin Baciu
+ * @since 3.2
+ */
 @Component
 public class SecurityHelper {
 

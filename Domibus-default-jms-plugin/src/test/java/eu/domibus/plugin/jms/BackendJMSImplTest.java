@@ -1,12 +1,13 @@
 package eu.domibus.plugin.jms;
 
+import eu.domibus.common.ErrorResult;
+import eu.domibus.common.ErrorResultImpl;
+import eu.domibus.common.MessageReceiveFailureEvent;
+import eu.domibus.common.NotificationType;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.activemq.command.ActiveMQMapMessage;
 import org.junit.Test;
@@ -111,6 +112,26 @@ public class BackendJMSImplTest {
 
             assertEquals(capturedMessageId, messageId);
             assertEquals(capturedJmsCorrelationId, jmsCorrelationId);
+        }};
+    }
+
+    @Test
+    public void testMessageReceiveFailed(@Mocked ErrorMessageCreator errorMessageCreator) throws Exception {
+        MessageReceiveFailureEvent event = new MessageReceiveFailureEvent();
+        final ErrorResult errorResult = new ErrorResultImpl();
+        event.setErrorResult(errorResult);
+        final String myEndpoint = "myEndpoint";
+        event.setEndpoint(myEndpoint);
+        final String messageId = "1";
+        event.setMessageId(messageId);
+
+        backendJMS.messageReceiveFailed(event);
+
+        new Verifications() {{
+            withCapture(new ErrorMessageCreator(errorResult,
+                    myEndpoint,
+                    NotificationType.MESSAGE_RECEIVED_FAILURE));
+
         }};
     }
 }

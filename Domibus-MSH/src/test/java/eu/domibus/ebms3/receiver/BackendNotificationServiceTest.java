@@ -33,6 +33,7 @@ import org.springframework.jms.core.JmsOperations;
 import javax.jms.Queue;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -179,7 +180,8 @@ public class BackendNotificationServiceTest {
             result = null;
         }};
 
-        backendNotificationService.validateAndNotify(userMessage, backendName, notificationType);
+        Map<String, Object> properties = new HashMap<>();
+        backendNotificationService.validateAndNotify(userMessage, backendName, notificationType, properties);
 
         new Verifications() {{
             backendNotificationService.validateSubmission(userMessage, backendName, notificationType);

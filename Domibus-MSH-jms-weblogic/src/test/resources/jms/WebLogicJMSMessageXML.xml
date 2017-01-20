@@ -1,0 +1,22 @@
+<mes:WLJMSMessage xmlns:mes="http://www.bea.com/WLS/JMS/Message">
+    <mes:Header>
+        <mes:JMSMessageID>ID:&lt;704506.1481721027366.0></mes:JMSMessageID>
+        <mes:JMSDeliveryMode>PERSISTENT</mes:JMSDeliveryMode>
+        <mes:JMSExpiration>0</mes:JMSExpiration>
+        <mes:JMSPriority>4</mes:JMSPriority>
+        <mes:JMSRedelivered>false</mes:JMSRedelivered>
+        <mes:JMSTimestamp>1481721027366</mes:JMSTimestamp>
+        <mes:JMSType>myJMSType</mes:JMSType>
+        <mes:Properties>
+            <mes:property name="originalQueue">
+                <mes:String>DomibusErrorNotifyProducerQueue</mes:String>
+            </mes:property>
+            <mes:property name="JMSXDeliveryCount">
+                <mes:Int>0</mes:Int>
+            </mes:property>
+        </mes:Properties>
+    </mes:Header>
+    <mes:Body>
+        <mes:Text>mycontent</mes:Text>
+    </mes:Body>
+</mes:WLJMSMessage>
