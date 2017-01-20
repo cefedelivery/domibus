@@ -220,7 +220,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @param messaging
      * @return result of duplicate handle
      */
-    private Boolean checkDuplicate(final Messaging messaging) {
+    protected Boolean checkDuplicate(final Messaging messaging) {
         LOG.debug("Checking for duplicate messages");
         return userMessageLogDao.findByMessageId(messaging.getUserMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
     }
@@ -232,7 +232,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @param message
      * @return result of ping service and action handle
      */
-    private Boolean checkPingMessage(final UserMessage message) {
+    protected Boolean checkPingMessage(final UserMessage message) {
         LOG.debug("Checking if it is a ping message");
         return eu.domibus.common.model.configuration.Service.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
                 && eu.domibus.common.model.configuration.Action.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
