@@ -1,6 +1,5 @@
 package eu.domibus.ebms3.common.dao;
 
-import com.google.gson.GsonBuilder;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -81,6 +80,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
                 if (!process.getInitiatorParties().contains(getConfiguration().getParty())) {
                     process.getInitiatorParties().add(getConfiguration().getParty());
                 }
+                LOG.debug("Found dynamic receiver process: " + process.getName());
                 result.add(process);
             }
         }
@@ -94,6 +94,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
                 if (!process.getResponderParties().contains(getConfiguration().getParty())) {
                     process.getResponderParties().add(getConfiguration().getParty());
                 }
+                LOG.debug("Found dynamic sender process: " + process.getName());
                 result.add(process);
             }
         }
@@ -113,6 +114,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             doDynamicDiscovery(userMessage, mshRole);
 
         }
+        LOG.debug("Recalling findPModeKeyForUserMessage after the dynamic discovery");
         return super.findPModeKeyForUserMessage(userMessage, mshRole);
     }
 
@@ -167,7 +169,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             from = userMessage.getPartyInfo().getFrom().getPartyId().iterator().next();
         }
         if (from == null) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Invalid To party identifier", null, null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Invalid From party identifier", null, null);
         }
 
         return from;
@@ -182,6 +184,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         Party configurationParty = null;
         for (final Party party : getConfiguration().getBusinessProcesses().getParties()) {
             if (StringUtils.equalsIgnoreCase(party.getName(), name)) {
+                LOG.debug("Party exists in the pmode: " + party.getName());
                 configurationParty = party;
                 break;
             }
@@ -189,6 +192,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
         // remove party if exists to add it with latest values for address and type
         if (configurationParty != null) {
+            LOG.debug("Remove party to add with new values " + configurationParty.getName());
             getConfiguration().getBusinessProcesses().getParties().remove(configurationParty);
         }
 
@@ -196,7 +200,9 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         String newEndpoint = endpoint != null ? endpoint: (configurationParty.getEndpoint() == null ? "" : configurationParty.getEndpoint());
         LOG.debug("New endpoint is " + newEndpoint);
         Party newConfigurationParty = buildNewConfigurationParty(name, configurationType, newEndpoint);
+        LOG.debug("Add new configuration party: " + newConfigurationParty.getName());
         getConfiguration().getBusinessProcesses().getParties().add(newConfigurationParty);
+
         return newConfigurationParty;
     }
 
@@ -215,17 +221,20 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     protected PartyIdType updateConfigurationType(String type) {
         Set<PartyIdType> partyIdTypes = getConfiguration().getBusinessProcesses().getPartyIdTypes();
         if (partyIdTypes == null) {
+            LOG.info("Empty partyIdTypes set");
             partyIdTypes = new HashSet<>();
         }
 
         PartyIdType configurationType = null;
         for (final PartyIdType t : partyIdTypes) {
             if (StringUtils.equalsIgnoreCase(t.getValue(), type)) {
+                LOG.debug("PartyIdType exists in the pmode: " + type);
                 configurationType = t;
             }
         }
         // add to partyIdType list
         if (configurationType == null) {
+            LOG.debug("Add new PartyIdType: " + type);
             configurationType = new PartyIdType();
             configurationType.setName(type);
             configurationType.setValue(type);
@@ -236,14 +245,13 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     }
 
     protected synchronized void updateResponderPartiesInPmode(Collection<eu.domibus.common.model.configuration.Process> candidates, Party configurationParty) {
-
-        this.getConfiguration().getBusinessProcesses().getParties().add(configurationParty);
-
+        LOG.debug("updateResponderPartiesInPmode with party " + configurationParty.getName());
         for (final Process candidate : candidates) {
             boolean partyFound = false;
             for (final Party party : candidate.getResponderParties()) {
                 if (StringUtils.equalsIgnoreCase(configurationParty.getName(), party.getName())) {
                     partyFound = true;
+                    LOG.debug("partyFound in candidate: " + candidate.getName());
                     break;
                 }
             }
@@ -254,14 +262,13 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     }
 
     protected synchronized void updateInitiatorPartiesInPmode(Collection<eu.domibus.common.model.configuration.Process> candidates, Party configurationParty) {
-
-        this.getConfiguration().getBusinessProcesses().getParties().add(configurationParty);
-
+        LOG.debug("updateInitiatorPartiesInPmode with party " + configurationParty.getName());
         for (final Process candidate : candidates) {
             boolean partyFound = false;
             for (final Party party : candidate.getInitiatorParties()) {
                 if (StringUtils.equalsIgnoreCase(configurationParty.getName(), party.getName())) {
                     partyFound = true;
+                    LOG.debug("partyFound in candidate: " + candidate.getName());
                     break;
                 }
             }
@@ -277,6 +284,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         try {
             //parse certificate for common name = toPartyId
             cn = certificateService.extractCommonName(endpoint.getCertificate());
+            LOG.debug("Extracted the common name: " + cn);
         } catch (final InvalidNameException e) {
             LOG.error("Error while extracting CommonName from certificate", e);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Error while extracting CommonName from certificate", null, e);
@@ -289,8 +297,11 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         userMessage.getPartyInfo().getTo().getPartyId().clear();
         userMessage.getPartyInfo().getTo().getPartyId().add(receiverParty);
 
+        LOG.debug("Add public certificate to the truststore");
         //add certificate to Truststore
         trustStoreService.addCertificate(endpoint.getCertificate(), cn, true);
+        LOG.debug("Certificate added");
+
     }
 
     protected Endpoint lookupByFinalRecipient(UserMessage userMessage) throws EbMS3Exception {
@@ -307,6 +318,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
                 userMessage.getCollaborationInfo().getService().getValue(),
                 userMessage.getCollaborationInfo().getService().getType());
 
+        LOG.debug("Lookup successful: " + endpoint.getAddress());
         return endpoint;
     }
 
@@ -319,9 +331,11 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
         for (final Process process : processes) {
             if (matchProcess(process, mshRole)) {
+                LOG.debug("Process matched: " + process.getName() + "  " + mshRole);
                 for (final LegConfiguration legConfiguration : process.getLegs()) {
                     if (StringUtils.equalsIgnoreCase(legConfiguration.getService().getValue(), userMessage.getCollaborationInfo().getService().getValue()) &&
                             StringUtils.equalsIgnoreCase(legConfiguration.getAction().getValue(), userMessage.getCollaborationInfo().getAction())) {
+                        LOG.debug("Leg matched, adding process. Leg: " + legConfiguration.getName());
                         candidates.add(process);
                     }
                 }
@@ -345,6 +359,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     protected Property getFinalRecipient(UserMessage userMessage) {
         if(userMessage.getMessageProperties() == null ||
                 userMessage.getMessageProperties().getProperty().isEmpty()) {
+            LOG.warn("Empty property set");
             return null;
         }
 
@@ -352,6 +367,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             if (p.getName() != null && p.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
                 return p;
             }
+            LOG.debug("Property: " + p.getName());
         }
         return null;
     }

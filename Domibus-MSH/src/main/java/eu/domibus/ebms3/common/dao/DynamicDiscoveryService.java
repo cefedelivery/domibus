@@ -53,6 +53,7 @@ public class DynamicDiscoveryService {
     @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
     public Endpoint lookupInformation(final String receiverId, final String receiverIdType, final String documentId, final String processId, final String processIdType) {
 
+        LOG.info("Do the lookup by: " + receiverId + " " + receiverIdType + " " + documentId + " " + processId + " " + processIdType);
         final String smlInfo = domibusProperties.getProperty(SMLZONE_KEY);
         if (smlInfo == null) {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
@@ -66,9 +67,9 @@ public class DynamicDiscoveryService {
             final DocumentIdentifier documentIdentifier = new DocumentIdentifier(documentId);
 
             final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, processIdType);
-
+            LOG.debug("smpClient.getServiceMetadata");
             final ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-
+            LOG.debug("sm.getEndpoint");
             final Endpoint endpoint;
             endpoint = sm.getEndpoint(processIdentifier, new TransportProfile("bdxr-transport-ebms3-as4-v1p0"), TransportProfile.AS4);
 
