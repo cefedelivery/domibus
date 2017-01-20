@@ -28,7 +28,7 @@ public class DefaultBackendConnectorDelegateTest {
     DefaultBackendConnectorDelegate defaultBackendConnectorDelegate;
 
     @Test
-    public void testMessageReceived(@Injectable final BackendConnector backendConnector,
+    public void testMessageReceive(@Injectable final BackendConnector backendConnector,
                                     @Injectable final MessageReceiveFailureEvent event) throws Exception {
 
         new Expectations(defaultBackendConnectorDelegate) {{
@@ -44,7 +44,7 @@ public class DefaultBackendConnectorDelegateTest {
     }
 
     @Test
-    public void testMessageReceivedWithDeprecatedMethodBeingCalled(
+    public void testMessageReceiveWithDeprecatedMethodBeingCalled(
             @Injectable final BackendConnector backendConnector,
             @Injectable final MessageReceiveFailureEvent event) throws Exception {
 
@@ -61,7 +61,7 @@ public class DefaultBackendConnectorDelegateTest {
     }
 
     @Test
-    public void testMessageReceivedWhenCannotDetermineWhichMethodShouldBeCalled(
+    public void testMessageReceiveWhenCannotDetermineWhichMethodShouldBeCalled(
             @Injectable final BackendConnector backendConnector,
             @Injectable final MessageReceiveFailureEvent event) throws Exception {
 
