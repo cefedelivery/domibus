@@ -34,17 +34,21 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.soap.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -133,7 +137,7 @@ public class MSHWebServiceTest {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
         final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
-        final Messaging messaging = createSampleMessaging();
+        final Messaging messaging = createSampleRequestMessaging();
         final UserMessage userMessage = messaging.getUserMessage();
         final Party receiverParty = getPartyFromConfiguration(configuration, RED);
 
@@ -176,7 +180,7 @@ public class MSHWebServiceTest {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
         final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
-        final Messaging messaging = createSampleMessaging();
+        final Messaging messaging = createSampleRequestMessaging();
         final UserMessage userMessage = messaging.getUserMessage();
         final Party receiverParty = getPartyFromConfiguration(configuration, RED);
 
@@ -408,31 +412,23 @@ public class MSHWebServiceTest {
     }
 
 
-        /*@Test
-    public void testSaveResponse() throws SOAPException, ParserConfigurationException, JAXBException {
+    @Test
+    public void testSaveResponse(@Injectable final SOAPHeader soapHeader, @Injectable final Node node) throws SOAPException, ParserConfigurationException, JAXBException, SAXException, IOException {
 
-        final Messaging messaging = createSampleMessaging();
-        final SignalMessage signalMessage = new SignalMessage();
-        messaging.setSignalMessage(signalMessage);
+        final Messaging responseMessaging = null;//createValidSampleResponseMessaging();
 
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.newDocument();
-        JAXBContext jaxbContext = JAXBContext.newInstance(Messaging.class);
-        jaxbContext.createMarshaller().marshal(messaging, doc);
-        final Node messagingNode = doc.getFirstChild();
 
         new Expectations() {{
-            soapResponseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME);
-            result = messagingNode;
+            soapResponseMessage.getSOAPHeader();
+            result = soapHeader;
 
-            messaging.getSignalMessage();
-            result = signalMessage;
+            jaxbContext.createUnmarshaller().unmarshal(withAny(node), Messaging.class).getValue();
+            result = responseMessaging;
+
         }};
 
         mshWebservice.saveResponse(soapResponseMessage);
-    }*/
+    }
 
     /*//TODO persistReceivedMessage UT*/
 
@@ -522,7 +518,7 @@ public class MSHWebServiceTest {
      * @throws TransformerException
      */
     @Test
-    public void test_HandlePayLoads_NullCIDMultiplePayload(@Injectable final UserMessage userMessage, @Injectable final Node bodyContent1) throws SOAPException, TransformerException {
+    public void test_HandlePayLoads_NullCIDMultiplePartInfo(@Injectable final UserMessage userMessage, @Injectable final Node bodyContent1) throws SOAPException, TransformerException {
 
         PartInfo partInfo1 = new PartInfo();
         partInfo1.setHref("");
@@ -613,8 +609,6 @@ public class MSHWebServiceTest {
     /*TODO getMessaging UT*/
 
 
-
-
     public Configuration loadSamplePModeConfiguration(String samplePModeFileRelativeURI) throws JAXBException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         LOG.debug("Inside sample PMode configuration");
         InputStream xmlStream = getClass().getClassLoader().getResourceAsStream(samplePModeFileRelativeURI);
@@ -649,7 +643,7 @@ public class MSHWebServiceTest {
         return result;
     }
 
-    protected Messaging createSampleMessaging() {
+    protected Messaging createSampleRequestMessaging() {
         Messaging messaging = new ObjectFactory().createMessaging();
         messaging.setUserMessage(createSampleUserMessage());
         messaging.getUserMessage().getMessageInfo().setMessageId("1234");
@@ -714,5 +708,19 @@ public class MSHWebServiceTest {
         aProperty.setName(name);
         aProperty.setType(type);
         return aProperty;
+    }
+
+
+    @Test
+    public void createValidSampleResponseMessaging() throws ParserConfigurationException, IOException, SAXException, JAXBException {
+        File validAS4ResponseFile = new File("./src/test/resources/dataset/as4/validAS4Response.xml");
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setNamespaceAware(true);
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document responseFileDocument = documentBuilder.parse(validAS4ResponseFile);
+        Node messagingNode = responseFileDocument.getElementsByTagName("eb3:Messaging").item(0);
+
+        Messaging messaging = JAXBContext.newInstance(Messaging.class).createUnmarshaller().unmarshal(messagingNode, Messaging.class).getValue();
+//        return messaging;
     }
 }
