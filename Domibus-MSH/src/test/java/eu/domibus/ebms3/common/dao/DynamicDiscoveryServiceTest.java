@@ -88,7 +88,7 @@ public class DynamicDiscoveryServiceTest {
         ServiceMetadata sm = new ServiceMetadata();
         X509Certificate testData = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE);
 
-        final ProcessIdentifier processIdentifier = new ProcessIdentifier(TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        ProcessIdentifier processIdentifier = new ProcessIdentifier(TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
 
         Endpoint endpoint = new Endpoint(processIdentifier, new TransportProfile(DynamicDiscoveryService.transportProfileDynDisc), ADDRESS, testData);
         sm.addEndpoint(endpoint);
