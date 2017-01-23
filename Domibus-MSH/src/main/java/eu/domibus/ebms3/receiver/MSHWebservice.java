@@ -374,7 +374,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return userMessage.getMessageInfo().getMessageId();
     }
 
-    private String getFinalRecipientName(UserMessage userMessage) {
+    protected String getFinalRecipientName(UserMessage userMessage) {
         for (Property property : userMessage.getMessageProperties().getProperty()) {
             if (property.getName() != null && property.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
                 return property.getValue();

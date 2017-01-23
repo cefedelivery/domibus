@@ -7,11 +7,13 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
+import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
@@ -47,6 +49,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
+import javax.xml.ws.WebServiceException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,6 +68,7 @@ import java.util.List;
 public class MSHWebServiceTest {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHWebServiceTest.class);
+    private static final String TEST_RESOURCES_DIR = "./src/test/resources";
     private static final String VALID_PMODE_CONFIG_URI = "SamplePModes/domibus-configuration-valid.xml";
     private static final String LEG_NO_SECNO_SEC_ACTION = "pushNoSecnoSecAction";
     private static final String PUSH_TESTCASE1_TC1ACTION = "pushTestcase1tc1Action";
@@ -72,7 +76,7 @@ public class MSHWebServiceTest {
     private static final String DEF_PARTY_TYPE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
     private static final String RED = "red_gw";
     private static final String BLUE = "blue_gw";
-
+    private static final String FINAL_RECEIPIENT_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4";
 
     @Injectable
     BackendNotificationService backendNotificationService;
@@ -131,13 +135,24 @@ public class MSHWebServiceTest {
     @Tested
     MSHWebservice mshWebservice;
 
+    /**
+     * Happy flow unit testing with actual data
+     *
+     * @throws SOAPException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws IllegalAccessException
+     * @throws JAXBException
+     * @throws EbMS3Exception
+     * @throws TransformerException
+     */
     @Test
-    public void testInvoke_tc1Process() throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
+    public void testInvoke_tc1Process_HappyFlow() throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
         final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
-        final Messaging messaging = createSampleRequestMessaging();
+        final Messaging messaging = createDummyRequestMessaging();
         final UserMessage userMessage = messaging.getUserMessage();
         final Party receiverParty = getPartyFromConfiguration(configuration, RED);
 
@@ -151,8 +166,8 @@ public class MSHWebServiceTest {
             mshWebservice.getMessaging(withAny(soapRequestMessage));
             result = messaging;
 
-            userMessageLogDao.findByMessageId(anyString, MSHRole.RECEIVING);
-            result = null;
+            mshWebservice.checkDuplicate(messaging);
+            result = false;
 
             mshWebservice.handlePayloads(soapRequestMessage, userMessage);
             result = any;
@@ -170,17 +185,119 @@ public class MSHWebServiceTest {
         mshWebservice.invoke(soapRequestMessage);
 
         new Verifications() {{
+            mshWebservice.checkCharset(messaging);
+            mshWebservice.checkPingMessage(messaging.getUserMessage());
+            mshWebservice.checkDuplicate(messaging);
+
             mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            mshWebservice.handlePayloads(soapRequestMessage, userMessage);
+            compressionService.handleDecompression(userMessage, legConfiguration);
+            payloadProfileValidator.validate(messaging, pmodeKey);
+            propertyProfileValidator.validate(messaging, pmodeKey);
+            messagingService.storeMessage(messaging);
+
+            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
+            backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
+            times = 0;
         }};
     }
 
+
     @Test
-    public void testInvoke_ErrorInNotifyingIncomingMessage() throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, TransformerException, EbMS3Exception {
+    public void testInvoke_DuplicateMessage() throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
         final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
-        final Messaging messaging = createSampleRequestMessaging();
+        final Messaging messaging = createDummyRequestMessaging();
+
+        new Expectations(mshWebservice) {{
+            soapRequestMessage.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
+            result = pmodeKey;
+
+            pModeProvider.getLegConfiguration(withSubstring(PUSH_TESTCASE1_TC1ACTION));
+            result = legConfiguration;
+
+            mshWebservice.getMessaging(withAny(soapRequestMessage));
+            result = messaging;
+
+            mshWebservice.checkDuplicate(messaging);
+            result = true;
+
+            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
+            result = soapResponseMessage;
+        }};
+
+        mshWebservice.invoke(soapRequestMessage);
+
+        new Verifications() {{
+            mshWebservice.checkCharset(messaging);
+            mshWebservice.checkPingMessage(messaging.getUserMessage());
+            mshWebservice.checkDuplicate(messaging);
+            mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            times = 0;
+            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+            times = 0;
+            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
+            backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
+            times = 0;
+
+        }};
+    }
+
+    @Test
+    public void testInvoke_PingMessage() throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
+
+        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+        final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
+        final Messaging messaging = createDummyRequestMessaging();
+
+        new Expectations(mshWebservice) {{
+            soapRequestMessage.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
+            result = pmodeKey;
+
+            pModeProvider.getLegConfiguration(withSubstring(PUSH_TESTCASE1_TC1ACTION));
+            result = legConfiguration;
+
+            mshWebservice.getMessaging(withAny(soapRequestMessage));
+            result = messaging;
+
+            mshWebservice.checkPingMessage(messaging.getUserMessage());
+            result = true;
+
+            mshWebservice.checkDuplicate(messaging);
+            result = false;
+
+            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
+            result = soapResponseMessage;
+        }};
+
+        mshWebservice.invoke(soapRequestMessage);
+
+        new Verifications() {{
+            mshWebservice.checkCharset(messaging);
+            mshWebservice.checkPingMessage(messaging.getUserMessage());
+            mshWebservice.checkDuplicate(messaging);
+            mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            times = 0;
+            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+            times = 0;
+            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
+            backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
+            times = 0;
+        }};
+    }
+
+    ///TODO
+    @Test
+    public void testInvoke_ErrorInNotifyingIncomingMessage() throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
+
+        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+        final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
+        final Messaging messaging = createDummyRequestMessaging();
         final UserMessage userMessage = messaging.getUserMessage();
         final Party receiverParty = getPartyFromConfiguration(configuration, RED);
 
@@ -194,8 +311,8 @@ public class MSHWebServiceTest {
             mshWebservice.getMessaging(withAny(soapRequestMessage));
             result = messaging;
 
-            userMessageLogDao.findByMessageId(anyString, MSHRole.RECEIVING);
-            result = null;
+            mshWebservice.checkDuplicate(messaging);
+            result = false;
 
             mshWebservice.handlePayloads(soapRequestMessage, userMessage);
             result = any;
@@ -206,8 +323,11 @@ public class MSHWebServiceTest {
             pModeProvider.getReceiverParty(pmodeKey);
             result = receiverParty;
 
+            legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer();
+            result = true;
+
             backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
-            result = new SubmissionValidationException();
+            result = new SubmissionValidationException("Error while submitting the message!!");
 
             mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
             result = soapResponseMessage;
@@ -215,13 +335,26 @@ public class MSHWebServiceTest {
 
         try {
             mshWebservice.invoke(soapRequestMessage);
-        } catch (Exception e) {
-            Assert.assertTrue("EbMS3 exception expected for failure to submit notify incoming message!", e instanceof EbMS3Exception);
-            Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0004, ((EbMS3Exception) e).getErrorCode());
+        } catch (WebServiceException e) {
+            e.printStackTrace();
         }
 
         new Verifications() {{
+            mshWebservice.checkCharset(messaging);
+            mshWebservice.checkPingMessage(messaging.getUserMessage());
+            mshWebservice.checkDuplicate(messaging);
+
             mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            mshWebservice.handlePayloads(soapRequestMessage, userMessage);
+            compressionService.handleDecompression(userMessage, legConfiguration);
+            payloadProfileValidator.validate(messaging, pmodeKey);
+            propertyProfileValidator.validate(messaging, pmodeKey);
+            messagingService.storeMessage(messaging);
+
+            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
+            times = 0;
+            backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
         }};
     }
 
@@ -413,26 +546,223 @@ public class MSHWebServiceTest {
 
 
     @Test
-    public void testSaveResponse(@Injectable final SOAPHeader soapHeader, @Injectable final Node node) throws SOAPException, ParserConfigurationException, JAXBException, SAXException, IOException {
+    public void testSaveResponse(@Injectable final SOAPHeader soapHeader, @Injectable final Iterator messagingIterator, @Injectable final Node node, @Injectable final Messaging receiptMessage) throws SOAPException, ParserConfigurationException, JAXBException, SAXException, IOException {
 
-        final Messaging responseMessaging = null;//createValidSampleResponseMessaging();
-
-
+        final Messaging responseMessaging = createValidSampleResponseMessaging();
+        final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
         new Expectations() {{
             soapResponseMessage.getSOAPHeader();
             result = soapHeader;
 
-            jaxbContext.createUnmarshaller().unmarshal(withAny(node), Messaging.class).getValue();
+            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
+            result = messagingIterator;
+
+            messagingIterator.next();
+            result = node;
+
+            jaxbContext.createUnmarshaller().unmarshal(node, Messaging.class).getValue();
             result = responseMessaging;
 
+            messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId());
+            result = receiptMessage;
         }};
 
         mshWebservice.saveResponse(soapResponseMessage);
+
+        new Verifications() {{
+            signalMessageDao.create(responseSignalMessage);
+            times = 1;
+
+            messagingDao.update(receiptMessage);
+            times = 1;
+        }};
     }
 
-    /*//TODO persistReceivedMessage UT*/
 
-    /*//TODO getFinalRecipientName  UT*/
+    @Test
+    public void testSaveResponse_SuppressedExceptionFlow(@Injectable final SOAPHeader soapHeader, @Injectable final Messaging receiptMessage) throws SOAPException, ParserConfigurationException, JAXBException, SAXException, IOException {
+
+        final Messaging responseMessaging = createValidSampleResponseMessaging();
+        final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
+        new Expectations() {{
+            soapResponseMessage.getSOAPHeader();
+            result = soapHeader;
+
+            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
+            result = new SOAPException();
+        }};
+
+        try {
+            mshWebservice.saveResponse(soapResponseMessage);
+        } catch (Exception e) {
+            Assert.fail("No exception is expected to be raised.");
+        }
+
+        new Verifications() {{
+            signalMessageDao.create(responseSignalMessage);
+            times = 0;
+
+            messagingDao.update(receiptMessage);
+            times = 0;
+        }};
+    }
+
+    @Test
+    public void testSaveResponse_DBWriteExceptionFlow(@Injectable final SOAPHeader soapHeader, @Injectable final Iterator messagingIterator, @Injectable final Node node, @Injectable final Messaging receiptMessage, @Injectable final SignalMessageLog signalMessageLog) throws SOAPException, ParserConfigurationException, JAXBException, SAXException, IOException {
+
+        final Messaging responseMessaging = createValidSampleResponseMessaging();
+        final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
+        new Expectations() {{
+            soapResponseMessage.getSOAPHeader();
+            result = soapHeader;
+
+            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
+            result = messagingIterator;
+
+            messagingIterator.next();
+            result = node;
+
+            jaxbContext.createUnmarshaller().unmarshal(node, Messaging.class).getValue();
+            result = responseMessaging;
+
+            messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId());
+            result = receiptMessage;
+
+            signalMessageLogDao.create(withAny(signalMessageLog));
+            result = new RuntimeException();
+        }};
+
+        try {
+            mshWebservice.saveResponse(soapResponseMessage);
+            Assert.fail("Expected failure propagation during DB commit failure!");
+        } catch (Exception e) {
+            Assert.assertTrue("Expected Runtime exception mocked!", e instanceof RuntimeException);
+        }
+
+        new Verifications() {{
+            signalMessageDao.create(responseSignalMessage);
+            times = 1;
+
+            messagingDao.update(receiptMessage);
+            times = 1;
+        }};
+    }
+
+    /**
+     * For the Happy Flow the Unit test with full data is happening with the test - testInvoke_tc1Process().
+     * This test is using mock objects.
+     *
+     * @param legConfiguration
+     * @param messaging
+     * @param userMessage
+     * @param receiverParty
+     * @param userMessageLog
+     * @throws EbMS3Exception
+     * @throws TransformerException
+     * @throws SOAPException
+     * @throws JAXBException
+     */
+    @Test
+    public void testPersistReceivedMessage_HappyFlow(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage, @Injectable final Party receiverParty, @Injectable final UserMessageLog userMessageLog) throws EbMS3Exception, TransformerException, SOAPException, JAXBException {
+        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+
+        new Expectations(mshWebservice) {{
+            messaging.getUserMessage();
+            result = userMessage;
+
+            compressionService.handleDecompression(userMessage, legConfiguration);
+            result = true;
+
+            pModeProvider.getReceiverParty(pmodeKey);
+            result = receiverParty;
+
+            userMessage.getMessageInfo().getMessageId();
+            result = "TestMessageId123";
+
+        }};
+        mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+
+        new Verifications() {{
+            mshWebservice.handlePayloads(soapRequestMessage, userMessage);
+            payloadProfileValidator.validate(messaging, pmodeKey);
+            propertyProfileValidator.validate(messaging, pmodeKey);
+            messagingService.storeMessage(messaging);
+            userMessageLogDao.create(withAny(userMessageLog));
+        }};
+    }
+
+    @Test
+    public void testPersistReceivedMessage_ValidationException(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage, @Injectable final UserMessageLog userMessageLog) throws EbMS3Exception, TransformerException, SOAPException, JAXBException {
+        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+
+        new Expectations(mshWebservice) {{
+            messaging.getUserMessage();
+            result = userMessage;
+
+            compressionService.handleDecompression(userMessage, legConfiguration);
+            result = true;
+
+            propertyProfileValidator.validate(messaging, pmodeKey);
+            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Property missing exception", "Message Id", null);
+        }};
+
+        try {
+            mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+        } catch (Exception e) {
+            Assert.assertTrue("Expecting Ebms3 exception", e instanceof EbMS3Exception);
+            Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0010, ((EbMS3Exception) e).getErrorCode());
+        }
+
+        new Verifications() {{
+            mshWebservice.handlePayloads(soapRequestMessage, userMessage);
+            payloadProfileValidator.validate(messaging, pmodeKey);
+            propertyProfileValidator.validate(messaging, pmodeKey);
+            messagingService.storeMessage(messaging);
+            times = 0;
+            userMessageLogDao.create(withAny(userMessageLog));
+            times = 0;
+        }};
+    }
+
+    @Test
+    public void testPersistReceivedMessage_CompressionError(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage, @Injectable final Party receiverParty, @Injectable final UserMessageLog userMessageLog) throws EbMS3Exception, TransformerException, SOAPException, JAXBException {
+        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+
+        new Expectations(mshWebservice) {{
+            messaging.getUserMessage();
+            result = userMessage;
+
+            compressionService.handleDecompression(userMessage, legConfiguration);
+            result = true;
+
+            messagingService.storeMessage(messaging);
+            result = new CompressionException("Could not store binary data for message ", null);
+
+            userMessage.getMessageInfo().getMessageId();
+            result = "TestMessageId123";
+        }};
+        try {
+            mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            Assert.fail("Exception for compression failure expected!");
+        } catch (EbMS3Exception e) {
+            Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0303, e.getErrorCode());
+        }
+
+        new Verifications() {{
+            mshWebservice.handlePayloads(soapRequestMessage, userMessage);
+            payloadProfileValidator.validate(messaging, pmodeKey);
+            propertyProfileValidator.validate(messaging, pmodeKey);
+            messagingService.storeMessage(messaging);
+            userMessageLogDao.create(withAny(userMessageLog));
+            times = 0;
+        }};
+    }
+
+    @Test
+    public void testGetFinalRecipientName() {
+        final UserMessage userMessage = createSampleUserMessage();
+        Assert.assertEquals(FINAL_RECEIPIENT_VALUE, mshWebservice.getFinalRecipientName(userMessage));
+    }
 
     @Test
     public void test_HandlePayLoads_HappyFlowUsingCID(@Injectable final UserMessage userMessage, @Injectable final AttachmentPart attachmentPart1, @Injectable final AttachmentPart attachmentPart2) {
@@ -606,7 +936,44 @@ public class MSHWebServiceTest {
 
     }
 
-    /*TODO getMessaging UT*/
+    /**
+     * Unit testing with actual data.
+     *
+     * @param soapHeader
+     * @param soapChildElementsIterator
+     * @param messagingXml
+     * @throws JAXBException
+     * @throws SOAPException
+     * @throws ParserConfigurationException
+     * @throws IOException
+     * @throws SAXException
+     */
+    @Test
+    public void testGetMessaging(@Injectable final SOAPHeader soapHeader, @Injectable final Iterator soapChildElementsIterator, @Injectable final Node messagingXml) throws JAXBException, SOAPException, ParserConfigurationException, IOException, SAXException {
+
+        File validRequestFile = new File(TEST_RESOURCES_DIR + "/dataset/as4/blue2redGoodMessage.xml");
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setNamespaceAware(true);
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document responseFileDocument = documentBuilder.parse(validRequestFile);
+        final Node messagingNode = responseFileDocument.getElementsByTagName("ns:Messaging").item(0);
+
+        new Expectations() {{
+            soapRequestMessage.getSOAPHeader();
+            result = soapHeader;
+
+            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
+            result = soapChildElementsIterator;
+
+            soapChildElementsIterator.next();
+            result = messagingNode;
+
+            jaxbContext.createUnmarshaller();
+            result = JAXBContext.newInstance(Messaging.class).createUnmarshaller();
+        }};
+
+        Assert.assertEquals(JAXBContext.newInstance(Messaging.class).createUnmarshaller().unmarshal(messagingNode, Messaging.class).getValue(), mshWebservice.getMessaging(soapRequestMessage));
+    }
 
 
     public Configuration loadSamplePModeConfiguration(String samplePModeFileRelativeURI) throws JAXBException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -643,7 +1010,7 @@ public class MSHWebServiceTest {
         return result;
     }
 
-    protected Messaging createSampleRequestMessaging() {
+    protected Messaging createDummyRequestMessaging() {
         Messaging messaging = new ObjectFactory().createMessaging();
         messaging.setUserMessage(createSampleUserMessage());
         messaging.getUserMessage().getMessageInfo().setMessageId("1234");
@@ -664,7 +1031,7 @@ public class MSHWebServiceTest {
         userMessage.setCollaborationInfo(collaborationInfo);
         MessageProperties messageProperties = new MessageProperties();
         messageProperties.getProperty().add(createProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1", STRING_TYPE));
-        messageProperties.getProperty().add(createProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4", STRING_TYPE));
+        messageProperties.getProperty().add(createProperty("finalRecipient", FINAL_RECEIPIENT_VALUE, STRING_TYPE));
         userMessage.setMessageProperties(messageProperties);
 
         PartyInfo partyInfo = new PartyInfo();
@@ -711,9 +1078,8 @@ public class MSHWebServiceTest {
     }
 
 
-    @Test
-    public void createValidSampleResponseMessaging() throws ParserConfigurationException, IOException, SAXException, JAXBException {
-        File validAS4ResponseFile = new File("./src/test/resources/dataset/as4/validAS4Response.xml");
+    public Messaging createValidSampleResponseMessaging() throws ParserConfigurationException, IOException, SAXException, JAXBException {
+        File validAS4ResponseFile = new File(TEST_RESOURCES_DIR + "/dataset/as4/validAS4Response.xml");
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setNamespaceAware(true);
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -721,6 +1087,6 @@ public class MSHWebServiceTest {
         Node messagingNode = responseFileDocument.getElementsByTagName("eb3:Messaging").item(0);
 
         Messaging messaging = JAXBContext.newInstance(Messaging.class).createUnmarshaller().unmarshal(messagingNode, Messaging.class).getValue();
-//        return messaging;
+        return messaging;
     }
 }
