@@ -45,8 +45,9 @@ import java.util.Properties;
 @Service
 public class DynamicDiscoveryService {
 
-    public static final String SMLZONE_KEY = "domibus.smlzone";
+    protected static final String SMLZONE_KEY = "domibus.smlzone";
     private static final Log LOG = LogFactory.getLog(DynamicDiscoveryService.class);
+    protected static final String transportProfileDynDisc = "bdxr-transport-ebms3-as4-v1p0";
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
 
@@ -71,9 +72,9 @@ public class DynamicDiscoveryService {
             final ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
             LOG.debug("sm.getEndpoint");
             final Endpoint endpoint;
-            endpoint = sm.getEndpoint(processIdentifier, new TransportProfile("bdxr-transport-ebms3-as4-v1p0"), TransportProfile.AS4);
+            endpoint = sm.getEndpoint(processIdentifier, new TransportProfile(transportProfileDynDisc), TransportProfile.AS4);
 
-            if (endpoint == null) {
+            if (endpoint == null || endpoint.getAddress() == null || endpoint.getProcessIdentifier() == null) {
                 throw new ConfigurationException("Receiver does not support reception of " + documentId + " for process " + processId + " using the AS4 Protocol");
             }
             return endpoint;

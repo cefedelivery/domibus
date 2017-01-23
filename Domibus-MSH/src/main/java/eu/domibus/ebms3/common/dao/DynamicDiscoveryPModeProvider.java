@@ -53,17 +53,18 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
     @Autowired
     protected CertificateService certificateService;
-    protected Collection<eu.domibus.common.model.configuration.Process> dynamicReceiverProcesses;
+    protected Collection<eu.domibus.common.model.configuration.Process> dynamicResponderProcesses;
     protected Collection<eu.domibus.common.model.configuration.Process> dynamicInitiatorProcesses;
 
     // default type in e-SENS
     protected static final String URN_TYPE_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
+    protected static final String MSH_ENDPOINT = "msh_endpoint";
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
     public void init() {
         super.init();
-        dynamicReceiverProcesses = findDynamicReceiverProcesses();
+        dynamicResponderProcesses = findDynamicResponderProcesses();
         dynamicInitiatorProcesses = findDynamicSenderProcesses();
     }
 
@@ -73,7 +74,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         this.init();
     }
 
-    protected Collection<eu.domibus.common.model.configuration.Process> findDynamicReceiverProcesses() {
+    protected Collection<eu.domibus.common.model.configuration.Process> findDynamicResponderProcesses() {
         final Collection<eu.domibus.common.model.configuration.Process> result = new ArrayList<>();
         for (final eu.domibus.common.model.configuration.Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
             if (process.isDynamicResponder() && (process.isDynamicInitiator() || process.getInitiatorParties().contains(getConfiguration().getParty()))) {
@@ -195,9 +196,15 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             LOG.debug("Remove party to add with new values " + configurationParty.getName());
             getConfiguration().getBusinessProcesses().getParties().remove(configurationParty);
         }
-
         // set the new endpoint if exists, otherwise copy the old one if exists
-        String newEndpoint = endpoint != null ? endpoint: (configurationParty.getEndpoint() == null ? "" : configurationParty.getEndpoint());
+        String newEndpoint = endpoint;
+        if(newEndpoint == null) {
+            newEndpoint = MSH_ENDPOINT;
+            if (configurationParty != null && configurationParty.getEndpoint() != null) {
+                newEndpoint = configurationParty.getEndpoint();
+            }
+        }
+
         LOG.debug("New endpoint is " + newEndpoint);
         Party newConfigurationParty = buildNewConfigurationParty(name, configurationType, newEndpoint);
         LOG.debug("Add new configuration party: " + newConfigurationParty.getName());
@@ -327,7 +334,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
      */
     protected Collection<eu.domibus.common.model.configuration.Process> findCandidateProcesses(UserMessage userMessage, final MSHRole mshRole) {
         Collection<eu.domibus.common.model.configuration.Process> candidates = new HashSet<>();
-        Collection<eu.domibus.common.model.configuration.Process> processes = MSHRole.SENDING.equals(mshRole) ? dynamicReceiverProcesses : dynamicInitiatorProcesses;
+        Collection<eu.domibus.common.model.configuration.Process> processes = MSHRole.SENDING.equals(mshRole) ? dynamicResponderProcesses : dynamicInitiatorProcesses;
 
         for (final Process process : processes) {
             if (matchProcess(process, mshRole)) {
