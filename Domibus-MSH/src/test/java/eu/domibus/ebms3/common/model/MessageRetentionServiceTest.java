@@ -72,26 +72,33 @@ public class MessageRetentionServiceTest {
         new Expectations(messageRetentionService) {{
             pModeProvider.getMpcURIList();
             result = mpcs;
+
+            messageRetentionService.getRetentionValue(MessageRetentionService.DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY, MessageRetentionService.DEFAULT_DOWNLOADED_MESSAGES_DELETE_LIMIT);
+            result = 10;
+
+            messageRetentionService.getRetentionValue(MessageRetentionService.NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY, MessageRetentionService.DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT);
+            result = 20;
         }};
 
         messageRetentionService.deleteExpiredMessages();
 
         new Verifications() {{
-            messageRetentionService.deleteExpiredMessages(mpc1);
-            messageRetentionService.deleteExpiredMessages(mpc2);
+            messageRetentionService.deleteExpiredMessages(mpc1, 10, 20);
         }};
     }
 
     @Test
     public void testDeleteExpiredMessagesForMpc() throws Exception {
         final String mpc1 = "mpc1";
+        final Integer expiredDownloadedMessagesLimit = 10;
+        final Integer expiredNotDownloadedMessagesLimit = 20;
 
         new Expectations(messageRetentionService) {{
-            messageRetentionService.deleteExpiredDownloadedMessages(mpc1);
-            messageRetentionService.deleteExpiredNotDownloadedMessages(mpc1);
+            messageRetentionService.deleteExpiredDownloadedMessages(mpc1, expiredDownloadedMessagesLimit);
+            messageRetentionService.deleteExpiredNotDownloadedMessages(mpc1, expiredNotDownloadedMessagesLimit);
         }};
 
-        messageRetentionService.deleteExpiredMessages(mpc1);
+        messageRetentionService.deleteExpiredMessages(mpc1, 10, 20);
 
     }
 
@@ -104,7 +111,7 @@ public class MessageRetentionServiceTest {
             result = -1;
         }};
 
-        messageRetentionService.deleteExpiredDownloadedMessages(mpc1);
+        messageRetentionService.deleteExpiredDownloadedMessages(mpc1, 10);
 
         new Verifications() {{
             userMessageLogDao.getDownloadedUserMessagesOlderThan(withAny(new Date()), anyString);
@@ -121,7 +128,7 @@ public class MessageRetentionServiceTest {
             result = -1;
         }};
 
-        messageRetentionService.deleteExpiredNotDownloadedMessages(mpc1);
+        messageRetentionService.deleteExpiredNotDownloadedMessages(mpc1, 10);
 
         new Verifications() {{
             userMessageLogDao.getUndownloadedUserMessagesOlderThan(withAny(new Date()), anyString);
@@ -143,12 +150,9 @@ public class MessageRetentionServiceTest {
 
             userMessageLogDao.getDownloadedUserMessagesOlderThan(withAny(new Date()), mpc1);
             result = downloadedMessageIds;
-
-            messageRetentionService.getRetentionValue(anyString, anyInt);
-            result = messagesDeleteLimit;
         }};
 
-        messageRetentionService.deleteExpiredDownloadedMessages(mpc1);
+        messageRetentionService.deleteExpiredDownloadedMessages(mpc1, messagesDeleteLimit);
 
         new Verifications() {{
             messageRetentionService.delete(downloadedMessageIds, messagesDeleteLimit);
@@ -169,12 +173,9 @@ public class MessageRetentionServiceTest {
 
             userMessageLogDao.getUndownloadedUserMessagesOlderThan(withAny(new Date()), mpc1);
             result = downloadedMessageIds;
-
-            messageRetentionService.getRetentionValue(anyString, anyInt);
-            result = messagesDeleteLimit;
         }};
 
-        messageRetentionService.deleteExpiredNotDownloadedMessages(mpc1);
+        messageRetentionService.deleteExpiredNotDownloadedMessages(mpc1, messagesDeleteLimit);
 
         new Verifications() {{
             messageRetentionService.delete(downloadedMessageIds, messagesDeleteLimit);

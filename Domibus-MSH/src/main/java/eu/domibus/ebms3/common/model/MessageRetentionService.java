@@ -37,10 +37,10 @@ public class MessageRetentionService {
 
     private static final Log LOG = LogFactory.getLog(MessageRetentionService.class);
 
-    private static final Integer DEFAULT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 30;
-    private static final Integer DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 30;
-    private static final String DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.downloaded.limit";
-    private static final String NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.not_downloaded.limit";
+    public static final Integer DEFAULT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 30;
+    public static final Integer DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 30;
+    public static final String DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.downloaded.limit";
+    public static final String NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.not_downloaded.limit";
 
     @Autowired
     private CollectionUtil collectionUtil;
@@ -75,43 +75,58 @@ public class MessageRetentionService {
     @Autowired
     AuthUtils authUtils;
 
+    /**
+     * Deletes the expired messages(downloaded or not) using the configured limits
+     */
     @Transactional
     public void deleteExpiredMessages() {
         final List<String> mpcs = pModeProvider.getMpcURIList();
+        final Integer expiredDownloadedMessagesLimit = getRetentionValue(DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY, DEFAULT_DOWNLOADED_MESSAGES_DELETE_LIMIT);
+        final Integer expiredNotDownloadedMessagesLimit = getRetentionValue(NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY, DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT);
         for (final String mpc : mpcs) {
-            deleteExpiredMessages(mpc);
+            deleteExpiredMessages(mpc, expiredDownloadedMessagesLimit, expiredNotDownloadedMessagesLimit);
         }
     }
 
-    protected void deleteExpiredMessages(String mpc) {
-        LOG.debug("Deleting expired messages for MPC [" + mpc + "]");
-        deleteExpiredDownloadedMessages(mpc);
-        deleteExpiredNotDownloadedMessages(mpc);
+    @Transactional
+    public void deleteAllExpiredMessages() {
+        final List<String> mpcs = pModeProvider.getMpcURIList();
+        final Integer expiredDownloadedMessagesLimit = Integer.MAX_VALUE;
+        final Integer expiredNotDownloadedMessagesLimit = Integer.MAX_VALUE;;
+        for (final String mpc : mpcs) {
+            deleteExpiredMessages(mpc, expiredDownloadedMessagesLimit, expiredNotDownloadedMessagesLimit);
+        }
     }
 
-    protected void deleteExpiredDownloadedMessages(String mpc) {
-        LOG.debug("Deleting expired downloaded messages for MPC [" + mpc + "]");
+    @Transactional
+    protected void deleteExpiredMessages(String mpc, Integer expiredDownloadedMessagesLimit, Integer expiredNotDownloadedMessagesLimit) {
+        LOG.debug("Deleting expired messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]" +
+                " and expiredNotDownloadedMessagesLimit [" + expiredNotDownloadedMessagesLimit + "]");
+        deleteExpiredDownloadedMessages(mpc, expiredDownloadedMessagesLimit);
+        deleteExpiredNotDownloadedMessages(mpc, expiredNotDownloadedMessagesLimit);
+    }
+
+    protected void deleteExpiredDownloadedMessages(String mpc, Integer expiredDownloadedMessagesLimit) {
+        LOG.debug("Deleting expired downloaded messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]");
         final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
         if (messageRetentionDownloaded > 0) { // if -1 the messages will be kept indefinetely and if 0 it already has been deleted
             List<String> downloadedMessageIds = userMessageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);
             if (downloadedMessageIds != null && downloadedMessageIds.size() > 0) {
                 LOG.info("Found [" + downloadedMessageIds.size() + "] downloaded messages to delete");
-                final Integer deleteMessagesLimit = getRetentionValue(DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY, DEFAULT_DOWNLOADED_MESSAGES_DELETE_LIMIT);
-                final Integer deleted = delete(downloadedMessageIds, deleteMessagesLimit);
+                final Integer deleted = delete(downloadedMessageIds, expiredDownloadedMessagesLimit);
                 LOG.info("Deleted [" + deleted + "] downloaded messages");
             }
         }
     }
 
-    protected void deleteExpiredNotDownloadedMessages(String mpc) {
-        LOG.debug("Deleting expired not-downloaded messages for MPC [" + mpc + "]");
+    protected void deleteExpiredNotDownloadedMessages(String mpc, Integer expiredNotDownloadedMessagesLimit) {
+        LOG.debug("Deleting expired not-downloaded messages for MPC [" + mpc + "] using expiredNotDownloadedMessagesLimit [" + expiredNotDownloadedMessagesLimit + "]");
         final int messageRetentionNotDownloaded = pModeProvider.getRetentionUndownloadedByMpcURI(mpc);
         if (messageRetentionNotDownloaded > -1) { // if -1 the messages will be kept indefinetely and if 0, although it makes no sense, is legal
             final List<String> notDownloadedMessageIds = userMessageLogDao.getUndownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionNotDownloaded * -1), mpc);
             if (notDownloadedMessageIds != null && notDownloadedMessageIds.size() > 0) {
                 LOG.info("Found [" + notDownloadedMessageIds.size() + "] not-downloaded messages to delete");
-                final Integer deleteMessagesLimit = getRetentionValue(NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY, DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT);
-                final Integer deleted = delete(notDownloadedMessageIds, deleteMessagesLimit);
+                final Integer deleted = delete(notDownloadedMessageIds, expiredNotDownloadedMessagesLimit);
                 LOG.info("Deleted [" + deleted + "] not-downloaded messages");
             }
         }
