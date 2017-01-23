@@ -117,7 +117,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             //message.setContent(XMLStreamReader.class, XMLInputFactory.newInstance().createXMLStreamReader(message.getContent(InputStream.class)));
             final Node messagingNode = soapEnvelope.getElementsByTagNameNS(ObjectFactory._Messaging_QNAME.getNamespaceURI(), ObjectFactory._Messaging_QNAME.getLocalPart()).item(0);
             messaging = ((JAXBElement<Messaging>) this.jaxbContext.createUnmarshaller().unmarshal(messagingNode)).getValue();
-            final String pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(messaging.getUserMessage()); // FIXME: This does not work for signalmessages
+            final String pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(messaging.getUserMessage(), MSHRole.RECEIVING); // FIXME: This does not work for signalmessages
             final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             final Policy policy = builder.getPolicy(new FileInputStream(new File(System.getProperty("domibus.config.location") + File.separator + "policies", legConfiguration.getSecurity().getPolicy())));

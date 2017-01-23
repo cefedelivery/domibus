@@ -111,7 +111,7 @@ public class MessageSender implements MessageListener {
 
         final UserMessage userMessage = this.messagingDao.findUserMessageByMessageId(messageId);
         try {
-            pModeKey = this.pModeProvider.findPModeKeyForUserMessage(userMessage);
+            pModeKey = this.pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
             legConfiguration = this.pModeProvider.getLegConfiguration(pModeKey);
 
             LOG.debug("PMode found : " + pModeKey);
