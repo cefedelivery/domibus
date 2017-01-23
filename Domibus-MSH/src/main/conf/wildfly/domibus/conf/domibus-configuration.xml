@@ -59,6 +59,11 @@
         <!-- regular expression used for identifying the internal queues in the Admin Page -->
         <prop key="domibus.jms.internalQueue.expression">.*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*</prop>
 
+        <!-- Uncomment the following line if you need to modify the default message retention downloaded limit -->
+        <!-- <prop key="message.retention.downloaded.limit">30</prop> -->
+        <!-- Uncomment the following line if you need to modify the default message retention not-downloaded limit -->
+        <!-- <prop key="message.retention.not_downloaded.limit">30</prop> -->
+
         <!-- Enable the proxy settings only if you use a proxy -->
         <!--
         <prop key="domibus.proxy.enabled">true</prop>

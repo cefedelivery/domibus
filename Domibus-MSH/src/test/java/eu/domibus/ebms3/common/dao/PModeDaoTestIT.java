@@ -34,13 +34,14 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.never;
 
 /**
- * Created by Cosmin Baciu on 14-Sep-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
-public class PModeDaoTest {
+public class PModeDaoTestIT {
 
-    private static final Log LOG = LogFactory.getLog(PModeDaoTest.class);
+    private static final Log LOG = LogFactory.getLog(PModeDaoTestIT.class);
 
 
     @org.springframework.context.annotation.Configuration
