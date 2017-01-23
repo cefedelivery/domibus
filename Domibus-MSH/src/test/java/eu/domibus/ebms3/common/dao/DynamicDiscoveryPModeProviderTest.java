@@ -1,5 +1,7 @@
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.xml.UnmarshallerResult;
+import eu.domibus.api.xml.XMLUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -12,6 +14,7 @@ import eu.domibus.ebms3.common.model.Service;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateServiceImpl;
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import eu.domibus.xml.XMLUtilImpl;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import no.difi.vefa.edelivery.lookup.model.ProcessIdentifier;
 import no.difi.vefa.edelivery.lookup.model.TransportProfile;
@@ -19,19 +22,15 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.xml.bind.JAXBContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.KeyStore;
@@ -46,9 +45,6 @@ import java.util.UUID;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:eu/domibus/ebms3/common/dao/DynamicDiscoveryPModeProviderTest/DynamicDiscoveryTest-context.xml")
-@DirtiesContext
 public class DynamicDiscoveryPModeProviderTest {
 
     private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/ebms3/common/dao/DynamicDiscoveryPModeProviderTest/";
@@ -82,10 +78,6 @@ public class DynamicDiscoveryPModeProviderTest {
     private static final String PROCESSIDENTIFIER_SCHEME = "testIdentifierScheme";
     private static final String ADDRESS = "http://localhost:9090/anonymous/msh";
 
-
-    @Autowired
-    private JAXBContext jaxbConfigurationObjectContext;
-
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -109,10 +101,23 @@ public class DynamicDiscoveryPModeProviderTest {
         MockitoAnnotations.initMocks(this);
     }
 
+    private Configuration initializeConfiguration(String resourceXML) throws Exception {
+        InputStream xmlStream = new FileInputStream(new File(RESOURCE_PATH + resourceXML));
+        JAXBContext jaxbContext = JAXBContext.newInstance("eu.domibus.common.model.configuration");
+        XMLUtil xmlUtil = new XMLUtilImpl();
+
+        UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(false, jaxbContext, xmlStream, null);
+        assertNotNull(unmarshallerResult.getResult());
+        assertTrue(unmarshallerResult.getResult() instanceof Configuration);
+        Configuration testData = (Configuration) unmarshallerResult.getResult();
+        assertTrue(initializeConfiguration(testData));
+
+        return testData;
+    }
+
     @Test
     public void testFindDynamicProcesses() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + DYNAMIC_DISCOVERY_ENABLED));
-        assertTrue(initializeConfiguration(testData));
+        Configuration testData = initializeConfiguration(DYNAMIC_DISCOVERY_ENABLED);
         doReturn(true).when(configurationDAO).configurationExists();
         doReturn(testData).when(configurationDAO).readEager();
         dynamicDiscoveryPModeProvider.init();
@@ -125,8 +130,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Test
     public void testDoDynamicDiscoveryOnSender() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + DYNAMIC_DISCOVERY_ENABLED));
-        assertTrue(initializeConfiguration(testData));
+        Configuration testData = initializeConfiguration(DYNAMIC_DISCOVERY_ENABLED);
         doReturn(true).when(configurationDAO).configurationExists();
         doReturn(testData).when(configurationDAO).readEager();
         dynamicDiscoveryPModeProvider.init();
@@ -151,8 +155,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Test
     public void testDoDynamicDiscoveryOnReceiver() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + DYNAMIC_DISCOVERY_ENABLED));
-        assertTrue(initializeConfiguration(testData));
+        Configuration testData = initializeConfiguration(DYNAMIC_DISCOVERY_ENABLED);
         doReturn(true).when(configurationDAO).configurationExists();
         doReturn(testData).when(configurationDAO).readEager();
         dynamicDiscoveryPModeProvider.init();
@@ -175,9 +178,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Test
     public void testFindDynamicReceiverProcesses_DynResponderAndPartySelf_ProcessInResultExpected() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + DYNRESPONDER_AND_PARTYSELF));
-        assertTrue(initializeConfiguration(testData));
-
+        Configuration testData = initializeConfiguration(DYNRESPONDER_AND_PARTYSELF);
         DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
         doReturn(testData).when(classUnderTest).getConfiguration();
 
@@ -192,9 +193,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Test
     public void testFindDynamicReceiverProcesses_MultipleDynResponderAndPartySelf_MultipleProcessesInResultExpected() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + MULTIPLE_DYNRESPONDER_AND_PARTYSELF));
-        assertTrue(initializeConfiguration(testData));
-
+        Configuration testData = initializeConfiguration(MULTIPLE_DYNRESPONDER_AND_PARTYSELF);
         DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
         doReturn(testData).when(classUnderTest).getConfiguration();
 
@@ -210,8 +209,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Test
     public void testFindDynamicReceiverProcesses_MultipleDynInitiatorAndPartySelf_NoProcessesInResultExpected() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + MULTIPLE_DYNINITIATOR_AND_PARTYSELF));
-        assertTrue(initializeConfiguration(testData));
+        Configuration testData = initializeConfiguration(MULTIPLE_DYNINITIATOR_AND_PARTYSELF);
 
         DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
         doReturn(testData).when(classUnderTest).getConfiguration();
@@ -223,8 +221,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Test
     public void testFindDynamicReceiverProcesses_MultipleDynResponderAndDynInitiator_MultipleInResultExpected() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + MULTIPLE_DYNRESPONDER_AND_DYNINITIATOR));
-        assertTrue(initializeConfiguration(testData));
+        Configuration testData = initializeConfiguration(MULTIPLE_DYNRESPONDER_AND_DYNINITIATOR);
 
         DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
         doReturn(testData).when(classUnderTest).getConfiguration();
@@ -243,8 +240,7 @@ public class DynamicDiscoveryPModeProviderTest {
     public void testDoDynamicThings_NoCandidates_EbMS3ExceptionExpected() throws Exception {
         thrown.expect(EbMS3Exception.class);
 
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + NO_DYNINITIATOR_AND_NOT_SELF));
-        assertTrue(initializeConfiguration(testData));
+        Configuration testData = initializeConfiguration(NO_DYNINITIATOR_AND_NOT_SELF);
 
         DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
         doReturn(testData).when(classUnderTest).getConfiguration();
