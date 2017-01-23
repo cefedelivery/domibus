@@ -210,7 +210,9 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         result.addFromParty(partyId.getValue(), partyId.getType());
 
         partyId = messaging.getPartyInfo().getTo().getPartyId();
-        result.addToParty(partyId.getValue(), partyId.getType());
+        if(partyId != null) {
+            result.addToParty(partyId.getValue(), partyId.getType());
+        }
 
         if (messaging.getMessageProperties() != null) {
             for (final Property property : messaging.getMessageProperties().getProperty()) {
