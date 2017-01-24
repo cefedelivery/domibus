@@ -89,7 +89,7 @@ public class MessageRetentionService {
     }
 
     /**
-     * Deletes all the expired messages
+     * Deletes all expired messages
      */
     @Transactional
     public void deleteAllExpiredMessages() {
