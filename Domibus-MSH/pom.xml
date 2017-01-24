@@ -1,22 +1,3 @@
-<!--
-  ~ Copyright 2015 e-CODEX Project
-  ~
-  ~ Licensed under the EUPL, Version 1.1 or – as soon they
-  ~ will be approved by the European Commission - subsequent
-  ~ versions of the EUPL (the "Licence");
-  ~ You may not use this work except in compliance with the
-  ~ Licence.
-  ~ You may obtain a copy of the Licence at:
-  ~ http://ec.europa.eu/idabc/eupl5
-  ~ Unless required by applicable law or agreed to in
-  ~ writing, software distributed under the Licence is
-  ~ distributed on an "AS IS" basis,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  ~ express or implied.
-  ~ See the Licence for the specific language governing
-  ~ permissions and limitations under the Licence.
-  -->
-
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -923,7 +904,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Create the folder to storre the generated sql scripts-->
+            <!-- Create the folder to store the generated sql scripts-->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.7</version>
@@ -952,6 +933,45 @@
                     <outputFileEncoding>UTF-8</outputFileEncoding>
                 </configuration>
                 <executions>
+                    <!-- 3.2.2 -->
+                    <execution>
+                        <id>generate-mysql-script-full-3.2.2</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>updateSQL</goal>
+                        </goals>
+                        <configuration>
+                            <changeLogFile>
+                                src/main/resources/db/changelog-3.2.2.xml
+                            </changeLogFile>
+                            <url>
+                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.2.2.mysql
+                            </url>
+                            <migrationSqlOutputFile>
+                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.2.2.ddl
+                            </migrationSqlOutputFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-oracle-script-full-3.2.2</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>updateSQL</goal>
+                        </goals>
+                        <configuration>
+                            <changeLogFile>
+                                src/main/resources/db/changelog-3.2.2.xml
+                            </changeLogFile>
+                            <url>
+                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.2.2.oracle
+                            </url>
+                            <migrationSqlOutputFile>
+                                ${project.build.directory}/sql-scripts/oracle10g-3.2.2.ddl
+                            </migrationSqlOutputFile>
+                        </configuration>
+                    </execution>
+
+                    <!-- 3.2.0 -->
                     <execution>
                         <id>generate-mysql-script-full-3.2.0</id>
                         <phase>generate-resources</phase>
