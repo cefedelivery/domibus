@@ -59,6 +59,12 @@
         <!-- regular expression used for identifying the internal queues in the Admin Page -->
         <prop key="domibus.jms.internalQueue.expression">.*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*</prop>
 
+        <!--Timeout values for communication between the access points -->
+        <!--ConnectionTimeOut - Specifies the amount of time, in milliseconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite.-->
+        <prop key="domibus.dispatcher.connectionTimeout">240000</prop>
+        <!--ReceiveTimeout - Specifies the amount of time, in milliseconds, that the consumer will wait for a response before it times out. 0 is infinite.-->
+        <prop key="domibus.dispatcher.receiveTimeout">240000</prop>
+
         <!-- Uncomment the following line if you need to tweak the maximum downloaded messages to be deleted by the retention worker -->
         <!-- <prop key="message.retention.downloaded.max.delete">50</prop> -->
         <!-- Uncomment the following line if you need to tweak the maximum not-downloaded messages to be deleted by the retention worker -->

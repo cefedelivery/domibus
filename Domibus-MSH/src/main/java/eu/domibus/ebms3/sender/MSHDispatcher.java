@@ -18,21 +18,15 @@
  */
 
 package eu.domibus.ebms3.sender;
-/**
- * @author Christian Koch, Stefan Mueller
- * @Since 3.0
- */
-
-//import eu.domibus.ebms3.pmode.model.PMode;
 
 import com.google.common.base.Strings;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.PolicyFactory;
 import eu.domibus.pki.CertificateService;
 import org.apache.commons.logging.Log;
@@ -58,7 +52,10 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPBinding;
 import java.util.Properties;
 
-
+/**
+ * @author Christian Koch, Stefan Mueller
+ * @Since 3.0
+ */
 @Service
 public class MSHDispatcher {
 
@@ -123,8 +120,12 @@ public class MSHDispatcher {
         final HTTPConduit httpConduit = (HTTPConduit) client.getConduit();
         final HTTPClientPolicy httpClientPolicy = httpConduit.getClient();
         httpConduit.setClient(httpClientPolicy);
-        httpClientPolicy.setConnectionTimeout(120000);
-        httpClientPolicy.setReceiveTimeout(120000);
+        //ConnectionTimeOut - Specifies the amount of time, in milliseconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite.
+        int connectionTimeout = Integer.parseInt(domibusProperties.getProperty("domibus.dispatcher.connectionTimeout", "120000"));
+        httpClientPolicy.setConnectionTimeout(connectionTimeout);
+        //ReceiveTimeOut - Specifies the amount of time, in milliseconds, that the consumer will wait for a response before it times out. 0 is infinite.
+        int receiveTimeout = Integer.parseInt(domibusProperties.getProperty("domibus.dispatcher.receiveTimeout", "120000"));
+        httpClientPolicy.setReceiveTimeout(receiveTimeout);
         final TLSClientParameters params = tlsReader.getTlsClientParameters();
         if (params != null && endpoint.startsWith("https://")) {
             httpConduit.setTlsClientParameters(params);
