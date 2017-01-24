@@ -188,14 +188,7 @@ public class MSHWebServiceTest {
             mshWebservice.checkCharset(messaging);
             mshWebservice.checkPingMessage(messaging.getUserMessage());
             mshWebservice.checkDuplicate(messaging);
-
             mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
-            mshWebservice.handlePayloads(soapRequestMessage, userMessage);
-            compressionService.handleDecompression(userMessage, legConfiguration);
-            payloadProfileValidator.validate(messaging, pmodeKey);
-            propertyProfileValidator.validate(messaging, pmodeKey);
-            messagingService.storeMessage(messaging);
-
             backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
             mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
             backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
@@ -203,14 +196,10 @@ public class MSHWebServiceTest {
         }};
     }
 
-
     @Test
-    public void testInvoke_DuplicateMessage() throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
+    public void testInvoke_DuplicateMessage(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
-        final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
-        final Messaging messaging = createDummyRequestMessaging();
 
         new Expectations(mshWebservice) {{
             soapRequestMessage.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
@@ -222,142 +211,142 @@ public class MSHWebServiceTest {
             mshWebservice.getMessaging(withAny(soapRequestMessage));
             result = messaging;
 
-            mshWebservice.checkDuplicate(messaging);
-            result = true;
+            messaging.getUserMessage().getMessageInfo().getMessageId();
+            result = "TestMessage123";
 
-            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
-            result = soapResponseMessage;
-        }};
-
-        mshWebservice.invoke(soapRequestMessage);
-
-        new Verifications() {{
-            mshWebservice.checkCharset(messaging);
-            mshWebservice.checkPingMessage(messaging.getUserMessage());
-            mshWebservice.checkDuplicate(messaging);
-            mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
-            times = 0;
-            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
-            times = 0;
-            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
-            backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
-            times = 0;
-
-        }};
-    }
-
-    @Test
-    public void testInvoke_PingMessage() throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
-
-        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
-        final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
-        final Messaging messaging = createDummyRequestMessaging();
-
-        new Expectations(mshWebservice) {{
-            soapRequestMessage.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
-            result = pmodeKey;
-
-            pModeProvider.getLegConfiguration(withSubstring(PUSH_TESTCASE1_TC1ACTION));
-            result = legConfiguration;
-
-            mshWebservice.getMessaging(withAny(soapRequestMessage));
-            result = messaging;
-
-            mshWebservice.checkPingMessage(messaging.getUserMessage());
-            result = true;
-
-            mshWebservice.checkDuplicate(messaging);
-            result = false;
-
-            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
-            result = soapResponseMessage;
-        }};
-
-        mshWebservice.invoke(soapRequestMessage);
-
-        new Verifications() {{
-            mshWebservice.checkCharset(messaging);
-            mshWebservice.checkPingMessage(messaging.getUserMessage());
-            mshWebservice.checkDuplicate(messaging);
-            mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
-            times = 0;
-            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
-            times = 0;
-            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
-            backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
-            times = 0;
-        }};
-    }
-
-    ///TODO
-    @Test
-    public void testInvoke_ErrorInNotifyingIncomingMessage() throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
-
-        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
-        final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
-        final Messaging messaging = createDummyRequestMessaging();
-        final UserMessage userMessage = messaging.getUserMessage();
-        final Party receiverParty = getPartyFromConfiguration(configuration, RED);
-
-        new Expectations(mshWebservice) {{
-            soapRequestMessage.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
-            result = pmodeKey;
-
-            pModeProvider.getLegConfiguration(withSubstring(PUSH_TESTCASE1_TC1ACTION));
-            result = legConfiguration;
-
-            mshWebservice.getMessaging(withAny(soapRequestMessage));
-            result = messaging;
-
-            mshWebservice.checkDuplicate(messaging);
-            result = false;
-
-            mshWebservice.handlePayloads(soapRequestMessage, userMessage);
+            mshWebservice.checkCharset(withAny(messaging));
             result = any;
 
-            compressionService.handleDecompression(userMessage, legConfiguration);
+            mshWebservice.checkPingMessage(withAny(userMessage));
+            result = false;
+
+            legConfiguration.getReceptionAwareness().getDuplicateDetection();
             result = true;
 
-            pModeProvider.getReceiverParty(pmodeKey);
-            result = receiverParty;
+            mshWebservice.checkDuplicate(withAny(messaging));
+            result = true;
+
+            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
+            result = soapResponseMessage;
+        }};
+
+        mshWebservice.invoke(soapRequestMessage);
+
+        new Verifications() {{
+            mshWebservice.checkCharset(messaging);
+            mshWebservice.checkPingMessage(messaging.getUserMessage());
+            mshWebservice.checkDuplicate(messaging);
+            mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            times = 0;
+            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+            times = 0;
+            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
+            backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
+            times = 0;
+        }};
+    }
+
+    @Test
+    public void testInvoke_PingMessage(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
+
+        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+
+        new Expectations(mshWebservice) {{
+            soapRequestMessage.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
+            result = pmodeKey;
+
+            pModeProvider.getLegConfiguration(withSubstring(PUSH_TESTCASE1_TC1ACTION));
+            result = legConfiguration;
+
+            mshWebservice.getMessaging(withAny(soapRequestMessage));
+            result = messaging;
+
+            messaging.getUserMessage().getMessageInfo().getMessageId();
+            result = "TestMessage123";
+
+            mshWebservice.checkCharset(withAny(messaging));
+            result = any;
+
+            mshWebservice.checkPingMessage(withAny(userMessage));
+            result = true;
+
+            legConfiguration.getReceptionAwareness().getDuplicateDetection();
+            result = true;
+
+            mshWebservice.checkDuplicate(withAny(messaging));
+            result = false;
+
+            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
+            result = soapResponseMessage;
+        }};
+
+        mshWebservice.invoke(soapRequestMessage);
+
+        new Verifications() {{
+            mshWebservice.checkCharset(messaging);
+            mshWebservice.checkPingMessage(messaging.getUserMessage());
+            mshWebservice.checkDuplicate(messaging);
+            mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            times = 0;
+            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+            times = 0;
+            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
+            backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
+            times = 0;
+        }};
+    }
+
+    @Test
+    public void testInvoke_ErrorInNotifyingIncomingMessage(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
+
+        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+
+        new Expectations(mshWebservice) {{
+            soapRequestMessage.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
+            result = pmodeKey;
+
+            pModeProvider.getLegConfiguration(withSubstring(PUSH_TESTCASE1_TC1ACTION));
+            result = legConfiguration;
+
+            mshWebservice.getMessaging(withAny(soapRequestMessage));
+            result = messaging;
+
+            messaging.getUserMessage().getMessageInfo().getMessageId();
+            result = "TestMessage123";
+
+            mshWebservice.checkPingMessage(withAny(userMessage));
+            result = false;
+
+            legConfiguration.getReceptionAwareness().getDuplicateDetection();
+            result = true;
+
+            mshWebservice.checkDuplicate(withAny(messaging));
+            result = false;
+
+            mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            result = any;
+
+            backendNotificationService.notifyOfIncoming(withAny(userMessage), NotificationType.MESSAGE_RECEIVED);
+            result = new SubmissionValidationException("Error while submitting the message!!");
 
             legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer();
             result = true;
 
-            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
-            result = new SubmissionValidationException("Error while submitting the message!!");
-
-            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
-            result = soapResponseMessage;
         }};
 
         try {
             mshWebservice.invoke(soapRequestMessage);
-        } catch (WebServiceException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Assert.assertTrue("Expecting Webservice exception!", e instanceof WebServiceException);
         }
 
         new Verifications() {{
-            mshWebservice.checkCharset(messaging);
-            mshWebservice.checkPingMessage(messaging.getUserMessage());
-            mshWebservice.checkDuplicate(messaging);
-
-            mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
-            mshWebservice.handlePayloads(soapRequestMessage, userMessage);
-            compressionService.handleDecompression(userMessage, legConfiguration);
-            payloadProfileValidator.validate(messaging, pmodeKey);
-            propertyProfileValidator.validate(messaging, pmodeKey);
-            messagingService.storeMessage(messaging);
-
             backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
             mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
             times = 0;
             backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
         }};
     }
-
 
     @Test
     public void testCheckCharset_HappyFlow() throws EbMS3Exception {

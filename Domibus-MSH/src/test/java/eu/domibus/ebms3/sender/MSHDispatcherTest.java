@@ -22,6 +22,7 @@ import org.apache.cxf.BusFactory;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.transport.http.HTTPConduit;
+import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.neethi.Policy;
 import org.junit.Assert;
@@ -79,6 +80,9 @@ public class MSHDispatcherTest {
     CertificateService certificateService;
 
     @Injectable
+    LegConfiguration legConfiguration;
+
+    @Injectable
     Properties domibusProperties;
 
     @Injectable
@@ -89,6 +93,9 @@ public class MSHDispatcherTest {
 
     @Injectable
     org.apache.cxf.jaxws.DispatchImpl<SOAPMessage> dispatch;
+
+    @Injectable
+    HTTPClientPolicy httpClientPolicy;
 
     @Injectable
     Client client;
@@ -102,8 +109,23 @@ public class MSHDispatcherTest {
     @Tested
     MSHDispatcher mshDispatcher;
 
+
+    /**
+     * Happy flow testing with actual data
+     *
+     * @param requestSoapMessage
+     * @param responseSoapMessage
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws IllegalAccessException
+     * @throws JAXBException
+     * @throws EbMS3Exception
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     */
     @Test
-    public void testDispatch_DoNothingSecurityPolicy(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
+    public void testDispatch_DoNothingSecurityPolicy_HappyFlow(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
         System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:noSecService:noSecAction:OAE:pushNoSecnoSecAction";
@@ -113,7 +135,7 @@ public class MSHDispatcherTest {
 
 
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, LEG_NO_SECNO_SEC_ACTION);
+        legConfiguration = getLegFromConfiguration(configuration, LEG_NO_SECNO_SEC_ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
         final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/doNothingPolicy.xml")));
         final String endPoint = getPartyFromConfiguration(configuration, RECEIVER_RED_GW).getEndpoint();
@@ -157,20 +179,40 @@ public class MSHDispatcherTest {
             domibusProperties.getProperty("domibus.proxy.enabled", "false");
             result = "false";
 
-            dispatch.invoke(withAny(requestSoapMessage));
-            result = responseSoapMessage;
         }};
 
         mshDispatcher.dispatch(requestSoapMessage, pModeKey);
 
         new Verifications() {{
+            certificateService.isCertificateValid(anyString);
+            times = 0;
+            certificateService.isCertificateValidationEnabled();
+            times = 0;
+            certificateService.isCertificateChainValid(anyString);
+            times = 0;
+            tlsReader.getTlsClientParameters();
+            mshDispatcher.configureProxy(withAny(httpClientPolicy), withAny(httpConduit));
+            times = 0;
             dispatch.invoke(requestSoapMessage);
         }};
 
     }
 
+    /**
+     * Testing with actual data
+     * @param requestSoapMessage
+     * @param responseSoapMessage
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws IllegalAccessException
+     * @throws JAXBException
+     * @throws EbMS3Exception
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     */
     @Test
-    public void testDispatch_tc1Process(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
+    public void testDispatch_tc1Process_HappyFlow(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
         System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
@@ -180,9 +222,9 @@ public class MSHDispatcherTest {
 
 
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
+        legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
+        final Policy signOnlyPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
         //replace receiver end point as https: to enable setting TLS client params.
         final Party receiverParty = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
         final String endPoint = receiverParty.getEndpoint().replace("http:", "https:");
@@ -200,9 +242,9 @@ public class MSHDispatcherTest {
             result = receiverParty;
 
             policyService.parsePolicy(withSubstring("signOnly"));
-            result = doNothingPolicy;
+            result = signOnlyPolicy;
 
-            policyService.isNoSecurityPolicy(doNothingPolicy);
+            policyService.isNoSecurityPolicy(signOnlyPolicy);
             result = false;
 
             certificateService.isCertificateValid(anyString);
@@ -257,6 +299,11 @@ public class MSHDispatcherTest {
         mshDispatcher.dispatch(requestSoapMessage, pModeKey);
 
         new Verifications() {{
+            certificateService.isCertificateValid(anyString);
+            certificateService.isCertificateValidationEnabled();
+            certificateService.isCertificateChainValid(anyString);
+            tlsReader.getTlsClientParameters();
+            mshDispatcher.configureProxy(withAny(httpClientPolicy), withAny(httpConduit));
             dispatch.invoke(requestSoapMessage);
         }};
     }
@@ -272,7 +319,7 @@ public class MSHDispatcherTest {
 
 
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, LEG_NO_SECNO_SEC_ACTION);
+        legConfiguration = getLegFromConfiguration(configuration, LEG_NO_SECNO_SEC_ACTION);
 
         new Expectations(mshDispatcher) {{
 
@@ -296,6 +343,21 @@ public class MSHDispatcherTest {
             Assert.assertTrue(e instanceof eu.domibus.common.exception.EbMS3Exception);
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0010, ((EbMS3Exception) e).getErrorCode());
         }
+
+        new Verifications() {{
+            certificateService.isCertificateValid(anyString);
+            times = 0;
+            certificateService.isCertificateValidationEnabled();
+            times = 0;
+            certificateService.isCertificateChainValid(anyString);
+            times = 0;
+            tlsReader.getTlsClientParameters();
+            times = 0;
+            mshDispatcher.configureProxy(withAny(httpClientPolicy), withAny(httpConduit));
+            times = 0;
+            dispatch.invoke(requestSoapMessage);
+            times = 0;
+        }};
     }
 
     @Test
@@ -309,9 +371,9 @@ public class MSHDispatcherTest {
 
 
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
+        legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
+        final Policy signOnlyPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
         //replace receiver end point as https: to enable setting TLS client params.
 
         new Expectations(mshDispatcher) {{
@@ -325,9 +387,9 @@ public class MSHDispatcherTest {
             result = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
 
             policyService.parsePolicy(withSubstring("signOnly"));
-            result = doNothingPolicy;
+            result = signOnlyPolicy;
 
-            policyService.isNoSecurityPolicy(doNothingPolicy);
+            policyService.isNoSecurityPolicy(signOnlyPolicy);
             result = false;
 
             certificateService.isCertificateValid(anyString);
@@ -342,6 +404,13 @@ public class MSHDispatcherTest {
             Assert.assertTrue(e instanceof eu.domibus.common.exception.EbMS3Exception);
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0101, ((EbMS3Exception) e).getErrorCode());
         }
+
+        new Verifications() {{
+            mshDispatcher.configureProxy(withAny(httpClientPolicy), withAny(httpConduit));
+            times = 0;
+            dispatch.invoke(requestSoapMessage);
+            times = 0;
+        }};
     }
 
     /**
@@ -369,9 +438,9 @@ public class MSHDispatcherTest {
 
 
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
+        legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
+        final Policy signOnlyPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
         //replace receiver end point as https: to enable setting TLS client params.
         final Party receiverParty = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
         final String endPoint = receiverParty.getEndpoint().replace("http:", "https:");
@@ -389,9 +458,9 @@ public class MSHDispatcherTest {
             result = receiverParty;
 
             policyService.parsePolicy(withSubstring("signOnly"));
-            result = doNothingPolicy;
+            result = signOnlyPolicy;
 
-            policyService.isNoSecurityPolicy(doNothingPolicy);
+            policyService.isNoSecurityPolicy(signOnlyPolicy);
             result = false;
 
             certificateService.isCertificateValid(anyString);
@@ -446,6 +515,8 @@ public class MSHDispatcherTest {
         mshDispatcher.dispatch(requestSoapMessage, pModeKey);
 
         new Verifications() {{
+            tlsReader.getTlsClientParameters();
+            mshDispatcher.configureProxy(withAny(httpClientPolicy), withAny(httpConduit));
             dispatch.invoke(requestSoapMessage);
         }};
     }
@@ -461,9 +532,9 @@ public class MSHDispatcherTest {
 
 
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
-        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
+        legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
+        final Policy signOnlyPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
         //replace receiver end point as https: to enable setting TLS client params.
         final Party receiverParty = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
         final String endPoint = receiverParty.getEndpoint().replace("http:", "https:");
@@ -481,9 +552,9 @@ public class MSHDispatcherTest {
             result = receiverParty;
 
             policyService.parsePolicy(withSubstring("signOnly"));
-            result = doNothingPolicy;
+            result = signOnlyPolicy;
 
-            policyService.isNoSecurityPolicy(doNothingPolicy);
+            policyService.isNoSecurityPolicy(signOnlyPolicy);
             result = false;
 
             certificateService.isCertificateValid(anyString);
@@ -546,9 +617,6 @@ public class MSHDispatcherTest {
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0005, ((EbMS3Exception) e).getErrorCode());
         }
 
-        new Verifications() {{
-            dispatch.invoke(requestSoapMessage);
-        }};
     }
 
     @Test

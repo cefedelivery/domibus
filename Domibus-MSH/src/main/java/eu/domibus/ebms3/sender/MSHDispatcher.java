@@ -172,7 +172,7 @@ public class MSHDispatcher {
         return dispatch;
     }
 
-    private void configureProxy(final HTTPClientPolicy httpClientPolicy, HTTPConduit httpConduit) {
+    protected void configureProxy(final HTTPClientPolicy httpClientPolicy, HTTPConduit httpConduit) {
         String httpProxyHost = domibusProperties.getProperty("domibus.proxy.http.host");
         String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
         String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
