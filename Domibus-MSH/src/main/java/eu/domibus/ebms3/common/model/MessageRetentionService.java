@@ -88,6 +88,9 @@ public class MessageRetentionService {
         }
     }
 
+    /**
+     * Deletes all the expired messages
+     */
     @Transactional
     public void deleteAllExpiredMessages() {
         final List<String> mpcs = pModeProvider.getMpcURIList();
