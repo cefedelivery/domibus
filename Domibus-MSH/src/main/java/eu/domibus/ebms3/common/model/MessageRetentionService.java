@@ -115,9 +115,9 @@ public class MessageRetentionService {
         if (messageRetentionDownloaded > 0) { // if -1 the messages will be kept indefinetely and if 0 it already has been deleted
             List<String> downloadedMessageIds = userMessageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);
             if (downloadedMessageIds != null && downloadedMessageIds.size() > 0) {
-                LOG.info("Found [" + downloadedMessageIds.size() + "] downloaded messages to delete");
+                LOG.debug("Found [" + downloadedMessageIds.size() + "] downloaded messages to delete");
                 final Integer deleted = delete(downloadedMessageIds, expiredDownloadedMessagesLimit);
-                LOG.info("Deleted [" + deleted + "] downloaded messages");
+                LOG.debug("Deleted [" + deleted + "] downloaded messages");
             }
         }
     }
@@ -128,9 +128,9 @@ public class MessageRetentionService {
         if (messageRetentionNotDownloaded > -1) { // if -1 the messages will be kept indefinetely and if 0, although it makes no sense, is legal
             final List<String> notDownloadedMessageIds = userMessageLogDao.getUndownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionNotDownloaded * -1), mpc);
             if (notDownloadedMessageIds != null && notDownloadedMessageIds.size() > 0) {
-                LOG.info("Found [" + notDownloadedMessageIds.size() + "] not-downloaded messages to delete");
+                LOG.debug("Found [" + notDownloadedMessageIds.size() + "] not-downloaded messages to delete");
                 final Integer deleted = delete(notDownloadedMessageIds, expiredNotDownloadedMessagesLimit);
-                LOG.info("Deleted [" + deleted + "] not-downloaded messages");
+                LOG.debug("Deleted [" + deleted + "] not-downloaded messages");
             }
         }
     }
