@@ -39,8 +39,8 @@ public class MessageRetentionService {
 
     public static final Integer DEFAULT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 50;
     public static final Integer DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 50;
-    public static final String DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.downloaded.limit";
-    public static final String NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.not_downloaded.limit";
+    public static final String DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.downloaded.max.delete";
+    public static final String NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.not_downloaded.max.delete";
 
     @Autowired
     private CollectionUtil collectionUtil;

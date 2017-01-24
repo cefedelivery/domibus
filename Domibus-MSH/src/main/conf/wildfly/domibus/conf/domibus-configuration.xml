@@ -60,9 +60,9 @@
         <prop key="domibus.jms.internalQueue.expression">.*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*</prop>
 
         <!-- Uncomment the following line if you need to modify the default message retention downloaded limit -->
-        <!-- <prop key="message.retention.downloaded.limit">50</prop> -->
+        <!-- <prop key="message.retention.downloaded.max.delete">50</prop> -->
         <!-- Uncomment the following line if you need to modify the default message retention not-downloaded limit -->
-        <!-- <prop key="message.retention.not_downloaded.limit">50</prop> -->
+        <!-- <prop key="message.retention.not_downloaded.max.delete">50</prop> -->
 
         <!-- Enable the proxy settings only if you use a proxy -->
         <!--
