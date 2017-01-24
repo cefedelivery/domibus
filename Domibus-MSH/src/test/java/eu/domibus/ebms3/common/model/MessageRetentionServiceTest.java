@@ -94,11 +94,14 @@ public class MessageRetentionServiceTest {
         final Integer expiredNotDownloadedMessagesLimit = 20;
 
         new Expectations(messageRetentionService) {{
+            //partial mocking of the following methods
             messageRetentionService.deleteExpiredDownloadedMessages(mpc1, expiredDownloadedMessagesLimit);
             messageRetentionService.deleteExpiredNotDownloadedMessages(mpc1, expiredNotDownloadedMessagesLimit);
         }};
 
         messageRetentionService.deleteExpiredMessages(mpc1, 10, 20);
+
+        //the verifications are done in the Expectations block
 
     }
 
