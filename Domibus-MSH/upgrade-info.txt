@@ -1,5 +1,5 @@
 Domibus 3.2.2:
-               - Replace the war file and ws-plugin jar file
+               - Replace the war file and the default plugins: domibus-default-ws-plugin and domibus-default-jms-plugin jar files
                - Add the following lines to conf/domibus/internal/ehcache.xml
                    	<cache name="lookupInfo"
                           maxBytesLocalHeap="5m"
