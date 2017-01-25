@@ -31,12 +31,13 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 public class SendMessageSignOnlyIT extends AbstractSendMessageIT {
 
     private static boolean initialized;
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(SERVICE_PORT);
+
     @Autowired
     BackendInterface backendWebService;
+
     @Mock
     NonRepudiationChecker nonRepudiationChecker;
+
     @InjectMocks
     @Autowired
     private ReliabilityChecker reliabilityChecker;
@@ -68,6 +69,7 @@ public class SendMessageSignOnlyIT extends AbstractSendMessageIT {
         SendRequest sendRequest = createSendRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
+        super.prepareSendMessage("validAS4Response.xml");
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
 
         TimeUnit.SECONDS.sleep(4);

@@ -47,12 +47,13 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
 
     private static boolean initialized;
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(SERVICE_PORT);
+
     @Autowired
     BackendInterface backendWebService;
+
     @Mock
     NonRepudiationChecker nonRepudiationChecker;
+
     @InjectMocks
     @Autowired
     private ReliabilityChecker reliabilityChecker;
@@ -74,11 +75,11 @@ public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
      */
     @Test
     public void testSendMessageValid() throws SendMessageFault, InterruptedException {
-/*
         String payloadHref = "payload";
         SendRequest sendRequest = createSendRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
+        super.prepareSendMessage("validAS4Response.xml");
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
 
         TimeUnit.SECONDS.sleep(4);
@@ -88,6 +89,5 @@ public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
         verify(postRequestedFor(urlMatching("/domibus/services/msh"))
                 .withRequestBody(containing("EncryptionMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p\""))
                 .withHeader("Content-Type", notMatching("application/soap+xml")));
-                */
     }
 }
