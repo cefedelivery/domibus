@@ -1,5 +1,5 @@
 <settings>
-	<proxies>
+	<!--<proxies>-->
 		<!--<proxy>-->
 			<!--<id>httpProxy</id>-->
 			<!--<active>true</active>-->
@@ -20,7 +20,7 @@
 			<!--<password>{VtY9+xpYtF0HPwkX8WuewigB168oiHNqHaZo7DHI1y4=}</password>-->
 			<!--<nonProxyHosts>*localhost*|*.ec.europa.eu</nonProxyHosts>-->
 		<!--</proxy>-->
-	</proxies>
+	<!--</proxies>-->
 	<mirrors>
 		<!-- mirror
          | Specifies a repository mirror site to use instead of a given repository. The repository that
