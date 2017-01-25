@@ -4,12 +4,10 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
+import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
-import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.Mpc;
-import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
@@ -21,7 +19,11 @@ import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.ObjectFactory;
+import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.DuplicateMessageException;
@@ -30,8 +32,6 @@ import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,6 +45,8 @@ import javax.jms.Queue;
 import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.stereotype.Service;
 
 /**
  * @author Christian Koch, Stefan Mueller, Federico Martini, Ioana Dragusanu
@@ -150,7 +152,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 }
             }
         }
-        //userMessageLogDao.setMessageAsDownloaded(messageId);
         return transformer.transformFromMessaging(userMessage);
     }
 
@@ -198,10 +199,10 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = {IllegalArgumentException.class, ConfigurationException.class})
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
-        if(StringUtils.isNotEmpty(messageData.getMessageId())) {
+        if (StringUtils.isNotEmpty(messageData.getMessageId())) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());
         }
         LOG.info("Preparing to submit message");
@@ -244,19 +245,15 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             String pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
             Party from = pModeProvider.getSenderParty(pModeKey);
             Party to = pModeProvider.getReceiverParty(pModeKey);
-            // Verifies that the initiator and responder party are not the same.
-            if (from.getName().equals(to.getName())) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name is the same as the responder party's one[" + from.getName() + "]", null, null);
-            }
-            // Verifies that the message is not for the current gateway.
+            backendMessageValidator.validateParties(from, to);
+
             Configuration config = pModeProvider.getConfigurationDAO().read();
-            if (config.getParty().equals(to)) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "It is forbidden to submit a message to the sending access point[" + to.getName() + "]", null, null);
-            }
-            // Verifies that the message is being sent by the same party as the one configured for the sending access point
-            if (!config.getParty().equals(from)) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name [" + from.getName() + "] does not correspond to the access point's name [" + config.getParty().getName() + "]", null, null);
-            }
+            backendMessageValidator.validateInitiatorParty(config.getParty(), from);
+            backendMessageValidator.validateResponderParty(config.getParty(), to);
+
+            Role fromRole = pModeProvider.getBusinessProcessRole(userMessage.getPartyInfo().getFrom().getRole());
+            Role toRole = pModeProvider.getBusinessProcessRole(userMessage.getPartyInfo().getTo().getRole());
+            backendMessageValidator.validatePartiesRoles(fromRole, toRole);
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
 
@@ -294,10 +291,13 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             LOG.info("Message submitted");
             return userMessage.getMessageInfo().getMessageId();
 
-        } catch (final EbMS3Exception ebms3Ex) {
+        } catch (EbMS3Exception ebms3Ex) {
             LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", ebms3Ex);
             errorLogDao.create(new ErrorLogEntry(ebms3Ex));
             throw MessagingExceptionFactory.transform(ebms3Ex);
+        } catch (IllegalArgumentException | ConfigurationException runTimEx) {
+            LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", runTimEx);
+            throw MessagingExceptionFactory.transform(runTimEx, ErrorCode.EBMS_0003);
         }
     }
 

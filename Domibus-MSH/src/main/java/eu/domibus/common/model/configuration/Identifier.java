@@ -20,6 +20,8 @@
 package eu.domibus.common.model.configuration;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import javax.persistence.*;
@@ -113,31 +115,35 @@ public class Identifier extends AbstractBaseEntity {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Identifier)) return false;
-        if (!super.equals(o)) return false;
 
-        final Identifier that = (Identifier) o;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        if (!this.partyId.equals(that.partyId)) return false;
-        return this.partyIdType == that.partyIdType || this.partyIdType.equals(that.partyIdType);
+        Identifier that = (Identifier) o;
 
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(partyId, that.partyId)
+                .append(partyIdType, that.partyIdType)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + this.partyId.hashCode();
-        return result;
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(partyId)
+                .append(partyIdType)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .append("partyId", partyId)
-                .append("partyIdTypeXml", partyIdTypeXml)
                 .append("partyIdType", partyIdType)
                 .toString();
     }
+
 }

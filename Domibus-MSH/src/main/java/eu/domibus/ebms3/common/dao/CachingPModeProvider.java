@@ -7,11 +7,11 @@ import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang.StringUtils;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -298,6 +298,18 @@ public class CachingPModeProvider extends PModeProvider {
             result.add(mpc.getQualifiedName());
         }
         return result;
+    }
+
+    @Override
+    public Role getBusinessProcessRole(String roleValue) throws EbMS3Exception {
+        for (Role role : this.getConfiguration().getBusinessProcesses().getRoles()) {
+            if (StringUtils.equalsIgnoreCase(role.getValue(), roleValue)) {
+                return role;
+            }
+        }
+        LOG.businessError(DomibusMessageCode.BUS_PARTY_ROLE_NOT_FOUND, roleValue);
+        //throw new ConfigurationException("No matching Role found with value [" + roleValue + "]");
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "No matching Role found with value [" + roleValue + "]", null, null);
     }
 
     @Override

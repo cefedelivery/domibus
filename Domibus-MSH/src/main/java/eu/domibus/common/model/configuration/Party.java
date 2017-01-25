@@ -195,6 +195,14 @@ public class Party extends AbstractBaseEntity {
         this.endpoint = value;
     }
 
+
+    public void init(final Configuration configuration) {
+        for (final Identifier identifier : this.identifiers) {
+            identifier.init(configuration);
+        }
+
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -207,8 +215,6 @@ public class Party extends AbstractBaseEntity {
                 .appendSuper(super.equals(o))
                 .append(identifiers, party.identifiers)
                 .append(name, party.name)
-                .append(userName, party.userName)
-                .append(password, party.password)
                 .append(endpoint, party.endpoint)
                 .isEquals();
     }
@@ -219,16 +225,7 @@ public class Party extends AbstractBaseEntity {
                 .appendSuper(super.hashCode())
                 .append(identifiers)
                 .append(name)
-                .append(userName)
-                .append(password)
                 .append(endpoint)
                 .toHashCode();
-    }
-
-    public void init(final Configuration configuration) {
-        for (final Identifier identifier : this.identifiers) {
-            identifier.init(configuration);
-        }
-
     }
 }

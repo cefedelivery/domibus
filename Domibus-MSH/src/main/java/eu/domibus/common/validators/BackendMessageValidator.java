@@ -2,22 +2,27 @@ package eu.domibus.common.validators;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
-import org.apache.commons.lang.StringUtils;
+import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.Role;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- @author Arun Raj
- @since 3.3
- <br/>
- Class to contain validations in the backend interactions
+ * @author Arun Raj
+ * @author Federico Martini
+ * @since 3.3
+ * <br/>
+ * This class validates the content of the UserMessage which represents the message's header.
+ * These validations are based on the AS4 specifications and the gateway PMode configuration.
  */
 
 @Service
@@ -110,4 +115,76 @@ public class BackendMessageValidator {
             }
         }
     }
+
+
+    /**
+     * Verifies that the initiator and the responder parties are different.
+     *
+     * @param from
+     * @param to
+     * @throws EbMS3Exception
+     */
+    public void validateParties(Party from, Party to) throws EbMS3Exception {
+
+        Assert.notNull(from, "Initiator party cannot be null");
+        Assert.notNull(to, "Responder party cannot be null");
+
+        if (from.equals(to)) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name is the same as the responder party's one[" + from.getName() + "]", null, null);
+        }
+    }
+
+
+    /**
+     * Verifies that the message is being sent by the same party as the one configured for the sending access point
+     *
+     * @param gatewayParty
+     * @param from
+     * @throws EbMS3Exception
+     */
+    public void validateInitiatorParty(Party gatewayParty, Party from) throws EbMS3Exception {
+
+        Assert.notNull(gatewayParty, "Access point party cannot be null");
+        Assert.notNull(from, "Initiator party cannot be null");
+
+        if (!gatewayParty.equals(from)) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name [" + from.getName() + "] does not correspond to the access point's name [" + gatewayParty.getName() + "]", null, null);
+        }
+    }
+
+    /**
+     * Verifies that the message is not for the current gateway.
+     *
+     * @param gatewayParty
+     * @param to
+     * @throws EbMS3Exception
+     */
+    public void validateResponderParty(Party gatewayParty, Party to) throws EbMS3Exception {
+
+        Assert.notNull(gatewayParty, "Access point party cannot be null");
+        Assert.notNull(to, "Responder party cannot be null");
+
+        if (gatewayParty.equals(to)) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "It is forbidden to submit a message to the sending access point[" + to.getName() + "]", null, null);
+        }
+    }
+
+    /**
+     * Verifies that the parties' roles are different
+     *
+     * @param fromRole
+     * @param toRole
+     * @throws EbMS3Exception
+     */
+    public void validatePartiesRoles(Role fromRole, Role toRole) throws EbMS3Exception {
+
+        Assert.notNull(fromRole, "Role of the initiator party cannot be null");
+        Assert.notNull(toRole, "Role of the responder party cannot be null");
+
+        if (fromRole.equals(toRole)) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's role is the same as the responder party's one[" + fromRole.getName() + "]", null, null);
+        }
+    }
+
+
 }

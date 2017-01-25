@@ -22,6 +22,8 @@ import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.Service;
 import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.DuplicateMessageException;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
@@ -32,8 +34,6 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -411,16 +411,6 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findPModeKeyForUserMessage(userMessage);
             result = pModeKey;
 
-            Party sender = new Party();
-            sender.setName(GREEN);
-            pModeProvider.getSenderParty(pModeKey);
-            result = sender;
-
-            Party receiver = new Party();
-            receiver.setName(RED);
-            pModeProvider.getReceiverParty(pModeKey);
-            result = receiver;
-
             // Here the configuration of the access point is supposed to be BLUE!
             Configuration conf = new Configuration();
             Party confParty = new Party();
@@ -428,6 +418,9 @@ public class DatabaseMessageHandlerTest {
             conf.setParty(confParty);
             pModeProvider.getConfigurationDAO().read();
             result = conf;
+
+            backendMessageValidator.validateInitiatorParty(withAny(new Party()), withAny(new Party()));
+            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name [" + GREEN + "] does not correspond to the access point's name [" + BLUE + "]", null, null);
 
         }};
 
@@ -445,6 +438,12 @@ public class DatabaseMessageHandlerTest {
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            backendMessageValidator.validateParties(withAny(new Party()), withAny(new Party()));
+            backendMessageValidator.validateInitiatorParty(withAny(new Party()), withAny(new Party()));
+            backendMessageValidator.validateResponderParty(withAny(new Party()), withAny(new Party()));
+            times = 0;
+            backendMessageValidator.validatePartiesRoles(withAny(new Role()), withAny(new Role()));
+            times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
             messagingService.storeMessage(withAny(new Messaging()));
@@ -456,9 +455,7 @@ public class DatabaseMessageHandlerTest {
     }
 
     @Test
-    /**
-     * Tests a submit message where from and to parties are the same.
-     */
+    /* Tests a submit message where from and to parties are the same. */
     public void testSubmitMessageBlue2BlueNOk(@Injectable final Submission messageData) throws Exception {
         new Expectations() {{
 
@@ -472,20 +469,8 @@ public class DatabaseMessageHandlerTest {
             userMessageLogDao.getMessageStatus(MESS_ID);
             result = MessageStatus.NOT_FOUND;
 
-            String pModeKey = "blue_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
-
-            pModeProvider.findPModeKeyForUserMessage(userMessage);
-            result = pModeKey;
-
-            Party sender = new Party();
-            sender.setName(BLUE);
-            pModeProvider.getSenderParty(pModeKey);
-            result = sender;
-
-            Party receiver = new Party();
-            receiver.setName(BLUE);
-            pModeProvider.getReceiverParty(pModeKey);
-            result = receiver;
+            backendMessageValidator.validateParties(withAny(new Party()), withAny(new Party()));
+            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name is the same as the responder party's one", null, null);
 
         }};
 
@@ -503,6 +488,14 @@ public class DatabaseMessageHandlerTest {
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            backendMessageValidator.validateParties(withAny(new Party()), withAny(new Party()));
+
+            backendMessageValidator.validateInitiatorParty(withAny(new Party()), withAny(new Party()));
+            times = 0;
+            backendMessageValidator.validateResponderParty(withAny(new Party()), withAny(new Party()));
+            times = 0;
+            backendMessageValidator.validatePartiesRoles(withAny(new Role()), withAny(new Role()));
+            times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
             messagingService.storeMessage(withAny(new Messaging()));
@@ -512,70 +505,6 @@ public class DatabaseMessageHandlerTest {
         }};
     }
 
-    @Test
-    /**
-     * Tests when a message is sent to BLUE and the configuration of the SENDING access point is BLUE.
-     */
-    public void testSubmitMessageGreen2BlueNOk(@Injectable final Submission messageData) throws Exception {
-        new Expectations() {{
-
-            UserMessage userMessage = createUserMessage();
-            transformer.transformFromSubmission(messageData);
-            result = userMessage;
-
-            messageIdGenerator.generateMessageId();
-            result = MESS_ID;
-
-            userMessageLogDao.getMessageStatus(MESS_ID);
-            result = MessageStatus.NOT_FOUND;
-
-            String pModeKey = "green_gw:blue_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
-
-            pModeProvider.findPModeKeyForUserMessage(userMessage);
-            result = pModeKey;
-
-            Party sender = new Party();
-            sender.setName(GREEN);
-            pModeProvider.getSenderParty(pModeKey);
-            result = sender;
-
-            Party receiver = new Party();
-            receiver.setName(BLUE);
-            pModeProvider.getReceiverParty(pModeKey);
-            result = receiver;
-
-            // Here the configuration of the access point is supposed to be BLUE!
-            Configuration conf = new Configuration();
-            Party confParty = new Party();
-            confParty.setName(BLUE);
-            conf.setParty(confParty);
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
-
-        }};
-
-        try {
-            dmh.submit(messageData, BACKEND);
-            Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
-        } catch (MessagingProcessingException mpEx) {
-            LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
-            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
-            assert (mpEx.getMessage().contains("It is forbidden to submit a message to the sending access point"));
-        }
-
-        new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
-            messageIdGenerator.generateMessageId();
-            userMessageLogDao.getMessageStatus(MESS_ID);
-            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
-            pModeProvider.getLegConfiguration(anyString);
-            times = 0;
-            messagingService.storeMessage(withAny(new Messaging()));
-            times = 0;
-            userMessageLogDao.create(withAny(new UserMessageLog()));
-            times = 0;
-        }};
-    }
 
     @Test
     public void testSubmitMessageCompressionNOk(@Injectable final Submission messageData) throws Exception {

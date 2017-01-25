@@ -1,12 +1,14 @@
 package eu.domibus.common.validators;
 
+import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.Role;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,9 +35,11 @@ import java.util.Properties;
 @RunWith(JMockit.class)
 public class BackendMessageValidatorTest {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendMessageValidatorTest.class);
-
     private static final String DOMIBUS_CONFIGURATION_FILE = "domibus-configuration.xml";
+    private static final String RED = "red_gw";
+    private static final String BLUE = "blue_gw";
+    private static final String INITIATOR_ROLE = "defaultInitiatorRole";
+    private static final String RESPONDER_ROLE = "defaultResponderRole";
 
     @Injectable
     Properties domibusProperties;
@@ -231,6 +235,159 @@ public class BackendMessageValidatorTest {
         } catch (Exception e1) {
             Assert.fail("When MessageId pattern configuration is not specified, then skip the format validation and no exception is expected!!");
         }
+    }
+
+    @Test
+    /* Verifies that the initiator and the responder parties are different. */
+    public void validatePartiesOk() throws Exception {
+
+        final Party from = new Party();
+        from.setName(RED);
+
+        final Party to = new Party();
+        to.setName(BLUE);
+
+        backendMessageValidatorObj.validateParties(from, to);
+
+        new Verifications() {{
+            from.getName().equals(to.getName());
+        }};
+
+    }
+
+    @Test
+    /* Verifies that the initiator and the responder parties are the same. */
+    public void validatePartiesNOk() throws Exception {
+
+        final Party from = new Party();
+        from.setName(BLUE);
+
+        final Party to = new Party();
+        to.setName(BLUE);
+
+        try {
+            backendMessageValidatorObj.validateParties(from, to);
+            Assert.fail("It should throw " + EbMS3Exception.class.getCanonicalName());
+        } catch (EbMS3Exception ex) {
+            assert (ex.getErrorCode().equals(ErrorCode.EbMS3ErrorCode.EBMS_0010));
+            assert (ex.getErrorDetail().contains("The initiator party's name is the same as the responder party's one"));
+        }
+
+    }
+
+    @Test
+    /* Verifies that the message is being sent by the same party as the one configured for the sending access point */
+    public void validateInitiatorPartyOk() throws Exception {
+
+        final Party gatewayParty = new Party();
+        gatewayParty.setName(BLUE);
+
+        final Party from = new Party();
+        from.setName(BLUE);
+
+        backendMessageValidatorObj.validateInitiatorParty(gatewayParty, from);
+
+        new Verifications() {{
+            gatewayParty.equals(from);
+        }};
+
+    }
+
+    @Test
+    /* Verifies that the message is NOT being sent by the same party as the one configured for the sending access point */
+    public void validateInitiatorPartyNOk() throws Exception {
+
+        final Party gatewayParty = new Party();
+        gatewayParty.setName(RED);
+
+        final Party from = new Party();
+        from.setName(BLUE);
+
+        try {
+            backendMessageValidatorObj.validateInitiatorParty(gatewayParty, from);
+            Assert.fail("It should throw " + EbMS3Exception.class.getCanonicalName());
+        } catch (EbMS3Exception ex) {
+            assert (ex.getErrorCode().equals(ErrorCode.EbMS3ErrorCode.EBMS_0010));
+            assert (ex.getErrorDetail().contains("does not correspond to the access point's name"));
+        }
+
+    }
+
+    @Test
+    /* Verifies that the message is not for the current gateway. */
+    public void validateResponderPartyOk() throws Exception {
+
+        final Party gatewayParty = new Party();
+        gatewayParty.setName(BLUE);
+
+        final Party to = new Party();
+        to.setName(RED);
+
+        backendMessageValidatorObj.validateResponderParty(gatewayParty, to);
+
+        new Verifications() {{
+            gatewayParty.equals(to);
+        }};
+
+    }
+
+    @Test
+    /* Verifies that the message is wrongly sent to current gateway.*/
+    public void validateResponderPartyNOk() throws Exception {
+
+        final Party gatewayParty = new Party();
+        gatewayParty.setName(BLUE);
+
+        final Party to = new Party();
+        to.setName(BLUE);
+
+        try {
+            backendMessageValidatorObj.validateResponderParty(gatewayParty, to);
+            Assert.fail("It should throw " + EbMS3Exception.class.getCanonicalName());
+        } catch (EbMS3Exception ex) {
+            assert (ex.getErrorCode().equals(ErrorCode.EbMS3ErrorCode.EBMS_0010));
+            assert (ex.getErrorDetail().contains("It is forbidden to submit a message to the sending access point"));
+        }
+
+    }
+
+
+    @Test
+    /* Verifies that the parties' roles are different. */
+    public void validatePartiesRolesOk() throws Exception {
+
+        final Role fromRole = new Role();
+        fromRole.setName(INITIATOR_ROLE);
+
+        final Role toRole = new Role();
+        toRole.setName(RESPONDER_ROLE);
+
+        backendMessageValidatorObj.validatePartiesRoles(fromRole, toRole);
+
+        new Verifications() {{
+            fromRole.equals(toRole);
+        }};
+
+    }
+
+    @Test
+    /* Verifies that the parties' roles are the same. */
+    public void validatePartiesRolesNOk() throws Exception {
+
+        final Role fromRole = new Role();
+        fromRole.setName(INITIATOR_ROLE);
+
+        final Role toRole = new Role();
+        toRole.setName(INITIATOR_ROLE);
+
+        try {
+            backendMessageValidatorObj.validatePartiesRoles(fromRole, toRole);
+            Assert.fail("It should throw " + EbMS3Exception.class.getCanonicalName());
+        } catch (EbMS3Exception ex) {
+            assert (ex.getErrorCode().equals(ErrorCode.EbMS3ErrorCode.EBMS_0010));
+            assert (ex.getErrorDetail().contains("The initiator party's role is the same as the responder party's one"));
+        }
+
     }
 
 

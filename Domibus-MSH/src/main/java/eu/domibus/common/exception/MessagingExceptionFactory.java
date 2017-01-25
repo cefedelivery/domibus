@@ -53,4 +53,11 @@ public class MessagingExceptionFactory {
         messagingProcessingException.setEbms3ErrorCode(errorCode);
         return messagingProcessingException;
     }
+
+    public static MessagingProcessingException transform(Exception originalException, ErrorCode errorCode) {
+        MessagingProcessingException messagingProcessingException = new MessagingProcessingException(originalException.getMessage(), originalException);
+        messagingProcessingException.setEbms3ErrorCode(errorCode);
+        return messagingProcessingException;
+    }
+
 }

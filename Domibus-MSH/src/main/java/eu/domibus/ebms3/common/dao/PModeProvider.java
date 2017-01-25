@@ -29,11 +29,11 @@ import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang.StringUtils;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
@@ -226,6 +226,8 @@ public abstract class PModeProvider {
     public abstract int getRetentionUndownloadedByMpcName(String mpcName);
 
     public abstract int getRetentionUndownloadedByMpcURI(final String mpcURI);
+
+    public abstract Role getBusinessProcessRole(String roleValue) throws EbMS3Exception;
 
     public ConfigurationDAO getConfigurationDAO() {
         return configurationDAO;

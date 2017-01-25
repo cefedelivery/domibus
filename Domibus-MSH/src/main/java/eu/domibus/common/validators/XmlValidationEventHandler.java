@@ -1,8 +1,8 @@
 package eu.domibus.common.validators;
 
-import org.apache.commons.lang.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.ValidationEvent;
@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by martifp on 21/04/2016.
+ @author Federico Martini
+ @since 3.1
+ <br/> Class to handle and customize the validation events triggered during XML parsing.
  */
 public class XmlValidationEventHandler implements ValidationEventHandler {
 
