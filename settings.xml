@@ -39,12 +39,12 @@
 		<server>
 			<id>webgate-releases</id>
 			<username>feriaad</username>
-			<password>{t1Dvle4YGQkHvSJT8dEOoP8mRVkbx71nfyi5yDnyLzI=}</password>
+			<password>{0Dch8DXGG8wHq9jf+cOEcRVf67N6jAj7BkWAxlqNvUk=}</password>
 		</server>
 		<server>
 			<id>webgate-digit-third-party</id>
 			<username>feriaad</username>
-			<password>{t1Dvle4YGQkHvSJT8dEOoP8mRVkbx71nfyi5yDnyLzI=}</password>
+			<password>{0Dch8DXGG8wHq9jf+cOEcRVf67N6jAj7BkWAxlqNvUk=}</password>
 		</server>
 	</servers>
 
