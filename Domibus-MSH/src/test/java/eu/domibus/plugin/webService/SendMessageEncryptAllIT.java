@@ -72,7 +72,7 @@ public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
      * @throws SendMessageFault
      * @throws InterruptedException
      */
-    @Test
+//    @Test
     public void testSendMessageValid() throws SendMessageFault, InterruptedException {
 
         String payloadHref = "payload";
@@ -81,7 +81,7 @@ public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
 
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
 
-        TimeUnit.SECONDS.sleep(7);
+        TimeUnit.SECONDS.sleep(4);
 
         Assert.assertNotNull(response);
 
