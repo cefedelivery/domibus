@@ -69,7 +69,7 @@
     <!-- Where are we looking for JARs -->
     <pluginRepositories>
         <pluginRepository>
-            <id>cefdigital-public</id>
+            <id>cefdigital-releases</id>
             <url>https://ec.europa.eu/cefdigital/artifact/content/groups/public/</url>
         </pluginRepository>
         <pluginRepository>
@@ -88,7 +88,7 @@
     </pluginRepositories>
     <repositories>
         <repository>
-            <id>cefdigital-nexus</id>
+            <id>cefdigital-releases</id>
             <url>https://ec.europa.eu/cefdigital/artifact/content/groups/public/</url>
             <releases>
                 <enabled>true</enabled>
@@ -98,7 +98,7 @@
             </snapshots>
         </repository>
         <repository>
-            <id>cefdigital-nexus-snapshots</id>
+            <id>cefdigital-snapshots</id>
             <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots/</url>
             <releases>
                 <enabled>false</enabled>
