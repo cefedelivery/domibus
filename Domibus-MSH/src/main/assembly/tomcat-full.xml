@@ -63,6 +63,7 @@
                 <exclude>example/**</exclude>
                 <exclude>policies/**</exclude>
                 <exclude>keystores/**</exclude>
+                <exclude>keystores_dyn/**</exclude>
                 <exclude>plugins/**</exclude>
             </excludes>
         </fileSet>
