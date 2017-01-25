@@ -54,6 +54,7 @@
         <commons-configuration.version>1.10</commons-configuration.version>
     </properties>
 
+    <!-- Where to deploy the binaries -->
     <distributionManagement>
         <repository>
             <id>cefdigital-releases</id>
@@ -64,6 +65,70 @@
             <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <!-- Where are we looking for JARs -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>cefdigital-public</id>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/groups/public/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>SmartBearPluginRepository</id>
+            <url>https://www.soapui.org/repository/maven2</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>smartbear</id>
+            <url>http://smartbearsoftware.com/repository/maven2</url>
+        </pluginRepository>
+
+        <pluginRepository>
+            <id>plugin.joinup</id>
+            <url>https://joinup.ec.europa.eu/nexus/content/groups/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <repositories>
+        <repository>
+            <id>cefdigital-nexus</id>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>cefdigital-nexus-snapshots</id>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>joinup.nexus</id>
+            <url>https://joinup.ec.europa.eu/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>joinup.nexus.snapshot</id>
+            <url>https://joinup.ec.europa.eu/nexus/content/repositories/snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencyManagement>
         <dependencies>
