@@ -30,43 +30,6 @@
         <soapui.remoteUrl>http://localhost:9080</soapui.remoteUrl>
     </properties>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>SmartBearPluginRepository</id>
-            <url>https://www.soapui.org/repository/maven2</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>plugin.joinup</id>
-            <url>https://joinup.ec.europa.eu/nexus/content/groups/public/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>smartbear</id>
-            <url>http://smartbearsoftware.com/repository/maven2</url>
-        </pluginRepository>
-    </pluginRepositories>
-    <repositories>
-        <repository>
-            <id>joinup.nexus</id>
-            <url>https://joinup.ec.europa.eu/nexus/content/groups/public</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>joinup.nexus.snapshot</id>
-            <url>https://joinup.ec.europa.eu/nexus/content/repositories/snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <profiles>
         <profile>
             <id>wildfly-mysql</id>

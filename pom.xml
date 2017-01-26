@@ -63,6 +63,7 @@
         <!--<sonar.web.javaAdditionalOpts>-Dhttp.proxyHost=158.169.9.13 -Dhttp.proxyPort=8012 -Dhttp.proxyUser=theuser -Dhttp.proxyPassword=thepassword -Dhttps.proxyHost=158.169.9.13 -Dhttps.proxyPort=8012 -Dhttps.proxyUser=theuser -Dhttps.proxyPassword=thepassword -Dhttps.nonProxyHosts=localhost -Dhttp.nonProxyHosts=localhost</sonar.web.javaAdditionalOpts>-->
     </properties>
 
+    <!-- Where to deploy the binaries -->
     <distributionManagement>
         <repository>
             <id>cefdigital-releases</id>
@@ -73,6 +74,38 @@
             <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <!-- Where are we looking for JARs -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>cefdigital-releases</id>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/groups/public/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>SmartBearPluginRepository</id>
+            <url>https://www.soapui.org/repository/maven2</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>smartbear</id>
+            <url>http://smartbearsoftware.com/repository/maven2</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <repositories>
+        <repository>
+            <id>cefdigital-releases</id>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>cefdigital-snapshots</id>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots/</url>
+        </repository>
+    </repositories>
 
     <dependencyManagement>
         <dependencies>
