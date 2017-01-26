@@ -70,6 +70,11 @@
         <!-- Use the below property to customize the task executor threads count -->
         <!--<prop key="domibus.taskExecutor.threadCount">50</prop>-->
 
+        <!-- Uncomment the following line if you need to tweak the maximum downloaded messages to be deleted by the retention worker -->
+        <!-- <prop key="message.retention.downloaded.max.delete">50</prop> -->
+        <!-- Uncomment the following line if you need to tweak the maximum not-downloaded messages to be deleted by the retention worker -->
+        <!-- <prop key="message.retention.not_downloaded.max.delete">50</prop> -->
+
         <!-- Enable the proxy settings only if you use a proxy -->
         <prop key="domibus.proxy.enabled">false</prop>
         <prop key="domibus.proxy.http.host"></prop>
@@ -81,7 +86,7 @@
         <!-- To disable unsecureLogin, set this to false -->
         <!-- <prop key="domibus.auth.unsecureLoginAllowed">true</prop> -->
 
-    </util:properties>
+</util:properties>
 
     <!-- Mime-Types listed in this map will not be compressed (in outgoing messages) even if compression is turned on for the given message. -->
     <util:list id="compressionBlacklist" value-type="java.lang.String">
