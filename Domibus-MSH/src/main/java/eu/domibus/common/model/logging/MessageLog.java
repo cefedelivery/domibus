@@ -88,6 +88,10 @@ public abstract class MessageLog extends AbstractBaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date received;
 
+    @Column(name = "DOWNLOADED")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date downloaded;
+
     @Column(name = "SEND_ATTEMPTS")
     private int sendAttempts;
 
@@ -152,6 +156,14 @@ public abstract class MessageLog extends AbstractBaseEntity {
 
     public void setReceived(final Date received) {
         this.received = received;
+    }
+
+    public Date getDownloaded() {
+        return this.downloaded;
+    }
+
+    public void setDownloaded(final Date downloaded) {
+        this.downloaded = downloaded;
     }
 
     public Date getNextAttempt() {

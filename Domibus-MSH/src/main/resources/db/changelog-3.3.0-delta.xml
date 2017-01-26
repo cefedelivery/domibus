@@ -4,7 +4,7 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <changeSet id="MySQL_Collation_Update" author="ArunRaj" dbms="mysql">
+    <changeSet id="MySQL_Collation_Update_1554" author="ArunRaj" dbms="mysql">
         <sql dbms="mysql">
             SET FOREIGN_KEY_CHECKS=0;
             ALTER TABLE QRTZ_TRIGGERS CONVERT TO CHARACTER SET UTF8 COLLATE UTF8_BIN;
@@ -63,6 +63,12 @@
             ALTER TABLE TB_USER_MESSAGE CONVERT TO CHARACTER SET UTF8 COLLATE UTF8_BIN;
             SET FOREIGN_KEY_CHECKS=1;
         </sql>
+    </changeSet>
+
+    <changeSet author="ArunRaj" id="Add_Downloaded_1542">
+        <addColumn tableName="tb_message_log">
+            <column name="DOWNLOADED" type="datetime" afterColumn="RECEIVED"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>
