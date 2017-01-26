@@ -12,7 +12,6 @@ import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.net.URI;
@@ -31,16 +30,32 @@ public class PModeDao extends PModeProvider {
 
     @Override
     public Party getSenderParty(final String pModeKey) {
+
+        String senderPartyName = this.getSenderPartyNameFromPModeKey(pModeKey);
+
         final TypedQuery<Party> query = this.entityManager.createNamedQuery("Party.findByName", Party.class);
-        query.setParameter("NAME", this.getSenderPartyNameFromPModeKey(pModeKey));
-        return query.getSingleResult();
+        query.setParameter("NAME", senderPartyName);
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException pEx) {
+            LOG.businessError(DomibusMessageCode.BUS_PARTY_NAME_NOT_FOUND, senderPartyName);
+            return null;
+        }
     }
 
     @Override
     public Party getReceiverParty(final String pModeKey) {
+
+        String senderPartyName = this.getReceiverPartyNameFromPModeKey(pModeKey);
+
         final TypedQuery<Party> query = this.entityManager.createNamedQuery("Party.findByName", Party.class);
-        query.setParameter("NAME", this.getReceiverPartyNameFromPModeKey(pModeKey));
-        return query.getSingleResult();
+        query.setParameter("NAME", senderPartyName);
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException pEx) {
+            LOG.businessError(DomibusMessageCode.BUS_PARTY_NAME_NOT_FOUND, senderPartyName);
+            return null;
+        }
     }
 
     @Override
@@ -307,7 +322,7 @@ public class PModeDao extends PModeProvider {
     }
 
     @Override
-    public Role getBusinessProcessRole(String roleValue) throws EbMS3Exception {
+    public Role getBusinessProcessRole(String roleValue) {
         final TypedQuery<Role> query = entityManager.createNamedQuery("Role.findByValue", Role.class);
         query.setParameter("VALUE", roleValue);
 
@@ -315,11 +330,8 @@ public class PModeDao extends PModeProvider {
             return query.getSingleResult();
         } catch (NoResultException pEx) {
             LOG.businessError(DomibusMessageCode.BUS_PARTY_ROLE_NOT_FOUND, roleValue);
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "No matching Role found with value [" + roleValue + "]", null, null);
-        } catch (PersistenceException pEx) {
-            LOG.error("Error executing query:", pEx);
+            return null;
         }
-        return null;
     }
 
 }

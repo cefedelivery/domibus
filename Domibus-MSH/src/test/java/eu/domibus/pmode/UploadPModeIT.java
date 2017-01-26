@@ -6,6 +6,7 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.controller.AdminGUIController;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.Validate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -121,7 +122,9 @@ public class UploadPModeIT extends AbstractIT {
             Configuration configuration = testUpdatePModes(IOUtils.toByteArray(fis));
             // Starts to check that the content of the XML file has actually been saved!
             Party receiverParty = pModeProvider.getReceiverParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            Validate.notNull(receiverParty, "Responder party was not found");
             Party senderParty = pModeProvider.getSenderParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+            Validate.notNull(senderParty, "Initiator party was not found");
             List<String> parties = new ArrayList<>();
             parties.add(receiverParty.getName());
             parties.add(senderParty.getName());

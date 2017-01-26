@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.springframework.util.StringUtils.hasLength;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -100,7 +99,7 @@ public class CachingPModeProvider extends PModeProvider {
     @Override
     protected String findServiceName(final eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception {
         for (final Service service1 : this.getConfiguration().getBusinessProcesses().getServices()) {
-            if ((StringUtils.equalsIgnoreCase(service1.getServiceType(), service.getType()) || (!hasLength(service1.getServiceType()) && !hasLength(service.getType()))))
+            if ((StringUtils.equalsIgnoreCase(service1.getServiceType(), service.getType()) || (!StringUtils.isNotEmpty(service1.getServiceType()) && !StringUtils.isNotEmpty(service.getType()))))
                 if (StringUtils.equalsIgnoreCase(service1.getValue(), service.getValue())) {
                     return service1.getName();
                 }
@@ -301,15 +300,14 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
-    public Role getBusinessProcessRole(String roleValue) throws EbMS3Exception {
+    public Role getBusinessProcessRole(String roleValue) {
         for (Role role : this.getConfiguration().getBusinessProcesses().getRoles()) {
             if (StringUtils.equalsIgnoreCase(role.getValue(), roleValue)) {
                 return role;
             }
         }
         LOG.businessError(DomibusMessageCode.BUS_PARTY_ROLE_NOT_FOUND, roleValue);
-        //throw new ConfigurationException("No matching Role found with value [" + roleValue + "]");
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "No matching Role found with value [" + roleValue + "]", null, null);
+        return null;
     }
 
     @Override

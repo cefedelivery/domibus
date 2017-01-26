@@ -227,7 +227,7 @@ public abstract class PModeProvider {
 
     public abstract int getRetentionUndownloadedByMpcURI(final String mpcURI);
 
-    public abstract Role getBusinessProcessRole(String roleValue) throws EbMS3Exception;
+    public abstract Role getBusinessProcessRole(String roleValue);
 
     public ConfigurationDAO getConfigurationDAO() {
         return configurationDAO;

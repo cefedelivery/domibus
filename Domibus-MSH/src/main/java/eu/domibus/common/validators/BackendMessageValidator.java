@@ -7,10 +7,11 @@ import eu.domibus.common.model.configuration.Role;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -23,9 +24,15 @@ import java.util.regex.Pattern;
  * <br/>
  * This class validates the content of the UserMessage which represents the message's header.
  * These validations are based on the AS4 specifications and the gateway PMode configuration.
+ *
+ * Since any RuntimeException rollbacks the transaction and we don't want that now (because the client would receive a JTA Transaction error as response),
+ * the class uses the "noRollbackFor" attribute inside the @Transactional annotation.
+ *
+ * TODO EbMS3Exception will be soon replaced with a custom Domibus exception in order to report this validation errors.
  */
 
 @Service
+@Transactional(noRollbackFor = {IllegalArgumentException.class})
 public class BackendMessageValidator {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendMessageValidator.class);
@@ -126,8 +133,8 @@ public class BackendMessageValidator {
      */
     public void validateParties(Party from, Party to) throws EbMS3Exception {
 
-        Assert.notNull(from, "Initiator party cannot be null");
-        Assert.notNull(to, "Responder party cannot be null");
+        Validate.notNull(from, "Initiator party was not found");
+        Validate.notNull(to, "Responder party was not found");
 
         if (from.equals(to)) {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name is the same as the responder party's one[" + from.getName() + "]", null, null);
@@ -144,8 +151,8 @@ public class BackendMessageValidator {
      */
     public void validateInitiatorParty(Party gatewayParty, Party from) throws EbMS3Exception {
 
-        Assert.notNull(gatewayParty, "Access point party cannot be null");
-        Assert.notNull(from, "Initiator party cannot be null");
+        Validate.notNull(gatewayParty, "Access point party was not found");
+        Validate.notNull(from, "Initiator party was not found");
 
         if (!gatewayParty.equals(from)) {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name [" + from.getName() + "] does not correspond to the access point's name [" + gatewayParty.getName() + "]", null, null);
@@ -161,8 +168,8 @@ public class BackendMessageValidator {
      */
     public void validateResponderParty(Party gatewayParty, Party to) throws EbMS3Exception {
 
-        Assert.notNull(gatewayParty, "Access point party cannot be null");
-        Assert.notNull(to, "Responder party cannot be null");
+        Validate.notNull(gatewayParty, "Access point party was not found");
+        Validate.notNull(to, "Responder party was not found");
 
         if (gatewayParty.equals(to)) {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "It is forbidden to submit a message to the sending access point[" + to.getName() + "]", null, null);
@@ -178,8 +185,8 @@ public class BackendMessageValidator {
      */
     public void validatePartiesRoles(Role fromRole, Role toRole) throws EbMS3Exception {
 
-        Assert.notNull(fromRole, "Role of the initiator party cannot be null");
-        Assert.notNull(toRole, "Role of the responder party cannot be null");
+        Validate.notNull(fromRole, "Role of the initiator party was not found");
+        Validate.notNull(toRole, "Role of the responder party was not found");
 
         if (fromRole.equals(toRole)) {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's role is the same as the responder party's one[" + fromRole.getName() + "]", null, null);

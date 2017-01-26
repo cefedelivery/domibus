@@ -32,6 +32,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
+import org.apache.commons.lang.Validate;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
@@ -89,7 +90,9 @@ public class MSHDispatcher {
 
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
         Party sendingParty = pModeProvider.getSenderParty(pModeKey);
+        Validate.notNull(sendingParty, "Initiator party was not found");
         Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+        Validate.notNull(receiverParty, "Responder party was not found");
         Policy policy;
         try {
             policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());

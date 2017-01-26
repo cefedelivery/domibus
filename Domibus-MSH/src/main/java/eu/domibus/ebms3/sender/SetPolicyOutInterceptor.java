@@ -5,11 +5,13 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.pki.PolicyService;
+import org.apache.commons.lang.Validate;
 import org.apache.cxf.attachment.AttachmentImpl;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -81,7 +83,10 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
         final String securityAlgorithm = legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
         message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
         LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_ALGORITHM_OUTGOING_USE, securityAlgorithm);
-        final String encryptionUsername = pModeProvider.getReceiverParty(pModeKey).getName();
+        Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+        Validate.notNull(receiverParty, "Initiator party was not found");
+
+        final String encryptionUsername = receiverParty.getName();
         message.put(SecurityConstants.ENCRYPT_USERNAME, encryptionUsername);
         LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_USER_OUTGOING_USE, encryptionUsername);
 

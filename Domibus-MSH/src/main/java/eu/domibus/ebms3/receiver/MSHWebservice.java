@@ -28,6 +28,7 @@ import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -355,6 +356,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
 
         Party to = pModeProvider.getReceiverParty(pmodeKey);
+        Validate.notNull(to, "Responder party was not found");
 
         // Builds the user message log
         UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()

@@ -250,7 +250,7 @@ public class BackendMessageValidatorTest {
         backendMessageValidatorObj.validateParties(from, to);
 
         new Verifications() {{
-            from.getName().equals(to.getName());
+            Assert.assertNotEquals(from, to);
         }};
 
     }
@@ -288,7 +288,7 @@ public class BackendMessageValidatorTest {
         backendMessageValidatorObj.validateInitiatorParty(gatewayParty, from);
 
         new Verifications() {{
-            gatewayParty.equals(from);
+            Assert.assertEquals(gatewayParty, from);
         }};
 
     }
@@ -326,7 +326,7 @@ public class BackendMessageValidatorTest {
         backendMessageValidatorObj.validateResponderParty(gatewayParty, to);
 
         new Verifications() {{
-            gatewayParty.equals(to);
+            Assert.assertNotEquals(gatewayParty, to);
         }};
 
     }
@@ -365,7 +365,7 @@ public class BackendMessageValidatorTest {
         backendMessageValidatorObj.validatePartiesRoles(fromRole, toRole);
 
         new Verifications() {{
-            fromRole.equals(toRole);
+            Assert.assertNotEquals(fromRole, toRole);
         }};
 
     }

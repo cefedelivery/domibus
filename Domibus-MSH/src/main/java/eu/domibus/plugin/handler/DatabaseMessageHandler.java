@@ -4,7 +4,6 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
-import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
 import eu.domibus.common.model.configuration.*;
@@ -199,7 +198,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
 
     @Override
-    @Transactional(noRollbackFor = {IllegalArgumentException.class, ConfigurationException.class})
+    @Transactional
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
         if (StringUtils.isNotEmpty(messageData.getMessageId())) {
@@ -243,17 +242,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             message.setUserMessage(userMessage);
 
             String pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
-            Party from = pModeProvider.getSenderParty(pModeKey);
-            Party to = pModeProvider.getReceiverParty(pModeKey);
-            backendMessageValidator.validateParties(from, to);
-
-            Configuration config = pModeProvider.getConfigurationDAO().read();
-            backendMessageValidator.validateInitiatorParty(config.getParty(), from);
-            backendMessageValidator.validateResponderParty(config.getParty(), to);
-
-            Role fromRole = pModeProvider.getBusinessProcessRole(userMessage.getPartyInfo().getFrom().getRole());
-            Role toRole = pModeProvider.getBusinessProcessRole(userMessage.getPartyInfo().getTo().getRole());
-            backendMessageValidator.validatePartiesRoles(fromRole, toRole);
+            Party to = messageValidations(userMessage, pModeKey, backendName);
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
 
@@ -295,7 +284,24 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", ebms3Ex);
             errorLogDao.create(new ErrorLogEntry(ebms3Ex));
             throw MessagingExceptionFactory.transform(ebms3Ex);
-        } catch (IllegalArgumentException | ConfigurationException runTimEx) {
+        }
+    }
+
+    private Party messageValidations(UserMessage userMessage, String pModeKey, String backendName) throws EbMS3Exception, MessagingProcessingException {
+        try {
+            Party from = pModeProvider.getSenderParty(pModeKey);
+            Party to = pModeProvider.getReceiverParty(pModeKey);
+            backendMessageValidator.validateParties(from, to);
+
+            Configuration config = pModeProvider.getConfigurationDAO().read();
+            backendMessageValidator.validateInitiatorParty(config.getParty(), from);
+            backendMessageValidator.validateResponderParty(config.getParty(), to);
+
+            Role fromRole = pModeProvider.getBusinessProcessRole(userMessage.getPartyInfo().getFrom().getRole());
+            Role toRole = pModeProvider.getBusinessProcessRole(userMessage.getPartyInfo().getTo().getRole());
+            backendMessageValidator.validatePartiesRoles(fromRole, toRole);
+            return to;
+        } catch (IllegalArgumentException runTimEx) {
             LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", runTimEx);
             throw MessagingExceptionFactory.transform(runTimEx, ErrorCode.EBMS_0003);
         }

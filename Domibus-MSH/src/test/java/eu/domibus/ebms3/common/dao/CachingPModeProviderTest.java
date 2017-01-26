@@ -4,13 +4,14 @@ import eu.domibus.api.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.common.model.configuration.Role;
 import eu.domibus.ebms3.common.model.PartyId;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -197,4 +198,31 @@ public class CachingPModeProviderTest {
         Assert.assertEquals(configuration, cachingPModeProvider.getConfiguration());
     }
 
+    @Test
+    public void testGetBusinessProcessRoleOk() throws Exception {
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        new Expectations() {{
+            cachingPModeProvider.getConfiguration().getBusinessProcesses().getRoles();
+            result = configuration.getBusinessProcesses().getRoles();
+        }};
+
+        Role expectedRole = new Role();
+        expectedRole.setName("defaultInitiatorRole");
+        expectedRole.setValue("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+
+        Role role = cachingPModeProvider.getBusinessProcessRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+        Assert.assertEquals(expectedRole, role);
+    }
+
+    @Test
+    public void testGetBusinessProcessRoleNOk() throws Exception {
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        new Expectations() {{
+            cachingPModeProvider.getConfiguration().getBusinessProcesses().getRoles();
+            result = configuration.getBusinessProcesses().getRoles();
+        }};
+
+        Role role = cachingPModeProvider.getBusinessProcessRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator123");
+        Assert.assertNull(role);
+    }
 }
