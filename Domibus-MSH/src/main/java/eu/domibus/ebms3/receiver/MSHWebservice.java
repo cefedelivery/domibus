@@ -201,7 +201,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @param messaging
      * @throws EbMS3Exception
      */
-    private void checkCharset(final Messaging messaging) throws EbMS3Exception {
+    protected void checkCharset(final Messaging messaging) throws EbMS3Exception {
         LOG.info("Checking charset for attachments");
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             for (final Property property : partInfo.getPartProperties().getProperties()) {
@@ -221,7 +221,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @param messaging
      * @return result of duplicate handle
      */
-    private Boolean checkDuplicate(final Messaging messaging) {
+    protected Boolean checkDuplicate(final Messaging messaging) {
         LOG.debug("Checking for duplicate messages");
         return userMessageLogDao.findByMessageId(messaging.getUserMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
     }
@@ -233,7 +233,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @param message
      * @return result of ping service and action handle
      */
-    private Boolean checkPingMessage(final UserMessage message) {
+    protected Boolean checkPingMessage(final UserMessage message) {
         LOG.debug("Checking if it is a ping message");
         return eu.domibus.common.model.configuration.Service.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
                 && eu.domibus.common.model.configuration.Action.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
@@ -249,7 +249,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @return the response message to the incoming request message
      * @throws EbMS3Exception if generation of receipt was not successful
      */
-    private SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate) throws EbMS3Exception {
+    protected SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate) throws EbMS3Exception {
 
         SOAPMessage responseMessage = null;
 
@@ -293,7 +293,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return responseMessage;
     }
 
-    private void saveResponse(final SOAPMessage responseMessage) {
+    protected void saveResponse(final SOAPMessage responseMessage) {
         try {
             Messaging messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
             final SignalMessage signalMessage = messaging.getSignalMessage();
@@ -331,7 +331,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      * @throws EbMS3Exception
      */
     //TODO: improve error handling
-    private String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging) throws SOAPException, JAXBException, TransformerException, EbMS3Exception {
+    protected String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging) throws SOAPException, JAXBException, TransformerException, EbMS3Exception {
         LOG.info("Persisting received message");
         UserMessage userMessage = messaging.getUserMessage();
 
@@ -376,7 +376,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return userMessage.getMessageInfo().getMessageId();
     }
 
-    private String getFinalRecipientName(UserMessage userMessage) {
+    protected String getFinalRecipientName(UserMessage userMessage) {
         for (Property property : userMessage.getMessageProperties().getProperty()) {
             if (property.getName() != null && property.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
                 return property.getValue();
@@ -385,7 +385,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return null;
     }
 
-    private void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
+    protected void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
         boolean bodyloadFound = false;
         for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
             final String cid = partInfo.getHref();
@@ -434,7 +434,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
     }
 
-    private Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
+    protected Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
         LOG.debug("Unmarshalling the Messaging instance from the request");
         final Node messagingXml = (Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
         final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
