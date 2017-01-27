@@ -16,7 +16,7 @@ Domibus 3.3-RC1
 - While submitting the message, validation comparisons with the PMode data are made case insensitive.
 - New configuration properties added for ConnectionTimeout and ReceiveTimeout for connection between access points.
 - Provision added to support DoNothing security policy (no security, no encryption) by checking security policy specified has no child elements.
-- On downloading the message from receiver access point, the message status will be set to DOWNLOADED.
+- Added the DOWNLOADED status to the message state workflow. This new state is also visible through Domibus console.
 Domibus 3.2.2
 - Solved issue related to CXF attachment temp file leakage (for payloads over 200Mb).
 Domibus 3.2.1
