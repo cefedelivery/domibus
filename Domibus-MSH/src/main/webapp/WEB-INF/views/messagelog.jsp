@@ -176,6 +176,9 @@
         <c:url value="${order}" var="received"><c:param name="orderby" value="received"/></c:url>
         <th>Received <a href="<c:url value="${received}"><c:param name="asc" value = "true"/></c:url>">&#9650;</a> \ <a
                 href="<c:url value="${received}"><c:param name="asc" value = "false"/></c:url>">&#9660;</a></th>
+        <c:url value="${order}" var="downloaded"><c:param name="orderby" value="downloaded"/></c:url>
+        <th>Downloaded <a href="<c:url value="${downloaded}"><c:param name="asc" value = "true"/></c:url>">&#9650;</a> \ <a
+                href="<c:url value="${downloaded}"><c:param name="asc" value = "false"/></c:url>">&#9660;</a></th>
         <c:url value="${order}" var="sendAttempts"><c:param name="orderby" value="sendAttempts"/></c:url>
         <th>FailedSendAttempts <a href="<c:url value="${sendAttempts}"><c:param name="asc" value = "true"/></c:url>">
             &#9650;</a> \ <a href="<c:url value="${sendAttempts}"><c:param name="asc" value = "false"/></c:url>">
@@ -189,7 +192,7 @@
             \ <a href="<c:url value="${nextAttempt}"><c:param name="asc" value = "false"/></c:url>">&#9660;</a></th>
     </tr>
     <c:forEach var="o" items="${table}">
-        <tr>
+        <tr class="messageLogTr">
             <td>${o.messageId}</td>
             <td>${o.messageStatus}</td>
             <td>${o.notificationStatus}</td>
@@ -197,6 +200,7 @@
             <td>${o.messageType}</td>
             <td>${o.deleted}</td>
             <td>${o.received}</td>
+            <td>${o.downloaded}</td>
             <td>${o.sendAttempts}</td>
             <td>${o.sendAttemptsMax}</td>
             <td>${o.nextAttempt}</td>
