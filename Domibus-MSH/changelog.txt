@@ -1,23 +1,24 @@
 Domibus 3.3-RC1
-- JMS monitoring: fixed the computation of the total number of messages in the queue for WebLogic
 - Migrated the logging framework to SLF4J and Logback
 - Domibus uses 3 logs files: domibus.log, domibus-business.log and domibus-security.log
-- Fixed the search of the JMS messages for WebLogic(for JMS messages having property with null values) and Tomcat(for JMS messages with no "Text" property)
-- Spring services are always executing within a transaction even if there is no specific @Transactional annotation present
-- Quartz integration with managed threads in WebLogic and WildFly
-- During submit operation, Domibus verifies that the message is being sent by the same party as the one configured as the sending access point.
-- During MSH dispatch, Domibus verifies the validity of sender's certificate.
-- During MSH receive, Domibus verifies the trust of the sender.
-- Domibus MSH sendMessage would trim the leading and trailing whitespaces in all the request fields.
-- Domibus MSH sendMessage verifies that - if MessageId and RefToMessageId is specified by backend client, then it should contain only printable ASCII characters.
-- Validation on MessageId and RefToMessageId can be bypassed by removing the key "domibus.sendMessage.messageIdPattern" from configuration file.
-- MySQL installation of Domibus database is set to have collation of 'UTF8_BIN' to make DB level string comparison (in SQLs) case sensitive. This will enable support for case sensitive message ids.
-- Result set of ListPendingMessages operation limited by a new configuration property - domibus.listPendingMessages.maxCount
-- While submitting the message, validation comparisons with the PMode data are made case insensitive.
-- New configuration properties added for ConnectionTimeout and ReceiveTimeout for connection between access points.
-- Provision added to support DoNothing security policy (no security, no encryption) by checking security policy specified has no child elements.
+- JMS monitoring: fixed the computation of the total number of messages in the queue for WebLogic
+- JMS monitoring: Fixed the search of the JMS messages for WebLogic(for JMS messages having property with null values) and Tomcat(for JMS messages with no "Text" property)
+- Core: Spring services are always executing within a transaction even if there is no specific @Transactional annotation present
+- Core: Quartz integration with managed threads in WebLogic and WildFly
+- Core: during sendMessage operation, Domibus verifies that the parties roles are allowed (present in PMode) and different among them.
+- Core: during sendMessage operation, Domibus verifies that the message is being sent by the same party as the one configured as the sending access point.
+- Core: during sendMessage operation, Domibus trims the leading and trailing whitespaces in all the request fields.
+- Core: during sendMessage operation, Domibus verifies that, if MessageId and RefToMessageId is specified by backend client, then it should contain only printable ASCII characters.
+- Core: during sendMessage operation, all validations comparisons with the PMode data are case insensitive.
+- Core: during MSH dispatch operation, Domibus verifies the validity of sender's certificate.
+- Core: during MSH receive operation, Domibus verifies the trust of the sender.
+- Core: validation on MessageId and RefToMessageId can be by-passed by removing the key "domibus.sendMessage.messageIdPattern" from configuration file.
+- Core: new configuration properties added for ConnectionTimeout and ReceiveTimeout to allow fine tuning of the access points' conduit.
+- Core: provision added to support the "DoNothing security" policy (no security, no encryption).
+- DB: MySQL installation of Domibus database is set to have collation of 'UTF8_BIN' to make DB level string comparison (in SQLs) case sensitive. This will enable support for case sensitive message ids.
+- WS Plugin: the response list of ListPendingMessages operation can be limited using a new configuration property (domibus.listPendingMessages.maxCount).
 Domibus 3.2.2
-- Solved issue related to CXF attachment temp file leakage (for payloads over 200Mb).
+- Core: solved issue related to CXF attachment temp file leakage (for payloads over 200Mb).
 Domibus 3.2.1
 - JMX access to the JMS queues is secured
 - Force the usage of the apache commons IO library from the application
