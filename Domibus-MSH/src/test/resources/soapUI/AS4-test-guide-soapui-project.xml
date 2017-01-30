@@ -251,6 +251,7 @@
           <xs:enumeration value="RECEIVED"/>
           <xs:enumeration value="RECEIVED_WITH_WARNINGS"/>
           <xs:enumeration value="DELETED"/>
+          <xs:enumeration value="DOWNLOADED"/>
         </xs:restriction>
       </xs:simpleType>
       <xs:simpleType name="errorCode">
