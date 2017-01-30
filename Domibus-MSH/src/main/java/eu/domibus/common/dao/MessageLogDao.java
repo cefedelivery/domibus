@@ -32,6 +32,10 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         setMessageStatus(messageId, MessageStatus.DELETED);
     }
 
+    public void setMessageAsDownloaded(String messageId) {
+        setMessageStatus(messageId, MessageStatus.DOWNLOADED);
+    }
+
     public void setMessageAsAcknowledged(String messageId) {
         setMessageStatus(messageId, MessageStatus.ACKNOWLEDGED);
     }
@@ -58,6 +62,9 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
             case ACKNOWLEDGED:
             case ACKNOWLEDGED_WITH_WARNING:
                 messageLog.setDeleted(new Date());
+                break;
+            case DOWNLOADED:
+                messageLog.setDownloaded(new Date());
                 break;
             default:
         }

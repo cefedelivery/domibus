@@ -50,6 +50,10 @@
             color: white;
         }
 
+		tr.messageLogTr {
+			font-size: .93em;
+		}
+
         fieldset {
             border: 1px solid black;
             padding: 0.2em;

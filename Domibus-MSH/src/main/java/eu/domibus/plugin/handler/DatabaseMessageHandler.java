@@ -132,6 +132,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
         }
 
+        userMessageLogDao.setMessageAsDownloaded(messageId);
+
         // Deleting the message and signal message if the retention download is zero
         if (0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc())) {
             messagingDao.clearPayloadData(messageId);

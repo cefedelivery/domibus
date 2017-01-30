@@ -790,15 +790,70 @@ public class DatabaseMessageHandlerTest {
         }};
 
         final Submission sub = dmh.downloadMessage(MESS_ID);
+        Assert.assertNotNull(sub);
+        Assert.assertEquals(MESS_ID, sub.getMessageId());
+        Assert.assertEquals(submission, sub);
 
         new Verifications() {{
             authUtils.hasUserOrAdminRole();
             userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
+            userMessageLogDao.setMessageAsDownloaded(anyString);
             pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc());
+            messagingDao.clearPayloadData(anyString);
             signalMessageDao.findSignalMessagesByRefMessageId(MESS_ID);
-            Assert.assertNotNull(sub);
-            Assert.assertEquals(MESS_ID, sub.getMessageId());
-            Assert.assertEquals(submission, sub);
+            userMessageLogDao.setMessageAsDeleted(anyString);
+            signalMessageLogDao.setMessageAsDeleted(anyString);
+        }};
+
+    }
+
+    @Test
+    public void testDownloadMessageOK_RetentionNonZero() throws Exception {
+
+        final UserMessage userMessage = createUserMessage();
+
+        final Submission submission = new Submission();
+        submission.setMessageId(MESS_ID);
+
+        new Expectations() {{
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4";
+
+            messagingDao.findUserMessageByMessageId(MESS_ID);
+            result = userMessage;
+
+            userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
+            result = new UserMessageLog();
+
+            pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc());
+            result = 5;
+
+            transformer.transformFromMessaging(userMessage);
+            result = submission;
+
+        }};
+
+        final Submission sub = dmh.downloadMessage(MESS_ID);
+        Assert.assertNotNull(sub);
+        Assert.assertEquals(MESS_ID, sub.getMessageId());
+        Assert.assertEquals(submission, sub);
+
+        new Verifications() {{
+            authUtils.hasUserOrAdminRole();
+            userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
+            userMessageLogDao.setMessageAsDownloaded(anyString);
+            pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc());
+            messagingDao.clearPayloadData(anyString);
+            times = 0;
+            signalMessageDao.findSignalMessagesByRefMessageId(MESS_ID);
+            times = 0;
+            userMessageLogDao.setMessageAsDeleted(anyString);
+            times = 0;
+            signalMessageLogDao.setMessageAsDeleted(anyString);
+            times = 0;
         }};
 
     }

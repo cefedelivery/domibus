@@ -15,6 +15,7 @@ Domibus 3.3-RC1
 - Core: validation on MessageId and RefToMessageId can be by-passed by removing the key "domibus.sendMessage.messageIdPattern" from configuration file.
 - Core: new configuration properties added for ConnectionTimeout and ReceiveTimeout to allow fine tuning of the access points' conduit.
 - Core: provision added to support the "DoNothing security" policy (no security, no encryption).
+- Core: added the DOWNLOADED status to the message state workflow. This new state is also visible through Domibus console.
 - DB: MySQL installation of Domibus database is set to have collation of 'UTF8_BIN' to make DB level string comparison (in SQLs) case sensitive. This will enable support for case sensitive message ids.
 - WS Plugin: the response list of ListPendingMessages operation can be limited using a new configuration property (domibus.listPendingMessages.maxCount).
 Domibus 3.2.2
