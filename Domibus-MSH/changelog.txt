@@ -2,7 +2,7 @@ Domibus 3.3-RC1
 - Migrated the logging framework to SLF4J and Logback
 - Domibus uses 3 logs files: domibus.log, domibus-business.log and domibus-security.log
 - JMS monitoring: fixed the computation of the total number of messages in the queue for WebLogic
-- JMS monitoring: Fixed the search of the JMS messages for WebLogic(for JMS messages having property with null values) and Tomcat(for JMS messages with no "Text" property)
+- JMS monitoring: fixed the search of the JMS messages for WebLogic(for JMS messages having property with null values) and Tomcat(for JMS messages with no "Text" property)
 - Core: Spring services are always executing within a transaction even if there is no specific @Transactional annotation present
 - Core: Quartz integration with managed threads in WebLogic and WildFly
 - Core: during sendMessage operation, Domibus verifies that the parties roles are allowed (present in PMode) and different among them.
@@ -15,7 +15,7 @@ Domibus 3.3-RC1
 - Core: validation on MessageId and RefToMessageId can be by-passed by removing the key "domibus.sendMessage.messageIdPattern" from configuration file.
 - Core: new configuration properties added for ConnectionTimeout and ReceiveTimeout to allow fine tuning of the access points' conduit.
 - Core: provision added to support the "DoNothing security" policy (no security, no encryption).
-- Core: added the DOWNLOADED status to the message state workflow. This new state is also visible through Domibus console.
+- Core+Plugins: added the DOWNLOADED status to message state workflow. This new status is also visible through the console.
 - DB: MySQL installation of Domibus database is set to have collation of 'UTF8_BIN' to make DB level string comparison (in SQLs) case sensitive. This will enable support for case sensitive message ids.
 - WS Plugin: the response list of ListPendingMessages operation can be limited using a new configuration property (domibus.listPendingMessages.maxCount).
 Domibus 3.2.2
