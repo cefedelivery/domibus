@@ -67,11 +67,11 @@
     <distributionManagement>
         <repository>
             <id>cefdigital-releases</id>
-            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery</url>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery/</url>
         </repository>
         <snapshotRepository>
             <id>cefdigital-snapshots</id>
-            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots</url>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
