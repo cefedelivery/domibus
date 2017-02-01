@@ -779,7 +779,7 @@
                 <version>5.1.2</version>
                 <executions>
                     <execution>
-                    <phase>deploy</phase>
+                    <phase>none</phase>
                     <goals>
                         <goal>test</goal>
                     </goals>
