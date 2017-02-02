@@ -33,13 +33,10 @@
 
     <bean id="gatewayConfigurationValidator" class="eu.domibus.common.validators.GatewayConfigurationValidator"/>
 
-    <!-- Comment the following if you are using Oracle or if you have special requirements (i.e. dynamic discovery injection of PModes) -->
+    <!-- Internal configuration provider. Do not change unless you have special requirements (i.e. dynamic
+       discovery injection of PModes)-->
     <bean id="pModeProvider"
           class="eu.domibus.ebms3.common.dao.CachingPModeProvider"/>
-
-    <!-- Uncomment the following if you are using Oracle or if you have special requirements (i.e. dynamic discovery injection of PModes) -->
-    <!--    <bean id="pModeProvider"
-          class="eu.domibus.common.dao.PModeDao"/> -->
 
     <!-- General domibus properties -->
     <util:properties id="domibusProperties">
