@@ -1,37 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright 2015 e-CODEX Project
-  ~
-  ~ Licensed under the EUPL, Version 1.1 or – as soon they
-  ~ will be approved by the European Commission - subsequent
-  ~ versions of the EUPL (the "Licence");
-  ~ You may not use this work except in compliance with the
-  ~ Licence.
-  ~ You may obtain a copy of the Licence at:
-  ~ http://ec.europa.eu/idabc/eupl5
-  ~ Unless required by applicable law or agreed to in
-  ~ writing, software distributed under the Licence is
-  ~ distributed on an "AS IS" basis,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  ~ express or implied.
-  ~ See the Licence for the specific language governing
-  ~ permissions and limitations under the Licence.
-  -->
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:jee="http://www.springframework.org/schema/jee"
        xmlns:c="http://www.springframework.org/schema/c"
        xmlns:p="http://www.springframework.org/schema/p"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+						   http://www.springframework.org/schema/beans/spring-beans.xsd
+						   http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+						   http://www.springframework.org/schema/jee
+						   http://www.springframework.org/schema/jee/spring-jee.xsd">
 
-    <!-- This is an example for the configuration of the Domibus-ecodex-ws-plugin -->
-    <!-- Example starts here -->
-    <bean id="notifyBackendWebServiceQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
-        <property name="jndiName" value="jms/domibus.notification.webservice" />
-    </bean>
+    <!-- JMS ConnectionFactory to use in a Weblogic cluster. Adjust the URL according to the environment! -->
+    <jee:jndi-lookup id="notifyBackendWebServiceQueue"
+                     jndi-name="jms/domibus.notification.webservice"
+                     cache="true"
+                     resource-ref="true"
+                     lookup-on-startup="false">
+        <jee:environment>
+            java.naming.provider.url=t3://localhost:7003,localhost:7004
+        </jee:environment>
+    </jee:jndi-lookup>
 
     <bean id="backendWebservice"
           class="eu.domibus.plugin.webService.impl.BackendWebServiceImpl">
