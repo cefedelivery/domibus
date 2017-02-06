@@ -1,6 +1,7 @@
 package eu.domibus.ext.services;
 
 import eu.domibus.ext.services.domain.AttemptDTO;
+import eu.domibus.ext.services.exceptions.MessagesMonitorException;
 
 import java.util.List;
 
@@ -13,44 +14,45 @@ import java.util.List;
 public interface MessagesMonitorService {
 
     /**
-     * Operation to retrieve all the messages that are currently in the Dead Letter Queue.
+     * Operation to retrieve all the messages that are currently in a SEND_FAILURE status in the access point.
      *
-     * @return List a list of message ids
+     * @return List list of unique message ids.
      * @throws MessagesMonitorException
      */
-    public List<String> getMessagesInDLQ() throws MessagesMonitorException;
+    public List<String> getFailedMessages() throws MessagesMonitorException;
 
     /**
-     * Operation to get the time, in msecs, a message has been in the Dead Letter Queue.
+     * Operation to get the time, in msecs, that a message has been in a SEND_FAILURE status in the access point.
      *
-     * @param messageId
+     * @param messageId Unique id of the message
      * @return long
      * @throws MessagesMonitorException
      */
-    public long getMessageInDLQTime(String messageId) throws MessagesMonitorException;
+    public long getSendFailureMessageTime(String messageId) throws MessagesMonitorException;
 
     /**
-     * Operation to put back a message in the "normal sending" queue.
+     * Operation to unblock and retry to send a message which has a SEND_FAILURE status in the access point.
+     * The retry mechanism, as configured in the PMode, will apply.
      *
-     * @param messageId
+     * @param messageId Unique id of the message
      * @return boolean
      * @throws MessagesMonitorException
      */
-    public boolean restoreMessageInDLQ(String messageId) throws MessagesMonitorException;
+    public boolean restoreFailedMessage(String messageId) throws MessagesMonitorException;
 
     /**
-     * Operation to delete a message which is in the Dead Letter Queue.
+     * Operation to delete a message which is in SEND_FAILURE status in the access point.
      *
-     * @param messageId
+     * @param messageId Unique id of the message
      * @return boolean
      * @throws MessagesMonitorException
      */
-    public boolean deleteMessage(String messageId) throws MessagesMonitorException;
+    public boolean deleteFailedMessage(String messageId) throws MessagesMonitorException;
 
     /**
-     * Operation to get the history of delivery attempts.
+     * Operation to get the history of the delivery attempts for a certain message.
      *
-     * @param messageId
+     * @param messageId Unique id of the message
      * @return List
      * @throws MessagesMonitorException
      */
