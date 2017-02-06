@@ -118,6 +118,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
         validateOriginalUser(userMessage, originalUser, MessageConstants.FINAL_RECIPIENT);
 
+        userMessageLogDao.setMessageAsDownloaded(messageId);
         // Deleting the message and signal message if the retention download is zero
         if (0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc())) {
             messagingDao.clearPayloadData(messageId);
@@ -127,7 +128,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                     signalMessageDao.clear(signalMessage);
                 }
             }
-            // Sets the log status to deleted.
+            // Sets the message log status to DELETED
             userMessageLogDao.setMessageAsDeleted(messageId);
             // Sets the log status to deleted also for the signal messages (if present).
             List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
@@ -137,7 +138,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 }
             }
         }
-        //userMessageLogDao.setMessageAsDownloaded(messageId);
         return transformer.transformFromMessaging(userMessage);
     }
 
