@@ -7,6 +7,7 @@ Domibus 3.2.2
 - Solved issue related to CXF attachment temp file leakage (for payloads over 200Mb).
 - New configuration properties added for ConnectionTimeout and ReceiveTimeout for connection between access points.
 - Fixed Domibus integration with SMP/SML
+- Fixed bug about the retention (downloaded and undownloaded) parameters. Downloading the message, the message status will be set to DOWNLOADED status.
 Domibus 3.2.1
 - JMX access to the JMS queues is secured
 - Force the usage of the apache commons IO library from the application
