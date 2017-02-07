@@ -5,9 +5,12 @@ import java.sql.Timestamp;
 import java.util.Map;
 
 /**
- * Contains the details of a message acknowledgement
+ * DTO class for the Message Acknowledgements Service.
+ *
+ * Contains the details of a message acknowledgement.
  *
  * @author Cosmin Baciu
+ * @since 3.3
  */
 public class MessageAcknowledgementDTO implements Serializable {
 

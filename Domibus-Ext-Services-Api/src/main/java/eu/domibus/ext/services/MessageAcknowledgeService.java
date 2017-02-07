@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Cosmin Baciu
+ * Service responsible for managing message acknowledgments.
  *
- * Service responsible for managing message acknowledgments
+ * @author Cosmin Baciu
+ * @since 3.3
+ *
  */
 public interface MessageAcknowledgeService {
 

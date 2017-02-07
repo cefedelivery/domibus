@@ -1,7 +1,10 @@
 package eu.domibus.ext.services.exceptions;
 
 /**
- * Raised in case an exception occurs when dealing with acknowledgment of messages
+ * Raised in case an exception occurs when dealing with message acknowledgments.
+ *
+ * @author Cosmin Baciu
+ * @since 3.3
  */
 public class MessageAcknowledgeException extends DomibusServiceException {
 
