@@ -17,7 +17,7 @@ public interface MessagesMonitorService {
      * Operation to retrieve all the messages that are currently in a SEND_FAILURE status in the access point.
      *
      * @return List - a list of unique message ids.
-     * @throws MessagesMonitorException
+     * @throws MessagesMonitorException Raised in case an exception occurs while trying to get the failed messages list.
      */
     public List<String> getFailedMessages() throws MessagesMonitorException;
 
@@ -26,9 +26,9 @@ public interface MessagesMonitorService {
      *
      * @param messageId Unique id of the message
      * @return long - the passed time in ms
-     * @throws MessagesMonitorException
+     * @throws MessagesMonitorException Raised in case an exception occurs while trying to get the failed message period.
      */
-    public long getSendFailureMessageTime(String messageId) throws MessagesMonitorException;
+    public long getFailedMessagePeriod(String messageId) throws MessagesMonitorException;
 
     /**
      * Operation to unblock and retry to send a message which has a SEND_FAILURE status in the access point.
@@ -36,7 +36,7 @@ public interface MessagesMonitorService {
      *
      * @param messageId Unique id of the message
      * @return boolean - true if the operation succeeded
-     * @throws MessagesMonitorException
+     * @throws MessagesMonitorException Raised in case an exception occurs while trying to restore the failed message.
      */
     public boolean restoreFailedMessage(String messageId) throws MessagesMonitorException;
 
@@ -45,7 +45,7 @@ public interface MessagesMonitorService {
      *
      * @param messageId Unique id of the message
      * @return boolean - true if the operation succeeded
-     * @throws MessagesMonitorException
+     * @throws MessagesMonitorException Raised in case an exception occurs while trying to delete the failed message.
      */
     public boolean deleteFailedMessage(String messageId) throws MessagesMonitorException;
 
@@ -54,7 +54,7 @@ public interface MessagesMonitorService {
      *
      * @param messageId Unique id of the message
      * @return List - a list of AttemptDTO
-     * @throws MessagesMonitorException
+     * @throws MessagesMonitorException Raised in case an exception occurs while trying to get the attempts history.
      */
     public List<AttemptDTO> getAttemptsHistory(String messageId) throws MessagesMonitorException;
 

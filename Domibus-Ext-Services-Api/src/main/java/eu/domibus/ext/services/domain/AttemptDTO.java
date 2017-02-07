@@ -24,29 +24,48 @@ public class AttemptDTO implements Serializable {
     private int number;
 
     /**
-     * When the attemp has started
+     * When the attempt has started
      */
     private Date start;
 
     /**
-     * When the attemp has finished
+     * When the attempt has finished
      */
     private Date end;
 
-    /**
-     * Gets the progressive number of the attempt.
-     *
-     * @return
-     */
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public AttemptDTO setMessageId(String messageId) {
+        this.messageId = messageId;
+        return this;
+    }
+
     public int getNumber() {
         return number;
     }
 
-    /**
-     * Sets the progressive number of the attempt.
-     * @param number
-     */
-    public void setNumber(int number) {
+    public AttemptDTO setNumber(int number) {
         this.number = number;
+        return this;
+    }
+
+    public Date getStart() {
+        return start;
+    }
+
+    public AttemptDTO setStart(Date start) {
+        this.start = start;
+        return this;
+    }
+
+    public Date getEnd() {
+        return end;
+    }
+
+    public AttemptDTO setEnd(Date end) {
+        this.end = end;
+        return this;
     }
 }

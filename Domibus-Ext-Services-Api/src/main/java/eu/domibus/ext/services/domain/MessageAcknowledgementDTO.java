@@ -35,7 +35,7 @@ public class MessageAcknowledgementDTO implements Serializable {
     protected Timestamp acknowledgeTimestamp;
 
     /**
-     * Properties of the message acknowledgment
+     * Custom properties of the message acknowledgment (like FROM and TO)
      */
     protected Map<String, String> properties;
 

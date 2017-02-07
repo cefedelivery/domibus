@@ -19,6 +19,7 @@ public interface MessageAcknowledgeService {
      * Registers an acknowledgment for a specific message
      *
      * @param messageId The message id for which the acknowledgement is registered
+     * @param properties Custom properties of the message acknowledgment (like FROM and TO)
      * @throws MessageAcknowledgeException Raised in case an exception occurs while trying to register an acknowledgment
      */
     void acknowledgeMessage(String messageId, Map<String, String> properties) throws MessageAcknowledgeException;

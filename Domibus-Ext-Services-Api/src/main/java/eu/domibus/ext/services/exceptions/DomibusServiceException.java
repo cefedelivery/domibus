@@ -23,6 +23,7 @@ public class DomibusServiceException extends RuntimeException {
     /**
      * Constructs a new DomibusServiceException with a specific error and message.
      *
+     * @param domErr a Domibus error.
      * @param message the detail message. The detail message is saved for later retrieval by the {@link #getMessage()} method.
      */
     public DomibusServiceException(DomibusError domErr, String message) {
