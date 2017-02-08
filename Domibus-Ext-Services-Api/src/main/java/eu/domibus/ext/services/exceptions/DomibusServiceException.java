@@ -47,8 +47,8 @@ public class DomibusServiceException extends RuntimeException {
     }
 
     /**
-     * Constructs a new DomibusServiceException without any specific Domibus error
-     * and with the specified detail message, cause and writable stack trace enabled or disabled.
+     * Constructs a new DomibusServiceException without any specific error
+     * but with a detail message, a cause and the writable stack trace enabled or disabled.
      *
      * @param message            the message detail. It is saved for later retrieval by the {@link #getMessage()} method.
      * @param cause              the cause of the exception.

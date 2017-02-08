@@ -10,7 +10,7 @@ package eu.domibus.ext.services.exceptions;
 public class MessagesMonitorException extends DomibusServiceException {
 
     /**
-     * Constructs a new MessagesMonitorException with a specific error and message.
+     * Constructs a new MessagesMonitorException with a specific error.
      *
      * @param domErr a DomibusError
      */
