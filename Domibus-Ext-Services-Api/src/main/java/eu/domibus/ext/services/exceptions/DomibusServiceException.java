@@ -7,6 +7,7 @@ package eu.domibus.ext.services.exceptions;
  *
  * @author Federico Martini
  * @since 3.3
+ * @see DomibusError
  */
 public class DomibusServiceException extends RuntimeException {
 
@@ -34,7 +35,7 @@ public class DomibusServiceException extends RuntimeException {
     }
 
     /**
-     * Constructs a new DomibusServiceException with a specific error and message.
+     * Constructs a new DomibusServiceException with a specific error, message and cause.
      *
      * @param domErr  a DomibusError.
      * @param message the message detail. It is saved for later retrieval by the {@link #getMessage()} method.

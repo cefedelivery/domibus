@@ -19,7 +19,7 @@ import java.util.List;
  * <p>6. to delete the message payload of a failed message.
  *
  * <p>Notice about Domibus notification mechanism: whenever a message fails to be sent several times, according to the configuration of the reception awareness/retry in the PMode,
- * <p>it get the status changed to SEND_FAILURE and Domibus notifies the plugin(s) with a JMS message either on the "domibus.notification.webservice" or "domibus.notification.jms" queue.
+ * <p>it gets the status changed to SEND_FAILURE and Domibus notifies the plugin(s) with a JMS message either on the "domibus.notification.webservice" or "domibus.notification.jms" queue.
  *
  * @author Federico Martini
  * @since 3.3
@@ -30,7 +30,7 @@ public interface MessagesMonitorService {
      * Operation to retrieve all the messages that are currently in a SEND_FAILURE status in the access point.
      *
      * @return List - a list of unique message ids.
-     * @throws MessagesMonitorException Raised in case an exception occurs while trying to get the failed messages list.
+     * @throws MessagesMonitorException Raised in case an exception occurs while trying to get the failed messages list
      */
     public List<String> getFailedMessages() throws MessagesMonitorException;
 
@@ -39,29 +39,30 @@ public interface MessagesMonitorService {
      *
      * @param messageId Unique id of the message
      * @return long - the passed time in ms
-     * @throws MessagesMonitorException Raised in case an exception occurs while trying to get the failed message period.
+     * @throws MessagesMonitorException Raised in case an exception occurs while trying to get the failed message period
      */
     public Long getFailedMessageInterval(String messageId) throws MessagesMonitorException;
 
     /**
      * Operation to unblock and retry to send a message which has a SEND_FAILURE status in the access point.
-     * <p>This will set the message to SEND_ENQUEUED status.
+     * <p>This operation will set the message to SEND_ENQUEUED status, so that a new send is attempted.
      * <p>Afterwards, in case of failure, the retry mechanism, as configured in the PMode, will apply.
      *
      * @param messageId Unique id of the message
-     * @throws MessagesMonitorException Raised in case an exception occurs while trying to restore the failed message.
+     * @throws MessagesMonitorException Raised in case an exception occurs while trying to restore the failed message
      */
     public void restoreFailedMessage(String messageId) throws MessagesMonitorException;
 
     /**
-     * Operation to unblock and retry to send all messages which have the SEND_FAILURE status during the period occurring between the begin, end parameters.
-     * <p>This will set each message to SEND_ENQUEUED status.
+     * Operation to unblock and retry to send all messages which had the SEND_FAILURE status
+     * during the period occurred between the "begin" and "end" times.
+     * <p>This operation will set each message to SEND_ENQUEUED status, so that a new send is attempted.
      * <p>Afterwards, in case of failure, the retry mechanism, as configured in the PMode, will apply.
      *
-     * @param begin period start timestamp
-     * @param end   period end timestamp
-     * @return List the list of messages ids successfully restored
-     * @throws MessagesMonitorException Raised in case an exception occurs
+     * @param begin specific instant time starting period
+     * @param end   specific instant time ending period
+     * @return List the messages ids's list of successfully restored messages.
+     * @throws MessagesMonitorException Raised in case a blocking event occurs. It is not raised when the operation is successful for at least one message
      */
     public List<String> restoreFailedMessagesDuringPeriod(Date begin, Date end) throws MessagesMonitorException;
 
@@ -70,7 +71,7 @@ public interface MessagesMonitorService {
      * <p>Only the payload will be deleted. The LOGs tables will keep track of the message.
      *
      * @param messageId Unique id of the message
-     * @throws MessagesMonitorException Raised in case an exception occurs while trying to delete the failed message.
+     * @throws MessagesMonitorException Raised in case an exception occurs while trying to delete the failed message
      */
     public void deleteFailedMessage(String messageId) throws MessagesMonitorException;
 
@@ -79,7 +80,7 @@ public interface MessagesMonitorService {
      *
      * @param messageId Unique id of the message
      * @return List - a list of AttemptDTO
-     * @throws MessagesMonitorException Raised in case an exception occurs while trying to get the attempts history.
+     * @throws MessagesMonitorException Raised in case an exception occurs while trying to get the attempts history
      */
     public List<AttemptDTO> getAttemptsHistory(String messageId) throws MessagesMonitorException;
 
