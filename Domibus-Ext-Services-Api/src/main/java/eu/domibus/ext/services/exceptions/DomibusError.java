@@ -8,8 +8,17 @@ package eu.domibus.ext.services.exceptions;
  */
 public enum DomibusError {
 
+    /**
+     * Service is not available
+     */
     DOM_001(001, "Service is not available"),
+    /**
+     * User is not authorized to call this service
+     */
     DOM_002(002, "User is not authorized to call this service"),
+    /**
+     * Operation has failed
+     */
     DOM_003(003, "Operation has failed");
 
     private final int errorCode;

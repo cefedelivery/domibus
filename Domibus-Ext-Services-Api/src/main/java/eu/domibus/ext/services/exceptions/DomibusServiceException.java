@@ -1,14 +1,16 @@
 package eu.domibus.ext.services.exceptions;
 
 /**
- * Root exception for Domibus services.
+ * This class is the root exception for all Domibus services.
+ *
+ * <p>It provides three constructors using the enum DomibusError and one constructor without any Domibus error for a more flexible usage.
  *
  * @author Federico Martini
  * @since 3.3
  */
 public class DomibusServiceException extends RuntimeException {
 
-    private DomibusError domibusError;
+    private DomibusError error;
 
     /**
      * Constructs a new DomibusServiceException with a specific error.
@@ -17,26 +19,50 @@ public class DomibusServiceException extends RuntimeException {
      */
     public DomibusServiceException(DomibusError domErr) {
         super();
-        domibusError = domErr;
+        error = domErr;
     }
 
     /**
      * Constructs a new DomibusServiceException with a specific error and message.
      *
-     * @param domErr a Domibus error.
-     * @param message the detail message. The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param domErr a DomibusError.
+     * @param message the message detail. It is saved for later retrieval by the {@link #getMessage()} method.
      */
     public DomibusServiceException(DomibusError domErr, String message) {
         super(message);
-        domibusError = domErr;
+        error = domErr;
     }
 
-    public DomibusError getDomibusError() {
-        return domibusError;
+    /**
+     * Constructs a new DomibusServiceException with a specific error and message.
+     *
+     * @param domErr  a DomibusError.
+     * @param message the message detail. It is saved for later retrieval by the {@link #getMessage()} method.
+     * @param cause   the cause of the exception.
+     */
+    public DomibusServiceException(DomibusError domErr, String message, Throwable cause) {
+        super(message, cause);
+        error = domErr;
     }
 
-    public void setDomibusError(DomibusError domibusError) {
-        this.domibusError = domibusError;
+    /**
+     * Constructs a new DomibusServiceException without any specific Domibus error
+     * and with the specified detail message, cause and writable stack trace enabled or disabled.
+     *
+     * @param message            the message detail. It is saved for later retrieval by the {@link #getMessage()} method.
+     * @param cause              the cause of the exception.
+     * @param writableStackTrace whether or not the stack trace should be writable
+     */
+    public DomibusServiceException(String message, Throwable cause, boolean writableStackTrace) {
+        super(message, cause, false, writableStackTrace);
+    }
+
+    public DomibusError getError() {
+        return error;
+    }
+
+    public void setError(DomibusError domError) {
+        this.error = domError;
     }
 
 

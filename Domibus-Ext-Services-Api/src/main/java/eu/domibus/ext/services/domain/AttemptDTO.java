@@ -33,6 +33,12 @@ public class AttemptDTO implements Serializable {
      */
     private Date end;
 
+    /**
+     * Cause of the failing attempt.
+     * It is null whenever the attempt has succeeded.
+     */
+    private String failingCause;
+
     public String getMessageId() {
         return messageId;
     }
@@ -68,4 +74,14 @@ public class AttemptDTO implements Serializable {
         this.end = end;
         return this;
     }
+
+    public String getFailingCause() {
+        return failingCause;
+    }
+
+    public AttemptDTO setFailingCause(String failingCause) {
+        this.failingCause = failingCause;
+        return this;
+    }
+
 }
