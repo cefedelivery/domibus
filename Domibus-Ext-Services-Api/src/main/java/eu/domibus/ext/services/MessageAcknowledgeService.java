@@ -19,7 +19,7 @@ import java.util.Map;
  *     and delegates the processing to {@link MessageAcknowledgeService}</li>
  * </ul>
  *
- * There are two ways of performing message acknowledgments from the backend to C3:
+ * <p>There are two ways of performing message acknowledgments from the backend to C3:</p>
  *
  * <ul>
  *     <li>synchronous</li>
@@ -61,7 +61,7 @@ public interface MessageAcknowledgeService {
     MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws MessageAcknowledgeException;
 
     /**
-     * Gets all acknowledgments for a specific message id
+     * Gets all acknowledgments associated to a message id
      *
      * @param messageId The message id for which message acknowledgments are retrieved
      * @return All acknowledgments registered for a specific message
