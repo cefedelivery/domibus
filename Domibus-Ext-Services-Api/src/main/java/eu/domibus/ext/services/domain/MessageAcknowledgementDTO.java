@@ -5,9 +5,9 @@ import java.sql.Timestamp;
 import java.util.Map;
 
 /**
- * DTO class for the Message Acknowledgements Service.
+ * DTO class used by {@link eu.domibus.ext.services.MessageAcknowledgeService}.
  *
- * Contains the details of a message acknowledgement.
+ * <p>Contains the details of a message acknowledgement.</p>
  *
  * @author Cosmin Baciu
  * @since 3.3
@@ -15,19 +15,24 @@ import java.util.Map;
 public class MessageAcknowledgementDTO implements Serializable {
 
     /**
-     * Property indicating the source of the message acknowledgment(C3 or the backend name)
+     * The id of the message acknowledgement
      */
-    public static final String FROM = "FROM";
-
-    /**
-     * Property indicating the destination of the message acknowledgment(C3 or the backend name))
-     */
-    public static final String TO = "TO";
+    protected String id;
 
     /**
      * The message id associated with the message acknowledgement
      */
     protected String messageId;
+
+    /**
+     * The source of the acknowledgement(eg: C3 or backend name)
+     */
+    protected String from;
+
+    /**
+     * The target of the acknowledgement(eg: C3 or backend name)
+     */
+    protected String to;
 
     /**
      * Timestamp of the acknowledged time
@@ -38,6 +43,11 @@ public class MessageAcknowledgementDTO implements Serializable {
      * Custom properties of the message acknowledgment (like FROM and TO)
      */
     protected Map<String, String> properties;
+
+    /**
+     * Timestamp of the acknowledgement creation time(when it has been saved into the persistence layer)
+     */
+    protected Timestamp createdTimestamp;
 
 
     public String getMessageId() {
@@ -54,6 +64,30 @@ public class MessageAcknowledgementDTO implements Serializable {
 
     public void setAcknowledgeTimestamp(Timestamp acknowledgeTimestamp) {
         this.acknowledgeTimestamp = acknowledgeTimestamp;
+    }
+
+    public Timestamp getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+
+    public void setCreatedTimestamp(Timestamp createdTimestamp) {
+        this.createdTimestamp = createdTimestamp;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
     }
 
     public Map<String, String> getProperties() {
