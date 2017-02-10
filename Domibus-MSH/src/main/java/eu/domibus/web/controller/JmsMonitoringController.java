@@ -3,10 +3,10 @@ package eu.domibus.web.controller;
 import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.util.JsonUtil;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,12 +25,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
+ * // TODO Documentation
  * Created by Cosmin Baciu on 17-Aug-16.
  */
 @Controller
 public class JmsMonitoringController {
 
-    private final static Log LOG = LogFactory.getLog(JmsMonitoringController.class);
+    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(JmsMonitoringController.class);
 
     @Autowired
     JMSManager jmsManager;
@@ -52,7 +53,7 @@ public class JmsMonitoringController {
     ) {
 
         final ModelAndView model = new ModelAndView();
-        Map<String, JMSDestination> jmsDestinations = jmsManager.getDestinations();
+        Map<String, List<JMSDestination>> jmsDestinations = jmsManager.getDestinations();
 
         model.addObject("destinationMap", jmsDestinations);
         model.addObject("source", source);
@@ -64,9 +65,11 @@ public class JmsMonitoringController {
         model.addObject("fromDate", df.format(from));
         model.addObject("toDate", df.format(to));
 
-        List<JmsMessage> messages = jmsManager.getMessages(source, jmsType, from, to, selector);
+        if (StringUtils.isNotEmpty(source)) {
+            List<JmsMessage> messages = jmsManager.browseMessages(source, jmsType, from, to, selector);
+            model.addObject("messages", messages);
+        }
 
-        model.addObject("messages", messages);
         model.setViewName("jmsmonitoring");
         return model;
     }
@@ -102,7 +105,7 @@ public class JmsMonitoringController {
             }
         }
 
-        Map<String, JMSDestination> jmsDestinations = jmsManager.getDestinations();
+        Map<String, List<JMSDestination>> jmsDestinations = jmsManager.getDestinations();
         model.addObject("destinationMap", jmsDestinations);
 
         model.addObject("action", action);
@@ -138,45 +141,45 @@ public class JmsMonitoringController {
         if ("send".equals(action)) {
             if(messageIds != null && messageIds.length > 0) {
                 for (String messageId : messageIds) {
-                    JmsMessage message = jmsManager.getMessage(source, messageId);
-                    boolean success = jmsManager.sendMessageToQueue(message, destination);
-                    if(!success) {
-                        messageOutcome.append("Failed to send message [" + message.getId() + "]");
+                    try {
+                        JmsMessage message = jmsManager.getMessage(source, messageId);
+                        jmsManager.sendMessageToQueue(message, destination);
+                        messageOutcome.append("Messages sent.");
+                    } catch (Exception e) {
+                        messageOutcome.append("Failed to send message [" + messageId + "]");
                     }
-
-                }
-                if(messageOutcome.length() == 0) {
-                    messageOutcome.append("Messages sent.");
                 }
             } else { //new message
                 JmsMessage message = new JmsMessage();
                 message.setContent(content);
                 message.setType(type);
                 message.setProperties(jsonUtil.jsonToMap(request.getParameter("customProperties")));
-                boolean success = jmsManager.sendMessageToQueue(message, destination);
-                messageOutcome.append(success ? "Message sent." : "Failed to send message.");
+                try {
+                    jmsManager.sendMessageToQueue(message, destination);
+                    messageOutcome.append("Message sent.");
+                } catch (Exception ex) {
+                    LOG.error("Send failed", ex);
+                    messageOutcome.append("Failed to send message [" + message + "]");
+                }
             }
         } else if ("move".equals(action)) {
-            boolean success = jmsManager.moveMessages(source, destination, messageIds);
-            if(!success) {
+            try {
+                jmsManager.moveMessages(source, destination, messageIds);
+                messageOutcome.append("Messages moved.");
+            } catch (Exception ex) {
+                LOG.error("Move failed", ex);
                 messageOutcome.append("Failed to move messages");
             }
-
-            if(messageOutcome.length() == 0) {
-                messageOutcome.append("Messages moved.");
-            }
         } else if ("remove".equals(action)) {
-            boolean success = jmsManager.deleteMessages(source, messageIds);
-            if(!success) {
-                messageOutcome.append("Failed to delete messages");
-            }
-
-            if(messageOutcome.length() == 0) {
+            try {
+                jmsManager.deleteMessages(source, messageIds);
                 messageOutcome.append("Messages deleted.");
+            } catch (Exception ex) {
+                LOG.error("Delete failed", ex);
+                messageOutcome.append("Failed to delete messages");
             }
         }
         model.addObject("messageResult", messageOutcome.toString());
-
         model.setViewName("jmsmessageaction");
         return model;
     }

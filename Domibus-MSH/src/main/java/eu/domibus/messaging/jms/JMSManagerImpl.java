@@ -3,11 +3,11 @@ package eu.domibus.messaging.jms;
 import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSManager;
 import eu.domibus.jms.spi.InternalJmsMessage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * // TODO Documentation
+ *
  * @author Cosmin Baciu
  * @since 3.2
  */
@@ -26,7 +28,7 @@ import java.util.Map;
 @Transactional
 public class JMSManagerImpl implements JMSManager {
 
-    private static final Log LOG = LogFactory.getLog(JMSManagerImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMSManagerImpl.class);
 
     @Autowired
     InternalJMSManager internalJmsManager;
@@ -39,34 +41,38 @@ public class JMSManagerImpl implements JMSManager {
 
     @Override
     public Map<String, JMSDestination> getDestinations() {
-        Map<String, InternalJMSDestination> destinations = internalJmsManager.getDestinations();
-        return jmsDestinationMapper.convert(destinations);
+        return jmsDestinationMapper.convert(internalJmsManager.findDestinationsGroupedByFQName());
     }
 
     @Override
     public JmsMessage getMessage(String source, String messageId) {
-        InternalJmsMessage internalJmsMessage = internalJmsManager.getMessage(source, messageId);
+        InternalJmsMessage internalJmsMessage = internalJmsManager.getMessage(removeJmsModule(source), messageId);
         return jmsMessageMapper.convert(internalJmsMessage);
     }
 
     @Override
-    public List<JmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selector) {
-        List<InternalJmsMessage> messagesSPI = internalJmsManager.getMessages(source, jmsType, fromDate, toDate, selector);
+    public List<JmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selector) {
+        List<InternalJmsMessage> messagesSPI = internalJmsManager.browseMessages(removeJmsModule(source), jmsType, fromDate, toDate, selector);
         return jmsMessageMapper.convert(messagesSPI);
     }
 
+    @Override
+    public List<JmsMessage> browseMessages(String source) {
+        List<InternalJmsMessage> messagesSPI = internalJmsManager.browseMessages(removeJmsModule(source));
+        return jmsMessageMapper.convert(messagesSPI);
+    }
 
     @Override
-    public boolean sendMessageToQueue(JmsMessage message, String destination) {
-        message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination);
+    public void sendMessageToQueue(JmsMessage message, String destination) {
+        message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, removeJmsModule(destination));
         InternalJmsMessage internalJmsMessage = jmsMessageMapper.convert(message);
-        return internalJmsManager.sendMessage(internalJmsMessage, destination);
+        internalJmsManager.sendMessage(internalJmsMessage, destination);
     }
 
     @Override
     public void sendMessageToQueue(JmsMessage message, Queue destination) {
         try {
-            message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination.getQueueName());
+            message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, removeJmsModule(destination.getQueueName()));
         } catch (JMSException e) {
             LOG.warn("Could not add the property [" + JmsMessage.PROPERTY_ORIGINAL_QUEUE + "] on the destination", e);
         }
@@ -75,12 +81,24 @@ public class JMSManagerImpl implements JMSManager {
     }
 
     @Override
-    public boolean deleteMessages(String source, String[] messageIds) {
-        return internalJmsManager.deleteMessages(source, messageIds);
+    public void deleteMessages(String source, String[] messageIds) {
+        internalJmsManager.deleteMessages(removeJmsModule(source), messageIds);
     }
 
     @Override
-    public boolean moveMessages(String source, String destination, String[] messageIds) {
-        return internalJmsManager.moveMessages(source, destination, messageIds);
+    public void moveMessages(String source, String destination, String[] messageIds) {
+        internalJmsManager.moveMessages(removeJmsModule(source), destination, messageIds);
     }
+
+    @Override
+    public JmsMessage consumeMessage(String source, String messageId) {
+        InternalJmsMessage internalJmsMessage = internalJmsManager.consumeMessage(removeJmsModule(source), messageId);
+        return jmsMessageMapper.convert(internalJmsMessage);
+    }
+
+    private String removeJmsModule(String destination) {
+        String destName = StringUtils.substringAfter(destination, "!");
+        return (destName.equals("")) ? destination : destName;
+    }
+
 }

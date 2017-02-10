@@ -78,13 +78,13 @@ public class JMSManagerActiveMQTest {
             result = "queueMbean2";
         }};
 
-        Map<String, List<InternalJMSDestination>> destinations = jmsManagerActiveMQ.getDestinations();
+        Map<String, InternalJMSDestination> destinations = jmsManagerActiveMQ.findDestinationsGroupedByFQName();
 
         assertNotNull(destinations);
         assertEquals(destinations.size(), 2);
 
-        assertTrue(destinations.get("queueMbean1").contains(internalJmsDestination1));
-        assertTrue(destinations.get("queueMbean2").contains(internalJmsDestination2));
+        assertEquals(destinations.get("queueMbean1"), internalJmsDestination1);
+        assertEquals(destinations.get("queueMbean2"), internalJmsDestination2);
     }
 
     @Test
@@ -160,9 +160,10 @@ public class JMSManagerActiveMQTest {
 
     @Test
     public void testBrowseMessages(final @Injectable InternalJMSDestination selectedDestination,
+                                   final @Injectable List<InternalJMSDestination> selectedDestinations,
+                                   final @Injectable Map<String, List<InternalJMSDestination>> destinationMap,
                                    final @Injectable QueueViewMBean queueMbean,
                                    final @Injectable CompositeData[] compositeDatas,
-                                   final @Injectable Map<String, InternalJMSDestination> destinationMap,
                                    final @Injectable List<InternalJmsMessage> messageSPIs) throws Exception {
         final String source = "myqueue";
         final String jmsType = "message";
@@ -171,10 +172,11 @@ public class JMSManagerActiveMQTest {
         final String selectorClause = "mytype = 'message'";
 
         new Expectations(jmsManagerActiveMQ) {{
-            jmsManagerActiveMQ.getDestinations().get(source);
+            jmsManagerActiveMQ.findDestinationsGroupedByName().get(source);
             result = destinationMap;
+
             destinationMap.get(source);
-            result = selectedDestination;
+            result = selectedDestinations;
 
             selectedDestination.getType();
             result = "Queue";

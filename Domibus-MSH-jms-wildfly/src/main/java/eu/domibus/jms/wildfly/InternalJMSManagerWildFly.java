@@ -2,13 +2,14 @@ package eu.domibus.jms.wildfly;
 
 import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.jms.spi.InternalJMSDestination;
+import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJMSManager;
 import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hornetq.api.jms.management.JMSQueueControl;
 import org.hornetq.api.jms.management.JMSServerControl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,8 @@ import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import javax.jms.JMSException;
-import javax.jms.QueueBrowser;
-import javax.jms.Session;
-import javax.jms.TextMessage;
+import javax.jms.*;
+import javax.jms.Queue;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.MalformedObjectNameException;
@@ -31,12 +30,13 @@ import javax.naming.NamingException;
 import java.util.*;
 
 /**
- * Created by Cosmin Baciu on 17-Aug-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 @Component
 public class InternalJMSManagerWildFly implements InternalJMSManager {
 
-    private static final Log LOG = LogFactory.getLog(InternalJMSManagerWildFly.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(InternalJMSManagerWildFly.class);
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
     private static final String PROPERTY_JNDI_NAME = "Jndi";
@@ -60,7 +60,8 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     JMSSelectorUtil jmsSelectorUtil;
 
     @Override
-    public Map<String, InternalJMSDestination> getDestinations() {
+    public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
+
         Map<String, InternalJMSDestination> destinationMap = new TreeMap<>();
 
         try {
@@ -74,13 +75,45 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
                 internalJmsDestination.setProperty(PROPERTY_OBJECT_NAME, objectName);
                 internalJmsDestination.setProperty(PROPERTY_JNDI_NAME, jmsQueueControl.getAddress());
                 internalJmsDestination.setInternal(jmsDestinationHelper.isInternal(jmsQueueControl.getAddress()));
-                destinationMap.put(jmsQueueControl.getName(), internalJmsDestination);
+                destinationMap.put(jmsQueueControl.getName() + jmsQueueControl.getAddress(), internalJmsDestination);
             }
+            return destinationMap;
         } catch (Exception e) {
-            LOG.error("Failed to build JMS destination map", e);
+            throw new InternalJMSException("Failed to build JMS destination map", e);
         }
+    }
 
-        return destinationMap;
+    protected Map<String, List<InternalJMSDestination>> findDestinationsGroupedByName() {
+        Map<String, List<InternalJMSDestination>> destinationMap = new TreeMap<>();
+
+        try {
+            Map<String, ObjectName> queueMap = getQueueMap();
+            for (ObjectName objectName : queueMap.values()) {
+                JMSQueueControl jmsQueueControl = MBeanServerInvocationHandler.newProxyInstance(mBeanServer, objectName, JMSQueueControl.class, false);
+                InternalJMSDestination internalJmsDestination = new InternalJMSDestination();
+                internalJmsDestination.setName(jmsQueueControl.getName());
+                internalJmsDestination.setType(InternalJMSDestination.QUEUE_TYPE);
+                internalJmsDestination.setNumberOfMessages(jmsQueueControl.getMessageCount());
+                internalJmsDestination.setProperty(PROPERTY_OBJECT_NAME, objectName);
+                internalJmsDestination.setProperty(PROPERTY_JNDI_NAME, jmsQueueControl.getAddress());
+                internalJmsDestination.setInternal(jmsDestinationHelper.isInternal(jmsQueueControl.getAddress()));
+                addDestination(destinationMap, internalJmsDestination);
+            }
+            return destinationMap;
+        } catch (Exception e) {
+            throw new InternalJMSException("Failed to build JMS destination map", e);
+        }
+    }
+
+    private void addDestination(Map<String, List<InternalJMSDestination>> destinationMap, InternalJMSDestination destination) {
+        if (destinationMap.containsKey(destination.getName())) {
+            List<InternalJMSDestination> destinations = destinationMap.get(destination.getName());
+            destinations.add(destination);
+        } else {
+            List<InternalJMSDestination> destinations = new ArrayList<>();
+            destinations.add(destination);
+            destinationMap.put(destination.getName(), destinations);
+        }
     }
 
     protected JMSQueueControl getQueueControl(ObjectName objectName) {
@@ -110,39 +143,15 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
                 LOG.error("Error getting queue [" + queueName + "] using mbeanName [" + mbeanObjectName + "]", e);
             }
         }
-
         return queueMap;
     }
 
-    @Override
-    public boolean sendMessage(InternalJmsMessage message, String destination) {
-        InternalJMSDestination internalJmsDestination = getDestinations().get(destination);
-        if (internalJmsDestination == null) {
-            LOG.warn("Destination [" + destination + "] does not exists");
-            return false;
-        }
-
-        javax.jms.Queue jmsDestination = null;
-        try {
-            jmsDestination = getQueue(destination);
-        } catch (NamingException e) {
-            LOG.error("Error performing lookup for [" + destination + "]", e);
-            return false;
-        }
-        sendMessage(message, jmsDestination);
-        return true;
+    protected Queue getQueue(String queueName) throws NamingException {
+        return (Queue) lookupDestination(queueName);
     }
 
-    @Override
-    public void sendMessage(InternalJmsMessage message, javax.jms.Queue destination) {
-        jmsOperations.send(destination, new JmsMessageCreator(message));
-    }
-
-    protected javax.jms.Queue getQueue(String queueName) throws NamingException {
-        InternalJMSDestination internalJmsDestination = getDestinations().get(queueName);
-        String destinationJndi = getJndiName(internalJmsDestination);
-        LOG.debug("Found JNDI [" + destinationJndi + "] for destination [" + queueName + "]");
-        return InitialContext.doLookup(destinationJndi);
+    protected Topic getTopic(String topicName) throws NamingException {
+        return (Topic) lookupDestination(topicName);
     }
 
     protected String getJndiName(InternalJMSDestination internalJmsDestination) {
@@ -150,15 +159,39 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
         return "java:/" + StringUtils.replace(destinationJndi, ".", "/");
     }
 
+    // TODO to be put in helper or super class
+    protected javax.jms.Destination lookupDestination(String destName) throws NamingException {
+        // It is enough to get the first destination object also in case of clustered destinations because then a JNDI look up is performed.
+        InternalJMSDestination internalJmsDestination = findDestinationsGroupedByName().get(destName).get(0);
+        if (internalJmsDestination == null) {
+            throw new InternalJMSException("Destination [" + destName + "] does not exists");
+        }
+        String destinationJndi = getJndiName(internalJmsDestination);
+        LOG.debug("Found JNDI [" + destinationJndi + "] for destination [" + destName + "]");
+        return InitialContext.doLookup(destinationJndi);
+    }
+
     @Override
-    public boolean deleteMessages(String source, String[] messageIds) {
+    public void sendMessage(InternalJmsMessage message, String destName) {
+        try {
+            jmsOperations.send(lookupDestination(destName), new JmsMessageCreator(message));
+        } catch (NamingException e) {
+            throw new InternalJMSException("Error performing lookup for [" + destName + "]", e);
+        }
+    }
+
+    @Override
+    public void sendMessage(InternalJmsMessage message, Destination destination) {
+        jmsOperations.send(destination, new JmsMessageCreator(message));
+    }
+
+    @Override
+    public void deleteMessages(String source, String[] messageIds) {
         JMSQueueControl queue = getQueueControl(source);
         try {
-            int deleted = queue.removeMessages(jmsSelectorUtil.getSelector(messageIds));
-            return deleted == messageIds.length;
+            queue.removeMessages(jmsSelectorUtil.getSelector(messageIds));
         } catch (Exception e) {
-            LOG.error("Failed to delete messages from source [" + source + "]:" + messageIds, e);
-            return false;
+            throw new InternalJMSException("Failed to delete messages from source [" + source + "]:" + messageIds, e);
         }
     }
 
@@ -166,53 +199,62 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     public InternalJmsMessage getMessage(String source, String messageId) {
         String selector = jmsSelectorUtil.getSelector(messageId);
 
-        List<InternalJmsMessage> messages = null;
         try {
-            messages = getMessagesFromDestination(source, selector);
+            List<InternalJmsMessage> messages = getMessagesFromDestination(source, selector);
+            if (!messages.isEmpty()) {
+                return messages.get(0);
+            }
         } catch (Exception e) {
-            LOG.error("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
-            return null;
-        }
-
-        if (messages != null && !messages.isEmpty()) {
-            return messages.get(0);
+            throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
         }
         return null;
     }
 
-
     @Override
-    public List<InternalJmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
-        List<InternalJmsMessage> messages = new ArrayList<>();
-        if (StringUtils.isEmpty(source)) {
-            return messages;
-        }
-        Map<String, Object> criteria = new HashMap<String, Object>();
-        if (jmsType != null) {
-            criteria.put("JMSType", jmsType);
-        }
-        if (fromDate != null) {
-            criteria.put("JMSTimestamp_from", fromDate.getTime());
-        }
-        if (toDate != null) {
-            criteria.put("JMSTimestamp_to", toDate.getTime());
-        }
-        if (selectorClause != null) {
-            criteria.put("selectorClause", selectorClause);
-        }
-        String selector = jmsSelectorUtil.getSelector(criteria);
-
-        try {
-            return getMessagesFromDestination(source, selector);
-        } catch (Exception e) {
-            LOG.error("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
-        }
-
-        return messages;
+    public List<InternalJmsMessage> browseMessages(String source) {
+        return browseMessages(source, null, null, null, null);
     }
 
-    private List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws Exception {
-//        JMSQueueControl queue = getQueueControl(destination);
+    @Override
+    public List<InternalJmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
+        if (StringUtils.isEmpty(source)) {
+            throw new InternalJMSException("Source has not been specified");
+        }
+        List<InternalJMSDestination> destinations = findDestinationsGroupedByName().get(source);
+        if (destinations == null || destinations.isEmpty()) {
+            throw new InternalJMSException("Could not find destination for [" + source + "]");
+        }
+        List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
+        for (InternalJMSDestination destination : destinations) {
+            String destinationType = destination.getType();
+            if ("Queue".equals(destinationType)) {
+                Map<String, Object> criteria = new HashMap<String, Object>();
+                if (jmsType != null) {
+                    criteria.put("JMSType", jmsType);
+                }
+                if (fromDate != null) {
+                    criteria.put("JMSTimestamp_from", fromDate.getTime());
+                }
+                if (toDate != null) {
+                    criteria.put("JMSTimestamp_to", toDate.getTime());
+                }
+                if (selectorClause != null) {
+                    criteria.put("selectorClause", selectorClause);
+                }
+                String selector = jmsSelectorUtil.getSelector(criteria);
+                try {
+                    internalJmsMessages.addAll(getMessagesFromDestination(source, selector));
+                } catch (Exception e) {
+                    throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
+                }
+            } else {
+                throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
+            }
+        }
+        return internalJmsMessages;
+    }
+
+    private List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws NamingException {
         javax.jms.Queue queue = getQueue(destination);
         return jmsOperations.browseSelected(queue, selector, new BrowserCallback<List<InternalJmsMessage>>() {
             @Override
@@ -247,7 +289,7 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
             String name = (String) propertyNames.nextElement();
             Object objectProperty = textMessage.getObjectProperty(name);
 //            if (objectProperty instanceof String) {
-                properties.put(name, objectProperty);
+            properties.put(name, objectProperty);
 //            }
         }
         result.setProperties(properties);
@@ -281,7 +323,7 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
             Object propertyValue = entry.getValue();
 
 //            if (propertyValue instanceof String) {
-                properties.put(entry.getKey(), propertyValue);
+            properties.put(entry.getKey(), propertyValue);
 //            }
         }
         result.setProperties(properties);
@@ -289,14 +331,31 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     }
 
     @Override
-    public boolean moveMessages(String source, String destination, String[] messageIds) {
-        JMSQueueControl queue = getQueueControl(source);
+    public void moveMessages(String source, String destination, String[] messageIds) {
         try {
-            int moved = queue.moveMessages(jmsSelectorUtil.getSelector(messageIds), destination);
-            return moved == messageIds.length;
+            JMSQueueControl queue = getQueueControl(source);
+            queue.moveMessages(jmsSelectorUtil.getSelector(messageIds), destination);
         } catch (Exception e) {
-            LOG.error("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds, e);
-            return false;
+            throw new InternalJMSException("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds, e);
         }
+    }
+
+    @Override
+    public InternalJmsMessage consumeMessage(String source, String customMessageId) {
+
+        InternalJmsMessage intJmsMsg = null;
+        String selector = "MESSAGE_ID='" + customMessageId + "'";
+        try {
+            List<InternalJmsMessage> messages = getMessagesFromDestination(source, selector);
+            if (!messages.isEmpty()) {
+                intJmsMsg = messages.get(0);
+                // Deletes it
+                JMSQueueControl queue = getQueueControl(source);
+                queue.removeMessages(selector);
+            }
+        } catch (Exception ex) {
+            throw new InternalJMSException("Failed to consume message [" + customMessageId + "] from source [" + source + "]", ex);
+        }
+        return intJmsMsg;
     }
 }
