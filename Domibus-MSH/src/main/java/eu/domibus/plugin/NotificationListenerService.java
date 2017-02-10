@@ -1,31 +1,30 @@
 package eu.domibus.plugin;
 
+import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.AuthRole;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
 import org.apache.commons.lang.StringUtils;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.SimpleJmsListenerEndpoint;
-import org.springframework.jms.core.BrowserCallback;
-import org.springframework.jms.core.JmsOperations;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Properties;
+import javax.jms.Queue;
+import java.util.*;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -36,9 +35,12 @@ public class NotificationListenerService implements MessageListener, JmsListener
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(NotificationListenerService.class);
     protected static final String PROP_LIST_PENDING_MESSAGES_MAXCOUNT = "domibus.listPendingMessages.maxCount";
 
+    //  @Autowired
+    //   @Qualifier(value = "jmsTemplateNotify")
+    //private JmsOperations jmsOperations;
+
     @Autowired
-    @Qualifier(value = "jmsTemplateNotify")
-    private JmsOperations jmsOperations;
+    JMSManager jmsManager;
 
     @Autowired
     @Qualifier("internalJmsListenerContainerFactory")
@@ -83,11 +85,11 @@ public class NotificationListenerService implements MessageListener, JmsListener
                     break;
                 case MESSAGE_RECEIVED_FAILURE:
                     backendConnector.messageReceiveFailed(messageId, message.getStringProperty(MessageConstants.ENDPOINT));
-
             }
-        } catch (Exception e) {
-            LOG.error("Error processing message", e);
-            throw new RuntimeException("Error processing message", e);
+        } catch (JMSException jmsEx) {
+            LOG.error("Error getting the property from JMS message", jmsEx);
+            // TODO to be changed with something like the new DomibusCoreException
+            throw new RuntimeException("Error getting the property from JMS message", jmsEx);
         }
     }
 
@@ -130,13 +132,30 @@ public class NotificationListenerService implements MessageListener, JmsListener
         final int intMaxPendingMessagesRetrieveCount = Integer.parseInt(strMaxPendingMessagesRetrieveCount);
         LOG.debug("maxPendingMessagesRetrieveCount:" + intMaxPendingMessagesRetrieveCount);
 
-        jmsOperations.browse(backendNotificationQueue, new BrowserCallback<Void>() {
-            @Override
-            public Void doInJms(final Session session, final QueueBrowser browser) throws JMSException {
-                result.addAll(listFromQueue(notificationType, browser, finalRecipient, intMaxPendingMessagesRetrieveCount));
-                return null;
+        try {
+            List<JmsMessage> messages = jmsManager.browseMessages(backendNotificationQueue.getQueueName());
+
+            int countOfMessagesIncluded = 0;
+            for (JmsMessage message : messages) {
+                Map customProps = message.getCustomProperties(); // TODO check values
+                if (notificationType.name().equals(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE))) {
+                    if (finalRecipient == null || (StringUtils.equals(finalRecipient, message.getStringProperty(MessageConstants.FINAL_RECIPIENT)))) {
+                        String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+                        result.add(messageId);
+                        countOfMessagesIncluded++;
+                        LOG.debug("Added MessageId [" + messageId + "]");
+                        if ((intMaxPendingMessagesRetrieveCount != 0) && (countOfMessagesIncluded >= intMaxPendingMessagesRetrieveCount)) {
+                            LOG.info("Limit of pending messages to return has been reached [" + countOfMessagesIncluded + "]");
+                            break;
+                        }
+                    }
+                }
             }
-        });
+        } catch (JMSException jmsEx) {
+            LOG.error("Error trying to read the queue name", jmsEx);
+            // TODO to be changed with something like the new DomibusCoreException
+            throw new RuntimeException("Queue name error", jmsEx.getCause());
+        }
         return result;
     }
 
@@ -172,18 +191,21 @@ public class NotificationListenerService implements MessageListener, JmsListener
             LOG.debug("No messages will be removed because this a PUSH consumer");
             return;
         }
-        final String selector = MessageConstants.MESSAGE_ID + "= '" + messageId + "'";
 
-        final Boolean received = jmsOperations.browseSelected(backendNotificationQueue, selector, new BrowserCallback<Boolean>() {
-            @Override
-            public Boolean doInJms(final Session session, final QueueBrowser browser) throws JMSException {
-                return browser.getEnumeration().hasMoreElements();
+        try {
+            String queueName = backendNotificationQueue.getQueueName();
+            JmsMessage message = jmsManager.getMessage(queueName, messageId);
+            if (message == null) {
+                LOG.businessError(DomibusMessageCode.BUS_MSG_NOT_FOUND, messageId);
+                throw new MessageNotFoundException("No message with id [" + messageId + "] pending for download");
             }
-        });
-        if (!received) {
-            throw new MessageNotFoundException("No message with id [" + messageId + "] pending for download");
+            LOG.businessInfo(DomibusMessageCode.BUS_MSG_CONSUMED, messageId, queueName);
+        } catch (JMSException jmsEx) {
+            LOG.error("Error trying to read the queue name", jmsEx);
+            // TODO to be changed with something like the new DomibusCoreException
+            throw new RuntimeException("Queue name error", jmsEx.getCause());
         }
-        jmsOperations.receiveSelected(getBackendNotificationQueue(), selector);
+
     }
 
 

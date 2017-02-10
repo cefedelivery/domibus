@@ -79,12 +79,13 @@ public class JMSManagerActiveMQTest {
             result = "queueMbean2";
         }};
 
-        Map<String, InternalJMSDestination> destinations = jmsManagerActiveMQ.getDestinations();
+        Map<String, List<InternalJMSDestination>> destinations = jmsManagerActiveMQ.getDestinations();
+
         assertNotNull(destinations);
         assertEquals(destinations.size(), 2);
 
-        assertEquals(destinations.get("queueMbean1"), internalJmsDestination1);
-        assertEquals(destinations.get("queueMbean2"), internalJmsDestination2);
+        assertTrue(destinations.get("queueMbean1").contains(internalJmsDestination1));
+        assertTrue(destinations.get("queueMbean2").contains(internalJmsDestination2));
     }
 
     @Test
@@ -159,11 +160,11 @@ public class JMSManagerActiveMQTest {
     }
 
     @Test
-    public void testGetMessages(final @Injectable InternalJMSDestination selectedDestination,
-                                final @Injectable QueueViewMBean queueMbean,
-                                final @Injectable CompositeData[] compositeDatas,
-                                final @Injectable Map<String, InternalJMSDestination> destinationMap,
-                                final @Injectable List<InternalJmsMessage> messageSPIs) throws Exception {
+    public void testBrowseMessages(final @Injectable InternalJMSDestination selectedDestination,
+                                   final @Injectable QueueViewMBean queueMbean,
+                                   final @Injectable CompositeData[] compositeDatas,
+                                   final @Injectable Map<String, InternalJMSDestination> destinationMap,
+                                   final @Injectable List<InternalJmsMessage> messageSPIs) throws Exception {
         final String source = "myqueue";
         final String jmsType = "message";
         final Date fromDate = new Date();
@@ -191,7 +192,7 @@ public class JMSManagerActiveMQTest {
         }};
 
 
-        List<InternalJmsMessage> messages = jmsManagerActiveMQ.getMessages(source, jmsType, fromDate, toDate, selectorClause);
+        List<InternalJmsMessage> messages = jmsManagerActiveMQ.browseMessages(source, jmsType, fromDate, toDate, selectorClause);
         assertEquals(messages, messageSPIs);
 
         new Verifications() {{

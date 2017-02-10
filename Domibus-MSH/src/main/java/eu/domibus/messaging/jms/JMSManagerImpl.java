@@ -3,7 +3,6 @@ package eu.domibus.messaging.jms;
 import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSManager;
 import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -19,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * // TODO Documentation
  * @author Cosmin Baciu
  * @since 3.2
  */
@@ -38,9 +38,8 @@ public class JMSManagerImpl implements JMSManager {
     JMSMessageMapper jmsMessageMapper;
 
     @Override
-    public Map<String, JMSDestination> getDestinations() {
-        Map<String, InternalJMSDestination> destinations = internalJmsManager.getDestinations();
-        return jmsDestinationMapper.convert(destinations);
+    public Map<String, List<JMSDestination>> getDestinations() {
+        return jmsDestinationMapper.convert(internalJmsManager.getDestinations());
     }
 
     @Override
@@ -50,8 +49,14 @@ public class JMSManagerImpl implements JMSManager {
     }
 
     @Override
-    public List<JmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selector) {
-        List<InternalJmsMessage> messagesSPI = internalJmsManager.getMessages(source, jmsType, fromDate, toDate, selector);
+    public List<JmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selector) {
+        List<InternalJmsMessage> messagesSPI = internalJmsManager.browseMessages(source, jmsType, fromDate, toDate, selector);
+        return jmsMessageMapper.convert(messagesSPI);
+    }
+
+    @Override
+    public List<JmsMessage> browseMessages(String source) {
+        List<InternalJmsMessage> messagesSPI = internalJmsManager.browseMessages(source);
         return jmsMessageMapper.convert(messagesSPI);
     }
 

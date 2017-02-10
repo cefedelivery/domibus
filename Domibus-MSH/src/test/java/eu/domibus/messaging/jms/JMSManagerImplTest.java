@@ -37,7 +37,7 @@ public class JMSManagerImplTest {
 
     @Test
     public void testGetDestinations() throws Exception {
-        final Map<String, InternalJMSDestination> destinations = new HashMap<>();
+        final Map<String, List<InternalJMSDestination>> destinations = new HashMap<>();
 
         new Expectations() {{
             internalJmsManager.getDestinations();
@@ -72,21 +72,20 @@ public class JMSManagerImplTest {
     }
 
     @Test
-    public void testGetMessages() throws Exception {
+    public void testBrowseMessages() throws Exception {
         final String source = "source";
         final String jmsType = "jmsType";
         final Date fromDate = new Date();
         final Date toDate = new Date();
         final String selector = "myselector";
-        final String messageId = "messageId";
         final List<InternalJmsMessage> internalJmsMessage = new ArrayList<>();
 
         new Expectations() {{
-            internalJmsManager.getMessages(source, jmsType, fromDate, toDate, selector);
+            internalJmsManager.browseMessages(source, jmsType, fromDate, toDate, selector);
             result = internalJmsMessage;
         }};
 
-        jmsManager.getMessages(source, jmsType, fromDate, toDate, selector);
+        jmsManager.browseMessages(source, jmsType, fromDate, toDate, selector);
 
         new Verifications() {{
             jmsMessageMapper.convert(internalJmsMessage);

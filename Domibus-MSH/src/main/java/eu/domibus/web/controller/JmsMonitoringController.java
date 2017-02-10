@@ -3,10 +3,10 @@ package eu.domibus.web.controller;
 import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.util.JsonUtil;
-import org.apache.commons.lang.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.util.JsonUtil;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,6 +25,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
+ * // TODO Documentation
  * Created by Cosmin Baciu on 17-Aug-16.
  */
 @Controller
@@ -52,7 +53,7 @@ public class JmsMonitoringController {
     ) {
 
         final ModelAndView model = new ModelAndView();
-        Map<String, JMSDestination> jmsDestinations = jmsManager.getDestinations();
+        Map<String, List<JMSDestination>> jmsDestinations = jmsManager.getDestinations();
 
         model.addObject("destinationMap", jmsDestinations);
         model.addObject("source", source);
@@ -65,7 +66,7 @@ public class JmsMonitoringController {
         model.addObject("toDate", df.format(to));
 
         if(StringUtils.isNotEmpty(source)) {
-            List<JmsMessage> messages = jmsManager.getMessages(source, jmsType, from, to, selector);
+            List<JmsMessage> messages = jmsManager.browseMessages(source, jmsType, from, to, selector);
             model.addObject("messages", messages);
         }
 
@@ -104,7 +105,7 @@ public class JmsMonitoringController {
             }
         }
 
-        Map<String, JMSDestination> jmsDestinations = jmsManager.getDestinations();
+        Map<String, List<JMSDestination>> jmsDestinations = jmsManager.getDestinations();
         model.addObject("destinationMap", jmsDestinations);
 
         model.addObject("action", action);

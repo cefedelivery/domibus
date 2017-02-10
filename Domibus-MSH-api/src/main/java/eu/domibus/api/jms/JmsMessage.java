@@ -89,6 +89,10 @@ public class JmsMessage {
         this.properties = properties;
     }
 
+    public String getStringProperty(String key) {
+        return (String) properties.get(key);
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)

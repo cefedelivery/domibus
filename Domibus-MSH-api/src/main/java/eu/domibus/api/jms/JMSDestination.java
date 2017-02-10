@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * // TODO Documentation
+ *
  * Created by Cosmin Baciu on 17-Aug-16.
  */
 public class JMSDestination {

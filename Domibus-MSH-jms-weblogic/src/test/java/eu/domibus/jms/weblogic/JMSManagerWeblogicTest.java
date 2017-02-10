@@ -50,10 +50,10 @@ public class JMSManagerWeblogicTest {
 
     @Test
     public void testGetQueueName() throws Exception {
-        String queueName = jmsManagerWeblogic.getQueueName("JmsModule!DomibusNotifyBackendEtrustexQueue");
+        String queueName = jmsManagerWeblogic.getShortDestName("JmsModule!DomibusNotifyBackendEtrustexQueue");
         Assert.assertEquals(queueName, "DomibusNotifyBackendEtrustexQueue");
 
-        queueName = jmsManagerWeblogic.getQueueName("DomibusNotifyBackendEtrustexQueue");
+        queueName = jmsManagerWeblogic.getShortDestName("DomibusNotifyBackendEtrustexQueue");
         Assert.assertEquals(queueName, "DomibusNotifyBackendEtrustexQueue");
     }
 
@@ -186,10 +186,10 @@ public class JMSManagerWeblogicTest {
 
         }};
 
-        final Map<String, InternalJMSDestination> destinations = jmsManagerWeblogic.doGetDestinations(mbsc);
+        final Map<String, List<InternalJMSDestination>> destinations = jmsManagerWeblogic.doGetDestinations(mbsc);
         assertNotNull(destinations);
         assertEquals(destinations.size(), 1);
-        final InternalJMSDestination internalJmsDestination = destinations.get(queueName);
+        final InternalJMSDestination internalJmsDestination = destinations.get(queueName).get(0);
         assertNotNull(internalJmsDestination);
 
         assertEquals(internalJmsDestination.getName(), queueName);
@@ -223,9 +223,9 @@ public class JMSManagerWeblogicTest {
     }
 
     @Test
-    public void testGetMessages(final @Injectable InternalJMSDestination internalJmsDestination,
-                                final @Mocked ObjectName destination,
-                                final @Injectable List<InternalJmsMessage> messageSPIs) throws Exception {
+    public void testBrowseMessagesMessages(final @Injectable InternalJMSDestination internalJmsDestination,
+                                           final @Mocked ObjectName destination,
+                                           final @Injectable List<InternalJmsMessage> messageSPIs) throws Exception {
         final String source = "myqueue";
         final String jmsType = "message";
         final Date fromDate = new Date();
@@ -250,7 +250,7 @@ public class JMSManagerWeblogicTest {
         }};
 
 
-        List<InternalJmsMessage> messages = jmsManagerWeblogic.getMessages(source, jmsType, fromDate, toDate, selectorClause);
+        List<InternalJmsMessage> messages = jmsManagerWeblogic.browseMessages(source, jmsType, fromDate, toDate, selectorClause);
         assertEquals(messages, messageSPIs);
 
         new Verifications() {{
@@ -383,8 +383,6 @@ public class JMSManagerWeblogicTest {
         final String jndi = "jndiqueue";
 
         new Expectations(jmsManagerWeblogic) {{
-            jmsManagerWeblogic.getInternalJMSDestination(destinationQueue);
-            result = internalJmsDestination;
 
             internalJmsDestination.getProperty("Jndi");
             result = jndi;
