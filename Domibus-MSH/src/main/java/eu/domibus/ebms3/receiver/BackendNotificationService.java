@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.common.ErrorResult;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
@@ -72,6 +73,7 @@ public class BackendNotificationService {
     @Autowired
     private ApplicationContext applicationContext;
 
+    //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
 
 
@@ -198,8 +200,6 @@ public class BackendNotificationService {
     }
 
     protected void validateAndNotify(UserMessage userMessage, String backendName, NotificationType notificationType, Map<String, Object> properties) {
-        LOG.info("Notifying backend [{}] of message [{}] and notification type [{}]", backendName, userMessage.getMessageInfo().getMessageId(), notificationType);
-
         validateSubmission(userMessage, backendName, notificationType);
         String finalRecipient = getFinalRecipient(userMessage);
         properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
@@ -210,13 +210,13 @@ public class BackendNotificationService {
         notify(messageId, backendName, notificationType, null);
     }
 
-    protected void notify(String messageId, String backendName, NotificationType notificationType, String finalRecipient, Map<String, Object> properties) {
+    protected void notify(String messageId, String backendName, NotificationType notificationType, Map<String, Object> properties) {
         NotificationListener notificationListener = getNotificationListener(backendName);
         if (notificationListener == null) {
             LOG.warn("No notification listeners found for backend [" + backendName + "]");
             return;
         }
-        jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, finalRecipient, properties).createMessage(), notificationListener.getBackendNotificationQueue());
+        jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, properties).createMessage(), notificationListener.getBackendNotificationQueue());
     }
 
     public void notifyOfSendFailure(final String messageId) {

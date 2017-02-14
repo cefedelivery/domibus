@@ -82,7 +82,6 @@ public class DynamicDiscoveryService {
         } catch (final LookupException e) {
             throw new ConfigurationException("Receiver does not support reception of " + documentId + " for process " + processId + " using the AS4 Protocol", e);
         } catch (final no.difi.vefa.edelivery.lookup.api.SecurityException e) {
-            LOG.error(e);
             throw new ConfigurationException("Could not fetch metadata from SMP", e);
         }
     }

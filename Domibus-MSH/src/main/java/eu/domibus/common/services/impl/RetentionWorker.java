@@ -1,4 +1,4 @@
-package eu.domibus.ebms3.common.model;
+package eu.domibus.common.services.impl;
 
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.ebms3.security.util.AuthUtils;

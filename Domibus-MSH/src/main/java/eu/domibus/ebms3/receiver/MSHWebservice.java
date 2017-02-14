@@ -171,7 +171,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
                 persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
                 try {
-                    backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+                    backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
                 } catch(SubmissionValidationException e) {
                     LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
@@ -184,7 +184,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (final EbMS3Exception e) {
             try {
                 if (!pingMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
-                    backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
+                    backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), createErrorResult(e));
                 }
             } catch (Exception ex) {
                 LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex,  messageId);
@@ -194,6 +194,20 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         return responseMessage;
     }
+
+    private ErrorResult createErrorResult(EbMS3Exception ebm3Exception) {
+        ErrorResultImpl result = new ErrorResultImpl();
+        result.setMshRole(MSHRole.RECEIVING);
+        result.setMessageInErrorId(ebm3Exception.getRefToMessageId());
+        try {
+            result.setErrorCode(ebm3Exception.getErrorCodeObject());
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Could not find error code for [" + ebm3Exception.getErrorCode() + "]");
+        }
+        result.setErrorDetail(ebm3Exception.getErrorDetail());
+        return result;
+    }
+
 
     /**
      * Required for AS4_TA_12
@@ -340,8 +354,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
         LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
         try {
-            payloadProfileValidator.validate(messaging, pmodeKey);
-            propertyProfileValidator.validate(messaging, pmodeKey);
+            this.payloadProfileValidator.validate(messaging, pmodeKey);
+            this.propertyProfileValidator.validate(messaging, pmodeKey);
         } catch (EbMS3Exception e) {
             e.setMshRole(MSHRole.RECEIVING);
             throw e;

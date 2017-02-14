@@ -11,6 +11,8 @@ import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.NotificationListener;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,7 +35,7 @@ import java.util.Properties;
 @Service
 public class MessageRetentionService {
 
-    private static final Log LOG = LogFactory.getLog(MessageRetentionService.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageRetentionService.class);
 
     public static final Integer DEFAULT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 50;
     public static final Integer DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 50;
@@ -100,14 +102,14 @@ public class MessageRetentionService {
     }
 
     @Transactional
-    protected void deleteExpiredMessages(String mpc, Integer expiredDownloadedMessagesLimit, Integer expiredNotDownloadedMessagesLimit) {
+    public  void deleteExpiredMessages(String mpc, Integer expiredDownloadedMessagesLimit, Integer expiredNotDownloadedMessagesLimit) {
         LOG.debug("Deleting expired messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]" +
                 " and expiredNotDownloadedMessagesLimit [" + expiredNotDownloadedMessagesLimit + "]");
         deleteExpiredDownloadedMessages(mpc, expiredDownloadedMessagesLimit);
         deleteExpiredNotDownloadedMessages(mpc, expiredNotDownloadedMessagesLimit);
     }
 
-    protected void deleteExpiredDownloadedMessages(String mpc, Integer expiredDownloadedMessagesLimit) {
+    public void deleteExpiredDownloadedMessages(String mpc, Integer expiredDownloadedMessagesLimit) {
         LOG.debug("Deleting expired downloaded messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]");
         final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
         if (messageRetentionDownloaded > 0) { // if -1 the messages will be kept indefinetely and if 0 it already has been deleted
@@ -120,7 +122,7 @@ public class MessageRetentionService {
         }
     }
 
-    protected void deleteExpiredNotDownloadedMessages(String mpc, Integer expiredNotDownloadedMessagesLimit) {
+    public void deleteExpiredNotDownloadedMessages(String mpc, Integer expiredNotDownloadedMessagesLimit) {
         LOG.debug("Deleting expired not-downloaded messages for MPC [" + mpc + "] using expiredNotDownloadedMessagesLimit [" + expiredNotDownloadedMessagesLimit + "]");
         final int messageRetentionNotDownloaded = pModeProvider.getRetentionUndownloadedByMpcURI(mpc);
         if (messageRetentionNotDownloaded > -1) { // if -1 the messages will be kept indefinetely and if 0, although it makes no sense, is legal
@@ -133,7 +135,7 @@ public class MessageRetentionService {
         }
     }
 
-    protected Integer getRetentionValue(String propertyName, Integer defaultValue) {
+    public Integer getRetentionValue(String propertyName, Integer defaultValue) {
         final String propertyValueString = domibusProperties.getProperty(propertyName);
         if (propertyValueString == null) {
             LOG.debug("Could not find property [" + propertyName + "]. Using the default value [" + defaultValue + "]");
@@ -149,7 +151,7 @@ public class MessageRetentionService {
 
     /* TODO it is not the responsibility of the MessageRetentionService to delete messages, the actual delete of the message should be delegated;
     move this method in the MessageService;*/
-    protected Integer delete(List<String> messageIds, Integer limit) {
+    public Integer delete(List<String> messageIds, Integer limit) {
         List<String> toDelete = messageIds;
         if (messageIds.size() > limit) {
             LOG.debug("Only the first [" + limit + "] will be deleted");

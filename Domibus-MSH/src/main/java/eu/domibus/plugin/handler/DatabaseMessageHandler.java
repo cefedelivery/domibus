@@ -244,7 +244,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             Messaging message = ebMS3Of.createMessaging();
             message.setUserMessage(userMessage);
 
-            String pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
+            String pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
             Party to = messageValidations(userMessage, pModeKey, backendName);
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
