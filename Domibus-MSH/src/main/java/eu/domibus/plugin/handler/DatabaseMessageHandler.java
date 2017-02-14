@@ -96,7 +96,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public Submission downloadMessage(final String messageId) throws MessageNotFoundException {
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
 
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
@@ -119,8 +119,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         validateOriginalUser(userMessage, originalUser, MessageConstants.FINAL_RECIPIENT);
 
         userMessageLogDao.setMessageAsDownloaded(messageId);
-        // Deleting the message and signal message if the retention download is zero
-        if (0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc())) {
+        // Deleting the message and signal message if the retention download is zero and the payload is not stored on the file system.
+        if (0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc()) && !userMessage.isPayloadOnFileSystem()) {
             messagingDao.clearPayloadData(messageId);
             List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
             if (!signalMessages.isEmpty()) {
@@ -142,8 +142,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     }
 
     private void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String type) {
-        if(authOriginalUser != null) {
-            LOG.debug("OriginalUser is " + authOriginalUser );
+        if (authOriginalUser != null) {
+            LOG.debug("OriginalUser is " + authOriginalUser);
             /* check the message belongs to the authenticated user */
             String originalUser = getOriginalUser(userMessage, type);
             if (originalUser != null && !originalUser.equals(authOriginalUser)) {
@@ -154,13 +154,13 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     }
 
     private String getOriginalUser(UserMessage userMessage, String type) {
-        if(userMessage == null || userMessage.getMessageProperties() == null ||
-                userMessage.getMessageProperties().getProperty() == null ) {
+        if (userMessage == null || userMessage.getMessageProperties() == null ||
+                userMessage.getMessageProperties().getProperty() == null) {
             return null;
         }
         String originalUser = null;
-        for(Property property : userMessage.getMessageProperties().getProperty()) {
-            if(property.getName() != null && property.getName().equals(type)) {
+        for (Property property : userMessage.getMessageProperties().getProperty()) {
+            if (property.getName() != null && property.getName().equals(type)) {
                 originalUser = property.getValue();
                 break;
             }
@@ -170,7 +170,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     public MessageStatus getMessageStatus(final String messageId) {
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasAdminRole();
 
         return userMessageLogDao.getMessageStatus(messageId);
@@ -178,7 +178,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     public List<? extends ErrorResult> getErrorsForMessage(final String messageId) {
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasAdminRole();
 
         return errorLogDao.getErrorsForMessage(messageId);
@@ -189,7 +189,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Transactional
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
 
-        if(!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
         String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
