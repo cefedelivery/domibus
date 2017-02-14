@@ -20,6 +20,7 @@
 package eu.domibus.ebms3.common.model;
 
 import eu.domibus.common.model.configuration.Mpc;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -222,6 +223,19 @@ public class UserMessage extends AbstractBaseEntity {
      */
     public void setMpc(final String value) {
         this.mpc = value;
+    }
+
+    /**
+     * Gives info about the payload storage approach.
+     *
+     * @return true if the payload has been stored on file system, false otherwise, i.e. it has been stored on DB.
+     */
+    public boolean isPayloadOnFileSystem() {
+        for (PartInfo partInfo : getPayloadInfo().getPartInfo()) {
+            if (StringUtils.isNotEmpty(partInfo.getFileName()))
+                return true;
+        }
+        return false;
     }
 
     @Override

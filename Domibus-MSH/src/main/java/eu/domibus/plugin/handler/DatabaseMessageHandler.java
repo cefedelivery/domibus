@@ -1,37 +1,29 @@
+
 package eu.domibus.plugin.handler;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
-import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
-import eu.domibus.common.model.configuration.*;
+import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Mpc;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
-import eu.domibus.common.services.MessagingService;
-import eu.domibus.common.services.impl.CompressionService;
-import eu.domibus.common.services.impl.MessageIdGenerator;
-import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.common.model.ObjectFactory;
-import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.security.util.AuthUtils;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.logging.DomibusMessageCode;
-import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.DuplicateMessageException;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.AccessDeniedException;
@@ -44,8 +36,6 @@ import javax.jms.Queue;
 import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.stereotype.Service;
 
 /**
  * @author Christian Koch, Stefan Mueller, Federico Martini, Ioana Dragusanu
@@ -133,8 +123,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         }
 
         userMessageLogDao.setMessageAsDownloaded(messageId);
-        // Deleting the message and signal message if the retention download is zero
-        if (0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc())) {
+        // Deleting the message and signal message if the retention download is zero and the payload is not stored on the file system.
+        if (0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc()) && !userMessage.isPayloadOnFileSystem()) {
             messagingDao.clearPayloadData(messageId);
             List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
             if (!signalMessages.isEmpty()) {
