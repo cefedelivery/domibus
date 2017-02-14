@@ -27,24 +27,34 @@ import no.difi.vefa.edelivery.lookup.locator.BusdoxLocator;
 import no.difi.vefa.edelivery.lookup.model.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Properties;
 
 /**
- * @author Christian Koch, Stefan Mueller
+ * Service to query the SMP to extract the required information about the unknown receiver AP.
+ * The SMP Lookup is done using an SMP Client software, with the following input:
+ *       The End Receiver Participant ID (C4)
+ *       The Document ID
+ *       The Process ID
+ *
+ * Upon a successful lookup, the result contains the endpoint address and also othe public certificate of the receiver.
  */
 @Service
 public class DynamicDiscoveryService {
 
     public static final String SMLZONE_KEY = "domibus.smlzone";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryService.class);
+    protected static final String transportProfileDynDisc = "bdxr-transport-ebms3-as4-v1p0";
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
 
+    @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
     public Endpoint lookupInformation(final String receiverId, final String receiverIdType, final String documentId, final String processId, final String processIdType) {
 
+        LOG.info("Do the lookup by: " + receiverId + " " + receiverIdType + " " + documentId + " " + processId + " " + processIdType);
         final String smlInfo = domibusProperties.getProperty(SMLZONE_KEY);
         if (smlInfo == null) {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
@@ -58,13 +68,13 @@ public class DynamicDiscoveryService {
             final DocumentIdentifier documentIdentifier = new DocumentIdentifier(documentId);
 
             final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, processIdType);
-
+            LOG.debug("smpClient.getServiceMetadata");
             final ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-
+            LOG.debug("sm.getEndpoint");
             final Endpoint endpoint;
-            endpoint = sm.getEndpoint(processIdentifier, new TransportProfile("bdxr-transport-ebms3-as4-v1p0"), TransportProfile.AS4);
+            endpoint = sm.getEndpoint(processIdentifier, new TransportProfile(transportProfileDynDisc), TransportProfile.AS4);
 
-            if (endpoint == null) {
+            if (endpoint == null || endpoint.getAddress() == null || endpoint.getProcessIdentifier() == null) {
                 throw new ConfigurationException("Receiver does not support reception of " + documentId + " for process " + processId + " using the AS4 Protocol");
             }
             return endpoint;
@@ -72,6 +82,7 @@ public class DynamicDiscoveryService {
         } catch (final LookupException e) {
             throw new ConfigurationException("Receiver does not support reception of " + documentId + " for process " + processId + " using the AS4 Protocol", e);
         } catch (final no.difi.vefa.edelivery.lookup.api.SecurityException e) {
+            LOG.error(e);
             throw new ConfigurationException("Could not fetch metadata from SMP", e);
         }
     }

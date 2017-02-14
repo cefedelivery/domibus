@@ -1,13 +1,20 @@
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.xml.UnmarshallerResult;
+import eu.domibus.api.xml.XMLUtil;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.common.model.configuration.Identifier;
-import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.ObjectFactory;
+import eu.domibus.ebms3.common.model.Property;
+import eu.domibus.ebms3.common.model.Service;
+import eu.domibus.messaging.MessageConstants;
+import eu.domibus.pki.CertificateServiceImpl;
 import eu.domibus.wss4j.common.crypto.CryptoService;
+import eu.domibus.xml.XMLUtilImpl;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import no.difi.vefa.edelivery.lookup.model.ProcessIdentifier;
 import no.difi.vefa.edelivery.lookup.model.TransportProfile;
@@ -15,19 +22,15 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.xml.bind.JAXBContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.KeyStore;
@@ -42,9 +45,6 @@ import java.util.UUID;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:eu/domibus/ebms3/common/dao/DynamicDiscoveryPModeProviderTest/DynamicDiscoveryPModeProviderTest-context.xml")
-@DirtiesContext
 public class DynamicDiscoveryPModeProviderTest {
 
     private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/ebms3/common/dao/DynamicDiscoveryPModeProviderTest/";
@@ -69,21 +69,20 @@ public class DynamicDiscoveryPModeProviderTest {
     private static final String TEST_ACTION_VALUE = "testAction";
     private static final String TEST_SERVICE_VALUE = "serviceValue";
     private static final String TEST_SERVICE_TYPE = "serviceType";
-    private static final String UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE = "unkownPartyIdValue";
-    private static final String UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE = "unkownPartyIdType";
-
+    private static final String UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE = "unkownResponderPartyIdValue";
+    private static final String UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE = "unkownResponderPartyIdType";
+    private static final String UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE = "unknownInitiatorPartyIdValue";
+    private static final String UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE = "unknownInitiatorPartyIdType";
 
     private static final String PROCESSIDENTIFIER_ID = "testIdentifierId";
     private static final String PROCESSIDENTIFIER_SCHEME = "testIdentifierScheme";
     private static final String ADDRESS = "http://localhost:9090/anonymous/msh";
 
-
-    @Autowired
-    private JAXBContext jaxbConfigurationObjectContext;
-
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
+    @Spy
+    private CertificateServiceImpl certificateService;
 
     @InjectMocks
     private DynamicDiscoveryPModeProvider dynamicDiscoveryPModeProvider;
@@ -102,16 +101,88 @@ public class DynamicDiscoveryPModeProviderTest {
         MockitoAnnotations.initMocks(this);
     }
 
+    private Configuration initializeConfiguration(String resourceXML) throws Exception {
+        InputStream xmlStream = new FileInputStream(new File(RESOURCE_PATH + resourceXML));
+        JAXBContext jaxbContext = JAXBContext.newInstance("eu.domibus.common.model.configuration");
+        XMLUtil xmlUtil = new XMLUtilImpl();
+
+        UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(false, jaxbContext, xmlStream, null);
+        assertNotNull(unmarshallerResult.getResult());
+        assertTrue(unmarshallerResult.getResult() instanceof Configuration);
+        Configuration testData = (Configuration) unmarshallerResult.getResult();
+        assertTrue(initializeConfiguration(testData));
+
+        return testData;
+    }
+
+    @Test
+    public void testFindDynamicProcesses() throws Exception {
+        Configuration testData = initializeConfiguration(DYNAMIC_DISCOVERY_ENABLED);
+        doReturn(true).when(configurationDAO).configurationExists();
+        doReturn(testData).when(configurationDAO).readEager();
+        dynamicDiscoveryPModeProvider.init();
+        assertTrue(dynamicDiscoveryPModeProvider.dynamicResponderProcesses.size() == 1);
+        assertTrue(dynamicDiscoveryPModeProvider.dynamicInitiatorProcesses.size() == 1);
+        dynamicDiscoveryPModeProvider.refresh();
+        assertTrue(dynamicDiscoveryPModeProvider.dynamicResponderProcesses.size() == 1);
+        assertTrue(dynamicDiscoveryPModeProvider.dynamicInitiatorProcesses.size() == 1);
+    }
+
+    @Test
+    public void testDoDynamicDiscoveryOnSender() throws Exception {
+        Configuration testData = initializeConfiguration(DYNAMIC_DISCOVERY_ENABLED);
+        doReturn(true).when(configurationDAO).configurationExists();
+        doReturn(testData).when(configurationDAO).readEager();
+        dynamicDiscoveryPModeProvider.init();
+
+        Endpoint testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, ADDRESS, ALIAS_CN_AVAILABLE);
+        doReturn(testDataEndpoint).when(dynamicDiscoveryService).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        doReturn(true).when(trustStoreService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
+        UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
+        dynamicDiscoveryPModeProvider.doDynamicDiscovery(userMessage, MSHRole.SENDING);
+        Party expectedParty = new Party();
+        expectedParty.setName(EXPECTED_COMMON_NAME);
+        expectedParty.setEndpoint(ADDRESS);
+        Identifier expectedIdentifier = new Identifier();
+        expectedIdentifier.setPartyId(EXPECTED_COMMON_NAME);
+        PartyIdType expectedPartyIType = new PartyIdType();
+        expectedPartyIType.setName(dynamicDiscoveryPModeProvider.URN_TYPE_VALUE);
+        expectedPartyIType.setValue(dynamicDiscoveryPModeProvider.URN_TYPE_VALUE);
+        expectedIdentifier.setPartyIdType(expectedPartyIType);
+        expectedParty.getIdentifiers().add(expectedIdentifier);
+        assertTrue(dynamicDiscoveryPModeProvider.getConfiguration().getBusinessProcesses().getParties().contains(expectedParty));
+    }
+
+    @Test
+    public void testDoDynamicDiscoveryOnReceiver() throws Exception {
+        Configuration testData = initializeConfiguration(DYNAMIC_DISCOVERY_ENABLED);
+        doReturn(true).when(configurationDAO).configurationExists();
+        doReturn(testData).when(configurationDAO).readEager();
+        dynamicDiscoveryPModeProvider.init();
+
+        UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
+        dynamicDiscoveryPModeProvider.doDynamicDiscovery(userMessage, MSHRole.RECEIVING);
+        Party expectedParty = new Party();
+        expectedParty.setName(UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE);
+        expectedParty.setEndpoint("");
+        Identifier expectedIdentifier = new Identifier();
+        expectedIdentifier.setPartyId(UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE);
+        PartyIdType expectedPartyIType = new PartyIdType();
+        expectedPartyIType.setName(UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE);
+        expectedPartyIType.setValue(UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE);
+        expectedIdentifier.setPartyIdType(expectedPartyIType);
+        expectedParty.getIdentifiers().add(expectedIdentifier);
+        expectedParty.setEndpoint(dynamicDiscoveryPModeProvider.MSH_ENDPOINT);
+        assertTrue(dynamicDiscoveryPModeProvider.getConfiguration().getBusinessProcesses().getParties().contains(expectedParty));
+    }
 
     @Test
     public void testFindDynamicReceiverProcesses_DynResponderAndPartySelf_ProcessInResultExpected() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + DYNRESPONDER_AND_PARTYSELF));
-        assertTrue(initializeConfiguration(testData));
-
+        Configuration testData = initializeConfiguration(DYNRESPONDER_AND_PARTYSELF);
         DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
         doReturn(testData).when(classUnderTest).getConfiguration();
 
-        Collection<Process> result = classUnderTest.findDynamicReceiverProcesses();
+        Collection<Process> result = classUnderTest.findDynamicResponderProcesses();
 
         assertEquals(1, result.size());
 
@@ -122,13 +193,11 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Test
     public void testFindDynamicReceiverProcesses_MultipleDynResponderAndPartySelf_MultipleProcessesInResultExpected() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + MULTIPLE_DYNRESPONDER_AND_PARTYSELF));
-        assertTrue(initializeConfiguration(testData));
-
+        Configuration testData = initializeConfiguration(MULTIPLE_DYNRESPONDER_AND_PARTYSELF);
         DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
         doReturn(testData).when(classUnderTest).getConfiguration();
 
-        Collection<Process> result = classUnderTest.findDynamicReceiverProcesses();
+        Collection<Process> result = classUnderTest.findDynamicResponderProcesses();
 
         assertEquals(3, result.size());
 
@@ -140,26 +209,24 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Test
     public void testFindDynamicReceiverProcesses_MultipleDynInitiatorAndPartySelf_NoProcessesInResultExpected() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + MULTIPLE_DYNINITIATOR_AND_PARTYSELF));
-        assertTrue(initializeConfiguration(testData));
+        Configuration testData = initializeConfiguration(MULTIPLE_DYNINITIATOR_AND_PARTYSELF);
 
         DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
         doReturn(testData).when(classUnderTest).getConfiguration();
 
-        Collection<Process> result = classUnderTest.findDynamicReceiverProcesses();
+        Collection<Process> result = classUnderTest.findDynamicResponderProcesses();
 
         assertTrue(result.isEmpty());
     }
 
     @Test
     public void testFindDynamicReceiverProcesses_MultipleDynResponderAndDynInitiator_MultipleInResultExpected() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + MULTIPLE_DYNRESPONDER_AND_DYNINITIATOR));
-        assertTrue(initializeConfiguration(testData));
+        Configuration testData = initializeConfiguration(MULTIPLE_DYNRESPONDER_AND_DYNINITIATOR);
 
         DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
         doReturn(testData).when(classUnderTest).getConfiguration();
 
-        Collection<Process> result = classUnderTest.findDynamicReceiverProcesses();
+        Collection<Process> result = classUnderTest.findDynamicResponderProcesses();
 
         assertEquals(3, result.size());
 
@@ -173,44 +240,15 @@ public class DynamicDiscoveryPModeProviderTest {
     public void testDoDynamicThings_NoCandidates_EbMS3ExceptionExpected() throws Exception {
         thrown.expect(EbMS3Exception.class);
 
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + NO_DYNINITIATOR_AND_NOT_SELF));
-        assertTrue(initializeConfiguration(testData));
+        Configuration testData = initializeConfiguration(NO_DYNINITIATOR_AND_NOT_SELF);
 
         DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
         doReturn(testData).when(classUnderTest).getConfiguration();
-        classUnderTest.dynamicReceiverProcesses = classUnderTest.findDynamicReceiverProcesses();
+        classUnderTest.dynamicResponderProcesses = classUnderTest.findDynamicResponderProcesses();
 
-        UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(null, null, null, null, null, UUID.randomUUID().toString());
+        UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(null, null, null, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
 
-        classUnderTest.doDynamicThings(userMessage);
-    }
-
-    @Test
-    public void testDoDynamicThings_DynamicDiscoveryEnabled_NewPartyAddedToCandidates() throws Exception {
-        Configuration testData = (Configuration) jaxbConfigurationObjectContext.createUnmarshaller().unmarshal(new File(RESOURCE_PATH + DYNAMIC_DISCOVERY_ENABLED));
-        assertTrue(initializeConfiguration(testData));
-
-        doReturn(testData).when(configurationDAO).readEager();
-        doReturn(true).when(configurationDAO).configurationExists();
-        dynamicDiscoveryPModeProvider.dynamicReceiverProcesses = dynamicDiscoveryPModeProvider.findDynamicReceiverProcesses();
-
-        Endpoint testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, ADDRESS, ALIAS_CN_AVAILABLE);
-        doReturn(testDataEndpoint).when(dynamicDiscoveryService).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
-
-        doReturn(true).when(cryptoService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
-
-        UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UUID.randomUUID().toString());
-
-
-        dynamicDiscoveryPModeProvider.doDynamicThings(userMessage);
-        Party expectedParty = new Party();
-        expectedParty.setName(EXPECTED_COMMON_NAME);
-        expectedParty.setEndpoint(ADDRESS);
-        Identifier expectedIdentifier = new Identifier();
-        expectedIdentifier.setPartyId(EXPECTED_COMMON_NAME);
-        expectedParty.getIdentifiers().add(expectedIdentifier);
-
-        assertTrue(dynamicDiscoveryPModeProvider.getConfiguration().getBusinessProcesses().getParties().contains(expectedParty));
+        classUnderTest.doDynamicDiscovery(userMessage, MSHRole.SENDING);
     }
 
     @Test
@@ -219,7 +257,7 @@ public class DynamicDiscoveryPModeProviderTest {
         X509Certificate testData = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE);
         assertNotNull(testData);
 
-        String result = dynamicDiscoveryPModeProvider.extractCommonName(testData);
+        String result = certificateService.extractCommonName(testData);
 
         assertEquals(EXPECTED_COMMON_NAME, result);
     }
@@ -231,7 +269,7 @@ public class DynamicDiscoveryPModeProviderTest {
         X509Certificate testData = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_NOT_AVAILABLE);
         assertNotNull(testData);
 
-        dynamicDiscoveryPModeProvider.extractCommonName(testData);
+        certificateService.extractCommonName(testData);
     }
 
 
@@ -246,7 +284,7 @@ public class DynamicDiscoveryPModeProviderTest {
      * @param messageId
      * @return
      */
-    private UserMessage buildUserMessageForDoDynamicThingsWithArguments(String action, String serviceValue, String serviceType, String toPartyId, String toPartyIdType, String messageId) {
+    private UserMessage buildUserMessageForDoDynamicThingsWithArguments(String action, String serviceValue, String serviceType, String toPartyId, String toPartyIdType, String fromPartyId, String fromPartyIdType, String messageId) {
 
         ObjectFactory ebmsObjectFactory = new ObjectFactory();
 
@@ -268,10 +306,14 @@ public class DynamicDiscoveryPModeProviderTest {
 
         userMessageToBuild.setCollaborationInfo(collaborationInfo);
 
+        Property property = new Property();
+        property.setName(MessageConstants.FINAL_RECIPIENT);
+        property.setValue(toPartyId);
+        property.setType((toPartyIdType));
 
         PartyId partyId = ebmsObjectFactory.createPartyId();
-        partyId.setValue(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE);
-        partyId.setType((UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE));
+        partyId.setValue(toPartyId);
+        partyId.setType((toPartyIdType));
 
         To to = ebmsObjectFactory.createTo();
         to.getPartyId().add(partyId);
@@ -279,7 +321,18 @@ public class DynamicDiscoveryPModeProviderTest {
         PartyInfo partyInfo = ebmsObjectFactory.createPartyInfo();
         partyInfo.setTo(to);
 
+        partyId = ebmsObjectFactory.createPartyId();
+        partyId.setValue(fromPartyId);
+        partyId.setType((fromPartyIdType));
+
+        From from = ebmsObjectFactory.createFrom();
+        from.getPartyId().add(partyId);
+        partyInfo.setFrom(from);
+
         userMessageToBuild.setPartyInfo(partyInfo);
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.getProperty().add(property);
+        userMessageToBuild.setMessageProperties(messageProperties);
 
         return userMessageToBuild;
     }

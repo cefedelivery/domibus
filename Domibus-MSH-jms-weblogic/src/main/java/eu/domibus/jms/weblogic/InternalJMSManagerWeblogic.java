@@ -2,7 +2,6 @@ package eu.domibus.jms.weblogic;
 
 import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.jms.spi.InternalJMSDestination;
-import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJMSManager;
 import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
@@ -17,7 +16,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import weblogic.messaging.runtime.MessageInfo;
 
 import javax.annotation.Resource;
@@ -27,7 +25,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
@@ -45,12 +42,10 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     private static final String PROPERTY_JNDI_NAME = "Jndi";
 
     protected Map<String, ObjectName> queueMap;
+    protected Map<String, ObjectName> topicMap;
 
     @Autowired
     JMXHelper jmxHelper;
-
-    @Autowired
-    JMXTemplate jmxTemplate;
 
     @Resource(name = "jmsSender")
     private JmsOperations jmsOperations;
@@ -63,19 +58,9 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     @Override
     public Map<String, InternalJMSDestination> getDestinations() {
-        return jmxTemplate.query(
-                new JMXOperation() {
-                    @Override
-                    public Map<String, InternalJMSDestination> execute(MBeanServerConnection mbsc) {
-                        return doGetDestinations(mbsc);
-                    }
-                }
-        );
-    }
-
-    protected Map<String, InternalJMSDestination> doGetDestinations(MBeanServerConnection mbsc) {
-        Map<String, InternalJMSDestination> destinationMap = new TreeMap<>();
+        Map<String, InternalJMSDestination> destinationMap = new TreeMap<String, InternalJMSDestination>();
         try {
+            MBeanServerConnection mbsc = jmxHelper.getDomainRuntimeMBeanServerConnection();
             ObjectName drs = jmxHelper.getDomainRuntimeService();
             ObjectName[] servers = (ObjectName[]) mbsc.getAttribute(drs, "ServerRuntimes");
             for (ObjectName server : servers) {
@@ -100,32 +85,17 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                             destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
                             destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
                         }
+                        Long numberOfMessages = (Long) mbsc.getAttribute(jmsDestination, "MessagesCurrentCount");
 
-                        destination.setNumberOfMessages(getMessagesTotalCount(mbsc, jmsDestination));
+                        destination.setNumberOfMessages(numberOfMessages);
                         destinationMap.put(destination.getName(), destination);
                     }
                 }
             }
-            return destinationMap;
         } catch (Exception e) {
-            throw new InternalJMSException("Failed to build JMS destination map", e);
+            LOG.error("Failed to build JMS destination map", e);
         }
-
-    }
-
-    protected Long getMessagesTotalCount(MBeanServerConnection mbsc, ObjectName jmsDestination) throws AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
-        Long result = 0L;
-
-        Long messagesCurrentCount = (Long) mbsc.getAttribute(jmsDestination, "MessagesCurrentCount");
-        if(messagesCurrentCount != null) {
-            result += messagesCurrentCount;
-        }
-        Long messagesPendingCount = (Long) mbsc.getAttribute(jmsDestination, "MessagesPendingCount");
-        if(messagesPendingCount != null) {
-            result += messagesPendingCount;
-        }
-
-        return result;
+        return destinationMap;
     }
 
     protected String getQueueName(String destinationName) {
@@ -173,10 +143,11 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     }
 
     @Override
-    public void sendMessage(InternalJmsMessage message, String destination) {
+    public boolean sendMessage(InternalJmsMessage message, String destination) {
         InternalJMSDestination internalJmsDestination = getInternalJMSDestination(destination);
         if (internalJmsDestination == null) {
-            throw new InternalJMSException("Destination [" + destination + "] does not exists");
+            LOG.warn("Destination [" + destination + "] does not exists");
+            return false;
         }
 
         javax.jms.Queue jmsDestination = null;
@@ -185,9 +156,11 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             LOG.debug("Found JNDI [" + destinationJndi + "] for destination [" + destination + "]");
             jmsDestination = InitialContext.doLookup(destinationJndi);
         } catch (NamingException e) {
-            throw new InternalJMSException("Error performing lookup for [" + destination + "]", e);
+            LOG.error("Error performing lookup for [" + destination + "]", e);
+            return false;
         }
         sendMessage(message, jmsDestination);
+        return true;
     }
 
     @Override
@@ -196,35 +169,36 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     }
 
     @Override
-    public void deleteMessages(String source, String[] messageIds) {
+    public boolean deleteMessages(String source, String[] messageIds) {
         InternalJMSDestination selectedDestination = getInternalJMSDestination(source);
         try {
             ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
-            deleteMessages(destination, jmsSelectorUtil.getSelector(messageIds));
+            int deleted = deleteMessages(destination, jmsSelectorUtil.getSelector(messageIds));
+            return deleted == messageIds.length;
         } catch (Exception e) {
-            throw new InternalJMSException("Failed to delete messages from source [" + source + "]:" + messageIds, e);
+            LOG.error("Failed to delete messages from source [" + source + "]:" + messageIds , e);
+            return false;
         }
     }
 
     @Override
     public InternalJmsMessage getMessage(String source, String messageId) {
         InternalJMSDestination internalJmsDestination = getInternalJMSDestination(source);
-        if (internalJmsDestination == null) {
-            throw new InternalJMSException("Could not get message: could not find destination for source [" + source + "]");
-        }
-        String destinationType = internalJmsDestination.getType();
-        if ("Queue".equals(destinationType)) {
-            try {
-                ObjectName destination = internalJmsDestination.getProperty(PROPERTY_OBJECT_NAME);
-                return getMessageFromDestination(destination, messageId);
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+        if (internalJmsDestination != null) {
+            String destinationType = internalJmsDestination.getType();
+            if ("Queue".equals(destinationType)) {
+                try {
+                    ObjectName destination = internalJmsDestination.getProperty(PROPERTY_OBJECT_NAME);
+                    return getMessageFromDestination(destination, messageId);
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
         }
-        throw new InternalJMSException("Unknown destination type [" + destinationType + "]");
+        return null;
     }
 
-    protected InternalJmsMessage getMessageFromDestination(ObjectName destination, String messageId)  {
+    protected InternalJmsMessage getMessageFromDestination(ObjectName destination, String messageId) throws Exception {
         List<InternalJmsMessage> messages = getMessagesFromDestination(destination, jmsSelectorUtil.getSelector(messageId));
         if (!messages.isEmpty()) {
             return messages.get(0);
@@ -232,58 +206,42 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return null;
     }
 
-    protected List<InternalJmsMessage> getMessagesFromDestination(final ObjectName destination, final String selectorString) {
-        return jmxTemplate.query(
-                new JMXOperation() {
-                    @Override
-                    public List<InternalJmsMessage> execute(MBeanServerConnection mbsc) {
-                        return doGetMessagesFromDestination(mbsc, selectorString, destination);
-                    }
-                }
-        );
-    }
-
-    protected List<InternalJmsMessage> doGetMessagesFromDestination(MBeanServerConnection mbsc, String selectorString, ObjectName destination) {
-        try {
-
-            List<InternalJmsMessage> messages = new ArrayList<InternalJmsMessage>();
-            String selector = selectorString;
-            if (selector == null) {
-                selector = "true";
-            }
-            Integer timeout = new Integer(0);
-            Integer stateMask = new Integer( // Show messages in destination in all possible states
-                    MessageInfo.STATE_VISIBLE | // Visible and available for consumption
-                            MessageInfo.STATE_DELAYED | // Pending delayed delivery
-                            MessageInfo.STATE_PAUSED | // Pending pause operation
-                            MessageInfo.STATE_RECEIVE | // Pending receive operation
-                            MessageInfo.STATE_SEND | // Pending send operation
-                            MessageInfo.STATE_TRANSACTION // Pending send or receive operation as part of global transaction
-            );
-            String messageCursor = (String) mbsc.invoke(destination, "getMessages", new Object[]{selector, timeout, stateMask},
-                    new String[]{String.class.getName(), Integer.class.getName(), Integer.class.getName()});
-            Long totalAmountOfMessages = (Long) mbsc.invoke(destination, "getCursorSize", new Object[]{messageCursor}, new String[]{String.class.getName()});
-            CompositeData[] allMessageMetaData = (CompositeData[]) mbsc.invoke(destination, "getItems", new Object[]{messageCursor, new Long(0),
-                    new Integer(totalAmountOfMessages.intValue())}, new String[]{String.class.getName(), Long.class.getName(), Integer.class.getName()});
-
-
-            if (allMessageMetaData != null) {
-                for (CompositeData compositeData : allMessageMetaData) {
-                    try {
-                        InternalJmsMessage message = getInternalJmsMessage(destination, mbsc, messageCursor, compositeData);
-                        messages.add(message);
-                    } catch (Exception e) {
-                        LOG.error("Error converting message [" + compositeData + "]", e);
-                    }
-                }
-            }
-            return messages;
-        } catch (Exception e) {
-            throw new InternalJMSException("Error getting messages from destination: " + destination, e);
+    protected List<InternalJmsMessage> getMessagesFromDestination(ObjectName destination, String selector) throws Exception {
+        List<InternalJmsMessage> messages = new ArrayList<InternalJmsMessage>();
+        MBeanServerConnection mbsc = jmxHelper.getDomainRuntimeMBeanServerConnection();
+        if (selector == null) {
+            selector = "true";
         }
+        Integer timeout = new Integer(0);
+        Integer stateMask = new Integer( // Show messages in destination in all possible states
+                MessageInfo.STATE_VISIBLE | // Visible and available for consumption
+                        MessageInfo.STATE_DELAYED | // Pending delayed delivery
+                        MessageInfo.STATE_PAUSED | // Pending pause operation
+                        MessageInfo.STATE_RECEIVE | // Pending receive operation
+                        MessageInfo.STATE_SEND | // Pending send operation
+                        MessageInfo.STATE_TRANSACTION // Pending send or receive operation as part of global transaction
+        );
+        String messageCursor = (String) mbsc.invoke(destination, "getMessages", new Object[]{selector, timeout, stateMask},
+                new String[]{String.class.getName(), Integer.class.getName(), Integer.class.getName()});
+        Long totalAmountOfMessages = (Long) mbsc.invoke(destination, "getCursorSize", new Object[]{messageCursor}, new String[]{String.class.getName()});
+        CompositeData[] allMessageMetaData = (CompositeData[]) mbsc.invoke(destination, "getItems", new Object[]{messageCursor, new Long(0),
+                new Integer(totalAmountOfMessages.intValue())}, new String[]{String.class.getName(), Long.class.getName(), Integer.class.getName()});
+
+
+        if (allMessageMetaData != null) {
+            for (CompositeData compositeData : allMessageMetaData) {
+                try {
+                    InternalJmsMessage message = getInternalJmsMessage(destination, mbsc, messageCursor, compositeData);
+                    messages.add(message);
+                } catch (Exception e) {
+                    LOG.error("Error converting message [" + compositeData + "]", e);
+                }
+            }
+        }
+        return messages;
     }
 
-    protected InternalJmsMessage getInternalJmsMessage(ObjectName destination, MBeanServerConnection mbsc, String messageCursor, CompositeData messageMetaData) throws ParserConfigurationException, SAXException, IOException, MBeanException, InstanceNotFoundException, ReflectionException {
+    protected InternalJmsMessage getInternalJmsMessage(ObjectName destination, MBeanServerConnection mbsc, String messageCursor, CompositeData messageMetaData) throws Exception {
         InternalJmsMessage message = convertMessage(messageMetaData);
         String messageId = message.getId();
         CompositeData messageDataDetails = (CompositeData) mbsc.invoke(destination, "getMessage", new Object[]{messageCursor, messageId}, new String[]{
@@ -299,97 +257,70 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     @Override
     public List<InternalJmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
+        List<InternalJmsMessage> messages = new ArrayList<>();
         if (source == null) {
-            throw new InternalJMSException("Source has not been specified");
+            return messages;
         }
 
         InternalJMSDestination selectedDestination = getInternalJMSDestination(source);
-        if (selectedDestination == null) {
-            throw new InternalJMSException("Could not find destination for [" + source + "]");
-        }
-
-        String destinationType = selectedDestination.getType();
-        if ("Queue".equals(destinationType)) {
-            Map<String, Object> criteria = new HashMap<String, Object>();
-            if (jmsType != null) {
-                criteria.put("JMSType", jmsType);
-            }
-            if (fromDate != null) {
-                criteria.put("JMSTimestamp_from", fromDate.getTime());
-            }
-            if (toDate != null) {
-                criteria.put("JMSTimestamp_to", toDate.getTime());
-            }
-            if (selectorClause != null) {
-                criteria.put("selectorClause", selectorClause);
-            }
-            String selector = jmsSelectorUtil.getSelector(criteria);
-            try {
-                ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
-                return getMessagesFromDestination(destination, selector);
-            } catch (Exception e) {
-                throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
-            }
-        }
-        throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
-    }
-
-    protected int deleteMessages(final ObjectName destination, final String selector) {
-        return jmxTemplate.query(
-                new JMXOperation() {
-                    @Override
-                    public Integer execute(MBeanServerConnection mbsc) {
-                        return doDeleteMessages(mbsc, destination, selector);
-                    }
+        if (selectedDestination != null) {
+            String destinationType = selectedDestination.getType();
+            if ("Queue".equals(destinationType)) {
+                Map<String, Object> criteria = new HashMap<String, Object>();
+                if (jmsType != null) {
+                    criteria.put("JMSType", jmsType);
                 }
-        );
+                if (fromDate != null) {
+                    criteria.put("JMSTimestamp_from", fromDate.getTime());
+                }
+                if (toDate != null) {
+                    criteria.put("JMSTimestamp_to", toDate.getTime());
+                }
+                if (selectorClause != null) {
+                    criteria.put("selectorClause", selectorClause);
+                }
+                String selector = jmsSelectorUtil.getSelector(criteria);
+                try {
+                    ObjectName destination = selectedDestination.getProperty(PROPERTY_OBJECT_NAME);
+                    messages = getMessagesFromDestination(destination, selector);
+                } catch (Exception e) {
+                    LOG.error("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
+                }
+            }
+        }
+        return messages;
     }
 
-    protected Integer doDeleteMessages(MBeanServerConnection mbsc, ObjectName destination, String selector) {
-        try {
-            Integer deleted = (Integer) mbsc.invoke(destination, "deleteMessages", new Object[]{selector}, new String[]{String.class.getName()});
-            return deleted;
-        } catch (Exception e) {
-            throw new InternalJMSException("Failed to build JMS destination map", e);
-        }
+    protected int deleteMessages(ObjectName destination, String selector) throws Exception {
+        MBeanServerConnection mbsc = jmxHelper.getDomainRuntimeMBeanServerConnection();
+        Integer deleted = (Integer) mbsc.invoke(destination, "deleteMessages", new Object[]{selector}, new String[]{String.class.getName()});
+        return deleted;
     }
 
     @Override
-    public void moveMessages(String source, String destination, String[] messageIds) {
+    public boolean moveMessages(String source, String destination, String[] messageIds) {
         InternalJMSDestination from = getInternalJMSDestination(source);
         InternalJMSDestination to = getInternalJMSDestination(destination);
         try {
             ObjectName fromDestination = from.getProperty(PROPERTY_OBJECT_NAME);
             ObjectName toDestination = to.getProperty(PROPERTY_OBJECT_NAME);
-            moveMessages(fromDestination, toDestination, jmsSelectorUtil.getSelector(messageIds));
+            int moved = moveMessages(fromDestination, toDestination, jmsSelectorUtil.getSelector(messageIds));
+            return moved == messageIds.length;
         } catch (Exception e) {
-            throw new InternalJMSException("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds, e);
+            LOG.error("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds , e);
+            return false;
         }
     }
 
-    protected int moveMessages(final ObjectName from, final ObjectName to, final String selector) {
-        return jmxTemplate.query(
-                new JMXOperation() {
-                    @Override
-                    public Integer execute(MBeanServerConnection mbsc) {
-                        return doMoveMessages(mbsc, to, from, selector);
-                    }
-                }
-        );
+    protected int moveMessages(ObjectName from, ObjectName to, String selector) throws Exception {
+        MBeanServerConnection mbsc = jmxHelper.getDomainRuntimeMBeanServerConnection();
+        CompositeData toDestinationInfo = (CompositeData) mbsc.getAttribute(to, "DestinationInfo");
+        Integer moved = (Integer) mbsc.invoke(from, "moveMessages", new Object[]{selector, toDestinationInfo}, new String[]{String.class.getName(),
+                CompositeData.class.getName()});
+        return moved;
     }
 
-    protected Integer doMoveMessages(MBeanServerConnection mbsc, ObjectName to, ObjectName from, String selector) {
-        try {
-            CompositeData toDestinationInfo = (CompositeData) mbsc.getAttribute(to, "DestinationInfo");
-            Integer moved = (Integer) mbsc.invoke(from, "moveMessages", new Object[]{selector, toDestinationInfo}, new String[]{String.class.getName(),
-                    CompositeData.class.getName()});
-            return moved;
-        } catch (Exception e) {
-            throw new InternalJMSException("Error moving messages", e);
-        }
-    }
-
-    protected InternalJmsMessage convertMessage(CompositeData messageData) throws IOException, SAXException, ParserConfigurationException {
+    public InternalJmsMessage convertMessage(CompositeData messageData) throws Exception {
         InternalJmsMessage message = new InternalJmsMessage();
         String xmlMessage = String.valueOf(messageData.get("MessageXMLText"));
         Document xmlDocument = parseXML(xmlMessage);
@@ -416,7 +347,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             String key = property.getAttribute("name");
             final Element firstChildElement = getFirstChildElement(property);
             String value = null;
-            if (firstChildElement != null) {
+            if(firstChildElement != null) {
                 value = firstChildElement.getTextContent();
             }
             message.getProperties().put(key, value);
@@ -428,7 +359,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return message;
     }
 
-    protected Document parseXML(String xml) throws ParserConfigurationException, IOException, SAXException {
+    public Document parseXML(String xml) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         factory.setNamespaceAware(true);
@@ -436,7 +367,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return builder.parse(is);
     }
 
-    protected Element getChildElement(Element parent, String name) {
+    public Element getChildElement(Element parent, String name) {
         for (int i = 0; i < parent.getChildNodes().getLength(); i++) {
             if (parent.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE) {
                 Element child = (Element) parent.getChildNodes().item(i);
@@ -447,7 +378,8 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         localName = localName.substring(localName.indexOf(":") + 1);
                     }
                 }
-                if (StringUtils.equals(localName, name)) {
+                String ns = child.getNamespaceURI();
+                if (localName.equals(name)) {
                     return child;
                 }
             }
@@ -455,7 +387,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return null;
     }
 
-    protected List<Element> getChildElements(Element parent, String name) {
+    public List<Element> getChildElements(Element parent, String name) {
         List<Element> childElements = new ArrayList<Element>();
         for (int i = 0; i < parent.getChildNodes().getLength(); i++) {
             if (parent.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE) {
@@ -467,7 +399,8 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         localName = localName.substring(localName.indexOf(":") + 1);
                     }
                 }
-                if (StringUtils.equals(localName, name)) {
+                String ns = child.getNamespaceURI();
+                if (localName.equals(name)) {
                     childElements.add(child);
                 }
             }
@@ -475,7 +408,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return childElements;
     }
 
-    protected Element getFirstChildElement(Element parent) {
+    public Element getFirstChildElement(Element parent) {
         for (int i = 0; i < parent.getChildNodes().getLength(); i++) {
             if (parent.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE) {
                 Element child = (Element) parent.getChildNodes().item(i);

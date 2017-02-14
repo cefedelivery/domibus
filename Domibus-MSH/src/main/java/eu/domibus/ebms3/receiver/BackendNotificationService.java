@@ -8,7 +8,6 @@ import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
-import eu.domibus.messaging.ReceiveFailedMessageCreator;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.routing.*;
@@ -92,41 +91,71 @@ public class BackendNotificationService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void notifyOfIncomingFailure(final UserMessage userMessage) {
-        notifyOfIncoming(userMessage, NotificationType.MESSAGE_RECEIVED_FAILURE);
+    public void notifyMessageReceivedFailure(final UserMessage userMessage, ErrorResult errorResult) {
+        final HashMap<String, Object> properties = new HashMap<>();
+        if (errorResult.getErrorCode() != null) {
+            properties.put(MessageConstants.ERROR_CODE, errorResult.getErrorCode().getErrorCodeName());
+        }
+        properties.put(MessageConstants.ERROR_DETAIL, errorResult.getErrorDetail());
+        notifyOfIncoming(userMessage, NotificationType.MESSAGE_RECEIVED_FAILURE, properties);
     }
 
-    public void notifyOfIncoming(final UserMessage userMessage, NotificationType notificationType) {
-        LOG.debug("Notify of incoming message, notificationType is " + (notificationType == null ? "null" : notificationType.name()));
-        List<BackendFilter> backendFilter = backendFilterDao.findAll();
-        if (backendFilter.isEmpty()) { // There is no saved backendfilter configuration. Most likely the backends have not been configured yet
-            backendFilter = routingService.getBackendFilters();
-            if (backendFilter.isEmpty()) {
+    public void notifyMessageReceived(final UserMessage userMessage) {
+        notifyOfIncoming(userMessage, NotificationType.MESSAGE_RECEIVED, new HashMap<String, Object>());
+    }
+
+    protected void notifyOfIncoming(final UserMessage userMessage, final NotificationType notificationType, Map<String, Object> properties) {
+        List<BackendFilter> backendFilters = getBackendFilters();
+        final BackendFilter matchingBackendFilter = getMatchingBackendFilter(backendFilters, criteriaMap, userMessage);
+        if (matchingBackendFilter == null) {
+            //TODO throw an exception instead of silently logging
+            LOG.error("No backend responsible for message [" + userMessage.getMessageInfo().getMessageId() + "] found. Sending notification to [" + unknownReceiverQueue + "]");
+            String finalRecipient = getFinalRecipient(userMessage);
+            properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
+            jmsManager.sendMessageToQueue(new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), notificationType, properties).createMessage(), unknownReceiverQueue);
+            return;
+        }
+
+        LOG.info("Notify backend " + matchingBackendFilter.getBackendName() + " of messageId " + userMessage.getMessageInfo().getMessageId());
+        validateAndNotify(userMessage, matchingBackendFilter.getBackendName(), notificationType, properties);
+    }
+
+    protected BackendFilter getMatchingBackendFilter(final List<BackendFilter> backendFilters, final Map<String, IRoutingCriteria> criteriaMap, final UserMessage userMessage) {
+        for (final BackendFilter filter : backendFilters) {
+            final boolean backendFilterMatching = isBackendFilterMatching(filter, criteriaMap, userMessage);
+            if (backendFilterMatching) {
+                return filter;
+            }
+        }
+        return null;
+    }
+
+    protected boolean isBackendFilterMatching(BackendFilter filter, Map<String, IRoutingCriteria> criteriaMap, final UserMessage userMessage) {
+        for (final RoutingCriteria routingCriteria : filter.getRoutingCriterias()) {
+            final IRoutingCriteria criteria = criteriaMap.get(routingCriteria.getName());
+            boolean matches = criteria.matches(userMessage, routingCriteria.getExpression());
+            //if at least one criteria does not match it means the filter is not matching
+            if (!matches) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected List<BackendFilter> getBackendFilters() {
+        List<BackendFilter> backendFilters = backendFilterDao.findAll();
+        if (backendFilters.isEmpty()) { // There is no saved backendfilter configuration. Most likely the backends have not been configured yet
+            backendFilters = routingService.getBackendFilters();
+            if (backendFilters.isEmpty()) {
                 LOG.error("There are no backend plugins deployed on this server");
             }
-            if (backendFilter.size() > 1) { //There is more than one unconfigured backend available. For security reasons we cannot send the message just to the first one
-                LOG.error("There are multiple un-configured backend plugins available. Please set up the configuration using the \"Message filter\" panel of the administrative GUI.");
-                backendFilter.clear(); // empty the list so its handled in the desired way.
+            if (backendFilters.size() > 1) { //There is more than one unconfigured backend available. For security reasons we cannot send the message just to the first one
+                LOG.error("There are multiple unconfigured backend plugins available. Please set up the configuration using the \"Message filter\" pannel of the administrative GUI.");
+                backendFilters.clear(); // empty the list so its handled in the desired way.
             }
             //If there is only one backend deployed we send it to that as this is most likely the intent
         }
-        for (final BackendFilter filter : backendFilter) {
-            boolean matches = true;
-            for (final RoutingCriteria routingCriteria : filter.getRoutingCriterias()) {
-                final IRoutingCriteria criteria = criteriaMap.get(routingCriteria.getName());
-                matches = criteria.matches(userMessage, routingCriteria.getExpression());
-                if (!matches) {
-                    break;
-                }
-            }
-            if (matches) {
-                validateAndNotify(userMessage, filter.getBackendName(), notificationType);
-                return;
-            }
-        }
-        String finalRecipient = getFinalRecipient(userMessage);
-        LOG.error("No backend responsible for message [" + userMessage.getMessageInfo().getMessageId() + "] found. Sending notification to [" + unknownReceiverQueue + "]");
-        jmsManager.sendMessageToQueue(new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), NotificationType.MESSAGE_RECEIVED, finalRecipient).createMessage(), unknownReceiverQueue);
+        return backendFilters;
     }
 
     private String getFinalRecipient(UserMessage userMessage) {
@@ -168,27 +197,26 @@ public class BackendNotificationService {
         return null;
     }
 
-    protected void validateAndNotify(UserMessage userMessage, String backendName, NotificationType notificationType) {
+    protected void validateAndNotify(UserMessage userMessage, String backendName, NotificationType notificationType, Map<String, Object> properties) {
         LOG.info("Notifying backend [{}] of message [{}] and notification type [{}]", backendName, userMessage.getMessageInfo().getMessageId(), notificationType);
 
         validateSubmission(userMessage, backendName, notificationType);
         String finalRecipient = getFinalRecipient(userMessage);
-        notify(userMessage.getMessageInfo().getMessageId(), backendName, notificationType, finalRecipient);
+        properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
+        notify(userMessage.getMessageInfo().getMessageId(), backendName, notificationType, properties);
     }
 
     protected void notify(String messageId, String backendName, NotificationType notificationType) {
         notify(messageId, backendName, notificationType, null);
     }
 
-    protected void notify(String messageId, String backendName, NotificationType notificationType, String finalRecipient) {
+    protected void notify(String messageId, String backendName, NotificationType notificationType, String finalRecipient, Map<String, Object> properties) {
         NotificationListener notificationListener = getNotificationListener(backendName);
         if (notificationListener == null) {
             LOG.warn("No notification listeners found for backend [" + backendName + "]");
             return;
         }
-        LOG.info("Notifying backend [{}] for message [{}] with notificationType [{}] and finalRecipient [{}]", backendName, messageId, notificationType, finalRecipient);
-        jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, finalRecipient).createMessage(), notificationListener.getBackendNotificationQueue());
-//        jmsOperations.send(notificationListener.getBackendNotificationQueue(), new NotifyMessageCreator(messageId, notificationType));
+        jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, finalRecipient, properties).createMessage(), notificationListener.getBackendNotificationQueue());
     }
 
     public void notifyOfSendFailure(final String messageId) {
@@ -200,16 +228,6 @@ public class BackendNotificationService {
     public void notifyOfSendSuccess(final String messageId) {
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_SUCCESS);
-    }
-
-    public void notifyOfReceiveFailure(final String messageId, String endpoint) {
-        final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
-        for (final NotificationListener notificationListenerService : notificationListenerServices) {
-            if (notificationListenerService.getBackendName().equals(backendName)) {
-                jmsManager.sendMessageToQueue(new ReceiveFailedMessageCreator(messageId, endpoint).createMessage(), notificationListenerService.getBackendNotificationQueue());
-
-            }
-        }
     }
 
     public List<NotificationListener> getNotificationListenerServices() {

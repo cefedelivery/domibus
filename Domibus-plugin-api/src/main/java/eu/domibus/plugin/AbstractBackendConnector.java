@@ -1,6 +1,7 @@
 package eu.domibus.plugin;
 
 import eu.domibus.common.ErrorResult;
+import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -63,6 +64,7 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     }
 
 
+
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public T downloadMessage(final String messageId, final T target) throws MessageNotFoundException {
@@ -81,7 +83,6 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     public MessageStatus getMessageStatus(final String messageId) {
         return this.messageRetriever.getMessageStatus(messageId);
     }
-
 
     @Override
     public List<ErrorResult> getErrorsForMessage(final String messageId) {
