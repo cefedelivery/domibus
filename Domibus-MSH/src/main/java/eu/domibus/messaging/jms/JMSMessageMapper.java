@@ -26,6 +26,7 @@ public class JMSMessageMapper {
     }
 
     public JmsMessage convert(InternalJmsMessage message) {
+        if (message == null) return null;
         JmsMessage result = new JmsMessage();
         result.setId(message.getId());
         result.setContent(message.getContent());
