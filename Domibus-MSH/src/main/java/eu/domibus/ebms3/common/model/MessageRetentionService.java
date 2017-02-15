@@ -10,6 +10,7 @@ import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.NotificationListener;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -112,7 +113,9 @@ public class MessageRetentionService {
     protected void deleteExpiredDownloadedMessages(String mpc, Integer expiredDownloadedMessagesLimit) {
         LOG.debug("Deleting expired downloaded messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]");
         final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
-        if (messageRetentionDownloaded > 0) { // if -1 the messages will be kept indefinetely and if 0 it already has been deleted
+        String fileLocation = domibusProperties.getProperty("domibus.attachment.storage.location");
+        // If messageRetentionDownloaded is equal to -1, the messages will be kept indefinitely and, if 0 and no file system storage was used, they have already been deleted during download operation.
+        if (messageRetentionDownloaded > 0 || (StringUtils.isNotEmpty(fileLocation) && messageRetentionDownloaded >= 0)) {
             List<String> downloadedMessageIds = userMessageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);
             if (downloadedMessageIds != null && downloadedMessageIds.size() > 0) {
                 LOG.debug("Found [" + downloadedMessageIds.size() + "] downloaded messages to delete");
