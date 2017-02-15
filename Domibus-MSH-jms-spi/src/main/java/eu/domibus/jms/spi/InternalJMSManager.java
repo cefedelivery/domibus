@@ -13,6 +13,10 @@ import java.util.Map;
  */
 public interface InternalJMSManager {
 
+    static final String QUEUE = "Queue";
+
+    static final String TOPIC = "Topic";
+
     Map<String, List<InternalJMSDestination>> getDestinations();
 
     void sendMessage(InternalJmsMessage message, String destination);
@@ -28,4 +32,6 @@ public interface InternalJMSManager {
     List<InternalJmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selector);
 
     List<InternalJmsMessage> browseMessages(String source);
+
+    InternalJmsMessage consumeMessage(String source, String messageId);
 }

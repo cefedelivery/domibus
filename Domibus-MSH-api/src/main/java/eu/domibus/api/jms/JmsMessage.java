@@ -21,6 +21,8 @@ public class JmsMessage {
 
     protected Map<String, Object> properties = new HashMap<>();
 
+    protected Map<String, Object> customProperties;
+
     public String getId() {
         return id;
     }
@@ -72,10 +74,12 @@ public class JmsMessage {
     }
 
     public Map<String, Object> getCustomProperties() {
-        Map<String, Object> customProperties = new HashMap<>();
-        for (String key : properties.keySet()) {
-            if (!key.startsWith("JMS")) {
-                customProperties.put(key, properties.get(key));
+        if (customProperties == null) {
+            customProperties = new HashMap<>();
+            for (String key : properties.keySet()) {
+                if (!key.startsWith("JMS")) {
+                    customProperties.put(key, properties.get(key));
+                }
             }
         }
         return customProperties;
@@ -91,6 +95,10 @@ public class JmsMessage {
 
     public String getStringProperty(String key) {
         return (String) properties.get(key);
+    }
+
+    public String getCustomStringProperty(String key) {
+        return (String) getCustomProperties().get(key);
     }
 
     @Override

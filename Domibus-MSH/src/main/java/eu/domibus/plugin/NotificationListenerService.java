@@ -137,10 +137,9 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
             int countOfMessagesIncluded = 0;
             for (JmsMessage message : messages) {
-                Map customProps = message.getCustomProperties(); // TODO check values
-                if (notificationType.name().equals(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE))) {
+                if (notificationType.name().equals(message.getCustomStringProperty(MessageConstants.NOTIFICATION_TYPE))) {
                     if (finalRecipient == null || (StringUtils.equals(finalRecipient, message.getStringProperty(MessageConstants.FINAL_RECIPIENT)))) {
-                        String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+                        String messageId = message.getCustomStringProperty(MessageConstants.MESSAGE_ID);
                         result.add(messageId);
                         countOfMessagesIncluded++;
                         LOG.debug("Added MessageId [" + messageId + "]");
@@ -194,7 +193,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
         try {
             String queueName = backendNotificationQueue.getQueueName();
-            JmsMessage message = jmsManager.getMessage(queueName, messageId);
+            JmsMessage message = jmsManager.consumeMessage(queueName, messageId);
             if (message == null) {
                 LOG.businessError(DomibusMessageCode.BUS_MSG_NOT_FOUND, messageId);
                 throw new MessageNotFoundException("No message with id [" + messageId + "] pending for download");

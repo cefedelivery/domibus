@@ -315,4 +315,9 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
             throw new InternalJMSException("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds, e);
         }
     }
+
+    @Override
+    public InternalJmsMessage consumeMessage(String source, String messageId) {
+        throw new InternalJMSException("Not Implemented yet");
+    }
 }

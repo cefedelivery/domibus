@@ -88,4 +88,10 @@ public class JMSManagerImpl implements JMSManager {
     public void moveMessages(String source, String destination, String[] messageIds) {
         internalJmsManager.moveMessages(source, destination, messageIds);
     }
+
+    @Override
+    public JmsMessage consumeMessage(String source, String messageId) {
+        InternalJmsMessage internalJmsMessage = internalJmsManager.consumeMessage(source, messageId);
+        return jmsMessageMapper.convert(internalJmsMessage);
+    }
 }

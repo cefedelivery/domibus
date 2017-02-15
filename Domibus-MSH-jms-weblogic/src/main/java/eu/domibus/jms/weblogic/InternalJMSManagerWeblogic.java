@@ -193,20 +193,13 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return (Topic) lookupDestination(topicName);
     }
 
-    protected String getJndiName(InternalJMSDestination internalJmsDestination) {
-        String destinationJndi = internalJmsDestination.getProperty(PROPERTY_JNDI_NAME);
-        return destinationJndi;
-        //return "java:/" + StringUtils.replace(destinationJndi, ".", "/");
-    }
-
-    // TODO to be put in helper or super class
     protected javax.jms.Destination lookupDestination(String destName) throws NamingException {
         // It is enough to get the first destination object also in case of clustered destinations because then a JNDI look up is performed.
         InternalJMSDestination internalJmsDestination = getDestinations().get(destName).get(0);
         if (internalJmsDestination == null) {
             throw new InternalJMSException("Destination [" + destName + "] does not exists");
         }
-        String destinationJndi = getJndiName(internalJmsDestination);
+        String destinationJndi = internalJmsDestination.getProperty(PROPERTY_JNDI_NAME);
         LOG.debug("Found JNDI [" + destinationJndi + "] for destination [" + destName + "]");
         return InitialContext.doLookup(destinationJndi);
     }
@@ -246,17 +239,13 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     public InternalJmsMessage getMessage(String source, String messageId) {
         InternalJmsMessage internalJmsMessage = null;
         for (InternalJMSDestination internalJmsDestination : getInternalJMSDestinations(source)) {
-            //String destinationType = internalJmsDestination.getType();
-            //if ("Queue".equals(destinationType)) {
             try {
                 ObjectName destination = internalJmsDestination.getProperty(PROPERTY_OBJECT_NAME);
                 internalJmsMessage = getMessageFromDestination(destination, messageId);
                 if (internalJmsMessage != null) break;
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+            } catch (Exception ex) {
+                LOG.error(ex.getMessage(), ex);
             }
-            //}
-            //throw new InternalJMSException("Unknown destination type [" + destinationType + "]");
         }
         return internalJmsMessage;
     }
@@ -299,7 +288,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
             String messageCursor = (String) mbsc.invoke(
                     destination,
-                    "browseMessages",
+                    "getMessages",
                     new Object[]{selector, timeout, stateMask},
                     new String[]{String.class.getName(), Integer.class.getName(), Integer.class.getName()});
 
@@ -356,12 +345,17 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     }
 
     @Override
+    public InternalJmsMessage consumeMessage(String source, String messageId) {
+        throw new InternalJMSException("Not Implemented yet");
+    }
+
+    @Override
     public List<InternalJmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
 
         List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
         for (InternalJMSDestination destination : getInternalJMSDestinations(source)) {
             String destinationType = destination.getType();
-            if ("Queue".equals(destinationType)) {
+            if (QUEUE.equals(destinationType)) {
                 Map<String, Object> criteria = new HashMap<String, Object>();
                 if (jmsType != null) {
                     criteria.put("JMSType", jmsType);
@@ -382,8 +376,9 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                 } catch (Exception e) {
                     throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
                 }
+            } else {
+                throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
             }
-            throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
         }
         return internalJmsMessages;
     }

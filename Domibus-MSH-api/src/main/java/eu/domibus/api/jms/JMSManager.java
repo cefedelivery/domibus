@@ -22,6 +22,13 @@ public interface JMSManager {
      */
     Map<String, List<JMSDestination>> getDestinations();
 
+    /**
+     * Finds a JMS message in a source.
+     *
+     * @param source    a JMS source
+     * @param messageId JMS message's identifier
+     * @return a JmsMessage
+     */
     JmsMessage getMessage(String source, String messageId);
 
     /**
@@ -51,4 +58,13 @@ public interface JMSManager {
     void deleteMessages(String source, String[] messageIds);
 
     void moveMessages(String source, String destination, String[] messageIds);
+
+    /**
+     * Consumes a business message from a source.
+     *
+     * @param source    a JMS source
+     * @param messageId Business message id
+     * @return a JmsMessage
+     */
+    JmsMessage consumeMessage(String source, String messageId);
 }
