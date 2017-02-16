@@ -17,9 +17,9 @@ import java.util.Map;
 @Component
 public class JMSDestinationMapper {
 
-    public Map<String, List<JMSDestination>> convert(Map<String, List<InternalJMSDestination>> destinations) {
-        Map<String, List<JMSDestination>> result = new HashMap<>();
-        for (Map.Entry<String, List<InternalJMSDestination>> spiEntry : destinations.entrySet()) {
+    public Map<String, JMSDestination> convert(Map<String, InternalJMSDestination> destinations) {
+        Map<String, JMSDestination> result = new HashMap<>();
+        for (Map.Entry<String, InternalJMSDestination> spiEntry : destinations.entrySet()) {
             result.put(spiEntry.getKey(), convert(spiEntry.getValue()));
         }
         return result;

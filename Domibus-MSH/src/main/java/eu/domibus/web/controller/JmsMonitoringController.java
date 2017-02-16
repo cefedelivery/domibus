@@ -53,7 +53,7 @@ public class JmsMonitoringController {
     ) {
 
         final ModelAndView model = new ModelAndView();
-        Map<String, List<JMSDestination>> jmsDestinations = jmsManager.getDestinations();
+        Map<String, JMSDestination> jmsDestinations = jmsManager.getDestinations();
 
         model.addObject("destinationMap", jmsDestinations);
         model.addObject("source", source);
@@ -105,7 +105,7 @@ public class JmsMonitoringController {
             }
         }
 
-        Map<String, List<JMSDestination>> jmsDestinations = jmsManager.getDestinations();
+        Map<String, JMSDestination> jmsDestinations = jmsManager.getDestinations();
         model.addObject("destinationMap", jmsDestinations);
 
         model.addObject("action", action);
