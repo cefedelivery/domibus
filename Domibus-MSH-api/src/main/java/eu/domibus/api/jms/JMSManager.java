@@ -18,9 +18,9 @@ public interface JMSManager {
     /**
      * Operation to get all destinations available on the JMS server
      *
-     * @return a map where the key is the name of the real JMS destination and the the value is a list of JMSDestination objects
+     * @return a map where the key is the fully qualified name of the real JMS destination and the value is a JMSDestination object.
      */
-    Map<String, List<JMSDestination>> getDestinations();
+    Map<String, JMSDestination> getDestinations();
 
     /**
      * Finds a JMS message in a source.

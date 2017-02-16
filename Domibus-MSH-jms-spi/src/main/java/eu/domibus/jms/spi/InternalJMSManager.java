@@ -17,7 +17,7 @@ public interface InternalJMSManager {
 
     static final String TOPIC = "Topic";
 
-    Map<String, List<InternalJMSDestination>> getDestinations();
+    Map<String, InternalJMSDestination> findDestinationsGroupedByFQName();
 
     void sendMessage(InternalJmsMessage message, String destination);
 
@@ -33,5 +33,5 @@ public interface InternalJMSManager {
 
     List<InternalJmsMessage> browseMessages(String source);
 
-    InternalJmsMessage consumeMessage(String source, String messageId);
+    InternalJmsMessage consumeMessage(String source, String customMessageId);
 }

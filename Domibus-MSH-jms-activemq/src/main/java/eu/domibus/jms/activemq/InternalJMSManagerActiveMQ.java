@@ -57,7 +57,26 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     JMSSelectorUtil jmsSelectorUtil;
 
     @Override
-    public Map<String, List<InternalJMSDestination>> getDestinations() {
+    public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
+
+        Map<String, InternalJMSDestination> destinationMap = new TreeMap<>();
+
+        try {
+            //build the destinationMap every time in order to get up to date statistics
+            for (ObjectName name : getQueueMap().values()) {
+                QueueViewMBean queueMbean = getQueue(name);
+                InternalJMSDestination internalJmsDestination = createInternalJmsDestination(name, queueMbean);
+                // TODO How to get the address or Fully Qualified name ?
+                destinationMap.put(queueMbean.getName(), internalJmsDestination);
+            }
+            return destinationMap;
+        } catch (Exception e) {
+            throw new InternalJMSException("Error getting destinations", e);
+        }
+    }
+
+
+    protected Map<String, List<InternalJMSDestination>> findDestinationsGroupedByName() {
 
         Map<String, List<InternalJMSDestination>> destinationMap = new TreeMap<>();
 
@@ -161,14 +180,14 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         if (StringUtils.isEmpty(source)) {
             throw new InternalJMSException("Source has not been specified");
         }
-        List<InternalJMSDestination> destinations = getDestinations().get(source);
+        List<InternalJMSDestination> destinations = findDestinationsGroupedByName().get(source);
         if (destinations == null || destinations.isEmpty()) {
             throw new InternalJMSException("Could not find destination for [" + source + "]");
         }
         List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
         for (InternalJMSDestination destination : destinations) {
             String destinationType = destination.getType();
-            if ("Queue".equals(destinationType)) {
+            if (QUEUE.equals(destinationType)) {
                 Map<String, Object> criteria = new HashMap<String, Object>();
                 if (jmsType != null) {
                     criteria.put("JMSType", jmsType);
@@ -191,8 +210,9 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
                 } catch (Exception e) {
                     throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
                 }
+            } else {
+                throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
             }
-            throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
         }
         return internalJmsMessages;
     }
@@ -204,7 +224,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         List<InternalJmsMessage> result = new ArrayList<>();
         for (CompositeData compositeData : browse) {
             try {
-                final InternalJmsMessage internalJmsMessage = convertCompositeData(compositeData);
+                InternalJmsMessage internalJmsMessage = convertCompositeData(compositeData);
                 result.add(internalJmsMessage);
             } catch (Exception e) {
                 LOG.error("Error converting message [" + compositeData + "]", e);
@@ -268,7 +288,23 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     }
 
     @Override
-    public InternalJmsMessage consumeMessage(String source, String messageId) {
-        throw new InternalJMSException("Not Implemented yet");
+    public InternalJmsMessage consumeMessage(String source, String customMessageId) {
+
+        String selector = "MESSAGE_ID='" + customMessageId + "'";
+
+        InternalJmsMessage intJmsMsg = null;
+        try {
+            QueueViewMBean queue = getQueue(source);
+            CompositeData[] browse = queue.browse(selector);
+            List<InternalJmsMessage> messages = convertCompositeData(browse);
+            if (!messages.isEmpty()) {
+                intJmsMsg = messages.get(0);
+                // Deletes it
+                queue.removeMatchingMessages(selector);
+            }
+        } catch (Exception ex) {
+            throw new InternalJMSException("Failed to consume message [" + customMessageId + "] from source [" + source + "]", ex);
+        }
+        return intJmsMsg;
     }
 }

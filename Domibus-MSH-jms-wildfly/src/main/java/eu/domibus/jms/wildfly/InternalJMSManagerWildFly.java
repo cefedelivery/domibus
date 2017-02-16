@@ -60,7 +60,30 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     JMSSelectorUtil jmsSelectorUtil;
 
     @Override
-    public Map<String, List<InternalJMSDestination>> getDestinations() {
+    public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
+
+        Map<String, InternalJMSDestination> destinationMap = new TreeMap<>();
+
+        try {
+            Map<String, ObjectName> queueMap = getQueueMap();
+            for (ObjectName objectName : queueMap.values()) {
+                JMSQueueControl jmsQueueControl = MBeanServerInvocationHandler.newProxyInstance(mBeanServer, objectName, JMSQueueControl.class, false);
+                InternalJMSDestination internalJmsDestination = new InternalJMSDestination();
+                internalJmsDestination.setName(jmsQueueControl.getName());
+                internalJmsDestination.setType(InternalJMSDestination.QUEUE_TYPE);
+                internalJmsDestination.setNumberOfMessages(jmsQueueControl.getMessageCount());
+                internalJmsDestination.setProperty(PROPERTY_OBJECT_NAME, objectName);
+                internalJmsDestination.setProperty(PROPERTY_JNDI_NAME, jmsQueueControl.getAddress());
+                internalJmsDestination.setInternal(jmsDestinationHelper.isInternal(jmsQueueControl.getAddress()));
+                destinationMap.put(jmsQueueControl.getName() + jmsQueueControl.getAddress(), internalJmsDestination);
+            }
+            return destinationMap;
+        } catch (Exception e) {
+            throw new InternalJMSException("Failed to build JMS destination map", e);
+        }
+    }
+
+    protected Map<String, List<InternalJMSDestination>> findDestinationsGroupedByName() {
         Map<String, List<InternalJMSDestination>> destinationMap = new TreeMap<>();
 
         try {
@@ -139,7 +162,7 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     // TODO to be put in helper or super class
     protected javax.jms.Destination lookupDestination(String destName) throws NamingException {
         // It is enough to get the first destination object also in case of clustered destinations because then a JNDI look up is performed.
-        InternalJMSDestination internalJmsDestination = getDestinations().get(destName).get(0);
+        InternalJMSDestination internalJmsDestination = findDestinationsGroupedByName().get(destName).get(0);
         if (internalJmsDestination == null) {
             throw new InternalJMSException("Destination [" + destName + "] does not exists");
         }
@@ -178,7 +201,7 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
 
         try {
             List<InternalJmsMessage> messages = getMessagesFromDestination(source, selector);
-            if (messages != null && !messages.isEmpty()) {
+            if (!messages.isEmpty()) {
                 return messages.get(0);
             }
         } catch (Exception e) {
@@ -197,7 +220,7 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
         if (StringUtils.isEmpty(source)) {
             throw new InternalJMSException("Source has not been specified");
         }
-        List<InternalJMSDestination> destinations = getDestinations().get(source);
+        List<InternalJMSDestination> destinations = findDestinationsGroupedByName().get(source);
         if (destinations == null || destinations.isEmpty()) {
             throw new InternalJMSException("Could not find destination for [" + source + "]");
         }
@@ -224,8 +247,9 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
                 } catch (Exception e) {
                     throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
                 }
+            } else {
+                throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
             }
-            throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
         }
         return internalJmsMessages;
     }
@@ -317,7 +341,21 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     }
 
     @Override
-    public InternalJmsMessage consumeMessage(String source, String messageId) {
-        throw new InternalJMSException("Not Implemented yet");
+    public InternalJmsMessage consumeMessage(String source, String customMessageId) {
+
+        InternalJmsMessage intJmsMsg = null;
+        String selector = "MESSAGE_ID='" + customMessageId + "'";
+        try {
+            List<InternalJmsMessage> messages = getMessagesFromDestination(source, selector);
+            if (!messages.isEmpty()) {
+                intJmsMsg = messages.get(0);
+                // Deletes it
+                JMSQueueControl queue = getQueueControl(source);
+                queue.removeMessages(selector);
+            }
+        } catch (Exception ex) {
+            throw new InternalJMSException("Failed to consume message [" + customMessageId + "] from source [" + source + "]", ex);
+        }
+        return intJmsMsg;
     }
 }

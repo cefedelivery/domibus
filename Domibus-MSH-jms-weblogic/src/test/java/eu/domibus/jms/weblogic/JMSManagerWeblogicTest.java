@@ -187,10 +187,9 @@ public class JMSManagerWeblogicTest {
 
         }};
 
-        final Map<String, List<InternalJMSDestination>> destinations = jmsManagerWeblogic.doGetDestinations(mbsc);
+        final Map<String, InternalJMSDestination> destinations = jmsManagerWeblogic.findDestinationsGroupedByFQName(mbsc);
         assertNotNull(destinations);
-        assertEquals(destinations.size(), 1);
-        final InternalJMSDestination internalJmsDestination = destinations.get(queueName).get(0);
+        final InternalJMSDestination internalJmsDestination = destinations.get(queueName);
         assertNotNull(internalJmsDestination);
 
         assertEquals(internalJmsDestination.getName(), queueName);
@@ -258,7 +257,7 @@ public class JMSManagerWeblogicTest {
         assertEquals(messages, messageSPIs);
 
         new Verifications() {{
-            Map<String, Object> criteria = null;
+            Map<String, Object> criteria = new HashMap<>();
             jmsSelectorUtil.getSelector(criteria = withCapture());
 
             assertEquals(criteria.get("JMSType"), jmsType);
@@ -278,9 +277,6 @@ public class JMSManagerWeblogicTest {
         new Expectations(jmsManagerWeblogic) {{
             jmsManagerWeblogic.getInternalJMSDestinations(myqueue);
             result = internalJmsDestination;
-
-            internalJmsDestination.getType();
-            result = "Queue";
 
             internalJmsDestination.getProperty("ObjectName");
             result = destination;

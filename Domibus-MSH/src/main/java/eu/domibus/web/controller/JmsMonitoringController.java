@@ -53,7 +53,7 @@ public class JmsMonitoringController {
     ) {
 
         final ModelAndView model = new ModelAndView();
-        Map<String, List<JMSDestination>> jmsDestinations = jmsManager.getDestinations();
+        Map<String, JMSDestination> jmsDestinations = jmsManager.getDestinations();
 
         model.addObject("destinationMap", jmsDestinations);
         model.addObject("source", source);
@@ -105,7 +105,7 @@ public class JmsMonitoringController {
             }
         }
 
-        Map<String, List<JMSDestination>> jmsDestinations = jmsManager.getDestinations();
+        Map<String, JMSDestination> jmsDestinations = jmsManager.getDestinations();
         model.addObject("destinationMap", jmsDestinations);
 
         model.addObject("action", action);
@@ -157,7 +157,8 @@ public class JmsMonitoringController {
                 try {
                     jmsManager.sendMessageToQueue(message, destination);
                     messageOutcome.append("Message sent.");
-                } catch (Exception e) {
+                } catch (Exception ex) {
+                    LOG.error("Send failed", ex);
                     messageOutcome.append("Failed to send message [" + message + "]");
                 }
             }
@@ -165,14 +166,16 @@ public class JmsMonitoringController {
             try {
                 jmsManager.moveMessages(source, destination, messageIds);
                 messageOutcome.append("Messages moved.");
-            } catch (Exception e) {
+            } catch (Exception ex) {
+                LOG.error("Move failed", ex);
                 messageOutcome.append("Failed to move messages");
             }
         } else if ("remove".equals(action)) {
             try {
                 jmsManager.deleteMessages(source, messageIds);
                 messageOutcome.append("Messages deleted.");
-            } catch (Exception e) {
+            } catch (Exception ex) {
+                LOG.error("Delete failed", ex);
                 messageOutcome.append("Failed to delete messages");
             }
         }
