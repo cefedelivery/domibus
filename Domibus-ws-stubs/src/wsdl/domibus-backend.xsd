@@ -106,7 +106,7 @@
            <xsd:element name="value" type="xsd:base64Binary" ns1:expectedContentTypes="application/octet-stream"></xsd:element>
        </xsd:sequence>
        <xsd:attribute name="payloadId" type="xsd:token" use="required"/>
-       <xsd:attribute name="contentType" type="xsd:string" use="required"/>
+       <xsd:attribute name="contentType" type="xsd:string"/>
     </xsd:complexType>
 
     <xsd:complexType name="errorResultImpl">
