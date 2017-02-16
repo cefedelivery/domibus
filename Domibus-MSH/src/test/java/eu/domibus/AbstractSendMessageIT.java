@@ -151,12 +151,12 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
         PayloadType payload = new PayloadType();
         payload.setPayloadId(payloadHref);
         payload.setContentType("text/xml");
-        payload.setValue(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()));
+//        payload.setValue(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()));
         sendRequest.getPayload().add(payload);
 
         payload = new PayloadType();
         payload.setPayloadId(payloadHref);
-        payload.setValue(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()));
+//        payload.setValue(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()));
         sendRequest.setBodyload(payload);
         return sendRequest;
     }

@@ -110,7 +110,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                     this.copyPartProperties(payload, extendedPartInfo);
                     extendedPartInfo.setInBody(false);
                     LOG.debug("sendMessage - payload Content Type: " + payload.getContentType());
-                    extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(payload.getValue(), payload.getContentType() == null ? DEFAULT_MT : payload.getContentType())));
+                    extendedPartInfo.setPayloadDatahandler(new DataHandler(payload.getValue().getDataSource(), payload.getContentType() == null ? DEFAULT_MT : payload.getContentType()));
                     foundPayload = true;
                     break;
                 }
@@ -125,7 +125,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                     this.copyPartProperties(bodyload, extendedPartInfo);
                     extendedPartInfo.setInBody(true);
                     LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
-                    extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(bodyload.getValue(), bodyload.getContentType() == null ? DEFAULT_MT : bodyload.getContentType())));
+                    extendedPartInfo.setPayloadDatahandler(new DataHandler(bodyload.getValue().getDataSource(), bodyload.getContentType() == null ? DEFAULT_MT : bodyload.getContentType()));
                 } else {
                     throw new SendMessageFault("No payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
                 }
@@ -248,8 +248,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             final PayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createPayloadType();
             try {
                 LOG.debug("downloadMessage - payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
-                payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
-            } catch (final IOException ioEx) {
+                payloadType.setValue(extPartInfo.getPayloadDatahandler());
+            } catch (final Exception ioEx) {
                 LOG.error(ERROR_IS_PAYLOAD_DATA_HANDLER, ioEx);
                 throw new DownloadMessageFault(ERROR_IS_PAYLOAD_DATA_HANDLER, createDownloadMessageFault(ioEx));
             }

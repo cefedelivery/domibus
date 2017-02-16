@@ -71,6 +71,7 @@
             <xsd:sequence>
                 <xsd:element minOccurs="0" name="bodyload" type="tns:PayloadType"/>
                 <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:PayloadType"/>
+                <!--<xsd:element maxOccurs="unbounded" minOccurs="0" name="payload1" nillable="true" type="tns:PayloadType1"/>-->
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
@@ -93,12 +94,19 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:complexType name="PayloadType">
-        <xsd:simpleContent>
-            <xsd:extension base="ns1:base64Binary">
-                <xsd:attribute name="payloadId" type="xsd:token" use="required"/>
-            </xsd:extension>
-        </xsd:simpleContent>
+    <!--<xsd:complexType name="PayloadType">-->
+        <!--<xsd:simpleContent>-->
+            <!--<xsd:extension base="ns1:base64Binary">-->
+                <!--<xsd:attribute name="payloadId" type="xsd:token" use="required"/>-->
+            <!--</xsd:extension>-->
+        <!--</xsd:simpleContent>-->
+    <!--</xsd:complexType>-->
+   <xsd:complexType name="PayloadType">
+       <xsd:sequence>
+           <xsd:element name="value" type="xsd:base64Binary" ns1:expectedContentTypes="application/octet-stream"></xsd:element>
+       </xsd:sequence>
+       <xsd:attribute name="payloadId" type="xsd:token" use="required"/>
+       <xsd:attribute name="contentType" type="xsd:string" use="required"/>
     </xsd:complexType>
 
     <xsd:complexType name="errorResultImpl">
