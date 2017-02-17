@@ -24,11 +24,7 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <tx:annotation-driven/>
-    <jms:annotation-driven/>
-
     <import resource="domibus-datasources.xml"/>
-
 
     <bean id="internalJmsListenerContainerFactory"
           class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
