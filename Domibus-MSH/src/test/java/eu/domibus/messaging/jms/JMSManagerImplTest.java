@@ -37,10 +37,11 @@ public class JMSManagerImplTest {
 
     @Test
     public void testGetDestinations() throws Exception {
-        final Map<String, List<InternalJMSDestination>> destinations = new HashMap<>();
+
+        final Map<String, InternalJMSDestination> destinations = new HashMap<>();
 
         new Expectations() {{
-            internalJmsManager.getDestinations();
+            internalJmsManager.findDestinationsGroupedByFQName();
             result = destinations;
         }};
 

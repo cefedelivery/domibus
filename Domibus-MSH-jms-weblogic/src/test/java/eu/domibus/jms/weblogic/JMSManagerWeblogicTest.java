@@ -387,6 +387,9 @@ public class JMSManagerWeblogicTest {
 
         new Expectations(jmsManagerWeblogic) {{
 
+            jmsManagerWeblogic.findDestinationsGroupedByName().get(destinationQueue).get(0);
+            result = internalJmsDestination;
+
             internalJmsDestination.getProperty("Jndi");
             result = jndi;
 
@@ -397,7 +400,6 @@ public class JMSManagerWeblogicTest {
                 }
             };
 
-            jmsManagerWeblogic.sendMessage(internalJmsMessage, jmsDestination);
         }};
 
         jmsManagerWeblogic.sendMessage(internalJmsMessage, destinationQueue);

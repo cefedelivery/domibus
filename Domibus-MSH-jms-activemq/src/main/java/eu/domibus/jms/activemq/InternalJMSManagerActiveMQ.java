@@ -203,6 +203,9 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
                 }
 
                 String selector = jmsSelectorUtil.getSelector(criteria);
+                if (StringUtils.isEmpty(selector)) {
+                    selector = "true";
+                }
                 try {
                     QueueViewMBean queue = getQueue(source);
                     CompositeData[] browse = queue.browse(selector);
