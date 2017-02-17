@@ -354,8 +354,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
         LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
         try {
-            this.payloadProfileValidator.validate(messaging, pmodeKey);
-            this.propertyProfileValidator.validate(messaging, pmodeKey);
+            payloadProfileValidator.validate(messaging, pmodeKey);
+            propertyProfileValidator.validate(messaging, pmodeKey);
         } catch (EbMS3Exception e) {
             e.setMshRole(MSHRole.RECEIVING);
             throw e;
