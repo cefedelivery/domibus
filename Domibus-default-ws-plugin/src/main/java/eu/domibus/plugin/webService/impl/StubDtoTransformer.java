@@ -194,8 +194,6 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
                 result.addPayload(extPartInfo.getHref(), extPartInfo.getPayloadDatahandler(), properties, extPartInfo.isInBody(), description, /*(partInfo.getSchema() != null) ? partInfo.getSchema().getLocation() :*/ null);
             }
         }
-        result.setFromRole(trim(messaging.getPartyInfo().getFrom().getRole()));
-        result.setToRole(trim(messaging.getPartyInfo().getTo().getRole()));
 
         if(messaging.getPartyInfo() != null && messaging.getPartyInfo().getFrom() != null) {
             PartyId partyId = messaging.getPartyInfo().getFrom().getPartyId();
