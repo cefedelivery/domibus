@@ -1,4 +1,4 @@
-package eu.domibus.ebms3.common.model;
+package eu.domibus.common.services;
 
 import eu.domibus.api.util.CollectionUtil;
 import eu.domibus.common.dao.MessagingDao;
