@@ -1,36 +1,38 @@
 package eu.domibus.plugin;
 
+import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.NotificationType;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.messaging.MessageNotFoundException;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import org.apache.activemq.command.ActiveMQMessage;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.jms.config.JmsListenerContainerFactory;
-import org.springframework.jms.core.JmsOperations;
 
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.QueueBrowser;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
 
 /**
- * @author venugar
+ * // TODO reach 70% coverage.
+ *
+ * @author Arun Venugopal
+ * @author Federico Martini
  * @since 3.3
  */
-
 @RunWith(JMockit.class)
 public class NotificationListenerServiceTest {
-
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(NotificationListenerServiceTest.class);
 
     private static final String TEST_FINAL_RECIPIENT = "TEST_FINAL_RECIPIENT1";
     private static final String TEST_FINAL_RECIPIENT2 = "ANOTHER_FINAL_RECIPIENT";
@@ -45,7 +47,7 @@ public class NotificationListenerServiceTest {
     private AuthUtils authUtils;
 
     @Injectable
-    private JmsOperations jmsTemplateNotify;
+    JMSManager jmsManager;
 
     @Injectable
     private JmsListenerContainerFactory internalJmsListenerContainerFactory;
@@ -60,39 +62,108 @@ public class NotificationListenerServiceTest {
     @Test
     public void testAddToListFromQueueHappyFlow(final @Injectable QueueBrowser queueBrowser) throws JMSException {
         mode = BackendConnector.Mode.PULL;
-        final Enumeration<Message> enumeration = generateTestInputEnumeration();
+
+        final List<JmsMessage> messages = generateTestMessages();
 
         new Expectations() {{
-            queueBrowser.getEnumeration();
-            result = enumeration;
+
+            domibusProperties.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
+            result = 5;
+
+            jmsManager.browseMessages(withAny(new String()));
+            result = messages;
 
         }};
 
-        Collection<String> result1 = new ArrayList<String>();
-        result1.addAll(objNotificationListenerService.listFromQueue(NotificationType.MESSAGE_RECEIVED, queueBrowser, TEST_FINAL_RECIPIENT, 5));
-        Assert.assertEquals(5, result1.size());
+        Collection<String> result = new ArrayList<String>();
+        result.addAll(objNotificationListenerService.browseQueue(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT));
+        Assert.assertEquals(5, result.size());
     }
 
     @Test
     public void testAddToListFromQueueMissingConfiguration(final @Injectable QueueBrowser queueBrowser) throws JMSException {
         mode = BackendConnector.Mode.PULL;
-        final Enumeration en = generateTestInputEnumeration();
+
+        final List<JmsMessage> messages = generateTestMessages();
 
         new Expectations() {{
-            queueBrowser.getEnumeration();
-            result = en;
+
+            domibusProperties.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
+            result = 500;
+
+            jmsManager.browseMessages(withAny(new String()));
+            result = messages;
 
         }};
 
-        /*Expected scenario when max pending messages configuration is not specified*/
-        Collection<String> result3 = new ArrayList<String>();
-        result3.addAll(objNotificationListenerService.listFromQueue(NotificationType.MESSAGE_RECEIVED, queueBrowser, TEST_FINAL_RECIPIENT, 0));
-        Assert.assertEquals(10, result3.size());
+        /* Expected scenario when max pending messages configuration is not specified */
+        Collection<String> result = new ArrayList<String>();
+        result.addAll(objNotificationListenerService.browseQueue(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT));
+        Assert.assertEquals(10, result.size());
     }
 
-    protected Enumeration<Message> generateTestInputEnumeration() throws JMSException, NullPointerException {
+    @Test
+    public void testRemoveFromPendingOk() throws Exception {
 
-        List<Message> testInputList = new ArrayList<>(12);
+        mode = BackendConnector.Mode.PULL;
+
+        final String messageId = "ID1";
+        final String queueName = "eDeliveryModule!DomibusNotifyBackendWebServiceQueue";
+
+        final List<JmsMessage> messages = generateTestMessages();
+
+        new Expectations() {{
+
+            objNotificationListenerService.getBackendNotificationQueue().getQueueName();
+            result = queueName;
+
+            jmsManager.consumeMessage(queueName, messageId);
+            result = messages.get(0);
+
+        }};
+
+        objNotificationListenerService.removeFromPending(messageId);
+
+        new Verifications() {{
+            objNotificationListenerService.getBackendNotificationQueue().getQueueName();
+            jmsManager.consumeMessage(queueName, messageId);
+        }};
+    }
+
+    @Test
+    public void removeFromPendingNOk() throws Exception {
+
+        mode = BackendConnector.Mode.PULL;
+
+        final String messageId = "ID1";
+        final String queueName = "eDeliveryModule!DomibusNotifyBackendWebServiceQueue";
+
+        new Expectations() {{
+
+            objNotificationListenerService.getBackendNotificationQueue().getQueueName();
+            result = queueName;
+
+            jmsManager.consumeMessage(queueName, messageId);
+            result = null;
+
+        }};
+
+        try {
+            objNotificationListenerService.removeFromPending(messageId);
+        } catch (MessageNotFoundException mnfEx) {
+            Assert.assertEquals(mnfEx.getMessage(), "No message with id [" + messageId + "] pending for download");
+        }
+
+        new Verifications() {{
+            objNotificationListenerService.getBackendNotificationQueue().getQueueName();
+            jmsManager.consumeMessage(queueName, messageId);
+        }};
+
+    }
+
+    private List<JmsMessage> generateTestMessages() throws JMSException {
+
+        List<JmsMessage> testInputList = new ArrayList<>(12);
 
         testInputList.add(generateTestMessage(NotificationType.MESSAGE_SEND_SUCCESS, TEST_FINAL_RECIPIENT, "ID1"));
         testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT2, "ID2"));
@@ -107,15 +178,14 @@ public class NotificationListenerServiceTest {
         testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT, "ID11"));
         testInputList.add(generateTestMessage(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT, "ID12"));
 
-        return Collections.enumeration(testInputList);
+        return testInputList;
     }
 
-    public Message generateTestMessage(NotificationType notificationType, String recipient, String messageid) throws JMSException {
-        Message message = new ActiveMQMessage();
-        message.setStringProperty(MessageConstants.NOTIFICATION_TYPE, notificationType.name());
-        message.setStringProperty((MessageConstants.FINAL_RECIPIENT), recipient);
-        message.setStringProperty((MessageConstants.MESSAGE_ID), messageid);
-
+    private JmsMessage generateTestMessage(NotificationType notificationType, String recipient, String messageid) throws JMSException {
+        JmsMessage message = new JmsMessage();
+        message.setProperty(MessageConstants.NOTIFICATION_TYPE, notificationType.name());
+        message.setProperty((MessageConstants.FINAL_RECIPIENT), recipient);
+        message.setProperty((MessageConstants.MESSAGE_ID), messageid);
         return message;
     }
 
