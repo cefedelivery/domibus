@@ -1,6 +1,7 @@
 package eu.domibus.plugin;
 
 import eu.domibus.common.ErrorResult;
+import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -63,6 +64,7 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     }
 
 
+
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public T downloadMessage(final String messageId, final T target) throws MessageNotFoundException {
@@ -82,12 +84,26 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
         return this.messageRetriever.getMessageStatus(messageId);
     }
 
-
     @Override
     public List<ErrorResult> getErrorsForMessage(final String messageId) {
         return new ArrayList<>(this.messageRetriever.getErrorsForMessage(messageId));
     }
 
+    /**
+     * @deprecated Since 3.2.2 this method is deprecated. Use {@link #messageReceiveFailed(MessageReceiveFailureEvent)}
+     * @param messageId the Id of the failed message
+     * @param ednpoint  the endpoint that tried to send the message or null if unknown
+     */
+    @Override
+    @Deprecated
+    public void messageReceiveFailed(String messageId, String ednpoint) {
+        throw new UnsupportedOperationException("Method [messageReceiveFailed(String messageId, String endpoint)] is deprecated");
+    }
+
+    @Override
+    public void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent) {
+        throw new UnsupportedOperationException("Plugins using " + Mode.PUSH.name() + " must implement this method");
+    }
 
     @Override
     public void deliverMessage(final String messageId) {

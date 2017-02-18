@@ -19,7 +19,15 @@ Domibus 3.3-RC1
 - DB: MySQL installation of Domibus database is set to have collation of 'UTF8_BIN' to make DB level string comparison (in SQLs) case sensitive. This will enable support for case sensitive message ids.
 - WS Plugin: the response list of ListPendingMessages operation can be limited using a new configuration property (domibus.listPendingMessages.maxCount).
 Domibus 3.2.2
-- Core: solved issue related to CXF attachment temp file leakage (for payloads over 200Mb).
+- Possibility to configure the limit of downloaded/not-downloaded messages for the retention worker
+- Fixed the notifications sent by the JMS plugin
+- Deprecated the method "void messageReceiveFailed(String messageId, String ednpoint)" from the BackendConnector interface and added a new method "void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent)"
+- Changed the default JMX password for WebLogic
+- Fixed the search of the JMS messages for WebLogic(for JMS messages having property with null values) and Tomcat(for JMS messages with no "Text" property)
+- Solved issue related to CXF attachment temp file leakage (for payloads over 200Mb).
+- New configuration properties added for ConnectionTimeout and ReceiveTimeout for connection between access points.
+- Fixed Domibus integration with SMP/SML
+- Fixed bug about the retention (downloaded and undownloaded) parameters. Downloading the message, its status will be set to DOWNLOADED.
 Domibus 3.2.1
 - JMX access to the JMS queues is secured
 - Force the usage of the apache commons IO library from the application

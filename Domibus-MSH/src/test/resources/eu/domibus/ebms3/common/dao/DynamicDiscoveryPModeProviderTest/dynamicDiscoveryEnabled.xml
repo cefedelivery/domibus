@@ -86,6 +86,19 @@
 				 binding="push"
 				 initiatorRole="defaultInitiatorRole"
 				 responderRole="defaultResponderRole">
+			<responderParties>
+				<responderParty name="self"/>
+			</responderParties>
+			<legs>
+				<leg name="testLegtestAction"/>
+			</legs>
+		</process>
+		<process name="testProcessNoResponder"
+				 agreement="agreementEmpty"
+				 mep="oneway"
+				 binding="push"
+				 initiatorRole="defaultInitiatorRole"
+				 responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="self"/>
 			</initiatorParties>

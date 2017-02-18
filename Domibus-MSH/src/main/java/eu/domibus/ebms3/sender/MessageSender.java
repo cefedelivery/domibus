@@ -114,7 +114,7 @@ public class MessageSender implements MessageListener {
 
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         try {
-            pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage);
+            pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);

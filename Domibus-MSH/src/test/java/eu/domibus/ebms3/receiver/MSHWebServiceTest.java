@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.common.ErrorCode;
+import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.MessagingDao;
@@ -189,9 +190,9 @@ public class MSHWebServiceTest {
             mshWebservice.checkPingMessage(messaging.getUserMessage());
             mshWebservice.checkDuplicate(messaging);
             mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
-            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+            backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
             mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
-            backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
+            backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), (ErrorResult) any);
             times = 0;
         }};
     }
@@ -238,10 +239,10 @@ public class MSHWebServiceTest {
             mshWebservice.checkDuplicate(messaging);
             mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
             times = 0;
-            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+            backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
             times = 0;
             mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
-            backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
+            backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), (ErrorResult) any);
             times = 0;
         }};
     }
@@ -288,10 +289,10 @@ public class MSHWebServiceTest {
             mshWebservice.checkDuplicate(messaging);
             mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
             times = 0;
-            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+            backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
             times = 0;
             mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
-            backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
+            backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), (ErrorResult) any);
             times = 0;
         }};
     }
@@ -326,7 +327,7 @@ public class MSHWebServiceTest {
             mshWebservice.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
             result = any;
 
-            backendNotificationService.notifyOfIncoming(withAny(userMessage), NotificationType.MESSAGE_RECEIVED);
+            backendNotificationService.notifyMessageReceived(withAny(userMessage));
             result = new SubmissionValidationException("Error while submitting the message!!");
 
             legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer();
@@ -341,10 +342,10 @@ public class MSHWebServiceTest {
         }
 
         new Verifications() {{
-            backendNotificationService.notifyOfIncoming(messaging.getUserMessage(), NotificationType.MESSAGE_RECEIVED);
+            backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
             mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
             times = 0;
-            backendNotificationService.notifyOfIncomingFailure(messaging.getUserMessage());
+            backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), (ErrorResult) any);
         }};
     }
 

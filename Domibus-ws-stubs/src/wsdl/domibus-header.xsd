@@ -47,8 +47,8 @@
 
     <xsd:complexType name="PartyInfo">
         <xsd:all>
-            <xsd:element name="From" type="tns:From"/>
-            <xsd:element name="To" type="tns:To"/>
+            <xsd:element name="From" type="tns:From" maxOccurs="1" minOccurs="1"/>
+            <xsd:element name="To" type="tns:To" maxOccurs="1" minOccurs="0"/>
         </xsd:all>
     </xsd:complexType>
 

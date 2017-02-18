@@ -933,7 +933,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Create the folder to storre the generated sql scripts-->
+            <!-- Create the folder to store the generated sql scripts-->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.7</version>

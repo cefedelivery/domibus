@@ -3,6 +3,7 @@ package eu.domibus.plugin;
 import eu.domibus.common.NotificationType;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.plugin.delegate.BackendConnectorDelegate;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -52,6 +53,9 @@ public class NotificationListenerServiceTest {
 
     @Injectable
     private Properties domibusProperties;
+
+    @Injectable
+    BackendConnectorDelegate backendConnectorDelegate;
 
     @Tested
     NotificationListenerService objNotificationListenerService;

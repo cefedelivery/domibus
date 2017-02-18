@@ -364,9 +364,6 @@ public class Submission {
      * @param toRole a string identifying the authorized role of the receiving Party
      */
     public void setToRole(final String toRole) {
-        if(!StringUtils.hasLength(toRole)) {
-            throw new IllegalArgumentException("to role must not be empty");
-        }
         this.toRole = toRole;
     }
 

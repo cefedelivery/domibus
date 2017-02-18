@@ -194,14 +194,21 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
                 result.addPayload(extPartInfo.getHref(), extPartInfo.getPayloadDatahandler(), properties, extPartInfo.isInBody(), description, /*(partInfo.getSchema() != null) ? partInfo.getSchema().getLocation() :*/ null);
             }
         }
-        result.setFromRole(trim(messaging.getPartyInfo().getFrom().getRole()));
-        result.setToRole(trim(messaging.getPartyInfo().getTo().getRole()));
 
-        PartyId partyId = messaging.getPartyInfo().getFrom().getPartyId();
-        result.addFromParty(trim(partyId.getValue()), trim(partyId.getType()));
-
-        partyId = messaging.getPartyInfo().getTo().getPartyId();
-        result.addToParty(trim(partyId.getValue()), trim(partyId.getType()));
+        if(messaging.getPartyInfo() != null && messaging.getPartyInfo().getFrom() != null) {
+            PartyId partyId = messaging.getPartyInfo().getFrom().getPartyId();
+            if(partyId != null) {
+                result.addFromParty(trim(partyId.getValue()), trim(partyId.getType()));
+            }
+            result.setFromRole(trim(messaging.getPartyInfo().getFrom().getRole()));
+        }
+        if(messaging.getPartyInfo() != null && messaging.getPartyInfo().getTo() != null) {
+            PartyId partyId = messaging.getPartyInfo().getTo().getPartyId();
+            if(partyId != null) {
+                result.addToParty(trim(partyId.getValue()), trim(partyId.getType()));
+            }
+            result.setToRole(trim(messaging.getPartyInfo().getTo().getRole()));
+        }
 
         if (messaging.getMessageProperties() != null) {
             for (final Property property : messaging.getMessageProperties().getProperty()) {

@@ -82,7 +82,6 @@
 
         <prop key="domibus.auth.unsecureLoginAllowed">true</prop>
 
-
     </util:properties>
 
     <!-- Mimetypes listed in this map will not be compressed (in outgoing messages)

@@ -1,7 +1,6 @@
 package eu.domibus.messaging.jms;
 
-import eu.domibus.api.regex.RegexUtil;
-import eu.domibus.messaging.jms.JMSDestinationHelperImpl;
+import eu.domibus.api.util.RegexUtil;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;

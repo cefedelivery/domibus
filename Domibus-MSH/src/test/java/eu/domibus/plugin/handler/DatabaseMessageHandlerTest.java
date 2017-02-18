@@ -198,7 +198,7 @@ public class DatabaseMessageHandlerTest {
 
             String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
-            pModeProvider.findPModeKeyForUserMessage(userMessage);
+            pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
             result = pModeKey;
 
             Party sender = new Party();
@@ -242,7 +242,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
-            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()));
@@ -268,7 +268,7 @@ public class DatabaseMessageHandlerTest {
 
             String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
-            pModeProvider.findPModeKeyForUserMessage(userMessage);
+            pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
             result = pModeKey;
 
             Party sender = new Party();
@@ -300,7 +300,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
-            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()));
@@ -337,7 +337,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             userMessageLogDao.getMessageStatus(MESS_ID);
             times = 0;
-            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
@@ -380,7 +380,7 @@ public class DatabaseMessageHandlerTest {
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
             times = 0;
-            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
@@ -408,7 +408,7 @@ public class DatabaseMessageHandlerTest {
 
             String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
-            pModeProvider.findPModeKeyForUserMessage(userMessage);
+            pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
             result = pModeKey;
 
             // Here the configuration of the access point is supposed to be BLUE!
@@ -437,7 +437,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
-            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
             backendMessageValidator.validateParties(withAny(new Party()), withAny(new Party()));
             backendMessageValidator.validateInitiatorParty(withAny(new Party()), withAny(new Party()));
             backendMessageValidator.validateResponderParty(withAny(new Party()), withAny(new Party()));
@@ -487,7 +487,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
-            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
             backendMessageValidator.validateParties(withAny(new Party()), withAny(new Party()));
 
             backendMessageValidator.validateInitiatorParty(withAny(new Party()), withAny(new Party()));
@@ -522,7 +522,7 @@ public class DatabaseMessageHandlerTest {
 
             String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
-            pModeProvider.findPModeKeyForUserMessage(userMessage);
+            pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
             result = pModeKey;
 
             Party sender = new Party();
@@ -560,7 +560,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
-            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             errorLogDao.create(withAny(new ErrorLogEntry()));
@@ -586,7 +586,7 @@ public class DatabaseMessageHandlerTest {
             userMessageLogDao.getMessageStatus(MESS_ID);
             result = MessageStatus.NOT_FOUND;
 
-            pModeProvider.findPModeKeyForUserMessage(userMessage);
+            pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
             result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "PMode could not be found. Are PModes configured in the database?", MESS_ID, null);
 
         }};
@@ -604,7 +604,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
-            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
             messagingService.storeMessage(withAny(new Messaging()));
@@ -693,7 +693,7 @@ public class DatabaseMessageHandlerTest {
 
             String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
-            pModeProvider.findPModeKeyForUserMessage(userMessage);
+            pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
             result = pModeKey;
 
             Party sender = new Party();
@@ -734,7 +734,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
-            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()));
+            pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()));

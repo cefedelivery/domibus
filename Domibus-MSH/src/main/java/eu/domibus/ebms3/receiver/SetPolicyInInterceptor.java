@@ -112,7 +112,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             //set the messageId in the MDC context
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
 
-            final String pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(messaging.getUserMessage()); // FIXME: This does not work for signalmessages
+            final String pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(messaging.getUserMessage(), MSHRole.RECEIVING); // FIXME: This does not work for signalmessages
             final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();
@@ -120,6 +120,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
 
             message.put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
+            //FIXME: Test!!!!
             message.getExchange().put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
             //FIXME: Consistent way! If properties are added to the exchange you will have access via PhaseInterceptorChain
 

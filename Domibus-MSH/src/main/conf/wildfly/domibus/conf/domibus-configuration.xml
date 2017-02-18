@@ -71,6 +71,11 @@
         <!--ReceiveTimeout - Specifies the amount of time, in milliseconds, that the consumer will wait for a response before it times out. 0 is infinite.-->
         <prop key="domibus.dispatcher.receiveTimeout">240000</prop>
 
+        <!-- Uncomment the following line if you need to tweak the maximum downloaded messages to be deleted by the retention worker -->
+        <!-- <prop key="message.retention.downloaded.max.delete">50</prop> -->
+        <!-- Uncomment the following line if you need to tweak the maximum not-downloaded messages to be deleted by the retention worker -->
+        <!-- <prop key="message.retention.not_downloaded.max.delete">50</prop> -->
+
         <!-- Enable the proxy settings only if you use a proxy -->
         <!--
         <prop key="domibus.proxy.enabled">true</prop>
