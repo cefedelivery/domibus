@@ -9,10 +9,11 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.security.util.AuthUtils;
-import eu.domibus.messaging.MessageConstants;
-import eu.domibus.plugin.NotificationListener;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
+import eu.domibus.plugin.NotificationListener;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,7 +31,11 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * @author Christian Koch, Stefan Mueller
+ * This service class is responsible for the retention and clean up of Domibus messages, including signal messages.
+ * Notice that only payloads data are really deleted.
+ *
+ * @author Christian Koch, Stefan Mueller, Federico Martini, Cosmin Baciu
+ * @since 3.0
  */
 @Service
 public class MessageRetentionService {
@@ -95,14 +100,15 @@ public class MessageRetentionService {
     public void deleteAllExpiredMessages() {
         final List<String> mpcs = pModeProvider.getMpcURIList();
         final Integer expiredDownloadedMessagesLimit = Integer.MAX_VALUE;
-        final Integer expiredNotDownloadedMessagesLimit = Integer.MAX_VALUE;;
+        final Integer expiredNotDownloadedMessagesLimit = Integer.MAX_VALUE;
+        ;
         for (final String mpc : mpcs) {
             deleteExpiredMessages(mpc, expiredDownloadedMessagesLimit, expiredNotDownloadedMessagesLimit);
         }
     }
 
     @Transactional
-    public  void deleteExpiredMessages(String mpc, Integer expiredDownloadedMessagesLimit, Integer expiredNotDownloadedMessagesLimit) {
+    public void deleteExpiredMessages(String mpc, Integer expiredDownloadedMessagesLimit, Integer expiredNotDownloadedMessagesLimit) {
         LOG.debug("Deleting expired messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]" +
                 " and expiredNotDownloadedMessagesLimit [" + expiredNotDownloadedMessagesLimit + "]");
         deleteExpiredDownloadedMessages(mpc, expiredDownloadedMessagesLimit);
@@ -112,7 +118,9 @@ public class MessageRetentionService {
     public void deleteExpiredDownloadedMessages(String mpc, Integer expiredDownloadedMessagesLimit) {
         LOG.debug("Deleting expired downloaded messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]");
         final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
-        if (messageRetentionDownloaded > 0) { // if -1 the messages will be kept indefinetely and if 0 it already has been deleted
+        String fileLocation = domibusProperties.getProperty("domibus.attachment.storage.location");
+        // If messageRetentionDownloaded is equal to -1, the messages will be kept indefinitely and, if 0 and no file system storage was used, they have already been deleted during download operation.
+        if (messageRetentionDownloaded > 0 || (StringUtils.isNotEmpty(fileLocation) && messageRetentionDownloaded >= 0)) {
             List<String> downloadedMessageIds = userMessageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);
             if (downloadedMessageIds != null && downloadedMessageIds.size() > 0) {
                 LOG.debug("Found [" + downloadedMessageIds.size() + "] downloaded messages to delete");

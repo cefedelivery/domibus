@@ -28,6 +28,7 @@ Domibus 3.2.2
 - New configuration properties added for ConnectionTimeout and ReceiveTimeout for connection between access points.
 - Fixed Domibus integration with SMP/SML
 - Fixed bug about the retention (downloaded and undownloaded) parameters. Downloading the message, its status will be set to DOWNLOADED.
+- Fixed message cannot be downloaded, when the message retention download is set to 0 and the file storage is used.
 Domibus 3.2.1
 - JMX access to the JMS queues is secured
 - Force the usage of the apache commons IO library from the application
