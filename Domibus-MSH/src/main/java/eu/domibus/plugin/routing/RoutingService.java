@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.plugin.routing;
 
 import eu.domibus.plugin.NotificationListener;
@@ -27,6 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -43,9 +25,13 @@ public class RoutingService {
 
     @Cacheable(value = "backendFilterCache")
     public List<BackendFilter> getBackendFilters() {
-        final List<BackendFilter> filters = backendFilterDao.findAll();
+        final List<BackendFilter> filters = new ArrayList<>(backendFilterDao.findAll());
         final List<NotificationListener> backendsTemp = new ArrayList<>(notificationListeners);
-        for (final BackendFilter filter : filters) {
+
+        final Iterator<BackendFilter> backendFilterIterator = filters.iterator();
+        while (backendFilterIterator.hasNext()) {
+            BackendFilter filter = backendFilterIterator.next();
+
             boolean filterExists = false;
             for (final NotificationListener backend : backendsTemp) {
                 if (filter.getBackendName().equals(backend.getBackendName())) {
@@ -55,9 +41,10 @@ public class RoutingService {
                 }
             }
             if (!filterExists) {
-                filters.remove(filter);
+                backendFilterIterator.remove();
             }
         }
+
         for (final NotificationListener backend : backendsTemp) {
             final BackendFilter filter = new BackendFilter();
             filter.setBackendName(backend.getBackendName());
