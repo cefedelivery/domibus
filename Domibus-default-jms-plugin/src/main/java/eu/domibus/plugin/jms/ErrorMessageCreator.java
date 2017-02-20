@@ -68,9 +68,9 @@ class ErrorMessageCreator implements MessageCreator {
                 message.setStringProperty(JMSMessageConstants.ERROR_CODE, errorResult.getErrorCode().getErrorCodeName());
             }
             message.setStringProperty(JMSMessageConstants.ERROR_DETAIL, errorResult.getErrorDetail());
+            message.setStringProperty(MESSAGE_ID, errorResult.getMessageInErrorId());
         }
 
-        message.setStringProperty(MESSAGE_ID, errorResult.getMessageInErrorId());
         return message;
     }
 }
