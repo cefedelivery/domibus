@@ -23,6 +23,11 @@ public class RoutingService {
     @Autowired
     private List<NotificationListener> notificationListeners;
 
+    /**
+     * Returns the configured backend filters present in the classpath
+     *
+     * @return The configured backend filters
+     */
     @Cacheable(value = "backendFilterCache")
     public List<BackendFilter> getBackendFilters() {
         final List<BackendFilter> filters = new ArrayList<>(backendFilterDao.findAll());
