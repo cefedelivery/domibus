@@ -38,7 +38,7 @@ public class DefaultBackendConnectorDelegate implements BackendConnectorDelegate
         }
     }
 
-    protected boolean isNewMessageReceiveFailureDefined(BackendConnector backendConnector) throws Exception {
+    protected boolean isNewMessageReceiveFailureDefined(BackendConnector backendConnector) throws ClassNotFoundException {
         final Class<?> pluginImplementationClass = classUtil.getTargetObjectClass(backendConnector);
         boolean isNewMessageReceiveFailureDefined = true;
         try {
