@@ -1,6 +1,7 @@
 package eu.domibus.util;
 
 import eu.domibus.api.util.ClassUtil;
+import org.springframework.aop.AopInvocationException;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class ClassUtilImpl implements ClassUtil {
             try {
                 return ((Advised) object).getTargetSource().getTarget().getClass().getCanonicalName();
             } catch (Exception e) {
-                throw new RuntimeException("Error getting the class canonical name", e);
+                throw new AopInvocationException("Error getting the class canonical name", e);
             }
         } else if (AopUtils.isCglibProxy(object)) {
             return ClassUtils.getUserClass(object).getCanonicalName();
