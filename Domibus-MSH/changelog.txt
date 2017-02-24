@@ -1,3 +1,7 @@
+Domibus 3.2.3
+- JMS monitoring: fixed the computation of the total number of messages in the queue for WebLogic
+- JMS monitoring: fixed the search of the JMS messages for WebLogic(for JMS messages having property with null values) and Tomcat(for JMS messages with no "Text" property)
+- Core: listPendingMessages and download operations behave correctly in case of a clustered installation.
 Domibus 3.2.2
 - Possibility to configure the limit of downloaded/not-downloaded messages for the retention worker
 - Fixed the notifications sent by the JMS plugin
