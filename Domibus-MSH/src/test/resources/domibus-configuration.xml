@@ -62,6 +62,12 @@
             .*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*
         </prop>
         <prop key="activeMQ.JMXURL">service:jmx:rmi:///jndi/rmi://localhost:2000/jmxrmi</prop>
+        <prop key="domibus.certificate.validation.enabled">true</prop>
+        <!-- regular expression used for identifying the internal queues in the Admin Page -->
+        <prop key="domibus.jms.internalQueue.expression">
+            .*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*
+        </prop>
+        <prop key="activeMQ.JMXURL">service:jmx:rmi:///jndi/rmi://localhost:2000/jmxrmi</prop>
 
         <!--Timeout values for communication between the access points -->
         <!--ConnectionTimeOut - Specifies the amount of time, in milliseconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite.-->
