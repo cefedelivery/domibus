@@ -62,45 +62,14 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         Map<String, InternalJMSDestination> destinationMap = new TreeMap<>();
 
         try {
-            //build the destinationMap every time in order to get up to date statistics
             for (ObjectName name : getQueueMap().values()) {
                 QueueViewMBean queueMbean = getQueue(name);
                 InternalJMSDestination internalJmsDestination = createInternalJmsDestination(name, queueMbean);
-                // TODO How to get the address or Fully Qualified name ?
                 destinationMap.put(queueMbean.getName(), internalJmsDestination);
             }
             return destinationMap;
         } catch (Exception e) {
             throw new InternalJMSException("Error getting destinations", e);
-        }
-    }
-
-
-    protected Map<String, List<InternalJMSDestination>> findDestinationsGroupedByName() {
-
-        Map<String, List<InternalJMSDestination>> destinationMap = new TreeMap<>();
-
-        try {
-            //build the destinationMap every time in order to get up to date statistics
-            for (ObjectName name : getQueueMap().values()) {
-                QueueViewMBean queueMbean = getQueue(name);
-                InternalJMSDestination internalJmsDestination = createInternalJmsDestination(name, queueMbean);
-                addDestination(destinationMap, internalJmsDestination);
-            }
-            return destinationMap;
-        } catch (Exception e) {
-            throw new InternalJMSException("Error getting destinations", e);
-        }
-    }
-
-    private void addDestination(Map<String, List<InternalJMSDestination>> destinationMap, InternalJMSDestination destination) {
-        if (destinationMap.containsKey(destination.getName())) {
-            List<InternalJMSDestination> destinations = destinationMap.get(destination.getName());
-            destinations.add(destination);
-        } else {
-            List<InternalJMSDestination> destinations = new ArrayList<>();
-            destinations.add(destination);
-            destinationMap.put(destination.getName(), destinations);
         }
     }
 
@@ -180,42 +149,40 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         if (StringUtils.isEmpty(source)) {
             throw new InternalJMSException("Source has not been specified");
         }
-        List<InternalJMSDestination> destinations = findDestinationsGroupedByName().get(source);
-        if (destinations == null || destinations.isEmpty()) {
+        InternalJMSDestination destination = findDestinationsGroupedByFQName().get(source);
+        if (destination == null) {
             throw new InternalJMSException("Could not find destination for [" + source + "]");
         }
         List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
-        for (InternalJMSDestination destination : destinations) {
-            String destinationType = destination.getType();
-            if (QUEUE.equals(destinationType)) {
-                Map<String, Object> criteria = new HashMap<String, Object>();
-                if (jmsType != null) {
-                    criteria.put("JMSType", jmsType);
-                }
-                if (fromDate != null) {
-                    criteria.put("JMSTimestamp_from", fromDate.getTime());
-                }
-                if (toDate != null) {
-                    criteria.put("JMSTimestamp_to", toDate.getTime());
-                }
-                if (selectorClause != null) {
-                    criteria.put("selectorClause", selectorClause);
-                }
-
-                String selector = jmsSelectorUtil.getSelector(criteria);
-                if (StringUtils.isEmpty(selector)) {
-                    selector = "true";
-                }
-                try {
-                    QueueViewMBean queue = getQueue(source);
-                    CompositeData[] browse = queue.browse(selector);
-                    internalJmsMessages.addAll(convertCompositeData(browse));
-                } catch (Exception e) {
-                    throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
-                }
-            } else {
-                throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
+        String destinationType = destination.getType();
+        if (QUEUE.equals(destinationType)) {
+            Map<String, Object> criteria = new HashMap<String, Object>();
+            if (jmsType != null) {
+                criteria.put("JMSType", jmsType);
             }
+            if (fromDate != null) {
+                criteria.put("JMSTimestamp_from", fromDate.getTime());
+            }
+            if (toDate != null) {
+                criteria.put("JMSTimestamp_to", toDate.getTime());
+            }
+            if (selectorClause != null) {
+                criteria.put("selectorClause", selectorClause);
+            }
+
+            String selector = jmsSelectorUtil.getSelector(criteria);
+            if (StringUtils.isEmpty(selector)) {
+                selector = "true";
+            }
+            try {
+                QueueViewMBean queue = getQueue(source);
+                CompositeData[] browse = queue.browse(selector);
+                internalJmsMessages.addAll(convertCompositeData(browse));
+            } catch (Exception e) {
+                throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
+            }
+        } else {
+            throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
         }
         return internalJmsMessages;
     }
