@@ -56,8 +56,12 @@
         <prop key="domibus.backend.jmsInQueue">domibus.backend.jms.inQueue</prop>
         <prop key="domibus.deployment.clustered">false</prop>
         <prop key="messageFactoryClass">com.sun.xml.internal.messaging.saaj.soap.ver1_2.SOAPMessageFactory1_2Impl</prop>
-        <prop key="activeMQ.JMXURL">service:jmx:rmi://localhost:1198/jndi/rmi://localhost:1199/jmxrmi</prop>
-        <prop key="domibus.attachment.storage.location">#{ systemProperties['storage.location']!= null?systemProperties['storage.location'] : '' }</prop>
+        <prop key="domibus.certificate.validation.enabled">true</prop>
+        <!-- regular expression used for identifying the internal queues in the Admin Page -->
+        <prop key="domibus.jms.internalQueue.expression">
+            .*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*
+        </prop>
+        <prop key="activeMQ.JMXURL">service:jmx:rmi:///jndi/rmi://localhost:2000/jmxrmi</prop>
 
         <!--Timeout values for communication between the access points -->
         <!--ConnectionTimeOut - Specifies the amount of time, in milliseconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite.-->
@@ -78,8 +82,7 @@
 
     </util:properties>
 
-    <!-- Mimetypes listed in this map will not be compressed (in outgoing messages)
-    even if compression is turned on for the given message. -->
+    <!-- Mime-Types listed in this map will not be compressed (in outgoing messages) even if compression is turned on for the given message. -->
     <util:list id="compressionBlacklist" value-type="java.lang.String">
         <value>application/vnd.etsi.asic-s+zip</value>
         <value>image/jpeg</value>
@@ -88,7 +91,7 @@
     <!-- message sender that is being executed by the senderworker -->
     <!--    <bean id="messageSender" class="eu.domibus.ebms3.sender.MessageSender"/>-->
 
-    <!-- quartz job for the  -->
+    <!-- quartz job for the retry  -->
     <bean id="retryWorkerJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="eu.domibus.ebms3.sender.SendRetryWorker"/>

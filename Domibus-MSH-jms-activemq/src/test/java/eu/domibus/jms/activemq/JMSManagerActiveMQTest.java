@@ -160,8 +160,7 @@ public class JMSManagerActiveMQTest {
 
     @Test
     public void testBrowseMessages(final @Injectable InternalJMSDestination selectedDestination,
-                                   final @Injectable List<InternalJMSDestination> selectedDestinations,
-                                   final @Injectable Map<String, List<InternalJMSDestination>> destinationMap,
+                                   final @Injectable Map<String, InternalJMSDestination> destinationsMap,
                                    final @Injectable QueueViewMBean queueMbean,
                                    final @Injectable CompositeData[] compositeDatas,
                                    final @Injectable List<InternalJmsMessage> messageSPIs) throws Exception {
@@ -172,11 +171,11 @@ public class JMSManagerActiveMQTest {
         final String selectorClause = "mytype = 'message'";
 
         new Expectations(jmsManagerActiveMQ) {{
-            jmsManagerActiveMQ.findDestinationsGroupedByName().get(source);
-            result = destinationMap;
+            jmsManagerActiveMQ.findDestinationsGroupedByFQName();
+            result = destinationsMap;
 
-            destinationMap.get(source);
-            result = selectedDestinations;
+            destinationsMap.get(source);
+            result = selectedDestination;
 
             selectedDestination.getType();
             result = "Queue";
