@@ -131,7 +131,7 @@
     </jaxws:client>
 
     <http-conf:conduit name="*.http-conduit">
-        <http-conf:client AllowChunking="false"/>
+        <http-conf:client AllowChunking="true"/>
     </http-conf:conduit>
 
 </beans>

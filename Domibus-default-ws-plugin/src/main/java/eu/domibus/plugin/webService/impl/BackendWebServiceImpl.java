@@ -110,7 +110,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                     this.copyPartProperties(payload, extendedPartInfo);
                     extendedPartInfo.setInBody(false);
                     LOG.debug("sendMessage - payload Content Type: " + payload.getContentType());
-                    extendedPartInfo.setPayloadDatahandler(new DataHandler(payload.getValue().getDataSource(), payload.getContentType() == null ? DEFAULT_MT : payload.getContentType()));
+                    extendedPartInfo.setPayloadDatahandler(payload.getValue());
+//                    extendedPartInfo.setPayloadDatahandler(new DataHandler(payload.getValue().getDataSource(), payload.getContentType() == null ? DEFAULT_MT : payload.getContentType()));
                     foundPayload = true;
                     break;
                 }
