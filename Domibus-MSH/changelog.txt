@@ -3,6 +3,8 @@ Domibus 3.3-RC1
 - Domibus uses 3 logs files: domibus.log, domibus-business.log and domibus-security.log
 - JMS monitoring: fixed the computation of the total number of messages in the queue for WebLogic
 - JMS monitoring: fixed the search of the JMS messages for WebLogic(for JMS messages having property with null values) and Tomcat(for JMS messages with no "Text" property)
+- JMS monitoring: extended the functionality for clustered installations.
+- Core: listPendingMessages and download operations behave correctly in case of a clustered installation.
 - Core: Spring services are always executing within a transaction even if there is no specific @Transactional annotation present
 - Core: Quartz integration with managed threads in WebLogic and WildFly
 - Core: during sendMessage operation, Domibus verifies that the parties roles are allowed (present in PMode) and different among them.
