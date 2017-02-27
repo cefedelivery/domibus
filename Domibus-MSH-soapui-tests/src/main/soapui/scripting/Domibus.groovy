@@ -2,7 +2,7 @@
  * Created by ghouiah on 16/09/2016.
  */
 
-package soapui.Domibus;
+package soapui.domibus;
 
 import groovy.sql.Sql;
 import java.sql.SQLException;
@@ -11,33 +11,21 @@ import java.sql.SQLException;
 
 class Domibus
 {
-    def messageExchange;
-    def context
-    def log;
-    def urlBlue=null;
-    def urlRed=null;
-    def driver=null
-    def sqlBlue=null;
-    def sqlRed=null;
+    def messageExchange=null;
+    def context=null;
+    def log=null;
     def sleepDelay=2000;
-    def database=null;
-    def user=null;
-    def password=null;
+	def sqlBlue;
+	def sqlRed;
 
-
-    // Constructor of the Domibus Class
-    Domibus(log,messageExchange,context,urlBlue,urlRed,driver,database,user,password) {
+	
+    // Short constructor of the Domibus Class
+    Domibus(log, messageExchange, context) {
         this.log = log
         this.messageExchange = messageExchange;
         this.context=context;
-        this.urlBlue=urlBlue;
-        this.urlRed=urlRed;
-        this.driver=driver;
-        this.database=context.expand( database );
-        this.user=context.expand( user );
-        this.password=context.expand( password );
-    }
-
+    }	
+	
     // Class destructor
     void finalize() {
         log.info "Test finished."
@@ -45,11 +33,24 @@ class Domibus
 
     // Simply open DB connection
     def openConnection(){
-        log.info(database)
-        if(database.toLowerCase()=="mysql"){
+		log.debug "Open DB connections"
+        
+		def databaseBlue=context.expand( '${#Project#databaseBlue}' );
+        def driverBlue=context.expand('${#Project#driverBlue}');
+        def urlBlue=context.expand('${#Project#jdbcUrlBlue}');
+        def blueDbUser=context.expand( '${#Project#blueDbUser}' );
+        def blueDbPassword=context.expand( '${#Project#blueDbPassword}' );
+        
+		def databaseRed=context.expand( '${#Project#databaseRed}' );
+        def driverRed=context.expand('${#Project#driverRed}');
+        def urlRed=context.expand('${#Project#jdbcUrlRed}');
+        def redDbUser=context.expand( '${#Project#redDbUser}' );
+        def redDbPassword=context.expand( '${#Project#redDbPassword}' );
+		
+        log.info("Open connection to DB: " + databaseBlue + " Url: " + urlBlue)
+       if(databaseBlue.toLowerCase() == "mysql" || databaseBlue.toLowerCase() == "oracle" ){
             try{
-                sqlBlue = Sql.newInstance(context.expand( urlBlue ), user, password, context.expand( driver ))
-                sqlRed = Sql.newInstance(context.expand( urlRed ), user, password, context.expand( driver ))
+                sqlBlue = Sql.newInstance(urlBlue, blueDbUser, blueDbPassword, driverBlue)
             }
             catch (SQLException ex){
                 assert 0,"SQLException occured: " + ex;
@@ -57,24 +58,38 @@ class Domibus
         }
         else{
             try{
-                sqlBlue = Sql.newInstance(context.expand( urlBlue ), context.expand( driver ))
-                sqlRed = Sql.newInstance(context.expand( urlRed ), context.expand( driver ))
+                sqlBlue = Sql.newInstance(urlBlue, driverBlue)
             }
             catch (SQLException ex)
             {
                 assert 0,"SQLException occured: " + ex;
             }
         }
-    }
-
-    def demo(){
-        sqlBlue.eachRow("Select * from TB_PAYLOAD"){
-            log.info(it.ID_PK);
+		
+		log.info("Open connection to DB: " + databaseRed + " Url: " + urlRed)
+		if(databaseRed.toLowerCase() == "mysql" || databaseRed.toLowerCase() == "oracle" ){
+            try{
+                sqlRed = Sql.newInstance(urlRed, redDbUser, redDbPassword, driverRed)
+            }
+            catch (SQLException ex){
+                assert 0,"SQLException occured: " + ex;
+            }
         }
+        else{
+            try{
+                sqlRed = Sql.newInstance(urlRed, driverRed)
+            }
+            catch (SQLException ex)
+            {
+                assert 0,"SQLException occured: " + ex;
+            }
+        }
+
     }
 
     // Close the DB connection opened previously
     def closeConnection(){
+		log.debug "DB connection would be closed"	
         if(sqlBlue){
             sqlBlue.connection.close();
             sqlBlue = null;
@@ -182,24 +197,25 @@ class Domibus
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Wait until status or timer expire
-    def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTime=null){
+    def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null){
         def messageID=null;
-        def waitMax=10000;
+        def waitMax=10_000;
         def numberAttempts=0;
         def maxNumberAttempts=4;
         def interval=1000;
         def messageStatus="INIT";
         def wait=false;
-
+		log.info "waitForStatus params: messageID: " + messageID + " RMSH: " + RMSH + " IDMes: " + IDMes + " bonusTimeForSender: " + bonusTimeForSender + " bonusTimeForReceiver: " + bonusTimeForReceiver
         if(IDMes!=null){
             messageID=IDMes;
         }
         else{
             messageID=findReturnedMessageID();
         }
-        log.info "messageID: " + messageID
-		if(bonusTime){
-            waitMax=500000;
+		
+		if(bonusTimeForSender){
+			log.info "Waiting time for Sender extended to 500 seconds"
+            waitMax=500_000;
         }
         openConnection();
         if(SMSH){
@@ -214,6 +230,7 @@ class Domibus
                     messageStatus=it.MESSAGE_STATUS;
                     numberAttempts=it.SEND_ATTEMPTS;
                 }
+				log.info "messageStatus="+messageStatus + " SMSH="+ SMSH
                 if((SMSH=="SEND_FAILURE")&&(messageStatus=="WAITING_FOR_RETRY")){
                     if(((maxNumberAttempts-numberAttempts)>0)&&(wait==false)){
                         wait=true;
@@ -223,10 +240,20 @@ class Domibus
                     }
                 }
             }
-            assert(messageStatus!="INIT"),"Error:waitForStatus: Message "+messageID+" is not present in the sender side."+messageStatus;
+			log.info "finished checking sender, messageStatus: " + messageStatus + " waitMax: " + waitMax  
+
+            assert(messageStatus!="INIT"),"Error:waitForStatus: Message "+messageID+" is not present in the sender side.";
             assert(messageStatus.toLowerCase()==SMSH.toLowerCase()),"Error:waitForStatus: Message in the sender side has status "+messageStatus+" instead of "+SMSH+".";
         }
-        waitMax=10000;
+        if (bonusTimeForReceiver) 
+		{
+			log.info "Waiting time for Receiver extended to 500 seconds"		
+			waitMax=500_000;
+		}
+		else 
+		{
+			waitMax=10_000;
+		}
         messageStatus="INIT";
         if(RMSH){
             while((messageStatus!=RMSH)&&(waitMax>0)){
@@ -235,118 +262,259 @@ class Domibus
                 sqlRed.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
                     messageStatus=it.MESSAGE_STATUS;
                 }
+				log.info "W:" + waitMax + " M:" + messageStatus
             }
+			log.info "finished checking receiver, messageStatus: " + messageStatus + " waitMax: " + waitMax 
             assert(messageStatus!="INIT"),"Error:waitForStatus: Message "+messageID+" is not present in the receiver side.";
             assert(messageStatus.toLowerCase()==RMSH.toLowerCase()),"Error:waitForStatus: Message in the receiver side has status "+messageStatus+" instead of "+RMSH+".";
         }
         closeConnection();
     }
+
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+
+	def executeListOfQueriesOnAllDB(String[] sqlQueriesList) {
+		executeListOfSqlQueries(sqlQueriesList,"BLUE");
+		executeListOfSqlQueries(sqlQueriesList,"RED");
+	}
+	
+	def executeListOfQueriesOnBlue(String[] sqlQueriesList) {
+		log.info "Executing SQL queries on sender/Blue";
+		executeListOfSqlQueries(sqlQueriesList,"BLUE");
+	}
+	
+	def executeListOfQueriesOnRed(String[] sqlQueriesList) {
+		log.info "Executing SQL queries on receiver/Red";		
+		executeListOfSqlQueries(sqlQueriesList,"RED");
+	}
+	
+	def executeListOfSqlQueries(String[] sqlQueriesList, String targetSchema) {
+		def connectionOpenedInsideMethod = false; 
+		if (!((sqlRed) && (sqlBlue))) {
+			log.debug "Method executed without connections open to the DB - try to open connection"
+			openConnection();
+			connectionOpenedInsideMethod = true;
+		}
+
+		def sqlDB = sqlRed;
+		switch (targetSchema) {
+			case "RED":
+				sqlDB = this.sqlRed
+				break
+			case "BLUE":
+				sqlDB = this.sqlBlue
+				break
+			default:
+				log.error "Not supported schema type: " + targetSchema
+				return
+		}
+
+		for (query in sqlQueriesList) {
+			log.info "Executing SQL query: " + query
+			sqlDB.execute query
+			}
+			
+		if (connectionOpenedInsideMethod) {
+			log.debug "Connection to DB opened during method execution - close openned connection"
+			closeConnection();
+		}				
+	}
+
+ // Clean all the messages from the DB
+    def cleanDatabaseAll(){
+		log.info "Clean all messgae related information from DB";
+        openConnection();
+		
+		
+		def sqlQueriesList = [
+		"delete from TB_RECEIPT_DATA",
+		"delete from TB_PROPERTY",
+		"delete from TB_PART_INFO",
+		"delete from TB_PARTY_ID",
+		//"delete from TB_PARTY_ID",
+		"delete from TB_MESSAGING",
+		"delete from TB_ERROR",
+		"delete from TB_USER_MESSAGE",
+		"delete from TB_SIGNAL_MESSAGE",
+		"delete from TB_RECEIPT",
+		"delete from TB_MESSAGE_INFO",
+		"delete from TB_MESSAGE_LOG"
+		] as String[];
+		
+		executeListOfQueriesOnAllDB(sqlQueriesList);
+		
+        closeConnection();
+    }
+	
+	// Clean single message identified by messageID starting with provided value
+	def cleanDBMessageIDStartsWith(String messageID){
+		cleanDBMessageID(messageID, true);
+		}
+		
+    // Clean single message identified by ID
+    def cleanDBMessageID(String messageID, boolean  messgaeIDStartWithProvidedValue = false){
+		log.info "Clean from DB information related to the message with ID: " + messageID
+          openConnection();
+
+		def messageIDCheck = "= '${messageID}'" //default comparison method use equal operator
+		if (messgaeIDStartWithProvidedValue) 
+			messageIDCheck = "like '${messageID}%'" //if cleanDBMessageIDStartsWith method was called change method for comparison
+		
+		def select_ID_PK = "select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID ${messageIDCheck}" //extracted as common part of queries bellow
+		def sqlQueriesList = [
+			"delete from TB_RECEIPT_DATA where RECEIPT_ID IN (select ID_PK from TB_RECEIPT where ID_PK IN(select receipt_ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (" + select_ID_PK + ")))",
+			"delete from TB_RECEIPT where ID_PK IN(select receipt_ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (" + select_ID_PK + "))",
+			"delete from TB_PROPERTY where MESSAGEPROPERTIES_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (" + select_ID_PK + "))",
+			"delete from TB_PROPERTY where PARTPROPERTIES_ID IN (select ID_PK from TB_PART_INFO where PAYLOADINFO_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (" + select_ID_PK + ")))",
+			"delete from TB_PART_INFO where PAYLOADINFO_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (" + select_ID_PK + "))",
+			"delete from TB_PARTY_ID where FROM_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (" + select_ID_PK + "))",
+			"delete from TB_PARTY_ID where TO_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (" + select_ID_PK + "))",
+			"delete from TB_MESSAGING where (SIGNAL_MESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (" + select_ID_PK + "))) OR (USER_MESSAGE_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (" + select_ID_PK + ")))",
+			"delete from TB_ERROR where SIGNALMESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (" + select_ID_PK + "))",
+			"delete from TB_USER_MESSAGE where messageInfo_ID_PK IN (" + select_ID_PK + ")",
+			"delete from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (" + select_ID_PK + " OR REF_TO_MESSAGE_ID " + messageIDCheck + ")",
+			"delete from TB_MESSAGE_INFO where MESSAGE_ID " + messageIDCheck + " OR REF_TO_MESSAGE_ID " + messageIDCheck + "",
+			"delete from TB_MESSAGE_LOG where MESSAGE_ID " + messageIDCheck + ""					
+		] as String[];
+		
+		executeListOfQueriesOnAllDB(sqlQueriesList);
+		
+        closeConnection();
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+
+// Static methods 
+
+	static def getStatusRetriveStatus(log, context, messageExchange) {
+		def outStatus=null;
+        def responseContent = messageExchange.getResponseContentAsXml() ;
+        def requestFile = new XmlSlurper().parseText(responseContent);
+        def allNodes = requestFile.depthFirst().each{
+            if(it.name()== "getMessageStatusResponse"){
+                outStatus=it.text();
+            }
+        }
+		assert (outStatus != null),"Error:getStatusRetriveStatus: Not able to return status from response message";
+		return outStatus
+	}
+
+
+	static def showPopUpForManualCheck(messagePrefix, log, testRunner) {
+		def message = messagePrefix + """
+
+		After the manual check of the expected result:
+		- Click 'Yes' when result is correct.
+		- Click 'No' when result is incorrect. 
+		- Click 'Cancel' to skip this check."""
+
+		def result=javax.swing.JOptionPane.showConfirmDialog( null,message); 
+		if(result == javax.swing.JOptionPane.YES_OPTION)
+			{
+				log.info "PASS MANUAL TEST STEP: Result as expected, continuing the test.";
+			}
+		else if(result == javax.swing.JOptionPane.NO_OPTION)
+			{
+				log.info "FAIL MANUAL TEST STEP: Manual check unsuccessful.";
+				testRunner.fail("Manual check indicated as unsuccessful by user.");
+			}
+		else if (result == javax.swing.JOptionPane.CANCEL_OPTION) 
+			{
+				log.info "SKIP MANUAL TEST STEP: Check skipped bu user.";
+			}
+	}
+
+	static def showPopUpForManualConfigurationChange(messagePrefix, log, testRunner) {
+		def message = messagePrefix + """
+
+		Did configuration was changed?
+		- Click 'Yes' when configuration was changed.
+		- Click 'No' when configuration was not changed, this test step would be marked as failed.
+		- Click 'Cancel' to skip this configuration change, the test would be continue from next test step."""
+
+		def result=javax.swing.JOptionPane.showConfirmDialog( null,message); 
+		if(result == javax.swing.JOptionPane.YES_OPTION)
+			{
+				log.info "User indicated configuration was changed as described in test step, continuing the test.";
+			}
+		else if(result == javax.swing.JOptionPane.NO_OPTION)
+			{
+				log.info "User indicated configuration wasn't changed, this test step would be marked as failed.";
+				testRunner.fail("User indicated configuration wasn't changed, this test step would be marked as failed.");
+			}
+		else if (result == javax.swing.JOptionPane.CANCEL_OPTION) 
+			{
+				log.info "This configuration changed was skipped, continue with next test step.";
+			}
+	}	
+
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Start Gateway
-    def startMSH(String side){
+    static def startMSH(String side, context, log){
         def outputCatcher = new StringBuffer();
         def errorCatcher = new StringBuffer();
         def pathS=context.expand( '${#Project#pathExeSender}' );
         def pathR=context.expand( '${#Project#pathExeReceiver}' );
         def proc=null;
-        if(side=="sender"){
+		
+		log.info "Trying to start the " + side.toUpperCase()
+        
+		if(side.toLowerCase()=="sender"){
             proc="cmd /c cd ${pathS} && startup.bat".execute();
         }
-        else{
-            proc="cmd /c cd ${pathR} && startup.bat".execute();
-        }
+        else
+		{		
+			if(side.toLowerCase()=="receiver")
+			{
+				proc="cmd /c cd ${pathR} && startup.bat".execute();
+			}
+			else
+			{			
+				assert (false) , "Incorect side";
+			}
+		}
         if(proc!=null){
             proc.consumeProcessOutput(outputCatcher, errorCatcher);
             proc.waitFor();
         }
-        assert((!errorCatcher)&&(proc!=null)),"Error:startMSH: Error while trying to start the MSH.";
-        sleep(35000);
+        assert((!errorCatcher)&&(proc!=null)), "Error:startMSH: Error while trying to start the MSH.";
+		
+        sleep(65_000);
+		log.info "--- DONE - " + side.toUpperCase() + " started ---" 
+		
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Stop Gateway
-    def stopMSH(String side){
+    static def stopMSH(String side, context, log){
         def outputCatcher = new StringBuffer();
         def errorCatcher = new StringBuffer();
         def proc=null;
         def pathS=context.expand( '${#Project#pathExeSender}' );
         def pathR=context.expand( '${#Project#pathExeReceiver}' );
-        if(side=="sender"){
+
+		log.info "Trying to start the " + side.toUpperCase()
+   		
+        if(side.toLowerCase()=="sender"){
             proc="cmd /c cd ${pathS} && shutdown.bat".execute();
         }
-        else{
+        else
+		{		
+			if(side.toLowerCase()=="receiver")
+			{
             proc="cmd /c cd ${pathR} && shutdown.bat".execute();
+			}
+			else
+			{			
+				assert (false) , "Incorect side";
+			}
         }
         if(proc!=null){
             proc.consumeProcessOutput(outputCatcher, errorCatcher);
             proc.waitFor();
         }
         assert((!errorCatcher)&&(proc!=null)),"Error:startMSH: Error while trying to stop the MSH.";
-        sleep(5000);
-    }
-//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-    // Clean all the messages from the DB
-    def cleanDatabaseAll(){
-        openConnection();
-		sqlBlue.execute "delete from TB_RECEIPT_DATA";	
-        sqlBlue.execute "delete from TB_PROPERTY";
-        sqlBlue.execute "delete from TB_PART_INFO";
-        sqlBlue.execute "delete from TB_PARTY_ID";
-        //sqlBlue.execute "delete from TB_PARTY_ID";
-        sqlBlue.execute "delete from TB_MESSAGING";
-        sqlBlue.execute "delete from TB_ERROR";
-        sqlBlue.execute "delete from TB_USER_MESSAGE";
-        sqlBlue.execute "delete from TB_SIGNAL_MESSAGE";
-		sqlBlue.execute "delete from TB_RECEIPT";
-        sqlBlue.execute "delete from TB_MESSAGE_INFO";
-        sqlBlue.execute "delete from TB_MESSAGE_LOG";
-		
-        sqlRed.execute "delete from TB_RECEIPT_DATA";
-        sqlRed.execute "delete from TB_PROPERTY";
-        sqlRed.execute "delete from TB_PART_INFO";
-        sqlRed.execute "delete from TB_PARTY_ID";
-        //sqlRed.execute "delete from TB_PARTY_ID";
-        sqlRed.execute "delete from TB_MESSAGING";
-        sqlRed.execute "delete from TB_ERROR";
-        sqlRed.execute "delete from TB_USER_MESSAGE";
-        sqlRed.execute "delete from TB_SIGNAL_MESSAGE";
-		sqlRed.execute "delete from TB_RECEIPT";
-        sqlRed.execute "delete from TB_MESSAGE_INFO";
-        sqlRed.execute "delete from TB_MESSAGE_LOG";
-        closeConnection();
-    }
-
-    // Clean single message identified by ID
-    def cleanDBMessageID(String messageID){
-        openConnection();
-        sqlBlue.execute "delete from TB_RECEIPT_DATA where RECEIPT_ID IN (select ID_PK from TB_RECEIPT where ID_PK IN(select receipt_ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})))";
-        sqlBlue.execute "delete from TB_RECEIPT where ID_PK IN(select receipt_ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
-        sqlBlue.execute "delete from TB_PROPERTY where MESSAGEPROPERTIES_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
-        sqlBlue.execute "delete from TB_PROPERTY where PARTPROPERTIES_ID IN (select ID_PK from TB_PART_INFO where PAYLOADINFO_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})))";
-        sqlBlue.execute "delete from TB_PART_INFO where PAYLOADINFO_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
-        sqlBlue.execute "delete from TB_PARTY_ID where FROM_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
-        sqlBlue.execute "delete from TB_PARTY_ID where TO_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
-        sqlBlue.execute "delete from TB_MESSAGING where (SIGNAL_MESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))) OR (USER_MESSAGE_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})))";
-        sqlBlue.execute "delete from TB_ERROR where SIGNALMESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
-        sqlBlue.execute "delete from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})";
-        sqlBlue.execute "delete from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where ((MESSAGE_ID = ${messageID}) OR (REF_TO_MESSAGE_ID = ${messageID})))";
-        sqlBlue.execute "delete from TB_MESSAGE_INFO where ((MESSAGE_ID = ${messageID}) OR (REF_TO_MESSAGE_ID = ${messageID}))";
-        sqlBlue.execute "delete from TB_MESSAGE_LOG where MESSAGE_ID = ${messageID}";
-		
-        sqlRed.execute "delete from TB_RECEIPT_DATA where RECEIPT_ID IN (select ID_PK from TB_RECEIPT where ID_PK IN(select receipt_ID_PK from TB_SIGNAL_message where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})))";
-        sqlRed.execute "delete from TB_RECEIPT where ID_PK IN(select receipt_ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
-        sqlRed.execute "delete from TB_PROPERTY where MESSAGEPROPERTIES_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
-        sqlRed.execute "delete from TB_PROPERTY where PARTPROPERTIES_ID IN (select ID_PK from TB_PART_INFO where PAYLOADINFO_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})))";
-        sqlRed.execute "delete from TB_PART_INFO where PAYLOADINFO_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
-        sqlRed.execute "delete from TB_PARTY_ID where FROM_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
-        sqlRed.execute "delete from TB_PARTY_ID where TO_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
-        sqlRed.execute "delete from TB_MESSAGING where (SIGNAL_MESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))) OR (USER_MESSAGE_ID IN (select ID_PK from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})))";
-        sqlRed.execute "delete from TB_ERROR where SIGNALMESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID}))";
-        sqlRed.execute "delete from TB_USER_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where MESSAGE_ID = ${messageID})";
-        sqlRed.execute "delete from TB_SIGNAL_MESSAGE where messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO where ((MESSAGE_ID = ${messageID}) OR (REF_TO_MESSAGE_ID = ${messageID})))";
-        sqlRed.execute "delete from TB_MESSAGE_INFO where ((MESSAGE_ID = ${messageID}) OR (REF_TO_MESSAGE_ID = ${messageID}))";
-        sqlRed.execute "delete from TB_MESSAGE_LOG where MESSAGE_ID = ${messageID}";
-        closeConnection();
-    }
-//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+        sleep(8000);
+		log.info "--- DONE - " + side.toUpperCase() + " stopped ---" 		
+    }	
+	
+	
 }
-
