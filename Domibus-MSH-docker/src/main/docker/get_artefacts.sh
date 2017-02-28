@@ -41,13 +41,15 @@ sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-red.xml
 curl -X POST -F pmode=@./domibus-gw-sample-pmode-blue.xml http://localhost:8180/domibus/home/uploadPmodeFile
 curl -X POST -F pmode=@./domibus-gw-sample-pmode-red.xml http://localhost:9080/domibus/home/uploadPmodeFile
 
-export MYSQL_CONNECTOR="mysql-connector-java-5.1.40"
+MYSQL_CONNECTOR="mysql-connector-java-5.1.40"
+
+echo $MYSQL_CONNECTOR
 
 sudo apt-get install -y wget
 sudo apt-get install -y unzip
 sudo wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
     && sudo unzip -o $MYSQL_CONNECTOR.zip
 
-sudo cp ./$MYSQL_CONNECTOR-bin.jar ./src/main/soapui/lib
+sudo cp $MYSQL_CONNECTOR/$MYSQL_CONNECTOR-bin.jar ./src/main/soapui/lib
 
 mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
