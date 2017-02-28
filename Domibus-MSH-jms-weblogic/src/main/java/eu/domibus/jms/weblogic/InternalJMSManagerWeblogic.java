@@ -213,6 +213,11 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return result;
     }
 
+    private String removeJmsModule(String destination) {
+        String destName = StringUtils.substringAfter(destination, "!");
+        return (destName.equals("")) ? destination : destName;
+    }
+
     protected Map<String, ObjectName> getQueueMap(MBeanServerConnection mbsc) throws IOException, AttributeNotFoundException, InstanceNotFoundException, MBeanException,
             ReflectionException {
         if (queueMap != null) {
@@ -284,14 +289,14 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     @Override
     public void deleteMessages(String source, String[] messageIds) {
         String selector = jmsSelectorUtil.getSelector(messageIds);
-        int n = deleteMessages(getMessageDestinationName(source), selector);
+        int n = deleteMessages(getMessageDestinationName(removeJmsModule(source)), selector);
         LOG.debug(n + " messages have been successfully deleted from [" + source + "]");
     }
 
     @Override
     public InternalJmsMessage getMessage(String source, String messageId) {
         InternalJmsMessage internalJmsMessage = null;
-        for (InternalJMSDestination internalJmsDestination : getInternalJMSDestinations(source)) {
+        for (InternalJMSDestination internalJmsDestination : getInternalJMSDestinations(removeJmsModule(source))) {
             try {
                 ObjectName destination = internalJmsDestination.getProperty(PROPERTY_OBJECT_NAME);
                 internalJmsMessage = getMessageFromDestination(destination, messageId);
@@ -420,14 +425,14 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     @Override
     public List<InternalJmsMessage> browseMessages(String source) {
-        return browseMessages(source, null, null, null, null);
+        return browseMessages(removeJmsModule(source), null, null, null, null);
     }
 
     @Override
     public List<InternalJmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
 
         List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
-        InternalJMSDestination destination = getInternalJMSDestination(source);
+        InternalJMSDestination destination = getInternalJMSDestination(removeJmsModule(source));
         String destinationType = destination.getType();
         if (QUEUE.equals(destinationType)) {
             Map<String, Object> criteria = new HashMap<String, Object>();
@@ -479,8 +484,8 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     @Override
     public void moveMessages(String sourceFrom, String sourceTo, String[] messageIds) {
 
-        ObjectName fromDestination = getMessageDestinationName(sourceFrom);
-        ObjectName toDestination = getMessageDestinationName(sourceTo);
+        ObjectName fromDestination = getMessageDestinationName(removeJmsModule(sourceFrom));
+        ObjectName toDestination = getMessageDestinationName(removeJmsModule(sourceTo));
         String selector = jmsSelectorUtil.getSelector(messageIds);
         int n = moveMessages(fromDestination, toDestination, selector);
         LOG.debug(n + " messages have been successfully moved to [" + sourceTo + "]");
@@ -513,7 +518,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         InternalJmsMessage intJmsMsg = null;
         String selector = "MESSAGE_ID='" + customMessageId + "'";
         try {
-            ObjectName destinationName = getMessageDestinationName(source);
+            ObjectName destinationName = getMessageDestinationName(removeJmsModule(source));
             List<InternalJmsMessage> messages = getMessagesFromDestination(destinationName, selector);
             if (!messages.isEmpty()) {
                 intJmsMsg = messages.get(0);

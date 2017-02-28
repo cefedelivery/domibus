@@ -133,29 +133,31 @@ public class NotificationListenerService implements MessageListener, JmsListener
         final int intMaxPendingMessagesRetrieveCount = Integer.parseInt(strMaxPendingMessagesRetrieveCount);
         LOG.debug("maxPendingMessagesRetrieveCount:" + intMaxPendingMessagesRetrieveCount);
 
+        List<JmsMessage> messages;
         try {
-            List<JmsMessage> messages = jmsManager.browseMessages(backendNotificationQueue.getQueueName());
-
-            int countOfMessagesIncluded = 0;
-            for (JmsMessage message : messages) {
-                if (notificationType.name().equals(message.getCustomStringProperty(MessageConstants.NOTIFICATION_TYPE))) {
-                    if (finalRecipient == null || (StringUtils.equals(finalRecipient, message.getStringProperty(MessageConstants.FINAL_RECIPIENT)))) {
-                        String messageId = message.getCustomStringProperty(MessageConstants.MESSAGE_ID);
-                        result.add(messageId);
-                        countOfMessagesIncluded++;
-                        LOG.debug("Added MessageId [" + messageId + "]");
-                        if ((intMaxPendingMessagesRetrieveCount != 0) && (countOfMessagesIncluded >= intMaxPendingMessagesRetrieveCount)) {
-                            LOG.info("Limit of pending messages to return has been reached [" + countOfMessagesIncluded + "]");
-                            break;
-                        }
-                    }
-                }
-            }
+            messages = jmsManager.browseMessages(backendNotificationQueue.getQueueName());
         } catch (JMSException jmsEx) {
             LOG.error("Error trying to read the queue name", jmsEx);
             // TODO to be changed with something like the new DomibusCoreException
             throw new RuntimeException("Queue name error", jmsEx.getCause());
         }
+
+        int countOfMessagesIncluded = 0;
+        for (JmsMessage message : messages) {
+            if (notificationType.name().equals(message.getCustomStringProperty(MessageConstants.NOTIFICATION_TYPE))) {
+                if (finalRecipient == null || (StringUtils.equals(finalRecipient, message.getStringProperty(MessageConstants.FINAL_RECIPIENT)))) {
+                    String messageId = message.getCustomStringProperty(MessageConstants.MESSAGE_ID);
+                    result.add(messageId);
+                    countOfMessagesIncluded++;
+                    LOG.debug("Added MessageId [" + messageId + "]");
+                    if ((intMaxPendingMessagesRetrieveCount != 0) && (countOfMessagesIncluded >= intMaxPendingMessagesRetrieveCount)) {
+                        LOG.info("Limit of pending messages to return has been reached [" + countOfMessagesIncluded + "]");
+                        break;
+                    }
+                }
+            }
+        }
+
         return result;
     }
 
@@ -171,19 +173,22 @@ public class NotificationListenerService implements MessageListener, JmsListener
             return;
         }
 
+        String queueName;
         try {
-            String queueName = backendNotificationQueue.getQueueName();
-            JmsMessage message = jmsManager.consumeMessage(queueName, messageId);
-            if (message == null) {
-                LOG.businessError(DomibusMessageCode.BUS_MSG_NOT_FOUND, messageId);
-                throw new MessageNotFoundException("No message with id [" + messageId + "] pending for download");
-            }
-            LOG.businessInfo(DomibusMessageCode.BUS_MSG_CONSUMED, messageId, queueName);
+            queueName = backendNotificationQueue.getQueueName();
         } catch (JMSException jmsEx) {
             LOG.error("Error trying to get the queue name", jmsEx);
             // TODO to be changed with something like the new DomibusCoreException
             throw new RuntimeException("Queue name error", jmsEx.getCause());
         }
+
+        JmsMessage message = jmsManager.consumeMessage(queueName, messageId);
+        if (message == null) {
+            LOG.businessError(DomibusMessageCode.BUS_MSG_NOT_FOUND, messageId);
+            throw new MessageNotFoundException("No message with id [" + messageId + "] pending for download");
+        }
+        LOG.businessInfo(DomibusMessageCode.BUS_MSG_CONSUMED, messageId, queueName);
+
     }
 
 
