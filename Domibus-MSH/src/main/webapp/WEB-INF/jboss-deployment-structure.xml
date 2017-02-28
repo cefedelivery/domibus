@@ -11,7 +11,7 @@
             <module name="javax.xml.ws.api"/>
             <module name="javax.jms.api"/>
             <module name="com.sun.xml.messaging.saaj"/>
-            <module name="org.apache.xalan"/>
+            <!-- <module name="org.apache.xalan"/>-->
 
             <system export="true">
                 <paths>

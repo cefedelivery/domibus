@@ -46,19 +46,19 @@ public class JMSManagerImpl implements JMSManager {
 
     @Override
     public JmsMessage getMessage(String source, String messageId) {
-        InternalJmsMessage internalJmsMessage = internalJmsManager.getMessage(removeJmsModule(source), messageId);
+        InternalJmsMessage internalJmsMessage = internalJmsManager.getMessage(source, messageId);
         return jmsMessageMapper.convert(internalJmsMessage);
     }
 
     @Override
     public List<JmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selector) {
-        List<InternalJmsMessage> messagesSPI = internalJmsManager.browseMessages(removeJmsModule(source), jmsType, fromDate, toDate, selector);
+        List<InternalJmsMessage> messagesSPI = internalJmsManager.browseMessages(source, jmsType, fromDate, toDate, selector);
         return jmsMessageMapper.convert(messagesSPI);
     }
 
     @Override
     public List<JmsMessage> browseMessages(String source) {
-        List<InternalJmsMessage> messagesSPI = internalJmsManager.browseMessages(removeJmsModule(source));
+        List<InternalJmsMessage> messagesSPI = internalJmsManager.browseMessages(source);
         return jmsMessageMapper.convert(messagesSPI);
     }
 
@@ -82,17 +82,17 @@ public class JMSManagerImpl implements JMSManager {
 
     @Override
     public void deleteMessages(String source, String[] messageIds) {
-        internalJmsManager.deleteMessages(removeJmsModule(source), messageIds);
+        internalJmsManager.deleteMessages(source, messageIds);
     }
 
     @Override
     public void moveMessages(String source, String destination, String[] messageIds) {
-        internalJmsManager.moveMessages(removeJmsModule(source), destination, messageIds);
+        internalJmsManager.moveMessages(source, destination, messageIds);
     }
 
     @Override
     public JmsMessage consumeMessage(String source, String messageId) {
-        InternalJmsMessage internalJmsMessage = internalJmsManager.consumeMessage(removeJmsModule(source), messageId);
+        InternalJmsMessage internalJmsMessage = internalJmsManager.consumeMessage(source, messageId);
         return jmsMessageMapper.convert(internalJmsMessage);
     }
 
@@ -100,5 +100,4 @@ public class JMSManagerImpl implements JMSManager {
         String destName = StringUtils.substringAfter(destination, "!");
         return (destName.equals("")) ? destination : destName;
     }
-
 }
