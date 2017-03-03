@@ -52,7 +52,7 @@
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
                     <testSuite>PASSING TCs - Web Service Submission - Auto for Bamboo</testSuite>
-                    <!--<testCase>Dom118-Submit message-Data-AgreementRefId-Value</testCase>-->
+                    <testCase>Dom001-Submit Message-Basic Flow</testCase>
                     <projectProperties>
                         <value>localUrl=http://localhost:8180</value>
                         <value>remoteUrl=http://localhost:9080</value>
