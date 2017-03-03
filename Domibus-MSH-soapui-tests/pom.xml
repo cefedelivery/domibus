@@ -52,7 +52,7 @@
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
                     <testSuite>PASSING TCs - Web Service Submission - Auto for Bamboo</testSuite>
-                    <testCase>Dom002-Submit Message-Basic Flow-Message with ID</testCase>
+                    <!--<testCase>Dom002-Submit Message-Basic Flow-Message with ID</testCase>-->
                     <projectProperties>
                         <value>localUrl=http://localhost:8180/domibus</value>
                         <value>remoteUrl=http://localhost:9080/domibus</value>
@@ -112,7 +112,6 @@
                         <artifactId>poi</artifactId>
                         <version>3.15</version>
                     </dependency>
-
                     <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
                     <dependency>
                         <groupId>org.apache.poi</groupId>
@@ -125,7 +124,6 @@
                         <artifactId>poi-ooxml-schemas</artifactId>
                         <version>3.15</version>
                     </dependency>
-
                 </dependencies>
             </plugin>
         </plugins>
