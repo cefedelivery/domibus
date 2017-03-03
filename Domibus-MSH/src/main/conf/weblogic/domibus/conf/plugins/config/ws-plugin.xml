@@ -9,17 +9,18 @@
 						   http://www.springframework.org/schema/beans/spring-beans.xsd
 						   http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
-    <!-- JMS ConnectionFactory to use in a Weblogic cluster. Adjust the URL according to the environment! -->
+    <!-- Uncomment this in case of a clustered environment -->
     <!-- <jee:jndi-lookup id="notifyBackendWebServiceQueue"
                      jndi-name="jms/domibus.notification.webservice"
                      cache="true"
                      resource-ref="true"
                      lookup-on-startup="false">
         <jee:environment>
-            java.naming.provider.url=t3://localhost:7003,localhost:7004
+            java.naming.provider.url=${domibus.deployment.cluster.url}
         </jee:environment>
     </jee:jndi-lookup> -->
 
+    <!-- Comment this in case of a clustered environment -->
     <bean id="notifyBackendWebServiceQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.notification.webservice"/>
     </bean>
