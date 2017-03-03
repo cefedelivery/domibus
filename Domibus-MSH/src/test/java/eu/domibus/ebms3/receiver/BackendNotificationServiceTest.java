@@ -30,11 +30,7 @@ import org.junit.runner.RunWith;
 import org.springframework.context.ApplicationContext;
 
 import javax.jms.Queue;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by baciuco on 08/08/2016.
@@ -209,7 +205,9 @@ public class BackendNotificationServiceTest {
     public void testNotifyWithConfiguredNotificationListener(
             @Injectable final NotificationListener notificationListener,
             @Injectable final Queue queue) throws Exception {
+
         final String backendName = "customPlugin";
+
         new Expectations(backendNotificationService) {{
             backendNotificationService.getNotificationListener(backendName);
             result = notificationListener;
