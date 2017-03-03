@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.context.ApplicationContext;
-import org.springframework.jms.core.JmsOperations;
 
 import javax.jms.Queue;
 import java.util.ArrayList;
@@ -42,9 +41,6 @@ import java.util.Map;
  */
 @RunWith(JMockit.class)
 public class BackendNotificationServiceTest {
-
-    @Injectable
-    JmsOperations jmsTemplateNotify;
 
     @Injectable
     JMSManager jmsManager;
@@ -205,7 +201,6 @@ public class BackendNotificationServiceTest {
 
         new Verifications() {{
             jmsManager.sendMessageToQueue(withAny(new JmsMessage()), withAny(queue));
-//            jmsTemplateNotify.send(withAny(queue), withAny(new NotifyMessageCreator("", NotificationType.MESSAGE_RECEIVED)));
             times = 0;
         }};
     }
@@ -230,7 +225,6 @@ public class BackendNotificationServiceTest {
         new Verifications() {{
             JmsMessage jmsMessage = null;
             jmsManager.sendMessageToQueue(jmsMessage = withCapture(), queue);
-//            jmsTemplateNotify.send(queue, jmsMessage = withCapture());
             times = 1;
 
             Assert.assertEquals(jmsMessage.getProperty(MessageConstants.MESSAGE_ID), messageId);

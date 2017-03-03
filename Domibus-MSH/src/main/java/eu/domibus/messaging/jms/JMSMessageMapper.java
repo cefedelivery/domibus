@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * // TODO Documentation
  * @author Cosmin Baciu
  * @since 3.2
  */
@@ -25,6 +26,7 @@ public class JMSMessageMapper {
     }
 
     public JmsMessage convert(InternalJmsMessage message) {
+        if (message == null) return null;
         JmsMessage result = new JmsMessage();
         result.setId(message.getId());
         result.setContent(message.getContent());

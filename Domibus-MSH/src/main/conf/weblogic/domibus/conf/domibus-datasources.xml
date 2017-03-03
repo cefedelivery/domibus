@@ -1,35 +1,26 @@
-<!--
-  ~ Copyright 2015 e-CODEX Project
-  ~
-  ~ Licensed under the EUPL, Version 1.1 or – as soon they
-  ~ will be approved by the European Commission - subsequent
-  ~ versions of the EUPL (the "Licence");
-  ~ You may not use this work except in compliance with the
-  ~ Licence.
-  ~ You may obtain a copy of the Licence at:
-  ~ http://ec.europa.eu/idabc/eupl5
-  ~ Unless required by applicable law or agreed to in
-  ~ writing, software distributed under the Licence is
-  ~ distributed on an "AS IS" basis,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  ~ express or implied.
-  ~ See the Licence for the specific language governing
-  ~ permissions and limitations under the Licence.
-  -->
-
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:jee="http://www.springframework.org/schema/jee"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans.xsd
-	http://www.springframework.org/schema/jee 
-    http://www.springframework.org/schema/jee/spring-jee.xsd">
+    http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <import resource="file:///${domibus.config.location}/domibus-transactions.xml"/>
 
-    <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
-    <jee:jndi-lookup id="domibusJMS-XAConnectionFactory" jndi-name="jms/ConnectionFactory"/>
+    <!-- JMS ConnectionFactory to be used in case of a clustered environment -->
+    <!-- <jee:jndi-lookup id="domibusJMS-XAConnectionFactory"
+                     jndi-name="jms/ConnectionFactory"
+                     cache="true"
+                     resource-ref="true"
+                     lookup-on-startup="false"
+                     expected-type="javax.jms.ConnectionFactory">
+        <jee:environment>
+            java.naming.provider.url=${domibus.deployment.cluster.url}
+        </jee:environment>
+    </jee:jndi-lookup>
+    -->
 
+    <!-- JMS ConnectionFactory to be used in case of single instance environment -->
+    <jee:jndi-lookup id="domibusJMS-XAConnectionFactory" jndi-name="jms/ConnectionFactory"/>
 
     <bean id="sendMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.dispatch.queue"/>
@@ -86,8 +77,7 @@
 
     <bean id="internalJmsListenerContainerFactory"
           class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
-        <property name="connectionFactory"
-                  ref="domibusJMS-XAConnectionFactory"/>
+        <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
         <property name="transactionManager" ref="transactionManager"/>
         <property name="concurrency" value="3-10"/>
         <property name="sessionTransacted" value="true"/>
