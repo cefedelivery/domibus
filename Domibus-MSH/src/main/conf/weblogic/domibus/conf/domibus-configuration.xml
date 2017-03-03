@@ -55,6 +55,8 @@
         <prop key="domibus.backend.jmsInQueue">jms/domibus.backend.jms.inQueue</prop>
 	    <prop key="domibus.backend.etrustexInQueue">jms/domibus.backend.etrustex.inQueue</prop>
         <prop key="domibus.deployment.clustered">false</prop>
+        <!-- In case of clustered environment, uncomment and adjust the value
+        <prop key="domibus.deployment.cluster.url">t3://localhost:7003,localhost:7004</prop> -->
         <prop key="messageFactoryClass">com.sun.xml.internal.messaging.saaj.soap.ver1_2.SOAPMessageFactory1_2Impl</prop>
         <prop key="domibus.certificate.validation.enabled">true</prop>
         <!-- regular expression used for identifying the internal queues in the Admin Page -->

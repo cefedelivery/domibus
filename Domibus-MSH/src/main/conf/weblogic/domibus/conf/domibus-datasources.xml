@@ -1,11 +1,12 @@
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jee="http://www.springframework.org/schema/jee"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <import resource="file:///${domibus.config.location}/domibus-transactions.xml"/>
 
-    <!-- JMS ConnectionFactory to use in a Weblogic cluster. Adjust the URL according to the environment! -->
+    <!-- JMS ConnectionFactory to be used in case of a clustered environment -->
     <!-- <jee:jndi-lookup id="domibusJMS-XAConnectionFactory"
                      jndi-name="jms/ConnectionFactory"
                      cache="true"
@@ -13,14 +14,13 @@
                      lookup-on-startup="false"
                      expected-type="javax.jms.ConnectionFactory">
         <jee:environment>
-            java.naming.provider.url=t3://localhost:7003,localhost:7004
+            java.naming.provider.url=${domibus.deployment.cluster.url}
         </jee:environment>
     </jee:jndi-lookup>
     -->
 
-    <bean id="notifyBackendWebServiceQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
-        <property name="jndiName" value="jms/domibus.notification.webservice"/>
-    </bean>
+    <!-- JMS ConnectionFactory to be used in case of single instance environment -->
+    <jee:jndi-lookup id="domibusJMS-XAConnectionFactory" jndi-name="jms/ConnectionFactory"/>
 
     <bean id="sendMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.dispatch.queue"/>
