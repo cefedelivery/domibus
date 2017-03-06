@@ -1,46 +1,41 @@
-<!--
-  ~ Copyright 2015 e-CODEX Project
-  ~
-  ~ Licensed under the EUPL, Version 1.1 or – as soon they
-  ~ will be approved by the European Commission - subsequent
-  ~ versions of the EUPL (the "Licence");
-  ~ You may not use this work except in compliance with the
-  ~ Licence.
-  ~ You may obtain a copy of the Licence at:
-  ~ http://ec.europa.eu/idabc/eupl5
-  ~ Unless required by applicable law or agreed to in
-  ~ writing, software distributed under the Licence is
-  ~ distributed on an "AS IS" basis,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  ~ express or implied.
-  ~ See the Licence for the specific language governing
-  ~ permissions and limitations under the Licence.
-  -->
-
 <beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xmlns="http://www.springframework.org/schema/security"
              xsi:schemaLocation="http://www.springframework.org/schema/beans
-	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-	http://www.springframework.org/schema/security
-	http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+                                 http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+                                 http://www.springframework.org/schema/security
+                                 http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
     <http auto-config="true" pattern="/services/**">
     </http>
 
-    <http auto-config="true" authentication-manager-ref="authenticationManagerForAdminConsole">
-        <intercept-url pattern="/home**" access="ROLE_USER"/>
-        <intercept-url pattern="/home/messagelog**" access="ROLE_USER"/>
-        <intercept-url pattern="/home/errorlog**" access="ROLE_USER"/>
-        <intercept-url pattern="/home/messagefilter**" access="ROLE_USER"/>
-        <intercept-url pattern="/home/updatepmode**" access="ROLE_ADMIN"/>
-        <logout logout-success-url="/home"/>
+    <http auto-config="false"
+          use-expressions="true"
+          entry-point-ref="http403ForbiddenEntryPoint"
+          authentication-manager-ref="authenticationManagerForAdminConsole">
+
+        <intercept-url pattern="/api/authenticate" access="permitAll" />
+        <intercept-url pattern="/api/logout" access="permitAll" />
+        <intercept-url pattern="/api/domibusinfo" access="permitAll" />
+        <intercept-url pattern="/" access="permitAll" />
+        <intercept-url pattern="/api/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')" />
+
+        <!-- Enable CSRF protection -->
+        <csrf request-matcher-ref="csrfURLMatcher" token-repository-ref="tokenRepository"/>
 
         <headers>
             <frame-options policy="DENY" />
             <content-type-options />
             <xss-protection enabled="true" />
         </headers>
-
     </http>
+
+    <beans:bean id="tokenRepository" class="org.springframework.security.web.csrf.CookieCsrfTokenRepository">
+        <beans:property name="cookieHttpOnly" value="false"/>
+    </beans:bean>
+    <beans:bean id="csrfURLMatcher" class="eu.domibus.web.matcher.URLCsrfMatcher">
+        <beans:property name="url" value="/api/authenticate"/>
+    </beans:bean>
+
+    <beans:bean id="http403ForbiddenEntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"/>
 </beans:beans>

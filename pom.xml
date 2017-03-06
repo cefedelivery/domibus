@@ -35,7 +35,7 @@
     <properties>
         <cxf.version>3.1.7</cxf.version>
         <spring.version>4.2.2.RELEASE</spring.version>
-        <spring.security.version>3.2.0.RELEASE</spring.security.version>
+        <spring.security.version>4.2.2.RELEASE</spring.security.version>
         <activemq.version>5.12.1</activemq.version>
         <aspectj.version>1.8.9</aspectj.version>
         <slf4j.version>1.7.21</slf4j.version>
@@ -47,6 +47,7 @@
         <commons-fileupload.version>1.3.1</commons-fileupload.version>
         <bouncycastle.version>1.51</bouncycastle.version>
         <quartz.version>2.2.1</quartz.version>
+        <jackson-databind.version>2.8.6</jackson-databind.version>
 
         <!-- Sonar properties -->
         <sonar.binaries>target/classes</sonar.binaries>
@@ -136,6 +137,14 @@
                 <version>${logback.version}</version>
             </dependency>
             <!-- End SL4J + Logback -->
+
+            <!-- Jackson -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-databind.version}</version>
+            </dependency>
+            <!-- End Jackson -->
 
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -267,17 +276,6 @@
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-config</artifactId>
                 <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-taglibs</artifactId>
-                <version>${spring.security.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>spring-aop</artifactId>
-                        <groupId>org.springframework</groupId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <!-- End Spring Security -->
 

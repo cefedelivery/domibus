@@ -17,7 +17,6 @@
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hibernate.version>4.1.9.Final</hibernate.version>
-        <jstl.version>1.2</jstl.version>
         <atomikos.version>3.9.3</atomikos.version>
         <dom4j.version>1.6.1</dom4j.version>
         <webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
@@ -490,6 +489,11 @@
         <!-- Domibus modules -->
         <dependency>
             <groupId>eu.domibus</groupId>
+            <artifactId>domibus-angular</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-plugin-api</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -520,6 +524,13 @@
             <artifactId>aspectjweaver</artifactId>
         </dependency>
         <!-- End AspectJ -->
+
+        <!-- Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <!-- End Jackson -->
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -586,10 +597,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-taglibs</artifactId>
         </dependency>
         <!-- End Spring Security -->
 
@@ -679,17 +686,6 @@
         </dependency>
         <!-- End Apache commons -->
 
-        <dependency>
-            <groupId>com.sun.faces</groupId>
-            <artifactId>jsf-api</artifactId>
-            <version>2.1.20</version>
-        </dependency>
-
-        <dependency>
-            <groupId>jstl</groupId>
-            <artifactId>jstl</artifactId>
-            <version>${jstl.version}</version>
-        </dependency>
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>

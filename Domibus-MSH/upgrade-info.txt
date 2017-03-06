@@ -35,6 +35,9 @@ Domibus 3.3-RC1 (from 3.2.1):
                     o   add   <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
                     o   add   <prop key="domibus.dispatcher.connectionTimeout">240000</prop>
                     o   add   <prop key="domibus.dispatcher.receiveTimeout">240000</prop>
+               - in file "\conf\domibus\domibus-security.xml":
+                    o   replace "http://www.springframework.org/schema/security/spring-security-3.2.xsd"
+                        with "http://www.springframework.org/schema/security/spring-security-4.2.xsd"
                - [Tomcat only] in file "\conf\domibus\domibus-datasources.xml" add the following bean(please adapt the values for for host, port, username and password properties according to your database schema):
                    o for MySQL:
                        <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
