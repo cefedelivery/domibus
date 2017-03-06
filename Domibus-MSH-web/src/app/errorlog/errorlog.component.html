@@ -1,0 +1,186 @@
+﻿<div>
+
+  <div class="selectionCriteria">
+    <md-card style="margin:0;padding:10px;">
+      <md-card-content>
+        <h2 style="margin:0;">Selection criteria</h2>
+
+        <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
+          <table class="filterTable">
+            <tr>
+              <td>
+                <md-input-container class="inputField">
+                  <input mdInput placeholder="Original Message Id" name="errorSignalMessageId" [(ngModel)]="filter.errorSignalMessageId" #errorSignalMessageId="ngModel">
+                </md-input-container>
+              </td>
+              <td>
+                <md-select placeholder="MSH Role" [(ngModel)]="filter.mshRole" name="mshRole">
+                  <md-option *ngFor="let role of mshRoles" [value]="role">
+                    {{role}}
+                  </md-option>
+                </md-select>
+              </td>
+              <td>
+                <table>
+                  <tr>
+                    <td class="dateTimeTitle">Timestamp:</td>
+                    <td>
+                      <md2-datepicker placeholder="From:"
+                                      [(ngModel)]="filter.fromTimestamp"
+                                      name="fromTimestmap"
+                                      [type]="'datetime'"
+                                      #timestampControl="ngModel"></md2-datepicker>
+                    </td>
+                    <td>
+                      <md2-datepicker placeholder="To:"
+                                      [(ngModel)]="filter.toTimestamp"
+                                      name="toTimestmap"
+                                      [type]="'datetime'"
+                                      #timestampControl="ngModel"></md2-datepicker>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <md-input-container class="inputField">
+                  <input mdInput placeholder="Signal Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId" #messageInErrorId="ngModel">
+                </md-input-container>
+              </td>
+              <td>
+                <md-select placeholder="Error Code" [(ngModel)]="filter.errorCode" name="errorCode">
+                  <md-option *ngFor="let code of errorCodes" [value]="code">
+                    {{code}}
+                  </md-option>
+                </md-select>
+              </td>
+              <td>
+                <table>
+                  <tr>
+                    <td class="dateTimeTitle">Notified:</td>
+                    <td>
+                      <md2-datepicker placeholder="From:"
+                                      [(ngModel)]="filter.fromNotified"
+                                      name="fromNotified"
+                                      [type]="'datetime'"
+                                      #timestampControl="ngModel"></md2-datepicker>
+                    </td>
+                    <td>
+                      <md2-datepicker placeholder="To:"
+                                      [(ngModel)]="filter.toNotified"
+                                      name="toNotified"
+                                      [type]="'datetime'"
+                                      #timestampControl="ngModel"></md2-datepicker>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <md-input-container class="inputField">
+                  <input mdInput placeholder="Error detail" name="ErrorDetail" [(ngModel)]="filter.errorDetail" #errorDetail="ngModel">
+                </md-input-container>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>
+                <button md-raised-button color="primary" [disabled]="!filterForm.form.valid">
+                  <md-icon>search</md-icon>
+                  <span>Search</span>
+                </button>
+              </td>
+              <td></td>
+            </tr>
+          </table>
+        </form>
+
+      </md-card-content>
+    </md-card>
+  </div>
+
+  <div class="rowsDiv">
+    <md-select placeholder="Rows" [(ngModel)]="limit" name="limit" (change)="changeRowLimits($event)">
+      <md-option *ngFor="let rowLimit of rowLimits" [value]="rowLimit.value">
+        {{rowLimit.key}}
+      </md-option>
+    </md-select>
+  </div>
+
+  <ngx-datatable
+    class="material striped"
+    [rows]="rows"
+    [columnMode]="'force'"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    [rowHeight]="'auto'"
+    [scrollbarH]="true"
+    [externalPaging]="true"
+    [externalSorting]="true"
+    [loadingIndicator]="loading"
+    [count]="count"
+    [offset]="offset"
+    [limit]="limit"
+    (page)='onPage($event)'
+    (sort)="onSort($event)">
+    <ngx-datatable-column name="ErrorSignalMessageId" >
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        {{value}}
+      </template>
+    </ngx-datatable-column>
+    <ngx-datatable-column name="MshRole"  [width]="50">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        {{value}}
+      </template>
+    </ngx-datatable-column>
+    <ngx-datatable-column name="MessageInErrorId" >
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        {{value}}
+      </template>
+    </ngx-datatable-column>
+    <ngx-datatable-column name="ErrorCode"  [width]="50">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        {{value}}
+      </template>
+    </ngx-datatable-column>
+    <ngx-datatable-column name="ErrorDetail" [width]="250">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        {{value}}
+      </template>
+    </ngx-datatable-column>
+    <ngx-datatable-column name="Timestamp"  [width]="180">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        {{value | date: dateFormat}}
+      </template>
+    </ngx-datatable-column>
+    <ngx-datatable-column name="Notified" [width]="180">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        {{value | date: dateFormat}}
+      </template>
+    </ngx-datatable-column>
+  </ngx-datatable>
+
+</div>

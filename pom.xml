@@ -11,6 +11,7 @@
     <name>Domibus MSH</name>
     <modules>
         <module>Domibus-MSH</module>
+        <module>Domibus-MSH-web</module>
         <module>Domibus-MSH-api</module>
         <module>Domibus-MSH-logging</module>
         <module>Domibus-MSH-jms-spi</module>
@@ -429,6 +430,11 @@
                         <target>1.7</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.0.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

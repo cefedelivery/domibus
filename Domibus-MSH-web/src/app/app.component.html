@@ -1,0 +1,56 @@
+<div id="domibusTemplate" class="fullSize">
+  <md-toolbar color="primary" id="mainToolbar">
+    <span>Domibus Administration Console</span>
+
+    <!-- This fills the remaining space of the current row -->
+    <span class="fill-remaining-space"></span>
+    <button md-icon-button [md-menu-trigger-for]="settingsMenu">
+      <md-icon>menu</md-icon>
+    </button>
+  </md-toolbar>
+  <md-menu x-position="before" #settingsMenu="mdMenu">
+    <button md-menu-item (click)="logout($event)">
+      <md-icon>power_settings_new</md-icon>
+      <span>Logout</span>
+    </button>
+  </md-menu>
+
+  <md-sidenav-container>
+    <md-sidenav mode="side" opened="true" class="app-sidenav" id="sideMenu">
+      <button md-raised-button [routerLink]="['/']" class="sideNavButton">
+        <md-icon>home</md-icon>
+        <span>Home</span>
+      </button>
+      <button md-raised-button class="sideNavButton">
+        <md-icon>message</md-icon>
+        <span>Messages</span>
+      </button>
+      <button md-raised-button class="sideNavButton">
+        <md-icon>filter_list</md-icon>
+        <span>Message Filter</span>
+      </button>
+      <button md-raised-button [routerLink]="['/errorlog']" class="sideNavButton">
+        <md-icon>sms_failed</md-icon>
+        <span>Error Log</span>
+      </button>
+      <button md-raised-button class="sideNavButton">
+        <md-icon>description</md-icon>
+        <span>PMode</span>
+      </button>
+      <button md-raised-button class="sideNavButton">
+        <md-icon>show_chart</md-icon>
+        <span>JMS Monitoring</span>
+      </button>
+    </md-sidenav>
+
+    <alert></alert>
+    <div id="mainContent">
+      <router-outlet></router-outlet>
+    </div>
+
+  </md-sidenav-container>
+
+  <footer></footer>
+</div>
+
+

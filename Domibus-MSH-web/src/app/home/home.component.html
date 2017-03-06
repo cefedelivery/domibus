@@ -1,0 +1,33 @@
+﻿<div>
+    <table class="userInfo">
+      <tr>
+        <td>Username:</td>
+        <td>{{currentUser.username}}</td>
+      </tr>
+      <tr>
+        <td>Role(s):</td>
+        <td>
+          <table *ngFor="let role of currentUser.authorities">
+            <tr><td>{{role}}</td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+</div>
+
+<!--<div class="col-md-6 col-md-offset-3">-->
+  <!--<h1>Hi {{currentUser.username}} !</h1>-->
+
+  <!--<p>Home: You're logged in with Angular 2!!</p>-->
+
+  <!--<div [isAuthorized]="'ROLE_ADMIN'">-->
+    <!--<h2>Granted authorities:</h2>-->
+    <!--<ul>-->
+      <!--<li *ngFor="let role of currentUser.authorities">{{role}}</li>-->
+    <!--</ul>-->
+  <!--</div>-->
+  <!--<p><a [routerLink]="['/admin']" class="btn btn-link">Admin</a></p>-->
+  <!--<p><a href="" (click)="testPost($event)">test post</a></p>-->
+  <!--<p><a href="" (click)="testGet($event)">test get</a></p>-->
+<!--</div>-->
+

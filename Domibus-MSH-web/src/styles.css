@@ -1,0 +1,22 @@
+/* You can add global styles to this file, and also import other style files */
+
+
+@import '~@angular/material/core/theming/prebuilt/indigo-pink.css';
+
+@import '~@swimlane/ngx-datatable/release/index.css';
+@import '~@swimlane/ngx-datatable/release/themes/material.css';
+@import '~@swimlane/ngx-datatable/release/assets/icons.css';
+
+html,body{
+  margin:0;
+  padding:0;
+  height:100%;
+  width:100%;
+}
+
+.fullSize {
+  height:100%;
+  width:100%;
+}
+
+

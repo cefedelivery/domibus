@@ -1,0 +1,26 @@
+[md-raised-button] {
+  width: 100%;
+}
+
+md-sidenav-container {
+  height:85%;
+}
+
+md-sidenav {
+  width: 150px;
+}
+
+#mainContent {
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 10px;
+}
+
+.fill-remaining-space {
+  /*This fills the remaining space, by using flexbox. Every toolbar row uses a flexbox row layout.*/
+  flex: 1 1 auto;
+}
+
+.sideNavButton {
+  text-align: left;
+}
