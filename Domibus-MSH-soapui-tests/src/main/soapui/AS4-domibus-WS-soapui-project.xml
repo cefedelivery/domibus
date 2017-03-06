@@ -3302,7 +3302,156 @@ ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properti
 test.cleanDatabaseAll();
 test.finalize();
 
-</script></con:config></con:testStep><con:tearDownScript>ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+</script></con:config></con:testStep><con:testStep type="groovy" name="Groovy Script" id="d967ac61-2ddc-4d6a-92f9-1b9eeac01643"><con:settings/><con:config><script>/**
+ * Created by kopecgr on 22/02/2017.
+ */
+
+import org.apache.poi.ss.usermodel.*
+class ExcelReporting
+{
+	//Excel template report file columns indexes (0 base indexed) 
+	static final def TC_TEST_SUITE_COLUMN = 1	// Test Suite Name 
+	static final def TC_ID_COLUMN = 2			// Test Case ID (assuming  everything before first dash in test case name is test case ID)
+	static final def TC_NAME_COLUMN = 3			// Full Test Case Name (with test case ID)
+	static final def TC_DISABLED_COLUMN = 5		// Is Test Case Disabled in SoapUI project
+	static final def TC_RESULT_COLUMN = 6		// Last Result of test case execution [see bellow REPORT_PASS_STRING/REPORT_FAIL_STRING]
+	static final def TC_TIME_COLUMN = 7			// Time of last Execution was Started 
+	static final def TC_EXEC_TIME_COLUMN = 8	// Test case execution time in seconds 
+	static final def TC_COMMENT_COLUMN = 10		// Collected information about failed assertion, empty for passing TCs
+		
+	static final def newLine = System.getProperty("line.separator") 
+	
+	static final def REPORT_PASS_STRING = "PASS"
+	static final def REPORT_FAIL_STRING = "FAIL"
+	
+	private static def showResultRow(row, log) {
+		log.debug "TC_TEST_SUITE_COLUMN: " + row.getCell(TC_TEST_SUITE_COLUMN)
+		log.debug "TC_ID_COLUMN: " + row.getCell(TC_ID_COLUMN).getStringCellValue()
+		log.debug "TC_NAME_COLUMN: " + row.getCell(TC_NAME_COLUMN)
+		log.debug "TC_DISABLED_COLUMN: " + row.getCell(TC_DISABLED_COLUMN)
+		log.debug "TC_RESULT_COLUMN: " + row.getCell(TC_RESULT_COLUMN)
+		log.debug "TC_TIME_COLUMN: " + row.getCell(TC_TIME_COLUMN)
+		log.debug "TC_EXEC_TIME_COLUMN: " + row.getCell(TC_EXEC_TIME_COLUMN) 
+		log.debug "TC_COMMENT_COLUMN: " + row.getCell(TC_COMMENT_COLUMN)
+	}
+	
+	static def reportTestCase(testRunner, log) {
+		// check update report property is not true or '1' 
+		def updateReport = testRunner.getRunContext().expand( '${#Project#updateReport}' )
+		if (updateReport == null || updateReport.trim().isEmpty() || !(updateReport.toLowerCase().equals('true') || updateReport == '1'))
+		{
+			log.warn "Reporting disabled, please refer to SoapUI Project level property updateReport"
+			return
+		}
+		
+		//check report file exist
+		log.debug "check report file exist"
+		def outputReportFilePath = testRunner.getRunContext().expand( '${#Project#reportFilePath}' ) as String
+		
+		def file = new File(outputReportFilePath)
+		if (!file.exists() || file.isDirectory()) {
+			log.error "Error: template report Excel file doesn't exist or is directory on path:" + outputReportFilePath
+			return
+		}
+		file.finalize()
+
+		// project name it should same as worksheet name
+		def projectName = testRunner.testCase.testSuite.project.name
+		def testSuiteName = testRunner.testCase.testSuite.getLabel()
+		// extract test case ID 
+		def tcName = testRunner.testCase.getLabel()
+		def searchedID = tcName.split("-").getAt(0).trim()
+
+		// File exist than read file
+		log.debug "Try to open Workbook and specific Worksheet"
+		InputStream inp = new FileInputStream(outputReportFilePath)
+		Workbook wb = WorkbookFactory.create(inp)
+		Sheet sheet = wb.getSheet(projectName)
+		if (sheet == null) {
+			log.error "Worksheet with name: |" + projectName + "| doesn't exist."
+			return
+		}
+		
+		// Find row with specific Test Case ID
+		def searchedTestCaseRowNum = -1
+		for (Row r : sheet) {
+			def testCaseIdValue = r.getCell(TC_ID_COLUMN).getStringCellValue().trim()
+			if (testCaseIdValue == searchedID) {
+				log.debug "Found test case ID |" + searchedID + "| in template report file"
+				searchedTestCaseRowNum = r.getRowNum()
+				break
+			}
+		}
+		if (!(searchedTestCaseRowNum>0)) {
+			log.error "Test case ID: |" + searchedID + "| not found" 
+			return
+		}
+		
+		def row = sheet.getRow(searchedTestCaseRowNum) 
+		//old values
+		showResultRow(row, log) 
+		
+		//if some steps were executed put new values in report
+		if (testRunner.getResults().size()>0) 
+		{
+		
+			def tcStatus = testRunner.getStatus().toString().equals("FINISHED")? REPORT_PASS_STRING : REPORT_FAIL_STRING
+			def startTime = new Date(testRunner.getStartTime())
+			def timeTaken = testRunner.getTimeTaken()/1000 + "s"
+			def comment = ""
+
+			testRunner.getResults().each{ t->
+				def stepStatus = t.status.toString()
+				def stepName = t.getTestStep().getLabel()
+				def stepNum = (testRunner.getResults().indexOf(t) as Integer) +1
+				def executionStart = new Date(t.getTimeStamp()).format("dd-MM-yyyy HH:mm:ss")
+
+				log.debug "Check status of step " + stepNum + " - " + stepName + " --> " + stepStatus
+
+				if (!(stepStatus == "OK" || comment == "")) {
+					comment += newLine
+				}
+
+				if (stepStatus == "FAILED")
+				{
+					log.debug "Found test step with FAILED status try extract error messages"
+					def messages = ""
+					t.getMessages().each() { msg -> messages += newLine + " |" + msg + "| " }
+
+					comment += executionStart + ": Test case FAILED on step " + stepNum + ": " + stepName + "|| Returned error message[s]: " + messages
+				}
+				if (stepStatus == "CANCELED")
+				{
+					log.debug "Found test step with CANCELED status"
+					comment += executionStart + ": Test case CANCELED on step " + stepNum + ": " + stepName
+				}
+
+			}
+		//update values
+		log.info "REPORTING Test case: \"" + tcName + "\" " +  tcStatus + "ED, details in the report file"
+		row.getCell(TC_TEST_SUITE_COLUMN).setCellValue(testSuiteName)
+		row.getCell(TC_NAME_COLUMN).setCellValue(tcName)
+		row.getCell(TC_DISABLED_COLUMN).setCellValue(testRunner.testCase.isDisabled())
+		row.getCell(TC_RESULT_COLUMN).setCellValue(tcStatus)
+		row.getCell(TC_TIME_COLUMN).setCellValue(DateUtil.getExcelDate(startTime))
+		row.getCell(TC_EXEC_TIME_COLUMN).setCellValue(timeTaken)
+		row.getCell(TC_COMMENT_COLUMN).setCellValue(comment)
+		}
+		
+		// new row values 
+		showResultRow(row, log) 
+		
+		// Write the output to a file
+		FileOutputStream fileOut = new FileOutputStream(outputReportFilePath)
+		wb.write(fileOut)
+		wb.finalize()
+		fileOut.close()
+
+	}
+	
+}    
+
+ExcelReporting.reportTestCase(testRunner, log)</script></con:config></con:testStep><con:tearDownScript>ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom001-Submit Message-Basic Flow" searchProperties="true" id="fc5799aa-a012-4399-b831-0a12b65fa64c" timeout="0" wsrmEnabled="false" wsrmVersion="1.0" wsrmAckTo="" amfAuthorisation="false" amfEndpoint="" amfLogin="" amfPassword="">
             <con:settings/>
             <con:testStep type="request" name="Submit Message" id="704eaf62-395d-4ad6-ae0e-2dc8a3757e2d">
@@ -3444,9 +3593,9 @@ test.finalize()
    </soap:Body>
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" id="3a65a26d-664a-40b6-9237-8cfd66c7c2db"/><con:assertion type="SOAP Fault Assertion" id="d3b2a875-2c73-4b67-a8c8-f45848cb70da" name="Not SOAP Fault"/><con:assertion type="XPath Match" id="f0667722-516b-4a0c-ba90-e95409275f02" name="XPath Match"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" id="c8a24d36-ed80-46f7-90dd-1c94f468ce2d" name="Script Assertion"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
 test.waitForStatus("ACKNOWLEDGED","RECEIVED");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
-test.cleanDBMessageID(context.expand('${Submit Message#Request#//ns:MessageId}'))
-test.finalize();
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>//def test = new Domibus(log,null,context);
+//test.cleanDBMessageID(context.expand('${Submit Message#Request#//ns:MessageId}'))
+//test.finalize();
 
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom006-Submit Message-Exceptional flow-Data-TimeStamp-Format" searchProperties="true" id="c918b491-f002-4381-8387-b5443615b73c">
@@ -13581,4 +13730,4 @@ testRunner.testCase.testSuite.project.getTestSuiteList().each { testSuite ->
  	}
  }
 log.info "END: Amendment tear down sciprts"
-</script></con:config></con:testStep><con:tearDownScript>ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:requirements/><con:properties><con:property><con:name>localUrl</con:name><con:value>http://wltdgt02.cc.cec.eu.int:1063/domibus-weblogic</con:value></con:property><con:property><con:name>remoteUrl</con:name><con:value>http://localhost:8180/domibus</con:value></con:property><con:property><con:name>pathExeSender</con:name><con:value>c:/domibus/sender/domibus/bin/</con:value></con:property><con:property><con:name>pathExeReceiver</con:name><con:value>c:/domibus/receiver/domibus/bin/</con:value></con:property><con:property><con:name>databaseBlue</con:name><con:value>oracle</con:value></con:property><con:property><con:name>driverBlue</con:name><con:value>oracle.jdbc.pool.OracleDataSource</con:value></con:property><con:property><con:name>jdbcUrlBlue</con:name><con:value>jdbc:oracle:thin:@olrdev3.cc.cec.eu.int:1597/EX1UDIGT_TAF.cc.cec.eu.int</con:value></con:property><con:property><con:name>blueDbUser</con:name><con:value>CIPA_ADMIN</con:value></con:property><con:property><con:name>blueDbPassword</con:name><con:value>asdqwe123$</con:value></con:property><con:property><con:name>databaseRed</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverRed</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlRed</con:name><con:value>jdbc:mysql://localhost:3306/domibus_red</con:value></con:property><con:property><con:name>redDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>redDbPassword</con:name><con:value>root</con:value></con:property><con:property><con:name>pathExeGreen</con:name><con:value>c:/work/Tools/Domibus/Releases/3.2RC1/green/domibus/bin/</con:value></con:property><con:property><con:name>jdbcUrl3</con:name><con:value>jdbc:mysql://localhost:3306/domibus_green</con:value></con:property><con:property><con:name>greenUrl</con:name><con:value>http://localhost:8280</con:value></con:property><con:property><con:name>reportFilePath</con:name><con:value>${projectDir}\\reports\\Domibus_3_2_2_test_results.xlsx</con:value></con:property><con:property><con:name>updateReport</con:name><con:value>true</con:value></con:property><con:property><con:name>pdfAttachment</con:name><con:value>C:/SoapUIProjects/sampleFiles/fileSmall.pdf</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
+</script></con:config></con:testStep><con:tearDownScript>ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:requirements/><con:properties><con:property><con:name>localUrl</con:name><con:value>http://localhost:8080/domibus</con:value></con:property><con:property><con:name>remoteUrl</con:name><con:value>http://localhost:8180/domibus</con:value></con:property><con:property><con:name>pathExeSender</con:name><con:value>c:/domibus/sender/domibus/bin/</con:value></con:property><con:property><con:name>pathExeReceiver</con:name><con:value>c:/domibus/receiver/domibus/bin/</con:value></con:property><con:property><con:name>databaseBlue</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverBlue</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlBlue</con:name><con:value>jdbc:mysql://localhost:3306/domibus_blue</con:value></con:property><con:property><con:name>blueDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>blueDbPassword</con:name><con:value>root</con:value></con:property><con:property><con:name>databaseRed</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverRed</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlRed</con:name><con:value>jdbc:mysql://localhost:3306/domibus_red</con:value></con:property><con:property><con:name>redDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>redDbPassword</con:name><con:value>root</con:value></con:property><con:property><con:name>pathExeGreen</con:name><con:value>c:/work/Tools/Domibus/Releases/3.2RC1/green/domibus/bin/</con:value></con:property><con:property><con:name>jdbcUrl3</con:name><con:value>jdbc:mysql://localhost:3306/domibus_green</con:value></con:property><con:property><con:name>greenUrl</con:name><con:value>http://localhost:8280</con:value></con:property><con:property><con:name>reportFilePath</con:name><con:value>${projectDir}\\testReports\\Domibus_3_2_2_test_results.xlsx</con:value></con:property><con:property><con:name>updateReport</con:name><con:value>true</con:value></con:property><con:property><con:name>pdfAttachment</con:name><con:value>C:/SoapUIProjects/sampleFiles/fileSmall.pdf</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
