@@ -1,5 +1,5 @@
 {
-  "/api/**": {
+  "/rest/**": {
     "target": "http://localhost:8091",
     "changeOrigin": true,
     "secure": false,
