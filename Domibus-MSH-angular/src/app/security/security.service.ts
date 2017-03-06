@@ -16,7 +16,7 @@ export class SecurityService {
 //TODO rename to authenticate
   login(username: string, password: string) {
     let headers = new Headers({'Content-Type': 'application/json'});
-    return this.http.post('api/authenticate', JSON.stringify({username: username, password: password}), {headers: headers})
+    return this.http.post('rest/authenticate', JSON.stringify({username: username, password: password}), {headers: headers})
       //TODO use subscribe
       .map((response: Response) => {
         localStorage.setItem('currentUser', JSON.stringify(response.json()));
@@ -25,7 +25,7 @@ export class SecurityService {
 
   testPost(username: string, password: string) {
     let headers = new Headers({'Content-Type': 'application/json'});
-    return this.http.post('api/testPost', JSON.stringify({username: username, password: password}), {headers: headers})
+    return this.http.post('rest/testPost', JSON.stringify({username: username, password: password}), {headers: headers})
       .subscribe((res: Response) => {
         console.log("response1:" + res)
       }, (res: Response) => {
@@ -35,7 +35,7 @@ export class SecurityService {
 
   testGet() {
     let headers = new Headers({'Content-Type': 'application/json'});
-    return this.http.get('api/testGet', {headers: headers})
+    return this.http.get('rest/testGet', {headers: headers})
       .subscribe((res: Response) => {
         console.log("get response1:" + res)
       }, (res: Response) => {
@@ -49,7 +49,7 @@ export class SecurityService {
 
   getCurrentUsernameFromServer(): Observable<string> {
     let subject = new ReplaySubject();
-    this.http.get('api/user')
+    this.http.get('rest/user')
       .subscribe((res: Response) => {
         subject.next(res.text());
       }, (error: any) => {
@@ -103,7 +103,7 @@ export class SecurityService {
 
   logout() {
     console.log("Logging out");
-    this.http.get('api/logout').subscribe((res: Response) => {
+    this.http.get('rest/logout').subscribe((res: Response) => {
       localStorage.removeItem('currentUser');
       this.router.navigate(['/login']);
       }, (error: any) => {

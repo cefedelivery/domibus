@@ -24,8 +24,8 @@ import java.util.Map;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+//TODO to remove
 /**
- * // TODO Documentation
  * Created by Cosmin Baciu on 17-Aug-16.
  */
 @Controller

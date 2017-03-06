@@ -1,12 +1,12 @@
-package eu.domibus.web.rest;
+package eu.domibus.web.rest.ro;
 
 /**
  * @author Cosmin Baciu
  * @since 3.3
  */
-public class DomibusInfoDTO {
+public class DomibusInfoRO {
 
-   private String version;
+    private String version;
 
     public String getVersion() {
         return version;

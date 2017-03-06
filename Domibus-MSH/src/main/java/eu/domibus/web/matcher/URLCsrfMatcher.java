@@ -15,15 +15,15 @@ public class URLCsrfMatcher implements RequestMatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(URLCsrfMatcher.class);
 
-    protected String url;
+    protected String ignoreUrl;
 
     private RegexRequestMatcher unprotectedMatcher = null;
     private final HashSet<String> allowedMethods = new HashSet<String>( Arrays.asList("GET", "HEAD", "TRACE", "OPTIONS"));
 
     @PostConstruct
     public void init() {
-        LOGGER.debug("Initializing the matcher with [{}]", url);
-        unprotectedMatcher = new RegexRequestMatcher(url, null);
+        LOGGER.debug("Initializing the matcher with [{}]", ignoreUrl);
+        unprotectedMatcher = new RegexRequestMatcher(ignoreUrl, null);
 
     }
 
@@ -36,11 +36,11 @@ public class URLCsrfMatcher implements RequestMatcher {
         return !unprotectedMatcher.matches(request);
     }
 
-    public String getUrl() {
-        return url;
+    public String getIgnoreUrl() {
+        return ignoreUrl;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setIgnoreUrl(String ignoreUrl) {
+        this.ignoreUrl = ignoreUrl;
     }
 }

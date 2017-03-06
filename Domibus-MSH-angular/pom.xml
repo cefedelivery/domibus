@@ -38,7 +38,7 @@
                         <fileset>
                             <directory>./src/main/resources/META-INF/resources</directory>
                             <includes>
-                                <include>*</include>
+                                <include>**/*</include>
                             </includes>
                         </fileset>
                     </filesets>

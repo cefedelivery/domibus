@@ -1,7 +1,7 @@
 package eu.domibus.web.security;
 
-import eu.domibus.web.rest.LoginDTO;
-import eu.domibus.web.rest.UserDTO;
+import eu.domibus.web.rest.ro.LoginRO;
+import eu.domibus.web.rest.ro.UserRO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,8 +26,8 @@ public class AuthenticationService {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    public UserDTO authenticate(LoginDTO loginDTO) {
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword());
+    public UserRO authenticate(LoginRO loginRO) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRO.getUsername(), loginRO.getPassword());
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -39,9 +39,9 @@ public class AuthenticationService {
             authorities.add(grantedAuthority.getAuthority());
         }
 
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUsername(loginDTO.getUsername());
-        userDTO.setAuthorities(authorities);
-        return userDTO;
+        UserRO userRO = new UserRO();
+        userRO.setUsername(loginRO.getUsername());
+        userRO.setAuthorities(authorities);
+        return userRO;
     }
 }

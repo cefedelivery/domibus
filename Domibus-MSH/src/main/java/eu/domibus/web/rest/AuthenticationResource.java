@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
+import eu.domibus.web.rest.ro.*;
 import eu.domibus.web.security.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ import java.util.List;
  * @since 3.3
  */
 @RestController
-@RequestMapping(value = "/api")
+@RequestMapping(value = "/rest")
 public class AuthenticationResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationResource.class);
@@ -36,9 +37,9 @@ public class AuthenticationResource {
     private AuthenticationService authenticationService;
 
     @RequestMapping(value = "authenticate", method = RequestMethod.POST)
-    public UserDTO authenticate(@RequestBody LoginDTO loginDTO, HttpServletResponse response) throws Exception {
-        LOGGER.info("Authenticating using [{}]", loginDTO);
-        return authenticationService.authenticate(loginDTO);
+    public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) throws Exception {
+        LOGGER.info("Authenticating using [{}]", loginRO);
+        return authenticationService.authenticate(loginRO);
     }
 
     @RequestMapping(value = "user", method = RequestMethod.GET)
@@ -48,27 +49,27 @@ public class AuthenticationResource {
     }
 
     @RequestMapping(value = "testPost", method = RequestMethod.POST)
-    public UserDTO testPost(@RequestBody LoginDTO loginDTO, HttpServletRequest request) throws Exception {
-        LOGGER.info("-------------Testing post", loginDTO);
-        final UserDTO userDTO = new UserDTO();
-        userDTO.setUsername("testPost");
-        return userDTO;
+    public UserRO testPost(@RequestBody LoginRO loginRO, HttpServletRequest request) throws Exception {
+        LOGGER.info("-------------Testing post", loginRO);
+        final UserRO userRO = new UserRO();
+        userRO.setUsername("testPost");
+        return userRO;
     }
 
     @RequestMapping(value = "testGet", method = RequestMethod.GET)
-    public UserDTO testGet() throws Exception {
+    public UserRO testGet() throws Exception {
         LOGGER.info("-------------Testing get");
-        final UserDTO userDTO = new UserDTO();
-        userDTO.setUsername("testGet");
-        return userDTO;
+        final UserRO userRO = new UserRO();
+        userRO.setUsername("testGet");
+        return userRO;
     }
 
     @RequestMapping(value = "domibusinfo", method = RequestMethod.GET)
-    public DomibusInfoDTO getDomibusInfo() throws Exception {
+    public DomibusInfoRO getDomibusInfo() throws Exception {
         LOGGER.info("-------------domibus info");
-        final DomibusInfoDTO domibusInfoDTO = new DomibusInfoDTO();
-        domibusInfoDTO.setVersion("4.0");
-        return domibusInfoDTO;
+        final DomibusInfoRO domibusInfoRO = new DomibusInfoRO();
+        domibusInfoRO.setVersion("4.0");
+        return domibusInfoRO;
     }
 
     @RequestMapping(value = "errorlog", method = RequestMethod.GET)

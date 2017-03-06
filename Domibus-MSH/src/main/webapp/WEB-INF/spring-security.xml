@@ -34,7 +34,7 @@
         <beans:property name="cookieHttpOnly" value="false"/>
     </beans:bean>
     <beans:bean id="csrfURLMatcher" class="eu.domibus.web.matcher.URLCsrfMatcher">
-        <beans:property name="url" value="/api/authenticate"/>
+        <beans:property name="ignoreUrl" value="/api/authenticate"/>
     </beans:bean>
 
     <beans:bean id="http403ForbiddenEntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"/>

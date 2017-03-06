@@ -1,4 +1,4 @@
-package eu.domibus.web.rest;
+package eu.domibus.web.rest.ro;
 
 import java.util.List;
 
@@ -6,12 +6,11 @@ import java.util.List;
  * @author Cosmin Baciu
  * @since 3.3
  */
-public class UserDTO {
+public class UserRO {
 
     private Integer id;
 
     private String username;
-
 
     private List<String> authorities;
 

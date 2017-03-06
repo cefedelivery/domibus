@@ -38,7 +38,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 /**
  * @author Christian Walczac
  */
-
+//TODO to remove
 @Controller
 public class AdminGUIController {
 

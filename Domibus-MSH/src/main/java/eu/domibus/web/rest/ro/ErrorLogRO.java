@@ -1,4 +1,4 @@
-package eu.domibus.web.rest;
+package eu.domibus.web.rest.ro;
 
 import java.util.Date;
 

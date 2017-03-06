@@ -1,4 +1,4 @@
-package eu.domibus.web.rest;
+package eu.domibus.web.rest.ro;
 
 import java.io.Serializable;
 
@@ -6,7 +6,7 @@ import java.io.Serializable;
  * @author Cosmin Baciu
  * @since 3.3
  */
-public class LoginDTO implements Serializable {
+public class LoginRO implements Serializable {
 
     private String username;
     private String password;
