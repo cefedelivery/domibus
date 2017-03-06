@@ -9,15 +9,6 @@ package eu.domibus.ext.services.exceptions;
 public class MessageAcknowledgeException extends DomibusServiceException {
 
     /**
-     * Constructs a new MessageAcknowledgeException with a specific error.
-     *
-     * @param domibusError a DomibusError
-     */
-    public MessageAcknowledgeException(DomibusError domibusError) {
-        super(domibusError);
-    }
-
-    /**
      * Constructs a new MessageAcknowledgeException with a specific error and message.
      *
      * @param domibusError  a DomibusError

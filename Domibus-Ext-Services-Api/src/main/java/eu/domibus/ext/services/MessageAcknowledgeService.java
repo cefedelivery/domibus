@@ -49,7 +49,7 @@ import java.util.Map;
 public interface MessageAcknowledgeService {
 
     /**
-     * Registers an acknowledgment for a specific message
+     * Registers an acknowledgment for a specific message using the provided properties
      *
      * @param messageId The message id for which the acknowledgement is registered
      * @param acknowledgeTimestamp Timestamp of the acknowledged time
@@ -57,8 +57,22 @@ public interface MessageAcknowledgeService {
      * @param to The target of the acknowledgement(eg: C3 or backend name)
      * @param properties Custom properties of the message acknowledgment
      * @throws MessageAcknowledgeException Raised in case an exception occurs while trying to register an acknowledgment
+     * @return The newly created message acknowledgement
      */
     MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws MessageAcknowledgeException;
+
+
+    /**
+     * Registers an acknowledgment for a specific message
+     *
+     * @param messageId The message id for which the acknowledgement is registered
+     * @param acknowledgeTimestamp Timestamp of the acknowledged time
+     * @param from The source of the acknowledgement(eg: C3 or backend name)
+     * @param to The target of the acknowledgement(eg: C3 or backend name)
+     * @throws MessageAcknowledgeException Raised in case an exception occurs while trying to register an acknowledgment
+     * @return The newly created message acknowledgement
+     */
+    MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to) throws MessageAcknowledgeException;
 
     /**
      * Gets all acknowledgments associated to a message id
