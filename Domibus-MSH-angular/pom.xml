@@ -10,9 +10,9 @@
         <artifactId>domibus</artifactId>
         <version>3.3-SNAPSHOT</version>
     </parent>
-    <artifactId>domibus-web</artifactId>
+    <artifactId>domibus-angular</artifactId>
     <packaging>jar</packaging>
-    <name>Domibus MSH Web</name>
+    <name>Domibus MSH Angular UI</name>
 
     <properties>
         <frontend-maven-plugin.version>1.3</frontend-maven-plugin.version>
