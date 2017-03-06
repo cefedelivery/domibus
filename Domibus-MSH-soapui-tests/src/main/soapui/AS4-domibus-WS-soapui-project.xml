@@ -3302,156 +3302,7 @@ ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properti
 test.cleanDatabaseAll();
 test.finalize();
 
-</script></con:config></con:testStep><con:testStep type="groovy" name="Groovy Script" id="d967ac61-2ddc-4d6a-92f9-1b9eeac01643"><con:settings/><con:config><script>/**
- * Created by kopecgr on 22/02/2017.
- */
-
-import org.apache.poi.ss.usermodel.*
-class ExcelReporting
-{
-	//Excel template report file columns indexes (0 base indexed) 
-	static final def TC_TEST_SUITE_COLUMN = 1	// Test Suite Name 
-	static final def TC_ID_COLUMN = 2			// Test Case ID (assuming  everything before first dash in test case name is test case ID)
-	static final def TC_NAME_COLUMN = 3			// Full Test Case Name (with test case ID)
-	static final def TC_DISABLED_COLUMN = 5		// Is Test Case Disabled in SoapUI project
-	static final def TC_RESULT_COLUMN = 6		// Last Result of test case execution [see bellow REPORT_PASS_STRING/REPORT_FAIL_STRING]
-	static final def TC_TIME_COLUMN = 7			// Time of last Execution was Started 
-	static final def TC_EXEC_TIME_COLUMN = 8	// Test case execution time in seconds 
-	static final def TC_COMMENT_COLUMN = 10		// Collected information about failed assertion, empty for passing TCs
-		
-	static final def newLine = System.getProperty("line.separator") 
-	
-	static final def REPORT_PASS_STRING = "PASS"
-	static final def REPORT_FAIL_STRING = "FAIL"
-	
-	private static def showResultRow(row, log) {
-		log.debug "TC_TEST_SUITE_COLUMN: " + row.getCell(TC_TEST_SUITE_COLUMN)
-		log.debug "TC_ID_COLUMN: " + row.getCell(TC_ID_COLUMN).getStringCellValue()
-		log.debug "TC_NAME_COLUMN: " + row.getCell(TC_NAME_COLUMN)
-		log.debug "TC_DISABLED_COLUMN: " + row.getCell(TC_DISABLED_COLUMN)
-		log.debug "TC_RESULT_COLUMN: " + row.getCell(TC_RESULT_COLUMN)
-		log.debug "TC_TIME_COLUMN: " + row.getCell(TC_TIME_COLUMN)
-		log.debug "TC_EXEC_TIME_COLUMN: " + row.getCell(TC_EXEC_TIME_COLUMN) 
-		log.debug "TC_COMMENT_COLUMN: " + row.getCell(TC_COMMENT_COLUMN)
-	}
-	
-	static def reportTestCase(testRunner, log) {
-		// check update report property is not true or '1' 
-		def updateReport = testRunner.getRunContext().expand( '${#Project#updateReport}' )
-		if (updateReport == null || updateReport.trim().isEmpty() || !(updateReport.toLowerCase().equals('true') || updateReport == '1'))
-		{
-			log.warn "Reporting disabled, please refer to SoapUI Project level property updateReport"
-			return
-		}
-		
-		//check report file exist
-		log.debug "check report file exist"
-		def outputReportFilePath = testRunner.getRunContext().expand( '${#Project#reportFilePath}' ) as String
-		
-		def file = new File(outputReportFilePath)
-		if (!file.exists() || file.isDirectory()) {
-			log.error "Error: template report Excel file doesn't exist or is directory on path:" + outputReportFilePath
-			return
-		}
-		file.finalize()
-
-		// project name it should same as worksheet name
-		def projectName = testRunner.testCase.testSuite.project.name
-		def testSuiteName = testRunner.testCase.testSuite.getLabel()
-		// extract test case ID 
-		def tcName = testRunner.testCase.getLabel()
-		def searchedID = tcName.split("-").getAt(0).trim()
-
-		// File exist than read file
-		log.debug "Try to open Workbook and specific Worksheet"
-		InputStream inp = new FileInputStream(outputReportFilePath)
-		Workbook wb = WorkbookFactory.create(inp)
-		Sheet sheet = wb.getSheet(projectName)
-		if (sheet == null) {
-			log.error "Worksheet with name: |" + projectName + "| doesn't exist."
-			return
-		}
-		
-		// Find row with specific Test Case ID
-		def searchedTestCaseRowNum = -1
-		for (Row r : sheet) {
-			def testCaseIdValue = r.getCell(TC_ID_COLUMN).getStringCellValue().trim()
-			if (testCaseIdValue == searchedID) {
-				log.debug "Found test case ID |" + searchedID + "| in template report file"
-				searchedTestCaseRowNum = r.getRowNum()
-				break
-			}
-		}
-		if (!(searchedTestCaseRowNum>0)) {
-			log.error "Test case ID: |" + searchedID + "| not found" 
-			return
-		}
-		
-		def row = sheet.getRow(searchedTestCaseRowNum) 
-		//old values
-		showResultRow(row, log) 
-		
-		//if some steps were executed put new values in report
-		if (testRunner.getResults().size()>0) 
-		{
-		
-			def tcStatus = testRunner.getStatus().toString().equals("FINISHED")? REPORT_PASS_STRING : REPORT_FAIL_STRING
-			def startTime = new Date(testRunner.getStartTime())
-			def timeTaken = testRunner.getTimeTaken()/1000 + "s"
-			def comment = ""
-
-			testRunner.getResults().each{ t->
-				def stepStatus = t.status.toString()
-				def stepName = t.getTestStep().getLabel()
-				def stepNum = (testRunner.getResults().indexOf(t) as Integer) +1
-				def executionStart = new Date(t.getTimeStamp()).format("dd-MM-yyyy HH:mm:ss")
-
-				log.debug "Check status of step " + stepNum + " - " + stepName + " --> " + stepStatus
-
-				if (!(stepStatus == "OK" || comment == "")) {
-					comment += newLine
-				}
-
-				if (stepStatus == "FAILED")
-				{
-					log.debug "Found test step with FAILED status try extract error messages"
-					def messages = ""
-					t.getMessages().each() { msg -> messages += newLine + " |" + msg + "| " }
-
-					comment += executionStart + ": Test case FAILED on step " + stepNum + ": " + stepName + "|| Returned error message[s]: " + messages
-				}
-				if (stepStatus == "CANCELED")
-				{
-					log.debug "Found test step with CANCELED status"
-					comment += executionStart + ": Test case CANCELED on step " + stepNum + ": " + stepName
-				}
-
-			}
-		//update values
-		log.info "REPORTING Test case: \"" + tcName + "\" " +  tcStatus + "ED, details in the report file"
-		row.getCell(TC_TEST_SUITE_COLUMN).setCellValue(testSuiteName)
-		row.getCell(TC_NAME_COLUMN).setCellValue(tcName)
-		row.getCell(TC_DISABLED_COLUMN).setCellValue(testRunner.testCase.isDisabled())
-		row.getCell(TC_RESULT_COLUMN).setCellValue(tcStatus)
-		row.getCell(TC_TIME_COLUMN).setCellValue(DateUtil.getExcelDate(startTime))
-		row.getCell(TC_EXEC_TIME_COLUMN).setCellValue(timeTaken)
-		row.getCell(TC_COMMENT_COLUMN).setCellValue(comment)
-		}
-		
-		// new row values 
-		showResultRow(row, log) 
-		
-		// Write the output to a file
-		FileOutputStream fileOut = new FileOutputStream(outputReportFilePath)
-		wb.write(fileOut)
-		wb.finalize()
-		fileOut.close()
-
-	}
-	
-}    
-
-ExcelReporting.reportTestCase(testRunner, log)</script></con:config></con:testStep><con:tearDownScript>ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+</script></con:config></con:testStep><con:tearDownScript>ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom001-Submit Message-Basic Flow" searchProperties="true" id="fc5799aa-a012-4399-b831-0a12b65fa64c" timeout="0" wsrmEnabled="false" wsrmVersion="1.0" wsrmAckTo="" amfAuthorisation="false" amfEndpoint="" amfLogin="" amfPassword="">
             <con:settings/>
             <con:testStep type="request" name="Submit Message" id="704eaf62-395d-4ad6-ae0e-2dc8a3757e2d">
@@ -3595,7 +3446,7 @@ test.finalize()
 test.waitForStatus("ACKNOWLEDGED","RECEIVED");
 test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>//def test = new Domibus(log,null,context);
 //test.cleanDBMessageID(context.expand('${Submit Message#Request#//ns:MessageId}'))
-//test.finalize();
+//test.finalize();	
 
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom006-Submit Message-Exceptional flow-Data-TimeStamp-Format" searchProperties="true" id="c918b491-f002-4381-8387-b5443615b73c">
@@ -3971,7 +3822,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom010-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom011-Submit message-Exceptional flow-Data-Message ID-Maximum length" searchProperties="true" id="e340a070-bf5b-49b8-8feb-2c8fd45e5463">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom011-Submit message-Exceptional flow-Data-Message ID-Maximum length" searchProperties="true" id="e340a070-bf5b-49b8-8feb-2c8fd45e5463" disabled="true">
             <con:settings/>
             
             
@@ -4042,7 +3893,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-01234567890123456789012345678901234567890123456789-01234567890123456789012345678901234567890123456789-01234567890123456789012345678901234567890123456789-01234567890123456789012345678901234567890123456789-01234567890123456789012345678901234567890123456789-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom012-Submit message-Exceptional flow-Data-RefToMessageId-Format" searchProperties="true" id="3cec7f7e-7d98-475d-bc62-fa14ba1fb4f7">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom012-Submit message-Exceptional flow-Data-RefToMessageId-Format" searchProperties="true" id="3cec7f7e-7d98-475d-bc62-fa14ba1fb4f7" disabled="true">
             <con:settings/>
             
             
@@ -4114,7 +3965,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom012-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom014-Submit message-Exceptional flow-Data-RefToMessageId-Maximum length" searchProperties="true" id="713adf19-e38d-422a-8501-39cb5fb0dbdf">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom014-Submit message-Exceptional flow-Data-RefToMessageId-Maximum length" searchProperties="true" id="713adf19-e38d-422a-8501-39cb5fb0dbdf" disabled="true">
             <con:settings/>
             
             
@@ -4186,7 +4037,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom014-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom015-Submit message-Exceptional flow-Data-From/PartyId-Existence" searchProperties="true" id="d0208948-e1fd-4a7f-b74e-ebb11a9c53ba">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom015-Submit message-Exceptional flow-Data-From/PartyId-Existence" searchProperties="true" id="d0208948-e1fd-4a7f-b74e-ebb11a9c53ba" disabled="true">
             <con:settings/>
             
             
@@ -4257,7 +4108,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom015-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom016-Submit message-Exceptional flow-Data-From/PartyId-Role" searchProperties="true" id="8344f1de-e54d-4a4d-ad1b-a6ad66d95b63">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom016-Submit message-Exceptional flow-Data-From/PartyId-Role" searchProperties="true" id="8344f1de-e54d-4a4d-ad1b-a6ad66d95b63" disabled="true">
             <con:settings/>
             
             
@@ -4328,7 +4179,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom016-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom019-Submit message-Exceptional flow-Data-From/PartyId-Empty" searchProperties="true" id="0e2688d6-c0bf-4ab9-8932-b8512a62b58d">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom019-Submit message-Exceptional flow-Data-From/PartyId-Empty" searchProperties="true" id="0e2688d6-c0bf-4ab9-8932-b8512a62b58d" disabled="true">
             <con:settings/>
             
             
@@ -4399,7 +4250,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom019-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom024-Submit message-Exceptional flow-Data-From/Role-Empty" searchProperties="true" id="d940bd71-27fb-41ec-bf53-74438b40b5f4">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom024-Submit message-Exceptional flow-Data-From/Role-Empty" searchProperties="true" id="d940bd71-27fb-41ec-bf53-74438b40b5f4" disabled="true">
             <con:settings/>
             
             
@@ -4470,7 +4321,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom024-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom026-Submit message-Exceptional flow-Data-From/PartyId:Type-Existence" searchProperties="true" id="ecc5da9e-5375-4c1c-a4b6-0385c4edb9d0">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom026-Submit message-Exceptional flow-Data-From/PartyId:Type-Existence" searchProperties="true" id="ecc5da9e-5375-4c1c-a4b6-0385c4edb9d0" disabled="true">
             <con:settings/>
             
             
@@ -4541,7 +4392,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom026-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom030-Submit message-Exceptional flow-Data-To/PartyId-Existence" searchProperties="true" id="d6362e20-7540-4982-b287-16f75e9c0d28">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom030-Submit message-Exceptional flow-Data-To/PartyId-Existence" searchProperties="true" id="d6362e20-7540-4982-b287-16f75e9c0d28" disabled="true">
             <con:settings/>
             
             
@@ -4612,7 +4463,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom030-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom031-Submit message-Exceptional flow-Data-To/PartyId-Role" searchProperties="true" id="cad44098-edd4-4644-8a41-0040ef33971a">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom031-Submit message-Exceptional flow-Data-To/PartyId-Role" searchProperties="true" id="cad44098-edd4-4644-8a41-0040ef33971a" disabled="true">
             <con:settings/>
             
             
@@ -4683,7 +4534,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom031-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom034-Submit message-Exceptional flow-Data-To/PartyId-Empty" searchProperties="true" id="8d4f8566-a473-46e7-8825-81116d7a1fde">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom034-Submit message-Exceptional flow-Data-To/PartyId-Empty" searchProperties="true" id="8d4f8566-a473-46e7-8825-81116d7a1fde" disabled="true">
             <con:settings/>
             
             
@@ -4754,7 +4605,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom034-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom041-Submit message-Exceptional flow-Data-To/PartyId:Type-Existence" searchProperties="true" id="4679538d-6745-4e7f-bb54-9198dafcc8e4">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom041-Submit message-Exceptional flow-Data-To/PartyId:Type-Existence" searchProperties="true" id="4679538d-6745-4e7f-bb54-9198dafcc8e4" disabled="true">
             <con:settings/>
             
             
@@ -4825,7 +4676,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom041-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom045-Submit message-Exceptional flow-Data-Sender=Receiver" searchProperties="true" id="0c0defeb-f300-4137-84fc-c3995b26b3df">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom045-Submit message-Exceptional flow-Data-Sender=Receiver" searchProperties="true" id="0c0defeb-f300-4137-84fc-c3995b26b3df" disabled="true">
             <con:settings/>
             
             
@@ -4896,7 +4747,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom045-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom046-Submit message-Exceptional flow-Data-AgreementRefId-Empty" searchProperties="true" id="1e1e8d3d-8271-48e4-8300-5850ac384c9e">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom046-Submit message-Exceptional flow-Data-AgreementRefId-Empty" searchProperties="true" id="1e1e8d3d-8271-48e4-8300-5850ac384c9e" disabled="true">
             <con:settings/>
             
             
@@ -4968,7 +4819,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom046-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom049-Submit message-Exceptional flow-Data-Service-Existence" searchProperties="true" id="edd6c003-16ae-47e4-9b2f-e72d8a161ff1">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom049-Submit message-Exceptional flow-Data-Service-Existence" searchProperties="true" id="edd6c003-16ae-47e4-9b2f-e72d8a161ff1" disabled="true">
             <con:settings/>
             
             
@@ -5039,7 +4890,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom049-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom052-Submit message-Exceptional flow-Data-Service-Empty" searchProperties="true" id="c5e181be-c2a9-4cff-9b18-fe6761b46dce">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom052-Submit message-Exceptional flow-Data-Service-Empty" searchProperties="true" id="c5e181be-c2a9-4cff-9b18-fe6761b46dce" disabled="true">
             <con:settings/>
             
             
@@ -5110,7 +4961,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom052-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom054-Submit message-Exceptional flow-Data-Action-Existence" searchProperties="true" id="8d7bd77a-8d06-4a1b-bd9e-688ea3b37813">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom054-Submit message-Exceptional flow-Data-Action-Existence" searchProperties="true" id="8d7bd77a-8d06-4a1b-bd9e-688ea3b37813" disabled="true">
             <con:settings/>
             
             
@@ -5181,7 +5032,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom054-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ba9db319-b7cc-4f30-9a2f-3d112806acad</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom056-Submit message-Exceptional flow-Data-Action-Not present" searchProperties="true" id="2d7134a9-98e9-4cb4-817c-89156dabb25e">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ba9db319-b7cc-4f30-9a2f-3d112806acad</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom056-Submit message-Exceptional flow-Data-Action-Not present" searchProperties="true" id="2d7134a9-98e9-4cb4-817c-89156dabb25e" disabled="true">
             <con:settings/>
             
             
@@ -5251,7 +5102,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom056-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom057-Submit message-Exceptional flow-Data-Action-Empty" searchProperties="true" id="93c7982c-2018-414c-9ac3-b249ce05281b">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom057-Submit message-Exceptional flow-Data-Action-Empty" searchProperties="true" id="93c7982c-2018-414c-9ac3-b249ce05281b" disabled="true">
             <con:settings/>
             
             
@@ -5322,7 +5173,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom057-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom059-Submit message-Exceptional flow-Data-ConversationId-Empty" searchProperties="true" id="fb0feb31-a997-4ea8-9911-043de8f019f7">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom059-Submit message-Exceptional flow-Data-ConversationId-Empty" searchProperties="true" id="fb0feb31-a997-4ea8-9911-043de8f019f7" disabled="true">
             <con:settings/>
             
             
@@ -5394,7 +5245,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom059-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom062-Submit message-Exceptional flow-Data-Original Sender-Existence" searchProperties="true" id="872b4fe8-939c-4581-aeb0-6fb62555ca09">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom062-Submit message-Exceptional flow-Data-Original Sender-Existence" searchProperties="true" id="872b4fe8-939c-4581-aeb0-6fb62555ca09" disabled="true">
             <con:settings/>
             
             
@@ -5465,7 +5316,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom062-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom064-Submit message-Exceptional flow-Data-Original Sender-Not present" searchProperties="true" id="bc94c54a-107e-41aa-9b4a-a56fa0cc9590">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom064-Submit message-Exceptional flow-Data-Original Sender-Not present" searchProperties="true" id="bc94c54a-107e-41aa-9b4a-a56fa0cc9590" disabled="true">
             <con:settings/>
             
             
@@ -5535,7 +5386,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom064-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom065-Submit message-Exceptional flow-Data-Original Sender-Empty name" searchProperties="true" id="b77de503-576c-42d2-a9cd-779f32685118">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom065-Submit message-Exceptional flow-Data-Original Sender-Empty name" searchProperties="true" id="b77de503-576c-42d2-a9cd-779f32685118" disabled="true">
             <con:settings/>
             
             
@@ -5606,7 +5457,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom065-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom066-Submit message-Exceptional flow-Data-Original Sender-Empty" searchProperties="true" id="7b70545e-3b82-4d81-8f78-8b2c6e91bdbb">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom066-Submit message-Exceptional flow-Data-Original Sender-Empty" searchProperties="true" id="7b70545e-3b82-4d81-8f78-8b2c6e91bdbb" disabled="true">
             <con:settings/>
             
             
@@ -5677,7 +5528,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom066-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom068-Submit message-Exceptional flow-Data-Final Receiver-Existence" searchProperties="true" id="2580c152-6437-4562-93f7-8468599686a6">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom068-Submit message-Exceptional flow-Data-Final Receiver-Existence" searchProperties="true" id="2580c152-6437-4562-93f7-8468599686a6" disabled="true">
             <con:settings/>
             
             
@@ -5748,7 +5599,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom068-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom070-Submit message-Exceptional flow-Data-Final Receiver-Not present" searchProperties="true" id="13317326-be67-4e00-9c6b-b81527069551">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom070-Submit message-Exceptional flow-Data-Final Receiver-Not present" searchProperties="true" id="13317326-be67-4e00-9c6b-b81527069551" disabled="true">
             <con:settings/>
             
             
@@ -5818,7 +5669,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom070-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom071-Submit message-Exceptional flow-Data-Final Receiver-Empty name" searchProperties="true" id="a79ccdcb-63e7-4b14-949a-b62c64f3b8fe">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom071-Submit message-Exceptional flow-Data-Final Receiver-Empty name" searchProperties="true" id="a79ccdcb-63e7-4b14-949a-b62c64f3b8fe" disabled="true">
             <con:settings/>
             
             
@@ -5889,7 +5740,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom071-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom072-Submit message-Exceptional flow-Data-Final Receiver-Empty" searchProperties="true" id="4af7789f-6621-4e8e-867f-6345c7bad4e3">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom072-Submit message-Exceptional flow-Data-Final Receiver-Empty" searchProperties="true" id="4af7789f-6621-4e8e-867f-6345c7bad4e3" disabled="true">
             <con:settings/>
             
             
@@ -5960,7 +5811,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom072-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom074-Submit message-Exceptional flow-Data-PartInfo:href-Existence" searchProperties="true" id="df4e23ca-06b5-4a41-9b5e-cec33dab64dc">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom074-Submit message-Exceptional flow-Data-PartInfo:href-Existence" searchProperties="true" id="df4e23ca-06b5-4a41-9b5e-cec33dab64dc" disabled="true">
             <con:settings/>
             
             
@@ -6031,7 +5882,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom074-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom075-Submit message-Exceptional flow-Data-PartInfo:href-Payload" searchProperties="true" id="c4cf2443-8667-40c8-a880-a119781b099d">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom075-Submit message-Exceptional flow-Data-PartInfo:href-Payload" searchProperties="true" id="c4cf2443-8667-40c8-a880-a119781b099d" disabled="true">
             <con:settings/>
             
             
@@ -6102,7 +5953,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom075-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom076-Submit message-Exceptional flow-Data-PartInfo:href-Not present" searchProperties="true" id="9fecf1f2-345f-4819-b15e-4966916b8deb">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom076-Submit message-Exceptional flow-Data-PartInfo:href-Not present" searchProperties="true" id="9fecf1f2-345f-4819-b15e-4966916b8deb" disabled="true">
             <con:settings/>
             
             
@@ -6173,7 +6024,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom076-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom077-Submit message-Exceptional flow-Data-PartInfo:href-Empty" searchProperties="true" id="0df4bebb-9d14-41a2-9039-eff95b80d845">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom077-Submit message-Exceptional flow-Data-PartInfo:href-Empty" searchProperties="true" id="0df4bebb-9d14-41a2-9039-eff95b80d845" disabled="true">
             <con:settings/>
             
             
@@ -6244,7 +6095,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom077-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom079-Submit message-Exceptional flow-Data-Property(MimeType)-Existence" searchProperties="true" id="2aa85746-5c38-486c-939b-2913f0eb5aa5">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom079-Submit message-Exceptional flow-Data-Property(MimeType)-Existence" searchProperties="true" id="2aa85746-5c38-486c-939b-2913f0eb5aa5" disabled="true">
             <con:settings/>
             
             
@@ -6315,7 +6166,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom079-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom080-Submit message-Exceptional flow-Data-Property(MimeType)-Not present" searchProperties="true" id="71bc254a-d99a-4159-af8a-a9ec2d036bc0">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom080-Submit message-Exceptional flow-Data-Property(MimeType)-Not present" searchProperties="true" id="71bc254a-d99a-4159-af8a-a9ec2d036bc0" disabled="true">
             <con:settings/>
             
             
@@ -6385,7 +6236,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom080-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom081-Submit message-Exceptional flow-Data-Property(MimeType)-Empty" searchProperties="true" id="203d86d8-f6b9-4835-b584-69f06bf63dbd">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom081-Submit message-Exceptional flow-Data-Property(MimeType)-Empty" searchProperties="true" id="203d86d8-f6b9-4835-b584-69f06bf63dbd" disabled="true">
             <con:settings/>
             
             
@@ -6456,7 +6307,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom081-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom083-Submit message-Exceptional flow-Data-Property(Description)-Empty" searchProperties="true" id="b02c81de-37dd-49e5-b863-3e25dd7fcd31">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom083-Submit message-Exceptional flow-Data-Property(Description)-Empty" searchProperties="true" id="b02c81de-37dd-49e5-b863-3e25dd7fcd31" disabled="true">
             <con:settings/>
             
             
@@ -6528,7 +6379,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom083-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom087-Submit message-Exceptional flow-Data-payload:payloadId-Maximum length" searchProperties="true" id="f4459016-dd53-4f70-93e1-c2f8f181ffe0">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom087-Submit message-Exceptional flow-Data-payload:payloadId-Maximum length" searchProperties="true" id="f4459016-dd53-4f70-93e1-c2f8f181ffe0" disabled="true">
             <con:settings/>
             
             
@@ -6599,7 +6450,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom087-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom089-Download Message-Basic flow" searchProperties="true" id="b2826521-5094-47be-b8cd-738abac3169e">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom089-Download Message-Basic flow" searchProperties="true" id="b2826521-5094-47be-b8cd-738abac3169e" disabled="true">
             <con:settings/>
             
             
@@ -6613,7 +6464,7 @@ ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properti
             
             
             
-            <con:testStep type="request" name="Submit Message" id="64a3212a-635d-4d24-b9bf-4d6133fad38e">
+            <con:testStep type="request" name="Submit Message" id="64a3212a-635d-4d24-b9bf-4d6133fad38e" disabled="true">
                 <con:settings/>
                 <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -6666,7 +6517,7 @@ ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properti
    </soap:Body>
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" id="3a65a26d-664a-40b6-9237-8cfd66c7c2db"/><con:assertion type="SOAP Fault Assertion" id="d3b2a875-2c73-4b67-a8c8-f45848cb70da" name="Not SOAP Fault"/><con:assertion type="XPath Match" id="f0667722-516b-4a0c-ba90-e95409275f02" name="XPath Match"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" id="c8a24d36-ed80-46f7-90dd-1c94f468ce2d" name="Script Assertion"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
 test.waitForStatus("ACKNOWLEDGED","RECEIVED");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D1" id="2b23a8f6-2bc1-4d6f-b7dd-14eae67bd851"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="request" name="downloadMessage" id="3d0a5cb7-d893-4124-8488-2b90ad7910bc">
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D1" id="2b23a8f6-2bc1-4d6f-b7dd-14eae67bd851" disabled="true"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="request" name="downloadMessage" id="3d0a5cb7-d893-4124-8488-2b90ad7910bc" disabled="true">
                 <con:settings/>
                 <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -6701,7 +6552,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageIDStartsWith("-Dom089-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom090-Download Message-Exceptional flow-Message deleted" searchProperties="true" id="7ec69cc5-ce9c-4f1a-9afb-19f8cbf3144c">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom090-Download Message-Exceptional flow-Message deleted" searchProperties="true" id="7ec69cc5-ce9c-4f1a-9afb-19f8cbf3144c" disabled="true">
             <con:settings/>
             
             
@@ -6715,7 +6566,7 @@ ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properti
             
             
             
-            <con:testStep type="request" name="Submit Message" id="2ad836f5-0bff-4b44-b0e3-74ce13887251">
+            <con:testStep type="request" name="Submit Message" id="2ad836f5-0bff-4b44-b0e3-74ce13887251" disabled="true">
                 <con:settings/>
                 <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -6768,7 +6619,7 @@ ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properti
    </soap:Body>
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" id="3a65a26d-664a-40b6-9237-8cfd66c7c2db"/><con:assertion type="SOAP Fault Assertion" id="d3b2a875-2c73-4b67-a8c8-f45848cb70da" name="Not SOAP Fault"/><con:assertion type="XPath Match" id="f0667722-516b-4a0c-ba90-e95409275f02" name="XPath Match"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" id="c8a24d36-ed80-46f7-90dd-1c94f468ce2d" name="Script Assertion"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
 test.waitForStatus("ACKNOWLEDGED","RECEIVED");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D1" id="79ec84e1-806e-445c-89b6-4ba92a8f12d1"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="request" name="downloadMessageInit" id="da253639-ecb8-4c72-b07e-0f821b8705ab">
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D1" id="79ec84e1-806e-445c-89b6-4ba92a8f12d1" disabled="true"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="request" name="downloadMessageInit" id="da253639-ecb8-4c72-b07e-0f821b8705ab" disabled="true">
                 <con:settings/>
                 <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -6797,7 +6648,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
                         <con:wsrmConfig version="1.2"/>
                     </con:request>
                 </con:config>
-            </con:testStep><con:testStep type="delay" name="D2" id="10dd89bc-365f-4e17-9679-d70b4236a036"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="request" name="downloadMessage" id="f1a5f38b-6c63-4511-9741-b7848070d7ab">
+            </con:testStep><con:testStep type="delay" name="D2" id="10dd89bc-365f-4e17-9679-d70b4236a036" disabled="true"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="request" name="downloadMessage" id="f1a5f38b-6c63-4511-9741-b7848070d7ab" disabled="true">
                 <con:settings/>
                 <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -6835,7 +6686,7 @@ declare namespace soap='http://www.w3.org/2003/05/soap-envelope';
 test.cleanDBMessageID("-Dom090-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>da253639-ecb8-4c72-b07e-0f821b8705ab</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom091-Download Message-Exceptional flow-Message not existing" searchProperties="true" id="42f8eeae-7627-49de-a0a7-362d9e84e1d0">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>da253639-ecb8-4c72-b07e-0f821b8705ab</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom091-Download Message-Exceptional flow-Message not existing" searchProperties="true" id="42f8eeae-7627-49de-a0a7-362d9e84e1d0" disabled="true">
             <con:settings/>
             
             
@@ -6849,7 +6700,7 @@ ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properti
             
             
             
-            <con:testStep type="request" name="downloadMessage" id="fc65d817-bb78-4c85-8ffe-fe917b5f2c54">
+            <con:testStep type="request" name="downloadMessage" id="fc65d817-bb78-4c85-8ffe-fe917b5f2c54" disabled="true">
                 <con:settings/>
                 <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -6880,7 +6731,7 @@ ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properti
                 </con:config>
             </con:testStep><con:tearDownScript>
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom093-Get Status-Basic flow-ACKNOWLEDGED" searchProperties="true" id="2e04241b-3edb-432b-be8a-fba8e1c62431">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom093-Get Status-Basic flow-ACKNOWLEDGED" searchProperties="true" id="2e04241b-3edb-432b-be8a-fba8e1c62431" disabled="true">
             <con:settings/>
             
             
@@ -6997,7 +6848,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
 test.cleanDBMessageID("-Dom093-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom094-Get Status-Basic flow-RECEIVED" searchProperties="true" id="e4940aed-e6a9-472f-b7b4-a1a59da606f5">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom094-Get Status-Basic flow-RECEIVED" searchProperties="true" id="e4940aed-e6a9-472f-b7b4-a1a59da606f5" disabled="true">
             <con:settings/>
             
             
@@ -7114,7 +6965,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
 test.cleanDBMessageID("-Dom094-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom095-Get Status-Basic flow-DELETED" searchProperties="true" id="e4801e3a-acdd-4253-a200-c1c288a3d42c">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom095-Get Status-Basic flow-DELETED" searchProperties="true" id="e4801e3a-acdd-4253-a200-c1c288a3d42c" disabled="true">
             <con:settings/>
             
             
@@ -7247,7 +7098,7 @@ assert (outStatus.equals("DOWNLOADED") || outStatus.equals("DELETED")), "The ret
 test.cleanDBMessageID("-Dom095-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>977767ab-2c74-46c6-b8d6-34ea85b84d76</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom098-Get Status-Basic flow-NOT_FOUND" searchProperties="true" id="5af15313-d4d3-4759-a23c-3028a2c0291e">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>977767ab-2c74-46c6-b8d6-34ea85b84d76</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom098-Get Status-Basic flow-NOT_FOUND" searchProperties="true" id="5af15313-d4d3-4759-a23c-3028a2c0291e" disabled="true">
             <con:settings/>
             
             
@@ -7311,7 +7162,7 @@ ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properti
 test.cleanDBMessageID("-Dom102-");
 test.finalize();</con:setupScript><con:tearDownScript>
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom099-List Pending Messages-Basic flow" searchProperties="true" id="e18d6cef-b431-45c4-af54-2e9c3504cff1">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom099-List Pending Messages-Basic flow" searchProperties="true" id="e18d6cef-b431-45c4-af54-2e9c3504cff1" disabled="true">
             <con:settings/>
             
             
@@ -7687,7 +7538,7 @@ test.cleanDBMessageID("-Dom099-4-");
 test.cleanDBMessageID("-Dom099-5-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a15d0fd6-9a45-4bc0-9cd5-9b917557a40b</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>12f097d7-dc49-429b-a62b-85c3a362b975</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ac44f74f-f851-457e-8274-d4946cf538d7</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a020aad4-67bc-4b2d-be0d-efa8ca0f6fdb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase id="4e0191a1-8ef4-4c7c-b98e-cf5217d19398" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom102-Test Experience-Several payloads" searchProperties="true"><con:settings/><con:testStep type="request" name="Submit Message" id="839f3079-d960-479e-b825-50faa179e077">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a15d0fd6-9a45-4bc0-9cd5-9b917557a40b</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>12f097d7-dc49-429b-a62b-85c3a362b975</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ac44f74f-f851-457e-8274-d4946cf538d7</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a020aad4-67bc-4b2d-be0d-efa8ca0f6fdb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase id="4e0191a1-8ef4-4c7c-b98e-cf5217d19398" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom102-Test Experience-Several payloads" searchProperties="true" disabled="true"><con:settings/><con:testStep type="request" name="Submit Message" id="839f3079-d960-479e-b825-50faa179e077">
                 <con:settings/>
                 <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -7780,7 +7631,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
             </con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
 test.cleanDBMessageID("-Dom102-");
 test.finalize();
-ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>5c64f413-9357-4e6d-b370-6a96a3767bee</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom103-Test Experience-href format" searchProperties="true" id="8e2266ed-8a2a-4a10-9bbd-b9c2f2f761ad">
+ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>5c64f413-9357-4e6d-b370-6a96a3767bee</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom103-Test Experience-href format" searchProperties="true" id="8e2266ed-8a2a-4a10-9bbd-b9c2f2f761ad" disabled="true">
             <con:settings/>
             <con:testStep type="request" name="Submit Message" id="e04d526e-22b1-42aa-a738-361ebc10e979">
                 <con:settings/>
@@ -7851,7 +7702,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom103-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom107-Test Experience-Sign only" searchProperties="true" id="54946de3-4651-48fe-98d7-a19f6eba6191">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom107-Test Experience-Sign only" searchProperties="true" id="54946de3-4651-48fe-98d7-a19f6eba6191" disabled="true">
             <con:settings/>
             <con:testStep type="request" name="Submit Message" id="df5de886-1b64-4f62-9a5c-e83c17105563">
                 <con:settings/>
@@ -7922,9 +7773,9 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
 test.cleanDBMessageID("-Dom107-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom108-Test Experience-NoSign-NoEnc" searchProperties="true" id="8fd105d7-ac43-4b55-94e0-53444d2e6a47">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom108-Test Experience-NoSign-NoEnc" searchProperties="true" id="8fd105d7-ac43-4b55-94e0-53444d2e6a47" disabled="true">
             <con:settings/>
-            <con:testStep type="request" name="Submit Message" id="d919a720-2440-45d4-bd99-f32bb4858cc8">
+            <con:testStep type="request" name="Submit Message" id="d919a720-2440-45d4-bd99-f32bb4858cc8" disabled="true">
                 <con:settings/>
                 <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -7990,7 +7841,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
 test.cleanDBMessageID("-Dom108-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase id="050b0673-12c6-40e1-b3b5-70f6a778c6d6" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom110-payload conversion-EDELIVERY-1436" searchProperties="true"><con:settings/><con:testStep type="request" name="Submit Message Attachment In Body" id="174aa99b-a219-4e18-9791-13338a5cdef1">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase id="050b0673-12c6-40e1-b3b5-70f6a778c6d6" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom110-payload conversion-EDELIVERY-1436" searchProperties="true" disabled="true"><con:settings/><con:testStep type="request" name="Submit Message Attachment In Body" id="174aa99b-a219-4e18-9791-13338a5cdef1" disabled="true">
                 <con:settings/>
                 <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -8043,7 +7894,7 @@ ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properti
    </soap:Body>
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" id="3a65a26d-664a-40b6-9237-8cfd66c7c2db"/><con:assertion type="SOAP Fault Assertion" id="d3b2a875-2c73-4b67-a8c8-f45848cb70da" name="Not SOAP Fault"/><con:assertion type="XPath Match" id="f0667722-516b-4a0c-ba90-e95409275f02" name="XPath Match"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" id="753e87d3-8dd2-4862-b385-4f1161093818" name="Script Assertion"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
 test.waitForStatus("ACKNOWLEDGED","RECEIVED");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" name="Submit Message Mix Attachments" id="a3e11440-2ce8-449e-b428-ae3a79019641">
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" name="Submit Message Mix Attachments" id="a3e11440-2ce8-449e-b428-ae3a79019641" disabled="true">
                 <con:settings/>
                 <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -8102,7 +7953,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
    </soap:Body>
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" id="3a65a26d-664a-40b6-9237-8cfd66c7c2db"/><con:assertion type="SOAP Fault Assertion" id="d3b2a875-2c73-4b67-a8c8-f45848cb70da" name="Not SOAP Fault"/><con:assertion type="XPath Match" id="f0667722-516b-4a0c-ba90-e95409275f02" name="XPath Match"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" id="753e87d3-8dd2-4862-b385-4f1161093818" name="Script Assertion"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
 test.waitForStatus("ACKNOWLEDGED","RECEIVED");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:attachment><con:name>fileSmall.pdf</con:name><con:contentType>application/pdf</con:contentType><con:contentId>1234</con:contentId><con:part>1234</con:part><con:url>${#Project#pdfAttachment}</con:url><con:id>e68aa69b-59b5-4507-814c-ff4527dbed1c</con:id></con:attachment><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" name="Submit Message MTOM Enabled" id="7e23c10e-8f6a-4dbc-8be8-880384a6fc0a">
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:attachment><con:name>fileSmall.pdf</con:name><con:contentType>application/pdf</con:contentType><con:contentId>1234</con:contentId><con:part>1234</con:part><con:url>${#Project#pdfAttachment}</con:url><con:id>e68aa69b-59b5-4507-814c-ff4527dbed1c</con:id></con:attachment><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" name="Submit Message MTOM Enabled" id="7e23c10e-8f6a-4dbc-8be8-880384a6fc0a" disabled="true">
                 <con:settings/>
                 <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -8164,7 +8015,7 @@ test.waitForStatus("ACKNOWLEDGED","RECEIVED");
 test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:attachment><con:name>fileSmall.pdf</con:name><con:contentType>application/pdf</con:contentType><con:contentId>1234</con:contentId><con:part>1234</con:part><con:url>C:/SoapUIProjects/sampleFiles/fileSmall.pdf</con:url><con:id>e68aa69b-59b5-4507-814c-ff4527dbed1c</con:id></con:attachment><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
 test.cleanDBMessageIDStartsWith("-Dom110-");
 test.finalize();
-ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>a3e11440-2ce8-449e-b428-ae3a79019641</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>174aa99b-a219-4e18-9791-13338a5cdef1</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom113-List Pending Messages-Non Expected Input" searchProperties="true" id="36e44f4a-09eb-4007-81f9-a8f724782019">
+ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>a3e11440-2ce8-449e-b428-ae3a79019641</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>174aa99b-a219-4e18-9791-13338a5cdef1</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom113-List Pending Messages-Non Expected Input" searchProperties="true" id="36e44f4a-09eb-4007-81f9-a8f724782019" disabled="true">
             <con:settings/>
             
             
@@ -8178,7 +8029,7 @@ ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properti
             
             
             
-            <con:testStep type="request" name="list Pending Messages" id="740ce9d9-d26f-427e-89be-848e9a35020d">
+            <con:testStep type="request" name="list Pending Messages" id="740ce9d9-d26f-427e-89be-848e9a35020d" disabled="true">
                 <con:settings/>
                 <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -8207,7 +8058,7 @@ ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properti
                 </con:config>
             </con:testStep><con:tearDownScript>
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a15d0fd6-9a45-4bc0-9cd5-9b917557a40b</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>12f097d7-dc49-429b-a62b-85c3a362b975</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ac44f74f-f851-457e-8274-d4946cf538d7</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a020aad4-67bc-4b2d-be0d-efa8ca0f6fdb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom118-Submit message-Data-AgreementRefId-Value" searchProperties="true" id="777e8f51-670e-40ed-811a-78c15950e329">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a15d0fd6-9a45-4bc0-9cd5-9b917557a40b</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>12f097d7-dc49-429b-a62b-85c3a362b975</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ac44f74f-f851-457e-8274-d4946cf538d7</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a020aad4-67bc-4b2d-be0d-efa8ca0f6fdb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom118-Submit message-Data-AgreementRefId-Value" searchProperties="true" id="777e8f51-670e-40ed-811a-78c15950e329" disabled="true">
             <con:settings/>
             
             
@@ -13730,4 +13581,4 @@ testRunner.testCase.testSuite.project.getTestSuiteList().each { testSuite ->
  	}
  }
 log.info "END: Amendment tear down sciprts"
-</script></con:config></con:testStep><con:tearDownScript>ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:requirements/><con:properties><con:property><con:name>localUrl</con:name><con:value>http://localhost:8080/domibus</con:value></con:property><con:property><con:name>remoteUrl</con:name><con:value>http://localhost:8180/domibus</con:value></con:property><con:property><con:name>pathExeSender</con:name><con:value>c:/domibus/sender/domibus/bin/</con:value></con:property><con:property><con:name>pathExeReceiver</con:name><con:value>c:/domibus/receiver/domibus/bin/</con:value></con:property><con:property><con:name>databaseBlue</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverBlue</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlBlue</con:name><con:value>jdbc:mysql://localhost:3306/domibus_blue</con:value></con:property><con:property><con:name>blueDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>blueDbPassword</con:name><con:value>root</con:value></con:property><con:property><con:name>databaseRed</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverRed</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlRed</con:name><con:value>jdbc:mysql://localhost:3306/domibus_red</con:value></con:property><con:property><con:name>redDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>redDbPassword</con:name><con:value>root</con:value></con:property><con:property><con:name>pathExeGreen</con:name><con:value>c:/work/Tools/Domibus/Releases/3.2RC1/green/domibus/bin/</con:value></con:property><con:property><con:name>jdbcUrl3</con:name><con:value>jdbc:mysql://localhost:3306/domibus_green</con:value></con:property><con:property><con:name>greenUrl</con:name><con:value>http://localhost:8280</con:value></con:property><con:property><con:name>reportFilePath</con:name><con:value>${projectDir}\\testReports\\Domibus_3_2_2_test_results.xlsx</con:value></con:property><con:property><con:name>updateReport</con:name><con:value>true</con:value></con:property><con:property><con:name>pdfAttachment</con:name><con:value>C:/SoapUIProjects/sampleFiles/fileSmall.pdf</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
+</script></con:config></con:testStep><con:tearDownScript>ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:requirements/><con:properties><con:property><con:name>localUrl</con:name><con:value>http://localhost:8080/domibus</con:value></con:property><con:property><con:name>remoteUrl</con:name><con:value>http://localhost:8180/domibus</con:value></con:property><con:property><con:name>pathExeSender</con:name><con:value>c:/domibus/sender/domibus/bin/</con:value></con:property><con:property><con:name>pathExeReceiver</con:name><con:value>c:/domibus/receiver/domibus/bin/</con:value></con:property><con:property><con:name>databaseBlue</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverBlue</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlBlue</con:name><con:value>jdbc:mysql://localhost:3306/domibus_blue</con:value></con:property><con:property><con:name>blueDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>blueDbPassword</con:name><con:value>root</con:value></con:property><con:property><con:name>databaseRed</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverRed</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlRed</con:name><con:value>jdbc:mysql://localhost:3306/domibus_red</con:value></con:property><con:property><con:name>redDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>redDbPassword</con:name><con:value>root</con:value></con:property><con:property><con:name>pathExeGreen</con:name><con:value>c:/work/Tools/Domibus/Releases/3.2RC1/green/domibus/bin/</con:value></con:property><con:property><con:name>jdbcUrl3</con:name><con:value>jdbc:mysql://localhost:3306/domibus_green</con:value></con:property><con:property><con:name>greenUrl</con:name><con:value>http://localhost:8280</con:value></con:property><con:property><con:name>reportFilePath</con:name><con:value>${projectDir}\\reports\\Domibus_3_2_2_test_results.xlsx</con:value></con:property><con:property><con:name>updateReport</con:name><con:value>true</con:value></con:property><con:property><con:name>pdfAttachment</con:name><con:value>C:/SoapUIProjects/sampleFiles/fileSmall.pdf</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
