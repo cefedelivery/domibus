@@ -43,7 +43,7 @@ export class ErrorLogComponent {
     params.set('offset', offset.toString());
     params.set('limit', limit.toString());
 
-    return this.http.get('rest/errorlog', {
+    return this.http.get('rest/errorlogs', {
       search: params
     }).map((response: Response) =>
       response.json()

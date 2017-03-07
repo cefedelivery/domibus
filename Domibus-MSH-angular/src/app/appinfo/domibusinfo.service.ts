@@ -14,7 +14,7 @@ export class DomibusInfoService {
 
   getDomibusInfo(): Observable<DomibusInfo> {
     let subject = new ReplaySubject();
-    this.http.get('rest/domibusinfo')
+    this.http.get('rest/application/info')
       .map((response: Response) => {
         let domibusInfo = new DomibusInfo(JSON.parse(response.json().version));
         return domibusInfo;

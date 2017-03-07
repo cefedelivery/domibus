@@ -1,4 +1,4 @@
-package eu.domibus.web.security;
+package eu.domibus.security;
 
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
