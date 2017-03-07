@@ -14,11 +14,11 @@
           entry-point-ref="http403ForbiddenEntryPoint"
           authentication-manager-ref="authenticationManagerForAdminConsole">
 
-        <intercept-url pattern="/api/authenticate" access="permitAll" />
-        <intercept-url pattern="/api/logout" access="permitAll" />
-        <intercept-url pattern="/api/domibusinfo" access="permitAll" />
+        <intercept-url pattern="/rest/authenticate" access="permitAll" />
+        <intercept-url pattern="/rest/logout" access="permitAll" />
+        <intercept-url pattern="/rest/domibusinfo" access="permitAll" />
         <intercept-url pattern="/" access="permitAll" />
-        <intercept-url pattern="/api/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')" />
+        <intercept-url pattern="/rest/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')" />
 
         <!-- Enable CSRF protection -->
         <csrf request-matcher-ref="csrfURLMatcher" token-repository-ref="tokenRepository"/>
@@ -34,7 +34,7 @@
         <beans:property name="cookieHttpOnly" value="false"/>
     </beans:bean>
     <beans:bean id="csrfURLMatcher" class="eu.domibus.web.matcher.URLCsrfMatcher">
-        <beans:property name="ignoreUrl" value="/api/authenticate"/>
+        <beans:property name="ignoreUrl" value="/rest/authenticate"/>
     </beans:bean>
 
     <beans:bean id="http403ForbiddenEntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"/>
