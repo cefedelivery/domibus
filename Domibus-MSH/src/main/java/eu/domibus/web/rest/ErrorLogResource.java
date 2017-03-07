@@ -34,7 +34,7 @@ public class ErrorLogResource {
             ErrorLogRO entry1 = new ErrorLogRO();
             entry1.setErrorCode("DOM_00" + i);
             entry1.setErrorDetail("Error occurred while calling the backend " + i);
-            entry1.setErrorSignalMessageId("signal id qqq" + i);
+            entry1.setErrorSignalMessageId("signal id" + i);
             entry1.setMessageInErrorId("messageIn error" + i);
             entry1.setMshRole("SENDING");
             entry1.setNotified(new Timestamp(System.currentTimeMillis()));

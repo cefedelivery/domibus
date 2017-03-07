@@ -3,13 +3,14 @@ package eu.domibus.web.rest.ro;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author Cosmin Baciu
  * @since 3.3
  */
-public class ErrorLogResultRO {
+public class ErrorLogResultRO implements Serializable {
 
     private List<ErrorLogRO> errorLogEntries;
     private Integer count;

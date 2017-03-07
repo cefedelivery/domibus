@@ -1,17 +1,16 @@
 package eu.domibus.web.rest.ro;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author Cosmin Baciu
  * @since 3.3
  */
-public class UserRO {
+public class UserRO implements Serializable {
 
     private Integer id;
-
     private String username;
-
     private List<String> authorities;
 
     public Integer getId() {

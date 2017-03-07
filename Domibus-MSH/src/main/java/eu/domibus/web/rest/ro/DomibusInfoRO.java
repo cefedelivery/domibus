@@ -1,10 +1,12 @@
 package eu.domibus.web.rest.ro;
 
+import java.io.Serializable;
+
 /**
  * @author Cosmin Baciu
  * @since 3.3
  */
-public class DomibusInfoRO {
+public class DomibusInfoRO implements Serializable {
 
     private String version;
 

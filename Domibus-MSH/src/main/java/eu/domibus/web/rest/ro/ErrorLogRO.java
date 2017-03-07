@@ -1,12 +1,13 @@
 package eu.domibus.web.rest.ro;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * @author Cosmin Baciu
  * @since 3.3
  */
-public class ErrorLogRO {
+public class ErrorLogRO implements Serializable {
 
     private String errorSignalMessageId;
     private String mshRole;
