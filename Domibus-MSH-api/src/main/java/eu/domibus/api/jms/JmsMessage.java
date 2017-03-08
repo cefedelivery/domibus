@@ -1,11 +1,14 @@
 package eu.domibus.api.jms;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Cosmin Baciu on 17-Aug-16.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 public class JmsMessage {
 
@@ -17,6 +20,8 @@ public class JmsMessage {
     protected Date timestamp;
 
     protected Map<String, Object> properties = new HashMap<>();
+
+    protected Map<String, Object> customProperties;
 
     public String getId() {
         return id;
@@ -69,10 +74,12 @@ public class JmsMessage {
     }
 
     public Map<String, Object> getCustomProperties() {
-        Map<String, Object> customProperties = new HashMap<>();
-        for (String key : properties.keySet()) {
-            if (!key.startsWith("JMS")) {
-                customProperties.put(key, properties.get(key));
+        if (customProperties == null) {
+            customProperties = new HashMap<>();
+            for (String key : properties.keySet()) {
+                if (!key.startsWith("JMS")) {
+                    customProperties.put(key, properties.get(key));
+                }
             }
         }
         return customProperties;
@@ -86,4 +93,22 @@ public class JmsMessage {
         this.properties = properties;
     }
 
+    public String getStringProperty(String key) {
+        return (String) properties.get(key);
+    }
+
+    public String getCustomStringProperty(String key) {
+        return (String) getCustomProperties().get(key);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("type", type)
+                .append("content", content)
+                .append("timestamp", timestamp)
+                .append("properties", properties)
+                .toString();
+    }
 }

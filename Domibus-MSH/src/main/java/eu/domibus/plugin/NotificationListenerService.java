@@ -1,11 +1,14 @@
 package eu.domibus.plugin;
 
-import eu.domibus.common.AuthRole;
-import eu.domibus.common.NotificationType;
+import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.common.*;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
+import eu.domibus.plugin.delegate.BackendConnectorDelegate;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +28,6 @@ import javax.jms.Queue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -42,10 +44,10 @@ public class NotificationListenerService implements MessageListener, JmsListener
     private JmsListenerContainerFactory jmsListenerContainerFactory;
 
     @Autowired
-    AuthUtils authUtils;
+    private AuthUtils authUtils;
 
     @Autowired
-    private Properties domibusProperties;
+    private BackendConnectorDelegate backendConnectorDelegate;
 
     private Queue backendNotificationQueue;
     private BackendConnector.Mode mode;
@@ -62,12 +64,16 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
     @Transactional
     public void onMessage(final Message message) {
-        if (!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.setAuthenticationToSecurityContext("notif", "notif", AuthRole.ROLE_ADMIN);
+        }
 
         try {
             final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
             final NotificationType notificationType = NotificationType.valueOf(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE));
+
+            LOG.info("Received message with messageId [" + messageId + "] and notification type [" + notificationType + "]");
+
             switch (notificationType) {
                 case MESSAGE_RECEIVED:
                     backendConnector.deliverMessage(messageId);
@@ -79,16 +85,36 @@ public class NotificationListenerService implements MessageListener, JmsListener
                     backendConnector.messageSendSuccess(messageId);
                     break;
                 case MESSAGE_RECEIVED_FAILURE:
-                    backendConnector.messageReceiveFailed(messageId, message.getStringProperty(MessageConstants.ENDPOINT));
+                    doMessageReceiveFailure(message);
+
             }
-        } catch (JMSException jmsEx) {
-            LOG.error("Error getting the property from JMS message", jmsEx);
-            // TODO to be changed with something like the new DomibusCoreException
-            throw new RuntimeException("Error getting the property from JMS message", jmsEx);
+        } catch (Exception e) {
+            LOG.error("Error processing message", e);
+            throw new RuntimeException("Error processing message", e);
         }
     }
 
-    public Collection<String> listPendingMessages() {
+
+    protected void doMessageReceiveFailure(final Message message) throws JMSException {
+        MessageReceiveFailureEvent event = new MessageReceiveFailureEvent();
+        final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+        event.setMessageId(messageId);
+        final String errorCode = message.getStringProperty(MessageConstants.ERROR_CODE);
+        final String errorDetail = message.getStringProperty(MessageConstants.ERROR_DETAIL);
+        ErrorResultImpl errorResult = new ErrorResultImpl();
+        try {
+            errorResult.setErrorCode(ErrorCode.findBy(errorCode));
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Could not find error code for [" + errorCode + "]");
+        }
+        errorResult.setErrorDetail(errorDetail);
+        errorResult.setMessageInErrorId(messageId);
+        event.setErrorResult(errorResult);
+        event.setEndpoint(message.getStringProperty(MessageConstants.ENDPOINT));
+        backendConnectorDelegate.messageReceiveFailed(backendConnector, event);
+    }
+
+    public final Collection<String> listPendingMessages() {
         if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
 
@@ -99,11 +125,11 @@ public class NotificationListenerService implements MessageListener, JmsListener
         return getQueueElements(NotificationType.MESSAGE_RECEIVED, originalUser);
     }
 
-    public Collection<String> listSendFailureMessages() {
+    public final Collection<String> listSendFailureMessages() {
         return getQueueElements(NotificationType.MESSAGE_SEND_FAILURE);
     }
 
-    public Collection<String> listReceiveFailureMessages() {
+    public final Collection<String> listReceiveFailureMessages() {
         return getQueueElements(NotificationType.MESSAGE_RECEIVED_FAILURE);
     }
 
@@ -123,9 +149,9 @@ public class NotificationListenerService implements MessageListener, JmsListener
     protected Collection<String> browseQueue(final NotificationType notificationType, final String finalRecipient) {
 
         final Collection<String> result = new ArrayList<>();
-        final String strMaxPendingMessagesRetrieveCount = domibusProperties.getProperty(PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
-        final int intMaxPendingMessagesRetrieveCount = Integer.parseInt(strMaxPendingMessagesRetrieveCount);
-        LOG.debug("maxPendingMessagesRetrieveCount:" + intMaxPendingMessagesRetrieveCount);
+        //final String strMaxPendingMessagesRetrieveCount = domibusProperties.getProperty(PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
+        //final int intMaxPendingMessagesRetrieveCount = Integer.parseInt(strMaxPendingMessagesRetrieveCount);
+        //LOG.debug("maxPendingMessagesRetrieveCount:" + intMaxPendingMessagesRetrieveCount);
 
         List<JmsMessage> messages;
         try {
@@ -136,18 +162,18 @@ public class NotificationListenerService implements MessageListener, JmsListener
             throw new RuntimeException("Queue name error", jmsEx.getCause());
         }
 
-        int countOfMessagesIncluded = 0;
+        //int countOfMessagesIncluded = 0;
         for (JmsMessage message : messages) {
             if (notificationType.name().equals(message.getCustomStringProperty(MessageConstants.NOTIFICATION_TYPE))) {
                 if (finalRecipient == null || (StringUtils.equals(finalRecipient, message.getStringProperty(MessageConstants.FINAL_RECIPIENT)))) {
                     String messageId = message.getCustomStringProperty(MessageConstants.MESSAGE_ID);
                     result.add(messageId);
-                    countOfMessagesIncluded++;
+                    //countOfMessagesIncluded++;
                     LOG.debug("Added MessageId [" + messageId + "]");
-                    if ((intMaxPendingMessagesRetrieveCount != 0) && (countOfMessagesIncluded >= intMaxPendingMessagesRetrieveCount)) {
+                    /*if ((intMaxPendingMessagesRetrieveCount != 0) && (countOfMessagesIncluded >= intMaxPendingMessagesRetrieveCount)) {
                         LOG.info("Limit of pending messages to return has been reached [" + countOfMessagesIncluded + "]");
                         break;
-                    }
+                    }*/
                 }
             }
         }
@@ -178,10 +204,10 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
         JmsMessage message = jmsManager.consumeMessage(queueName, messageId);
         if (message == null) {
-            LOG.businessError(DomibusMessageCode.BUS_MSG_NOT_FOUND, messageId);
+            LOG.error("Message not found [" + messageId + "]");
             throw new MessageNotFoundException("No message with id [" + messageId + "] pending for download");
         }
-        LOG.businessInfo(DomibusMessageCode.BUS_MSG_CONSUMED, messageId, queueName);
+        LOG.info("Message [" + messageId + "] consumed from queue [" + queueName + "]");
 
     }
 

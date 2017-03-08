@@ -4,6 +4,7 @@ import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.activemq.broker.jmx.BrokerViewMBean;
 import org.apache.activemq.broker.jmx.QueueViewMBean;
