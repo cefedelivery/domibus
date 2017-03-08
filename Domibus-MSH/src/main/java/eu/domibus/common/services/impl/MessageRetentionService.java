@@ -1,14 +1,16 @@
-package eu.domibus.ebms3.common.model;
+package eu.domibus.common.services.impl;
 
+import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.util.CollectionUtil;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.security.util.AuthUtils;
-import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.NotificationListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -16,22 +18,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.core.BrowserCallback;
-import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
-import javax.jms.QueueBrowser;
-import javax.jms.Session;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
-//TODO move this class out of the model package
+
 /**
- * @author Christian Koch, Stefan Mueller
+ * This service class is responsible for the retention and clean up of Domibus messages, including signal messages.
+ * Notice that only payloads data are really deleted.
+ *
+ * @author Christian Koch, Stefan Mueller, Federico Martini, Cosmin Baciu
+ * @since 3.0
  */
 @Service
 public class MessageRetentionService {
@@ -68,10 +69,8 @@ public class MessageRetentionService {
     @Autowired
     private BackendNotificationService backendNotificationService;
 
-    // we could use any internal jmsOperations as we need to browse the queues anyways
-    @Qualifier(value = "jmsTemplateNotify")
     @Autowired
-    private JmsOperations jmsOperations;
+    private JMSManager jmsManager;
 
     @Autowired
     AuthUtils authUtils;
@@ -96,7 +95,8 @@ public class MessageRetentionService {
     public void deleteAllExpiredMessages() {
         final List<String> mpcs = pModeProvider.getMpcURIList();
         final Integer expiredDownloadedMessagesLimit = Integer.MAX_VALUE;
-        final Integer expiredNotDownloadedMessagesLimit = Integer.MAX_VALUE;;
+        final Integer expiredNotDownloadedMessagesLimit = Integer.MAX_VALUE;
+
         for (final String mpc : mpcs) {
             deleteExpiredMessages(mpc, expiredDownloadedMessagesLimit, expiredNotDownloadedMessagesLimit);
         }
@@ -182,19 +182,16 @@ public class MessageRetentionService {
         LOG.debug("Deleting message [" + messageId + "]");
         if (backendNotificationService.getNotificationListenerServices() != null) {
             for (NotificationListener notificationListener : backendNotificationService.getNotificationListenerServices()) {
-                final String selector = MessageConstants.MESSAGE_ID + "= '" + messageId + "'";
-                boolean hasMessage = jmsOperations.browseSelected(notificationListener.getBackendNotificationQueue(), selector, new BrowserCallback<Boolean>() {
-                    @Override
-                    public Boolean doInJms(final Session session, final QueueBrowser browser) throws JMSException {
-                        final Enumeration browserEnumeration = browser.getEnumeration();
-                        if (browserEnumeration.hasMoreElements()) {
-                            return true;
-                        }
-                        return false;
+                try {
+                    String queueName = notificationListener.getBackendNotificationQueue().getQueueName();
+                    JmsMessage message = jmsManager.consumeMessage(queueName, messageId);
+                    if (message != null) {
+                        LOG.info("Message [" + messageId + "] consumed from queue [" + queueName + "]");
                     }
-                });
-                if (hasMessage) {
-                    jmsOperations.receiveSelected(notificationListener.getBackendNotificationQueue(), selector);
+                } catch (JMSException jmsEx) {
+                    LOG.error("Error trying to get the queue name", jmsEx);
+                    // TODO to be changed with something like the new DomibusCoreException
+                    throw new RuntimeException("Queue name error", jmsEx.getCause());
                 }
             }
         }

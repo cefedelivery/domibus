@@ -1,4 +1,4 @@
-package eu.domibus.ebms3.common.model;
+package eu.domibus.common.services.impl;
 
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.ebms3.security.util.AuthUtils;
@@ -10,16 +10,13 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
-//TODO move this class out of the model package
 /**
  * @author Christian Koch, Stefan Mueller
  */
 @DisallowConcurrentExecution
 public class RetentionWorker extends QuartzJobBean {
 
-
     private static final Log LOG = LogFactory.getLog(RetentionWorker.class);
-
 
     @Autowired
     private MessageRetentionService messageRetentionService;
