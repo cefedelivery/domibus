@@ -67,6 +67,8 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_SECURITY_POLICY_INCOMING_USE("BUS-056", "Security policy [{}] for incoming message is used"),
     BUS_PARTY_ROLE_NOT_FOUND("BUS-057", "No Role with value [{}] has been found"),
     BUS_PARTY_NAME_NOT_FOUND("BUS-058", "Party with name [{}] has not been found"),
+    BUS_MSG_NOT_FOUND("BUS-059", "Message with id [{}] has not been found"),
+    BUS_MSG_CONSUMED("BUS-060", "Message with id [{}] has been consumed from the queue [{}]"),
 
     SEC_UNSECURED_LOGIN_ALLOWED("SEC-001", "Unsecure login is allowed, no authentication will be performed"),
     SEC_BASIC_AUTHENTICATION_USE("SEC-002", "Basic authentication is used"),

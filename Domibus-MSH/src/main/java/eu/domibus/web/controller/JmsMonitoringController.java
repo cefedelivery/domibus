@@ -3,10 +3,10 @@ package eu.domibus.web.controller;
 import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.util.JsonUtil;
-import org.apache.commons.lang.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.util.JsonUtil;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,6 +25,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
+ * // TODO Documentation
  * Created by Cosmin Baciu on 17-Aug-16.
  */
 @Controller
@@ -65,7 +66,7 @@ public class JmsMonitoringController {
         model.addObject("toDate", df.format(to));
 
         if(StringUtils.isNotEmpty(source)) {
-            List<JmsMessage> messages = jmsManager.getMessages(source, jmsType, from, to, selector);
+            List<JmsMessage> messages = jmsManager.browseMessages(source, jmsType, from, to, selector);
             model.addObject("messages", messages);
         }
 
@@ -156,7 +157,8 @@ public class JmsMonitoringController {
                 try {
                     jmsManager.sendMessageToQueue(message, destination);
                     messageOutcome.append("Message sent.");
-                } catch (Exception e) {
+                } catch (Exception ex) {
+                    LOG.error("Send failed", ex);
                     messageOutcome.append("Failed to send message [" + message + "]");
                 }
             }
@@ -164,14 +166,16 @@ public class JmsMonitoringController {
             try {
                 jmsManager.moveMessages(source, destination, messageIds);
                 messageOutcome.append("Messages moved.");
-            } catch (Exception e) {
+            } catch (Exception ex) {
+                LOG.error("Move failed", ex);
                 messageOutcome.append("Failed to move messages");
             }
         } else if ("remove".equals(action)) {
             try {
                 jmsManager.deleteMessages(source, messageIds);
                 messageOutcome.append("Messages deleted.");
-            } catch (Exception e) {
+            } catch (Exception ex) {
+                LOG.error("Delete failed", ex);
                 messageOutcome.append("Failed to delete messages");
             }
         }

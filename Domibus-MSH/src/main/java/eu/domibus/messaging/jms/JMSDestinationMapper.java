@@ -4,10 +4,13 @@ import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
+ * // TODO Documentation
  * @author Cosmin Baciu
  * @since 3.2
  */
@@ -20,6 +23,14 @@ public class JMSDestinationMapper {
             result.put(spiEntry.getKey(), convert(spiEntry.getValue()));
         }
         return result;
+    }
+
+    public List<JMSDestination> convert(List<InternalJMSDestination> internalJmsDestinations) {
+        List<JMSDestination> dests = new ArrayList<>();
+        for (InternalJMSDestination internalJmsDestination : internalJmsDestinations) {
+            dests.add(convert(internalJmsDestination));
+        }
+        return dests;
     }
 
     public JMSDestination convert(InternalJMSDestination internalJmsDestination) {

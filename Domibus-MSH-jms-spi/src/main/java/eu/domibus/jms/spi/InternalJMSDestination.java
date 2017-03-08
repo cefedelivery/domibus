@@ -8,6 +8,7 @@ import java.util.Map;
  * @since 3.2
  */
 public class InternalJMSDestination {
+
     public final static String QUEUE_TYPE = "Queue";
     public final static String TOPIC_TYPE = "Topic"; 
 

@@ -1,5 +1,6 @@
 package eu.domibus.common.services;
 
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.util.CollectionUtil;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
@@ -17,7 +18,6 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.jms.core.JmsOperations;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -56,7 +56,7 @@ public class MessageRetentionServiceTest {
     private BackendNotificationService backendNotificationService;
 
     @Injectable
-    private JmsOperations jmsTemplateNotify;
+    private JMSManager jmsManager;
 
     @Injectable
     AuthUtils authUtils;
