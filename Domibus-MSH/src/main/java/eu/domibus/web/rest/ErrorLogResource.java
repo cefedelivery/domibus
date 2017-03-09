@@ -112,12 +112,14 @@ public class ErrorLogResource {
 //        model.addObject("beginIndex", begin);
 //        model.addObject("endIndex", end);
         if (page <= pages) {
-            final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(size * (page - 1), size, column, asc, filters);
+            final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(size * (page/* - 1*/), size, column, asc, filters);
             result.setErrorLogEntries(convert(errorLogEntries));
         }
 
         result.setErrorCodes(ErrorCode.values());
         result.setMshRoles(MSHRole.values());
+        result.setPage(page);
+        result.setPageSize(size);
 
         return result;
     }

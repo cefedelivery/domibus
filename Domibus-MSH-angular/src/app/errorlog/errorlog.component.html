@@ -102,7 +102,7 @@
   </div>
 
   <div class="rowsDiv">
-    <md-select placeholder="Rows" [(ngModel)]="limit" name="limit" (change)="changeRowLimits($event)">
+    <md-select placeholder="Rows" [(ngModel)]="pageSize" name="pageSize" (change)="changeRowLimits($event)">
       <md-option *ngFor="let rowLimit of rowLimits" [value]="rowLimit.value">
         {{rowLimit.key}}
       </md-option>
@@ -122,7 +122,7 @@
     [loadingIndicator]="loading"
     [count]="count"
     [offset]="offset"
-    [limit]="limit"
+    [limit]="pageSize"
     (page)='onPage($event)'
     (sort)="onSort($event)">
     <ngx-datatable-column name="ErrorSignalMessageId" >

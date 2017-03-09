@@ -37,7 +37,7 @@ export class ErrorLogComponent {
   }
 
   ngOnInit() {
-    this.page(this.offset, this.pageSize, this.offset, this.asc);
+    this.page(this.offset, this.pageSize, this.orderBy, this.asc);
   }
 
   getErrorLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<ErrorLogResult> {
@@ -45,7 +45,10 @@ export class ErrorLogComponent {
     params.set('page', offset.toString());
     params.set('pageSize', pageSize.toString());
     params.set('orderBy', orderBy);
-    params.set('asc', asc.toString());
+
+    if(asc != null) {
+      params.set('asc', asc.toString());
+    }
 
     return this.http.get('rest/errorlogs', {
       search: params
@@ -55,9 +58,6 @@ export class ErrorLogComponent {
   }
 
   page(offset, pageSize, orderBy, asc) {
-    let start = offset * pageSize;
-    let end = start + pageSize;
-    console.log("offset:" + offset + ";pageSize:" + pageSize + ";start:" + start + ";end:" + end);
     this.loading = true;
 
     this.getErrorLogEntries(offset, pageSize, orderBy, asc).subscribe((result: ErrorLogResult) => {
@@ -66,12 +66,20 @@ export class ErrorLogComponent {
       this.pageSize = pageSize;
       this.orderBy = orderBy;
       this.asc = asc;
-
-      this.rows = result.errorLogEntries;
       this.count = result.count;
 
-      this.filter = result.filter;
+      const start = offset * pageSize;
+      const end = start + pageSize;
+      const newRows = [...result.errorLogEntries];
 
+      let index = 0;
+      for (let i = start; i < end; i++) {
+        newRows[i] = result.errorLogEntries[index++];
+      }
+
+      this.rows = newRows;
+
+      this.filter = result.filter;
       this.mshRoles = result.mshRoles;
       this.errorCodes = result.errorCodes;
 
@@ -97,13 +105,12 @@ export class ErrorLogComponent {
   changeRowLimits(event) {
     let newPageLimit = event.value;
     console.log('New page limit:', newPageLimit);
-    this.page(this.offset, newPageLimit, this.orderBy, this.asc);
+    this.page(0, newPageLimit, this.orderBy, this.asc);
   }
 
   search() {
     console.log("Searching...");
-
-    //TODO get the filter and perform a search
+    this.page(0, this.pageSize, this.orderBy, this.asc);
   }
 
 }
