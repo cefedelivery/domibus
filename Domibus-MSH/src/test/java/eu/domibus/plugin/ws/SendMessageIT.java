@@ -12,6 +12,7 @@ import eu.domibus.plugin.webService.generated.SendResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -41,6 +42,7 @@ public class SendMessageIT extends AbstractSendMessageIT {
      * @throws InterruptedException
      */
     @Test
+    @Transactional
     public void testSendMessageOK() throws SendMessageFault, InterruptedException, SQLException {
 
         String payloadHref = "sbdh-order";

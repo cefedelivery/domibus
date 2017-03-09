@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -99,6 +100,7 @@ public class ReceiveMessageIT extends AbstractIT {
      *                        ref: Receive Message-01
      */
     @Test
+    @Transactional
     public void testReceiveMessage() throws SOAPException, IOException, SQLException, ParserConfigurationException, SAXException {
         String filename = "SOAPMessage2.xml";
         String messageId = "43bb6883-77d2-4a41-bac4-52a485d50084@domibus.eu";
@@ -144,6 +146,7 @@ public class ReceiveMessageIT extends AbstractIT {
      *                      ref: Receive Message-02
      */
     @Test
+    @Transactional
     public void testReceiveMessageWithPolicy() throws IOException, SOAPException, SQLException, ParserConfigurationException, SAXException {
         String filename = "SOAPMessage.xml";
         String messageId = "359b840b-b215-4c70-89e7-59aa0fe73cec@domibus.eu";
@@ -160,6 +163,7 @@ public class ReceiveMessageIT extends AbstractIT {
     }
 
     @Test
+    @Transactional
     public void testReceivePingMessage() throws IOException, SOAPException, SQLException, ParserConfigurationException, SAXException {
         String filename = "SOAPPingMessage.xml";
         String messageId = "ping123@domibus.eu";

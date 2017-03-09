@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -73,6 +74,7 @@ public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
      * @throws InterruptedException
      */
     @Test
+    @Transactional
     public void testSendMessageValid() throws SendMessageFault, InterruptedException {
 
         String payloadHref = "payload";
