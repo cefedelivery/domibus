@@ -24,6 +24,7 @@ import eu.domibus.plugin.routing.dao.BackendFilterDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ public class RoutingService {
     }
 
     @CacheEvict(value = "backendFilterCache", allEntries = true)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateBackendFilters(final List<BackendFilter> filters) {
         backendFilterDao.update(filters);
     }
