@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
@@ -92,6 +93,7 @@ public abstract class PModeProvider {
     public abstract void refresh();
 
     @Transactional(propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<String> updatePModes(byte[] bytes) throws XmlProcessingException {
         LOG.debug("Updating the PMode");
 

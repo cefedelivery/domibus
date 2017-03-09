@@ -29,10 +29,12 @@
 
     <http auto-config="true" authentication-manager-ref="authenticationManagerForAdminConsole">
         <intercept-url pattern="/home**" access="ROLE_USER"/>
-        <intercept-url pattern="/home/messagelog**" access="ROLE_USER"/>
-        <intercept-url pattern="/home/errorlog**" access="ROLE_USER"/>
-        <intercept-url pattern="/home/messagefilter**" access="ROLE_USER"/>
-        <intercept-url pattern="/home/updatepmode**" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/home/messagelog/**" access="ROLE_USER"/>
+        <intercept-url pattern="/home/errorlog/**" access="ROLE_USER"/>
+        <intercept-url pattern="/home/messagefilter/**" access="ROLE_USER"/>
+        <intercept-url pattern="/home/updatepmode/**" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/home/uploadPmodeFile/**" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/home/uploadTruststoreFile/**" access="ROLE_ADMIN"/>
         <logout logout-success-url="/home"/>
     </http>
 </beans:beans>

@@ -101,5 +101,5 @@ sudo service domibus start
 
 while ! curl --output /dev/null --silent --head --fail http://localhost:8080/domibus/home; do sleep 1 && echo -n .; done;
 
-curl -X POST -F pmode=@"$DOMIBUS_DIST/conf/pmodes/domibus-ceftestparty8gw-pmode.xml" http://localhost:8080/domibus/home/uploadPmodeFile
+curl --user admin:123456 -X POST -F pmode=@"$DOMIBUS_DIST/conf/pmodes/domibus-ceftestparty8gw-pmode.xml" http://localhost:8080/domibus/home/uploadPmodeFile
 

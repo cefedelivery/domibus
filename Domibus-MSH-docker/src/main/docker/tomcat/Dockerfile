@@ -73,7 +73,7 @@ RUN echo '#!/bin/bash' >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo "cd $CATALINA_HOME" >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo './bin/catalina.sh start' >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo "while ! curl --output /dev/null --silent --head --fail http://localhost:8080/domibus/home; do sleep 1 && echo -n . ; done" >> $DOMIBUS_DIST/entrypoint.sh
-RUN echo "curl -X POST -F pmode=@\"$DOMIBUS_DIST/conf/pmodes/$PMODE_NAME\" http://localhost:8080/domibus/home/uploadPmodeFile" >> $DOMIBUS_DIST/entrypoint.sh
+RUN echo "curl --user admin:123456 -X POST -F pmode=@\"$DOMIBUS_DIST/conf/pmodes/$PMODE_NAME\" http://localhost:8080/domibus/home/uploadPmodeFile" >> $DOMIBUS_DIST/entrypoint.sh
 RUN echo "while true ; do sleep 1 ; done;" >> $DOMIBUS_DIST/entrypoint.sh
 RUN chmod 777 $DOMIBUS_DIST/entrypoint.sh
 EXPOSE 8080
