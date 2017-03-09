@@ -18,6 +18,8 @@ export class ErrorLogComponent {
   rows = [];
   count: number = 0;
   offset: number = 0;
+  orderBy: string;
+  asc: boolean;
 
   ROW_LIMITS = [
     {key: '10', value: 10},
@@ -26,7 +28,7 @@ export class ErrorLogComponent {
     {key: '100', value: 100}
   ];
   rowLimits: Array<any> = this.ROW_LIMITS;
-  limit: number = this.ROW_LIMITS[0].value;
+  pageSize: number = this.ROW_LIMITS[0].value;
 
   mshRoles: Array<String>;
   errorCodes: Array<String>;
@@ -35,13 +37,15 @@ export class ErrorLogComponent {
   }
 
   ngOnInit() {
-    this.page(this.offset, this.limit);
+    this.page(this.offset, this.pageSize, this.offset, this.asc);
   }
 
-  getErrorLogEntries(offset: number, limit: number): Observable<ErrorLogResult> {
+  getErrorLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<ErrorLogResult> {
     let params: URLSearchParams = new URLSearchParams();
-    params.set('offset', offset.toString());
-    params.set('limit', limit.toString());
+    params.set('page', offset.toString());
+    params.set('pageSize', pageSize.toString());
+    params.set('orderBy', orderBy);
+    params.set('asc', asc.toString());
 
     return this.http.get('rest/errorlogs', {
       search: params
@@ -50,18 +54,23 @@ export class ErrorLogComponent {
      );
   }
 
-  page(offset, limit) {
-    let start = offset * limit;
-    let end = start + limit;
-    console.log("offset:" + offset + ";limit:" + limit + ";start:" + start + ";end:" + end);
+  page(offset, pageSize, orderBy, asc) {
+    let start = offset * pageSize;
+    let end = start + pageSize;
+    console.log("offset:" + offset + ";pageSize:" + pageSize + ";start:" + start + ";end:" + end);
     this.loading = true;
 
-    this.getErrorLogEntries(offset, limit).subscribe((result: ErrorLogResult) => {
+    this.getErrorLogEntries(offset, pageSize, orderBy, asc).subscribe((result: ErrorLogResult) => {
       console.log("errorLog response:" + result);
       this.offset = offset;
+      this.pageSize = pageSize;
+      this.orderBy = orderBy;
+      this.asc = asc;
 
       this.rows = result.errorLogEntries;
       this.count = result.count;
+
+      this.filter = result.filter;
 
       this.mshRoles = result.mshRoles;
       this.errorCodes = result.errorCodes;
@@ -76,24 +85,25 @@ export class ErrorLogComponent {
 
   onPage(event) {
     console.log('Page Event', event);
-    this.page(event.offset, event.limit);
+    this.page(event.offset, event.pageSize, this.orderBy, this.asc);
   }
 
   onSort(event) {
     console.log('Sort Event', event);
     //TODO pass other properties
-    this.page(this.offset, this.limit);
+    this.page(this.offset, this.pageSize, "TODO_PASS_COLUMN", "TODO_PASS_ORDER");
   }
 
   changeRowLimits(event) {
     let newPageLimit = event.value;
-    this.limit = newPageLimit;
     console.log('New page limit:', newPageLimit);
-    this.page(this.offset, newPageLimit);
+    this.page(this.offset, newPageLimit, this.orderBy, this.asc);
   }
 
   search() {
     console.log("Searching...");
+
+    //TODO get the filter and perform a search
   }
 
 }

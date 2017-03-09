@@ -1,5 +1,8 @@
 package eu.domibus.web.rest.ro;
 
+import eu.domibus.common.ErrorCode;
+import eu.domibus.common.MSHRole;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,9 +13,9 @@ import java.util.Date;
 public class ErrorLogRO implements Serializable {
 
     private String errorSignalMessageId;
-    private String mshRole;
+    private MSHRole mshRole;
     private String messageInErrorId;
-    private String errorCode;
+    private ErrorCode errorCode;
     private String errorDetail;
     private Date timestamp;
     private Date notified;
@@ -25,28 +28,12 @@ public class ErrorLogRO implements Serializable {
         this.errorSignalMessageId = errorSignalMessageId;
     }
 
-    public String getMshRole() {
-        return mshRole;
-    }
-
-    public void setMshRole(String mshRole) {
-        this.mshRole = mshRole;
-    }
-
     public String getMessageInErrorId() {
         return messageInErrorId;
     }
 
     public void setMessageInErrorId(String messageInErrorId) {
         this.messageInErrorId = messageInErrorId;
-    }
-
-    public String getErrorCode() {
-        return errorCode;
-    }
-
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
     }
 
     public String getErrorDetail() {
@@ -71,5 +58,21 @@ public class ErrorLogRO implements Serializable {
 
     public void setNotified(Date notified) {
         this.notified = notified;
+    }
+
+    public MSHRole getMshRole() {
+        return mshRole;
+    }
+
+    public void setMshRole(MSHRole mshRole) {
+        this.mshRole = mshRole;
+    }
+
+    public ErrorCode getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(ErrorCode errorCode) {
+        this.errorCode = errorCode;
     }
 }

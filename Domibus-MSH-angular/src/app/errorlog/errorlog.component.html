@@ -26,14 +26,14 @@
                     <td class="dateTimeTitle">Timestamp:</td>
                     <td>
                       <md2-datepicker placeholder="From:"
-                                      [(ngModel)]="filter.fromTimestamp"
+                                      [(ngModel)]="filter.timestampFrom"
                                       name="fromTimestmap"
                                       [type]="'datetime'"
                                       #timestampControl="ngModel"></md2-datepicker>
                     </td>
                     <td>
                       <md2-datepicker placeholder="To:"
-                                      [(ngModel)]="filter.toTimestamp"
+                                      [(ngModel)]="filter.timestampTo"
                                       name="toTimestmap"
                                       [type]="'datetime'"
                                       #timestampControl="ngModel"></md2-datepicker>
@@ -61,15 +61,15 @@
                     <td class="dateTimeTitle">Notified:</td>
                     <td>
                       <md2-datepicker placeholder="From:"
-                                      [(ngModel)]="filter.fromNotified"
-                                      name="fromNotified"
+                                      [(ngModel)]="filter.notifiedFrom"
+                                      name="notifiedFrom"
                                       [type]="'datetime'"
                                       #timestampControl="ngModel"></md2-datepicker>
                     </td>
                     <td>
                       <md2-datepicker placeholder="To:"
-                                      [(ngModel)]="filter.toNotified"
-                                      name="toNotified"
+                                      [(ngModel)]="filter.notifiedTo"
+                                      name="notifiedTo"
                                       [type]="'datetime'"
                                       #timestampControl="ngModel"></md2-datepicker>
                     </td>

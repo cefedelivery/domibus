@@ -5,6 +5,7 @@ import eu.domibus.common.MSHRole;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Cosmin Baciu
@@ -12,10 +13,15 @@ import java.util.List;
  */
 public class ErrorLogResultRO implements Serializable {
 
+    private Map<String, Object> filter;
     private List<ErrorLogRO> errorLogEntries;
-    private Integer count;
+
     private MSHRole[] mshRoles;
     private ErrorCode[] errorCodes;
+
+    private Integer count;
+    private Integer page;
+    private Integer pageSize;
 
     public List<ErrorLogRO> getErrorLogEntries() {
         return errorLogEntries;
@@ -47,5 +53,29 @@ public class ErrorLogResultRO implements Serializable {
 
     public void setErrorCodes(ErrorCode[] errorCodes) {
         this.errorCodes = errorCodes;
+    }
+
+    public Map<String, Object> getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Map<String, Object> filter) {
+        this.filter = filter;
+    }
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public void setPage(Integer page) {
+        this.page = page;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 }
