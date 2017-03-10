@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
@@ -13,13 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Cosmin Baciu
@@ -33,6 +31,9 @@ public class ErrorLogResource {
 
     @Autowired
     private ErrorLogDao errorLogDao;
+
+    @Autowired
+    DateUtil dateUtil;
 
     @RequestMapping(method = RequestMethod.GET)
     public ErrorLogResultRO getErrorLog(
@@ -50,24 +51,9 @@ public class ErrorLogResource {
             @RequestParam(value = "notifiedFrom", required = false) String notifiedFrom,
             @RequestParam(value = "notifiedTo", required = false) String notifiedTo) {
 
-        LOGGER.info("-------------errorLog");
+        LOGGER.debug("Getting error log");
+
         ErrorLogResultRO result = new ErrorLogResultRO();
-
-//        List<ErrorLogRO> errorLogEntries = new ArrayList<>();
-//        for (int i = 0; i < 100; i++) {
-//            ErrorLogRO entry1 = new ErrorLogRO();
-//            entry1.setErrorCode("DOM_00" + i);
-//            entry1.setErrorDetail("Error occurred while calling the backend " + i);
-//            entry1.setErrorSignalMessageId("signal id" + i);
-//            entry1.setMessageInErrorId("messageIn error" + i);
-//            entry1.setMshRole("SENDING");
-//            entry1.setNotified(new Timestamp(System.currentTimeMillis()));
-//            entry1.setTimestamp(new Timestamp(System.currentTimeMillis()));
-//            errorLogEntries.add(entry1);
-//        }
-
-
-
 
         HashMap<String, Object> filters = new HashMap<>();
         filters.put("errorSignalMessageId", errorSignalMessageId);
@@ -75,11 +61,14 @@ public class ErrorLogResource {
         filters.put("messageInErrorId", messageInErrorId);
         filters.put("errorCode", errorCode);
         filters.put("errorDetail", errorDetail);
-        filters.put("timestampFrom", timestampFrom);
-        filters.put("timestampTo", timestampTo);
-        filters.put("notifiedFrom", notifiedFrom);
-        filters.put("notifiedTo", notifiedTo);
+
+        filters.put("timestampFrom", dateUtil.fromString(timestampFrom));
+        filters.put("timestampTo", dateUtil.fromString(timestampTo));
+        filters.put("notifiedFrom", dateUtil.fromString(notifiedFrom));
+        filters.put("notifiedTo", dateUtil.fromString(notifiedTo));
         result.setFilter(filters);
+        LOGGER.debug("Using filters []{}", filters);
+
 
         long entries = errorLogDao.countEntries(filters);
         long pages = entries / size;
@@ -91,26 +80,6 @@ public class ErrorLogResource {
 
         result.setCount(Long.valueOf(entries).intValue());
 
-        ModelAndView model = new ModelAndView();
-//        model.addObject("errorSignalMessageId", errorSignalMessageId);
-//        model.addObject("mshRole", mshRole);
-//        model.addObject("messageInErrorId", messageInErrorId);
-//        model.addObject("errorCode", errorCode);
-//        model.addObject("errorDetail", errorDetail);
-//        model.addObject("timestampFrom", timestampFrom);
-//        model.addObject("timestampTo", timestampTo);
-//        model.addObject("notifiedFrom", notifiedFrom);
-//        model.addObject("notifiedTo", notifiedTo);
-
-//        model.addObject("page", page);
-        //TODO pageSize should be sent to the UI and binded
-        model.addObject("size", size);
-//        model.addObject("pages", pages);
-        //TODO column and asc should be sent as parameters
-        model.addObject("column", column);
-        model.addObject("asc", asc);
-//        model.addObject("beginIndex", begin);
-//        model.addObject("endIndex", end);
         if (page <= pages) {
             final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(size * (page/* - 1*/), size, column, asc, filters);
             result.setErrorLogEntries(convert(errorLogEntries));

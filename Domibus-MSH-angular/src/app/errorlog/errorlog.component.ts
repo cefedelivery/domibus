@@ -47,15 +47,33 @@ export class ErrorLogComponent {
     params.set('orderBy', orderBy);
 
     //filter
-    params.set('errorSignalMessageId', this.filter.errorSignalMessageId);
-    params.set('mshRole', this.filter.mshRole);
-    params.set('messageInErrorId', this.filter.messageInErrorId);
-    params.set('errorCode', this.filter.errorCode);
-    params.set('errorDetail', this.filter.errorDetail);
-    params.set('timestampFrom', this.filter.timestampFrom);
-    params.set('timestampTo', this.filter.timestampTo);
-    params.set('notifiedFrom', this.filter.notifiedFrom);
-    params.set('notifiedTo', this.filter.notifiedTo);
+    if(this.filter.errorSignalMessageId) {
+      params.set('errorSignalMessageId', this.filter.errorSignalMessageId);
+    }
+    if(this.filter.mshRole) {
+      params.set('mshRole', this.filter.mshRole);
+    }
+    if(this.filter.messageInErrorId) {
+      params.set('messageInErrorId', this.filter.messageInErrorId);
+    }
+    if(this.filter.errorCode) {
+      params.set('errorCode', this.filter.errorCode);
+    }
+    if(this.filter.errorDetail) {
+      params.set('errorDetail', this.filter.errorDetail);
+    }
+    if(this.filter.timestampFrom != null) {
+      params.set('timestampFrom', this.filter.timestampFrom.getTime());
+    }
+    if(this.filter.timestampTo != null) {
+      params.set('timestampTo', this.filter.timestampTo.getTime());
+    }
+    if(this.filter.notifiedFrom != null) {
+      params.set('notifiedFrom', this.filter.notifiedFrom.getTime());
+    }
+    if(this.filter.notifiedTo != null) {
+      params.set('notifiedTo', this.filter.notifiedTo.getTime());
+    }
 
     if(asc != null) {
       params.set('asc', asc.toString());
