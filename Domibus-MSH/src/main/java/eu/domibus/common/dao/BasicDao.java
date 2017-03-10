@@ -38,7 +38,7 @@ public abstract class BasicDao<T extends AbstractBaseEntity> {
 
     private final Class<T> typeOfT;
 
-    @PersistenceContext
+    @PersistenceContext(unitName = "domibusJTA")
     protected EntityManager em;
 
     /**

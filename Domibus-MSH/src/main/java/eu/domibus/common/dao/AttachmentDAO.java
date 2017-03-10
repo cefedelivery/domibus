@@ -36,7 +36,7 @@ import javax.persistence.Query;
 @Repository
 public class AttachmentDAO {
 
-    @PersistenceContext
+    @PersistenceContext(unitName = "domibusJTA")
     private EntityManager em;
 
     public byte[] loadBinaryData(final int entityId) {
