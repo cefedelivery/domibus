@@ -1,5 +1,7 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.exceptions.DomibusCoreError;
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.util.CollectionUtil;
@@ -190,8 +192,7 @@ public class MessageRetentionService {
                     }
                 } catch (JMSException jmsEx) {
                     LOG.error("Error trying to get the queue name", jmsEx);
-                    // TODO to be changed with something like the new DomibusCoreException
-                    throw new RuntimeException("Queue name error", jmsEx.getCause());
+                    throw new DomibusCoreException(DomibusCoreError.DOM_001, "Could not get the queue name", jmsEx.getCause());
                 }
             }
         }
