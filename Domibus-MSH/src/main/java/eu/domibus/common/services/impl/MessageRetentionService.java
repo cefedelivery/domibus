@@ -7,6 +7,8 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.exception.DomibusCoreError;
+import eu.domibus.common.exception.DomibusCoreException;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -190,8 +192,7 @@ public class MessageRetentionService {
                     }
                 } catch (JMSException jmsEx) {
                     LOG.error("Error trying to get the queue name", jmsEx);
-                    // TODO to be changed with something like the new DomibusCoreException
-                    throw new RuntimeException("Queue name error", jmsEx.getCause());
+                    throw new DomibusCoreException(DomibusCoreError.DOM_001, "Could not get the queue name", jmsEx.getCause());
                 }
             }
         }

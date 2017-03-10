@@ -4,6 +4,8 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.*;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.exception.DomibusCoreError;
+import eu.domibus.common.exception.DomibusCoreException;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -166,8 +168,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
             messages = jmsManager.browseMessages(backendNotificationQueue.getQueueName());
         } catch (JMSException jmsEx) {
             LOG.error("Error trying to read the queue name", jmsEx);
-            // TODO to be changed with something like the new DomibusCoreException
-            throw new RuntimeException("Queue name error", jmsEx.getCause());
+            throw new DomibusCoreException(DomibusCoreError.DOM_001, "Could not get the queue name", jmsEx.getCause());
         }
 
         int countOfMessagesIncluded = 0;
@@ -206,8 +207,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
             queueName = backendNotificationQueue.getQueueName();
         } catch (JMSException jmsEx) {
             LOG.error("Error trying to get the queue name", jmsEx);
-            // TODO to be changed with something like the new DomibusCoreException
-            throw new RuntimeException("Queue name error", jmsEx.getCause());
+            throw new DomibusCoreException(DomibusCoreError.DOM_001, "Could not get the queue name", jmsEx.getCause());
         }
 
         JmsMessage message = jmsManager.consumeMessage(queueName, messageId);
