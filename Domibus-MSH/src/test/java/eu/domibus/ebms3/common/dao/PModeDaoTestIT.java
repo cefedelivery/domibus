@@ -5,11 +5,11 @@ import eu.domibus.api.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.PModeDao;
 import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.xml.XMLUtilImpl;
 import org.apache.commons.io.IOUtils;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +50,11 @@ public class PModeDaoTestIT {
         @Bean
         public ConfigurationDAO configurationDAO() {
             return Mockito.mock(ConfigurationDAO.class);
+        }
+
+        @Bean(name = "domibusJTA")
+        public EntityManagerFactory getdomibusJTA() {
+            return Mockito.mock(EntityManagerFactory.class);
         }
 
         @Bean
