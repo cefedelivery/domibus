@@ -128,6 +128,7 @@
     [count]="count"
     [offset]="offset"
     [limit]="pageSize"
+    [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
     (page)='onPage($event)'
     (sort)="onSort($event)">
     <ngx-datatable-column name="ErrorSignalMessageId" >

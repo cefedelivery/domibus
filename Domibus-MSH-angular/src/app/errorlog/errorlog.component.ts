@@ -19,8 +19,10 @@ export class ErrorLogComponent {
   rows = [];
   count: number = 0;
   offset: number = 0;
-  orderBy: string;
-  asc: boolean;
+  //default value
+  orderBy: string = "timestamp";
+  //default value
+  asc: boolean = false;
 
   ROW_LIMITS = [
     {key: '10', value: 10},
