@@ -31,12 +31,17 @@
                                       [(ngModel)]="filter.timestampFrom"
                                       name="fromTimestmap"
                                       [type]="'datetime'"
+                                      [max]="timestampFromMaxDate"
+                                      (change)='onTimestampFromChange($event)'
                                       #timestampControl="ngModel"></md2-datepicker>
                     </td>
                     <td>
                       <md2-datepicker placeholder="To:"
                                       [(ngModel)]="filter.timestampTo"
                                       name="toTimestmap"
+                                      [min]="timestampToMinDate"
+                                      [max]="timestampToMaxDate"
+                                      (change)='onTimestampToChange($event)'
                                       [type]="'datetime'"
                                       #timestampControl="ngModel"></md2-datepicker>
                     </td>
@@ -68,6 +73,8 @@
                                       [(ngModel)]="filter.notifiedFrom"
                                       name="notifiedFrom"
                                       [type]="'datetime'"
+                                      [max]="notifiedFromMaxDate"
+                                      (change)='onNotifiedFromChange($event)'
                                       #timestampControl="ngModel"></md2-datepicker>
                     </td>
                     <td>
@@ -75,6 +82,9 @@
                                       [(ngModel)]="filter.notifiedTo"
                                       name="notifiedTo"
                                       [type]="'datetime'"
+                                      [min]="notifiedToMinDate"
+                                      [max]="notifiedToMaxDate"
+                                      (change)='onNotifiedToChange($event)'
                                       #timestampControl="ngModel"></md2-datepicker>
                     </td>
                   </tr>

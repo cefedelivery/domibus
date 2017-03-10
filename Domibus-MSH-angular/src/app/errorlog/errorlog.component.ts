@@ -14,6 +14,14 @@ import {AlertService} from "../alert/alert.service";
 export class ErrorLogComponent {
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
+  timestampFromMaxDate: Date = new Date();
+  timestampToMinDate: Date = null;
+  timestampToMaxDate: Date = new Date();
+
+  notifiedFromMaxDate: Date = new Date();
+  notifiedToMinDate: Date = null;
+  notifiedToMaxDate: Date = new Date();
+
   filter: any = {};
   loading: boolean = false;
   rows = [];
@@ -160,6 +168,22 @@ export class ErrorLogComponent {
   search() {
     console.log("Searching using filter:" + this.filter);
     this.page(0, this.pageSize, this.orderBy, this.asc);
+  }
+
+  onTimestampFromChange(event) {
+    this.timestampToMinDate = event.value;
+  }
+
+  onTimestampToChange(event) {
+    this.timestampFromMaxDate = event.value;
+  }
+
+  onNotifiedFromChange(event) {
+    this.notifiedToMinDate = event.value;
+  }
+
+  onNotifiedToChange(event) {
+    this.notifiedFromMaxDate = event.value;
   }
 
 }
