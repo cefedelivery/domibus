@@ -99,8 +99,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
             }
         } catch (JMSException jmsEx) {
             LOG.error("Error getting the property from JMS message", jmsEx);
-            // TODO to be changed with something like the new DomibusCoreException
-            throw new RuntimeException("Error getting the property from JMS message", jmsEx);
+            throw new DomibusCoreException(DomibusCoreError.DOM_001, "Error getting the property from JMS message", jmsEx.getCause());
         }
     }
 
