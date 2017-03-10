@@ -142,8 +142,11 @@ export class ErrorLogComponent {
 
   onSort(event) {
     console.log('Sort Event', event);
-    //TODO pass other properties
-    this.page(this.offset, this.pageSize, "TODO_PASS_COLUMN", "TODO_PASS_ORDER");
+    let ascending = true;
+    if(event.newValue === 'desc') {
+      ascending = false;
+    }
+    this.page(this.offset, this.pageSize, event.column.prop, ascending);
   }
 
   changeRowLimits(event) {
