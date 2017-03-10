@@ -1,5 +1,7 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.exceptions.DomibusCoreError;
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.util.CollectionUtil;
@@ -7,8 +9,6 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.exception.DomibusCoreError;
-import eu.domibus.common.exception.DomibusCoreException;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;

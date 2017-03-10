@@ -1,7 +1,7 @@
-package eu.domibus.common.exception;
+package eu.domibus.api.exceptions;
 
 /**
- * This class is the root exception for Domibus core errors.
+ * This class is the root exceptions for Domibus core errors.
  * <p>
  * <p>It provides two constructors using the enum DomibusCoreError, one accepts the throwable cause.
  *
@@ -31,10 +31,10 @@ public class DomibusCoreException extends RuntimeException {
      *
      * @param dce     a DomibusCoreError.
      * @param message the message detail. It is saved for later retrieval by the {@link #getMessage()} method.
-     * @param cause   the cause of the exception.
+     * @param cause   the cause of the exceptions.
      */
     public DomibusCoreException(DomibusCoreError dce, String message, Throwable cause) {
-        super("[" + dce + "]:" + message);
+        super("[" + dce + "]:" + message, cause);
         error = dce;
     }
 

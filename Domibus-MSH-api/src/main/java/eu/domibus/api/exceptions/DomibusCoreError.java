@@ -1,4 +1,4 @@
-package eu.domibus.common.exception;
+package eu.domibus.api.exceptions;
 
 /**
  * Enum for Domibus core errors.
