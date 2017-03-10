@@ -103,7 +103,7 @@ public class MessageRetentionService {
     }
 
     @Transactional
-    protected void deleteExpiredMessages(String mpc, Integer expiredDownloadedMessagesLimit, Integer expiredNotDownloadedMessagesLimit) {
+    public void deleteExpiredMessages(String mpc, Integer expiredDownloadedMessagesLimit, Integer expiredNotDownloadedMessagesLimit) {
         LOG.debug("Deleting expired messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]" +
                 " and expiredNotDownloadedMessagesLimit [" + expiredNotDownloadedMessagesLimit + "]");
         deleteExpiredDownloadedMessages(mpc, expiredDownloadedMessagesLimit);
