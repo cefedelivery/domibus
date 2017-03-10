@@ -10,11 +10,13 @@
             <tr>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="Original Message Id" name="errorSignalMessageId" [(ngModel)]="filter.errorSignalMessageId" #errorSignalMessageId="ngModel">
+                  <input mdInput placeholder="Signal Message Id" name="errorSignalMessageId" [(ngModel)]="filter.errorSignalMessageId" #errorSignalMessageId="ngModel">
                 </md-input-container>
               </td>
               <td>
                 <md-select placeholder="MSH Role" [(ngModel)]="filter.mshRole" name="mshRole">
+                  <md-option [value]="''">
+                  </md-option>
                   <md-option *ngFor="let role of mshRoles" [value]="role">
                     {{role}}
                   </md-option>
@@ -45,11 +47,13 @@
             <tr>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="Signal Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId" #messageInErrorId="ngModel">
+                  <input mdInput placeholder="Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId" #messageInErrorId="ngModel">
                 </md-input-container>
               </td>
               <td>
                 <md-select placeholder="Error Code" [(ngModel)]="filter.errorCode" name="errorCode">
+                  <md-option [value]="''">
+                  </md-option>
                   <md-option *ngFor="let code of errorCodes" [value]="code">
                     {{code}}
                   </md-option>

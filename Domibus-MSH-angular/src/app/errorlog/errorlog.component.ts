@@ -108,6 +108,19 @@ export class ErrorLogComponent {
 
       this.rows = newRows;
 
+      if(result.filter.timestampFrom != null) {
+        result.filter.timestampFrom = new Date(result.filter.timestampFrom);
+      }
+      if(result.filter.timestampTo != null) {
+        result.filter.timestampTo = new Date(result.filter.timestampTo);
+      }
+      if(result.filter.notifiedFrom != null) {
+        result.filter.notifiedFrom = new Date(result.filter.notifiedFrom);
+      }
+      if(result.filter.notifiedTo != null) {
+        result.filter.notifiedTo = new Date(result.filter.notifiedTo);
+      }
+
       this.filter = result.filter;
       this.mshRoles = result.mshRoles;
       this.errorCodes = result.errorCodes;
