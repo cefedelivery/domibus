@@ -2,6 +2,7 @@
 import {Observable} from "rxjs";
 import {Http, Response, URLSearchParams} from "@angular/http";
 import {ErrorLogResult} from "./errorlogresult";
+import {AlertService} from "../alert/alert.service";
 
 @Component({
   moduleId: module.id,
@@ -33,7 +34,7 @@ export class ErrorLogComponent {
   mshRoles: Array<String>;
   errorCodes: Array<String>;
 
-  constructor(private http: Http) {
+  constructor(private http: Http, private alertService: AlertService) {
   }
 
   ngOnInit() {
@@ -129,6 +130,7 @@ export class ErrorLogComponent {
     }, (error: any) => {
       console.log("error getting the error log:" + error);
       this.loading = false;
+      this.alertService.error("Error occured:" + error);
     });
 
   }

@@ -38,7 +38,7 @@ public class ErrorLogResource {
     @RequestMapping(method = RequestMethod.GET)
     public ErrorLogResultRO getErrorLog(
             @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "pageSize", defaultValue = "10") int size,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(value = "orderBy", required = false) String column,
             @RequestParam(value = "asc", defaultValue = "true") boolean asc,
             @RequestParam(value = "errorSignalMessageId", required = false) String errorSignalMessageId,
@@ -67,28 +67,20 @@ public class ErrorLogResource {
         filters.put("notifiedFrom", dateUtil.fromString(notifiedFrom));
         filters.put("notifiedTo", dateUtil.fromString(notifiedTo));
         result.setFilter(filters);
-        LOGGER.debug("Using filters []{}", filters);
+        LOGGER.debug("using filters [{}]", filters);
 
 
         long entries = errorLogDao.countEntries(filters);
-        long pages = entries / size;
-        if (entries % size != 0) {
-            pages++;
-        }
-        int begin = Math.max(1, page - 5);
-        long end = Math.min(begin + 10, pages);
-
+        LOGGER.debug("count [{}]", entries);
         result.setCount(Long.valueOf(entries).intValue());
 
-        if (page <= pages) {
-            final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(size * (page/* - 1*/), size, column, asc, filters);
-            result.setErrorLogEntries(convert(errorLogEntries));
-        }
+        final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(pageSize * page, pageSize, column, asc, filters);
+        result.setErrorLogEntries(convert(errorLogEntries));
 
         result.setErrorCodes(ErrorCode.values());
         result.setMshRoles(MSHRole.values());
         result.setPage(page);
-        result.setPageSize(size);
+        result.setPageSize(pageSize);
 
         return result;
     }
@@ -105,7 +97,7 @@ public class ErrorLogResource {
     }
 
     protected ErrorLogRO convert(ErrorLogEntry errorLogEntry) {
-        if(errorLogEntry == null) {
+        if (errorLogEntry == null) {
             return null;
         }
         ErrorLogRO result = new ErrorLogRO();
