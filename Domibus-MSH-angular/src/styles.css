@@ -19,4 +19,12 @@ html,body{
   width:100%;
 }
 
+.text-select {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  -o-user-select: text;
+  user-select: text;
+}
+
 

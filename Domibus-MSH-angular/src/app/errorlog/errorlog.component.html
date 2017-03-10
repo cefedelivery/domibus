@@ -110,6 +110,7 @@
   </div>
 
   <ngx-datatable
+    id="errorLogTable"
     class="material striped"
     [rows]="rows"
     [columnMode]="'force'"
@@ -129,8 +130,8 @@
       <template let-column="column">
         {{column.name}}
       </template>
-      <template let-value="value" ngx-datatable-cell-template>
-        {{value}}
+      <template let-value="value" ngx-datatable-cell-template >
+        <span class="text-select">{{value}}</span>
       </template>
     </ngx-datatable-column>
     <ngx-datatable-column name="MshRole"  [width]="50">
@@ -138,7 +139,7 @@
         {{column.name}}
       </template>
       <template let-value="value" ngx-datatable-cell-template>
-        {{value}}
+        <span class="text-select">{{value}}</span>
       </template>
     </ngx-datatable-column>
     <ngx-datatable-column name="MessageInErrorId" >
@@ -146,7 +147,7 @@
         {{column.name}}
       </template>
       <template let-value="value" ngx-datatable-cell-template>
-        {{value}}
+        <span class="text-select">{{value}}</span>
       </template>
     </ngx-datatable-column>
     <ngx-datatable-column name="ErrorCode"  [width]="50">
@@ -154,7 +155,7 @@
         {{column.name}}
       </template>
       <template let-value="value" ngx-datatable-cell-template>
-        {{value}}
+        <span class="text-select">{{value}}</span>
       </template>
     </ngx-datatable-column>
     <ngx-datatable-column name="ErrorDetail" [width]="250">
@@ -162,7 +163,7 @@
         {{column.name}}
       </template>
       <template let-value="value" ngx-datatable-cell-template>
-        {{value}}
+        <span class="text-select">{{value}}</span>
       </template>
     </ngx-datatable-column>
     <ngx-datatable-column name="Timestamp"  [width]="180">
@@ -170,7 +171,7 @@
         {{column.name}}
       </template>
       <template let-value="value" ngx-datatable-cell-template>
-        {{value | date: dateFormat}}
+        <span class="text-select">{{value | date: dateFormat}}</span>
       </template>
     </ngx-datatable-column>
     <ngx-datatable-column name="Notified" [width]="180">
@@ -178,7 +179,7 @@
         {{column.name}}
       </template>
       <template let-value="value" ngx-datatable-cell-template>
-        {{value | date: dateFormat}}
+        <span class="text-select">{{value | date: dateFormat}}</span>
       </template>
     </ngx-datatable-column>
   </ngx-datatable>

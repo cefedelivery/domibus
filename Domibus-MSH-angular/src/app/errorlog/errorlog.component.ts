@@ -46,6 +46,17 @@ export class ErrorLogComponent {
     params.set('pageSize', pageSize.toString());
     params.set('orderBy', orderBy);
 
+    //filter
+    params.set('errorSignalMessageId', this.filter.errorSignalMessageId);
+    params.set('mshRole', this.filter.mshRole);
+    params.set('messageInErrorId', this.filter.messageInErrorId);
+    params.set('errorCode', this.filter.errorCode);
+    params.set('errorDetail', this.filter.errorDetail);
+    params.set('timestampFrom', this.filter.timestampFrom);
+    params.set('timestampTo', this.filter.timestampTo);
+    params.set('notifiedFrom', this.filter.notifiedFrom);
+    params.set('notifiedTo', this.filter.notifiedTo);
+
     if(asc != null) {
       params.set('asc', asc.toString());
     }
@@ -109,7 +120,7 @@ export class ErrorLogComponent {
   }
 
   search() {
-    console.log("Searching...");
+    console.log("Searching using filter:" + this.filter);
     this.page(0, this.pageSize, this.orderBy, this.asc);
   }
 
