@@ -106,7 +106,8 @@ export class SecurityService {
     this.http.delete('rest/security/authentication').subscribe((res: Response) => {
       localStorage.removeItem('currentUser');
       this.router.navigate(['/login']);
-      }, (error: any) => {
+      },
+      (error: any) => {
         console.debug("error logging out [" + error + "]");
       });
   }
