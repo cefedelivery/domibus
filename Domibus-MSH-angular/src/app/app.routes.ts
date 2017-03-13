@@ -10,7 +10,8 @@ const appRoutes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthenticatedGuard] },
   { path: 'pmode', component: PModeComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard] },
   { path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard]},
-  { path: 'login', component: LoginComponent }
+  { path: 'login', component: LoginComponent },
+  { path: '**', component: HomeComponent, canActivate: [AuthenticatedGuard] },
 ];
 
 export const routing = RouterModule.forRoot(appRoutes);
