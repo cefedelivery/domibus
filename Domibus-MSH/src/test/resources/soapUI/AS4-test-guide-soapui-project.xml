@@ -1162,7 +1162,7 @@
                </ns:PartInfo>
                 <ns:PartInfo href="cid:attachment">
                   <ns:PartProperties>
-                     <ns:Property name="MimeType">application/octet-stream</ns:Property>
+                     <ns:Property name="MimeType">application/pdf</ns:Property>
                   </ns:PartProperties>
                </ns:PartInfo>
             </ns:PayloadInfo>
@@ -1705,7 +1705,7 @@ iOQvLqT/2Q==
                </ns:PartInfo>
                 <ns:PartInfo href="cid:attachment">
                   <ns:PartProperties>
-                     <ns:Property name="MimeType">application/octet-stream</ns:Property>
+                     <ns:Property name="MimeType">application/pdf</ns:Property>
                   </ns:PartProperties>
                </ns:PartInfo>
             </ns:PayloadInfo>
@@ -1759,7 +1759,7 @@ iOQvLqT/2Q==
                </ns:PartInfo>
                 <ns:PartInfo href="cid:attachment">
                   <ns:PartProperties>
-                     <ns:Property name="MimeType">application/octet-stream</ns:Property>
+                     <ns:Property name="MimeType">application/pdf</ns:Property>
                   </ns:PartProperties>
                </ns:PartInfo>
             </ns:PayloadInfo>
