@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -148,6 +149,7 @@ public class TrustStoreService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void replaceTruststore(byte[] store, String password) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
         String truststoreFileValue = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
         File truststoreFile = new File(truststoreFileValue);
