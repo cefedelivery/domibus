@@ -14,10 +14,10 @@
           entry-point-ref="http403ForbiddenEntryPoint"
           authentication-manager-ref="authenticationManagerForAdminConsole">
 
-        <intercept-url pattern="/rest/security/authentication" access="permitAll" />
-        <!--<intercept-url pattern="/rest/security/logout" access="permitAll" />-->
-        <intercept-url pattern="/rest/application/info" access="permitAll" />
         <intercept-url pattern="/" access="permitAll" />
+        <intercept-url pattern="/rest/security/authentication" access="permitAll" />
+        <intercept-url pattern="/rest/application/info" access="permitAll" />
+        <intercept-url pattern="/rest/pmode/**" access="hasRole('ROLE_ADMIN')" />
         <intercept-url pattern="/rest/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')" />
 
         <!-- Enable CSRF protection -->
