@@ -9,7 +9,7 @@ import {DomibusInfo} from "./domibusinfo";
 
 @Injectable()
 export class DomibusInfoService {
-  constructor(private http: Http, private router: Router, private httpEventService: HttpEventService) {
+  constructor(private http: Http, private router: Router) {
   }
 
   getDomibusInfo(): Observable<DomibusInfo> {

@@ -1,45 +1,33 @@
-﻿import {Injectable, OnInit} from '@angular/core';
-import {Http, Headers, Response, RequestOptions} from '@angular/http';
-import {Observable} from 'rxjs/Observable';
-import 'rxjs/add/operator/map';
-import {User} from './user';
+﻿import {Injectable} from "@angular/core";
+import {Http, Headers, Response} from "@angular/http";
+import {Observable} from "rxjs/Observable";
+import "rxjs/add/operator/map";
+import {User} from "./user";
 import {Router} from "@angular/router";
 import {HttpEventService} from "../http/http.event.service";
-import {Subject, BehaviorSubject, ReplaySubject} from "rxjs";
+import {ReplaySubject} from "rxjs";
 
 @Injectable()
 export class SecurityService {
-  constructor(private http: Http, private router: Router, private httpEventService: HttpEventService) {
+  constructor(private http: Http, private router: Router) {
   }
 
-
-//TODO rename to authenticate
   login(username: string, password: string) {
     let headers = new Headers({'Content-Type': 'application/json'});
     return this.http.post('rest/security/authentication', JSON.stringify({username: username, password: password}), {headers: headers})
-      //TODO use subscribe
       .map((response: Response) => {
         localStorage.setItem('currentUser', JSON.stringify(response.json()));
       });
   }
 
-  testPost(username: string, password: string) {
-    let headers = new Headers({'Content-Type': 'application/json'});
-    return this.http.post('rest/test/testPost', JSON.stringify({username: username, password: password}), {headers: headers})
-      .subscribe((res: Response) => {
-        console.log("response1:" + res)
-      }, (res: Response) => {
-        console.log("response2:" + res)
-      });
-  }
-
-  testGet() {
-    let headers = new Headers({'Content-Type': 'application/json'});
-    return this.http.get('rest/test/testGet', {headers: headers})
-      .subscribe((res: Response) => {
-        console.log("get response1:" + res)
-      }, (res: Response) => {
-        console.log("get response2:" + res)
+  logout() {
+    console.log("Logging out");
+    this.http.delete('rest/security/authentication').subscribe((res: Response) => {
+        localStorage.removeItem('currentUser');
+        this.router.navigate(['/login']);
+      },
+      (error: any) => {
+        console.debug("error logging out [" + error + "]");
       });
   }
 
@@ -99,16 +87,5 @@ export class SecurityService {
       }
     });
     return subject.asObservable();
-  }
-
-  logout() {
-    console.log("Logging out");
-    this.http.delete('rest/security/authentication').subscribe((res: Response) => {
-      localStorage.removeItem('currentUser');
-      this.router.navigate(['/login']);
-      },
-      (error: any) => {
-        console.debug("error logging out [" + error + "]");
-      });
   }
 }

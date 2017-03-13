@@ -11,7 +11,6 @@ import { Md2Module }  from 'md2';
 import {AppComponent} from './app.component';
 import {LoginComponent} from "./login/login.component";
 import {HomeComponent} from "./home/home.component";
-import {AdminComponent} from "./admin/admin.component";
 import {PModeComponent} from "./pmode/pmode.component";
 
 import {AuthenticatedGuard} from "./guards/authenticated.guard";
@@ -39,7 +38,6 @@ export function extendedHttpClientFactory (xhrBackend: XHRBackend, requestOption
     ErrorLogComponent,
     AlertComponent,
     FooterComponent,
-    AdminComponent,
     PModeComponent,
     IsAuthorized
   ],

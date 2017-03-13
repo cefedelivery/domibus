@@ -25,17 +25,4 @@ export class HomeComponent implements OnInit{
     event.preventDefault();
     this.securityService.logout();
   }
-
-  testPost(event:Event):void {
-    event.preventDefault();
-    console.log("calling test post")
-    this.securityService.testPost("testUser", "testPassw");
-  }
-
-  testGet(event:Event):void {
-    event.preventDefault();
-    console.log("calling test get")
-    this.securityService.testGet();
-  }
-
 }
