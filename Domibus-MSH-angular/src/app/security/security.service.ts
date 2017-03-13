@@ -4,7 +4,6 @@ import {Observable} from "rxjs/Observable";
 import "rxjs/add/operator/map";
 import {User} from "./user";
 import {Router} from "@angular/router";
-import {HttpEventService} from "../http/http.event.service";
 import {ReplaySubject} from "rxjs";
 
 @Injectable()
