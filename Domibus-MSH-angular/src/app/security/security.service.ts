@@ -5,28 +5,41 @@ import "rxjs/add/operator/map";
 import {User} from "./user";
 import {Router} from "@angular/router";
 import {ReplaySubject} from "rxjs";
+import {SecurityEventService} from "./security.event.service";
 
 @Injectable()
 export class SecurityService {
-  constructor(private http: Http, private router: Router) {
+  constructor(private http: Http, private router: Router, private securityEventService: SecurityEventService) {
   }
 
   login(username: string, password: string) {
     let headers = new Headers({'Content-Type': 'application/json'});
-    return this.http.post('rest/security/authentication', JSON.stringify({username: username, password: password}), {headers: headers})
-      .map((response: Response) => {
-        localStorage.setItem('currentUser', JSON.stringify(response.json()));
-      });
+    return this.http.post('rest/security/authentication',
+      JSON.stringify({
+        username: username,
+        password: password
+      }),
+      {headers: headers})
+      .subscribe((response: Response) => {
+          console.log("Login success");
+          localStorage.setItem('currentUser', JSON.stringify(response.json()));
+          this.securityEventService.notifyLoginSuccessEvent(response);
+        },
+        (error: any) => {
+          console.log("Login error");
+          this.securityEventService.notifyLoginErrorEvent(error);
+        });
   }
 
   logout() {
     console.log("Logging out");
     this.http.delete('rest/security/authentication').subscribe((res: Response) => {
         localStorage.removeItem('currentUser');
-        this.router.navigate(['/login']);
+        this.securityEventService.notifyLogoutSuccessEvent(res);
       },
       (error: any) => {
         console.debug("error logging out [" + error + "]");
+        this.securityEventService.notifyLogoutErrorEvent(error);
       });
   }
 
@@ -66,23 +79,30 @@ export class SecurityService {
     return subject.asObservable();
   }
 
+  isCurrentUserAdmin(): boolean {
+    return this.isCurrentUserInRole(["ROLE_ADMIN"]);
+  }
+
+  isCurrentUserInRole(roles: Array<string>): boolean {
+    let hasRole = false;
+    let currentUser = this.getCurrentUser();
+    if (currentUser && currentUser.authorities) {
+      roles.forEach((role: string) => {
+        if (currentUser.authorities.indexOf(role) !== -1) {
+          hasRole = true;
+        }
+      });
+    }
+    return hasRole;
+  }
+
   isAuthorized(roles: Array<string>): Observable<boolean> {
     let subject = new ReplaySubject();
 
     this.isAuthenticated(false).subscribe((isAuthenticated: boolean) => {
       if (isAuthenticated && roles) {
-        let currentUser = this.getCurrentUser();
-        if (currentUser && currentUser.authorities) {
-          let hasRole = false;
-          roles.forEach((role: string) => {
-            if (currentUser.authorities.indexOf(role) !== -1) {
-              hasRole = true;
-            }
-          });
-          subject.next(hasRole);
-        } else {
-          subject.next(false);
-        }
+        let hasRole = this.isCurrentUserInRole(roles);
+        subject.next(hasRole);
       }
     });
     return subject.asObservable();

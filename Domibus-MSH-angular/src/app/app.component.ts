@@ -1,7 +1,7 @@
 import {Component, OnInit} from "@angular/core";
 import {SecurityService} from "./security/security.service";
-import {User} from "./security/user";
 import {Router} from "@angular/router";
+import {SecurityEventService} from "./security/security.event.service";
 
 @Component({
   selector: 'app-root',
@@ -11,30 +11,28 @@ import {Router} from "@angular/router";
 export class AppComponent implements OnInit {
 
   isAdmin: boolean;
-  isActive: boolean;
 
-  constructor(private securityService: SecurityService, private router: Router) {
+  constructor(private securityService: SecurityService,
+              private router: Router,
+              private securityEventService: SecurityEventService) {
   }
 
   ngOnInit() {
-    this.checkAdmin();
+    this.securityEventService.onLoginSuccessEvent().subscribe(
+      data => {
+        this.isAdmin = this.securityService.isCurrentUserAdmin();
+      });
 
-    this.router.events.subscribe((val) => {
-      // see also
-      console.log("---------checking admin");
+    this.securityEventService.onLoginErrorEvent().subscribe(
+      error => {
+        this.isAdmin = this.securityService.isCurrentUserAdmin();
+      });
 
-      this.checkAdmin();
-    });
-  }
-
-  checkAdmin() {
-    this.isAdmin = false;
-    let currentUser = this.securityService.getCurrentUser();
-    if (currentUser && currentUser.authorities) {
-      if (currentUser.authorities.indexOf('ROLE_ADMIN') !== -1) {
-        this.isAdmin = true;
-      }
-    }
+    this.securityEventService.onLogoutSuccessEvent().subscribe(
+      data => {
+        this.isAdmin = this.securityService.isCurrentUserAdmin();
+        this.router.navigate(['/login']);
+      });
   }
 
   logout(event:Event):void {

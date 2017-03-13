@@ -20,6 +20,7 @@ import {IsAuthorized} from "./security/is-authorized.directive";
 import {ExtendedHttpClient} from "./http/extended-http-client";
 import {HttpEventService} from "./http/http.event.service";
 import {SecurityService} from "./security/security.service";
+import {SecurityEventService} from "./security/security.event.service";
 import {AlertComponent} from "./alert/alert.component";
 import {AlertService} from "./alert/alert.service";
 import {ErrorLogComponent} from "./errorlog/errorlog.component";
@@ -59,6 +60,7 @@ export function extendedHttpClientFactory (xhrBackend: XHRBackend, requestOption
     AuthorizedGuard,
     HttpEventService,
     SecurityService,
+    SecurityEventService,
     DomibusInfoService,
     AlertService,
     {
