@@ -105,7 +105,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         final String httpMethod = (String) message.get("org.apache.cxf.request.method");
         //TODO add the below logic to a separate interceptor
         if(org.apache.commons.lang.StringUtils.containsIgnoreCase(httpMethod, "GET")) {
-            LOG.debug("Detected GET request on MSH: skipping the interceptor");
+            LOG.debug("Detected GET request on MSH: aborting the interceptor chain");
             message.put(SoapMessage.RESPONSE_CODE, 200);
             message.getInterceptorChain().abort();
             return;
