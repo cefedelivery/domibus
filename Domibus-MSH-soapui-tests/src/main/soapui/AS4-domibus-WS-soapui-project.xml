@@ -13581,7 +13581,7 @@ testRunner.testCase.testSuite.project.getTestSuiteList().each { testSuite ->
  	}
  }
 log.info "END: Amendment tear down sciprts"
-</script></con:config></con:testStep><con:testStep type="groovy" name="Replace" id="8eacd7c9-9a27-427b-a486-fc872b0d168e"><con:settings/><con:config><script>def newLine = System.getProperty("line.separator")
+</script></con:config></con:testStep><con:testStep type="groovy" name="ReplaceTearDownLine" id="8eacd7c9-9a27-427b-a486-fc872b0d168e"><con:settings/><con:config><script>def newLine = System.getProperty("line.separator")
 def oldLineToBeChanged = /(?&lt;!\/)ExcelReporting.reportTestCase/
 
 def newLineToBeChanged = "//ExcelReporting.reportTestCase"
