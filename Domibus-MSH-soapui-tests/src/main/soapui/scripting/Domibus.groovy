@@ -297,7 +297,7 @@ class Domibus
         }
 
         for (query in sqlQueriesList) {
-            log.info "Executing SQL query: " + query
+            log.debug "Executing SQL query: " + query
             sqlDB.execute query
         }
 

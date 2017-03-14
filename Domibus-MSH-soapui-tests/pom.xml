@@ -52,10 +52,10 @@
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
                     <testSuite>PASSING TCs - Web Service Submission - Auto for Bamboo</testSuite>
-                    <!--<testCase>Dom118-Submit message-Data-AgreementRefId-Value</testCase>-->
+                    <!--<testCase>Dom001-Submit Message-Basic Flow</testCase>-->
                     <projectProperties>
-                        <value>localUrl=http://localhost:8180</value>
-                        <value>remoteUrl=http://localhost:9080</value>
+                        <value>localUrl=http://localhost:8180/domibus</value>
+                        <value>remoteUrl=http://localhost:9080/domibus</value>
 
                         <value>databaseBlue=mysql</value>
                         <value>driverBlue=com.mysql.jdbc.Driver</value>
@@ -68,6 +68,22 @@
                         <value>jdbcUrlRed=jdbc:mysql://127.0.0.1:3305/domibus</value>
                         <value>redDbUser=root</value>
                         <value>redDbPassword=123456</value>
+
+                        <!---->
+                        <!--<value>localUrl=http://localhost:8080/domibus</value>-->
+                        <!--<value>remoteUrl=http://localhost:8180/domibus</value>-->
+
+                        <!--<value>databaseBlue=mysql</value>-->
+                        <!--<value>driverBlue=com.mysql.jdbc.Driver</value>-->
+                        <!--<value>jdbcUrlBlue=jdbc:mysql://localhost:3306/domibus_blue</value>-->
+                        <!--<value>blueDbUser=root</value>-->
+                        <!--<value>blueDbPassword=root</value>-->
+
+                        <!--<value>databaseRed=mysql</value>-->
+                        <!--<value>driverRed=com.mysql.jdbc.Driver</value>-->
+                        <!--<value>jdbcUrlRed=jdbc:mysql://localhost:3306/domibus_red</value>-->
+                        <!--<value>redDbUser=root</value>-->
+                        <!--<value>redDbPassword=root</value>-->
 
                         <value>pdfAttachment=${soapui.root.folder}/resources/fileSmall.pdf</value>
                         <value>reportFilePath=${soapui.root.folder}/reports/Domibus_3_2_2_test_results.xlsx</value>
@@ -105,6 +121,12 @@
                         <groupId>org.reflections</groupId>
                         <artifactId>reflections</artifactId>
                         <version>0.9.8</version>
+                    </dependency>
+                    <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
+                    <dependency>
+                        <groupId>org.apache.poi</groupId>
+                        <artifactId>poi-ooxml</artifactId>
+                        <version>3.15</version>
                     </dependency>
                 </dependencies>
             </plugin>

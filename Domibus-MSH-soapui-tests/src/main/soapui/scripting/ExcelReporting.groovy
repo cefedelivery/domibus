@@ -3,6 +3,8 @@
  */
 
 import org.apache.poi.ss.usermodel.*
+import org.apache.poi.xssf.usermodel.*
+
 class ExcelReporting
 {
 	//Excel template report file columns indexes (0 base indexed) 
@@ -135,8 +137,11 @@ class ExcelReporting
 		}
 		
 		// new row values 
-		showResultRow(row, log) 
-		
+		showResultRow(row, log)
+
+		// Delegate re-calculation to Excel - Perform a full recalculation when the workbook is opened
+		wb.setForceFormulaRecalculation(true)
+
 		// Write the output to a file
 		FileOutputStream fileOut = new FileOutputStream(outputReportFilePath)
 		wb.write(fileOut)

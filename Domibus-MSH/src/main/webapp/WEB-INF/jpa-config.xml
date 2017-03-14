@@ -57,12 +57,7 @@
           p:defaultDestination-ref="sendMessageQueue"
           p:sessionTransacted="true"
           p:sessionAcknowledgeMode="0"/>
-    <bean id="jmsTemplateNotify"
-          class="org.springframework.jms.core.JmsTemplate"
-          c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
-          p:defaultDestination-ref="notifyBackendQueue"
-          p:sessionTransacted="true"
-          p:sessionAcknowledgeMode="0"/>
+
     <bean id="jmsTemplateCommand"
           class="org.springframework.jms.core.JmsTemplate"
           c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
