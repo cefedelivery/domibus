@@ -102,10 +102,12 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
-        final String queryString = (String) message.get("org.apache.cxf.message.Message.QUERY_STRING");
-        //TODO make the matching mechanism reusable
-        if(org.apache.commons.lang.StringUtils.containsIgnoreCase(queryString, "wsdl")) {
-            LOG.debug("Detected WSDL request: skipping the interceptor");
+        final String httpMethod = (String) message.get("org.apache.cxf.request.method");
+        //TODO add the below logic to a separate interceptor
+        if(org.apache.commons.lang.StringUtils.containsIgnoreCase(httpMethod, "GET")) {
+            LOG.debug("Detected GET request on MSH: skipping the interceptor");
+            message.put(SoapMessage.RESPONSE_CODE, 200);
+            message.getInterceptorChain().abort();
             return;
         }
 
