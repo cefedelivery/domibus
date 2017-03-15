@@ -10,15 +10,15 @@
 						   http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
     <!-- Uncomment this in case of a clustered environment -->
-    <!-- <jee:jndi-lookup id="notifyBackendWebServiceQueue"
-                     jndi-name="jms/domibus.notification.webservice"
-                     cache="true"
-                     resource-ref="true"
-                     lookup-on-startup="false">
-        <jee:environment>
-            java.naming.provider.url=${domibus.deployment.cluster.url}
-        </jee:environment>
-    </jee:jndi-lookup> -->
+    <!--    <jee:jndi-lookup id="notifyBackendWebServiceQueue"
+                         jndi-name="jms/domibus.notification.webservice"
+                         cache="true"
+                         resource-ref="true"
+                         lookup-on-startup="false">
+            <jee:environment>
+                java.naming.provider.url=${domibus.deployment.cluster.url}
+            </jee:environment>
+        </jee:jndi-lookup>-->
 
     <!-- Comment this in case of a clustered environment -->
     <bean id="notifyBackendWebServiceQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
