@@ -46,8 +46,8 @@
         <prop key="domibus.msh.messageid.suffix">domibus.eu</prop>
         <!-- Retry Worker execution interval as a cron expression -->
         <prop key="domibus.msh.retry.cron">0/5 * * * * ?</prop>
-        <!-- Timeout tolerance for retry messages. Should be set to double the retry worker execution interval -->
-        <prop key="domibus.msh.retry.tolerance">10000</prop>
+        <!-- Timeout tolerance for retry messages (in miliseconds). Scheduled retries that, due to any reason, were not performed within this period will be timeout -->
+        <prop key="domibus.msh.retry.tolerance">10800000</prop>
         <!-- Should unrecoverable errors should be retried or not -->
         <prop key="domibus.dispatch.ebms.error.unrecoverable.retry">true</prop>
         <prop key="domibus.smlzone">acc.edelivery.tech.ec.europa.eu</prop>
