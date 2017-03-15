@@ -13,7 +13,7 @@
                      jndi-name="jms/domibus.notification.jms"
                      cache="true"
                      resource-ref="true"
-                     lookup-on-startup="false">
+                     lookup-on-startup="true">
         <jee:environment>
             java.naming.provider.url=${domibus.deployment.cluster.url}
         </jee:environment>
