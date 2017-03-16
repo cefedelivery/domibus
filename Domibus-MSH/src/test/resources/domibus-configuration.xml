@@ -66,6 +66,9 @@
         <!--Accepted Format for MessageId-->
         <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
 
+        <!-- Whether to delete the message payload on send failure. Defaults to false (the admin could put the message back in the send queue) -->
+        <prop key="domibus.sendMessage.failure.delete.payload">false</prop>
+
         <!--Maximum number of pending messages to be listed -->
         <prop key="domibus.listPendingMessages.maxCount">500</prop>
 
