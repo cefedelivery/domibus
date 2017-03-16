@@ -57,7 +57,7 @@ public class UpdateRetryLoggingService {
                 userMessageLogDao.update(userMessageLog);
             }
 
-        } else { // mark message as ultimately failed if max retries reached
+        } else { // max retries reached, mark message as ultimately failed (the message may be pushed back to the send queue by an administrator but this send completely failed)
             LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SEND_FAILURE);
             if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus())) {
                 LOG.debug("Notifying backend for message failure");
