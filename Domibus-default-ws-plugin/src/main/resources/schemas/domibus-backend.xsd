@@ -42,6 +42,15 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="downloadMessageResponseWithLargeFilesSupport">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element minOccurs="0" name="bodyload" type="tns:LargePayloadType"/>
+                <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" type="tns:LargePayloadType"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="listPendingMessagesRequest" type="xsd:anyType" nillable="false"/>
 
     <xsd:element name="listPendingMessagesResponse">
@@ -71,6 +80,14 @@
             <xsd:sequence>
                 <xsd:element minOccurs="0" name="bodyload" type="tns:PayloadType"/>
                 <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:PayloadType"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="sendRequestWithLargeFilesSupport">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element minOccurs="0" name="bodyload" type="tns:LargePayloadType"/>
+                <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:LargePayloadType"/>
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
@@ -107,6 +124,14 @@
                 <xsd:attribute name="payloadId" type="xsd:token" use="required"/>
             </xsd:extension>
         </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="LargePayloadType">
+        <xsd:sequence>
+            <xsd:element name="value" type="xsd:base64Binary" ns1:expectedContentTypes="application/octet-stream"></xsd:element>
+        </xsd:sequence>
+        <xsd:attribute name="payloadId" type="xsd:token" use="required"/>
+        <xsd:attribute name="contentType" type="xsd:string"/>
     </xsd:complexType>
 
     <xsd:complexType name="errorResultImpl">

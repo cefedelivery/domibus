@@ -129,6 +129,72 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         return response;
     }
 
+    @SuppressWarnings("ValidExternallyBoundObject")
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public SendResponse sendMessageWithLargeFilesSupport(SendRequestWithLargeFilesSupport sendRequestWithLargeFilesSupport, Messaging ebMSHeaderInfo) throws SendMessageFault {
+        LOG.info("sendMessageWithLargeFilesSupport");
+
+        final LargePayloadType bodyload = sendRequestWithLargeFilesSupport.getBodyload();
+
+        List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
+
+        List<ExtendedPartInfo> partInfosToAdd = new ArrayList<>();
+
+        for (Iterator<PartInfo> i = partInfoList.iterator(); i.hasNext(); ) {
+
+            ExtendedPartInfo extendedPartInfo = new ExtendedPartInfo(i.next());
+            partInfosToAdd.add(extendedPartInfo);
+            i.remove();
+
+            boolean foundPayload = false;
+            final String href = extendedPartInfo.getHref();
+            BackendWebServiceImpl.LOG.debug("Looking for payload: " + href);
+            for (final LargePayloadType payload : sendRequestWithLargeFilesSupport.getPayload()) {
+                BackendWebServiceImpl.LOG.debug("comparing with payload id: " + payload.getPayloadId());
+                if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
+                    this.copyPartProperties(payload, extendedPartInfo);
+                    extendedPartInfo.setInBody(false);
+                    extendedPartInfo.setPayloadDatahandler(payload.getValue());
+                    foundPayload = true;
+                    break;
+                }
+            }
+            if (!foundPayload) {
+                if (bodyload == null) {
+                    // in this case the payload referenced in the partInfo was neither an external payload nor a bodyload
+                    throw new SendMessageFault("No Payload or Bodyload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+                }
+                // It can only be in body load, href MAY be null!
+                if (href == null && bodyload.getPayloadId() == null || href != null && StringUtils.equalsIgnoreCase(href, bodyload.getPayloadId())) {
+                    this.copyPartProperties(bodyload, extendedPartInfo);
+                    extendedPartInfo.setInBody(true);
+                    LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
+                    extendedPartInfo.setPayloadDatahandler(bodyload.getValue());
+                } else {
+                    throw new SendMessageFault("No payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+                }
+            }
+        }
+        partInfoList.addAll(partInfosToAdd);
+        if (ebMSHeaderInfo.getUserMessage().getMessageInfo() == null) {
+            MessageInfo messageInfo = new MessageInfo();
+            messageInfo.setTimestamp(getXMLTimeStamp());
+            ebMSHeaderInfo.getUserMessage().setMessageInfo(messageInfo);
+        }
+        final String messageId;
+        try {
+            messageId = this.submit(ebMSHeaderInfo);
+        } catch (final MessagingProcessingException mpEx) {
+            BackendWebServiceImpl.LOG.error("Message submission failed", mpEx);
+            throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
+        }
+        LOG.info("Received message from backend to send, assigning messageID" + messageId);
+        final SendResponse response = BackendWebServiceImpl.WEBSERVICE_OF.createSendResponse();
+        response.getMessageID().add(messageId);
+        return response;
+    }
+
     protected XMLGregorianCalendar getXMLTimeStamp() {
         GregorianCalendar gc = new GregorianCalendar();
         return new XMLGregorianCalendarImpl(gc);
@@ -149,6 +215,38 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     }
 
     private void copyPartProperties(final PayloadType payload, final ExtendedPartInfo partInfo) {
+        final PartProperties partProperties = new PartProperties();
+        Property prop;
+
+        // add all partproperties WEBSERVICE_OF the backend message
+        if (partInfo.getPartProperties() != null) {
+            for (final Property property : partInfo.getPartProperties().getProperty()) {
+                prop = new Property();
+
+                prop.setName(property.getName());
+                prop.setValue(property.getValue());
+                partProperties.getProperty().add(prop);
+            }
+        }
+
+        boolean mimeTypePropFound = false;
+        for (final Property property : partProperties.getProperty()) {
+            if (MIME_TYPE.equals(property.getName())) {
+                mimeTypePropFound = true;
+                break;
+            }
+        }
+        // in case there was no property with name {@value Property.MIME_TYPE} and xmime:contentType attribute was set noinspection SuspiciousMethodCalls
+        if (!mimeTypePropFound && payload.getContentType() != null) {
+            prop = new Property();
+            prop.setName(MIME_TYPE);
+            prop.setValue(payload.getContentType());
+            partProperties.getProperty().add(prop);
+        }
+        partInfo.setPartProperties(partProperties);
+    }
+
+    private void copyPartProperties(final LargePayloadType payload, final ExtendedPartInfo partInfo) {
         final PartProperties partProperties = new PartProperties();
         Property prop;
 
@@ -229,6 +327,48 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         }
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
+    public void downloadMessageWithLargeFilesSupport(DownloadMessageRequest downloadMessageRequest, Holder<DownloadMessageResponseWithLargeFilesSupport> downloadMessageResponseWithLargeFilesSupport, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
+
+        UserMessage userMessage = null;
+        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(downloadMessageRequest.getMessageID());
+
+        try {
+            if (isMessageIdNotEmpty) {
+                userMessage = downloadMessage(downloadMessageRequest.getMessageID(), null);
+            }
+        } catch (final MessageNotFoundException mnfEx) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", mnfEx);
+            }
+            LOG.error(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]");
+            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", createDownloadMessageFault(mnfEx));
+        }
+
+        if(userMessage == null) {
+            LOG.error(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]");
+            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", createFault("UserMessage not found"));
+        }
+
+        // To avoid blocking errors during the Header's response validation
+        if (StringUtils.isEmpty(userMessage.getCollaborationInfo().getAgreementRef().getValue())) {
+            userMessage.getCollaborationInfo().setAgreementRef(null);
+        }
+        Messaging messaging = BackendWebServiceImpl.EBMS_OBJECT_FACTORY.createMessaging();
+        messaging.setUserMessage(userMessage);
+        ebMSHeaderInfo.value = messaging;
+        downloadMessageResponseWithLargeFilesSupport.value = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponseWithLargeFilesSupport();
+
+        if (isMessageIdNotEmpty) {
+            fillInfoPartsForLargeFiles(downloadMessageResponseWithLargeFilesSupport, messaging);
+        } else {
+            LOG.info("Returning an empty response because the message id was empty.");
+        }
+    }
+
+
+
     private void fillInfoParts(Holder<DownloadMessageResponse> downloadMessageResponse, Messaging messaging) throws DownloadMessageFault {
 
         String msgId = messaging.getUserMessage().getMessageInfo().getMessageId();
@@ -259,12 +399,49 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         }
     }
 
+    private void fillInfoPartsForLargeFiles(Holder<DownloadMessageResponseWithLargeFilesSupport> downloadMessageResponse, Messaging messaging) throws DownloadMessageFault {
+        for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
+            ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
+            LargePayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createLargePayloadType();
+//            try {
+                LOG.debug("payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
+                payloadType.setValue(extPartInfo.getPayloadDatahandler());
+//            } catch (IOException ioEx) {
+//                String msgToShow = "Error getting the input stream from the payload data handler for the required message [" + msgId + "]";
+//                LOG.error(msgToShow, ioEx);
+//                throw new DownloadMessageFault(msgToShow, createDownloadMessageFault(ioEx));
+//            }
+            if (extPartInfo.isInBody()) {
+                extPartInfo.setHref(BODYLOAD);
+                payloadType.setPayloadId(BODYLOAD);
+                downloadMessageResponse.value.setBodyload(payloadType);
+            } else {
+                payloadType.setPayloadId(partInfo.getHref());
+                downloadMessageResponse.value.getPayload().add(payloadType);
+            }
+        }
+    }
+
     private void setAnyPayload(String msgId, PayloadType payloadType, AnyPayloadType anyPayloadType) throws DownloadMessageFault {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document root = builder.parse(new ByteArrayInputStream(payloadType.getValue()));
+            anyPayloadType.setAny(root.getDocumentElement());
+        } catch (Exception ex) {
+            String msgToShow = "Payload bytes could not be correctly parsed for the required message [" + msgId + "]";
+            LOG.error(msgToShow, ex);
+            throw new DownloadMessageFault(msgToShow, createDownloadMessageFault(ex));
+        }
+    }
+
+    private void setAnyPayload(String msgId, LargePayloadType payloadType, AnyPayloadType anyPayloadType) throws DownloadMessageFault {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document root = builder.parse(payloadType.getValue().getInputStream());
             anyPayloadType.setAny(root.getDocumentElement());
         } catch (Exception ex) {
             String msgToShow = "Payload bytes could not be correctly parsed for the required message [" + msgId + "]";

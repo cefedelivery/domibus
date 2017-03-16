@@ -49,6 +49,12 @@
         <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
         </wsdl:part>
     </wsdl:message>
+    <wsdl:message name="downloadMessageResponseWithLargeFilesSupport">
+        <wsdl:part element="tns:downloadMessageResponseWithLargeFilesSupport" name="downloadMessageResponseWithLargeFilesSupport">
+        </wsdl:part>
+        <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
+        </wsdl:part>
+    </wsdl:message>
     <wsdl:message name="listPendingMessagesResponse">
         <wsdl:part element="tns:listPendingMessagesResponse" name="listPendingMessagesResponse">
         </wsdl:part>
@@ -75,6 +81,12 @@
         <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
         </wsdl:part>
     </wsdl:message>
+    <wsdl:message name="sendMessageWithLargeFilesSupport">
+        <wsdl:part element="tns:sendRequestWithLargeFilesSupport" name="sendRequestWithLargeFilesSupport">
+        </wsdl:part>
+        <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
+        </wsdl:part>
+    </wsdl:message>
     <wsdl:message name="SendMessageFault">
         <wsdl:part element="tns:FaultDetail" name="SendMessageFault">
         </wsdl:part>
@@ -86,6 +98,14 @@
     <wsdl:portType name="BackendInterface">
         <wsdl:operation name="sendMessage">
             <wsdl:input message="tns:sendMessage" name="sendMessage">
+            </wsdl:input>
+            <wsdl:output message="tns:sendMessageResponse" name="sendMessageResponse">
+            </wsdl:output>
+            <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault">
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="sendMessageWithLargeFilesSupport">
+            <wsdl:input message="tns:sendMessageWithLargeFilesSupport" name="sendRequestWithLargeFilesSupport">
             </wsdl:input>
             <wsdl:output message="tns:sendMessageResponse" name="sendMessageResponse">
             </wsdl:output>
@@ -118,6 +138,14 @@
             <wsdl:fault message="tns:DownloadMessageFault" name="DownloadMessageFault">
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="downloadMessageWithLargeFilesSupport">
+            <wsdl:input message="tns:downloadMessage" name="downloadMessage">
+            </wsdl:input>
+            <wsdl:output message="tns:downloadMessageResponseWithLargeFilesSupport" name="downloadMessageResponseWithLargeFilesSupport">
+            </wsdl:output>
+            <wsdl:fault message="tns:DownloadMessageFault" name="DownloadMessageFault">
+            </wsdl:fault>
+        </wsdl:operation>
     </wsdl:portType>
 
     <wsdl:binding name="BackendService_1_1SoapBinding" type="tns:BackendInterface">
@@ -127,6 +155,19 @@
             <wsdl:input name="sendMessage">
                 <soap12:header message="tns:sendMessage" part="ebMSHeaderInfo" use="literal"/>
                 <soap12:body parts="sendRequest" use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="sendMessageResponse">
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="SendMessageFault">
+                <soap12:fault name="SendMessageFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="sendMessageWithLargeFilesSupport">
+            <soap12:operation soapAction="" style="document"/>
+            <wsdl:input name="sendMessageWithLargeFilesSupport">
+                <soap12:header message="tns:sendMessageWithLargeFilesSupport" part="ebMSHeaderInfo" use="literal"/>
+                <soap12:body parts="sendRequestWithLargeFilesSupport" use="literal"/>
             </wsdl:input>
             <wsdl:output name="sendMessageResponse">
                 <soap12:body use="literal"/>
@@ -170,6 +211,19 @@
             <wsdl:output name="downloadMessageResponse">
                 <soap12:header message="tns:downloadMessageResponse" part="ebMSHeaderInfo" use="literal"/>
                 <soap12:body parts="downloadMessageResponse" use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="DownloadMessageFault">
+                <soap12:fault name="DownloadMessageFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="downloadMessageWithLargeFilesSupport">
+            <soap12:operation soapAction="" style="document"/>
+            <wsdl:input name="downloadMessage">
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="downloadMessageResponseWithLargeFilesSupport">
+                <soap12:header message="tns:downloadMessageResponseWithLargeFilesSupport" part="ebMSHeaderInfo" use="literal"/>
+                <soap12:body parts="downloadMessageResponseWithLargeFilesSupport" use="literal"/>
             </wsdl:output>
             <wsdl:fault name="DownloadMessageFault">
                 <soap12:fault name="DownloadMessageFault" use="literal"/>
