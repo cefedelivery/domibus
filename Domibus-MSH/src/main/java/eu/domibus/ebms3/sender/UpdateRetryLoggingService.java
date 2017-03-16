@@ -12,11 +12,15 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.util.Properties;
 
 @Service
 public class UpdateRetryLoggingService {
 
+    private static final String DELETE_PAYLOAD_ON_SEND_FAILURE = "domibus.sendMessage.failure.delete.payload";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UpdateRetryLoggingService.class);
 
     @Autowired
@@ -27,6 +31,10 @@ public class UpdateRetryLoggingService {
 
     @Autowired
     private MessagingDao messagingDao;
+
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
 
     /**
      * This method is responsible for the handling of retries for a given message
@@ -54,11 +62,12 @@ public class UpdateRetryLoggingService {
             if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus())) {
                 LOG.debug("Notifying backend for message failure");
                 backendNotificationService.notifyOfSendFailure(messageId);
-                messagingDao.delete(messageId, MessageStatus.SEND_FAILURE, NotificationStatus.NOTIFIED);
-            } else {
-                LOG.debug("Notifying backend not required for message failure");
+                userMessageLogDao.setAsNotified(messageId);
+            }
+            userMessageLogDao.setMessageAsSendFailure(messageId);
+
+            if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
                 messagingDao.clearPayloadData(messageId);
-                userMessageLogDao.setMessageAsSendFailure(messageId);
             }
         }
     }

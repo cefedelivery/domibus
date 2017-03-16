@@ -50,6 +50,7 @@ import java.util.Properties;
 @Service
 public class RetryService {
     public static final String TIMEOUT_TOLERANCE = "domibus.msh.retry.tolerance";
+    private static final String DELETE_PAYLOAD_ON_SEND_FAILURE = "domibus.sendMessage.failure.delete.payload";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RetryService.class);
     @Autowired
     private BackendNotificationService backendNotificationService;
@@ -107,12 +108,14 @@ public class RetryService {
 
         if (notify) {
             backendNotificationService.notifyOfSendFailure(messageIdToPurge);
-            messagingDao.delete(messageIdToPurge, MessageStatus.SEND_FAILURE, NotificationStatus.NOTIFIED);
-        } else {
-            messagingDao.clearPayloadData(messageIdToPurge);
-            userMessageLogDao.setMessageAsSendFailure(messageIdToPurge);
+            userMessageLogDao.setAsNotified(messageIdToPurge);
         }
-    }
+        userMessageLogDao.setMessageAsSendFailure(messageIdToPurge);
+
+        if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
+            messagingDao.clearPayloadData(messageIdToPurge);
+        }
+}
 
     private void sendJmsMessage(final String messageId) {
         jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, userMessageLogDao.findEndpointForMessageId(messageId)).createMessage(), dispatchQueue);
