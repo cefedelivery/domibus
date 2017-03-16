@@ -21,7 +21,7 @@ Domibus 3.3-RC1
 - DB: MySQL installation of Domibus database is set to have collation of 'UTF8_BIN' to make DB level string comparison (in SQLs) case sensitive. This will enable support for case sensitive message ids.
 - WS Plugin: the response list of ListPendingMessages operation can be limited using a new configuration property (domibus.listPendingMessages.maxCount).
 - Config: increased the value of the retry tolerance to 3 hours
-- Config: new property, delete payload when send message fails
+- Config: added new property "domibus.sendMessage.failure.delete.payload" to enable/disable the removal of the message payload on send failure.
 Domibus 3.2.2
 - Possibility to configure the limit of downloaded/not-downloaded messages for the retention worker
 - Fixed the notifications sent by the JMS plugin

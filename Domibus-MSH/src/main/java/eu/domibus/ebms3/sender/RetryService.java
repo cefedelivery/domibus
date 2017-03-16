@@ -101,6 +101,12 @@ public class RetryService {
         }
     }
 
+    /**
+     * Notifies send failure, updates the message status and deletes the payload (if required) for messages that failed to be sent and expired
+     *
+     * @param messageIdToPurge is the messageId of the expired message
+     *
+     */
     private void purgeTimedoutMessage(final String messageIdToPurge) {
         final MessageLog userMessageLog = userMessageLogDao.findByMessageId(messageIdToPurge, MSHRole.SENDING);
 
