@@ -5,7 +5,7 @@ import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._
 import eu.domibus.plugin.webService.generated.BackendService11;
 import eu.domibus.plugin.webService.generated.DownloadMessageRequest;
 import eu.domibus.plugin.webService.generated.DownloadMessageResponse;
-import eu.domibus.plugin.webService.generated.DownloadMessageResponseWithLargeFilesSupport;
+//import eu.domibus.plugin.webService.generated.DownloadMessageResponseWithLargeFilesSupport;
 import org.apache.commons.io.IOUtils;
 
 import javax.activation.DataHandler;
@@ -20,7 +20,7 @@ import java.net.URL;
 
 public class DownloadLargeFileTest {
 
-    public void testDownloadLargeFile() throws Exception {
+    /*public void testDownloadLargeFile() throws Exception {
         BackendService11 client = new BackendService11(new URL("http://localhost:8191/domibus/services/backend?wsdl"), new QName("http://org.ecodex.backend/1_1/", "BackendService_1_1"));
         DownloadMessageRequest request = new DownloadMessageRequest();
         request.setMessageID("15cc5c34-798a-496f-a41f-87ce38f0f5da@domibus.eu");
@@ -42,6 +42,6 @@ public class DownloadLargeFileTest {
         IOUtils.closeQuietly(is);
 
         System.out.println("Finished downloading " + downloadMessageResponse.value.getPayload().get(0).getValue());
-    }
+    }*/
 
 }

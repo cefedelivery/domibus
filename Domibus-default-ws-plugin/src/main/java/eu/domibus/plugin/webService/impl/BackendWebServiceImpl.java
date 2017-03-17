@@ -3,6 +3,8 @@ package eu.domibus.plugin.webService.impl;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.AbstractBackendConnector;
@@ -11,23 +13,17 @@ import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.webService.generated.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -129,13 +125,14 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         return response;
     }
 
+
     @SuppressWarnings("ValidExternallyBoundObject")
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public SendResponse sendMessageWithLargeFilesSupport(SendRequestWithLargeFilesSupport sendRequestWithLargeFilesSupport, Messaging ebMSHeaderInfo) throws SendMessageFault {
-        LOG.info("sendMessageWithLargeFilesSupport");
+    public SendResponse sendMessageWithLargeFileSupport(SendRequestWithLargeFileSupport sendRequestWithLargeFileSupport, Messaging ebMSHeaderInfo) throws SendMessageFault {
+        LOG.info("Received message");
 
-        final LargePayloadType bodyload = sendRequestWithLargeFilesSupport.getBodyload();
+        final LargePayloadType bodyload = sendRequestWithLargeFileSupport.getBodyload();
 
         List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
 
@@ -150,11 +147,12 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             boolean foundPayload = false;
             final String href = extendedPartInfo.getHref();
             BackendWebServiceImpl.LOG.debug("Looking for payload: " + href);
-            for (final LargePayloadType payload : sendRequestWithLargeFilesSupport.getPayload()) {
+            for (final LargePayloadType payload : sendRequestWithLargeFileSupport.getPayload()) {
                 BackendWebServiceImpl.LOG.debug("comparing with payload id: " + payload.getPayloadId());
                 if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
                     this.copyPartProperties(payload, extendedPartInfo);
                     extendedPartInfo.setInBody(false);
+                    LOG.debug("sendMessage - payload Content Type: " + payload.getContentType());
                     extendedPartInfo.setPayloadDatahandler(payload.getValue());
                     foundPayload = true;
                     break;
@@ -194,6 +192,72 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         response.getMessageID().add(messageId);
         return response;
     }
+
+//    @SuppressWarnings("ValidExternallyBoundObject")
+//    @Override
+//    @Transactional(propagation = Propagation.REQUIRED)
+//    public SendResponse sendMessageWithLargeFilesSupport(SendRequestWithLargeFilesSupport sendRequestWithLargeFilesSupport, Messaging ebMSHeaderInfo) throws SendMessageFault {
+//        LOG.info("sendMessageWithLargeFilesSupport");
+//
+////        final LargePayloadType bodyload = sendRequestWithLargeFilesSupport.getBodyload();
+//
+//        List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
+//
+//        List<ExtendedPartInfo> partInfosToAdd = new ArrayList<>();
+//
+//        for (Iterator<PartInfo> i = partInfoList.iterator(); i.hasNext(); ) {
+//
+//            ExtendedPartInfo extendedPartInfo = new ExtendedPartInfo(i.next());
+//            partInfosToAdd.add(extendedPartInfo);
+//            i.remove();
+//
+//            boolean foundPayload = false;
+//            final String href = extendedPartInfo.getHref();
+//            BackendWebServiceImpl.LOG.debug("Looking for payload: " + href);
+//            for (final LargePayloadType payload : sendRequestWithLargeFilesSupport.getLargePayload()) {
+//                BackendWebServiceImpl.LOG.debug("comparing with payload id: " + payload.getPayloadId());
+//                if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
+//                    this.copyPartProperties(payload, extendedPartInfo);
+//                    extendedPartInfo.setInBody(false);
+//                    extendedPartInfo.setPayloadDatahandler(payload.getValue());
+//                    foundPayload = true;
+//                    break;
+//                }
+//            }
+//           /* if (!foundPayload) {
+//                if (bodyload == null) {
+//                    // in this case the payload referenced in the partInfo was neither an external payload nor a bodyload
+//                    throw new SendMessageFault("No Payload or Bodyload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+//                }
+//                // It can only be in body load, href MAY be null!
+//                if (href == null && bodyload.getPayloadId() == null || href != null && StringUtils.equalsIgnoreCase(href, bodyload.getPayloadId())) {
+//                    this.copyPartProperties(bodyload, extendedPartInfo);
+//                    extendedPartInfo.setInBody(true);
+//                    LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
+//                    extendedPartInfo.setPayloadDatahandler(bodyload.getValue());
+//                } else {
+//                    throw new SendMessageFault("No payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+//                }
+//            }*/
+//        }
+//        partInfoList.addAll(partInfosToAdd);
+//        if (ebMSHeaderInfo.getUserMessage().getMessageInfo() == null) {
+//            MessageInfo messageInfo = new MessageInfo();
+//            messageInfo.setTimestamp(getXMLTimeStamp());
+//            ebMSHeaderInfo.getUserMessage().setMessageInfo(messageInfo);
+//        }
+//        final String messageId;
+//        try {
+//            messageId = this.submit(ebMSHeaderInfo);
+//        } catch (final MessagingProcessingException mpEx) {
+//            BackendWebServiceImpl.LOG.error("Message submission failed", mpEx);
+//            throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
+//        }
+//        LOG.info("Received message from backend to send, assigning messageID" + messageId);
+//        final SendResponse response = BackendWebServiceImpl.WEBSERVICE_OF.createSendResponse();
+//        response.getMessageID().add(messageId);
+//        return response;
+//    }
 
     protected XMLGregorianCalendar getXMLTimeStamp() {
         GregorianCalendar gc = new GregorianCalendar();
@@ -327,7 +391,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         }
     }
 
-    @Override
+    /*@Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
     public void downloadMessageWithLargeFilesSupport(DownloadMessageRequest downloadMessageRequest, Holder<DownloadMessageResponseWithLargeFilesSupport> downloadMessageResponseWithLargeFilesSupport, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
 
@@ -365,7 +429,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         } else {
             LOG.info("Returning an empty response because the message id was empty.");
         }
-    }
+    }*/
 
 
 
@@ -387,19 +451,15 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             if (extPartInfo.isInBody()) {
                 extPartInfo.setHref(BODYLOAD);
                 payloadType.setPayloadId(BODYLOAD);
-                JAXBElement<PayloadType> payloadElement = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponseBodyload(payloadType);
-                downloadMessageResponse.value.getContent().add(payloadElement);
+                downloadMessageResponse.value.setBodyload(payloadType);
             } else {
                 payloadType.setPayloadId(partInfo.getHref());
-                AnyPayloadType anyPayloadType = BackendWebServiceImpl.WEBSERVICE_OF.createAnyPayloadType();
-                setAnyPayload(msgId, payloadType, anyPayloadType);
-                JAXBElement<AnyPayloadType> anyPayloadTypeElement = BackendWebServiceImpl.WEBSERVICE_OF.createPayload(anyPayloadType);
-                downloadMessageResponse.value.getContent().add(anyPayloadTypeElement);
+                downloadMessageResponse.value.getPayload().add(payloadType);
             }
         }
     }
 
-    private void fillInfoPartsForLargeFiles(Holder<DownloadMessageResponseWithLargeFilesSupport> downloadMessageResponse, Messaging messaging) throws DownloadMessageFault {
+    /*private void fillInfoPartsForLargeFiles(Holder<DownloadMessageResponseWithLargeFilesSupport> downloadMessageResponse, Messaging messaging) throws DownloadMessageFault {
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
             LargePayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createLargePayloadType();
@@ -420,35 +480,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                 downloadMessageResponse.value.getPayload().add(payloadType);
             }
         }
-    }
-
-    private void setAnyPayload(String msgId, PayloadType payloadType, AnyPayloadType anyPayloadType) throws DownloadMessageFault {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document root = builder.parse(new ByteArrayInputStream(payloadType.getValue()));
-            anyPayloadType.setAny(root.getDocumentElement());
-        } catch (Exception ex) {
-            String msgToShow = "Payload bytes could not be correctly parsed for the required message [" + msgId + "]";
-            LOG.error(msgToShow, ex);
-            throw new DownloadMessageFault(msgToShow, createDownloadMessageFault(ex));
-        }
-    }
-
-    private void setAnyPayload(String msgId, LargePayloadType payloadType, AnyPayloadType anyPayloadType) throws DownloadMessageFault {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document root = builder.parse(payloadType.getValue().getInputStream());
-            anyPayloadType.setAny(root.getDocumentElement());
-        } catch (Exception ex) {
-            String msgToShow = "Payload bytes could not be correctly parsed for the required message [" + msgId + "]";
-            LOG.error(msgToShow, ex);
-            throw new DownloadMessageFault(msgToShow, createDownloadMessageFault(ex));
-        }
-    }
+    }*/
 
     private FaultDetail createDownloadMessageFault(Exception ex) {
         FaultDetail detail = WEBSERVICE_OF.createFaultDetail();
