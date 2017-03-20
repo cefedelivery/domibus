@@ -75,7 +75,7 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="sendRequestWithLargeFileSupport">
+    <xsd:element name="sendRequestWithLargeFilesSupport">
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element minOccurs="0" name="bodyload" type="tns:LargePayloadType"/>

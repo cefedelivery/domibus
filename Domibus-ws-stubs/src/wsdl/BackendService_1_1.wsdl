@@ -75,8 +75,8 @@
         <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
         </wsdl:part>
     </wsdl:message>
-    <wsdl:message name="sendMessageWithLargeFileSupport">
-        <wsdl:part element="tns:sendRequestWithLargeFileSupport" name="sendRequestWithLargeFileSupport">
+    <wsdl:message name="sendMessageWithLargeFilesSupport">
+        <wsdl:part element="tns:sendRequestWithLargeFilesSupport" name="sendRequestWithLargeFilesSupport">
         </wsdl:part>
         <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
         </wsdl:part>
@@ -98,8 +98,8 @@
             <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault">
             </wsdl:fault>
         </wsdl:operation>
-        <wsdl:operation name="sendMessageWithLargeFileSupport">
-            <wsdl:input message="tns:sendMessageWithLargeFileSupport" name="sendMessageWithLargeFileSupport">
+        <wsdl:operation name="sendMessageWithLargeFilesSupport">
+            <wsdl:input message="tns:sendMessageWithLargeFilesSupport" name="sendMessageWithLargeFilesSupport">
             </wsdl:input>
             <wsdl:output message="tns:sendMessageResponse" name="sendMessageResponse">
             </wsdl:output>
@@ -149,11 +149,11 @@
                 <soap12:fault name="SendMessageFault" use="literal"/>
             </wsdl:fault>
         </wsdl:operation>
-        <wsdl:operation name="sendMessageWithLargeFileSupport">
+        <wsdl:operation name="sendMessageWithLargeFilesSupport">
             <soap12:operation soapAction="" style="document"/>
-            <wsdl:input name="sendMessageWithLargeFileSupport">
-                <soap12:header message="tns:sendMessageWithLargeFileSupport" part="ebMSHeaderInfo" use="literal"/>
-                <soap12:body parts="sendRequestWithLargeFileSupport" use="literal"/>
+            <wsdl:input name="sendMessageWithLargeFilesSupport">
+                <soap12:header message="tns:sendMessageWithLargeFilesSupport" part="ebMSHeaderInfo" use="literal"/>
+                <soap12:body parts="sendRequestWithLargeFilesSupport" use="literal"/>
             </wsdl:input>
             <wsdl:output name="sendMessageResponse">
                 <soap12:body use="literal"/>
