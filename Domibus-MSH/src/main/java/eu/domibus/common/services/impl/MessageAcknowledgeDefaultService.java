@@ -1,6 +1,6 @@
-package eu.domibus.acknowledge.services;
+package eu.domibus.common.services.impl;
 
-import eu.domibus.acknowledge.dao.IMessageAcknowledgeDao;
+import eu.domibus.common.dao.IMessageAcknowledgeDao;
 import eu.domibus.api.acknowledge.IMessageAcknowledgeService;
 import eu.domibus.api.acknowledge.MessageAcknowledge;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class MessageAcknowledgeDefaultService implements IMessageAcknowledgeServ
 
     }
 
-    public List<MessageAcknowledge> getAcknowledgeMessages(String messageId) {
+    public List<MessageAcknowledge> getAcknowledgedMessages(String messageId) {
         return new ArrayList<>();
     }
 }

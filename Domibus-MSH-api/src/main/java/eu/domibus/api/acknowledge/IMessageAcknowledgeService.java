@@ -9,5 +9,5 @@ public interface IMessageAcknowledgeService {
 
     void acknowledgeMessage(String messageId) throws MessageAcknowledgeException;
 
-    List<MessageAcknowledge> getAcknowledgeMessages(String messageId) throws MessageAcknowledgeException;
+    List<MessageAcknowledge> getAcknowledgedMessages(String messageId) throws MessageAcknowledgeException;
 }
