@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
-import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
@@ -58,6 +57,14 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         super(name);
     }
 
+    /**
+     * @deprecated Use sendMessageWithLargeFilesSupport
+     * @param sendRequest
+     * @param ebMSHeaderInfo
+     * @return
+     * @throws SendMessageFault
+     */
+    @Deprecated
     @SuppressWarnings("ValidExternallyBoundObject")
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -82,7 +89,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             for (final PayloadType payload : sendRequest.getPayload()) {
                 BackendWebServiceImpl.LOG.debug("comparing with payload id: " + payload.getPayloadId());
                 if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
-                    this.copyPartProperties(payload, extendedPartInfo);
+                    this.copyPartProperties(payload.getContentType(), extendedPartInfo);
                     extendedPartInfo.setInBody(false);
                     LOG.debug("sendMessage - payload Content Type: " + payload.getContentType());
                     extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(payload.getValue(), payload.getContentType() == null ? DEFAULT_MT : payload.getContentType())));
@@ -97,7 +104,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                 }
                 // It can only be in body load, href MAY be null!
                 if (href == null && bodyload.getPayloadId() == null || href != null && StringUtils.equalsIgnoreCase(href, bodyload.getPayloadId())) {
-                    this.copyPartProperties(bodyload, extendedPartInfo);
+                    this.copyPartProperties(bodyload.getContentType(), extendedPartInfo);
                     extendedPartInfo.setInBody(true);
                     LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
                     extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(bodyload.getValue(), bodyload.getContentType() == null ? DEFAULT_MT : bodyload.getContentType())));
@@ -150,7 +157,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             for (final LargePayloadType payload : sendRequestWithLargeFileSupport.getPayload()) {
                 BackendWebServiceImpl.LOG.debug("comparing with payload id: " + payload.getPayloadId());
                 if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
-                    this.copyPartProperties(payload, extendedPartInfo);
+                    this.copyPartProperties(payload.getContentType(), extendedPartInfo);
                     extendedPartInfo.setInBody(false);
                     LOG.debug("sendMessage - payload Content Type: " + payload.getContentType());
                     extendedPartInfo.setPayloadDatahandler(payload.getValue());
@@ -165,7 +172,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                 }
                 // It can only be in body load, href MAY be null!
                 if (href == null && bodyload.getPayloadId() == null || href != null && StringUtils.equalsIgnoreCase(href, bodyload.getPayloadId())) {
-                    this.copyPartProperties(bodyload, extendedPartInfo);
+                    this.copyPartProperties(bodyload.getContentType(), extendedPartInfo);
                     extendedPartInfo.setInBody(true);
                     LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
                     extendedPartInfo.setPayloadDatahandler(bodyload.getValue());
@@ -212,7 +219,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         return fd;
     }
 
-    private void copyPartProperties(final PayloadType payload, final ExtendedPartInfo partInfo) {
+    private void copyPartProperties(final String payloadContentType, final ExtendedPartInfo partInfo) {
         final PartProperties partProperties = new PartProperties();
         Property prop;
 
@@ -235,47 +242,14 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             }
         }
         // in case there was no property with name {@value Property.MIME_TYPE} and xmime:contentType attribute was set noinspection SuspiciousMethodCalls
-        if (!mimeTypePropFound && payload.getContentType() != null) {
+        if (!mimeTypePropFound && payloadContentType != null) {
             prop = new Property();
             prop.setName(MIME_TYPE);
-            prop.setValue(payload.getContentType());
+            prop.setValue(payloadContentType);
             partProperties.getProperty().add(prop);
         }
         partInfo.setPartProperties(partProperties);
     }
-
-    private void copyPartProperties(final LargePayloadType payload, final ExtendedPartInfo partInfo) {
-        final PartProperties partProperties = new PartProperties();
-        Property prop;
-
-        // add all partproperties WEBSERVICE_OF the backend message
-        if (partInfo.getPartProperties() != null) {
-            for (final Property property : partInfo.getPartProperties().getProperty()) {
-                prop = new Property();
-
-                prop.setName(property.getName());
-                prop.setValue(property.getValue());
-                partProperties.getProperty().add(prop);
-            }
-        }
-
-        boolean mimeTypePropFound = false;
-        for (final Property property : partProperties.getProperty()) {
-            if (MIME_TYPE.equals(property.getName())) {
-                mimeTypePropFound = true;
-                break;
-            }
-        }
-        // in case there was no property with name {@value Property.MIME_TYPE} and xmime:contentType attribute was set noinspection SuspiciousMethodCalls
-        if (!mimeTypePropFound && payload.getContentType() != null) {
-            prop = new Property();
-            prop.setName(MIME_TYPE);
-            prop.setValue(payload.getContentType());
-            partProperties.getProperty().add(prop);
-        }
-        partInfo.setPartProperties(partProperties);
-    }
-
 
     @Override
     public ListPendingMessagesResponse listPendingMessages(final Object listPendingMessagesRequest) {
@@ -285,6 +259,14 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         return response;
     }
 
+    /**
+     * @deprecated Use downloadMessageWithLargeFilesSupport
+     * @param downloadMessageRequest
+     * @param downloadMessageResponse
+     * @param ebMSHeaderInfo
+     * @throws DownloadMessageFault
+     */
+    @Deprecated
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
     public void downloadMessage(final DownloadMessageRequest downloadMessageRequest, Holder<DownloadMessageResponse> downloadMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
