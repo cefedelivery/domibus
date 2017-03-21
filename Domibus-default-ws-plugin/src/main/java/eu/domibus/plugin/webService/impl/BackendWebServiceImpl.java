@@ -135,7 +135,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     @SuppressWarnings("ValidExternallyBoundObject")
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     public SendResponse sendMessageWithLargeFilesSupport(SendRequestWithLargeFilesSupport sendRequestWithLargeFileSupport, Messaging ebMSHeaderInfo) throws SendMessageFault {
         LOG.info("Received message");
 
