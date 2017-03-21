@@ -8,26 +8,26 @@
     </jaxb:globalBindings>
 
     <!-- XSD types packages customization -->
-    <jaxb:bindings schemaLocation="../wsdl/domibus-backend.xsd" node="/xsd:schema">
+    <jaxb:bindings schemaLocation="../main/resources/schemas/domibus-backend.xsd" node="/xsd:schema">
         <jaxb:schemaBindings>
             <jaxb:package name="eu.domibus.plugin.webService.generated"/>
         </jaxb:schemaBindings>
     </jaxb:bindings>
 
-    <jaxb:bindings schemaLocation="../wsdl/domibus-header.xsd" node="/xsd:schema">
+    <jaxb:bindings schemaLocation="../main/resources/schemas/domibus-header.xsd" node="/xsd:schema">
         <jaxb:schemaBindings>
             <jaxb:package name="eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704"/>
         </jaxb:schemaBindings>
     </jaxb:bindings>
 
-    <jaxb:bindings schemaLocation="../wsdl/xmlmime.xsd" node="/xs:schema">
+    <jaxb:bindings schemaLocation="../main/resources/schemas/xmlmime.xsd" node="/xs:schema">
         <jaxb:schemaBindings>
             <jaxb:package name="eu.domibus.common.model.org.w3._2005._05.xmlmime"/>
         </jaxb:schemaBindings>
     </jaxb:bindings>
 
     <!-- Used for the test SendSOAPMessageIT -->
-    <jaxb:bindings schemaLocation="../wsdl/envelope.xsd" node="/xs:schema">
+    <jaxb:bindings schemaLocation="../main/resources/schemas/envelope.xsd" node="/xs:schema">
         <jaxb:schemaBindings>
             <jaxb:package name="eu.domibus.common.model.org.w3._2003._05.soap_envelope"/>
         </jaxb:schemaBindings>

@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 
-import eu.domibus.plugin.webService.generated.DownloadMessageResponseWithLargeFilesSupport;
+import eu.domibus.plugin.webService.generated.RetrieveMessageResponse;
 
 
 public class DownloadLargeFileTest {
@@ -29,10 +29,10 @@ public class DownloadLargeFileTest {
         BackendService11 client = new BackendService11(new URL("http://localhost:8191/domibus/services/backend?wsdl"), new QName("http://org.ecodex.backend/1_1/", "BackendService_1_1"));
         DownloadMessageRequest request = new DownloadMessageRequest();
         request.setMessageID("ba66570c-baad-4c19-be30-185791d6bacf@domibus.eu");
-        Holder<DownloadMessageResponseWithLargeFilesSupport> downloadMessageResponse = new Holder(new eu.domibus.plugin.webService.generated.ObjectFactory().createDownloadMessageResponseWithLargeFilesSupport());
+        Holder<RetrieveMessageResponse> downloadMessageResponse = new Holder(new eu.domibus.plugin.webService.generated.ObjectFactory().createRetrieveMessageResponse());
         Holder<Messaging> result = new Holder(new ObjectFactory().createMessaging());
         System.out.println("Downloading.... ");
-        client.getBACKENDPORT().downloadMessageWithLargeFilesSupport(request, downloadMessageResponse, result);
+        client.getBACKENDPORT().retrieveMessage(request, downloadMessageResponse, result);
         final DataHandler value = downloadMessageResponse.value.getPayload().get(0).getValue();
         System.out.println("Data handler " + value);
 

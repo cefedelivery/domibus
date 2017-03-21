@@ -41,7 +41,7 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
-    <xsd:element name="downloadMessageResponseWithLargeFilesSupport">
+    <xsd:element name="retrieveMessageResponse">
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element minOccurs="0" name="bodyload" type="tns:LargePayloadType"/>
@@ -84,7 +84,7 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="sendRequestWithLargeFilesSupport">
+    <xsd:element name="submitRequest">
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element minOccurs="0" name="bodyload" type="tns:LargePayloadType"/>

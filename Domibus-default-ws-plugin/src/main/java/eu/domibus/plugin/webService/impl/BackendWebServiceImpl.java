@@ -136,10 +136,10 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @SuppressWarnings("ValidExternallyBoundObject")
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
-    public SendResponse sendMessageWithLargeFilesSupport(SendRequestWithLargeFilesSupport sendRequestWithLargeFileSupport, Messaging ebMSHeaderInfo) throws SendMessageFault {
+    public SendResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SendMessageFault {
         LOG.info("Received message");
 
-        final LargePayloadType bodyload = sendRequestWithLargeFileSupport.getBodyload();
+        final LargePayloadType bodyload = submitRequest.getBodyload();
 
         List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
 
@@ -154,7 +154,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             boolean foundPayload = false;
             final String href = extendedPartInfo.getHref();
             BackendWebServiceImpl.LOG.debug("Looking for payload: " + href);
-            for (final LargePayloadType payload : sendRequestWithLargeFileSupport.getPayload()) {
+            for (final LargePayloadType payload : submitRequest.getPayload()) {
                 BackendWebServiceImpl.LOG.debug("comparing with payload id: " + payload.getPayloadId());
                 if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
                     this.copyPartProperties(payload.getContentType(), extendedPartInfo);
@@ -309,7 +309,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
-    public void downloadMessageWithLargeFilesSupport(DownloadMessageRequest downloadMessageRequest, Holder<DownloadMessageResponseWithLargeFilesSupport> downloadMessageResponseWithLargeFilesSupport, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
+    public void retrieveMessage(DownloadMessageRequest downloadMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
 
         UserMessage userMessage = null;
         boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(downloadMessageRequest.getMessageID());
@@ -338,10 +338,10 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         Messaging messaging = BackendWebServiceImpl.EBMS_OBJECT_FACTORY.createMessaging();
         messaging.setUserMessage(userMessage);
         ebMSHeaderInfo.value = messaging;
-        downloadMessageResponseWithLargeFilesSupport.value = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponseWithLargeFilesSupport();
+        retrieveMessageResponse.value = BackendWebServiceImpl.WEBSERVICE_OF.createRetrieveMessageResponse();
 
         if (isMessageIdNotEmpty) {
-            fillInfoPartsForLargeFiles(downloadMessageResponseWithLargeFilesSupport, messaging);
+            fillInfoPartsForLargeFiles(retrieveMessageResponse, messaging);
         } else {
             LOG.info("Returning an empty response because the message id was empty.");
         }
@@ -374,7 +374,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         }
     }
 
-    private void fillInfoPartsForLargeFiles(Holder<DownloadMessageResponseWithLargeFilesSupport> downloadMessageResponse, Messaging messaging) throws DownloadMessageFault {
+    private void fillInfoPartsForLargeFiles(Holder<RetrieveMessageResponse> retrieveMessageResponse, Messaging messaging) throws DownloadMessageFault {
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
             LargePayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createLargePayloadType();
@@ -383,10 +383,10 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             if (extPartInfo.isInBody()) {
                 extPartInfo.setHref(BODYLOAD);
                 payloadType.setPayloadId(BODYLOAD);
-                downloadMessageResponse.value.setBodyload(payloadType);
+                retrieveMessageResponse.value.setBodyload(payloadType);
             } else {
                 payloadType.setPayloadId(partInfo.getHref());
-                downloadMessageResponse.value.getPayload().add(payloadType);
+                retrieveMessageResponse.value.getPayload().add(payloadType);
             }
         }
     }
