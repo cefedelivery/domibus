@@ -316,6 +316,14 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return null;
     }
 
+    protected InternalJmsMessage getMessageFromDestinationUsingCustomSelector(ObjectName destination, String customSelector) {
+        List<InternalJmsMessage> messages = getMessagesFromDestination(destination, customSelector);
+        if (!messages.isEmpty()) {
+            return messages.get(0);
+        }
+        return null;
+    }
+
     protected List<InternalJmsMessage> getMessagesFromDestination(final ObjectName destination, final String selectorString) {
         return jmxTemplate.query(
                 new JMXOperation() {
@@ -423,11 +431,44 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         throw new InternalJMSException("Could not find internal destination for [" + source + "]");
     }
 
+    /**
+     * To be used to browse all the messages of a specific queue. It works also in a cluster.
+     *
+     * @param source
+     * @return
+     */
     @Override
     public List<InternalJmsMessage> browseMessages(String source) {
-        return browseMessages(removeJmsModule(source), null, null, null, null);
+        List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
+        List<InternalJMSDestination> destinations = getInternalJMSDestinations(removeJmsModule(source));
+        for (InternalJMSDestination destination : destinations) {
+            String destinationType = destination.getType();
+            if (QUEUE.equals(destinationType)) {
+                Map<String, Object> criteria = new HashMap<String, Object>();
+                String selector = jmsSelectorUtil.getSelector(criteria);
+                try {
+                    ObjectName jmsDestination = destination.getProperty(PROPERTY_OBJECT_NAME);
+                    internalJmsMessages.addAll(getMessagesFromDestination(jmsDestination, selector));
+                } catch (Exception e) {
+                    throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
+                }
+            } else {
+                throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
+            }
+        }
+        return internalJmsMessages;
     }
 
+    /**
+     * To be used to browse messages for a specific queue and respecting certain criteria.
+     *
+     * @param source
+     * @param jmsType
+     * @param fromDate
+     * @param toDate
+     * @param selectorClause
+     * @return
+     */
     @Override
     public List<InternalJmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
 
@@ -513,21 +554,34 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         }
     }
 
+    /**
+     * Implements the consume operation.
+     * The message is browsed, deleted and returned to caller.
+     *
+     * @param source name of the JMS queue
+     * @param customMessageId ID of the message present in the custom properties.
+     * @return
+     */
     @Override
     public InternalJmsMessage consumeMessage(String source, String customMessageId) {
-        InternalJmsMessage intJmsMsg = null;
+
         String selector = "MESSAGE_ID='" + customMessageId + "'";
+
+        InternalJmsMessage internalJmsMessage = null;
+        ObjectName destinationName = null;
         try {
-            ObjectName destinationName = getMessageDestinationName(removeJmsModule(source));
-            List<InternalJmsMessage> messages = getMessagesFromDestination(destinationName, selector);
-            if (!messages.isEmpty()) {
-                intJmsMsg = messages.get(0);
+            for (InternalJMSDestination internalJmsDestination : getInternalJMSDestinations(removeJmsModule(source))) {
+                destinationName = internalJmsDestination.getProperty(PROPERTY_OBJECT_NAME);
+                internalJmsMessage = getMessageFromDestinationUsingCustomSelector(destinationName, selector);
+                if (internalJmsMessage != null) break;
             }
-            deleteMessages(destinationName, selector);
+            if (internalJmsMessage != null) {
+                deleteMessages(destinationName, selector);
+            }
         } catch (Exception ex) {
             throw new InternalJMSException("Failed to consume message [" + customMessageId + "] from source [" + source + "]", ex);
         }
-        return intJmsMsg;
+        return internalJmsMessage;
     }
 
 
