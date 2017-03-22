@@ -66,6 +66,7 @@
                         <sp:Header
                                 Namespace="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"
                                 Name="Messaging"/>
+                        <sp:Body/>
                         <sp:Attachments>
                             <sp13:ContentSignatureTransform/>
                         </sp:Attachments>

@@ -52,6 +52,11 @@ public class PModeDaoTestIT {
             return Mockito.mock(ConfigurationDAO.class);
         }
 
+        @Bean(name = "domibusJTA")
+        public EntityManagerFactory getdomibusJTA() {
+            return Mockito.mock(EntityManagerFactory.class);
+        }
+
         @Bean
         public EntityManagerFactory entityManagerFactory() {
             return Mockito.mock(EntityManagerFactory.class);

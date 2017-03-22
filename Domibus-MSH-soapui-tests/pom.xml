@@ -8,17 +8,95 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.2.2</version>
+        <version>3.2.3-SNAPSHOT</version>
     </parent>
     <artifactId>domibus-soapui-tests</artifactId>
     <packaging>jar</packaging>
 	<name>Domibus MSH SoapUI</name>
+
+    <properties>
+        <mysql.version>5.1.34</mysql.version>
+        <jdbc.url>jdbc:mysql://localhost:3306/domibus?pinGlobalTxToPhysicalConnection=true</jdbc.url>
+        <soapui.root.folder>${project.basedir}/src/main/soapui</soapui.root.folder>
+        <soapui.scripting.library>${soapui.root.folder}/scripting</soapui.scripting.library>
+        <soapui.ext.libraries>${soapui.root.folder}/lib</soapui.ext.libraries>
+    </properties>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>SmartBearPluginRepository</id>
+            <url>https://www.soapui.org/repository/maven2</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.smartbear.soapui</groupId>
+                <artifactId>soapui-pro-maven-plugin</artifactId>
+                <version>5.1.2</version>
+                <executions>
+                    <execution>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <outputFolder>${project.build.directory}/surefire-reports</outputFolder>
+                    <junitReport>true</junitReport>
+                    <printReport>true</printReport>
+                    <testSuite>Web Service Submission</testSuite>
+                    <!--<testCase>Dom118-Submit message-Data-AgreementRefId-Value</testCase>-->
+                    <projectProperties>
+                        <value>localUrl=http://localhost:8180</value>
+                        <value>remoteUrl=http://localhost:9080</value>
+                        <value>driver=com.mysql.jdbc.Driver</value>
+                        <value>jdbcUrl1=jdbc:mysql://127.0.0.1:3304/domibus</value>
+                        <value>jdbcUrl2=jdbc:mysql://127.0.0.1:3305/domibus</value>
+                        <value>database=mysql</value>
+                        <value>user=root</value>
+                        <value>password=123456</value>
+                    </projectProperties>
+                    <soapuiProperties>
+                        <property>
+                            <name>soapui.logroot</name>
+                            <value>${project.build.directory}/soapui/logs/</value>
+                        </property>
+                        <property>
+                            <name>http.nonProxyHosts</name>
+                            <value>localhost|127.*|[::1]</value>
+                        </property>
+                        <property>
+                            <name>soapui.scripting.library</name>
+                            <value>${soapui.scripting.library}</value>
+                        </property>
+                        <property>
+                            <name>soapui.ext.libraries</name>
+                            <value>${soapui.ext.libraries}</value>
+                        </property>
+                    </soapuiProperties>
+                    <testFailIgnore>false</testFailIgnore>
+                    <projectFile>${soapui.root.folder}/AS4-domibus-WS-BAMBOO-Restricted-soapui-project.xml</projectFile>
+                </configuration>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>${mysql.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.reflections</groupId>
+                        <artifactId>reflections</artifactId>
+                        <version>0.9.8</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

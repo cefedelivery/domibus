@@ -473,12 +473,6 @@
                     </pooled-connection-factory>
                 </jms-connection-factories>
                 <jms-destinations>
-                    <jms-queue name="ExpiryQueue">
-                        <entry name="java:/jms/queue/ExpiryQueue"/>
-                    </jms-queue>
-                    <jms-queue name="DLQ">
-                        <entry name="java:/jms/queue/DLQ"/>
-                    </jms-queue>
                    <jms-queue name="DomibusBusinessMessageOutQueue">
                         <entry name="java:/jms/domibus.backend.jms.outQueue"/>
                         <entry name="java:/jms/queue/DomibusBusinessMessageOutQueue"/>

@@ -1,3 +1,7 @@
+Domibus 3.2.3:
+               - Replace the war file and the default plugins: domibus-default-ws-plugin and domibus-default-jms-plugin jar files
+               - In case of Weblogic cluster uncomment and configure the "domibus.deployment.cluster.url" property
+                 and uncomment/comment the xml parts as indicated into ws-plugin.xml and domibus-datasources.xml.
 Domibus 3.2.2:
                - Replace the war file and the default plugins: domibus-default-ws-plugin and domibus-default-jms-plugin jar files
                - Add the following lines to conf/domibus/internal/ehcache.xml

@@ -1,10 +1,4 @@
-
 package eu.domibus.plugin.handler;
-
-/**
- * @author Christian Koch, Stefan Mueller, Federico Martini, Ioana Dragusanu
- * @Since 3.0
- */
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.*;
@@ -41,6 +35,14 @@ import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class is responsible of handling the plugins requests for all the operations exposed.
+ * During submit, it manages the user authentication and the AS4 message's validation, compression and saving.
+ * During download, it manages the user authentication and the AS4 message's reading, data clearing and status update.
+ *
+ * @author Christian Koch, Stefan Mueller, Federico Martini, Ioana Dragusanu
+ * @Since 3.0
+ */
 @Service
 public class DatabaseMessageHandler implements MessageSubmitter<Submission>, MessageRetriever<Submission> {
 

@@ -41,7 +41,7 @@
                 ${project.basedir}/src/main/conf/domibus/domibus-plugins.xml
             </source>
             <outputDirectory>/</outputDirectory>
-            <destName>domibus-submission.xml</destName>
+            <destName>domibus-plugins.xml</destName>
             <filtered>false</filtered>
         </file>
         <file>

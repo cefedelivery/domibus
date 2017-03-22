@@ -1,27 +1,37 @@
 package eu.domibus.jms.spi;
 
-import javax.jms.Queue;
+import javax.jms.Destination;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * // TODO Documentation
+ *
  * @author Cosmin Baciu
  * @since 3.2
  */
 public interface InternalJMSManager {
 
-    Map<String, InternalJMSDestination> getDestinations();
+    static final String QUEUE = "Queue";
 
-    boolean sendMessage(InternalJmsMessage message, String destination);
+    static final String TOPIC = "Topic";
 
-    void sendMessage(InternalJmsMessage message, Queue destination);
+    Map<String, InternalJMSDestination> findDestinationsGroupedByFQName();
 
-    boolean deleteMessages(String source, String[] messageIds);
+    void sendMessage(InternalJmsMessage message, String destination);
 
-    boolean moveMessages(String source, String destination, String[] messageIds);
+    void sendMessage(InternalJmsMessage message, Destination destination);
+
+    void deleteMessages(String source, String[] messageIds);
+
+    void moveMessages(String source, String destination, String[] messageIds);
 
     InternalJmsMessage getMessage(String source, String messageId);
 
-    List<InternalJmsMessage> getMessages(String source, String jmsType, Date fromDate, Date toDate, String selector);
+    List<InternalJmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selector);
+
+    List<InternalJmsMessage> browseMessages(String source);
+
+    InternalJmsMessage consumeMessage(String source, String customMessageId);
 }

@@ -73,7 +73,6 @@ public class BackendNotificationService {
     @Autowired
     private ApplicationContext applicationContext;
 
-    //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
 
 
@@ -200,9 +199,12 @@ public class BackendNotificationService {
     }
 
     protected void validateAndNotify(UserMessage userMessage, String backendName, NotificationType notificationType, Map<String, Object> properties) {
+
         validateSubmission(userMessage, backendName, notificationType);
         String finalRecipient = getFinalRecipient(userMessage);
-        properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
+        if (properties != null) {
+            properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
+        }
         notify(userMessage.getMessageInfo().getMessageId(), backendName, notificationType, properties);
     }
 
@@ -216,6 +218,11 @@ public class BackendNotificationService {
             LOG.warn("No notification listeners found for backend [" + backendName + "]");
             return;
         }
+        if (properties != null) {
+            String finalRecipient = (String) properties.get(MessageConstants.FINAL_RECIPIENT);
+            LOG.info("Notifying backend [" + backendName + "] for message [" + messageId + "] with notificationType [" + notificationType + "] and finalRecipient [" + finalRecipient + "]");
+        }
+        LOG.info("Notifying backend [" + backendName + "] for message [" + messageId + "] with notificationType [" + notificationType + "]");
         jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, properties).createMessage(), notificationListener.getBackendNotificationQueue());
     }
 
