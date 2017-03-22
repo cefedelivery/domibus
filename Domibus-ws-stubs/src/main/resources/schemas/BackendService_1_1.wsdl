@@ -49,6 +49,10 @@
         <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
         </wsdl:part>
     </wsdl:message>
+    <wsdl:message name="retrieveMessage">
+        <wsdl:part element="tns:retrieveMessageRequest" name="retrieveMessageRequest">
+        </wsdl:part>
+    </wsdl:message>
     <wsdl:message name="retrieveMessageResponse">
         <wsdl:part element="tns:retrieveMessageResponse" name="retrieveMessageResponse">
         </wsdl:part>
@@ -87,6 +91,10 @@
         <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
         </wsdl:part>
     </wsdl:message>
+    <wsdl:message name="submitMessageResponse">
+        <wsdl:part element="tns:submitResponse" name="submitResponse">
+        </wsdl:part>
+    </wsdl:message>
     <wsdl:message name="SendMessageFault">
         <wsdl:part element="tns:FaultDetail" name="SendMessageFault">
         </wsdl:part>
@@ -107,7 +115,7 @@
         <wsdl:operation name="submitMessage">
             <wsdl:input message="tns:submitMessage" name="submitMessage">
             </wsdl:input>
-            <wsdl:output message="tns:sendMessageResponse" name="sendMessageResponse">
+            <wsdl:output message="tns:submitMessageResponse" name="submitMessageResponse">
             </wsdl:output>
             <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault">
             </wsdl:fault>
@@ -139,7 +147,7 @@
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="retrieveMessage">
-            <wsdl:input message="tns:downloadMessage" name="downloadMessage">
+            <wsdl:input message="tns:retrieveMessage" name="retrieveMessage">
             </wsdl:input>
             <wsdl:output message="tns:retrieveMessageResponse" name="retrieveMessageResponse">
             </wsdl:output>
@@ -169,7 +177,7 @@
                 <soap12:header message="tns:submitMessage" part="ebMSHeaderInfo" use="literal"/>
                 <soap12:body parts="submitRequest" use="literal"/>
             </wsdl:input>
-            <wsdl:output name="sendMessageResponse">
+            <wsdl:output name="submitMessageResponse">
                 <soap12:body use="literal"/>
             </wsdl:output>
             <wsdl:fault name="SendMessageFault">

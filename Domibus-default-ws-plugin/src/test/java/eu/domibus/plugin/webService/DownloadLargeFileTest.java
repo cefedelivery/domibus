@@ -3,7 +3,8 @@ package eu.domibus.plugin.webService;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
 import eu.domibus.plugin.webService.generated.BackendService11;
-import eu.domibus.plugin.webService.generated.DownloadMessageRequest;
+import eu.domibus.plugin.webService.generated.RetrieveMessageRequest;
+import eu.domibus.plugin.webService.generated.RetrieveMessageResponse;
 import org.apache.commons.io.IOUtils;
 
 import javax.activation.DataHandler;
@@ -15,8 +16,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 
-import eu.domibus.plugin.webService.generated.RetrieveMessageResponse;
-
 
 public class DownloadLargeFileTest {
 
@@ -27,7 +26,7 @@ public class DownloadLargeFileTest {
 
     public void testDownloadLargeFile() throws Exception {
         BackendService11 client = new BackendService11(new URL("http://localhost:8191/domibus/services/backend?wsdl"), new QName("http://org.ecodex.backend/1_1/", "BackendService_1_1"));
-        DownloadMessageRequest request = new DownloadMessageRequest();
+        RetrieveMessageRequest request = new RetrieveMessageRequest();
         request.setMessageID("ba66570c-baad-4c19-be30-185791d6bacf@domibus.eu");
         Holder<RetrieveMessageResponse> downloadMessageResponse = new Holder(new eu.domibus.plugin.webService.generated.ObjectFactory().createRetrieveMessageResponse());
         Holder<Messaging> result = new Holder(new ObjectFactory().createMessaging());

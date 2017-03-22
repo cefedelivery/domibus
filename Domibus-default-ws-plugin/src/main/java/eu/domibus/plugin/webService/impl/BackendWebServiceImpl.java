@@ -136,7 +136,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @SuppressWarnings("ValidExternallyBoundObject")
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
-    public SendResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SendMessageFault {
+    public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SendMessageFault {
         LOG.info("Received message");
 
         final LargePayloadType bodyload = submitRequest.getBodyload();
@@ -195,7 +195,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
         }
         LOG.info("Received message from backend to send, assigning messageID" + messageId);
-        final SendResponse response = BackendWebServiceImpl.WEBSERVICE_OF.createSendResponse();
+        final SubmitResponse response = BackendWebServiceImpl.WEBSERVICE_OF.createSubmitResponse();
         response.getMessageID().add(messageId);
         return response;
     }
@@ -309,26 +309,26 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
-    public void retrieveMessage(DownloadMessageRequest downloadMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
+    public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
 
         UserMessage userMessage = null;
-        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(downloadMessageRequest.getMessageID());
+        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(retrieveMessageRequest.getMessageID());
 
         try {
             if (isMessageIdNotEmpty) {
-                userMessage = downloadMessage(downloadMessageRequest.getMessageID(), null);
+                userMessage = downloadMessage(retrieveMessageRequest.getMessageID(), null);
             }
         } catch (final MessageNotFoundException mnfEx) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", mnfEx);
+                LOG.debug(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]", mnfEx);
             }
-            LOG.error(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]");
-            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", createDownloadMessageFault(mnfEx));
+            LOG.error(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]");
+            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]", createDownloadMessageFault(mnfEx));
         }
 
         if (userMessage == null) {
-            LOG.error(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]");
-            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", createFault("UserMessage not found"));
+            LOG.error(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]");
+            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]", createFault("UserMessage not found"));
         }
 
         // To avoid blocking errors during the Header's response validation
