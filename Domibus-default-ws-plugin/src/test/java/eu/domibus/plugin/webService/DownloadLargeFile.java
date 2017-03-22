@@ -17,10 +17,10 @@ import java.io.OutputStream;
 import java.net.URL;
 
 
-public class DownloadLargeFileTest {
+public class DownloadLargeFile {
 
     public static void main(String[] args) throws Exception {
-        new DownloadLargeFileTest().testDownloadLargeFile();
+        new DownloadLargeFile().testDownloadLargeFile();
     }
 
 

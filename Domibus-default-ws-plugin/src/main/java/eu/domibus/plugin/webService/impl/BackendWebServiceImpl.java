@@ -85,9 +85,9 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
             boolean foundPayload = false;
             final String href = extendedPartInfo.getHref();
-            BackendWebServiceImpl.LOG.debug("Looking for payload: " + href);
+            LOG.debug("Looking for payload: " + href);
             for (final PayloadType payload : sendRequest.getPayload()) {
-                BackendWebServiceImpl.LOG.debug("comparing with payload id: " + payload.getPayloadId());
+                LOG.debug("comparing with payload id: " + payload.getPayloadId());
                 if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
                     this.copyPartProperties(payload.getContentType(), extendedPartInfo);
                     extendedPartInfo.setInBody(false);
@@ -123,16 +123,24 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         try {
             messageId = this.submit(ebMSHeaderInfo);
         } catch (final MessagingProcessingException mpEx) {
-            BackendWebServiceImpl.LOG.error("Message submission failed", mpEx);
+            LOG.error("Message submission failed", mpEx);
             throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
         }
         LOG.info("Received message from backend to send, assigning messageID" + messageId);
-        final SendResponse response = BackendWebServiceImpl.WEBSERVICE_OF.createSendResponse();
+        final SendResponse response = WEBSERVICE_OF.createSendResponse();
         response.getMessageID().add(messageId);
         return response;
     }
 
 
+    /**
+     * Add support for large files using DataHandler instead of byte[]
+     *
+     * @param submitRequest
+     * @param ebMSHeaderInfo
+     * @return
+     * @throws SendMessageFault
+     */
     @SuppressWarnings("ValidExternallyBoundObject")
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
@@ -153,9 +161,9 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
             boolean foundPayload = false;
             final String href = extendedPartInfo.getHref();
-            BackendWebServiceImpl.LOG.debug("Looking for payload: " + href);
+            LOG.debug("Looking for payload: " + href);
             for (final LargePayloadType payload : submitRequest.getPayload()) {
-                BackendWebServiceImpl.LOG.debug("comparing with payload id: " + payload.getPayloadId());
+                LOG.debug("comparing with payload id: " + payload.getPayloadId());
                 if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
                     this.copyPartProperties(payload.getContentType(), extendedPartInfo);
                     extendedPartInfo.setInBody(false);
@@ -191,11 +199,11 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         try {
             messageId = this.submit(ebMSHeaderInfo);
         } catch (final MessagingProcessingException mpEx) {
-            BackendWebServiceImpl.LOG.error("Message submission failed", mpEx);
+            LOG.error("Message submission failed", mpEx);
             throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
         }
         LOG.info("Received message from backend to send, assigning messageID" + messageId);
-        final SubmitResponse response = BackendWebServiceImpl.WEBSERVICE_OF.createSubmitResponse();
+        final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
         response.getMessageID().add(messageId);
         return response;
     }
@@ -253,7 +261,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     @Override
     public ListPendingMessagesResponse listPendingMessages(final Object listPendingMessagesRequest) {
-        final ListPendingMessagesResponse response = BackendWebServiceImpl.WEBSERVICE_OF.createListPendingMessagesResponse();
+        final ListPendingMessagesResponse response = WEBSERVICE_OF.createListPendingMessagesResponse();
         final Collection<String> pending = this.listPendingMessages();
         response.getMessageID().addAll(pending);
         return response;
@@ -295,10 +303,10 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         if (StringUtils.isEmpty(userMessage.getCollaborationInfo().getAgreementRef().getValue())) {
             userMessage.getCollaborationInfo().setAgreementRef(null);
         }
-        Messaging messaging = BackendWebServiceImpl.EBMS_OBJECT_FACTORY.createMessaging();
+        Messaging messaging = EBMS_OBJECT_FACTORY.createMessaging();
         messaging.setUserMessage(userMessage);
         ebMSHeaderInfo.value = messaging;
-        downloadMessageResponse.value = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponse();
+        downloadMessageResponse.value = WEBSERVICE_OF.createDownloadMessageResponse();
 
         if (isMessageIdNotEmpty) {
             fillInfoParts(downloadMessageResponse, messaging);
@@ -307,6 +315,14 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         }
     }
 
+    /**
+     * Add support for large files using DataHandler instead of byte[]
+     *
+     * @param retrieveMessageRequest
+     * @param retrieveMessageResponse
+     * @param ebMSHeaderInfo
+     * @throws DownloadMessageFault
+     */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
     public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
@@ -335,10 +351,10 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         if (StringUtils.isEmpty(userMessage.getCollaborationInfo().getAgreementRef().getValue())) {
             userMessage.getCollaborationInfo().setAgreementRef(null);
         }
-        Messaging messaging = BackendWebServiceImpl.EBMS_OBJECT_FACTORY.createMessaging();
+        Messaging messaging = EBMS_OBJECT_FACTORY.createMessaging();
         messaging.setUserMessage(userMessage);
         ebMSHeaderInfo.value = messaging;
-        retrieveMessageResponse.value = BackendWebServiceImpl.WEBSERVICE_OF.createRetrieveMessageResponse();
+        retrieveMessageResponse.value = WEBSERVICE_OF.createRetrieveMessageResponse();
 
         if (isMessageIdNotEmpty) {
             fillInfoPartsForLargeFiles(retrieveMessageResponse, messaging);
@@ -354,7 +370,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
-            PayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createPayloadType();
+            PayloadType payloadType = WEBSERVICE_OF.createPayloadType();
             try {
                 LOG.debug("payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
                 payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
@@ -377,7 +393,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     private void fillInfoPartsForLargeFiles(Holder<RetrieveMessageResponse> retrieveMessageResponse, Messaging messaging) throws DownloadMessageFault {
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
-            LargePayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createLargePayloadType();
+            LargePayloadType payloadType = WEBSERVICE_OF.createLargePayloadType();
             LOG.debug("payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
             payloadType.setValue(extPartInfo.getPayloadDatahandler());
             if (extPartInfo.isInBody()) {
