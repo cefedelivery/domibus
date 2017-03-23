@@ -2,7 +2,7 @@ Domibus 3.2.3
 - JMS monitoring: extended the functionality for clustered installations.
 - Core: listPendingMessages and download operations behave correctly in case of a clustered installation.
 - The MSH WS endpoint returns 200 for the GET operation
-- Updated the eSensPolicy.xml WS policy in order to sign the empty body
+- Renamed the eSensPolicy.xml WS policy to eSensPolicy.v2.0.xml which supports the signing of the empty body
 - Added the domibus-plugins.xml file in the configuration of the Tomcat full installation
 Domibus 3.2.2
 - Possibility to configure the limit of downloaded/not-downloaded messages for the retention worker
