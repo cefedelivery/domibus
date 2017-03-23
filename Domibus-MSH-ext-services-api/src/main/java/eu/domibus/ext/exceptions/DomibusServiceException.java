@@ -1,7 +1,8 @@
 package eu.domibus.ext.exceptions;
 
 /**
- * Created by migueti on 15/03/2017.
+ * @author  migueti, Cosmin Baciu
+ * @since 3.3
  */
 public class DomibusServiceException extends RuntimeException {
 }

@@ -1,11 +1,12 @@
-package eu.domibus.ext;
+package eu.domibus.ext.domain;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Map;
 
 /**
- * Created by migueti on 15/03/2017.
+ * @author  migueti, Cosmin Baciu
+ * @since 3.3
  */
 public class MessageAcknowledgeDTO implements Serializable {
 

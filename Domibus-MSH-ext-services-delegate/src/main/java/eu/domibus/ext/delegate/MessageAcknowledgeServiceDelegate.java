@@ -1,24 +1,25 @@
 package eu.domibus.ext.delegate;
 
-import eu.domibus.ext.services.IMessageAcknowledgeService;
-import eu.domibus.ext.MessageAcknowledgeDTO;
+import eu.domibus.ext.domain.MessageAcknowledgeDTO;
 import eu.domibus.ext.exceptions.MessageAcknowledgeException;
+import eu.domibus.ext.services.MessageAcknowledgeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * Created by migueti on 15/03/2017.
+ * @author  migueti, Cosmin Baciu
+ * @since 3.3
  */
-@Service(value = "messageAcknowledgeServiceDelegate")
-public class MessageAcknowledgeServiceDelegate implements IMessageAcknowledgeService {
+@Service
+public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeService {
 
     @Autowired
-    IMessageAcknowledgeService messageAcknowledgeService;
+    MessageAcknowledgeService messageAcknowledgeService;
 
     @Autowired
-    IDomibusDomainConverter domibusDomainConverter;
+    DomibusDomainConverter domibusDomainConverter;
 
     @Override
     public void acknowledgeMessage(MessageAcknowledgeDTO messageAcknowledge) throws MessageAcknowledgeException {

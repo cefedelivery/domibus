@@ -12,6 +12,8 @@
     <modules>
         <module>Domibus-MSH</module>
         <module>Domibus-MSH-api</module>
+        <module>Domibus-MSH-ext-services-api</module>
+        <module>Domibus-MSH-ext-services-delegate</module>
         <module>Domibus-MSH-logging</module>
         <module>Domibus-MSH-jms-spi</module>
         <module>Domibus-MSH-jms-spi-helper</module>
