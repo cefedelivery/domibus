@@ -28,6 +28,10 @@
                         </goals>
                         <configuration>
                             <extension>true</extension>
+                            <wsdlDirectory>src/main/resources/schemas</wsdlDirectory>
+                            <wsdlFiles>
+                                <wsdlFile>BackendService_1_1.wsdl</wsdlFile>
+                            </wsdlFiles>
                         </configuration>
                     </execution>
                 </executions>
