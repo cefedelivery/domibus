@@ -36,6 +36,9 @@
         <intercept-url pattern="/home/updatepmode/**" access="ROLE_ADMIN"/>
         <intercept-url pattern="/home/uploadPmodeFile/**" access="ROLE_ADMIN"/>
         <intercept-url pattern="/home/uploadTruststoreFile/**" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/home/jmsmonitoring/**" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/home/jmsmessage/**" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/home/jmsmessage/action/**" access="ROLE_ADMIN"/>
         <logout logout-success-url="/home"/>
 
         <headers>
