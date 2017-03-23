@@ -58,7 +58,7 @@
         </file>
 
         <file>
-            <source>${project.basedir}/src/main/conf/domibus/policies/eSensPolicy.xml</source>
+            <source>${project.basedir}/src/main/conf/domibus/policies/eSensPolicy.v2.0.xml</source>
             <outputDirectory>policies</outputDirectory>
             <filtered>false</filtered>
         </file>
