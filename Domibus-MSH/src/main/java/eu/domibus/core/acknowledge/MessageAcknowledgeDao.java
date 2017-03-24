@@ -1,6 +1,6 @@
 package eu.domibus.core.acknowledge;
 
-import eu.domibus.common.model.configuration.MessageAcknowledge;
+import eu.domibus.common.model.configuration.MessageAcknowledgementEntity;
 
 /**
  * @author migueti, Cosmin Baciu
@@ -8,9 +8,9 @@ import eu.domibus.common.model.configuration.MessageAcknowledge;
  */
 public interface MessageAcknowledgeDao {
 
-    MessageAcknowledge findByMessageId(String messageId);
+    MessageAcknowledgementEntity findByMessageId(String messageId);
 
-    MessageAcknowledge findByFrom(String from);
+    MessageAcknowledgementEntity findByFrom(String from);
 
-    MessageAcknowledge findByTo(String to);
+    MessageAcknowledgementEntity findByTo(String to);
 }

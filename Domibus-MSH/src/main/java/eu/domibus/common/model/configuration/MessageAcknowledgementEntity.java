@@ -20,7 +20,7 @@ import java.util.Set;
         @NamedQuery(name = "MessageAcknowledge.findMessageAcknowledgeByTo",
                 query = "select messageAcknowledge from MessageAcknowledge messageAcknowledge where messageAcknowledge.to = :TO")
 })
-public class MessageAcknowledge extends AbstractBaseEntity {
+public class MessageAcknowledgementEntity extends AbstractBaseEntity {
 
     @Column(name = "FK_MESSAGE_ID")
     private String messageId;
@@ -73,13 +73,13 @@ public class MessageAcknowledge extends AbstractBaseEntity {
 
         if (o == null || getClass() != o.getClass()) return false;
 
-        MessageAcknowledge messageAcknowledge = (MessageAcknowledge) o;
+        MessageAcknowledgementEntity messageAcknowledgementEntity = (MessageAcknowledgementEntity) o;
 
         return new EqualsBuilder()
                 .appendSuper(super.equals(o))
-                .append(messageId, messageAcknowledge.getMessageId())
-                .append(from, messageAcknowledge.getFrom())
-                .append(to, messageAcknowledge.getTo())
+                .append(messageId, messageAcknowledgementEntity.getMessageId())
+                .append(from, messageAcknowledgementEntity.getFrom())
+                .append(to, messageAcknowledgementEntity.getTo())
                 .isEquals();
     }
 

@@ -72,20 +72,20 @@
     </changeSet>
 
     <changeSet author="TiagoMiguel" id="EDelivery_1940">
-        <createTable tableName="tb_message_acknowledge">
-            <column name="ID_PK" type="VARCHAR(255)">
+        <createTable tableName="tb_message_acknowledgement">
+            <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="FK_MESSAGE_ID" type="VARCHAR(255)"/>
+            <column name="FK_MESSAGE_ID" type="INT"/>
             <column name="FROM" type="VARCHAR(255)"/>
             <column name="TO" type="VARCHAR(255)"/>
             <column name="CREATED_TIMESTAMP" type="DATETIME"/>
             <column name="ACKNOWLEDGED_TIMESTAMP" type="DATETIME"/>
         </createTable>
         <addForeignKeyConstraint baseColumnNames="FK_MESSAGE_ID" baseTableName="tb_message_acknowledge"
-                                 constraintName="FK_MESSAGING_MESSAGEACK_ID" deferrable="false"
+                                 constraintName="FK_MSG_MSG_ACK_ID" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="ID" referencedTableName="tb_messaging"/>
+                                 referencedColumnNames="ID_PK" referencedTableName="tb_messaging"/>
         <createTable tableName="tb_message_acknowledge_property">
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>
