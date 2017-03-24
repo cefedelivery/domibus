@@ -5,10 +5,14 @@ import java.sql.Timestamp;
 import java.util.Map;
 
 /**
+ * DTO class used by {@link eu.domibus.ext.services.MessageAcknowledgeService}.
+ *
+ * <p>Contains the details of a message acknowledgement.</p>
+ *
  * @author  migueti, Cosmin Baciu
  * @since 3.3
  */
-public class MessageAcknowledgeDTO implements Serializable {
+public class MessageAcknowledgementDTO implements Serializable {
 
     /**
      * The id of the message acknowledgement
