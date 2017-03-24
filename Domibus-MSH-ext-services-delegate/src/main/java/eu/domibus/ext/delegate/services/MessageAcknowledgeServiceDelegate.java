@@ -1,6 +1,7 @@
-package eu.domibus.ext.delegate;
+package eu.domibus.ext.delegate.services;
 
 import eu.domibus.api.acknowledge.MessageAcknowledgement;
+import eu.domibus.ext.delegate.converter.DomibusDomainConverter;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;
 import eu.domibus.ext.exceptions.MessageAcknowledgeException;
 import eu.domibus.ext.services.MessageAcknowledgeService;
