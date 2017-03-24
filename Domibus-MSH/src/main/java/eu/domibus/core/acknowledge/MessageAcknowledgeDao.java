@@ -1,11 +1,12 @@
-package eu.domibus.common.dao;
+package eu.domibus.core.acknowledge;
 
 import eu.domibus.common.model.configuration.MessageAcknowledge;
 
 /**
- * Created by migueti on 15/03/2017.
+ * @author migueti, Cosmin Baciu
+ * @since 3.3
  */
-public interface IMessageAcknowledgeDao {
+public interface MessageAcknowledgeDao {
 
     MessageAcknowledge findByMessageId(String messageId);
 

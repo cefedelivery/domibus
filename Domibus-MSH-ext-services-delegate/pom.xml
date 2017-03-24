@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>domibus-ext-services-delegate</artifactId>
-    <packaging>war</packaging>
     <name>Domibus EXT Services Delegate</name>
 
     <build>

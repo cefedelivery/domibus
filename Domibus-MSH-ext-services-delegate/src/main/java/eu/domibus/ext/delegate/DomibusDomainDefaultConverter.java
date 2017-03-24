@@ -1,6 +1,6 @@
 package eu.domibus.ext.delegate;
 
-import eu.domibus.api.acknowledge.MessageAcknowledge;
+import eu.domibus.api.acknowledge.MessageAcknowledgement;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;
 
 import java.util.List;
@@ -12,7 +12,12 @@ import java.util.List;
 public class DomibusDomainDefaultConverter implements DomibusDomainConverter {
 
     @Override
-    public List<MessageAcknowledgementDTO> convert(List<MessageAcknowledge> messagesList) {
+    public MessageAcknowledgementDTO convert(MessageAcknowledgement message) {
+        return null;
+    }
+
+    @Override
+    public List<MessageAcknowledgementDTO> convert(List<MessageAcknowledgement> messagesList) {
         return null;
     }
 }

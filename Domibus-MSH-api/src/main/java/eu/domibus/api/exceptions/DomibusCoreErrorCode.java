@@ -9,28 +9,28 @@ package eu.domibus.api.exceptions;
  * //TODO change package when refactoring of MSH will take place.
  * //TODO add enum's descriptions.
  */
-public enum DomibusCoreError {
+public enum DomibusCoreErrorCode {
 
     /**
      * Generical error
      */
-    DOM_001(001),
+    DOM_001("001"),
     /**
      *
      */
-    DOM_002(002),
+    DOM_002("002"),
     /**
      *
      */
-    DOM_003(003);
+    DOM_003("003");
 
-    private final int errorCode;
+    private final String errorCode;
 
-    DomibusCoreError(int errorCode) {
+    DomibusCoreErrorCode(String errorCode) {
         this.errorCode = errorCode;
     }
 
-    public int getErrorCode() {
+    public String getErrorCode() {
         return errorCode;
     }
 }

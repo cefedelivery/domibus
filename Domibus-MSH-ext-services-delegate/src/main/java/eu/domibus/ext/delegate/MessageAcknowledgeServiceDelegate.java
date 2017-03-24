@@ -1,5 +1,6 @@
 package eu.domibus.ext.delegate;
 
+import eu.domibus.api.acknowledge.MessageAcknowledgement;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;
 import eu.domibus.ext.exceptions.MessageAcknowledgeException;
 import eu.domibus.ext.services.MessageAcknowledgeService;
@@ -21,20 +22,26 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
     MessageAcknowledgeService messageAcknowledgeService;
 
     @Autowired
-    DomibusDomainConverter domibusDomainConverter;
+    eu.domibus.api.acknowledge.MessageAcknowledgeService messageAcknowledgeCoreService;
+
+    @Autowired
+    DomibusDomainConverter domainConverter;
 
     @Override
     public MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws MessageAcknowledgeException {
-        return null;
+        final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, properties);
+        return domainConverter.convert(messageAcknowledgement);
     }
 
     @Override
     public MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to) throws MessageAcknowledgeException {
-        return null;
+        final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to);
+        return domainConverter.convert(messageAcknowledgement);
     }
 
     @Override
     public List<MessageAcknowledgementDTO> getAcknowledgedMessages(String messageId) throws MessageAcknowledgeException {
-        return null;
+        final List<MessageAcknowledgement> messageAcknowledgement = messageAcknowledgeCoreService.getAcknowledgedMessages(messageId);
+        return domainConverter.convert(messageAcknowledgement);
     }
 }
