@@ -16,11 +16,7 @@ import java.util.Set;
 @Table(name = "TB_MESSAGE_ACKNOWLEDGEMENT")
 @NamedQueries({
         @NamedQuery(name = "MessageAcknowledgement.findMessageAcknowledgementByMessageId",
-                query = "select messageAcknowledge from MessageAcknowledgementEntity messageAcknowledge where messageAcknowledge.messageId = :MESSAGE_ID"),
-        @NamedQuery(name = "MessageAcknowledgement.findMessageAcknowledgementByFrom",
-                query = "select messageAcknowledge from MessageAcknowledgementEntity messageAcknowledge where messageAcknowledge.from = :FROM"),
-        @NamedQuery(name = "MessageAcknowledgement.findMessageAcknowledgementByTo",
-                query = "select messageAcknowledge from MessageAcknowledgementEntity messageAcknowledge where messageAcknowledge.to = :TO")
+                query = "select messageAcknowledge from MessageAcknowledgementEntity messageAcknowledge where messageAcknowledge.messageId = :MESSAGE_ID")
 })
 public class MessageAcknowledgementEntity extends AbstractBaseEntity {
 
@@ -111,7 +107,7 @@ public class MessageAcknowledgementEntity extends AbstractBaseEntity {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17,37)
+        return new HashCodeBuilder(17, 37)
                 .appendSuper(super.hashCode())
                 .append(messageId)
                 .append(from)

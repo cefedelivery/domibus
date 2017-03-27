@@ -12,7 +12,7 @@ public class MessageAcknowledgement {
     /**
      * The id of the message acknowledgement
      */
-    private String id;
+    private Integer id;
 
     /**
      * The message id associated with the message acknowledgement
@@ -37,18 +37,18 @@ public class MessageAcknowledgement {
     /**
      * Timestamp of the acknowledged time
      */
-    private Timestamp acknowledgeTimestamp;
+    private Timestamp acknowledged;
 
     /**
      * Timestamp of the acknowledgement creation time(when it has been saved into the persistence layer)
      */
-    private Timestamp createdTimestamp;
+    private Timestamp created;
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -84,19 +84,19 @@ public class MessageAcknowledgement {
         this.properties = properties;
     }
 
-    public Timestamp getAcknowledgeTimestamp() {
-        return acknowledgeTimestamp;
+    public Timestamp getAcknowledged() {
+        return acknowledged;
     }
 
-    public void setAcknowledgeTimestamp(Timestamp acknowledgeTimestamp) {
-        this.acknowledgeTimestamp = acknowledgeTimestamp;
+    public void setAcknowledged(Timestamp acknowledged) {
+        this.acknowledged = acknowledged;
     }
 
-    public Timestamp getCreatedTimestamp() {
-        return createdTimestamp;
+    public Timestamp getCreated() {
+        return created;
     }
 
-    public void setCreatedTimestamp(Timestamp createdTimestamp) {
-        this.createdTimestamp = createdTimestamp;
+    public void setCreated(Timestamp created) {
+        this.created = created;
     }
 }
