@@ -13,7 +13,7 @@ import java.util.Set;
  * @since 3.3
  */
 @Entity
-@Table(name = "TB_MESSAGE_ACKNOWLEDGEMENT")
+@Table(name = "TB_MESSAGE_ACKNW")
 @NamedQueries({
         @NamedQuery(name = "MessageAcknowledgement.findMessageAcknowledgementByMessageId",
                 query = "select messageAcknowledge from MessageAcknowledgementEntity messageAcknowledge where messageAcknowledge.messageId = :MESSAGE_ID")

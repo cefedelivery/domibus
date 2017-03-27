@@ -13,7 +13,7 @@ import javax.persistence.Table;
  * @since 3.3
  */
 @Entity
-@Table(name = "TB_MSG_ACKNOWLEDGE_PROP")
+@Table(name = "TB_MESSAGE_ACKNW_PROP")
 public class MessageAcknowledgementProperty extends AbstractBaseEntity {
 
     @Column(name = "PROPERTY_NAME")

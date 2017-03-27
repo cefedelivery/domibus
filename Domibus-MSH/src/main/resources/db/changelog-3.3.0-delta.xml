@@ -72,7 +72,7 @@
     </changeSet>
 
     <changeSet author="TiagoMiguel" id="EDelivery_1940">
-        <createTable tableName="TB_MESSAGE_ACKNOWLEDGEMENT">
+        <createTable tableName="TB_MESSAGE_ACKNW">
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>
             </column>
@@ -82,7 +82,7 @@
             <column name="CREATED_TIMESTAMP" type="DATETIME"/>
             <column name="ACKNOWLEDGED_TIMESTAMP" type="DATETIME"/>
         </createTable>
-        <createTable tableName="TB_MSG_ACKNOWLEDGE_PROP">
+        <createTable tableName="TB_MESSAGE_ACKNW_PROP">
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>
             </column>
@@ -90,10 +90,10 @@
             <column name="PROPERTY_VALUE" type="VARCHAR(255)"/>
             <column name="FK_MSG_ACKNOWLEDGE" type="INT"/>
         </createTable>
-        <addForeignKeyConstraint baseColumnNames="FK_MSG_ACKNOWLEDGE" baseTableName="TB_MSG_ACKNOWLEDGE_PROP"
+        <addForeignKeyConstraint baseColumnNames="FK_MSG_ACKNOWLEDGE" baseTableName="TB_MESSAGE_ACKNW_PROP"
                                  constraintName="FK_MSG_ACK_PROP_MSG_ACK" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_ACKNOWLEDGEMENT"/>
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_ACKNW"/>
     </changeSet>
 
 </databaseChangeLog>
