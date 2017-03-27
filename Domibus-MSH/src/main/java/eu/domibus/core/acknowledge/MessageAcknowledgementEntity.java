@@ -1,28 +1,30 @@
-package eu.domibus.common.model.configuration;
+package eu.domibus.core.acknowledge;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.Set;
 
 /**
- * Created by migueti on 15/03/2017.
+ * @author migueti, Cosmin Baciu
+ * @since 3.3
  */
 @Entity
-@Table(name = "tb_message_acknowledge")
+@Table(name = "TB_MESSAGE_ACKNOWLEDGEMENT")
 @NamedQueries({
-        @NamedQuery(name = "MessageAcknowledge.findMessageAcknowledgeByMessageId",
-                query = "select messageAcknowledge from MessageAcknowledge messageAcknowledge where messageAcknowledge.messageId = :MESSAGE_ID"),
-        @NamedQuery(name = "MessageAcknowledge.findMessageAcknowledgeByFrom",
-                query = "select messageAcknowledge from MessageAcknowledge messageAcknowledge where messageAcknowledge.from = :FROM"),
-        @NamedQuery(name = "MessageAcknowledge.findMessageAcknowledgeByTo",
-                query = "select messageAcknowledge from MessageAcknowledge messageAcknowledge where messageAcknowledge.to = :TO")
+        @NamedQuery(name = "MessageAcknowledgement.findMessageAcknowledgementByMessageId",
+                query = "select messageAcknowledge from MessageAcknowledgementEntity messageAcknowledge where messageAcknowledge.messageId = :MESSAGE_ID"),
+        @NamedQuery(name = "MessageAcknowledgement.findMessageAcknowledgementByFrom",
+                query = "select messageAcknowledge from MessageAcknowledgementEntity messageAcknowledge where messageAcknowledge.from = :FROM"),
+        @NamedQuery(name = "MessageAcknowledgement.findMessageAcknowledgementByTo",
+                query = "select messageAcknowledge from MessageAcknowledgementEntity messageAcknowledge where messageAcknowledge.to = :TO")
 })
 public class MessageAcknowledgementEntity extends AbstractBaseEntity {
 
-    @Column(name = "FK_MESSAGE_ID")
+    @Column(name = "MESSAGE_ID")
     private String messageId;
 
     @Column(name = "FROM")
@@ -31,9 +33,17 @@ public class MessageAcknowledgementEntity extends AbstractBaseEntity {
     @Column(name = "TO")
     private String to;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "CREATED_TIMESTAMP")
+    private Timestamp created;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "ACKNOWLEDGED_TIMESTAMP")
+    private Timestamp acknowledged;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_MESSAGEACKNOWLEDGE")
-    private Set<MessageAcknowledgeProperty> properties;
+    @JoinColumn(name = "FK_MSG_ACKNOWLEDGE")
+    private Set<MessageAcknowledgementProperty> properties;
 
     public String getMessageId() {
         return messageId;
@@ -59,12 +69,28 @@ public class MessageAcknowledgementEntity extends AbstractBaseEntity {
         this.to = to;
     }
 
-    public Set<MessageAcknowledgeProperty> getProperties() {
+    public Set<MessageAcknowledgementProperty> getProperties() {
         return properties;
     }
 
-    public void setProperties(Set<MessageAcknowledgeProperty> properties) {
+    public void setProperties(Set<MessageAcknowledgementProperty> properties) {
         this.properties = properties;
+    }
+
+    public Timestamp getCreated() {
+        return created;
+    }
+
+    public void setCreated(Timestamp created) {
+        this.created = created;
+    }
+
+    public Timestamp getAcknowledged() {
+        return acknowledged;
+    }
+
+    public void setAcknowledged(Timestamp acknowledged) {
+        this.acknowledged = acknowledged;
     }
 
     @Override

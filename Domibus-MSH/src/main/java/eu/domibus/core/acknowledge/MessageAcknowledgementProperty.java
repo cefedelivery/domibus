@@ -1,4 +1,4 @@
-package eu.domibus.common.model.configuration;
+package eu.domibus.core.acknowledge;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -9,11 +9,12 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- * Created by migueti on 16/03/2017.
+ * @author migueti, Cosmin Baciu
+ * @since 3.3
  */
 @Entity
-@Table(name = "tb_message_acknowledge_property")
-public class MessageAcknowledgeProperty extends AbstractBaseEntity {
+@Table(name = "TB_MSG_ACKNOWLEDGE_PROP")
+public class MessageAcknowledgementProperty extends AbstractBaseEntity {
 
     @Column(name = "PROPERTY_NAME")
     private String name;
@@ -43,11 +44,11 @@ public class MessageAcknowledgeProperty extends AbstractBaseEntity {
 
         if (o == null || getClass() != o.getClass()) return false;
 
-        MessageAcknowledgeProperty messageAcknowledgeProperty = (MessageAcknowledgeProperty) o;
+        MessageAcknowledgementProperty messageAcknowledgementProperty = (MessageAcknowledgementProperty) o;
 
         return new EqualsBuilder()
                 .appendSuper(super.equals(o))
-                .append(name, messageAcknowledgeProperty.getName())
+                .append(name, messageAcknowledgementProperty.getName())
                 .isEquals();
     }
 

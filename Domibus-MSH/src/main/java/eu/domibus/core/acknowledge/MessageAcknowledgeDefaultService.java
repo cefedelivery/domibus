@@ -18,7 +18,7 @@ import java.util.Map;
 public class MessageAcknowledgeDefaultService implements MessageAcknowledgeService {
 
     @Autowired
-    MessageAcknowledgeDao messageAcknowledgeDao;
+    MessageAcknowledgementDao messageAcknowledgementDao;
 
     @Override
     public MessageAcknowledgement acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws MessageAcknowledgeException {

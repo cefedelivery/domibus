@@ -1,7 +1,6 @@
 package eu.domibus.core.acknowledge;
 
 import eu.domibus.common.dao.BasicDao;
-import eu.domibus.common.model.configuration.MessageAcknowledgementEntity;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -14,19 +13,19 @@ import javax.persistence.TypedQuery;
  * @since 3.3
  */
 @Repository
-public class MessageAcknowledgeDefaultDao extends BasicDao<MessageAcknowledgementEntity> implements MessageAcknowledgeDao {
+public class MessageAcknowledgementDefaultDao extends BasicDao<MessageAcknowledgementEntity> implements MessageAcknowledgementDao {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageAcknowledgeDao.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageAcknowledgementDao.class);
 
-    public MessageAcknowledgeDefaultDao() {
+    public MessageAcknowledgementDefaultDao() {
         super(MessageAcknowledgementEntity.class);
     }
 
     public MessageAcknowledgementEntity findByMessageId(String messageId) {
         try {
-            final TypedQuery<MessageAcknowledgementEntity> query = em.createNamedQuery("MessageAcknowledgement.findMessageAcknowledgeByMessageId",
+            final TypedQuery<MessageAcknowledgementEntity> query = em.createNamedQuery("MessageAcknowledgement.findMessageAcknowledgementByMessageId",
                     MessageAcknowledgementEntity.class);
-            query.setParameter("FK_MESSAGE_ID", messageId);
+            query.setParameter("MESSAGE_ID", messageId);
             return query.getSingleResult();
         } catch (NoResultException e) {
             LOG.debug("Could not find any message acknowledge for message id[" + messageId + "]");
@@ -36,7 +35,7 @@ public class MessageAcknowledgeDefaultDao extends BasicDao<MessageAcknowledgemen
 
     public MessageAcknowledgementEntity findByFrom(String from) {
         try {
-            final TypedQuery<MessageAcknowledgementEntity> query = em.createNamedQuery("MessageAcknowledgement.findMessageAcknowledgeByFrom",
+            final TypedQuery<MessageAcknowledgementEntity> query = em.createNamedQuery("MessageAcknowledgement.findMessageAcknowledgementByFrom",
                     MessageAcknowledgementEntity.class);
             query.setParameter("FROM", from);
             return query.getSingleResult();
@@ -48,7 +47,7 @@ public class MessageAcknowledgeDefaultDao extends BasicDao<MessageAcknowledgemen
 
     public MessageAcknowledgementEntity findByTo(String to) {
         try {
-            final TypedQuery<MessageAcknowledgementEntity> query = em.createNamedQuery("MessageAcknowledgement.findMessageAcknowledgeByTo",
+            final TypedQuery<MessageAcknowledgementEntity> query = em.createNamedQuery("MessageAcknowledgement.findMessageAcknowledgementByTo",
                     MessageAcknowledgementEntity.class);
             query.setParameter("TO", to);
             return query.getSingleResult();

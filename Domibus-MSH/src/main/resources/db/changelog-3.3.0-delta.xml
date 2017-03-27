@@ -72,32 +72,28 @@
     </changeSet>
 
     <changeSet author="TiagoMiguel" id="EDelivery_1940">
-        <createTable tableName="tb_message_acknowledgement">
+        <createTable tableName="TB_MESSAGE_ACKNOWLEDGEMENT">
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="FK_MESSAGE_ID" type="INT"/>
+            <column name="MESSAGE_ID" type="VARCHAR(255)"/>
             <column name="FROM" type="VARCHAR(255)"/>
             <column name="TO" type="VARCHAR(255)"/>
             <column name="CREATED_TIMESTAMP" type="DATETIME"/>
             <column name="ACKNOWLEDGED_TIMESTAMP" type="DATETIME"/>
         </createTable>
-        <addForeignKeyConstraint baseColumnNames="FK_MESSAGE_ID" baseTableName="tb_message_acknowledge"
-                                 constraintName="FK_MSG_MSG_ACK_ID" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="ID_PK" referencedTableName="tb_messaging"/>
-        <createTable tableName="tb_message_acknowledge_property">
+        <createTable tableName="TB_MSG_ACKNOWLEDGE_PROP">
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>
             </column>
             <column name="PROPERTY_NAME" type="VARCHAR(255)"/>
             <column name="PROPERTY_VALUE" type="VARCHAR(255)"/>
-            <column name="FK_MESSAGEACKNOWLEDGE" type="VARCHAR(255)"/>
+            <column name="FK_MSG_ACKNOWLEDGE" type="INT"/>
         </createTable>
-        <addForeignKeyConstraint baseColumnNames="FK_MESSAGEACKNOWLEDGE" baseTableName="tb_message_acknowledge_property"
-                                 constraintName="FK_MESSAGEACK_PROPERTY_ID" deferrable="false"
+        <addForeignKeyConstraint baseColumnNames="FK_MSG_ACKNOWLEDGE" baseTableName="TB_MSG_ACKNOWLEDGE_PROP"
+                                 constraintName="FK_MSG_ACK_PROP_MSG_ACK" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="ID_PK" referencedTableName="tb_message_acknowledge"/>
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_ACKNOWLEDGEMENT"/>
     </changeSet>
 
 </databaseChangeLog>
