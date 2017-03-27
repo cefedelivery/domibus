@@ -31,7 +31,7 @@ public class MessageAcknowledgeResource {
      */
     @RequestMapping(method = RequestMethod.POST)
     public MessageAcknowledgementDTO acknowledgeMessage(@RequestBody MessageAcknowledgementDTO messageAcknowledgementDTO) throws MessageAcknowledgeException {
-        return null;
+        return messageAcknowledgeService.acknowledgeMessage(messageAcknowledgementDTO.getMessageId(), messageAcknowledgementDTO.getAcknowledgeTimestamp(), messageAcknowledgementDTO.getFrom(), messageAcknowledgementDTO.getTo(), messageAcknowledgementDTO.getProperties());
     }
 
     /**
@@ -42,7 +42,7 @@ public class MessageAcknowledgeResource {
      */
     @RequestMapping(method = RequestMethod.GET)
     public List<MessageAcknowledgementDTO> getAcknowledgedMessages(String messageId) throws MessageAcknowledgeException {
-        return null;
+        return messageAcknowledgeService.getAcknowledgedMessages(messageId);
     }
 
 
