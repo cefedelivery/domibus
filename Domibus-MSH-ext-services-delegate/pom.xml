@@ -12,6 +12,10 @@
     <artifactId>domibus-ext-services-delegate</artifactId>
     <name>Domibus EXT Services Delegate</name>
 
+    <properties>
+        <domibus-ext-services-api.version>1.0-SNAPSHOT</domibus-ext-services-api.version>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -26,7 +30,7 @@
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-ext-services-api</artifactId>
-            <version>${project.version}</version>
+            <version>${domibus-ext-services-api.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.domibus</groupId>
