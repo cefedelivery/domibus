@@ -5,7 +5,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -30,12 +30,12 @@ public class MessageAcknowledgementEntity extends AbstractBaseEntity {
     private String to;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "CREATED_TIMESTAMP")
-    private Timestamp created;
+    @Column(name = "CREATED")
+    private Date created;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "ACKNOWLEDGED_TIMESTAMP")
-    private Timestamp acknowledged;
+    @Column(name = "ACKNOWLEDGED")
+    private Date acknowledged;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_MSG_ACKNOWLEDGE")
@@ -73,19 +73,19 @@ public class MessageAcknowledgementEntity extends AbstractBaseEntity {
         this.properties = properties;
     }
 
-    public Timestamp getCreated() {
+    public Date getCreated() {
         return created;
     }
 
-    public void setCreated(Timestamp created) {
+    public void setCreated(Date created) {
         this.created = created;
     }
 
-    public Timestamp getAcknowledged() {
+    public Date getAcknowledged() {
         return acknowledged;
     }
 
-    public void setAcknowledged(Timestamp acknowledged) {
+    public void setAcknowledged(Date acknowledged) {
         this.acknowledged = acknowledged;
     }
 

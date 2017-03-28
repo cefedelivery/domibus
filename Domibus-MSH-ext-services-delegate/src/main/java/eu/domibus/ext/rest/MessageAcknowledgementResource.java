@@ -17,7 +17,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/ext/messageAcknowledgments")
-public class MessageAcknowledgeResource {
+public class MessageAcknowledgementResource {
 
     @Autowired
     MessageAcknowledgeService messageAcknowledgeService;

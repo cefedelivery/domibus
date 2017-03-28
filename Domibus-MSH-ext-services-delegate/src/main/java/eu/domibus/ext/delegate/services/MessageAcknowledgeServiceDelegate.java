@@ -20,9 +20,6 @@ import java.util.Map;
 public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeService {
 
     @Autowired
-    MessageAcknowledgeService messageAcknowledgeService;
-
-    @Autowired
     eu.domibus.api.acknowledge.MessageAcknowledgeService messageAcknowledgeCoreService;
 
     @Autowired
