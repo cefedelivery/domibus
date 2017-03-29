@@ -30,7 +30,6 @@ import java.util.Properties;
  *
  * Upon a successful lookup, the result contains the endpoint address and also othe public certificate of the receiver.
  */
-@Service
 public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryServicePEPPOL.class);

@@ -6,6 +6,8 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.DynamicDiscoveryService;
+import eu.domibus.common.services.impl.DynamicDiscoveryServiceOASIS;
+import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Property;
@@ -21,10 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /* This class is used for dynamic discovery of the parties participating in a message exchange.
  *
@@ -52,8 +51,11 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     private static final String useVefaPeppolDynamicDiscovery = "domibus.dynamic.discovery.vefapeppol";
     @Autowired
     protected CryptoService cryptoService;
+
     @Autowired
-    private DynamicDiscoveryService dynamicDiscoveryService;
+    private java.util.Properties domibusProperties;
+
+    private DynamicDiscoveryService dynamicDiscoveryService = null;
 
     @Autowired
     protected CertificateService certificateService;
@@ -71,6 +73,11 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         super.init();
         dynamicResponderProcesses = findDynamicResponderProcesses();
         dynamicInitiatorProcesses = findDynamicSenderProcesses();
+        if("true".equals(domibusProperties.getProperty(useVefaPeppolDynamicDiscovery, "false"))) {
+            dynamicDiscoveryService = new DynamicDiscoveryServicePEPPOL();
+        } else { // OASIS client is used by default
+            dynamicDiscoveryService = new DynamicDiscoveryServiceOASIS();
+        }
     }
 
     @Override

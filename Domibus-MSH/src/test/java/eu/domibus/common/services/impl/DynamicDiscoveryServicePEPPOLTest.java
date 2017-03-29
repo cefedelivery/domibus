@@ -1,8 +1,10 @@
-package eu.domibus.ebms3.common.dao;
+package eu.domibus.common.services.impl;
 
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
 import eu.domibus.common.util.EndpointInfo;
+import eu.domibus.common.util.TrustoreUtil;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import no.difi.vefa.edelivery.lookup.LookupClient;
@@ -33,6 +35,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
     private static final String TEST_SML_ZONE = "acc.edelivery.tech.ec.europa.eu";
 
     private static final String ALIAS_CN_AVAILABLE = "cn_available";
+    private static final String TEST_KEYSTORE_PASSWORD = "1234";
 
     private static final String TEST_RECEIVER_ID = "unknownRecipient";
     private static final String TEST_RECEIVER_ID_TYPE = "unknownRecipientType";
@@ -102,30 +105,14 @@ public class DynamicDiscoveryServicePEPPOLTest {
     private ServiceMetadata buildServiceMetadata() {
 
         ServiceMetadata sm = new ServiceMetadata();
-        X509Certificate testData = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE);
+        X509Certificate testData = TrustoreUtil.loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
 
         ProcessIdentifier processIdentifier = new ProcessIdentifier(TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
 
-        Endpoint endpoint = new Endpoint(processIdentifier, new TransportProfile(DynamicDiscoveryServicePEPPOL.transportProfileAS4), ADDRESS, testData);
+        Endpoint endpoint = new Endpoint(processIdentifier, new TransportProfile(DynamicDiscoveryService.transportProfileAS4), ADDRESS, testData);
         sm.addEndpoint(endpoint);
 
         return sm;
-    }
-
-    private X509Certificate loadCertificateFromJKS(String filePath, String alias) {
-        try {
-            FileInputStream fileInputStream = new FileInputStream(filePath);
-
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(fileInputStream, "1234".toCharArray());
-
-            Certificate cert = keyStore.getCertificate(alias);
-
-            return (X509Certificate) cert;
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
 }
