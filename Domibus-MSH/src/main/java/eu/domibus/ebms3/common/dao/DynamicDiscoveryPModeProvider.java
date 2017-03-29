@@ -5,12 +5,13 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.services.DynamicDiscoveryService;
+import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.wss4j.common.crypto.CryptoService;
-import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import org.apache.commons.lang.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -46,6 +48,8 @@ import java.util.Set;
 public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryPModeProvider.class);
+
+    private static final String useVefaPeppolDynamicDiscovery = "domibus.dynamic.discovery.vefapeppol";
     @Autowired
     protected CryptoService cryptoService;
     @Autowired
@@ -135,10 +139,10 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             updateInitiatorPartiesInPmode(candidates, configurationParty);
 
         } else {//MSHRole.SENDING
-            Endpoint endpoint = lookupByFinalRecipient(userMessage);
-            updateToParty(userMessage, endpoint);
+            EndpointInfo endpointInfo = lookupByFinalRecipient(userMessage);
+            updateToParty(userMessage, endpointInfo.getCertificate());
             PartyId toPartyId = getToPartyId(userMessage);
-            Party configurationParty = updateConfigurationParty(toPartyId.getValue(), toPartyId.getType(), endpoint.getAddress());
+            Party configurationParty = updateConfigurationParty(toPartyId.getValue(), toPartyId.getType(), endpointInfo.getAddress());
             updateResponderPartiesInPmode(candidates, configurationParty);
         }
     }
@@ -286,12 +290,12 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         }
     }
 
-    protected void updateToParty(UserMessage userMessage, final Endpoint endpoint) throws EbMS3Exception{
+    protected void updateToParty(UserMessage userMessage, final X509Certificate certificate) throws EbMS3Exception{
 
         String cn = null;
         try {
             //parse certificate for common name = toPartyId
-            cn = certificateService.extractCommonName(endpoint.getCertificate());
+            cn = certificateService.extractCommonName(certificate);
             LOG.debug("Extracted the common name: " + cn);
         } catch (final InvalidNameException e) {
             LOG.error("Error while extracting CommonName from certificate", e);
@@ -310,12 +314,12 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
         LOG.debug("Add public certificate to the truststore");
         //add certificate to Truststore
-        cryptoService.addCertificate(endpoint.getCertificate(), cn, true);
+        cryptoService.addCertificate(certificate, cn, true);
         LOG.debug("Certificate added");
 
     }
 
-    protected Endpoint lookupByFinalRecipient(UserMessage userMessage) throws EbMS3Exception {
+    protected EndpointInfo lookupByFinalRecipient(UserMessage userMessage) throws EbMS3Exception {
         Property finalRecipient = getFinalRecipient(userMessage);
         if(finalRecipient == null) {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Dynamic discovery processes found for message but finalRecipient information is missing in messageProperties.", userMessage.getMessageInfo().getMessageId(), null);
@@ -323,7 +327,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         LOG.info("Perform lookup by finalRecipient: " + finalRecipient.getName() + " " + finalRecipient.getType() + " " +finalRecipient.getValue());
 
         //lookup sml/smp - result is cached
-        final Endpoint endpoint = dynamicDiscoveryService.lookupInformation(finalRecipient.getValue(),
+        final EndpointInfo endpoint = dynamicDiscoveryService.lookupInformation(finalRecipient.getValue(),
                 finalRecipient.getType(),
                 userMessage.getCollaborationInfo().getAction(),
                 userMessage.getCollaborationInfo().getService().getValue(),

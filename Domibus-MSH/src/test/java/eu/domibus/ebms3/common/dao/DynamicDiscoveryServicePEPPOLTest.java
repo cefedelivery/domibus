@@ -1,6 +1,8 @@
 package eu.domibus.ebms3.common.dao;
 
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
+import eu.domibus.common.util.EndpointInfo;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import no.difi.vefa.edelivery.lookup.LookupClient;
@@ -22,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(JMockit.class)
-public class DynamicDiscoveryServiceTest {
+public class DynamicDiscoveryServicePEPPOLTest {
 
     private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/ebms3/common/dao/DynamicDiscoveryPModeProviderTest/";
 
@@ -45,12 +47,26 @@ public class DynamicDiscoveryServiceTest {
     private Properties domibusProperties;
 
     @Tested
-    private DynamicDiscoveryService dynamicDiscoveryService;
+    private DynamicDiscoveryServicePEPPOL dynamicDiscoveryService;
+
+    @Test
+    public void testLookupInformation() throws Exception {
+        new NonStrictExpectations() {{
+            domibusProperties.getProperty(DynamicDiscoveryServicePEPPOL.SMLZONE_KEY);
+            result = TEST_SML_ZONE;
+
+        }};
+
+        EndpointInfo endpoint = dynamicDiscoveryService.lookupInformation("0088:2111100000666", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
+        assertNotNull(endpoint);
+
+    }
+
 
     @Test
     public void testLookupInformationMock(final @Capturing LookupClient smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusProperties.getProperty(DynamicDiscoveryServicePEPPOL.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -59,7 +75,7 @@ public class DynamicDiscoveryServiceTest {
 
         }};
 
-        Endpoint endpoint = dynamicDiscoveryService.lookupInformation(TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        EndpointInfo endpoint = dynamicDiscoveryService.lookupInformation(TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
         assertNotNull(endpoint);
         assertEquals(ADDRESS, endpoint.getAddress());
 
@@ -71,7 +87,7 @@ public class DynamicDiscoveryServiceTest {
     @Test(expected = ConfigurationException.class)
     public void testLookupInformationNotFound(final @Capturing LookupClient smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusProperties.getProperty(DynamicDiscoveryServicePEPPOL.SMLZONE_KEY);
             result = TEST_SML_ZONE;
             ServiceMetadata sm = buildServiceMetadata();
             smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentIdentifier)any);
@@ -90,7 +106,7 @@ public class DynamicDiscoveryServiceTest {
 
         ProcessIdentifier processIdentifier = new ProcessIdentifier(TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
 
-        Endpoint endpoint = new Endpoint(processIdentifier, new TransportProfile(DynamicDiscoveryService.transportProfileDynDisc), ADDRESS, testData);
+        Endpoint endpoint = new Endpoint(processIdentifier, new TransportProfile(DynamicDiscoveryServicePEPPOL.transportProfileAS4), ADDRESS, testData);
         sm.addEndpoint(endpoint);
 
         return sm;

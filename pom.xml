@@ -15,11 +15,11 @@
         <module>Domibus-MSH-logging</module>
         <module>Domibus-MSH-jms-spi</module>
         <module>Domibus-MSH-jms-spi-helper</module>
-        <module>Domibus-MSH-jms-weblogic</module>
+        <!--<module>Domibus-MSH-jms-weblogic</module>-->
         <module>Domibus-MSH-jms-activemq</module>
-        <module>Domibus-MSH-jms-wildfly</module>
-		<module>Domibus-MSH-taskexecutor-weblogic</module>
-		<module>Domibus-MSH-taskexecutor-wildfly</module>
+        <!--<module>Domibus-MSH-jms-wildfly</module>-->
+		<!--<module>Domibus-MSH-taskexecutor-weblogic</module>-->
+		<!--<module>Domibus-MSH-taskexecutor-wildfly</module>-->
         <module>Domibus-MSH-taskexecutor-tomcat</module>
 
         <module>Domibus-MSH-soapui-tests</module>

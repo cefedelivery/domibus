@@ -7,6 +7,7 @@ import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.common.model.Property;
@@ -91,7 +92,7 @@ public class DynamicDiscoveryPModeProviderTest {
     ConfigurationDAO configurationDAO;
 
     @Spy
-    DynamicDiscoveryService dynamicDiscoveryService;
+    DynamicDiscoveryServicePEPPOL dynamicDiscoveryService;
 
     @Spy
     CryptoService cryptoService;
