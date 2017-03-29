@@ -18,15 +18,15 @@ import java.util.Set;
         @NamedQuery(name = "MessageAcknowledgement.findMessageAcknowledgementByMessageId",
                 query = "select messageAcknowledge from MessageAcknowledgementEntity messageAcknowledge where messageAcknowledge.messageId = :MESSAGE_ID")
 })
-public class MessageAcknowledgementEntity extends AbstractBaseEntity {
+public class  MessageAcknowledgementEntity extends AbstractBaseEntity {
 
     @Column(name = "MESSAGE_ID")
     private String messageId;
 
-    @Column(name = "FROM")
+    @Column(name = "FROM_VALUE")
     private String from;
 
-    @Column(name = "TO")
+    @Column(name = "TO_VALUE")
     private String to;
 
     @Temporal(TemporalType.TIMESTAMP)

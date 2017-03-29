@@ -77,8 +77,8 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="MESSAGE_ID" type="VARCHAR(255)"/>
-            <column name="FROM" type="VARCHAR(255)"/>
-            <column name="TO" type="VARCHAR(255)"/>
+            <column name="FROM_VALUE" type="VARCHAR(255)"/>
+            <column name="TO_VALUE" type="VARCHAR(255)"/>
             <column name="CREATED" type="DATETIME"/>
             <column name="ACKNOWLEDGED" type="DATETIME"/>
         </createTable>
