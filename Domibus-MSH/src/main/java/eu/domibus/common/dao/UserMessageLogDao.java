@@ -136,4 +136,11 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         query.setParameter("NOTIFICATION_STATUS", NotificationStatus.NOTIFIED);
         query.executeUpdate();
     }
+
+    public List<Object> findAllInfoPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
+        TypedQuery<Object> query = em.createNamedQuery("UserMessageLog.findAllInfo", Object.class);
+        query.setFirstResult(from);
+        query.setMaxResults(max);
+        return query.getResultList();
+    }
 }

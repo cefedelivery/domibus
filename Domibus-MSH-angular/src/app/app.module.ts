@@ -27,6 +27,7 @@ import {ErrorLogComponent} from "./errorlog/errorlog.component";
 import {FooterComponent} from "./footer/footer.component";
 import {DomibusInfoService} from "./appinfo/domibusinfo.service";
 import {AuthorizedAdminGuard} from "./guards/authorized-admin.guard";
+import {MessageLogComponent} from "./messagelog/messagelog.component";
 
 export function extendedHttpClientFactory (xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -37,6 +38,7 @@ export function extendedHttpClientFactory (xhrBackend: XHRBackend, requestOption
     AppComponent,
     LoginComponent,
     HomeComponent,
+    MessageLogComponent,
     ErrorLogComponent,
     AlertComponent,
     FooterComponent,

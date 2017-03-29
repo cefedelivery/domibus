@@ -89,21 +89,28 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
 
     protected abstract List<F> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters);
 
-    protected List<Predicate> getPredicates(HashMap<String, Object> filters, CriteriaBuilder cb, Root<? extends MessageLog> mle) {
+        protected List<Predicate> getPredicates(HashMap<String, Object> filters, CriteriaBuilder cb, Root<? extends MessageLog> mle) {
         List<Predicate> predicates = new ArrayList<>();
         for (Map.Entry<String, Object> filter : filters.entrySet()) {
             if (filter.getValue() != null) {
                 if (filter.getValue() instanceof String) {
                     if (!filter.getValue().toString().isEmpty()) {
-                        switch (filter.getKey()) {
+                        switch (filter.getKey().toString()) {
+                            case "":
+                                break;
+                            default:
+                                predicates.add(cb.like(mle.<String>get(filter.getKey()), (String) filter.getValue()));
+                                break;
+                        }
+                    }
+                } else if (filter.getValue() instanceof Date) {
+                    if (!filter.getValue().toString().isEmpty()) {
+                        switch (filter.getKey().toString()) {
                             case "receivedFrom":
                                 predicates.add(cb.greaterThanOrEqualTo(mle.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
                                 break;
                             case "receivedTo":
                                 predicates.add(cb.lessThanOrEqualTo(mle.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
-                                break;
-                            default:
-                                predicates.add(cb.like(mle.<String>get(filter.getKey()), (String) filter.getValue()));
                                 break;
                         }
                     }
