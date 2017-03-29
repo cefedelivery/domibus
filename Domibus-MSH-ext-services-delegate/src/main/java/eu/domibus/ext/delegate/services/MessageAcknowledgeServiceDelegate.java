@@ -40,6 +40,6 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
     @Override
     public List<MessageAcknowledgementDTO> getAcknowledgedMessages(String messageId) throws MessageAcknowledgeException {
         final List<MessageAcknowledgement> messageAcknowledgement = messageAcknowledgeCoreService.getAcknowledgedMessages(messageId);
-        return domainConverter.convert(messageAcknowledgement);
+       return domainConverter.convert(messageAcknowledgement);
     }
 }

@@ -4,10 +4,7 @@ import eu.domibus.ext.domain.MessageAcknowledgementDTO;
 import eu.domibus.ext.exceptions.MessageAcknowledgeException;
 import eu.domibus.ext.services.MessageAcknowledgeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,7 +28,7 @@ public class MessageAcknowledgementResource {
      */
     @RequestMapping(method = RequestMethod.POST)
     public MessageAcknowledgementDTO acknowledgeMessage(@RequestBody MessageAcknowledgementDTO messageAcknowledgementDTO) throws MessageAcknowledgeException {
-        return messageAcknowledgeService.acknowledgeMessage(messageAcknowledgementDTO.getMessageId(), messageAcknowledgementDTO.getAcknowledgeTimestamp(), messageAcknowledgementDTO.getFrom(), messageAcknowledgementDTO.getTo(), messageAcknowledgementDTO.getProperties());
+        return messageAcknowledgeService.acknowledgeMessage(messageAcknowledgementDTO.getMessageId(), messageAcknowledgementDTO.getAcknowledged(), messageAcknowledgementDTO.getFrom(), messageAcknowledgementDTO.getTo(), messageAcknowledgementDTO.getProperties());
     }
 
     /**
@@ -41,7 +38,8 @@ public class MessageAcknowledgementResource {
      * @return All acknowledgments registered for a specific message
      */
     @RequestMapping(method = RequestMethod.GET)
-    public List<MessageAcknowledgementDTO> getAcknowledgedMessages(String messageId) throws MessageAcknowledgeException {
+    @ResponseBody
+    public List<MessageAcknowledgementDTO> getAcknowledgedMessages(@RequestParam(value = "messageId") String messageId) throws MessageAcknowledgeException {
         return messageAcknowledgeService.getAcknowledgedMessages(messageId);
     }
 
