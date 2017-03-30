@@ -1,6 +1,6 @@
 package eu.domibus.ebms3.security.util;
 
-import eu.domibus.common.AuthRole;
+import eu.domibus.api.security.AuthRole;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.interceptor.security.AccessDeniedException;

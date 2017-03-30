@@ -1,7 +1,5 @@
-package eu.domibus.plugin.webService.security;
+package eu.domibus.api.security;
 
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
-import eu.domibus.plugin.webService.common.util.Constant;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.security.core.Authentication;
@@ -11,6 +9,8 @@ import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,6 +21,9 @@ import java.util.*;
  * Created by feriaad on 17/06/2015.
  */
 public class BlueCoatClientCertificateAuthentication implements Authentication {
+
+    private static final Locale LOCALE = Locale.US;
+    private Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     private boolean authenticated;
     private String certificateId;
@@ -89,7 +92,7 @@ public class BlueCoatClientCertificateAuthentication implements Authentication {
 
     protected String calculateCertificateId(final String certHeaderValue) throws AuthenticationException {
         try {
-            String clientCertHeaderDecoded = URLDecoder.decode(certHeaderValue, Constant.DEFAULT_CHARSET.name());
+            String clientCertHeaderDecoded = URLDecoder.decode(certHeaderValue, DEFAULT_CHARSET.name());
             parseClientCertHeader(clientCertHeaderDecoded);
             certificate.setSerial(certificate.getSerial().replaceAll(":", ""));
             String subject = certificate.getSubject();
@@ -124,7 +127,7 @@ public class BlueCoatClientCertificateAuthentication implements Authentication {
             throw new AuthenticationException(
                     "Invalid BlueCoat Client Certificate Header Received ");
         }
-        DateFormat df = new SimpleDateFormat("MMM d hh:mm:ss yyyy zzz", Constant.LOCALE);
+        DateFormat df = new SimpleDateFormat("MMM d hh:mm:ss yyyy zzz", LOCALE);
         for (final String attribute : split) {
             if (isIn(attribute, HEADER_ATTRIBUTE_ISSUER)) {
                 certificate.setIssuer(attribute.substring(attribute.indexOf('=') + 1));
@@ -156,7 +159,7 @@ public class BlueCoatClientCertificateAuthentication implements Authentication {
 
     private boolean isIn(String attribute, String[] headerAttributes) {
         for (String headerAttribute : headerAttributes) {
-            if (attribute.toLowerCase(Constant.LOCALE).startsWith(headerAttribute.toLowerCase(Constant.LOCALE))) {
+            if (attribute.toLowerCase(LOCALE).startsWith(headerAttribute.toLowerCase(LOCALE))) {
                 return true;
             }
         }

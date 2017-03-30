@@ -1,10 +1,10 @@
-package eu.domibus.plugin.webService.service.impl;
+package eu.domibus.core.security;
 
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
-import eu.domibus.plugin.webService.service.ICRLVerifierService;
-import org.apache.commons.io.IOUtils;
+import eu.domibus.api.security.AuthenticationException;
+import eu.domibus.api.security.ICRLVerifierService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERIA5String;

@@ -1,6 +1,5 @@
-package eu.domibus.plugin.webService.security;
+package eu.domibus.api.security;
 
-import eu.domibus.common.AuthRole;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.security.core.Authentication;

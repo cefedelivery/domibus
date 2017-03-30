@@ -1,15 +1,9 @@
-package eu.domibus.plugin.webService.security;
+package eu.domibus.core.security;
 
-import eu.domibus.common.AuthRole;
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
-import eu.domibus.plugin.webService.common.util.HashUtil;
-import eu.domibus.plugin.webService.dao.AuthenticationDAO;
-import eu.domibus.plugin.webService.entity.AuthenticationEntry;
-import eu.domibus.plugin.webService.impl.CustomAuthenticationInterceptor;
-import eu.domibus.plugin.webService.service.IBlueCoatCertificateService;
-import eu.domibus.plugin.webService.service.IX509CertificateService;
+import eu.domibus.api.security.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.api.util.HashUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -28,16 +22,19 @@ import java.util.List;
 @Component(value="customAuthenticationProvider")
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationInterceptor.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationProvider.class);
+
+    @Autowired
+    private HashUtil hashUtil;
 
     @Autowired
     private AuthenticationDAO authenticationDAO;
 
     @Autowired
-    private IBlueCoatCertificateService blueCoatCertificateService;
+    private BlueCoatCertificateService blueCoatCertificateService;
 
     @Autowired
-    private IX509CertificateService x509CertificateService;
+    private X509CertificateService x509CertificateService;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -63,7 +60,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 Boolean res = false;
                 AuthenticationEntry basicAuthenticationEntry = authenticationDAO.findByUser(authentication.getName());
                 try {
-                    res = HashUtil.getSHA256Hash((String) authentication.getCredentials()).equals(basicAuthenticationEntry.getPasswd());
+                    res = hashUtil.getSHA256Hash((String) authentication.getCredentials()).equals(basicAuthenticationEntry.getPasswd());
                 } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
                     LOG.error("Problem hashing the provided password", ex);
                 }

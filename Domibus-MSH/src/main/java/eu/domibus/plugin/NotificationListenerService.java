@@ -5,6 +5,7 @@ import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.*;
+import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.ebms3.security.util.AuthUtils;
 import eu.domibus.logging.DomibusLogger;

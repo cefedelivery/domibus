@@ -49,6 +49,7 @@
         <quartz.version>2.2.1</quartz.version>
         <dozer.version>5.5.1</dozer.version>
         <jackson.version>2.8.6</jackson.version>
+        <domibus-ext-services-api.version>1.0-SNAPSHOT</domibus-ext-services-api.version>
 
         <!-- Sonar properties -->
         <sonar.binaries>target/classes</sonar.binaries>

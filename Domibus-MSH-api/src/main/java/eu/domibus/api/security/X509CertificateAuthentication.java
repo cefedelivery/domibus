@@ -1,6 +1,5 @@
-package eu.domibus.plugin.webService.security;
+package eu.domibus.api.security;
 
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

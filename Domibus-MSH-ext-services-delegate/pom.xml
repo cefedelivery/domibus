@@ -43,6 +43,12 @@
         </dependency>
         <!-- End Domibus modules -->
 
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Dozer -->
         <dependency>
             <groupId>net.sf.dozer</groupId>

@@ -1,7 +1,7 @@
-package eu.domibus.plugin.webService.dao;
+package eu.domibus.core.security;
 
-import eu.domibus.common.AuthRole;
-import eu.domibus.plugin.webService.entity.AuthenticationEntry;
+import eu.domibus.api.security.AuthRole;
+import eu.domibus.common.dao.BasicDao;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;

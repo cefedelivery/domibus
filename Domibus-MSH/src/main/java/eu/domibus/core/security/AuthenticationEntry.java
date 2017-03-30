@@ -1,4 +1,6 @@
-package eu.domibus.plugin.webService.entity;
+package eu.domibus.core.security;
+
+import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
 import javax.persistence.*;
 

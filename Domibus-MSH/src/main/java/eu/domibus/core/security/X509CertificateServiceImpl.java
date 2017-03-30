@@ -1,11 +1,11 @@
-package eu.domibus.plugin.webService.service.impl;
+package eu.domibus.core.security;
 
+import eu.domibus.api.security.AuthenticationException;
+import eu.domibus.api.security.ICRLVerifierService;
+import eu.domibus.api.security.X509CertificateService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
-import eu.domibus.plugin.webService.service.ICRLVerifierService;
-import eu.domibus.plugin.webService.service.IX509CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.Locale;
 
 @Service
-public class X509CertificateServiceImpl implements IX509CertificateService {
+public class X509CertificateServiceImpl implements X509CertificateService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(X509CertificateServiceImpl.class);
 

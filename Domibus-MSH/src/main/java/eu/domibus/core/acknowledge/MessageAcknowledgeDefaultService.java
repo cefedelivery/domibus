@@ -23,7 +23,6 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
     public MessageAcknowledgement acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws MessageAcknowledgeException {
         MessageAcknowledgementEntity entity = create(messageId, acknowledgeTimestamp, from, to, properties);
         messageAcknowledgementDao.create(entity);
-        //TODO check if entity is refreshed(contains the newly created id)
         return convert(entity);
     }
 

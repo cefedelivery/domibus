@@ -1,4 +1,4 @@
-package eu.domibus.plugin.webService.security;
+package eu.domibus.api.security;
 
 /**
  * Created by feriaad on 18/06/2015.

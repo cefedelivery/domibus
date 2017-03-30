@@ -1,12 +1,12 @@
-package eu.domibus.plugin.webService.service.impl;
+package eu.domibus.core.security;
 
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
-import eu.domibus.plugin.webService.security.CertificateDetails;
-import eu.domibus.plugin.webService.service.IBlueCoatCertificateService;
+import eu.domibus.api.security.AuthenticationException;
+import eu.domibus.api.security.CertificateDetails;
+import eu.domibus.api.security.BlueCoatCertificateService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BlueCoatCertificateServiceImpl implements IBlueCoatCertificateService {
+public class BlueCoatCertificateServiceImpl implements BlueCoatCertificateService {
 
     /**
      * Validate the certificate.

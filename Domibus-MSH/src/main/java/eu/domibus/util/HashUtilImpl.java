@@ -1,14 +1,22 @@
-package eu.domibus.plugin.webService.common.util;
+package eu.domibus.util;
+
+import eu.domibus.api.util.HashUtil;
+import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 
 /**
- * Created by feriaad on 26/06/2015.
+ * @author feriaad, Cosmin Baciu
  */
-public class HashUtil {
+@Component
+public class HashUtilImpl implements HashUtil {
+
+    public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     /**
      * Returns the MD5 hash of the given String
@@ -18,7 +26,8 @@ public class HashUtil {
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
      */
-    public static String getMD5Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    @Override
+    public String getMD5Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         return getHash(stringToBeHashed, "MD5");
     }
 
@@ -30,7 +39,8 @@ public class HashUtil {
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
      */
-    public static String getSHA224Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    @Override
+    public String getSHA224Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         return getHash(stringToBeHashed, "SHA224");
     }
     
@@ -42,7 +52,8 @@ public class HashUtil {
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
      */
-    public static String getSHA256Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    @Override
+    public String getSHA256Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         return getHash(stringToBeHashed, "SHA256");
     }
     
@@ -54,13 +65,13 @@ public class HashUtil {
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
      */
-    private static String getHash(String stringToBeHashed, String algorithm) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private String getHash(String stringToBeHashed, String algorithm) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         if (Security.getProvider("BC") == null) {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         }
         MessageDigest md = MessageDigest.getInstance(algorithm, new org.bouncycastle.jce.provider.BouncyCastleProvider());
         md.reset();
-        md.update(stringToBeHashed.getBytes(Constant.DEFAULT_CHARSET));
+        md.update(stringToBeHashed.getBytes(DEFAULT_CHARSET));
         byte[] hashBytes = md.digest();
 
         //convert the byte to hex format method 2

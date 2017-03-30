@@ -1,6 +1,7 @@
-package eu.domibus.plugin.webService.security;
+package eu.domibus.core.security;
 
-import eu.domibus.plugin.webService.common.util.Constant;
+import eu.domibus.api.security.BlueCoatClientCertificateAuthentication;
+import eu.domibus.api.security.CertificateDetails;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,6 +10,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 
 public class BlueCoatClientCertificateAuthenticationTest {
@@ -18,7 +20,7 @@ public class BlueCoatClientCertificateAuthenticationTest {
         String serial = "123ABCD";
         String issuer = "CN=PEPPOL SERVICE METADATA PUBLISHER TEST CA,OU=FOR TEST PURPOSES ONLY,O=NATIONAL IT AND TELECOM AGENCY,C=DK";
         String subject = "O=DG-DIGIT,CN=SMP_1000000007,C=BE";
-        DateFormat df = new SimpleDateFormat("MMM d hh:mm:ss yyyy zzz", Constant.LOCALE);
+        DateFormat df = new SimpleDateFormat("MMM d hh:mm:ss yyyy zzz", Locale.US);
         Date validFrom = df.parse("Jun 01 10:37:53 2015 CEST");
         Date validTo = df.parse("Jun 01 10:37:53 2035 CEST");
 
@@ -41,7 +43,7 @@ public class BlueCoatClientCertificateAuthenticationTest {
         String serial = "123ABCD";
         String issuer = "C=DK, CN=PEPPOL SERVICE METADATA PUBLISHER TEST CA, O=NATIONAL IT AND TELECOM AGENCY, OU=FOR TEST PURPOSES ONLY";
         String subject = "C=BE, O=DG-DIGIT, CN=SMP_1000000007";
-        DateFormat df = new SimpleDateFormat("MMM d hh:mm:ss yyyy zzz", Constant.LOCALE);
+        DateFormat df = new SimpleDateFormat("MMM d hh:mm:ss yyyy zzz", Locale.US);
         Date validFrom = df.parse("Jun 01 10:37:53 2015 CEST");
         Date validTo = df.parse("Jun 01 10:37:53 2035 CEST");
 
@@ -65,7 +67,7 @@ public class BlueCoatClientCertificateAuthenticationTest {
         // different order for the issuer certificate with extra spaces
         String issuer = "CN=PEPPOL SERVICE METADATA PUBLISHER TEST CA,  C=DK, O=NATIONAL IT AND TELECOM AGENCY,    OU=FOR TEST PURPOSES ONLY";
         String subject = "C=BE, O=DG-DIGIT, CN=SMP_1000000007";
-        DateFormat df = new SimpleDateFormat("MMM d hh:mm:ss yyyy zzz", Constant.LOCALE);
+        DateFormat df = new SimpleDateFormat("MMM d hh:mm:ss yyyy zzz", Locale.US);
         Date validFrom = df.parse("Jun 01 10:37:53 2015 CEST");
         Date validTo = df.parse("Jun 01 10:37:53 2035 CEST");
 

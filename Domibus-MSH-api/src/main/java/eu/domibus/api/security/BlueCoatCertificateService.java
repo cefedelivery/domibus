@@ -1,12 +1,9 @@
-package eu.domibus.plugin.webService.service;
-
-import eu.domibus.plugin.webService.security.CertificateDetails;
-import eu.domibus.plugin.webService.common.exception.AuthenticationException;
+package eu.domibus.api.security;
 
 /**
  * Created by feriaad on 18/06/2015.
  */
-public interface IBlueCoatCertificateService {
+public interface BlueCoatCertificateService {
     /**
      * Validate a certificate sent by the BlueCoat server in the HTTP header
      *
