@@ -30,12 +30,15 @@ public class  MessageAcknowledgementEntity extends AbstractBaseEntity {
     private String to;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "CREATED")
-    private Date created;
+    @Column(name = "CREATE_DATE")
+    private Date createDate;
+
+    @Column(name = "CREATE_USER")
+    private String createUser;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "ACKNOWLEDGED")
-    private Date acknowledged;
+    @Column(name = "ACKNOWLEDGE_DATE")
+    private Date acknowledgeDate;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_MSG_ACKNOWLEDGE")
@@ -73,20 +76,28 @@ public class  MessageAcknowledgementEntity extends AbstractBaseEntity {
         this.properties = properties;
     }
 
-    public Date getCreated() {
-        return created;
+    public Date getCreateDate() {
+        return createDate;
     }
 
-    public void setCreated(Date created) {
-        this.created = created;
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 
-    public Date getAcknowledged() {
-        return acknowledged;
+    public Date getAcknowledgeDate() {
+        return acknowledgeDate;
     }
 
-    public void setAcknowledged(Date acknowledged) {
-        this.acknowledged = acknowledged;
+    public void setAcknowledgeDate(Date acknowledgeDate) {
+        this.acknowledgeDate = acknowledgeDate;
+    }
+
+    public String getCreateUser() {
+        return createUser;
+    }
+
+    public void setCreateUser(String createUser) {
+        this.createUser = createUser;
     }
 
     @Override

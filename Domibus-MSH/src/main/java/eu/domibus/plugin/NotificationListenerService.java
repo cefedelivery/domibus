@@ -128,7 +128,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
         if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
 
-        String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+        String originalUser = authUtils.getOriginalUserFromSecurityContext();
         LOG.info("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
         /* if originalUser is null, all messages are returned */

@@ -9,7 +9,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -31,14 +30,14 @@ public class AuthUtils {
     /* Returns the original user passed via the security context OR
     * null when the user has the role ROLE_ADMIN or unsecure authorizations is allowed
     * */
-    public String getOriginalUserFromSecurityContext(SecurityContext securityContext) throws AccessDeniedException {
+    public String getOriginalUserFromSecurityContext() throws AccessDeniedException {
 
         /* unsecured login allowed */
-        if(isUnsecureLoginAllowed()) {
+        if (isUnsecureLoginAllowed()) {
             return null;
         }
 
-        if(SecurityContextHolder.getContext() == null || SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (SecurityContextHolder.getContext() == null || SecurityContextHolder.getContext().getAuthentication() == null) {
             LOG.error("Authentication is missing from the security context. Unsecure login is not allowed");
             throw new AccessDeniedException("Authentication is missing from the security context. Unsecure login is not allowed");
         }
@@ -46,12 +45,21 @@ public class AuthUtils {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String originalUser = null;
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        if(!authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))) {
+        if (!authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))) {
             originalUser = (String) authentication.getPrincipal();
             LOG.debug("Security context OriginalUser is " + originalUser);
         }
 
         return originalUser;
+    }
+
+    public String getAuthenticatedUser() {
+        if (SecurityContextHolder.getContext() == null || SecurityContextHolder.getContext().getAuthentication() == null) {
+            LOG.debug("Authentication is missing from the security context");
+            return null;
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
     }
 
     public boolean isUnsecureLoginAllowed() {
@@ -60,10 +68,12 @@ public class AuthUtils {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public void hasUserOrAdminRole() {}
+    public void hasUserOrAdminRole() {
+    }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public void hasAdminRole() {}
+    public void hasAdminRole() {
+    }
 
     public void setAuthenticationToSecurityContext(String user, String password) {
         setAuthenticationToSecurityContext(user, password, AuthRole.ROLE_ADMIN);

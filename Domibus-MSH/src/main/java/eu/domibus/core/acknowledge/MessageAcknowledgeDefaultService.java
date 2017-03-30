@@ -3,6 +3,7 @@ package eu.domibus.core.acknowledge;
 import eu.domibus.api.acknowledge.MessageAcknowledgeException;
 import eu.domibus.api.acknowledge.MessageAcknowledgeService;
 import eu.domibus.api.acknowledge.MessageAcknowledgement;
+import eu.domibus.ebms3.security.util.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,18 +20,23 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
     @Autowired
     MessageAcknowledgementDao messageAcknowledgementDao;
 
+    @Autowired
+    AuthUtils authUtils;
+
     @Override
     public MessageAcknowledgement acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws MessageAcknowledgeException {
-        MessageAcknowledgementEntity entity = create(messageId, acknowledgeTimestamp, from, to, properties);
+        final String user = authUtils.getAuthenticatedUser();
+        MessageAcknowledgementEntity entity = create(user, messageId, acknowledgeTimestamp, from, to, properties);
         messageAcknowledgementDao.create(entity);
         return convert(entity);
     }
 
-    protected MessageAcknowledgementEntity create(String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) {
+    protected MessageAcknowledgementEntity create(String user, String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) {
         MessageAcknowledgementEntity result = new MessageAcknowledgementEntity();
         result.setMessageId(messageId);
-        result.setAcknowledged(acknowledgeTimestamp);
-        result.setCreated(new Timestamp(System.currentTimeMillis()));
+        result.setAcknowledgeDate(acknowledgeTimestamp);
+        result.setCreateDate(new Timestamp(System.currentTimeMillis()));
+        result.setCreateUser(user);
         result.setFrom(from);
         result.setTo(to);
         if (properties != null && !properties.isEmpty()) {
@@ -52,8 +58,9 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
         result.setMessageId(entity.getMessageId());
         result.setFrom(entity.getFrom());
         result.setTo(entity.getTo());
-        result.setCreated(entity.getCreated());
-        result.setAcknowledged(entity.getAcknowledged());
+        result.setCreateDate(entity.getCreateDate());
+        result.setCreateUser(entity.getCreateUser());
+        result.setAcknowledgeDate(entity.getAcknowledgeDate());
         final Set<MessageAcknowledgementProperty> properties = entity.getProperties();
 
         Map<String, Object> propertiesHashMap = new HashMap<>();

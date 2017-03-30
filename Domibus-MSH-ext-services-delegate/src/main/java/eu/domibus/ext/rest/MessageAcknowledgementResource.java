@@ -28,7 +28,7 @@ public class MessageAcknowledgementResource {
      */
     @RequestMapping(method = RequestMethod.POST)
     public MessageAcknowledgementDTO acknowledgeMessage(@RequestBody MessageAcknowledgementDTO messageAcknowledgementDTO) throws MessageAcknowledgeException {
-        return messageAcknowledgeService.acknowledgeMessage(messageAcknowledgementDTO.getMessageId(), messageAcknowledgementDTO.getAcknowledged(), messageAcknowledgementDTO.getFrom(), messageAcknowledgementDTO.getTo(), messageAcknowledgementDTO.getProperties());
+        return messageAcknowledgeService.acknowledgeMessage(messageAcknowledgementDTO.getMessageId(), messageAcknowledgementDTO.getAcknowledgeDate(), messageAcknowledgementDTO.getFrom(), messageAcknowledgementDTO.getTo(), messageAcknowledgementDTO.getProperties());
     }
 
     /**

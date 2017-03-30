@@ -37,12 +37,22 @@ public class MessageAcknowledgement {
     /**
      * Timestamp of the acknowledged time
      */
-    private Date acknowledged;
+    private Date acknowledgeDate;
 
     /**
      * Timestamp of the acknowledgement creation time(when it has been saved into the persistence layer)
      */
-    private Date created;
+    private Date createDate;
+
+    public String getCreateUser() {
+        return createUser;
+    }
+
+    public void setCreateUser(String createUser) {
+        this.createUser = createUser;
+    }
+
+    private String createUser;
 
     public Integer getId() {
         return id;
@@ -84,19 +94,19 @@ public class MessageAcknowledgement {
         this.properties = properties;
     }
 
-    public Date getAcknowledged() {
-        return acknowledged;
+    public Date getAcknowledgeDate() {
+        return acknowledgeDate;
     }
 
-    public void setAcknowledged(Date acknowledged) {
-        this.acknowledged = acknowledged;
+    public void setAcknowledgeDate(Date acknowledgeDate) {
+        this.acknowledgeDate = acknowledgeDate;
     }
 
-    public Date getCreated() {
-        return created;
+    public Date getCreateDate() {
+        return createDate;
     }
 
-    public void setCreated(Date created) {
-        this.created = created;
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 }

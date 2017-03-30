@@ -183,7 +183,7 @@ public class DatabaseMessageHandlerTest {
     public void testSubmitMessageGreen2RedOk(@Injectable final Submission messageData) throws Exception {
         new Expectations() {{
 
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
 
             UserMessage userMessage = createUserMessage();
@@ -239,7 +239,7 @@ public class DatabaseMessageHandlerTest {
         assertEquals(messageId, MESS_ID);
 
         new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
@@ -297,7 +297,7 @@ public class DatabaseMessageHandlerTest {
         assertEquals(messageId, MESS_ID);
 
         new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
@@ -332,7 +332,7 @@ public class DatabaseMessageHandlerTest {
         }
 
         new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messageIdGenerator.generateMessageId();
             times = 0;
             userMessageLogDao.getMessageStatus(MESS_ID);
@@ -376,7 +376,7 @@ public class DatabaseMessageHandlerTest {
         }
 
         new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
             times = 0;
@@ -434,7 +434,7 @@ public class DatabaseMessageHandlerTest {
         }
 
         new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
@@ -484,7 +484,7 @@ public class DatabaseMessageHandlerTest {
         }
 
         new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
@@ -557,7 +557,7 @@ public class DatabaseMessageHandlerTest {
         }
 
         new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
@@ -601,7 +601,7 @@ public class DatabaseMessageHandlerTest {
         }
 
         new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
@@ -639,7 +639,7 @@ public class DatabaseMessageHandlerTest {
         }
 
         new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
         }};
@@ -649,7 +649,7 @@ public class DatabaseMessageHandlerTest {
     public void testVerifyOriginalUserNOk(@Injectable final Submission messageData) throws Exception {
         new Expectations() {{
 
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             result = "mycorner";
 
             UserMessage userMessage = createUserMessage();
@@ -667,7 +667,7 @@ public class DatabaseMessageHandlerTest {
         }
 
         new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messageIdGenerator.generateMessageId();
             times = 0;
         }};
@@ -678,7 +678,7 @@ public class DatabaseMessageHandlerTest {
     public void testSubmitMessageStoreNOk(@Injectable final Submission messageData) throws Exception {
         new Expectations() {{
 
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
 
             UserMessage userMessage = createUserMessage();
@@ -731,7 +731,7 @@ public class DatabaseMessageHandlerTest {
         }
 
         new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findPModeKeyForUserMessage(withAny(new UserMessage()), MSHRole.SENDING);
@@ -757,7 +757,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.isUnsecureLoginAllowed();
             result = false;
 
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4";
 
             messagingDao.findUserMessageByMessageId(MESS_ID);
@@ -819,7 +819,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.isUnsecureLoginAllowed();
             result = false;
 
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4";
 
             messagingDao.findUserMessageByMessageId(MESS_ID);
@@ -867,7 +867,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.isUnsecureLoginAllowed();
             result = false;
 
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
 
             messagingDao.findUserMessageByMessageId(MESS_ID);
@@ -884,7 +884,7 @@ public class DatabaseMessageHandlerTest {
 
         new Verifications() {{
             authUtils.hasUserOrAdminRole();
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messagingDao.findUserMessageByMessageId(MESS_ID);
         }};
 
@@ -897,7 +897,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.isUnsecureLoginAllowed();
             result = false;
 
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
 
             messagingDao.findUserMessageByMessageId(MESS_ID);
@@ -914,7 +914,7 @@ public class DatabaseMessageHandlerTest {
 
         new Verifications() {{
             authUtils.hasUserOrAdminRole();
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messagingDao.findUserMessageByMessageId(MESS_ID);
             userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
             times = 0;
@@ -929,7 +929,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.isUnsecureLoginAllowed();
             result = false;
 
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
 
             messagingDao.findUserMessageByMessageId(MESS_ID);
@@ -949,7 +949,7 @@ public class DatabaseMessageHandlerTest {
 
         new Verifications() {{
             authUtils.hasUserOrAdminRole();
-            authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+            authUtils.getOriginalUserFromSecurityContext();
             messagingDao.findUserMessageByMessageId(MESS_ID);
             userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
         }};

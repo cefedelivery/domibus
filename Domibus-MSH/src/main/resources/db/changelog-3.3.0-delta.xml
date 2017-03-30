@@ -79,8 +79,9 @@
             <column name="MESSAGE_ID" type="VARCHAR(255)"/>
             <column name="FROM_VALUE" type="VARCHAR(255)"/>
             <column name="TO_VALUE" type="VARCHAR(255)"/>
-            <column name="CREATED" type="DATETIME"/>
-            <column name="ACKNOWLEDGED" type="DATETIME"/>
+            <column name="CREATE_DATE" type="DATETIME"/>
+            <column name="CREATE_USER" type="VARCHAR(255)"/>
+            <column name="ACKNOWLEDGE_DATE" type="DATETIME"/>
         </createTable>
         <createTable tableName="TB_MESSAGE_ACKNW_PROP">
             <column autoIncrement="true" name="ID_PK" type="INT">
