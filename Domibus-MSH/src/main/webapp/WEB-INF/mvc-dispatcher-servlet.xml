@@ -15,6 +15,15 @@
 
     <mvc:annotation-driven/>
 
+    <!-- Configuring interceptors based on URI -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/ext/**" />
+            <bean class="eu.domibus.ext.interceptor.AuthenticationInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+
     <bean id="multipartResolver"
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver"><property
             name="maxUploadSize" value="10000000" /></bean>

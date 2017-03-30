@@ -37,7 +37,7 @@ public class AuthenticationDefaultService implements AuthenticationService {
 
     @Override
     public void authenticate(HttpServletRequest httpRequest) throws AuthenticationException {
-        LOG.debug("Intercepted request for " + httpRequest.getPathInfo());
+        LOG.debug("Authenticating for " + httpRequest.getRequestURI());
 
         /* id domibus allows unsecure login, do not authenticate anymore, just go on */
         if ("true".equals(domibusProperties.getProperty(UNSECURE_LOGIN_ALLOWED, "true"))) {
