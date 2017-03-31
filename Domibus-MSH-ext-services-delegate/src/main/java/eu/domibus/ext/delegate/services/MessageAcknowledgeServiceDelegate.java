@@ -46,6 +46,7 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
     public MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws AuthenticationException, MessageAcknowledgeException {
         checkSecurity();
 
+        //TODO move the exception mapping into an interceptor
         try {
             final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, properties);
             return domainConverter.convert(messageAcknowledgement);
