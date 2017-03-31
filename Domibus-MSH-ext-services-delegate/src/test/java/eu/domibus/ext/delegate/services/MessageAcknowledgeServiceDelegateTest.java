@@ -5,4 +5,8 @@ package eu.domibus.ext.delegate.services;
  * @since 3.3
  */
 public class MessageAcknowledgeServiceDelegateTest {
+
+    public void name() throws Exception {
+
+    }
 }
