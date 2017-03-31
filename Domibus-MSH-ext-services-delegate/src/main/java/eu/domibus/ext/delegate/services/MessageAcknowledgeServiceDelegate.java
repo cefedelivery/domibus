@@ -31,6 +31,7 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
     @Autowired
     AuthUtils authUtils;
 
+    //TODO move this into an interceptor so that it can be reusable
     protected void checkSecurity() throws AuthenticationException {
         try {
             if (!authUtils.isUnsecureLoginAllowed()) {
