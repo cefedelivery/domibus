@@ -114,5 +114,11 @@
             <artifactId>spring-security-config</artifactId>
         </dependency>
         <!-- End Spring Security -->
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
