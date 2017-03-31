@@ -16,4 +16,8 @@ public class MessageAcknowledgeException extends DomibusCoreException {
     public MessageAcknowledgeException(DomibusCoreErrorCode dce, String message, Throwable cause) {
         super(dce, message, cause);
     }
+
+    public MessageAcknowledgeException(Throwable cause) {
+        super(DomibusCoreErrorCode.DOM_001, cause.getMessage(), cause);
+    }
 }

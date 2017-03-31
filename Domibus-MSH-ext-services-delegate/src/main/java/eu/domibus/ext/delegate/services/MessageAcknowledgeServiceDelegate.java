@@ -3,6 +3,7 @@ package eu.domibus.ext.delegate.services;
 import eu.domibus.api.acknowledge.MessageAcknowledgement;
 import eu.domibus.ext.delegate.converter.DomibusDomainConverter;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;
+import eu.domibus.ext.exceptions.DomibusErrorCode;
 import eu.domibus.ext.exceptions.MessageAcknowledgeException;
 import eu.domibus.ext.services.MessageAcknowledgeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,19 +28,27 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
 
     @Override
     public MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws MessageAcknowledgeException {
-        final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, properties);
-        return domainConverter.convert(messageAcknowledgement);
+        try {
+            final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, properties);
+            return domainConverter.convert(messageAcknowledgement);
+        } catch (Exception e) {
+            throw new MessageAcknowledgeException(e);
+        }
+
     }
 
     @Override
     public MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to) throws MessageAcknowledgeException {
-        final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to);
-        return domainConverter.convert(messageAcknowledgement);
+        return acknowledgeMessage(messageId, acknowledgeTimestamp, from, to);
     }
 
     @Override
     public List<MessageAcknowledgementDTO> getAcknowledgedMessages(String messageId) throws MessageAcknowledgeException {
-        final List<MessageAcknowledgement> messageAcknowledgement = messageAcknowledgeCoreService.getAcknowledgedMessages(messageId);
-       return domainConverter.convert(messageAcknowledgement);
+        try {
+            final List<MessageAcknowledgement> messageAcknowledgement = messageAcknowledgeCoreService.getAcknowledgedMessages(messageId);
+            return domainConverter.convert(messageAcknowledgement);
+        } catch (Exception e) {
+            throw new MessageAcknowledgeException(e);
+        }
     }
 }

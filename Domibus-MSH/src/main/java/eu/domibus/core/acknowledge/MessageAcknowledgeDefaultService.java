@@ -31,6 +31,11 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
         return convert(entity);
     }
 
+    @Override
+    public MessageAcknowledgement acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to) throws MessageAcknowledgeException {
+        return acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, null);
+    }
+
     protected MessageAcknowledgementEntity create(String user, String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) {
         MessageAcknowledgementEntity result = new MessageAcknowledgementEntity();
         result.setMessageId(messageId);
@@ -80,11 +85,6 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
             result.add(convert(entity));
         }
         return result;
-    }
-
-    @Override
-    public MessageAcknowledgement acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to) throws MessageAcknowledgeException {
-        return acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, null);
     }
 
     @Override
