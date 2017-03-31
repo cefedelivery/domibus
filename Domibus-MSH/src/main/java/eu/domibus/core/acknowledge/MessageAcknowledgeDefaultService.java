@@ -3,7 +3,7 @@ package eu.domibus.core.acknowledge;
 import eu.domibus.api.acknowledge.MessageAcknowledgeException;
 import eu.domibus.api.acknowledge.MessageAcknowledgeService;
 import eu.domibus.api.acknowledge.MessageAcknowledgement;
-import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.api.security.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,9 +1,10 @@
 package eu.domibus.ext.delegate.services;
 
 import eu.domibus.api.acknowledge.MessageAcknowledgement;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.ext.delegate.converter.DomibusDomainConverter;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;
-import eu.domibus.ext.exceptions.DomibusErrorCode;
+import eu.domibus.ext.exceptions.AuthenticationException;
 import eu.domibus.ext.exceptions.MessageAcknowledgeException;
 import eu.domibus.ext.services.MessageAcknowledgeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,27 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
     @Autowired
     eu.domibus.api.acknowledge.MessageAcknowledgeService messageAcknowledgeCoreService;
 
+
     @Autowired
     DomibusDomainConverter domainConverter;
 
+    @Autowired
+    AuthUtils authUtils;
+
+    protected void checkSecurity() throws AuthenticationException {
+        try {
+            if (!authUtils.isUnsecureLoginAllowed()) {
+                authUtils.hasUserOrAdminRole();
+            }
+        } catch (eu.domibus.api.security.AuthenticationException e) {
+            throw new AuthenticationException(e);
+        }
+    }
+
     @Override
-    public MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws MessageAcknowledgeException {
+    public MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws AuthenticationException, MessageAcknowledgeException {
+        checkSecurity();
+
         try {
             final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, properties);
             return domainConverter.convert(messageAcknowledgement);
@@ -38,12 +55,14 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
     }
 
     @Override
-    public MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to) throws MessageAcknowledgeException {
+    public MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to) throws AuthenticationException, MessageAcknowledgeException {
+        checkSecurity();
         return acknowledgeMessage(messageId, acknowledgeTimestamp, from, to);
     }
 
     @Override
-    public List<MessageAcknowledgementDTO> getAcknowledgedMessages(String messageId) throws MessageAcknowledgeException {
+    public List<MessageAcknowledgementDTO> getAcknowledgedMessages(String messageId) throws AuthenticationException, MessageAcknowledgeException {
+        checkSecurity();
         try {
             final List<MessageAcknowledgement> messageAcknowledgement = messageAcknowledgeCoreService.getAcknowledgedMessages(messageId);
             return domainConverter.convert(messageAcknowledgement);

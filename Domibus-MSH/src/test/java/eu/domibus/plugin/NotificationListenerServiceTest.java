@@ -3,7 +3,7 @@ package eu.domibus.plugin;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.NotificationType;
-import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.delegate.BackendConnectorDelegate;
 import eu.domibus.messaging.MessageNotFoundException;

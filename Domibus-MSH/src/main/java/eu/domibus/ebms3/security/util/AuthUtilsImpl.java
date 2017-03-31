@@ -1,9 +1,10 @@
 package eu.domibus.ebms3.security.util;
 
 import eu.domibus.api.security.AuthRole;
+import eu.domibus.api.security.AuthUtils;
+import eu.domibus.api.security.AuthenticationException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.cxf.interceptor.security.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,9 +19,9 @@ import java.util.Collections;
 import java.util.Properties;
 
 @Component(value = "authUtils")
-public class AuthUtils {
+public class AuthUtilsImpl implements AuthUtils {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuthUtils.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuthUtilsImpl.class);
 
     private static final String UNSECURE_LOGIN_ALLOWED = "domibus.auth.unsecureLoginAllowed";
 
@@ -30,7 +31,8 @@ public class AuthUtils {
     /* Returns the original user passed via the security context OR
     * null when the user has the role ROLE_ADMIN or unsecure authorizations is allowed
     * */
-    public String getOriginalUserFromSecurityContext() throws AccessDeniedException {
+    @Override
+    public String getOriginalUserFromSecurityContext() throws AuthenticationException {
 
         /* unsecured login allowed */
         if (isUnsecureLoginAllowed()) {
@@ -39,7 +41,7 @@ public class AuthUtils {
 
         if (SecurityContextHolder.getContext() == null || SecurityContextHolder.getContext().getAuthentication() == null) {
             LOG.error("Authentication is missing from the security context. Unsecure login is not allowed");
-            throw new AccessDeniedException("Authentication is missing from the security context. Unsecure login is not allowed");
+            throw new AuthenticationException("Authentication is missing from the security context. Unsecure login is not allowed");
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -53,6 +55,7 @@ public class AuthUtils {
         return originalUser;
     }
 
+    @Override
     public String getAuthenticatedUser() {
         if (SecurityContextHolder.getContext() == null || SecurityContextHolder.getContext().getAuthentication() == null) {
             LOG.debug("Authentication is missing from the security context");
@@ -62,23 +65,28 @@ public class AuthUtils {
         return authentication.getName();
     }
 
+    @Override
     public boolean isUnsecureLoginAllowed() {
         /* unsecured login allowed */
         return "true".equals(domibusProperties.getProperty(UNSECURE_LOGIN_ALLOWED, "true"));
     }
 
+    @Override
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public void hasUserOrAdminRole() {
     }
 
+    @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void hasAdminRole() {
     }
 
+    @Override
     public void setAuthenticationToSecurityContext(String user, String password) {
         setAuthenticationToSecurityContext(user, password, AuthRole.ROLE_ADMIN);
     }
 
+    @Override
     public void setAuthenticationToSecurityContext(String user, String password, AuthRole authRole) {
         SecurityContextHolder.getContext()
                 .setAuthentication(new UsernamePasswordAuthenticationToken(
