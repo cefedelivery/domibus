@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author  migueti, Cosmin Baciu
+ * @author migueti, Cosmin Baciu
  * @since 3.3
  */
 @Component
@@ -26,7 +26,7 @@ public class DomibusDomainDefaultConverter implements DomibusDomainConverter {
 
     @Override
     public List<MessageAcknowledgementDTO> convert(List<MessageAcknowledgement> messagesList) {
-        if(messagesList == null) {
+        if (messagesList == null) {
             return null;
         }
         List<MessageAcknowledgementDTO> result = new ArrayList<>();
