@@ -8,6 +8,7 @@ import eu.domibus.ext.exceptions.AuthenticationException;
 import eu.domibus.ext.exceptions.MessageAcknowledgeException;
 import eu.domibus.ext.services.MessageAcknowledgeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -37,7 +38,7 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
             if (!authUtils.isUnsecureLoginAllowed()) {
                 authUtils.hasUserOrAdminRole();
             }
-        } catch (eu.domibus.api.security.AuthenticationException e) {
+        } catch (AccessDeniedException e) {
             throw new AuthenticationException(e);
         }
     }
@@ -58,8 +59,7 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
 
     @Override
     public MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to) throws AuthenticationException, MessageAcknowledgeException {
-        checkSecurity();
-        return acknowledgeMessage(messageId, acknowledgeTimestamp, from, to);
+        return acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, null);
     }
 
     @Override

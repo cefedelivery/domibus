@@ -1,5 +1,6 @@
 package eu.domibus.api.acknowledge;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Map;
 
@@ -37,12 +38,12 @@ public class MessageAcknowledgement {
     /**
      * Timestamp of the acknowledged time
      */
-    private Date acknowledgeDate;
+    private Timestamp acknowledgeDate;
 
     /**
      * Timestamp of the acknowledgement creation time(when it has been saved into the persistence layer)
      */
-    private Date createDate;
+    private Timestamp createDate;
 
     public String getCreateUser() {
         return createUser;
@@ -94,19 +95,19 @@ public class MessageAcknowledgement {
         this.properties = properties;
     }
 
-    public Date getAcknowledgeDate() {
+    public Timestamp getAcknowledgeDate() {
         return acknowledgeDate;
     }
 
-    public void setAcknowledgeDate(Date acknowledgeDate) {
+    public void setAcknowledgeDate(Timestamp acknowledgeDate) {
         this.acknowledgeDate = acknowledgeDate;
     }
 
-    public Date getCreateDate() {
+    public Timestamp getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(Date createDate) {
+    public void setCreateDate(Timestamp createDate) {
         this.createDate = createDate;
     }
 }

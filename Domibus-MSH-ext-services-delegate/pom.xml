@@ -14,6 +14,7 @@
 
     <properties>
         <domibus-ext-services-api.version>1.0-SNAPSHOT</domibus-ext-services-api.version>
+        <commons-test.version>4.2</commons-test.version>
     </properties>
 
     <build>
@@ -115,10 +116,34 @@
         </dependency>
         <!-- End Spring Security -->
 
+        <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.digit.commons</groupId>
+            <artifactId>commons-test</artifactId>
+            <version>${commons-test.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- End Test dependencies -->
     </dependencies>
 </project>
