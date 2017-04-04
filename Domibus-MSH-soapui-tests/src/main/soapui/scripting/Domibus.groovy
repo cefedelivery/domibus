@@ -110,10 +110,10 @@ class Domibus
                 messageID=it.text()
             }
         }
-        assert (messageID != null),"Error:findReturnedMessageID: The message ID is not found in the response"
+        assert (messageID != null),locateTest()+"Error:findReturnedMessageID: The message ID is not found in the response"
         if((findGivenMessageID()!=null) && (findGivenMessageID().trim()!="")){
             //if(findGivenMessageID()!=null){
-            assert (messageID.toLowerCase() == findGivenMessageID().toLowerCase()),"Error:findReturnedMessageID: The message ID returned is ("+messageID+"), the message ID provided is ("+findGivenMessageID()+")."
+            assert (messageID.toLowerCase() == findGivenMessageID().toLowerCase()),locateTest()+"Error:findReturnedMessageID: The message ID returned is ("+messageID+"), the message ID provided is ("+findGivenMessageID()+")."
         }
         return(messageID.toLowerCase())
     }
@@ -137,10 +137,10 @@ class Domibus
         }
         if(presence1==1){
             //log.info "total = "+total
-            assert(total>0),"Error:verifyMessagePresence: Message with ID "+messageID+" is not found in sender side."
+            assert(total>0),locateTest()+"Error:verifyMessagePresence: Message with ID "+messageID+" is not found in sender side."
         }
         if(presence1==0){
-            assert(total==0),"Error:verifyMessagePresence: Message with ID "+messageID+" is found in sender side."
+            assert(total==0),locateTest()+"Error:verifyMessagePresence: Message with ID "+messageID+" is found in sender side."
         }
 
         // Receiver DB
@@ -150,10 +150,10 @@ class Domibus
             total=it.lignes
         }
         if(presence2==1){
-            assert(total>0),"Error:verifyMessagePresence: Message with ID "+messageID+" is not found in receiver side."
+            assert(total>0),locateTest()+"Error:verifyMessagePresence: Message with ID "+messageID+" is not found in receiver side."
         }
         if(presence2==0){
-            assert(total==0),"Error:verifyMessagePresence: Message with ID "+messageID+" is found in receiver side."
+            assert(total==0),locateTest()+"Error:verifyMessagePresence: Message with ID "+messageID+" is found in receiver side."
         }
 
         closeConnection()
@@ -174,12 +174,12 @@ class Domibus
         sqlBlue.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
             total=it.lignes
         }
-        assert(total==1),"Error:verifyMessageUnicity: Message found "+total+" times in sender side."
+        assert(total==1),locateTest()+"Error:verifyMessageUnicity: Message found "+total+" times in sender side."
         sleep(sleepDelay)
         sqlBlue.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
             total=it.lignes
         }
-        assert(total==1),"Error:verifyMessageUnicity: Message found "+total+" times in receiver side."
+        assert(total==1),locateTest()+"Error:verifyMessageUnicity: Message found "+total+" times in receiver side."
         closeConnection()
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
@@ -229,8 +229,8 @@ class Domibus
             }
             log.info "finished checking sender, messageStatus: " + messageStatus + " waitMax: " + waitMax
 
-            assert(messageStatus!="INIT"),"Error:waitForStatus: Message "+messageID+" is not present in the sender side."
-            assert(messageStatus.toLowerCase()==SMSH.toLowerCase()),"Error:waitForStatus: Message in the sender side has status "+messageStatus+" instead of "+SMSH+"."
+            assert(messageStatus!="INIT"),locateTest()+"Error:waitForStatus: Message "+messageID+" is not present in the sender side."
+            assert(messageStatus.toLowerCase()==SMSH.toLowerCase()),locateTest()+"Error:waitForStatus: Message in the sender side has status "+messageStatus+" instead of "+SMSH+"."
         }
         if (bonusTimeForReceiver)
         {
@@ -252,8 +252,8 @@ class Domibus
                 log.info "W:" + waitMax + " M:" + messageStatus
             }
             log.info "finished checking receiver, messageStatus: " + messageStatus + " waitMax: " + waitMax
-            assert(messageStatus!="INIT"),"Error:waitForStatus: Message "+messageID+" is not present in the receiver side."
-            assert(messageStatus.toLowerCase()==RMSH.toLowerCase()),"Error:waitForStatus: Message in the receiver side has status "+messageStatus+" instead of "+RMSH+"."
+            assert(messageStatus!="INIT"),locateTest()+"Error:waitForStatus: Message "+messageID+" is not present in the receiver side."
+            assert(messageStatus.toLowerCase()==RMSH.toLowerCase()),locateTest()+"Error:waitForStatus: Message in the receiver side has status "+messageStatus+" instead of "+RMSH+"."
         }
         closeConnection()
     }
@@ -371,6 +371,10 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 
 // Static methods
+    // Returns: "--TestCase--testStep--"  
+    def String locateTest(){
+        return("--"+context.testCase.name+"--"+context.testCase.getTestStepAt(context.getCurrentStepIndex()).getLabel()+"--  ");
+    }
 
     static def getStatusRetriveStatus(log, context, messageExchange) {
         def outStatus=null
@@ -381,7 +385,7 @@ class Domibus
                 outStatus=it.text()
             }
         }
-        assert (outStatus != null),"Error:getStatusRetriveStatus: Not able to return status from response message"
+        assert (outStatus != null),locateTest()+"Error:getStatusRetriveStatus: Not able to return status from response message"
         return outStatus
     }
 
@@ -441,33 +445,44 @@ class Domibus
         def errorCatcher = new StringBuffer()
         def pathS=context.expand( '${#Project#pathExeSender}' )
         def pathR=context.expand( '${#Project#pathExeReceiver}' )
+		def pathRG=context.expand( '${#Project#pathExeGreen}' )
         def proc=null
+		def passedDuration=0
 
-        log.info "Trying to start the " + side.toUpperCase()
 
-        if(side.toLowerCase()=="sender"){
-            proc="cmd /c cd ${pathS} && startup.bat".execute()
-        }
-        else
-        {
-            if(side.toLowerCase()=="receiver")
-            {
-                proc="cmd /c cd ${pathR} && startup.bat".execute()
-            }
-            else
-            {
-                assert (false) , "Incorrect side"
-            }
-        }
-        if(proc!=null){
-            proc.consumeProcessOutput(outputCatcher, errorCatcher)
-            proc.waitFor()
-        }
-        assert((!errorCatcher)&&(proc!=null)), "Error:startMSH: Error while trying to start the MSH."
-
-        sleep(65_000)
-        log.info "--- DONE - " + side.toUpperCase() + " started ---"
-
+		if(pingMSH(side,context,log).equals("200")){
+			log.info side.toUpperCase()+" is already running!"
+		}
+		else{
+			log.info "Trying to start the " + side.toUpperCase()
+			if(side.toLowerCase()=="sender"){
+				proc="cmd /c cd ${pathS} && startup.bat".execute()
+			}
+			else{
+				if(side.toLowerCase()=="receiver"){
+					proc="cmd /c cd ${pathR} && startup.bat".execute()
+				}
+				else{
+					if((side.toLowerCase()=="receivergreen")){
+						proc="cmd /c cd ${pathRG} && startup.bat".execute()
+					}
+					else{
+						assert (false) , "Incorrect side"
+					}
+				}
+			}
+			if(proc!=null){
+				proc.consumeProcessOutput(outputCatcher, errorCatcher)
+				proc.waitFor()
+			}
+			assert((!errorCatcher)&&(proc!=null)), locateTest()+"Error:startMSH: Error while trying to start the MSH."
+			while((!pingMSH(side,context,log).equals("200"))&&(passedDuration<100000)){
+				passedDuration=passedDuration+2000
+				sleep(2000)
+			}
+			assert(pingMSH(side,context,log).equals("200")),locateTest()+"Error:startMSH: Error while trying to start the MSH."
+			log.info "--- DONE - " + side.toUpperCase() + " started ---"
+		}
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Stop Gateway
@@ -477,31 +492,89 @@ class Domibus
         def proc=null
         def pathS=context.expand( '${#Project#pathExeSender}' )
         def pathR=context.expand( '${#Project#pathExeReceiver}' )
+		def pathRG=context.expand( '${#Project#pathExeGreen}' )
+		def passedDuration=0
 
-        log.info "Trying to start the " + side.toUpperCase()
+		if(!pingMSH(side,context,log).equals("200")){
+			log.info side.toUpperCase()+" is not running!"
+		}
+		else{
+			log.info "Trying to stop the " + side.toUpperCase()
+			if(side.toLowerCase()=="sender"){
+				proc="cmd /c cd ${pathS} && shutdown.bat".execute()
+			}
+			else{
+				if(side.toLowerCase()=="receiver"){
+					proc="cmd /c cd ${pathR} && shutdown.bat".execute()
+				}
+				else{
+					if((side.toLowerCase()=="receivergreen")){
+						proc="cmd /c cd ${pathRG} && shutdown.bat".execute()
+					}
+					else{
+						assert (false) , "Incorrect side"
+					}
+				}
+			}
+			if(proc!=null){
+				proc.consumeProcessOutput(outputCatcher, errorCatcher)
+				proc.waitFor()
+			}
+			assert((!errorCatcher)&&(proc!=null)),locateTest()+"Error:stopMSH: Error while trying to stop the MSH."
+			while((pingMSH(side,context,log).equals("200"))&&(passedDuration<5000)){
+				passedDuration=passedDuration+500
+				sleep(500)
+			}
+			assert(!pingMSH(side,context,log).equals("200")),locateTest()+"Error:startMSH: Error while trying to stop the MSH."
+			log.info "--- DONE - " + side.toUpperCase() + " stopped ---"
+		}
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	// Switch the jdbcURLs
+	static def swapJdbcUrls(String msh1,String msh2, testRunner, log){
+		def name1 = "jdbcUrl"+msh1;
+		def name2 = "jdbcUrl"+msh2;
+		def jdbcUrlMsh1 = testRunner.testCase.testSuite.project.getPropertyValue(name1);
+		def jdbcUrlMsh2 = testRunner.testCase.testSuite.project.getPropertyValue(name2);
+		
+		testRunner.testCase.testSuite.project.setPropertyValue(name1,jdbcUrlMsh2);
+		testRunner.testCase.testSuite.project.setPropertyValue(name2,jdbcUrlMsh1);
+		
+		log.info "jdbcURLs swap done between "+msh1+" and "+msh2;
+
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+    // Ping Gateway
+    static def String pingMSH(String side, context, log){
+        def outputCatcher = new StringBuffer()
+        def errorCatcher = new StringBuffer()
+        def proc=null
+		def commandString = null;
 
         if(side.toLowerCase()=="sender"){
-            proc="cmd /c cd ${pathS} && shutdown.bat".execute()
+			commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#localUrl}' )+"/services";
         }
-        else
-        {
-            if(side.toLowerCase()=="receiver")
-            {
-                proc="cmd /c cd ${pathR} && shutdown.bat".execute()
+        else{
+            if(side.toLowerCase()=="receiver"){
+				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#remoteUrl}' )+"/services"
             }
-            else
-            {
-                assert (false) , "Incorrect side"
+            else{
+				if((side.toLowerCase()=="receivergreen")){
+					commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#greenUrl}' )+"/services"
+				}
+				else{
+					assert (false) , "Incorrect side"
+				}
             }
         }
-        if(proc!=null){
-            proc.consumeProcessOutput(outputCatcher, errorCatcher)
-            proc.waitFor()
-        }
-        assert((!errorCatcher)&&(proc!=null)),"Error:startMSH: Error while trying to stop the MSH."
-        sleep(8000)
-        log.info "--- DONE - " + side.toUpperCase() + " stopped ---"
+		if(commandString){
+			proc = commandString.execute();
+			if(proc!=null){
+				proc.consumeProcessOutput(outputCatcher, errorCatcher)
+				proc.waitFor()
+			}
+		}
+		return outputCatcher.toString().trim();
     }
-
 
 }

@@ -63,10 +63,14 @@
 		<services>
 			<service name="testService5" value="bdx:noprocess" type="tc5"/>
 			<service name="testService6" value="bdx:noprocess" type="tc6"/>
+			<service name="testService7" value="bdx:noprocess" type="tc7"/>
+			<service name="testService8" value="bdx:noprocess" type="tc8"/>
 		</services>
 		<actions>
 			<action name="tc5Action" value="TC5Leg1"/>
 			<action name="tc6Action" value="TC6Leg1"/>
+			<action name="tc7Action" value="TC7Leg1"/>
+			<action name="tc8Action" value="TC8Leg1"/>
 		</actions>
 		<as4>
 			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>

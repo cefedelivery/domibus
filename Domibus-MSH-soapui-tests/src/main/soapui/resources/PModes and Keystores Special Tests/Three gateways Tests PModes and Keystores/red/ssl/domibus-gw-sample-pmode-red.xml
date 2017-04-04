@@ -15,10 +15,10 @@
 			<partyIdTypes>
 				<partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
 			</partyIdTypes>
-			<party name="red_gw" endpoint="http://localhost:8180/domibus/services/msh" allowChunking="false">
+			<party name="red_gw" endpoint="https://localhost:8680/domibus/services/msh" allowChunking="false">
 				<identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
 			</party>
-			<party name="blue_gw" endpoint="http://localhost:8080/domibus/services/msh" allowChunking="false">
+			<party name="blue_gw" endpoint="https://localhost:8580/domibus/services/msh" allowChunking="false">
 				<identifier partyId="domibus-blue" partyIdType="partyTypeUrn"/>
 			</party>
 			<party name="green_gw" endpoint="http://localhost:8280/domibus/services/msh" allowChunking="false">
