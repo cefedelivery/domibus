@@ -398,18 +398,22 @@ public class JMSManagerWeblogicTest {
     }
 
     @Test
-    public void testConsumeMessage(final @Injectable ObjectName destination, final @Injectable List<InternalJmsMessage> messages) throws Exception {
+    public void testConsumeMessage(final @Injectable InternalJMSDestination internalJmsDestination, final @Injectable ObjectName destination,
+                                   final @Injectable InternalJmsMessage internalJmsMessage)            throws Exception {
 
         final String sourceQueue = "sourceQueue";
         final String customMessageId = "ID1";
         final String selector = "MESSAGE_ID='" + customMessageId + "'";
 
         new Expectations(jmsManagerWeblogic) {{
-            jmsManagerWeblogic.getMessageDestinationName(sourceQueue);
+            jmsManagerWeblogic.getInternalJMSDestinations(sourceQueue);
+            result = internalJmsDestination;
+
+            internalJmsDestination.getProperty("ObjectName");
             result = destination;
 
-            jmsManagerWeblogic.getMessagesFromDestination(destination, selector);
-            result = messages;
+            jmsManagerWeblogic.getMessageFromDestinationUsingCustomSelector(withAny(destination), selector);
+            result = internalJmsMessage;
 
             jmsManagerWeblogic.deleteMessages(destination, selector);
             result = 1;

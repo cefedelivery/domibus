@@ -76,7 +76,7 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         try {
             return findByMessageId(messageId).getMessageStatus();
         } catch (NoResultException nrEx) {
-            LOG.debug("No result for message with id [" + messageId + "]", nrEx);
+            LOG.debug("No result for message with id [" + messageId + "]");
             return MessageStatus.NOT_FOUND;
         }
     }

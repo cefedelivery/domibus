@@ -50,7 +50,6 @@
             <filtered>false</filtered>
             <excludes>
                 <exclude>work</exclude>
-                <exclude>temp/**</exclude>
                 <exclude>webapps/**/*</exclude>
             </excludes>
         </fileSet>

@@ -74,18 +74,6 @@ public class MessagingDao extends BasicDao<Messaging> {
         }
     }
 
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void delete(final String messageId, final MessageStatus messageStatus, final NotificationStatus notificationStatus) {
-        clearPayloadData(messageId);
-
-        final Query messageStatusQuery = this.em.createNamedQuery("UserMessageLog.setMessageStatusAndNotificationStatus");
-        messageStatusQuery.setParameter("MESSAGE_ID", messageId);
-        messageStatusQuery.setParameter("TIMESTAMP", new Date());
-        messageStatusQuery.setParameter("MESSAGE_STATUS", messageStatus);
-        messageStatusQuery.setParameter("NOTIFICATION_STATUS", notificationStatus);
-        messageStatusQuery.executeUpdate();
-    }
-
     /**
      * Clears the payloads data for the message with the given messageId.
      *
