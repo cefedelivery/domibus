@@ -14,6 +14,8 @@
                            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
                            http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd" >
 
+    <import resource="classpath*:config/*-domibusContext.xml"/>
+
     <context:annotation-config/>
     <context:component-scan base-package="eu.domibus">
         <context:exclude-filter type="annotation" expression="org.springframework.context.annotation.Configuration"/>
@@ -23,6 +25,17 @@
     <jms:annotation-driven/>
 
     <tx:annotation-driven order="1" transaction-manager="transactionManager" proxy-target-class="true"/>
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+    <aop:config proxy-target-class="true">
+        <!-- all services from eu.domibus package which do not use a speicific @Transactional annotation; the implementations of the org.apache.cxf.phase.PhaseInterceptor are not taken into account due to final methods present in the CXF abstract class  -->
+        <aop:pointcut id="allMethods" expression="execution(public * eu.domibus..*(..)) and not @annotation(org.springframework.transaction.annotation.Transactional) and not within(@org.springframework.transaction.annotation.Transactional *) and not within(org.apache.cxf.phase.PhaseInterceptor+)"/>
+        <aop:advisor order="2" advice-ref="txAdvice" pointcut-ref="allMethods"/>
+    </aop:config>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
 
 
     <import resource="classpath*:config/*-jms-context.xml"/>

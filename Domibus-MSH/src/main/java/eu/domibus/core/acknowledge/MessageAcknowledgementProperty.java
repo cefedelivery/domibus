@@ -44,19 +44,21 @@ public class MessageAcknowledgementProperty extends AbstractBaseEntity {
 
         if (o == null || getClass() != o.getClass()) return false;
 
-        MessageAcknowledgementProperty messageAcknowledgementProperty = (MessageAcknowledgementProperty) o;
+        MessageAcknowledgementProperty property = (MessageAcknowledgementProperty) o;
 
         return new EqualsBuilder()
                 .appendSuper(super.equals(o))
-                .append(name, messageAcknowledgementProperty.getName())
+                .append(name, property.name)
+                .append(value, property.value)
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17,37)
+        return new HashCodeBuilder(17, 37)
                 .appendSuper(super.hashCode())
                 .append(name)
+                .append(value)
                 .toHashCode();
     }
 }

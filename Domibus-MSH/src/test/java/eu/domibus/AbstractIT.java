@@ -105,7 +105,7 @@ public abstract class AbstractIT {
                 .setAuthentication(new UsernamePasswordAuthenticationToken(
                         "test_user",
                         "test_password",
-                        Collections.singleton(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))));
+                        Collections.singleton(new SimpleGrantedAuthority(eu.domibus.api.security.AuthRole.ROLE_ADMIN.name()))));
     }
 
     /**
