@@ -33,7 +33,7 @@ public class MessageAcknowledgement {
     /**
      * Custom properties of the message acknowledgment (like FROM and TO)
      */
-    private Map<String, Object> properties;
+    private Map<String, String> properties;
 
     /**
      * Timestamp of the acknowledged time
@@ -87,11 +87,11 @@ public class MessageAcknowledgement {
         this.to = to;
     }
 
-    public Map<String, Object> getProperties() {
+    public Map<String, String> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, Object> properties) {
+    public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
 
