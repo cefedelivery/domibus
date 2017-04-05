@@ -123,8 +123,8 @@ public class MSHDispatcher {
         final HTTPConduit httpConduit = (HTTPConduit) client.getConduit();
         final HTTPClientPolicy httpClientPolicy = httpConduit.getClient();
         httpConduit.setClient(httpClientPolicy);
-        httpClientPolicy.setConnectionTimeout(120000);
-        httpClientPolicy.setReceiveTimeout(120000);
+        httpClientPolicy.setConnectionTimeout(300000);
+        httpClientPolicy.setReceiveTimeout(300000);
         final TLSClientParameters params = tlsReader.getTlsClientParameters();
         if (params != null && endpoint.startsWith("https://")) {
             httpConduit.setTlsClientParameters(params);
