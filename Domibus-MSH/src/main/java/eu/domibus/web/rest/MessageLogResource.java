@@ -7,7 +7,7 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogInfo;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -90,13 +89,10 @@ public class MessageLogResource {
         if(messageType != null )  {
             switch(messageType) {
                 case USER_MESSAGE:
-                    long entriesUser = userMessageLogDao.countMessages(filters);
-                    LOGGER.debug("count User Messages [{}]", entriesUser);
-                    result.setCount(Long.valueOf(entriesUser).intValue());
-                    messageLogEntries = userMessageLogDao.findPaged(pageSize * page, pageSize, column, asc, filters);
-                    result.setMessageLogEntries(convert(messageLogEntries));
-                    //List<Object> resultList = userMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
-                    //result.setMessageLogEntries(convertObjects(resultList));
+                    List<UserMessageLogInfo> resultList = userMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
+                    result.setMessageLogEntries(convertObjects(resultList));
+                    LOGGER.debug("count User Messages [{}]", resultList.size());
+                    result.setCount(Long.valueOf(resultList.size()).intValue());
 
                     break;
                 case SIGNAL_MESSAGE:
@@ -119,9 +115,9 @@ public class MessageLogResource {
         return result;
     }
 
-    /*protected List<MessageLogRO> convertObjects(List<Object> objects) {
+    protected List<MessageLogRO> convertObjects(List<UserMessageLogInfo> objects) {
         List<MessageLogRO> result = new ArrayList<>();
-        for(Object object : objects) {
+        for(UserMessageLogInfo object : objects) {
             final MessageLogRO messageLogRO = convertObject(object);
             if(messageLogRO != null) {
                 result.add(messageLogRO);
@@ -130,30 +126,30 @@ public class MessageLogResource {
         return result;
     }
 
-    private MessageLogRO convertObject(Object object) {
+    private MessageLogRO convertObject(UserMessageLogInfo object) {
         if(object == null) {
             return null;
         }
 
         MessageLogRO result = new MessageLogRO();
-        result.setMessageId("1");
-        result.setConversationId("conversation1");
-        result.setFromPartyId("fromPartyId");
-        result.setEndpoint("endpoint");
-        result.setMessageStatus(MessageStatus.ACKNOWLEDGED);
-        result.setNotificationStatus(NotificationStatus.NOT_REQUIRED);
-        result.setMshRole(MSHRole.RECEIVING);
-        result.setMessageType(MessageType.USER_MESSAGE);
-        result.setDeleted(new Date());
-        result.setReceived(new Date());
-        result.setSendAttempts(4);
-        result.setSendAttemptsMax(4);
-        result.setNextAttempt(new Date());
-        result.setOriginalSender("originalSender");
-        result.setFinalRecipient("finalRecipient");
-        result.setRefToMessageId("message1");
+        result.setMessageId(object.getUserMessageLog().getMessageId());
+        result.setConversationId(object.getConversationId());
+        result.setFromPartyId(object.getFromPartyId());
+        result.setEndpoint(object.getToPartyId());
+        result.setMessageStatus(object.getUserMessageLog().getMessageStatus());
+        result.setNotificationStatus(object.getUserMessageLog().getNotificationStatus());
+        result.setMshRole(object.getUserMessageLog().getMshRole());
+        result.setMessageType(object.getUserMessageLog().getMessageType());
+        result.setDeleted(object.getUserMessageLog().getDeleted());
+        result.setReceived(object.getUserMessageLog().getReceived());
+        result.setSendAttempts(object.getUserMessageLog().getSendAttempts());
+        result.setSendAttemptsMax(object.getUserMessageLog().getSendAttemptsMax());
+        result.setNextAttempt(object.getUserMessageLog().getNextAttempt());
+        result.setOriginalSender(object.getOriginalSender());
+        result.setFinalRecipient(object.getFinalRecipient());
+        result.setRefToMessageId(object.getRefToMessageId());
         return result;
-    }*/
+    }
 
     protected List<MessageLogRO> convert(List<? extends MessageLog> messageLogEntries) {
         List<MessageLogRO> result = new ArrayList<>();

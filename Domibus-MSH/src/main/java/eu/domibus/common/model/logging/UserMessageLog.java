@@ -25,6 +25,7 @@
 
 package eu.domibus.common.model.logging;
 
+import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.common.model.MessageType;
 
 import javax.persistence.*;
@@ -53,6 +54,10 @@ import java.util.Date;
         @NamedQuery(name = "UserMessageLog.findAllInfo", query = "select userMessageLog from UserMessageLog userMessageLog")
 })
 public class UserMessageLog extends MessageLog {
+
+    @ManyToOne
+    @JoinColumn(name = "MESSAGE_ID", referencedColumnName = "MESSAGE_ID", updatable = false, insertable = false)
+    protected MessageInfo messageInfo;
 
     public UserMessageLog() {
 

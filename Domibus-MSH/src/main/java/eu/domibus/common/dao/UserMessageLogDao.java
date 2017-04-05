@@ -3,6 +3,7 @@ package eu.domibus.common.dao;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogInfo;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -10,14 +11,8 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import javax.persistence.criteria.*;
+import java.util.*;
 
 /**
  * @author Christian Koch, Stefan Mueller, Federico Martini
@@ -137,10 +132,20 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         query.executeUpdate();
     }
 
-    public List<Object> findAllInfoPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
-        TypedQuery<Object> query = em.createNamedQuery("UserMessageLog.findAllInfo", Object.class);
-        query.setFirstResult(from);
-        query.setMaxResults(max);
-        return query.getResultList();
+    public List<UserMessageLogInfo> findAllInfoPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
+        String userMessageLogQuery = "select new eu.domibus.common.model.logging.UserMessageLogInfo(log, message.collaborationInfo.conversationId, partyFrom.value, partyTo.value, propsFrom.value, propsTo.value, info.refToMessageId) from UserMessageLog log, " +
+                "UserMessage message " +
+                "left join log.messageInfo info " +
+                "left join message.messageProperties.property propsFrom " +
+                "left join message.messageProperties.property propsTo " +
+                "left join message.partyInfo.from.partyId partyFrom " +
+                "left join message.partyInfo.to.partyId partyTo " +
+                "where message.messageInfo = info and propsFrom.name = 'originalSender'" +
+                "and propsTo.name = 'finalRecipient'";
+
+        TypedQuery<UserMessageLogInfo> typedQuery = em.createQuery(userMessageLogQuery, UserMessageLogInfo.class);
+
+        return typedQuery.getResultList();
     }
+
 }
