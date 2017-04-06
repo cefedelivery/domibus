@@ -88,8 +88,8 @@ export class MessageLogComponent {
       params.set('fromPartyId', this.filter.fromPartyId);
     }
 
-    if(this.filter.endpoint) {
-      params.set('endpoint', this.filter.endpoint);
+    if(this.filter.toPartyId) {
+      params.set('toPartyId', this.filter.toPartyId);
     }
 
     if(this.filter.originalSender) {

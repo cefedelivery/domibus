@@ -17,7 +17,7 @@ public class MessageLogRO implements Serializable {
     private String messageId;
     private String conversationId;
     private String fromPartyId;
-    private String endpoint;
+    private String toPartyId;
     private MessageStatus messageStatus;
     private NotificationStatus notificationStatus;
     private MSHRole mshRole;
@@ -55,12 +55,12 @@ public class MessageLogRO implements Serializable {
         this.fromPartyId = fromPartyId;
     }
 
-    public String getEndpoint() {
-        return endpoint;
+    public String getToPartyId() {
+        return toPartyId;
     }
 
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
+    public void setToPartyId(String toPartyId) {
+        this.toPartyId = toPartyId;
     }
 
     public MessageStatus getMessageStatus() {

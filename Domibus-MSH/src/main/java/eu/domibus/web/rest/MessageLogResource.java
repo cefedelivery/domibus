@@ -135,7 +135,7 @@ public class MessageLogResource {
         result.setMessageId(object.getUserMessageLog().getMessageId());
         result.setConversationId(object.getConversationId());
         result.setFromPartyId(object.getFromPartyId());
-        result.setEndpoint(object.getToPartyId());
+        result.setToPartyId(object.getToPartyId());
         result.setMessageStatus(object.getUserMessageLog().getMessageStatus());
         result.setNotificationStatus(object.getUserMessageLog().getNotificationStatus());
         result.setMshRole(object.getUserMessageLog().getMshRole());
@@ -171,7 +171,7 @@ public class MessageLogResource {
         result.setMessageId(messageLogEntry.getMessageId());
         //result.setConversationId("conversation1");
         //result.setFromPartyId("fromPartyId1");
-        result.setEndpoint(messageLogEntry.getEndpoint());
+        //result.setToPartyId(messageLogEntry.g());
         result.setMessageStatus(messageLogEntry.getMessageStatus());
         result.setNotificationStatus(messageLogEntry.getNotificationStatus());
         result.setMshRole(messageLogEntry.getMshRole());

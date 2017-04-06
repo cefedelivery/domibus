@@ -19,7 +19,7 @@
                 </md-input-container>
               </td>
               <td>
-                <md-select placeholder="AP Role" name="mshRole" [(ngModel)]="filter.mshRole">
+                <md-select placeholder="MSH Role" name="mshRole" [(ngModel)]="filter.mshRole">
                   <md-option [value]="''">
                   </md-option>
                   <md-option *ngFor="let role of mshRoles" [value]="role">
@@ -65,7 +65,7 @@
               </td>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="Endpoint" name="endpoint" [(ngModel)]="filter.endpoint" #toPartyId="ngModel">
+                  <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId" #toPartyId="ngModel">
                 </md-input-container>
               </td>
               <td>
@@ -153,7 +153,7 @@
     (page)='onPage($event)'
     (sort)="onSort($event)">
     <!-- Message Id -->
-    <ngx-datatable-column name="MessageId" [width]="400">
+    <ngx-datatable-column name="Message Id" [width]="500">
       <template let-column="column">
         {{column.name}}
       </template>
@@ -162,7 +162,7 @@
       </template>
     </ngx-datatable-column>
     <!-- Conversation Id -->
-    <ngx-datatable-column name="ConversationId">
+    <ngx-datatable-column name="Conversation Id" [width]="400" [canAutoResize]="true">
       <template let-column="column">
         {{column.name}}
       </template>
@@ -171,7 +171,7 @@
       </template>
     </ngx-datatable-column>
     <!-- From Party Id -->
-    <ngx-datatable-column name="FromPartyId" [canAutoResize]="true">
+    <ngx-datatable-column name="From Party Id" [canAutoResize]="true">
       <template let-column="column">
         {{column.name}}
       </template>
@@ -180,7 +180,7 @@
       </template>
     </ngx-datatable-column>
     <!-- To Party Id -->
-    <ngx-datatable-column name="Endpoint" [width]="400">
+    <ngx-datatable-column name="To Party Id" [canAutoResize]="true">
       <template let-column="column">
         {{column.name}}
       </template>
@@ -243,7 +243,7 @@
       </template>
     </ngx-datatable-column>
     <!-- Failed Send Attempts -->
-    <ngx-datatable-column name="SendAttempts" [canAutoResize]="true">
+    <ngx-datatable-column name="Send Attempts" [canAutoResize]="true">
       <template let-column="column">
         {{column.name}}
       </template>
@@ -252,7 +252,7 @@
       </template>
     </ngx-datatable-column>
     <!-- Send Attempts Max -->
-    <ngx-datatable-column name="SendAttemptsMax" [canAutoResize]="true">
+    <ngx-datatable-column name="Send Attempts Max" [canAutoResize]="true">
       <template let-column="column">
         {{column.name}}
       </template>
@@ -261,7 +261,7 @@
       </template>
     </ngx-datatable-column>
     <!-- Next Attempt -->
-    <ngx-datatable-column name="NextAttempt" [canAutoResize]="true">
+    <ngx-datatable-column name="Next Attempt" [canAutoResize]="true">
       <template let-column="column">
         {{column.name}}
       </template>
@@ -270,7 +270,7 @@
       </template>
     </ngx-datatable-column>
     <!-- Original Sender -->
-    <ngx-datatable-column name="OriginalSender" [canAutoResize]="true">
+    <ngx-datatable-column name="Original Sender" [width]="400" [canAutoResize]="true">
       <template let-column="column">
         {{column.name}}
       </template>
@@ -279,7 +279,7 @@
       </template>
     </ngx-datatable-column>
     <!-- Final Recipient -->
-    <ngx-datatable-column name="Final Recipient" [canAutoResize]="true">
+    <ngx-datatable-column name="Final Recipient" [width]="400" [canAutoResize]="true">
       <template let-column="column">
         {{column.name}}
       </template>
@@ -288,7 +288,7 @@
       </template>
     </ngx-datatable-column>
     <!-- Ref To Message Id -->
-    <ngx-datatable-column name="RefToMessageId" [canAutoResize]="true">
+    <ngx-datatable-column name="Ref To Message Id" [canAutoResize]="true">
       <template let-column="column">
         {{column.name}}
       </template>

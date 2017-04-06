@@ -3,15 +3,15 @@ package eu.domibus.common.dao;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogInfo;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 
 import javax.persistence.NoResultException;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -123,33 +123,57 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         return predicates;
     }
 
-    protected List<Predicate> getPredicatesLogInfo(HashMap<String, Object> filters, CriteriaBuilder cb, Root<UserMessageLogInfo> mle) {
+    List<Predicate> getPredicatesLogInfo(HashMap<String, Object> filters, CriteriaBuilder cb, Root<UserMessageLog> userMessageLogRoot, Root<UserMessage> userMessageRoot) {
         List<Predicate> predicates = new ArrayList<>();
         for (Map.Entry<String, Object> filter : filters.entrySet()) {
             if (filter.getValue() != null) {
                 if (filter.getValue() instanceof String) {
                     if (!filter.getValue().toString().isEmpty()) {
-                        switch (filter.getKey().toString()) {
+                        switch (filter.getKey()) {
                             case "":
                                 break;
+                            case "conversationId":
+                                Path<String> conversationIdPath = userMessageRoot.get("collaborationInfo").get("conversationId");
+                                predicates.add(cb.like(conversationIdPath, (String) filter.getValue()));
+                                break;
+                            case "refToMessageId":
+                                Path<String> refToMessageIdPath = userMessageRoot.get("messageInfo").get("refToMessageId");
+                                predicates.add(cb.like(refToMessageIdPath, (String) filter.getValue()));
+                                break;
                             default:
-                                predicates.add(cb.like(mle.<String>get(filter.getKey()), (String) filter.getValue()));
+                                Path<String> stringPath;
+                                try {
+                                    stringPath = userMessageLogRoot.get(filter.getKey());
+                                } catch (IllegalArgumentException e) {
+                                    stringPath = userMessageRoot.get(filter.getKey());
+                                }
+                                if (stringPath != null) {
+                                    predicates.add(cb.like(stringPath, (String) filter.getValue()));
+                                }
                                 break;
                         }
                     }
                 } else if (filter.getValue() instanceof Date) {
                     if (!filter.getValue().toString().isEmpty()) {
-                        switch (filter.getKey().toString()) {
+                        switch (filter.getKey()) {
                             case "receivedFrom":
-                                predicates.add(cb.greaterThanOrEqualTo(mle.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
+                                predicates.add(cb.greaterThanOrEqualTo(userMessageLogRoot.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
                                 break;
                             case "receivedTo":
-                                predicates.add(cb.lessThanOrEqualTo(mle.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
+                                predicates.add(cb.lessThanOrEqualTo(userMessageLogRoot.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
                                 break;
                         }
                     }
                 } else {
-                    predicates.add(cb.equal(mle.<String>get(filter.getKey()), filter.getValue()));
+                    Path<String> stringPath;
+                    try {
+                        stringPath = userMessageLogRoot.get(filter.getKey());
+                    } catch (IllegalArgumentException e) {
+                        stringPath = userMessageRoot.get(filter.getKey());
+                    }
+                    if(stringPath != null) {
+                        predicates.add(cb.equal(stringPath, filter.getValue()));
+                    }
                 }
             }
         }
