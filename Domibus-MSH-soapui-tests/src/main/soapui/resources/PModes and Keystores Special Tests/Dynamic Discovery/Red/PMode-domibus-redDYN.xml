@@ -2,7 +2,7 @@
 <db:configuration xmlns:db="http://domibus.eu/configuration" party="red_gw">
 	<mpcs>
 		<mpc name="defaultMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="600"/>
-		<mpc name="insolvencyMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/insolvencyMPC" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="5"/>
+		<mpc name="brisMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="2"/>
 	</mpcs>
 	<businessProcesses>
 		<roles>
@@ -14,21 +14,10 @@
 		<parties>
 			<partyIdTypes>
 				<partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
+				<partyIdType name="partyTypeiso" value="iso6523-actorid-upis"/>
 			</partyIdTypes>
-			<party name="red_gw" endpoint="http://localhost:8180/domibus/services/msh" allowChunking="false">
-				<identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
-			</party>
-			<party name="senderalias" endpoint="http://localhost:8080/domibus/services/msh" allowChunking="false">
-				<identifier partyId="senderalias" partyIdType="partyTypeUrn"/>
-			</party>
-			<party name="white_gw" endpoint="http://localhost:8080/domibus/services/msh" allowChunking="false">
-				<identifier partyId="domibus-white" partyIdType="partyTypeUrn"/>
-			</party>
-			<party name="black_gw" endpoint="http://localhost:8180/domibus/services/msh" allowChunking="false">
-				<identifier partyId="domibus-black" partyIdType="partyTypeUrn"/>
-			</party>
-			<party name="green_gw" endpoint="http://localhost:8280/domibus/services/msh" allowChunking="false">
-				<identifier partyId="domibus-green" partyIdType="partyTypeUrn"/>
+			<party name="red_gw" endpoint="http://40.118.20.112:8995/domibus/services/msh" allowChunking="false">
+				<identifier partyId="red_gw" partyIdType="partyTypeUrn"/>
 			</party>
 		</parties>
 		<meps>
@@ -55,6 +44,7 @@
 		</payloadProfiles>
 		<securities>
 			<security name="eDeliveryPolicy" policy="eDeliveryPolicy.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryPolicy_CA" policy="eDeliveryPolicy_CA.xml" signatureMethod="RSA_SHA256"/>
 			<security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
 		</securities>
@@ -63,15 +53,12 @@
 		</errorHandlings>
 		<agreements>
 			<agreement name="agreementEmpty" value="" type=""/>
-			<agreement name="agreementDummy" value="DummyAgr" type="DUM"/>
 		</agreements>
 		<services>
-			<service name="testService1" value="bdx:noprocess" type="tc1"/>
-			<service name="testService2" value="bdx:noprocess" type="tc2"/>
+			<service name="testService1" value="urn:www.cenbii.eu:profile:bii05:ver2.0" type="cenbii-procid-ubl"/>
 		</services>
 		<actions>
-			<action name="tc1Action" value="TC1Leg1"/>
-			<action name="tc2Action" value="TC2Leg1"/>
+			<action name="tc1Action" value="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1"/>
 		</actions>
 		<as4>
 			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
@@ -79,35 +66,14 @@
 			<reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
 		</as4>
 		<legConfigurations>
-			<legConfiguration name="pushTestcase1tc1Action" service="testService1" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
-			<legConfiguration name="pushTestcase2tc2Action" service="testService2" action="tc2Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase1tc1Action" service="testService1" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 		</legConfigurations>
 		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
-			<initiatorParties>
-				<initiatorParty name="senderalias"/>
-				<initiatorParty name="red_gw"/>
-				<initiatorParty name="black_gw"/>
-			</initiatorParties>
 			<responderParties>
-				<responderParty name="white_gw"/>
-				<responderParty name="senderalias"/>
 				<responderParty name="red_gw"/>
 			</responderParties>
 			<legs>
 				<leg name="pushTestcase1tc1Action"/>
-			</legs>
-		</process>
-		<process name="tc2Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
-			<initiatorParties>
-				<initiatorParty name="senderalias"/>
-				<initiatorParty name="red_gw"/>
-			</initiatorParties>
-			<responderParties>
-				<responderParty name="senderalias"/>
-				<responderParty name="red_gw"/>
-			</responderParties>
-			<legs>
-				<leg name="pushTestcase2tc2Action"/>
 			</legs>
 		</process>
 	</businessProcesses>
