@@ -28,7 +28,7 @@ export class MessageLogComponent {
   count: number = 0;
   offset: number = 0;
   //default value
-  orderBy: string = "timestamp";
+  orderBy: string = "messageId";
   //default value
   asc: boolean = false;
 
@@ -110,6 +110,10 @@ export class MessageLogComponent {
 
     if(this.filter.receivedTo) {
       params.set('receivedTo', this.filter.receivedTo.getTime());
+    }
+
+    if(asc != null) {
+      params.set('asc', asc.toString());
     }
 
     return this.http.get('rest/messagelog', {

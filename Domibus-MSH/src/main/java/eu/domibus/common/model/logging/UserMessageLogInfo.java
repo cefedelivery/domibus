@@ -24,14 +24,14 @@ public class UserMessageLogInfo extends UserMessageLog {
         super();
     }
 
-    //public UserMessageLogInfo(UserMessageLog userMessageLog, String conversationId, String fromPartyId, String toPartyId, String originalSender, String finalRecipient, String refToMessageId) {
-    public UserMessageLogInfo(UserMessageLog userMessageLog, String conversationId, String refToMessageId) {
+    public UserMessageLogInfo(UserMessageLog userMessageLog, String conversationId, String fromPartyId, String toPartyId, String originalSender, String finalRecipient, String refToMessageId) {
+    //public UserMessageLogInfo(UserMessageLog userMessageLog, String conversationId, String refToMessageId) {
         this.userMessageLog = userMessageLog;
         this.conversationId = conversationId;
-//        this.fromPartyId = fromPartyId;
-//        this.toPartyId = toPartyId;
-//        this.originalSender = originalSender;
-//        this.finalRecipient = finalRecipient;
+        this.fromPartyId = fromPartyId;
+        this.toPartyId = toPartyId;
+        this.originalSender = originalSender;
+        this.finalRecipient = finalRecipient;
         this.refToMessageId = refToMessageId;
     }
 

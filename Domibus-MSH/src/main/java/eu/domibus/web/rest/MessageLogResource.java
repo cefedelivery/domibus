@@ -37,9 +37,6 @@ public class MessageLogResource {
     private UserMessageLogDao userMessageLogDao;
 
     @Autowired
-    private SignalMessageLogDao signalMessageLogDao;
-
-    @Autowired
     DateUtil dateUtil;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -47,19 +44,19 @@ public class MessageLogResource {
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "orderby", required = false) String column,
+            @RequestParam(value = "orderBy", required = false) String column,
             @RequestParam(value = "asc", defaultValue = "true") boolean asc,
             @RequestParam(value = "messageId", required = false) String messageId,
             @RequestParam(value = "conversationId", required = false) String conversationId,
             @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
-            @RequestParam(value = "messageType", defaultValue = "SIGNAL_MESSAGE") MessageType messageType,
+            @RequestParam(value = "messageType", defaultValue = "USER_MESSAGE") MessageType messageType,
             @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus,
             @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus,
             @RequestParam(value = "fromPartyId", required = false) String fromPartyId,
-            @RequestParam(value = "endpoint", required = false) String endpoint,
+            @RequestParam(value = "toPartyId", required = false) String toPartyId,
             @RequestParam(value = "refToMessageId", required = false) String refToMessageId,
             @RequestParam(value = "originalSender", required = false) String originalSender,
-            @RequestParam(value = "finalReceiver", required = false) String finalReceiver,
+            @RequestParam(value = "finalRecipient", required = false) String finalRecipient,
             @RequestParam(value = "receivedFrom", required = false) String receivedFrom,
             @RequestParam(value = "receivedTo", required = false) String receivedTo) {
 
@@ -75,36 +72,20 @@ public class MessageLogResource {
         filters.put("messageStatus", messageStatus);
         filters.put("notificationStatus", notificationStatus);
         filters.put("fromPartyId", fromPartyId);
-        filters.put("endpoint", endpoint);
+        filters.put("toPartyId", toPartyId);
         filters.put("refToMessageId", refToMessageId);
         filters.put("originalSender", originalSender);
-        filters.put("finalReceiver", finalReceiver);
+        filters.put("finalRecipient", finalRecipient);
         filters.put("receivedFrom", dateUtil.fromString(receivedFrom));
         filters.put("receivedTo", dateUtil.fromString(receivedTo));
 
         result.setFilter(filters);
         LOGGER.debug("using filters [{}]", filters);
 
-        final List<? extends MessageLog> messageLogEntries;
-        if(messageType != null )  {
-            switch(messageType) {
-                case USER_MESSAGE:
-                    List<UserMessageLogInfo> resultList = userMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
-                    result.setMessageLogEntries(convertObjects(resultList));
-                    LOGGER.debug("count User Messages [{}]", resultList.size());
-                    result.setCount(Long.valueOf(resultList.size()).intValue());
-
-                    break;
-                case SIGNAL_MESSAGE:
-                    long entriesSignal = signalMessageLogDao.countMessages(filters);
-                    LOGGER.debug("count Signal Messages [{}]", entriesSignal);
-                    result.setCount(Long.valueOf(entriesSignal).intValue());
-                    messageLogEntries = signalMessageLogDao.findPaged(pageSize * page, pageSize, column, asc, filters);
-                    result.setMessageLogEntries(convert(messageLogEntries));
-                    break;
-            }
-        }
-
+        List<UserMessageLogInfo> resultList = userMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
+        result.setMessageLogEntries(convertObjects(resultList));
+        LOGGER.debug("count User Messages [{}]", resultList.size());
+        result.setCount(Long.valueOf(resultList.size()).intValue());
         result.setMshRoles(MSHRole.values());
         result.setMsgTypes(MessageType.values());
         result.setMsgStatus(MessageStatus.values());
