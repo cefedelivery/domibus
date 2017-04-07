@@ -42,8 +42,6 @@ import java.util.Properties;
 public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryServiceOASIS.class);
-    //TODO find the right mapping in the specification
-    private static final String DEFAULT_DOCUMENT_IDENTIFIER_SCHEME = "";
 
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
@@ -82,7 +80,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
             LOG.debug("Preparing to request the ServiceMetadata");
             final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(receiverId, receiverIdType);
-            final DocumentIdentifier documentIdentifier = new DocumentIdentifier(documentId, DEFAULT_DOCUMENT_IDENTIFIER_SCHEME);
+            final DocumentIdentifier documentIdentifier = new DocumentIdentifier(documentId);
 
             final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, processIdType);
 
