@@ -2,10 +2,9 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
+import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.common.model.logging.UserMessageLogInfo;
 import eu.domibus.common.model.logging.UserMessageLogInfoFilter;
-import eu.domibus.ebms3.common.model.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +13,14 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import java.sql.Timestamp;
-import java.util.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Christian Koch, Stefan Mueller, Federico Martini
@@ -139,106 +143,18 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         query.executeUpdate();
     }
 
-    /*String filterUserMessageLogQuery(String query, String column, boolean asc, HashMap<String, Object> filters) {
-        StringBuilder result = new StringBuilder(query);
-        for (Map.Entry<String, Object> filter : filters.entrySet()) {
-            if (filter.getValue() != null) {
-                result.append(" and ");
-                if (!(filter.getValue() instanceof Date)) {
-                    if (!filter.getValue().toString().isEmpty()) {
-                        String tableName = "";
-                        switch (filter.getKey()) {
-                            case "messageId":
-                            case "mshRole":
-                            case "messageType":
-                            case "messageStatus":
-                            case "notificationStatus":
-                                result.append("log").append(".").append(filter.getKey()).append(" = '").append(filter.getValue()).append("'");
-                                break;
-                            case "fromPartyId":
-                                result.append("partyFrom.value").append(" = '").append(filter.getValue()).append("'");
-                                break;
-                            case "toPartyId":
-                                result.append("partyTo.value").append(" = '").append(filter.getValue()).append("'");
-                                break;
-                            case "refToMessageId":
-                                result.append("info.refToMessageId").append(" = '").append(filter.getValue()).append("'");
-                                break;
-                            case "originalSender":
-                                result.append("propsFrom.value").append(" = '").append(filter.getValue()).append("'");
-                                break;
-                            case "finalRecipient":
-                                result.append("propsTo.value").append(" = '").append(filter.getValue()).append("'");
-                                break;
-                            case "conversationId":
-                                result.append("message.collaborationInfo").append(".").append(filter.getKey()).append(" = '").append(filter.getValue()).append("'");
-                            default:
-                                break;
-                        }
-                    }
-                } else {
-                    if (!filter.getValue().toString().isEmpty()) {
-                        switch (filter.getKey()) {
-                            case "":
-                                break;
-                            case "receivedFrom":
-                                result.append("log.received").append(" >= '").append(filter.getValue()).append("'");
-                                break;
-                            case "receivedTo":
-                                result.append("log.received").append(" <= '").append(filter.getValue()).append("'");
-                                break;
-                        }
-                    }
-                }
-            }
-        }
+    public int countAllInfo(String column, boolean asc, HashMap<String, Object> filters) {
+        String filteredSignalMessageLogQuery = userMessageLogInfoFilter.filterUserMessageLogQuery(column, asc, filters);
+        TypedQuery<MessageLogInfo> typedQuery = em.createQuery(filteredSignalMessageLogQuery, MessageLogInfo.class);
+        TypedQuery<MessageLogInfo> queryParameterized = userMessageLogInfoFilter.applyParameters(typedQuery, filters);
+        List<MessageLogInfo> resultList = queryParameterized.getResultList();
+        return resultList.size();
+    }
 
-        if (column != null) {
-            String usedColumn = null;
-            switch(column) {
-                case "messageId":
-                case "mshRole":
-                case "messageType":
-                case "messageStatus":
-                case "notificationStatus":
-                case "deleted":
-                case "received":
-                default:
-                    usedColumn = "log." + column;
-                    break;
-                case "fromPartyId":
-                    usedColumn = "partyFrom.value";
-                    break;
-                case "toPartyId":
-                    usedColumn = "partyTo.value";
-                    break;
-                case "refToMessageId":
-                    usedColumn = "info.refToMessageId";
-                    break;
-                case "originalSender":
-                    usedColumn = "propsFrom.value";
-                    break;
-                case "finalRecipient":
-                    usedColumn = "propsTo.value";
-                    break;
-                case "conversationId":
-                    usedColumn = "message.collaborationInfo"+column;
-                    break;
-            }
-            if (asc) {
-                result.append(" order by ").append(usedColumn).append(" asc");
-            } else {
-                result.append(" order by ").append(usedColumn).append(" desc");
-            }
-        }
-
-        return result.toString();
-    }*/
-
-    public List<UserMessageLogInfo> findAllInfoPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
+    public List<MessageLogInfo> findAllInfoPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
         String filteredUserMessageLogQuery = userMessageLogInfoFilter.filterUserMessageLogQuery(column, asc, filters);
-        TypedQuery<UserMessageLogInfo> typedQuery = em.createQuery(filteredUserMessageLogQuery, UserMessageLogInfo.class);
-        TypedQuery<UserMessageLogInfo> queryParameterized = userMessageLogInfoFilter.applyParameters(typedQuery, filters);
+        TypedQuery<MessageLogInfo> typedQuery = em.createQuery(filteredUserMessageLogQuery, MessageLogInfo.class);
+        TypedQuery<MessageLogInfo> queryParameterized = userMessageLogInfoFilter.applyParameters(typedQuery, filters);
         queryParameterized.setFirstResult(from);
         queryParameterized.setMaxResults(max);
         return queryParameterized.getResultList();

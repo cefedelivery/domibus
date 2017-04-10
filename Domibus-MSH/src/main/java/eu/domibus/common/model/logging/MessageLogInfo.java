@@ -4,9 +4,11 @@ package eu.domibus.common.model.logging;
  * @author Tiago Miguel
  * @since 3.3
  */
-public class UserMessageLogInfo extends UserMessageLog {
+public class MessageLogInfo {
 
     private UserMessageLog userMessageLog;
+
+    private SignalMessageLog signalMessageLog;
 
     private String conversationId;
 
@@ -20,14 +22,19 @@ public class UserMessageLogInfo extends UserMessageLog {
 
     private String refToMessageId;
 
-    public UserMessageLogInfo() {
-        super();
-    }
 
-    public UserMessageLogInfo(UserMessageLog userMessageLog, String conversationId, String fromPartyId, String toPartyId, String originalSender, String finalRecipient, String refToMessageId) {
-    //public UserMessageLogInfo(UserMessageLog userMessageLog, String conversationId, String refToMessageId) {
+    public MessageLogInfo(UserMessageLog userMessageLog, String conversationId, String fromPartyId, String toPartyId, String originalSender, String finalRecipient, String refToMessageId) {
         this.userMessageLog = userMessageLog;
         this.conversationId = conversationId;
+        this.fromPartyId = fromPartyId;
+        this.toPartyId = toPartyId;
+        this.originalSender = originalSender;
+        this.finalRecipient = finalRecipient;
+        this.refToMessageId = refToMessageId;
+    }
+
+    public MessageLogInfo(SignalMessageLog signalMessageLog, String fromPartyId, String toPartyId, String originalSender, String finalRecipient, String refToMessageId) {
+        this.signalMessageLog = signalMessageLog;
         this.fromPartyId = fromPartyId;
         this.toPartyId = toPartyId;
         this.originalSender = originalSender;
@@ -41,6 +48,14 @@ public class UserMessageLogInfo extends UserMessageLog {
 
     public void setUserMessageLog(UserMessageLog userMessageLog) {
         this.userMessageLog = userMessageLog;
+    }
+
+    public SignalMessageLog getSignalMessageLog() {
+        return signalMessageLog;
+    }
+
+    public void setSignalMessageLog(SignalMessageLog signalMessageLog) {
+        this.signalMessageLog = signalMessageLog;
     }
 
     public String getConversationId() {

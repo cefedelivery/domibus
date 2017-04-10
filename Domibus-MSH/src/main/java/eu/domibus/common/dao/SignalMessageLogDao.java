@@ -1,9 +1,12 @@
 package eu.domibus.common.dao;
 
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.SignalMessageLog;
+import eu.domibus.common.model.logging.SignalMessageLogInfoFilter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
@@ -21,6 +24,9 @@ import java.util.List;
  */
 @Repository
 public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
+
+    @Autowired
+    private SignalMessageLogInfoFilter signalMessageLogInfoFilter;
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SignalMessageLogDao.class);
 
@@ -77,6 +83,23 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         query.setFirstResult(from);
         query.setMaxResults(max);
         return query.getResultList();
+    }
+
+    public int countAllInfo(String column, boolean asc, HashMap<String, Object> filters) {
+        String filteredSignalMessageLogQuery = signalMessageLogInfoFilter.filterSignalMessageLogQuery(column, asc, filters);
+        TypedQuery<MessageLogInfo> typedQuery = em.createQuery(filteredSignalMessageLogQuery, MessageLogInfo.class);
+        TypedQuery<MessageLogInfo> queryParameterized = signalMessageLogInfoFilter.applyParameters(typedQuery, filters);
+        List<MessageLogInfo> resultList = queryParameterized.getResultList();
+        return resultList.size();
+    }
+
+    public List<MessageLogInfo> findAllInfoPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
+        String filteredSignalMessageLogQuery = signalMessageLogInfoFilter.filterSignalMessageLogQuery(column, asc, filters);
+        TypedQuery<MessageLogInfo> typedQuery = em.createQuery(filteredSignalMessageLogQuery, MessageLogInfo.class);
+        TypedQuery<MessageLogInfo> queryParameterized = signalMessageLogInfoFilter.applyParameters(typedQuery, filters);
+        queryParameterized.setFirstResult(from);
+        queryParameterized.setMaxResults(max);
+        return queryParameterized.getResultList();
     }
 
 }
