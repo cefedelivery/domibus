@@ -1,0 +1,112 @@
+<div>
+  <div class="messageFilter">
+    <md-card style="margin:0;padding:10px;">
+      <md-card-content>
+        <h2 style="margin:0;">Message Filter</h2>
+
+        <form name="messageFilterForm" #messageFilterForm="ngForm">
+          <table class="pluginRow">
+            <tr>
+              <td>
+                <md-select placeholder="Plugin" [(ngModel)]="plugin" name="plugin">
+                  <md-option [value]="''">
+                  </md-option>
+                  <md-option *ngFor="let plugin of plugins" [value]="plugin">
+                    {{plugin}}
+                  </md-option>
+                </md-select>
+              </td>
+            </tr>
+          </table>
+
+          <ngx-datatable
+            id="messageFilterTable"
+            class="material striped"
+            [rows]="rows"
+            [columnMode]="'force'"
+            [headerHeight]="50"
+            [footerHeight]="50"
+            [rowHeight]="'auto'"
+            [scrollbarH]="true"
+            [externalPaging]="true"
+            [externalSorting]="true"
+            [loadingIndicator]="loading"
+            [count]="count"
+            [offset]="offset"
+            [limit]="pageSize"
+            [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
+            (page)='onPage($event)'
+            (sort)="onSort($event)">
+            <ngx-datatable-column name="Plugin" >
+              <template let-column="column">
+                {{column.name}}
+              </template>
+              <template let-value="value" ngx-datatable-cell-template >
+                <span class="text-select">{{value}}</span>
+              </template>
+            </ngx-datatable-column>
+            <ngx-datatable-column name="From" >
+              <template let-column="column">
+                {{column.name}}
+              </template>
+              <template let-value="value" ngx-datatable-cell-template>
+                <span class="text-select">{{value}}</span>
+              </template>
+            </ngx-datatable-column>
+            <ngx-datatable-column name="To" >
+              <template let-column="column">
+                {{column.name}}
+              </template>
+              <template let-value="value" ngx-datatable-cell-template>
+                <span class="text-select">{{value}}</span>
+              </template>
+            </ngx-datatable-column>
+            <ngx-datatable-column name="Action" >
+              <template let-column="column">
+                {{column.name}}
+              </template>
+              <template let-value="value" ngx-datatable-cell-template>
+                <span class="text-select">{{value}}</span>
+              </template>
+            </ngx-datatable-column>
+            <ngx-datatable-column name="Service" >
+              <template let-column="column">
+                {{column.name}}
+              </template>
+              <template let-value="value" ngx-datatable-cell-template>
+                <span class="text-select">{{value}}</span>
+              </template>
+            </ngx-datatable-column>
+          </ngx-datatable>
+
+          <table class="buttonsRow">
+            <tr>
+              <td>
+                <!-- CANCEL BUTTON -->
+                <button md-raised-button color="primary" disabled>
+                  <md-icon>cancel</md-icon>
+                  <span>Cancel</span>
+                </button>
+                <!-- SAVE BUTTON -->
+                <button md-raised-button color="primary" disabled>
+                  <md-icon>save</md-icon>
+                  <span>Save</span>
+                </button>
+                <!-- NEW BUTTON -->
+                <button md-raised-button color="primary">
+                  <md-icon>add</md-icon>
+                  <span>New</span>
+                </button>
+                <!-- DELETE BUTTON -->
+                <button md-raised-button color="primary" disabled>
+                  <md-icon>delete</md-icon>
+                  <span>Delete</span>
+                </button>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </md-card-content>
+    </md-card>
+  </div>
+</div>
