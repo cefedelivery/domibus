@@ -1,12 +1,15 @@
 package eu.domibus.plugin.webService.impl;
 
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
-import eu.domibus.common.ErrorResult;
+import eu.domibus.common.*;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.webService.generated.*;
+import eu.domibus.plugin.webService.generated.ErrorCode;
+import eu.domibus.plugin.webService.generated.ErrorResultImpl;
+import eu.domibus.plugin.webService.generated.MessageStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -227,6 +230,11 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
     }
 
     public MessageStatus transformFromMessageStatus(eu.domibus.common.MessageStatus messageStatus) {
+        if(eu.domibus.common.MessageStatus.DOWNLOADED == messageStatus) {
+            //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
+            LOGGER.debug("Changing DOWNLOADED status to RECEIVED");
+            messageStatus = eu.domibus.common.MessageStatus.RECEIVED;
+        }
         return MessageStatus.fromValue(messageStatus.name());
 
     }

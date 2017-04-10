@@ -47,10 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -150,16 +147,42 @@ public class AdminGUIController {
         model.addObject("beginIndex", begin);
         model.addObject("endIndex", end);
         if (page <= pages) {
+            //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
+            convertDownloadedStatusToReceived(messageLogEntries);
             model.addObject("table", messageLogEntries);
         }
         model.addObject("title", "Domibus - Messages Log: ");
-        model.addObject("messagestatusvalues", MessageStatus.values());
+
+        List<MessageStatus> messageStatuses = getMessageStatuses();
+
+        model.addObject("messagestatusvalues", messageStatuses);
         model.addObject("notificationstatusvalues", NotificationStatus.values());
         model.addObject("mshrolevalues", MSHRole.values());
         model.addObject("messagetypevalues", MessageType.values());
         model.setViewName("messagelog");
         return model;
 
+    }
+
+    //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
+    protected void convertDownloadedStatusToReceived(List<? extends MessageLog> messageLogEntries) {
+        if(messageLogEntries == null) {
+            return;
+        }
+        for (MessageLog messageLogEntry : messageLogEntries) {
+            if(MessageStatus.DOWNLOADED == messageLogEntry.getMessageStatus()) {
+                messageLogEntry.setMessageStatus(MessageStatus.RECEIVED);
+            }
+        }
+    }
+
+
+    protected List<MessageStatus> getMessageStatuses() {
+        List<MessageStatus> messageStatuses = new ArrayList<>();
+        messageStatuses.addAll(Arrays.asList(MessageStatus.values()));
+        //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
+        messageStatuses.remove(MessageStatus.DOWNLOADED);
+        return messageStatuses;
     }
 
     @RequestMapping(value = {"/home/errorlog**"}, method = GET)
