@@ -1,0 +1,10 @@
+/*textarea {*/
+  /*max-width: 100%;*/
+  /*min-width: 100%;*/
+  /*height: 450px;*/
+/*}*/
+.pmodes-text-area {
+  min-width: 100%;
+  max-width: 100%;
+  min-height: 450px;
+}
