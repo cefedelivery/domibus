@@ -8,6 +8,8 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.MessageLogInfo;
+import eu.domibus.common.model.logging.SignalMessageLog;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -122,6 +124,19 @@ public class MessageLogResource {
         return result;
     }
 
+    private void setSpecificMessageLogInfo(MessageLogRO messageLogRO, MessageLog messageLog) {
+        messageLogRO.setMessageId(messageLog.getMessageId());
+        messageLogRO.setMessageStatus(messageLog.getMessageStatus());
+        messageLogRO.setNotificationStatus(messageLog.getNotificationStatus());
+        messageLogRO.setMshRole(messageLog.getMshRole());
+        messageLogRO.setMessageType(messageLog.getMessageType());
+        messageLogRO.setDeleted(messageLog.getDeleted());
+        messageLogRO.setReceived(messageLog.getReceived());
+        messageLogRO.setSendAttempts(messageLog.getSendAttempts());
+        messageLogRO.setSendAttemptsMax(messageLog.getSendAttemptsMax());
+        messageLogRO.setNextAttempt(messageLog.getNextAttempt());
+    }
+
     private MessageLogRO convertMessageLogInfo(MessageLogInfo messageLogInfo) {
         if(messageLogInfo == null) {
             return null;
@@ -134,64 +149,15 @@ public class MessageLogResource {
         result.setOriginalSender(messageLogInfo.getOriginalSender());
         result.setFinalRecipient(messageLogInfo.getFinalRecipient());
         result.setRefToMessageId(messageLogInfo.getRefToMessageId());
-        if (messageLogInfo.getUserMessageLog() != null) {
-            result.setMessageId(messageLogInfo.getUserMessageLog().getMessageId());
-            result.setMessageStatus(messageLogInfo.getUserMessageLog().getMessageStatus());
-            result.setNotificationStatus(messageLogInfo.getUserMessageLog().getNotificationStatus());
-            result.setMshRole(messageLogInfo.getUserMessageLog().getMshRole());
-            result.setMessageType(messageLogInfo.getUserMessageLog().getMessageType());
-            result.setDeleted(messageLogInfo.getUserMessageLog().getDeleted());
-            result.setReceived(messageLogInfo.getUserMessageLog().getReceived());
-            result.setSendAttempts(messageLogInfo.getUserMessageLog().getSendAttempts());
-            result.setSendAttemptsMax(messageLogInfo.getUserMessageLog().getSendAttemptsMax());
-            result.setNextAttempt(messageLogInfo.getUserMessageLog().getNextAttempt());
-        } else if(messageLogInfo.getSignalMessageLog() != null) {
-            result.setMessageId(messageLogInfo.getSignalMessageLog().getMessageId());
-            result.setMessageStatus(messageLogInfo.getSignalMessageLog().getMessageStatus());
-            result.setNotificationStatus(messageLogInfo.getSignalMessageLog().getNotificationStatus());
-            result.setMshRole(messageLogInfo.getSignalMessageLog().getMshRole());
-            result.setMessageType(messageLogInfo.getSignalMessageLog().getMessageType());
-            result.setDeleted(messageLogInfo.getSignalMessageLog().getDeleted());
-            result.setReceived(messageLogInfo.getSignalMessageLog().getReceived());
-            result.setSendAttempts(messageLogInfo.getSignalMessageLog().getSendAttempts());
-            result.setSendAttemptsMax(messageLogInfo.getSignalMessageLog().getSendAttemptsMax());
-            result.setNextAttempt(messageLogInfo.getSignalMessageLog().getNextAttempt());
+        UserMessageLog userMessageLog = messageLogInfo.getUserMessageLog();
+        SignalMessageLog signalMessageLog = messageLogInfo.getSignalMessageLog();
+        if (userMessageLog != null) {
+            setSpecificMessageLogInfo(result, userMessageLog);
+        } else if(signalMessageLog != null) {
+            setSpecificMessageLogInfo(result, signalMessageLog);
         } else {
             LOGGER.error("Message Log Info doesn't contain neither User nor Signal message.");
         }
         return result;
     }
-
-    /*protected List<MessageLogRO> convert(List<? extends MessageLog> messageLogEntries) {
-        List<MessageLogRO> result = new ArrayList<>();
-        for(MessageLog messageLogEntry : messageLogEntries) {
-            final MessageLogRO messageLogRO = convert(messageLogEntry);
-            if(messageLogRO != null) {
-                result.add(messageLogRO);
-            }
-        }
-        return result;
-    }
-
-    private MessageLogRO convert(MessageLog messageLogEntry) {
-        if(messageLogEntry == null) {
-            return null;
-        }
-
-        MessageLogRO result = new MessageLogRO();
-        result.setMessageId(messageLogEntry.getMessageId());
-        //result.setConversationId("conversation1");
-        //result.setFromPartyId("fromPartyId1");
-        //result.setToPartyId(messageLogEntry.g());
-        result.setMessageStatus(messageLogEntry.getMessageStatus());
-        result.setNotificationStatus(messageLogEntry.getNotificationStatus());
-        result.setMshRole(messageLogEntry.getMshRole());
-        result.setMessageType(messageLogEntry.getMessageType());
-        result.setDeleted(messageLogEntry.getDeleted());
-        result.setReceived(messageLogEntry.getReceived());
-        result.setSendAttempts(messageLogEntry.getSendAttempts());
-        result.setSendAttemptsMax(messageLogEntry.getSendAttemptsMax());
-        result.setNextAttempt(messageLogEntry.getNextAttempt());
-        return result;
-    }*/
 }
