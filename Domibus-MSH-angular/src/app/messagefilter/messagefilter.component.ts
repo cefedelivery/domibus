@@ -16,8 +16,34 @@ export class MessageFilterComponent {
 
   plugins: Array<String>;
 
+  enableCancel = false;
+  enableSave = false;
+  enableDelete = false;
+
   constructor(private http: Http, private alertService: AlertService) {
 
+  }
+
+  buttonNew() {
+    this.enableCancel = true;
+    this.enableSave = true;
+    this.enableDelete = false;
+  }
+
+  buttonCancel() {
+    this.enableCancel = false;
+    this.enableSave = false;
+    this.enableDelete = false;
+  }
+
+  buttonSave() {
+    this.enableCancel = false;
+    this.enableSave = false;
+    this.enableDelete = false;
+  }
+
+  buttonDelete() {
+    this.enableDelete = false;
   }
 
 }
