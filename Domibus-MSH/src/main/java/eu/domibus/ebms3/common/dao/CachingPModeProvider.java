@@ -27,6 +27,7 @@ import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.messaging.XmlProcessingException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.transaction.annotation.Propagation;
@@ -78,7 +79,7 @@ public class CachingPModeProvider extends PModeProvider {
                             if (process.getAgreement() != null && process.getAgreement().getName().equals(agreementName)
                                     || (agreementName.equals(OPTIONAL_AND_EMPTY) && process.getAgreement() == null)
                                     // Please notice that this is only for backward compatibility and will be removed ASAP!
-                                    || (agreementName.equals(OPTIONAL_AND_EMPTY) && process.getAgreement() != null && process.getAgreement().getValue().equals(""))
+                                    || (agreementName.equals(OPTIONAL_AND_EMPTY) && process.getAgreement() != null && StringUtils.isEmpty(process.getAgreement().getValue()))
                                     ) {
                                 /**
                                  * The Process is a candidate because either has an Agreement and its name matches the Agreement name found previously
