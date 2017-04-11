@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class MessageLogInfoFilter {
 
-    protected String returnCorrectColumn(String originalColumn) {
+    protected String getHQLKey(String originalColumn) {
         switch(originalColumn) {
             case "messageId":
                 return "log.messageId";
@@ -56,12 +56,12 @@ public class MessageLogInfoFilter {
             if (filter.getValue() != null) {
                 result.append(" and ");
                 if (!(filter.getValue() instanceof Date)) {
-                    if (!filter.getValue().toString().isEmpty()) {
-                        String tableName = returnCorrectColumn(filter.getKey());
+                    if (!(filter.getValue().toString().isEmpty())) {
+                        String tableName = getHQLKey(filter.getKey());
                         result.append(tableName).append(" = :").append(filter.getKey());
                     }
                 } else {
-                    if (!filter.getValue().toString().isEmpty()) {
+                    if (!(filter.getValue().toString().isEmpty())) {
                         switch (filter.getKey()) {
                             case "":
                                 break;
@@ -78,7 +78,7 @@ public class MessageLogInfoFilter {
         }
 
         if (column != null) {
-            String usedColumn = returnCorrectColumn(column);
+            String usedColumn = getHQLKey(column);
             if (asc) {
                 result.append(" order by ").append(usedColumn).append(" asc");
             } else {

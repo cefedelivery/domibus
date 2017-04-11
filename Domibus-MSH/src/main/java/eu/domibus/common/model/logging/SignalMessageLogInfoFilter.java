@@ -1,10 +1,9 @@
 package eu.domibus.common.model.logging;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -15,17 +14,17 @@ import java.util.Objects;
 public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
 
     @Override
-    protected String returnCorrectColumn(String originalColumn) {
-        if(Objects.equals(originalColumn, "conversationId")) {
+    protected String getHQLKey(String originalColumn) {
+        if(StringUtils.equals(originalColumn, "conversationId")) {
             return "";
         } else {
-            return super.returnCorrectColumn(originalColumn);
+            return super.getHQLKey(originalColumn);
         }
     }
 
     @Override
     protected StringBuilder filterQuery(String query, String column, boolean asc, HashMap<String, Object> filters) {
-        if(filters.get("conversationId") != "") {
+        if(StringUtils.isNotEmpty(String.valueOf(filters.get("conversationId")))) {
             filters.put("conversationId",null);
         }
         return super.filterQuery(query,column,asc,filters);
