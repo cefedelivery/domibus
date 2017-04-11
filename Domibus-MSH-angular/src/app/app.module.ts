@@ -32,6 +32,7 @@ import {MessageLogComponent} from "./messagelog/messagelog.component";
 import {TruststoreComponent} from './truststore/truststore.component';
 import {PmodeUploadComponent} from './pmode-upload/pmode-upload.component';
 import {UploadService} from "./upload.service";
+import {FileSelectDirective} from 'ng2-file-upload';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -50,7 +51,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     IsAuthorized,
     TruststoreComponent,
     PModeComponent,
-    PmodeUploadComponent
+    PmodeUploadComponent,
+    FileSelectDirective
   ],
   entryComponents: [
     AppComponent,

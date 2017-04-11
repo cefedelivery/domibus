@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 /**
- * @author Cosmin Baciu
+ * @author Mircea Musat
  * @since 3.3
  */
 @RestController
@@ -27,12 +27,12 @@ public class PModeResource {
     @Autowired
     private PModeProvider pModeProvider;
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public String downloadPmodes() {
         return "pmodetest";
     }
 
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public String uploadPmodes(@RequestParam("pmode") MultipartFile pmode) {
         if (pmode.isEmpty()) {
             return "Failed to upload the PMode file since it was empty.";

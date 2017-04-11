@@ -1,19 +1,14 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.wss4j.common.crypto.CryptoService;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 /**
- * @author Cosmin Baciu
+ * @author Mircea Musat
  * @since 3.3
  */
 @RestController
