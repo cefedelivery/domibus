@@ -568,19 +568,19 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         String selector = "MESSAGE_ID='" + customMessageId + "'";
 
         InternalJmsMessage internalJmsMessage = null;
-//        ObjectName destinationName = null;
-//        try {
-//            for (InternalJMSDestination internalJmsDestination : getInternalJMSDestinations(removeJmsModule(source))) {
-//                destinationName = internalJmsDestination.getProperty(PROPERTY_OBJECT_NAME);
-//                internalJmsMessage = getMessageFromDestinationUsingCustomSelector(destinationName, selector);
-//                if (internalJmsMessage != null) break;
-//            }
-//            if (internalJmsMessage != null) {
-//                deleteMessages(destinationName, selector);
-//            }
-//        } catch (Exception ex) {
-//            throw new InternalJMSException("Failed to consume message [" + customMessageId + "] from source [" + source + "]", ex);
-//        }
+        ObjectName destinationName = null;
+        try {
+            for (InternalJMSDestination internalJmsDestination : getInternalJMSDestinations(removeJmsModule(source))) {
+                destinationName = internalJmsDestination.getProperty(PROPERTY_OBJECT_NAME);
+                internalJmsMessage = getMessageFromDestinationUsingCustomSelector(destinationName, selector);
+                if (internalJmsMessage != null) break;
+            }
+            if (internalJmsMessage != null) {
+                deleteMessages(destinationName, selector);
+            }
+        } catch (Exception ex) {
+            throw new InternalJMSException("Failed to consume message [" + customMessageId + "] from source [" + source + "]", ex);
+        }
         return internalJmsMessage;
     }
 
