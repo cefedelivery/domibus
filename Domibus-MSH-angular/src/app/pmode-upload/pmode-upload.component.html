@@ -2,21 +2,21 @@
 
 <div md-dialog-content>
   <input type="file" ng2FileSelect [uploader]="uploader"/>
-
-  <p-fileUpload name="myfile[]" url="/rest/pmode"></p-fileUpload>
-  <!--<input type="file" name="fileToUpload" id="fileToUpload">-->
 </div>
 
 <div md-dialog-actions>
 
   <div *ngFor="let item of uploader.queue">
-    <button md-raised-button color="primary" (click)="item.upload()"
-            [disabled]="item.isReady || item.isUploading || item.isSuccess">Upload
+    <button md-raised-button color="primary" (click)="item.upload()" [disabled]="item.isReady || item.isUploading || item.isSuccess">Upload
     </button>
   </div>
 
   <div>
     <button md-raised-button color="primary" (click)="dialogRef.close('Cancel')">Exit</button>
   </div>
+
+</div>
+
+<div>
 
 </div>

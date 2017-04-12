@@ -6,10 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -19,7 +16,7 @@ import java.util.List;
  * @since 3.3
  */
 @RestController
-@RequestMapping(value = "/rest/pmode")
+@RequestMapping
 public class PModeResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(PModeResource.class);
@@ -27,13 +24,13 @@ public class PModeResource {
     @Autowired
     private PModeProvider pModeProvider;
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = "/rest/pmode", method = RequestMethod.GET)
     public String downloadPmodes() {
         return "pmodetest";
     }
 
-    @RequestMapping(method = RequestMethod.POST)
-    public String uploadPmodes(@RequestParam("pmode") MultipartFile pmode) {
+    @RequestMapping(value = "/rest/pmode", method = RequestMethod.POST)
+    public String uploadPmodes(@RequestPart("file") MultipartFile pmode) {
         if (pmode.isEmpty()) {
             return "Failed to upload the PMode file since it was empty.";
         }

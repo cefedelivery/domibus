@@ -1,7 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {MdDialogRef} from "@angular/material";
-import {FileUploadModule} from 'primeng/primeng';
-
 import {FileUploader, FileUploaderOptions} from 'ng2-file-upload'
 
 
@@ -11,7 +9,11 @@ import {FileUploader, FileUploaderOptions} from 'ng2-file-upload'
   styleUrls: ['./pmode-upload.component.css']
 })
 export class PmodeUploadComponent implements OnInit {
-  public options: FileUploaderOptions = {url:"/rest/pmode"};
+  public options: FileUploaderOptions = {
+    url: "/rest/pmode",
+    itemAlias: "file",
+    removeAfterUpload: true,
+  };
   public uploader: FileUploader = new FileUploader(this.options);
 
   constructor(public dialogRef: MdDialogRef<PmodeUploadComponent>) {
