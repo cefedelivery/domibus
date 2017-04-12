@@ -27,6 +27,7 @@ import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.messaging.XmlProcessingException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.transaction.annotation.Propagation;
@@ -72,13 +73,13 @@ public class CachingPModeProvider extends PModeProvider {
         final List<LegConfiguration> candidates = new ArrayList<>();
         for (final Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
             for (final Party party : process.getInitiatorParties()) {
-                if (party.getName().equals(senderParty)) {
+                if (StringUtils.equals(party.getName(), senderParty)) {
                     for (final Party responder : process.getResponderParties()) {
-                        if (responder.getName().equals(receiverParty)) {
-                            if (process.getAgreement() != null && process.getAgreement().getName().equals(agreementName)
-                                    || (agreementName.equals(OPTIONAL_AND_EMPTY) && process.getAgreement() == null)
+                        if (StringUtils.equals(responder.getName(), receiverParty)) {
+                            if (process.getAgreement() != null && StringUtils.equals(process.getAgreement().getName(), agreementName)
+                                    || (StringUtils.equals(agreementName, OPTIONAL_AND_EMPTY) && process.getAgreement() == null)
                                     // Please notice that this is only for backward compatibility and will be removed ASAP!
-                                    || (agreementName.equals(OPTIONAL_AND_EMPTY) && process.getAgreement() != null && process.getAgreement().getValue().equals(""))
+                                    || (StringUtils.equals(agreementName, OPTIONAL_AND_EMPTY) && process.getAgreement() != null && StringUtils.isEmpty(process.getAgreement().getValue()))
                                     ) {
                                 /**
                                  * The Process is a candidate because either has an Agreement and its name matches the Agreement name found previously
@@ -95,7 +96,7 @@ public class CachingPModeProvider extends PModeProvider {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
         }
         for (final LegConfiguration candidate : candidates) {
-            if (candidate.getService().getName().equals(service) && candidate.getAction().getName().equals(action)) {
+            if (StringUtils.equals(candidate.getService().getName(), service) && StringUtils.equals(candidate.getAction().getName(), action)) {
                 return candidate.getName();
             }
         }
@@ -105,7 +106,7 @@ public class CachingPModeProvider extends PModeProvider {
     @Override
     protected String findActionName(final String action) throws EbMS3Exception {
         for (final Action action1 : this.getConfiguration().getBusinessProcesses().getActions()) {
-            if (action1.getValue().equals(action)) {
+            if (StringUtils.equals(action1.getValue(), action)) {
                 return action1.getName();
             }
         }
@@ -115,8 +116,8 @@ public class CachingPModeProvider extends PModeProvider {
     @Override
     protected String findServiceName(final eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception {
         for (final Service service1 : this.getConfiguration().getBusinessProcesses().getServices()) {
-            if ((service1.getServiceType().equals(service.getType()) || (!hasLength(service1.getServiceType()) && !hasLength(service.getType()))))
-                if (service1.getValue().equals(service.getValue())) {
+            if ((StringUtils.equals(service1.getServiceType(), service.getType()) || (!hasLength(service1.getServiceType()) && !hasLength(service.getType()))))
+                if (StringUtils.equals(service1.getValue(), service.getValue())) {
                     return service1.getName();
                 }
         }
@@ -145,7 +146,7 @@ public class CachingPModeProvider extends PModeProvider {
                         identifierPartyIdType = identifier.getPartyIdType().getValue();
                     }
 
-                    if (partyIdType.equals(identifierPartyIdType) && id.getValue().equals(identifier.getPartyId())) {
+                    if (StringUtils.equals(partyIdType, identifierPartyIdType) && StringUtils.equals(id.getValue(), identifier.getPartyId())) {
                         return party.getName();
                     }
                 }
@@ -161,8 +162,8 @@ public class CachingPModeProvider extends PModeProvider {
         }
 
         for (final Agreement agreement : this.getConfiguration().getBusinessProcesses().getAgreements()) {
-            if (((agreementRef.getType() == null && "".equals(agreement.getType())) || agreement.getType().equals(agreementRef.getType()))
-                    && agreementRef.getValue().equals(agreement.getValue())) {
+            if (((agreementRef.getType() == null && "".equals(agreement.getType())) || StringUtils.equals(agreement.getType(), agreementRef.getType()))
+                    && StringUtils.equals(agreementRef.getValue(), agreement.getValue())) {
                 return agreement.getName();
             }
         }
@@ -173,7 +174,7 @@ public class CachingPModeProvider extends PModeProvider {
     public Party getSenderParty(final String pModeKey) {
         final String partyKey = this.getSenderPartyNameFromPModeKey(pModeKey);
         for (final Party party : this.getConfiguration().getBusinessProcesses().getParties()) {
-            if (party.getName().equals(partyKey)) {
+            if (StringUtils.equals(party.getName(), partyKey)) {
                 return party;
             }
         }
@@ -184,7 +185,7 @@ public class CachingPModeProvider extends PModeProvider {
     public Party getReceiverParty(final String pModeKey) {
         final String partyKey = this.getReceiverPartyNameFromPModeKey(pModeKey);
         for (final Party party : this.getConfiguration().getBusinessProcesses().getParties()) {
-            if (party.getName().equals(partyKey)) {
+            if (StringUtils.equals(party.getName(), partyKey)) {
                 return party;
             }
         }
@@ -195,7 +196,7 @@ public class CachingPModeProvider extends PModeProvider {
     public Service getService(final String pModeKey) {
         final String serviceKey = this.getServiceNameFromPModeKey(pModeKey);
         for (final Service service : this.getConfiguration().getBusinessProcesses().getServices()) {
-            if (service.getName().equals(serviceKey)) {
+            if (StringUtils.equals(service.getName(), serviceKey)) {
                 return service;
             }
         }
@@ -206,7 +207,7 @@ public class CachingPModeProvider extends PModeProvider {
     public Action getAction(final String pModeKey) {
         final String actionKey = this.getActionNameFromPModeKey(pModeKey);
         for (final Action action : this.getConfiguration().getBusinessProcesses().getActions()) {
-            if (action.getName().equals(actionKey)) {
+            if (StringUtils.equals(action.getName(), actionKey)) {
                 return action;
             }
         }
@@ -217,7 +218,7 @@ public class CachingPModeProvider extends PModeProvider {
     public Agreement getAgreement(final String pModeKey) {
         final String agreementKey = this.getAgreementRefNameFromPModeKey(pModeKey);
         for (final Agreement agreement : this.getConfiguration().getBusinessProcesses().getAgreements()) {
-            if (agreement.getName().equals(agreementKey)) {
+            if (StringUtils.equals(agreement.getName(), agreementKey)) {
                 return agreement;
             }
         }
@@ -228,7 +229,7 @@ public class CachingPModeProvider extends PModeProvider {
     public LegConfiguration getLegConfiguration(final String pModeKey) {
         final String legKey = this.getLegConfigurationNameFromPModeKey(pModeKey);
         for (final LegConfiguration legConfiguration : this.getConfiguration().getBusinessProcesses().getLegConfigurations()) {
-            if (legConfiguration.getName().equals(legKey)) {
+            if (StringUtils.equals(legConfiguration.getName(), legKey)) {
                 return legConfiguration;
             }
         }
@@ -238,7 +239,7 @@ public class CachingPModeProvider extends PModeProvider {
     @Override
     public boolean isMpcExistant(final String mpc) {
         for (final Mpc mpc1 : this.getConfiguration().getMpcs()) {
-            if (mpc1.getName().equals(mpc)) {
+            if (StringUtils.equals(mpc1.getName(), mpc)) {
                 return true;
             }
         }
@@ -248,7 +249,7 @@ public class CachingPModeProvider extends PModeProvider {
     @Override
     public int getRetentionDownloadedByMpcName(final String mpcName) {
         for (final Mpc mpc1 : this.getConfiguration().getMpcs()) {
-            if (mpc1.getName().equals(mpcName)) {
+            if (StringUtils.equals(mpc1.getName(), mpcName)) {
                 return mpc1.getRetentionDownloaded();
             }
         }
@@ -261,7 +262,7 @@ public class CachingPModeProvider extends PModeProvider {
     @Override
     public int getRetentionDownloadedByMpcURI(final String mpcURI) {
         for (final Mpc mpc1 : this.getConfiguration().getMpcs()) {
-            if (mpc1.getQualifiedName().equals(mpcURI)) {
+            if (StringUtils.equals(mpc1.getQualifiedName(), mpcURI)) {
                 return mpc1.getRetentionDownloaded();
             }
         }
@@ -274,7 +275,7 @@ public class CachingPModeProvider extends PModeProvider {
     @Override
     public int getRetentionUndownloadedByMpcName(final String mpcName) {
         for (final Mpc mpc1 : this.getConfiguration().getMpcs()) {
-            if (mpc1.getName().equals(mpcName)) {
+            if (StringUtils.equals(mpc1.getName(), mpcName)) {
                 return mpc1.getRetentionUndownloaded();
             }
         }
@@ -287,7 +288,7 @@ public class CachingPModeProvider extends PModeProvider {
     @Override
     public int getRetentionUndownloadedByMpcURI(final String mpcURI) {
         for (final Mpc mpc1 : this.getConfiguration().getMpcs()) {
-            if (mpc1.getQualifiedName().equals(mpcURI)) {
+            if (StringUtils.equals(mpc1.getQualifiedName(), mpcURI)) {
                 return mpc1.getRetentionUndownloaded();
             }
         }
