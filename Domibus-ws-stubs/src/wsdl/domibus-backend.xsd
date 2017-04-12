@@ -135,7 +135,7 @@
             <xsd:enumeration value="RECEIVED"/>
             <xsd:enumeration value="RECEIVED_WITH_WARNINGS"/>
             <xsd:enumeration value="DELETED"/>
-            <xsd:enumeration value="DOWNLOADED"/>
+            <!--<xsd:enumeration value="DOWNLOADED"/>-->
         </xsd:restriction>
     </xsd:simpleType>
 
