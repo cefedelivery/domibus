@@ -27,8 +27,10 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.impl.io.EmptyInputStream;
 
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.util.ByteArrayDataSource;
 import javax.persistence.*;
@@ -181,9 +183,18 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
 
     @PostLoad
     private void loadBinaray() {
+        LOG.info("In loadBinary");
         if (fileName != null) {
+            LOG.info("fileName != null");
+            File f = new File(fileName);
+
+            if(f.length() == 0) {
+                LOG.info("File length is 0");
+            }
             payloadDatahandler = new DataHandler(new FileDataSource(fileName));
         } else {
+            LOG.info("In loadBinary");
+            LOG.info("In loadBinary, binarydata is " + binaryData);
             payloadDatahandler = new DataHandler(new ByteArrayDataSource(binaryData, mime));
         }
     }

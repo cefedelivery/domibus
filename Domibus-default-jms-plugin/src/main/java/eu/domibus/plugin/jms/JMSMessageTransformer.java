@@ -132,7 +132,10 @@ public class JMSMessageTransformer
             for (final Submission.Payload p : submission.getPayloads()) {
 
                 if (p.isInBody()) {
-                    messageOut.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
+                    if(p.getPayloadDatahandler().getInputStream().available() > 0 ) {
+                        messageOut.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
+                    }
+
                     messageOut.setStringProperty(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, 1), findMime(p.getPayloadProperties()));
                     messageOut.setStringProperty(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, 1), p.getContentId());
                     if (p.getDescription() != null) {
@@ -143,7 +146,9 @@ public class JMSMessageTransformer
                     final String payDescrip = String.valueOf(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, counter));
                     final String propPayload = String.valueOf(MessageFormat.format(PAYLOAD_NAME_FORMAT, counter));
                     final String payMimeTypeProp = String.valueOf(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, counter));
-                    messageOut.setBytes(propPayload, IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
+                    if(p.getPayloadDatahandler().getInputStream().available() > 0 ) {
+                        messageOut.setBytes(propPayload, IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
+                    }
                     messageOut.setStringProperty(payMimeTypeProp, findMime(p.getPayloadProperties()));
                     messageOut.setStringProperty(payContID, p.getContentId());
 

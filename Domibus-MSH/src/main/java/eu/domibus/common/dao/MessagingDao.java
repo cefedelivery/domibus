@@ -59,7 +59,9 @@ public class MessagingDao extends BasicDao<Messaging> {
         final TypedQuery<UserMessage> query = this.em.createNamedQuery("Messaging.findUserMessageByMessageId", UserMessage.class);
         query.setParameter("MESSAGE_ID", messageId);
 
-        return DataAccessUtils.singleResult(query.getResultList());
+        UserMessage userMessage = DataAccessUtils.singleResult(query.getResultList());
+        LOG.info("Found userMessage: " + userMessage.toString());
+        return userMessage;
     }
 
     public Messaging findMessageByMessageId(final String messageId) {
