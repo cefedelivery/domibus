@@ -61,8 +61,8 @@
         <prop key="domibus.certificate.validation.enabled">true</prop>
         <!-- regular expression used for identifying the internal queues in the Admin Page -->
         <prop key="domibus.jms.internalQueue.expression">.*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*</prop>
-        <!--<prop key="domibus.jmx.user">jmsManager</prop>-->
-        <!--<prop key="domibus.jmx.password">jms_Manager1</prop>-->
+        <prop key="domibus.jmx.user">jmsManager</prop>
+        <prop key="domibus.jmx.password">jms_Manager1</prop>
 
         <!--Timeout values for communication between the access points -->
         <!--ConnectionTimeOut - Specifies the amount of time, in milliseconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite.-->
