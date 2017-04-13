@@ -192,10 +192,14 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
                 LOG.info("File length is 0");
             }
             payloadDatahandler = new DataHandler(new FileDataSource(fileName));
+            LOG.info("payloadDatahandler: " + payloadDatahandler);
         } else {
-            LOG.info("In loadBinary");
             LOG.info("In loadBinary, binarydata is " + binaryData);
-            payloadDatahandler = new DataHandler(new ByteArrayDataSource(binaryData, mime));
+            if(binaryData == null) {
+                payloadDatahandler = null;
+            } else {
+                payloadDatahandler = new DataHandler(new ByteArrayDataSource(binaryData, mime));
+            }
         }
     }
 
