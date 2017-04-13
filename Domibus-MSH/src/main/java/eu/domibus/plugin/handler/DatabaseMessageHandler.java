@@ -140,7 +140,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 }
             }
         }
-        LOG.info("transformer.transformFromMessaging UserMessage = " + userMessage.toString());
         return transformer.transformFromMessaging(userMessage);
     }
 

@@ -43,7 +43,6 @@ import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 
@@ -250,6 +249,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             try {
                 if(extPartInfo.getPayloadDatahandler() != null ) {
                     payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
+                    LOG.debug("downloadMessage - payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
                 }
             } catch (final IOException ioEx) {
                 LOG.error(ERROR_IS_PAYLOAD_DATA_HANDLER, ioEx);
