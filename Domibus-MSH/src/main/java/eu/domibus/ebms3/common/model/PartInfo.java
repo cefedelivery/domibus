@@ -27,10 +27,8 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.impl.io.EmptyInputStream;
 
 import javax.activation.DataHandler;
-import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.util.ByteArrayDataSource;
 import javax.persistence.*;
@@ -183,24 +181,19 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
 
     @PostLoad
     private void loadBinaray() {
-        LOG.info("In loadBinary");
-        if (fileName != null) {
-            LOG.info("fileName != null");
-            File f = new File(fileName);
-
-            if(f.length() == 0) {
-                LOG.info("File length is 0");
-            }
+        if (fileName != null) { /* Create payload data handler from File */
+            LOG.debug("LoadBinary from file: " + fileName);
             payloadDatahandler = new DataHandler(new FileDataSource(fileName));
-            LOG.info("payloadDatahandler: " + payloadDatahandler);
-        } else {
-            LOG.info("In loadBinary, binarydata is " + binaryData);
-            if(binaryData == null) {
-                payloadDatahandler = null;
-            } else {
-                payloadDatahandler = new DataHandler(new ByteArrayDataSource(binaryData, mime));
-            }
+            return;
         }
+        /* Create payload data handler from binaryData (byte[]) */
+        if(binaryData == null) {
+            LOG.info("Payload is empty!");
+            payloadDatahandler = null;
+        } else {
+            payloadDatahandler = new DataHandler(new ByteArrayDataSource(binaryData, mime));
+        }
+
     }
 
     private boolean isCompressed() {
