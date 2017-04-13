@@ -1,3 +1,5 @@
+Domibus 3.2.4:
+               - Replace the war file and the default plugins: domibus-default-ws-plugin and domibus-default-jms-plugin jar files
 Domibus 3.2.3:
                - Replace the war file and the default plugins: domibus-default-ws-plugin and domibus-default-jms-plugin jar files
                - In case of Weblogic cluster uncomment and configure the "domibus.deployment.cluster.url" property
