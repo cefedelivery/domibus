@@ -635,9 +635,6 @@ public class Submission {
         private final boolean inBody;
 
         public Payload(final String contentId, final DataHandler payloadDatahandler, final Collection<TypedProperty> payloadProperties, final boolean inBody, final Description description, String schemaLocation) {
-            if(payloadDatahandler == null) {
-                throw new IllegalArgumentException("payload data must not be null");
-            }
             this.contentId = contentId;
             this.payloadDatahandler = payloadDatahandler;
             this.description = description;
