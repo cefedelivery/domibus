@@ -46,12 +46,14 @@ public class MessageAcknowledgeDefaultConverter implements MessageAcknowledgeCon
         result.setCreateUser(entity.getCreateUser());
         result.setAcknowledgeDate(entity.getAcknowledgeDate());
         final Set<MessageAcknowledgementProperty> properties = entity.getProperties();
-
-        Map<String, String> propertiesHashMap = new HashMap<>();
-        for (MessageAcknowledgementProperty property : properties) {
-            propertiesHashMap.put(property.getName(), property.getValue());
+        if(properties != null) {
+            Map<String, String> propertiesHashMap = new HashMap<>();
+            for (MessageAcknowledgementProperty property : properties) {
+                propertiesHashMap.put(property.getName(), property.getValue());
+            }
+            result.setProperties(propertiesHashMap);
         }
-        result.setProperties(propertiesHashMap);
+
         return result;
     }
 
