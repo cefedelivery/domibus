@@ -14,9 +14,13 @@ public interface AuthUtils {
 
     boolean isUnsecureLoginAllowed();
 
+    boolean isUserAdmin();
+
     void hasUserOrAdminRole();
 
     void hasAdminRole();
+
+    void hasUserRole();
 
     void setAuthenticationToSecurityContext(String user, String password);
 

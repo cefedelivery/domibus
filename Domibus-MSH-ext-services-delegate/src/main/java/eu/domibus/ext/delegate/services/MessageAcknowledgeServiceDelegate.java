@@ -8,7 +8,6 @@ import eu.domibus.ext.exceptions.AuthenticationException;
 import eu.domibus.ext.exceptions.MessageAcknowledgeException;
 import eu.domibus.ext.services.MessageAcknowledgeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -32,42 +31,49 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
     @Autowired
     AuthUtils authUtils;
 
-    //TODO move this into an interceptor so that it can be reusable
-    protected void checkSecurity() throws AuthenticationException {
-        try {
-            if (!authUtils.isUnsecureLoginAllowed()) {
-                authUtils.hasUserOrAdminRole();
-            }
-        } catch (AccessDeniedException e) {
-            throw new AuthenticationException(e);
-        }
-    }
-
     @Override
-    public MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws AuthenticationException, MessageAcknowledgeException {
-        checkSecurity();
-
+    public MessageAcknowledgementDTO acknowledgeMessageDelivered(String messageId, Timestamp acknowledgeTimestamp, Map<String, String> properties) throws AuthenticationException, MessageAcknowledgeException {
         //TODO move the exception mapping into an interceptor
         try {
-            final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, properties);
+            final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessageDelivered(messageId, acknowledgeTimestamp, properties);
             return domainConverter.convert(messageAcknowledgement);
+        } catch (eu.domibus.api.security.AuthenticationException e) {
+            throw new AuthenticationException(e);
         } catch (Exception e) {
             throw new MessageAcknowledgeException(e);
         }
-
     }
 
     @Override
-    public MessageAcknowledgementDTO acknowledgeMessage(String messageId, Timestamp acknowledgeTimestamp, String from, String to) throws AuthenticationException, MessageAcknowledgeException {
-        return acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, null);
+    public MessageAcknowledgementDTO acknowledgeMessageDelivered(String messageId, Timestamp acknowledgeTimestamp) throws AuthenticationException, MessageAcknowledgeException {
+        return acknowledgeMessageDelivered(messageId, acknowledgeTimestamp, null);
+    }
+
+    @Override
+    public MessageAcknowledgementDTO acknowledgeMessageProcessed(String messageId, Timestamp acknowledgeTimestamp, Map<String, String> properties) throws AuthenticationException, MessageAcknowledgeException {
+        //TODO move the exception mapping into an interceptor
+        try {
+            final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessageProcessed(messageId, acknowledgeTimestamp, properties);
+            return domainConverter.convert(messageAcknowledgement);
+        } catch (eu.domibus.api.security.AuthenticationException e) {
+            throw new AuthenticationException(e);
+        } catch (Exception e) {
+            throw new MessageAcknowledgeException(e);
+        }
+    }
+
+    @Override
+    public MessageAcknowledgementDTO acknowledgeMessageProcessed(String messageId, Timestamp acknowledgeTimestamp) throws AuthenticationException, MessageAcknowledgeException {
+        return acknowledgeMessageProcessed(messageId, acknowledgeTimestamp, null);
     }
 
     @Override
     public List<MessageAcknowledgementDTO> getAcknowledgedMessages(String messageId) throws AuthenticationException, MessageAcknowledgeException {
-        checkSecurity();
         try {
             final List<MessageAcknowledgement> messageAcknowledgement = messageAcknowledgeCoreService.getAcknowledgedMessages(messageId);
             return domainConverter.convert(messageAcknowledgement);
+        } catch (eu.domibus.api.security.AuthenticationException e) {
+            throw new AuthenticationException(e);
         } catch (Exception e) {
             throw new MessageAcknowledgeException(e);
         }

@@ -72,6 +72,16 @@ public class AuthUtilsImpl implements AuthUtils {
     }
 
     @Override
+    public boolean isUserAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        if (authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public void hasUserOrAdminRole() {
     }
@@ -79,6 +89,12 @@ public class AuthUtilsImpl implements AuthUtils {
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void hasAdminRole() {
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    public void hasUserRole() {
+
     }
 
     @Override

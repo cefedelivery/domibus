@@ -22,15 +22,27 @@ public class MessageAcknowledgementResource {
     MessageAcknowledgeService messageAcknowledgeService;
 
     /**
-     * Registers an acknowledgment for a specific message using the provided properties
+     * Registers a message delivered acknowledgment for a specific message using the provided properties
      *
-     * @param messageAcknowledgementDTO  the details of the message acknowledgement to be created
+     * @param messageAcknowledgementDTO the details of the message delivered acknowledgement to be created
      * @return The newly created message acknowledgement
      * @throws MessageAcknowledgeException Raised in case an exception occurs while trying to register an acknowledgment
      */
-    @RequestMapping(method = RequestMethod.POST)
-    public MessageAcknowledgementDTO acknowledgeMessage(@RequestBody MessageAcknowledgementDTO messageAcknowledgementDTO) throws MessageAcknowledgeException {
-        return messageAcknowledgeService.acknowledgeMessage(messageAcknowledgementDTO.getMessageId(), messageAcknowledgementDTO.getAcknowledgeDate(), messageAcknowledgementDTO.getFrom(), messageAcknowledgementDTO.getTo(), messageAcknowledgementDTO.getProperties());
+    @RequestMapping(path = "/delivered", method = RequestMethod.POST)
+    public MessageAcknowledgementDTO acknowledgeMessageDelivered(@RequestBody MessageAcknowledgementDTO messageAcknowledgementDTO) throws MessageAcknowledgeException {
+        return messageAcknowledgeService.acknowledgeMessageDelivered(messageAcknowledgementDTO.getMessageId(), messageAcknowledgementDTO.getAcknowledgeDate(), messageAcknowledgementDTO.getProperties());
+    }
+
+    /**
+     * Registers a message delivered acknowledgment for a specific message using the provided properties
+     *
+     * @param messageAcknowledgementDTO the details of the message delivered acknowledgement to be created
+     * @return The newly created message acknowledgement
+     * @throws MessageAcknowledgeException Raised in case an exception occurs while trying to register an acknowledgment
+     */
+    @RequestMapping(path = "/processed", method = RequestMethod.POST)
+    public MessageAcknowledgementDTO acknowledgeMessageProcessed(@RequestBody MessageAcknowledgementDTO messageAcknowledgementDTO) throws MessageAcknowledgeException {
+        return messageAcknowledgeService.acknowledgeMessageProcessed(messageAcknowledgementDTO.getMessageId(), messageAcknowledgementDTO.getAcknowledgeDate(), messageAcknowledgementDTO.getProperties());
     }
 
     /**

@@ -3,6 +3,10 @@ package eu.domibus.plugin.webService.impl;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
+import eu.domibus.ext.exceptions.AuthenticationException;
+import eu.domibus.ext.exceptions.DomibusServiceException;
+import eu.domibus.ext.exceptions.MessageAcknowledgeException;
+import eu.domibus.ext.services.MessageAcknowledgeService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
@@ -24,6 +28,7 @@ import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.*;
 
 
@@ -53,16 +58,19 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @Autowired
     private StubDtoTransformer defaultTransformer;
 
+    @Autowired
+    private MessageAcknowledgeService messageAcknowledgeService;
+
     public BackendWebServiceImpl(final String name) {
         super(name);
     }
 
     /**
-     * @deprecated Use sendMessageWithLargeFilesSupport
      * @param sendRequest
      * @param ebMSHeaderInfo
      * @return
      * @throws SendMessageFault
+     * @deprecated Use sendMessageWithLargeFilesSupport
      */
     @Deprecated
     @SuppressWarnings("ValidExternallyBoundObject")
@@ -268,11 +276,11 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     }
 
     /**
-     * @deprecated Use downloadMessageWithLargeFilesSupport
      * @param downloadMessageRequest
      * @param downloadMessageResponse
      * @param ebMSHeaderInfo
      * @throws DownloadMessageFault
+     * @deprecated Use downloadMessageWithLargeFilesSupport
      */
     @Deprecated
     @Override
@@ -308,11 +316,21 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         ebMSHeaderInfo.value = messaging;
         downloadMessageResponse.value = WEBSERVICE_OF.createDownloadMessageResponse();
 
-        if (isMessageIdNotEmpty) {
-            fillInfoParts(downloadMessageResponse, messaging);
-        } else {
-            LOG.info("Returning an empty response because the message id was empty.");
+        fillInfoParts(downloadMessageResponse, messaging);
+
+        try {
+            messageAcknowledgeService.acknowledgeMessageDelivered(downloadMessageRequest.getMessageID(), new Timestamp(System.currentTimeMillis()));
+        } catch (AuthenticationException | MessageAcknowledgeException e) {
+            //if an error occurs related to the message acknowledgement do not block the download message operation
+            LOG.error("Error acknowledging message [" + downloadMessageRequest.getMessageID() + "]", e);
         }
+    }
+
+    protected DownloadMessageFault createFault(String message, DomibusServiceException e) {
+        FaultDetail detail = WEBSERVICE_OF.createFaultDetail();
+        detail.setCode(e.getErrorCode().getErrorCode());
+        detail.setMessage(e.getMessage());
+        return new DownloadMessageFault(message, detail);
     }
 
     /**
@@ -356,10 +374,13 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         ebMSHeaderInfo.value = messaging;
         retrieveMessageResponse.value = WEBSERVICE_OF.createRetrieveMessageResponse();
 
-        if (isMessageIdNotEmpty) {
-            fillInfoPartsForLargeFiles(retrieveMessageResponse, messaging);
-        } else {
-            LOG.info("Returning an empty response because the message id was empty.");
+        fillInfoPartsForLargeFiles(retrieveMessageResponse, messaging);
+
+        try {
+            messageAcknowledgeService.acknowledgeMessageDelivered(retrieveMessageRequest.getMessageID(), new Timestamp(System.currentTimeMillis()));
+        } catch (AuthenticationException | MessageAcknowledgeException e) {
+            //if an error occurs related to the message acknowledgement do not block the download message operation
+            LOG.error("Error acknowledging message [" + retrieveMessageRequest.getMessageID() + "]", e);
         }
     }
 
