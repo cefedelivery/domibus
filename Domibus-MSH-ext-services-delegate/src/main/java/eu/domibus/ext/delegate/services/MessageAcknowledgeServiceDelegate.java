@@ -36,7 +36,7 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
         //TODO move the exception mapping into an interceptor
         try {
             final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessageDelivered(messageId, acknowledgeTimestamp, properties);
-            return domainConverter.convert(messageAcknowledgement);
+            return domainConverter.convert(messageAcknowledgement, MessageAcknowledgementDTO.class);
         } catch (eu.domibus.api.security.AuthenticationException e) {
             throw new AuthenticationException(e);
         } catch (Exception e) {
@@ -54,7 +54,7 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
         //TODO move the exception mapping into an interceptor
         try {
             final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessageProcessed(messageId, acknowledgeTimestamp, properties);
-            return domainConverter.convert(messageAcknowledgement);
+            return domainConverter.convert(messageAcknowledgement, MessageAcknowledgementDTO.class);
         } catch (eu.domibus.api.security.AuthenticationException e) {
             throw new AuthenticationException(e);
         } catch (Exception e) {
@@ -71,7 +71,7 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
     public List<MessageAcknowledgementDTO> getAcknowledgedMessages(String messageId) throws AuthenticationException, MessageAcknowledgeException {
         try {
             final List<MessageAcknowledgement> messageAcknowledgement = messageAcknowledgeCoreService.getAcknowledgedMessages(messageId);
-            return domainConverter.convert(messageAcknowledgement);
+            return domainConverter.convert(messageAcknowledgement, MessageAcknowledgementDTO.class);
         } catch (eu.domibus.api.security.AuthenticationException e) {
             throw new AuthenticationException(e);
         } catch (Exception e) {

@@ -6,12 +6,15 @@ import eu.domibus.ext.domain.MessageAcknowledgementDTO;
 import java.util.List;
 
 /**
+ * Class responsible of conversion from the internal domain to external domain and the other way around
+ *
  * @author migueti, Cosmin Baciu
  * @since 3.3
  */
 public interface DomibusDomainConverter {
 
-    MessageAcknowledgementDTO convert(MessageAcknowledgement message);
+    <T, U> T convert(U source, Class<T> typeOfT);
 
-    List<MessageAcknowledgementDTO> convert(List<MessageAcknowledgement> messagesList);
+    <T, U> List<T> convert(List<U> sourceList, Class<T> typeOfT);
+
 }

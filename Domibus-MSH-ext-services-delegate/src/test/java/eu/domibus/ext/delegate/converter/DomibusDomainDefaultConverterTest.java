@@ -43,7 +43,7 @@ public class DomibusDomainDefaultConverterTest {
     @Test
     public void testConvert() throws Exception {
         MessageAcknowledgement toConvert = (MessageAcknowledgement) objectService.createInstance(MessageAcknowledgement.class);
-        final MessageAcknowledgementDTO converted = domibusDomainConverter.convert(toConvert);
+        final MessageAcknowledgementDTO converted = domibusDomainConverter.convert(toConvert, MessageAcknowledgementDTO.class);
         objectService.assertObjects(converted, toConvert);
     }
 
@@ -57,7 +57,7 @@ public class DomibusDomainDefaultConverterTest {
         toConvertList.add(toConvert2);
 
 
-        final List<MessageAcknowledgementDTO> convertedList = domibusDomainConverter.convert(toConvertList);
+        final List<MessageAcknowledgementDTO> convertedList = domibusDomainConverter.convert(toConvertList, MessageAcknowledgementDTO.class);
         objectService.assertObjects(convertedList, toConvertList);
     }
 }

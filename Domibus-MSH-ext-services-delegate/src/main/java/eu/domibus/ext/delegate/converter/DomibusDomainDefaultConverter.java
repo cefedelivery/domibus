@@ -20,20 +20,21 @@ public class DomibusDomainDefaultConverter implements DomibusDomainConverter {
     Mapper mapper;
 
     @Override
-    public MessageAcknowledgementDTO convert(MessageAcknowledgement message) {
-        return mapper.map(message, MessageAcknowledgementDTO.class);
+    public <T, U> T convert(U source, final Class<T> typeOfT) {
+        return mapper.map(source, typeOfT);
     }
 
     @Override
-    public List<MessageAcknowledgementDTO> convert(List<MessageAcknowledgement> messagesList) {
-        if (messagesList == null) {
+    public <T, U> List<T> convert(List<U> sourceList, final Class<T> typeOfT) {
+        if (sourceList == null) {
             return null;
         }
-        List<MessageAcknowledgementDTO> result = new ArrayList<>();
-        for (MessageAcknowledgement messageAcknowledgement : messagesList) {
-            result.add(convert(messageAcknowledgement));
+        List<T> result = new ArrayList<>();
+        for (U sourceObject : sourceList) {
+            result.add(convert(sourceObject, typeOfT));
 
         }
         return result;
     }
+
 }
