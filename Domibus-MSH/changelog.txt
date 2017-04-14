@@ -1,5 +1,6 @@
 Domibus 3.2.4
 - Default WS plugin: backwards compatibility fix for Domibus >3.2.2
+- Fix error when downloading a message with an empty payload
 Domibus 3.2.3
 - JMS monitoring: extended the functionality for clustered installations.
 - Core: listPendingMessages and download operations behave correctly in case of a clustered installation.

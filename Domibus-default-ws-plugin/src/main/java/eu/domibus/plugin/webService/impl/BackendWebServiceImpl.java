@@ -247,8 +247,10 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
             final PayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createPayloadType();
             try {
-                LOG.debug("downloadMessage - payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
-                payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
+                if(extPartInfo.getPayloadDatahandler() != null ) {
+                    payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
+                    LOG.debug("downloadMessage - payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
+                }
             } catch (final IOException ioEx) {
                 LOG.error(ERROR_IS_PAYLOAD_DATA_HANDLER, ioEx);
                 throw new DownloadMessageFault(ERROR_IS_PAYLOAD_DATA_HANDLER, createDownloadMessageFault(ioEx));
