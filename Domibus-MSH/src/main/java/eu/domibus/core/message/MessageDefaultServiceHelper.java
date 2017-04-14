@@ -1,5 +1,6 @@
 package eu.domibus.core.message;
 
+import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -8,6 +9,8 @@ import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.handler.DatabaseMessageHandler;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 /**
  * @author Cosmin Baciu
@@ -27,6 +30,16 @@ public class MessageDefaultServiceHelper implements MessageServiceHelper {
     @Override
     public String getFinalRecipient(UserMessage userMessage) {
         return getOriginalUser(userMessage, MessageConstants.FINAL_RECIPIENT);
+    }
+
+    @Override
+    public String getPartyTo(UserMessage userMessage) {
+        //TODO check why there are multiple party ids instead of just one
+        final Set<PartyId> partyId = userMessage.getPartyInfo().getTo().getPartyId();
+        if (partyId == null || partyId.isEmpty()) {
+            return null;
+        }
+        return partyId.iterator().next().getValue();
     }
 
     @Override

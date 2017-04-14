@@ -62,8 +62,44 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
         return userMessage;
     }
 
-    //TODO move this into an interceptor so that it can be reusable
+    @Override
+    public MessageAcknowledgement acknowledgeMessageDelivered(String messageId, Timestamp acknowledgeTimestamp) throws AuthenticationException, MessageAcknowledgeException {
+        return acknowledgeMessageDelivered(messageId, acknowledgeTimestamp, null);
+    }
 
+    @Override
+    public MessageAcknowledgement acknowledgeMessageProcessed(String messageId, Timestamp acknowledgeTimestamp, Map<String, String> properties) throws AuthenticationException, MessageAcknowledgeException {
+        final UserMessage userMessage = getUserMessage(messageId);
+        final String localAccessPointId = getLocalAccessPointId(userMessage);
+        final String finalRecipient = messageServiceHelper.getFinalRecipient(userMessage);
+        return acknowledgeMessage(userMessage, acknowledgeTimestamp, finalRecipient, localAccessPointId, properties);
+    }
+
+    @Override
+    public MessageAcknowledgement acknowledgeMessageProcessed(String messageId, Timestamp acknowledgeTimestamp) throws AuthenticationException, MessageAcknowledgeException {
+        return acknowledgeMessageProcessed(messageId, acknowledgeTimestamp, null);
+    }
+
+
+    protected MessageAcknowledgement acknowledgeMessage(final UserMessage userMessage, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws MessageAcknowledgeException {
+        checkSecurity(userMessage);
+
+        final String user = authUtils.getAuthenticatedUser();
+        MessageAcknowledgementEntity entity = messageAcknowledgeConverter.create(user, userMessage.getMessageInfo().getMessageId(), acknowledgeTimestamp, from, to, properties);
+        messageAcknowledgementDao.create(entity);
+        return messageAcknowledgeConverter.convert(entity);
+    }
+
+    @Override
+    public List<MessageAcknowledgement> getAcknowledgedMessages(String messageId) throws MessageAcknowledgeException {
+        final UserMessage userMessage = getUserMessage(messageId);
+        checkSecurity(userMessage);
+
+        final List<MessageAcknowledgementEntity> entities = messageAcknowledgementDao.findByMessageId(messageId);
+        return messageAcknowledgeConverter.convert(entities);
+    }
+
+    //TODO move this into an interceptor so that it can be reusable
     /**
      * Checks if the authenticated user has the rights to perform an acknowledge on the message
      * @param userMessage
@@ -96,57 +132,8 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
         }
     }
 
-
-    @Override
-    public MessageAcknowledgement acknowledgeMessageDelivered(String messageId, Timestamp acknowledgeTimestamp) throws AuthenticationException, MessageAcknowledgeException {
-        return acknowledgeMessageDelivered(messageId, acknowledgeTimestamp, null);
-    }
-
-    @Override
-    public MessageAcknowledgement acknowledgeMessageProcessed(String messageId, Timestamp acknowledgeTimestamp, Map<String, String> properties) throws AuthenticationException, MessageAcknowledgeException {
-        final UserMessage userMessage = getUserMessage(messageId);
-        final String localAccessPointId = getLocalAccessPointId(userMessage);
-        final String finalRecipient = messageServiceHelper.getFinalRecipient(userMessage);
-        return acknowledgeMessage(userMessage, acknowledgeTimestamp, finalRecipient, localAccessPointId, properties);
-    }
-
-    @Override
-    public MessageAcknowledgement acknowledgeMessageProcessed(String messageId, Timestamp acknowledgeTimestamp) throws AuthenticationException, MessageAcknowledgeException {
-        return acknowledgeMessageProcessed(messageId, acknowledgeTimestamp, null);
-    }
-
-
-    public MessageAcknowledgement acknowledgeMessage(final UserMessage userMessage, Timestamp acknowledgeTimestamp, String from, String to, Map<String, String> properties) throws MessageAcknowledgeException {
-        final String messageId = userMessage.getMessageInfo().getMessageId();
-        //throw exception in case the message id does not exist
-        if (userMessage == null) {
-            throw new MessageAcknowledgeException(DomibusCoreErrorCode.DOM_001, "Message with ID [" + messageId + "] does not exist");
-        }
-
-        checkSecurity(userMessage);
-
-        final String user = authUtils.getAuthenticatedUser();
-        MessageAcknowledgementEntity entity = messageAcknowledgeConverter.create(user, messageId, acknowledgeTimestamp, from, to, properties);
-        messageAcknowledgementDao.create(entity);
-        return messageAcknowledgeConverter.convert(entity);
-    }
-
-    @Override
-    public List<MessageAcknowledgement> getAcknowledgedMessages(String messageId) throws MessageAcknowledgeException {
-        final UserMessage userMessage = getUserMessage(messageId);
-        checkSecurity(userMessage);
-
-        final List<MessageAcknowledgementEntity> entities = messageAcknowledgementDao.findByMessageId(messageId);
-        return messageAcknowledgeConverter.convert(entities);
-    }
-
     private String getLocalAccessPointId(UserMessage userMessage) {
-        //TODO check why there are multiple party ids instead of just one
-        final Set<PartyId> partyId = userMessage.getPartyInfo().getTo().getPartyId();
-        if (partyId == null || partyId.isEmpty()) {
-            return null;
-        }
-        return partyId.iterator().next().getValue();
+        return messageServiceHelper.getPartyTo(userMessage);
     }
 
 }
