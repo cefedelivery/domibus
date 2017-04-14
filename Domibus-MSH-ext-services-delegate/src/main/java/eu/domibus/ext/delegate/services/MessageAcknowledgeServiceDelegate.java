@@ -1,6 +1,6 @@
 package eu.domibus.ext.delegate.services;
 
-import eu.domibus.api.acknowledge.MessageAcknowledgement;
+import eu.domibus.api.message.acknowledge.MessageAcknowledgement;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.ext.delegate.converter.DomibusDomainConverter;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;
@@ -22,7 +22,7 @@ import java.util.Map;
 public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeService {
 
     @Autowired
-    eu.domibus.api.acknowledge.MessageAcknowledgeService messageAcknowledgeCoreService;
+    eu.domibus.api.message.acknowledge.MessageAcknowledgeService messageAcknowledgeCoreService;
 
 
     @Autowired

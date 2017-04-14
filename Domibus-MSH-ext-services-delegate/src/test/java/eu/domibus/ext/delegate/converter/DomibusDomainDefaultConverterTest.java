@@ -1,6 +1,6 @@
 package eu.domibus.ext.delegate.converter;
 
-import eu.domibus.api.acknowledge.MessageAcknowledgement;
+import eu.domibus.api.message.acknowledge.MessageAcknowledgement;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;
 import eu.europa.ec.digit.commons.test.api.ObjectService;
 import org.junit.Test;

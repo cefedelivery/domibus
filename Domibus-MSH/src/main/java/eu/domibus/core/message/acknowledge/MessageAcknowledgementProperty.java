@@ -1,4 +1,4 @@
-package eu.domibus.core.acknowledge;
+package eu.domibus.core.message.acknowledge;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.apache.commons.lang.builder.EqualsBuilder;

@@ -1,6 +1,6 @@
 package eu.domibus.common.services;
 
-import eu.domibus.api.xml.XMLUtil;
+import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.services.impl.CompressionService;

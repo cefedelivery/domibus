@@ -1,7 +1,5 @@
 package eu.domibus.ext.delegate.converter;
 
-import eu.domibus.api.acknowledge.MessageAcknowledgement;
-import eu.domibus.ext.domain.MessageAcknowledgementDTO;
 import org.dozer.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

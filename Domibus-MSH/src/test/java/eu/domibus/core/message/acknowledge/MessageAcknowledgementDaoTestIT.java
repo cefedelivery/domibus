@@ -1,4 +1,4 @@
-package eu.domibus.core.acknowledge;
+package eu.domibus.core.message.acknowledge;
 
 import eu.domibus.AbstractIT;
 import eu.domibus.logging.DomibusLogger;

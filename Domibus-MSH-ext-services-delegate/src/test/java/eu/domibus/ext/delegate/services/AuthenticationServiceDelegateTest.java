@@ -1,13 +1,6 @@
 package eu.domibus.ext.delegate.services;
 
-import eu.domibus.api.acknowledge.MessageAcknowledgeService;
-import eu.domibus.api.acknowledge.MessageAcknowledgement;
-import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.security.AuthUtils;
-import eu.domibus.ext.delegate.converter.DomibusDomainConverter;
 import eu.domibus.ext.exceptions.AuthenticationException;
-import eu.domibus.ext.exceptions.MessageAcknowledgeException;
-import eu.domibus.ext.services.AuthenticationService;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -15,14 +8,8 @@ import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.security.access.AccessDeniedException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author migueti, Cosmin Baciu

@@ -1,27 +1,13 @@
 package eu.domibus.ext.delegate.services;
 
-import eu.domibus.api.acknowledge.MessageAcknowledgeService;
-import eu.domibus.api.acknowledge.MessageAcknowledgement;
-import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.message.acknowledge.MessageAcknowledgeService;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.ext.delegate.converter.DomibusDomainConverter;
-import eu.domibus.ext.domain.MessageAcknowledgementDTO;
-import eu.domibus.ext.exceptions.AuthenticationException;
-import eu.domibus.ext.exceptions.MessageAcknowledgeException;
-import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
-import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.security.access.AccessDeniedException;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -103,7 +89,7 @@ public class MessageAcknowledgeServiceDelegateTest {
             messageAcknowledgeServiceDelegate.checkSecurity();
 
             messageAcknowledgeService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, properties);
-            result = new eu.domibus.api.acknowledge.MessageAcknowledgeException(DomibusCoreErrorCode.DOM_001, "raised exception");
+            result = new eu.domibus.api.message.acknowledge.MessageAcknowledgeException(DomibusCoreErrorCode.DOM_001, "raised exception");
         }};
 
         messageAcknowledgeServiceDelegate.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, properties);

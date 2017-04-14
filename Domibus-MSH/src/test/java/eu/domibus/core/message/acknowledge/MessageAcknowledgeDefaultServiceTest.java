@@ -1,19 +1,11 @@
-package eu.domibus.core.acknowledge;
+package eu.domibus.core.message.acknowledge;
 
 import eu.domibus.api.security.AuthUtils;
-import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
-import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Cosmin Baciu

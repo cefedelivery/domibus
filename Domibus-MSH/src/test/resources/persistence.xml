@@ -62,8 +62,8 @@
         <class>eu.domibus.plugin.routing.BackendFilter</class>
         <class>eu.domibus.plugin.routing.RoutingCriteria</class>
         <class>eu.domibus.core.security.AuthenticationEntry</class>
-        <class>eu.domibus.core.acknowledge.MessageAcknowledgementEntity</class>
-        <class>eu.domibus.core.acknowledge.MessageAcknowledgementProperty</class>
+        <class>eu.domibus.core.message.acknowledge.MessageAcknowledgementEntity</class>
+        <class>eu.domibus.core.message.acknowledge.MessageAcknowledgementProperty</class>
 
         <properties>
             <property name="hibernate.transaction.manager_lookup_class"

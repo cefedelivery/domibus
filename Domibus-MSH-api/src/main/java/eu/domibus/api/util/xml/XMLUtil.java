@@ -1,4 +1,4 @@
-package eu.domibus.api.xml;
+package eu.domibus.api.util.xml;
 
 import org.xml.sax.SAXException;
 

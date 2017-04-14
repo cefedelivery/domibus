@@ -1,4 +1,4 @@
-package eu.domibus.api.acknowledge;
+package eu.domibus.api.message.acknowledge;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;

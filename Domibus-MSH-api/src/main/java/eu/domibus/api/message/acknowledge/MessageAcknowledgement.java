@@ -1,7 +1,6 @@
-package eu.domibus.api.acknowledge;
+package eu.domibus.api.message.acknowledge;
 
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Map;
 
 /**

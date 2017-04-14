@@ -1,14 +1,13 @@
-package eu.domibus.core.acknowledge;
+package eu.domibus.core.message.acknowledge;
 
-import eu.domibus.api.acknowledge.MessageAcknowledgeException;
-import eu.domibus.api.acknowledge.MessageAcknowledgeService;
-import eu.domibus.api.acknowledge.MessageAcknowledgement;
+import eu.domibus.api.message.acknowledge.MessageAcknowledgeException;
+import eu.domibus.api.message.acknowledge.MessageAcknowledgeService;
+import eu.domibus.api.message.acknowledge.MessageAcknowledgement;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.security.AuthenticationException;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.core.message.MessageServiceHelper;
-import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author migueti, Cosmin Baciu

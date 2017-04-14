@@ -1,6 +1,6 @@
-package eu.domibus.core.acknowledge;
+package eu.domibus.core.message.acknowledge;
 
-import eu.domibus.api.acknowledge.MessageAcknowledgement;
+import eu.domibus.api.message.acknowledge.MessageAcknowledgement;
 
 import java.sql.Timestamp;
 import java.util.List;
