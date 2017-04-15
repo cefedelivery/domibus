@@ -18,12 +18,14 @@ import org.apache.commons.lang.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.Properties;
 
 /* This class is used for dynamic discovery of the parties participating in a message exchange.
  *
@@ -48,14 +50,15 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryPModeProvider.class);
 
-    private static final String useVefaPeppolDynamicDiscovery = "domibus.dynamic.discovery.vefapeppol";
+    private static final String DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION = "domibus.dynamic.discovery.client.specification";
     @Autowired
     protected CryptoService cryptoService;
 
     @Autowired
-    private java.util.Properties domibusProperties;
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
 
-    private DynamicDiscoveryService dynamicDiscoveryService = null;
+    protected DynamicDiscoveryService dynamicDiscoveryService = null;
 
     @Autowired
     protected CertificateService certificateService;
@@ -73,7 +76,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         super.init();
         dynamicResponderProcesses = findDynamicResponderProcesses();
         dynamicInitiatorProcesses = findDynamicSenderProcesses();
-        if("true".equals(domibusProperties.getProperty(useVefaPeppolDynamicDiscovery, "false"))) {
+        if(DynamicDiscoveryClientSpecification.PEPPOL.getName().equals(domibusProperties.getProperty(DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION, "OASIS"))) {
             dynamicDiscoveryService = new DynamicDiscoveryServicePEPPOL();
         } else { // OASIS client is used by default
             dynamicDiscoveryService = new DynamicDiscoveryServiceOASIS();

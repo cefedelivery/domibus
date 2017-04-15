@@ -1,6 +1,8 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.services.DynamicDiscoveryService;
+import eu.domibus.common.services.impl.DynamicDiscoveryServiceOASIS;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
@@ -9,15 +11,15 @@ import eu.europa.ec.dynamicdiscovery.model.*;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceInformationType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadataType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.SignedServiceMetadataType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.*;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -57,60 +59,66 @@ public class DynamicDiscoveryServiceOASISTest {
     @Test
     public void testLookupInformationMock(final @Capturing DynamicDiscovery smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryServicePEPPOL.SMLZONE_KEY);
+            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
+
+            ServiceMetadata sm = buildServiceMetadata();
+            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentIdentifier) any);
+            result = sm;
+
         }};
-
-        //ServiceMetadata sm = buildServiceMetadata();
-
 
         EndpointInfo endpoint = dynamicDiscoveryServiceOASIS.lookupInformation(TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
         assertNotNull(endpoint);
         assertEquals(ADDRESS, endpoint.getAddress());
 
         new Verifications() {{
-            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentIdentifier)any);
+            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentIdentifier) any);
         }};
     }
 
-//    @Test(expected = ConfigurationException.class)
-//    public void testLookupInformationNotFound(final @Capturing DynamicDiscovery smpClient) throws Exception {
-//        new NonStrictExpectations() {{
-//            domibusProperties.getProperty(DynamicDiscoveryServicePEPPOL.SMLZONE_KEY);
-//            result = TEST_SML_ZONE;
-//            ServiceMetadataType sm = buildServiceMetadata();
-//            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentIdentifier)any);
-//            result = sm;
-//
-//        }};
-//
-//        dynamicDiscoveryServiceOASIS.lookupInformation(TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_INVALID_SERVICE_VALUE, TEST_SERVICE_TYPE);
-//    }
+    @Test(expected = ConfigurationException.class)
+    public void testLookupInformationNotFound(final @Capturing DynamicDiscovery smpClient) throws Exception {
+        new NonStrictExpectations() {{
+            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            result = TEST_SML_ZONE;
 
-//    private ServiceMetadataType buildServiceMetadata() throws Exception {
-//        InputStream inputStream = getClass().getResourceAsStream("../ServiceMetadataResponseOASIS.xml");
-//        FetcherResponse fetcherResponse = new FetcherResponse(inputStream, "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05");
-//        Object result = unmarshal(fetcherResponse);
-//        ServiceInformationType serviceInformationType = ((ServiceMetadataType) result).getServiceInformation();
-//        ServiceMetadataType serviceMetadata = new ServiceMetadataType();
-//        serviceMetadata.setServiceInformation(serviceInformationType);
-//
-//        return serviceMetadata;
-//    }
+            ServiceMetadata sm = buildServiceMetadata();
+            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentIdentifier) any);
+            result = sm;
+        }};
 
-    private Object unmarshal(FetcherResponse fetcherResponse) throws Exception {
-        JAXBContext jaxbContext = JAXBContext.newInstance(ServiceMetadataType.class, SignedServiceMetadataType.class);
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-        Document document = documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
-        return ((JAXBElement)jaxbContext.createUnmarshaller().unmarshal(document)).getValue();
+        dynamicDiscoveryServiceOASIS.lookupInformation(TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_INVALID_SERVICE_VALUE, TEST_SERVICE_TYPE);
     }
 
-    @Test // Hi Pawel and Flavio, this test is for you
-    //@Ignore
+    private ServiceMetadata buildServiceMetadata() throws Exception {
+
+        InputStream inputStream = getClass().getResourceAsStream("../ServiceMetadataResponseOASIS.xml");
+        FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setNamespaceAware(true);
+        JAXBContext jaxbContext = JAXBContext.newInstance(ServiceMetadataType.class, SignedServiceMetadataType.class, ServiceGroupType.class);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+
+
+        Document document = documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
+        Object result = ((JAXBElement) unmarshaller.unmarshal(document)).getValue();
+        if (result instanceof org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType) {
+            result = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType) result).getServiceMetadata();
+        }
+        org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType unmarshalledServiceMetadata = (org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType) result;
+        ServiceMetadata serviceMetadata = new ServiceMetadata(null, unmarshalledServiceMetadata.getServiceInformation());
+        return serviceMetadata;
+    }
+
+    /*
+    * This is not a unit tests but the code is useful to test real SMP entries.
+     */
+    @Test
+    @Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryServicePEPPOL.SMLZONE_KEY);
+            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
             KeyStore truststore;
