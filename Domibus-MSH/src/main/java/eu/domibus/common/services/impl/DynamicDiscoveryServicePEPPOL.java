@@ -15,6 +15,7 @@ import no.difi.vefa.edelivery.lookup.model.ParticipantIdentifier;
 import no.difi.vefa.edelivery.lookup.model.ProcessIdentifier;
 import no.difi.vefa.edelivery.lookup.model.ServiceMetadata;
 import no.difi.vefa.edelivery.lookup.model.TransportProfile;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ import java.util.Properties;
  *
  * Upon a successful lookup, the result contains the endpoint address and also othe public certificate of the receiver.
  */
+@Service
 public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryServicePEPPOL.class);

@@ -18,6 +18,7 @@ import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.security.KeyStore;
@@ -36,6 +37,7 @@ import java.util.regex.Pattern;
  * Upon a successful lookup, the result contains the endpoint address and also othe public
  * certificate of the receiver.
  */
+@Service
 public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryServiceOASIS.class);

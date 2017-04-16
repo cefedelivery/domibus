@@ -58,6 +58,12 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
 
+    @Autowired
+    private DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
+
+    @Autowired
+    private DynamicDiscoveryServicePEPPOL dynamicDiscoveryServicePEPPOL;
+
     protected DynamicDiscoveryService dynamicDiscoveryService = null;
 
     @Autowired
@@ -77,9 +83,9 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         dynamicResponderProcesses = findDynamicResponderProcesses();
         dynamicInitiatorProcesses = findDynamicSenderProcesses();
         if(DynamicDiscoveryClientSpecification.PEPPOL.getName().equals(domibusProperties.getProperty(DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION, "OASIS"))) {
-            dynamicDiscoveryService = new DynamicDiscoveryServicePEPPOL();
+            dynamicDiscoveryService = dynamicDiscoveryServicePEPPOL;
         } else { // OASIS client is used by default
-            dynamicDiscoveryService = new DynamicDiscoveryServiceOASIS();
+            dynamicDiscoveryService = dynamicDiscoveryServiceOASIS;
         }
     }
 

@@ -7,7 +7,6 @@ import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.services.impl.DynamicDiscoveryServiceOASIS;
 import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
 import eu.domibus.common.util.EndpointInfo;
@@ -19,8 +18,6 @@ import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateServiceImpl;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.domibus.xml.XMLUtilImpl;
-import junit.framework.Assert;
-import mockit.Injectable;
 import no.difi.vefa.edelivery.lookup.model.Endpoint;
 import no.difi.vefa.edelivery.lookup.model.ProcessIdentifier;
 import no.difi.vefa.edelivery.lookup.model.TransportProfile;
@@ -32,8 +29,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.xml.bind.JAXBContext;
 import java.io.File;
@@ -106,6 +101,9 @@ public class DynamicDiscoveryPModeProviderTest {
     private Properties domibusProperties;
 
     @Mock
+    private DynamicDiscoveryServicePEPPOL dynamicDiscoveryServicePEPPOL;
+
+    @Mock
     private DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
 
     @Before
@@ -163,9 +161,6 @@ public class DynamicDiscoveryPModeProviderTest {
         doReturn(true).when(configurationDAO).configurationExists();
         doReturn(testData).when(configurationDAO).readEager();
         dynamicDiscoveryPModeProvider.init();
-
-        dynamicDiscoveryPModeProvider.dynamicDiscoveryService = dynamicDiscoveryServiceOASIS;
-
         EndpointInfo testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, ADDRESS, ALIAS_CN_AVAILABLE);
         doReturn(testDataEndpoint).when(dynamicDiscoveryServiceOASIS).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
         doReturn(true).when(cryptoService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
@@ -190,7 +185,6 @@ public class DynamicDiscoveryPModeProviderTest {
         doReturn(true).when(configurationDAO).configurationExists();
         doReturn(testData).when(configurationDAO).readEager();
         dynamicDiscoveryPModeProvider.init();
-
         UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
         dynamicDiscoveryPModeProvider.doDynamicDiscovery(userMessage, MSHRole.RECEIVING);
         Party expectedParty = new Party();
