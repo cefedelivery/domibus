@@ -1,5 +1,4 @@
-import {Component, OnInit} from '@angular/core';
-import {FileUploader, FileUploaderOptions} from "ng2-file-upload";
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {Http} from "@angular/http";
 import {AlertService} from "app/alert/alert.service";
 import {Observable} from 'rxjs/Rx';
@@ -15,14 +14,14 @@ import 'rxjs/add/operator/catch';
 })
 export class TruststoreComponent implements OnInit {
 
-  public options: FileUploaderOptions = {
-    url: "/rest/truststore",
-    itemAlias: "file"
-  };
-  public uploader: FileUploader = new FileUploader(this.options);
-
-  private password: String;
   private url = "/rest/truststore";
+
+
+  @ViewChild('fileInput')
+  private fileInput;
+
+  @ViewChild('password')
+  private password;
 
   constructor(private http: Http, private alertService: AlertService) {
   }
@@ -30,13 +29,18 @@ export class TruststoreComponent implements OnInit {
   ngOnInit() {
   }
 
-  submitTruststore($event): Observable<any> {
-    this.alertService.success("Plm", true);
-    var files = $event.srcElement.files;
-    return this.http.post(this.url, {
-      password:this.password,
-      truststore:files
-    }, null);
+  public onSubmit(empForm: any, event: Event) {
+    event.preventDefault();
+    let fi = this.fileInput.nativeElement;
+    console.log(this.password.nativeElement);
+    let input = new FormData();
+    input.append('truststore', fi.files[0]);
+    input.append('password', this.password.nativeElement.value);
+    this.http.post(this.url, input).subscribe(res => {
+      console.log(res);
+    });
+
+
   }
 
 }

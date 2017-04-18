@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
  * @since 3.3
  */
 @RestController
-@RequestMapping(value = "/rest/truststore")
 public class TruststoreResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(TruststoreResource.class);
@@ -20,10 +19,10 @@ public class TruststoreResource {
     @Autowired
     private CryptoService cryptoService;
 
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @RequestMapping(value = "/rest/truststore", method = RequestMethod.POST)
     public
     @ResponseBody
-    String uploadTruststoreFile(@RequestParam("truststore") MultipartFile truststore, @RequestParam("password") String password) {
+    String uploadTruststoreFile(@RequestPart("truststore") MultipartFile truststore, @RequestParam("password") String password) {
 
         if (!truststore.isEmpty()) {
             try {

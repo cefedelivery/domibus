@@ -16,7 +16,6 @@ import java.util.List;
  * @since 3.3
  */
 @RestController
-@RequestMapping
 public class PModeResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(PModeResource.class);
