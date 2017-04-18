@@ -1,13 +1,11 @@
-package eu.domibus.ext.interceptor;
+package eu.domibus.ext.rest.interceptor;
 
-import eu.domibus.ext.delegate.services.AuthenticationServiceDelegate;
 import eu.domibus.ext.exceptions.AuthenticationException;
 import eu.domibus.ext.exceptions.DomibusErrorCode;
 import eu.domibus.ext.services.AuthenticationService;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
-import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;

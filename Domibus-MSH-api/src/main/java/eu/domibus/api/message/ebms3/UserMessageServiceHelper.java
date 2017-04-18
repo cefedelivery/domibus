@@ -1,4 +1,4 @@
-package eu.domibus.core.message;
+package eu.domibus.api.message.ebms3;
 
 import eu.domibus.api.message.ebms3.model.UserMessage;
 
@@ -6,7 +6,7 @@ import eu.domibus.api.message.ebms3.model.UserMessage;
  * @author Cosmin Baciu
  * @since 3.3
  */
-public interface MessageServiceHelper {
+public interface UserMessageServiceHelper {
 
     String getOriginalSender(UserMessage userMessage);
 

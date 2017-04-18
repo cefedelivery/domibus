@@ -1,5 +1,6 @@
-package eu.domibus.core.message;
+package eu.domibus.core.message.ebms3;
 
+import eu.domibus.api.message.ebms3.UserMessageServiceHelper;
 import eu.domibus.api.message.ebms3.model.PartyId;
 import eu.domibus.api.message.ebms3.model.Property;
 import eu.domibus.api.message.ebms3.model.UserMessage;
@@ -17,7 +18,7 @@ import java.util.Set;
  * @since 3.3
  */
 @Component
-public class MessageDefaultServiceHelper implements MessageServiceHelper {
+public class UserMessageDefaultServiceHelper implements UserMessageServiceHelper {
 
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DatabaseMessageHandler.class);

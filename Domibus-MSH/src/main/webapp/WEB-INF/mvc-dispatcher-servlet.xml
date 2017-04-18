@@ -21,7 +21,7 @@
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/ext/**" />
-            <bean class="eu.domibus.ext.interceptor.AuthenticationInterceptor"/>
+            <bean class="eu.domibus.ext.rest.interceptor.AuthenticationInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>
 
