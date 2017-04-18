@@ -3,7 +3,6 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
@@ -22,7 +21,7 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.*;
+import eu.domibus.api.message.ebms3.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -427,8 +426,8 @@ public class MSHWebServiceTest {
         Assert.assertFalse("Expecting false in test for ping message as valid data message is supplied ", mshWebservice.checkPingMessage(userMessage));
 
 
-        userMessage.getCollaborationInfo().getService().setValue(eu.domibus.common.model.configuration.Service.TEST_SERVICE);
-        userMessage.getCollaborationInfo().setAction(eu.domibus.common.model.configuration.Action.TEST_ACTION);
+        userMessage.getCollaborationInfo().getService().setValue(Ebms3Constants.TEST_SERVICE);
+        userMessage.getCollaborationInfo().setAction(Ebms3Constants.TEST_ACTION);
         Assert.assertTrue("Expecting true for Check Ping Message with modified data", mshWebservice.checkPingMessage(userMessage));
     }
 

@@ -1,4 +1,3 @@
-
 package eu.domibus.plugin.handler;
 
 import eu.domibus.api.jms.JMSManager;
@@ -18,18 +17,16 @@ import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.common.model.ObjectFactory;
-import eu.domibus.ebms3.common.model.Property;
+import eu.domibus.api.message.ebms3.model.*;
+import eu.domibus.api.message.ebms3.model.ObjectFactory;
+import eu.domibus.api.message.ebms3.model.Property;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
-import eu.domibus.messaging.DuplicateMessageException;
-import eu.domibus.messaging.MessageConstants;
-import eu.domibus.messaging.MessageNotFoundException;
-import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.messaging.*;
+import eu.domibus.messaging.DispatchMessageCreator;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import org.apache.commons.lang.StringUtils;
@@ -320,7 +317,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     private void fillMpc(UserMessage userMessage, LegConfiguration legConfiguration, Party to) {
         final Map<Party, Mpc> mpcMap = legConfiguration.getPartyMpcMap();
-        String mpc = Mpc.DEFAULT_MPC;
+        String mpc = Ebms3Constants.DEFAULT_MPC;
         if (legConfiguration.getDefaultMpc() != null) {
             mpc = legConfiguration.getDefaultMpc().getQualifiedName();
         }

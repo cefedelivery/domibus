@@ -50,15 +50,15 @@
         <class>eu.domibus.common.model.logging.ErrorLogEntry</class>
         <class>eu.domibus.common.model.logging.UserMessageLog</class>
         <class>eu.domibus.common.model.logging.SignalMessageLog</class>
-        <class>eu.domibus.ebms3.common.model.Error</class>
-        <class>eu.domibus.ebms3.common.model.MessageInfo</class>
-        <class>eu.domibus.ebms3.common.model.Messaging</class>
-        <class>eu.domibus.ebms3.common.model.PartInfo</class>
-        <class>eu.domibus.ebms3.common.model.PartyId</class>
-        <class>eu.domibus.ebms3.common.model.Property</class>
-        <class>eu.domibus.ebms3.common.model.Receipt</class>
-        <class>eu.domibus.ebms3.common.model.SignalMessage</class>
-        <class>eu.domibus.ebms3.common.model.UserMessage</class>
+        <class>eu.domibus.api.message.ebms3.model.Error</class>
+        <class>eu.domibus.api.message.ebms3.model.MessageInfo</class>
+        <class>eu.domibus.api.message.ebms3.model.Messaging</class>
+        <class>eu.domibus.api.message.ebms3.model.PartInfo</class>
+        <class>eu.domibus.api.message.ebms3.model.PartyId</class>
+        <class>eu.domibus.api.message.ebms3.model.Property</class>
+        <class>eu.domibus.api.message.ebms3.model.Receipt</class>
+        <class>eu.domibus.api.message.ebms3.model.SignalMessage</class>
+        <class>eu.domibus.api.message.ebms3.model.UserMessage</class>
         <class>eu.domibus.plugin.routing.BackendFilter</class>
         <class>eu.domibus.plugin.routing.RoutingCriteria</class>
         <class>eu.domibus.core.security.AuthenticationEntry</class>

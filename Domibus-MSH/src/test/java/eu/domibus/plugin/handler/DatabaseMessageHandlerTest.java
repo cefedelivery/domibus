@@ -18,9 +18,9 @@ import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.common.model.Property;
-import eu.domibus.ebms3.common.model.Service;
+import eu.domibus.api.message.ebms3.model.*;
+import eu.domibus.api.message.ebms3.model.Property;
+import eu.domibus.api.message.ebms3.model.Service;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -219,7 +219,7 @@ public class DatabaseMessageHandlerTest {
             result = conf;
 
             Mpc mpc = new Mpc();
-            mpc.setName(Mpc.DEFAULT_MPC);
+            mpc.setName(Ebms3Constants.DEFAULT_MPC);
 
             LegConfiguration legConfiguration = new LegConfiguration();
             final Map<Party, Mpc> mpcMap = new HashMap<>();

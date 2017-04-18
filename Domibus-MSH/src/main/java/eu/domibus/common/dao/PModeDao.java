@@ -4,8 +4,8 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.AgreementRef;
-import eu.domibus.ebms3.common.model.PartyId;
+import eu.domibus.api.message.ebms3.model.AgreementRef;
+import eu.domibus.api.message.ebms3.model.PartyId;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -173,7 +173,7 @@ public class PModeDao extends PModeProvider {
         }
     }
 
-    protected String findServiceName(final eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception {
+    protected String findServiceName(final eu.domibus.api.message.ebms3.model.Service service) throws EbMS3Exception {
         final String type = service.getType();
         final String value = service.getValue();
         final TypedQuery<String> query;

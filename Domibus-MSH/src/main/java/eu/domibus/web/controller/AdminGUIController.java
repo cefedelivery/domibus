@@ -9,7 +9,7 @@ import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.services.MessagesLogService;
 import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.api.message.ebms3.model.MessageType;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.*;

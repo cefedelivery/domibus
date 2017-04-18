@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.message.ebms3.model.Ebms3Constants;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.clustering.Command;
@@ -8,9 +9,9 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
-import eu.domibus.ebms3.common.model.AgreementRef;
-import eu.domibus.ebms3.common.model.PartyId;
-import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.api.message.ebms3.model.AgreementRef;
+import eu.domibus.api.message.ebms3.model.PartyId;
+import eu.domibus.api.message.ebms3.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -151,8 +152,8 @@ public abstract class PModeProvider {
             leg = findLegName(agreementName, senderParty, receiverParty, service, action);
             LOG.businessInfo(DomibusMessageCode.BUS_LEG_NAME_FOUND, leg, agreementName, senderParty, receiverParty, service, action);
 
-            if ((action.equals(Action.TEST_ACTION) && (!service.equals(Service.TEST_SERVICE)))) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Service.TEST_SERVICE + " and ebMS3 Test Action: " + Action.TEST_ACTION + " can only be used together [CORE] 5.2.2.9", userMessage.getMessageInfo().getMessageId(), null);
+            if ((action.equals(Ebms3Constants.TEST_ACTION) && (!service.equals(Ebms3Constants.TEST_SERVICE)))) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Ebms3Constants.TEST_SERVICE + " and ebMS3 Test Action: " + Ebms3Constants.TEST_ACTION + " can only be used together [CORE] 5.2.2.9", userMessage.getMessageInfo().getMessageId(), null);
             }
 
             final String pmodeKey = senderParty + ":" + receiverParty + ":" + service + ":" + action + ":" + agreementName + ":" + leg;
@@ -183,7 +184,7 @@ public abstract class PModeProvider {
 
     protected abstract String findActionName(String action) throws EbMS3Exception;
 
-    protected abstract String findServiceName(eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception;
+    protected abstract String findServiceName(eu.domibus.api.message.ebms3.model.Service service) throws EbMS3Exception;
 
     protected abstract String findPartyName(Collection<PartyId> partyId) throws EbMS3Exception;
 

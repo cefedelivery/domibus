@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.api.message.ebms3.model.*;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
@@ -8,7 +9,6 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
@@ -19,7 +19,6 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -249,8 +248,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
      */
     protected Boolean checkPingMessage(final UserMessage message) {
         LOG.debug("Checking if it is a ping message");
-        return eu.domibus.common.model.configuration.Service.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
-                && eu.domibus.common.model.configuration.Action.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
+        return Ebms3Constants.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
+                && Ebms3Constants.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
 
     }
 
@@ -378,7 +377,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 .setMessageStatus(MessageStatus.RECEIVED)
                 .setMshRole(MSHRole.RECEIVING)
                 .setNotificationStatus(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED)
-                .setMpc(StringUtils.isEmpty(userMessage.getMpc()) ? Mpc.DEFAULT_MPC : userMessage.getMpc())
+                .setMpc(StringUtils.isEmpty(userMessage.getMpc()) ? Ebms3Constants.DEFAULT_MPC : userMessage.getMpc())
                 .setSendAttemptsMax(0)
                 .setBackendName(getFinalRecipientName(userMessage))
                 .setEndpoint(to.getEndpoint());

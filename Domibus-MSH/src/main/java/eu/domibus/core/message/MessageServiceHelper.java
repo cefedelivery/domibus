@@ -1,6 +1,6 @@
 package eu.domibus.core.message;
 
-import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.api.message.ebms3.model.UserMessage;
 
 /**
  * @author Cosmin Baciu
