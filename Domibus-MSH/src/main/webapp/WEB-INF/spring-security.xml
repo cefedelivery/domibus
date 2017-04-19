@@ -15,20 +15,20 @@
           entry-point-ref="http403ForbiddenEntryPoint"
           authentication-manager-ref="authenticationManagerForAdminConsole">
 
-        <intercept-url pattern="/" access="permitAll" />
-        <intercept-url pattern="/rest/security/authentication" access="permitAll" />
-        <intercept-url pattern="/rest/application/info" access="permitAll" />
-        <!--<intercept-url pattern="/rest/pmode/**" access="hasRole('ROLE_ADMIN')" />-->
-        <intercept-url pattern="/rest/pmode" access="permitAll" />
-        <intercept-url pattern="/rest/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')" />
+        <intercept-url pattern="/" access="permitAll"/>
+        <intercept-url pattern="/rest/security/authentication" access="permitAll"/>
+        <intercept-url pattern="/rest/application/info" access="permitAll"/>
+        <intercept-url pattern="/rest/pmode/**" access="hasRole('ROLE_ADMIN')"/>
+        <intercept-url pattern="/rest/truststore/**" access="hasRole('ROLE_ADMIN')"/>
+        <intercept-url pattern="/rest/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')"/>
 
         <!-- Enable CSRF protection -->
         <csrf request-matcher-ref="csrfURLMatcher" token-repository-ref="tokenRepository"/>
 
         <headers>
-            <frame-options policy="DENY" />
-            <content-type-options />
-            <xss-protection enabled="true" />
+            <frame-options policy="DENY"/>
+            <content-type-options/>
+            <xss-protection enabled="true"/>
         </headers>
     </http>
 
@@ -39,5 +39,6 @@
         <beans:property name="ignoreUrl" value="/rest/security/authentication"/>
     </beans:bean>
 
-    <beans:bean id="http403ForbiddenEntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"/>
+    <beans:bean id="http403ForbiddenEntryPoint"
+                class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"/>
 </beans:beans>
