@@ -1,11 +1,23 @@
 package eu.domibus.core.message.acknowledge;
 
+import eu.domibus.api.message.ebms3.UserMessageService;
+import eu.domibus.api.message.ebms3.UserMessageServiceHelper;
+import eu.domibus.api.message.ebms3.model.UserMessage;
 import eu.domibus.api.security.AuthUtils;
+import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Cosmin Baciu
@@ -26,51 +38,84 @@ public class MessageAcknowledgeDefaultServiceTest {
     @Injectable
     MessageAcknowledgeConverter messageAcknowledgeConverter;
 
+    @Injectable
+    UserMessageService userMessageService;
+
+    @Injectable
+    UserMessageServiceHelper userMessageServiceHelper;
+
     @Test
-    public void testAcknowledgeMessage(@Injectable  final MessageAcknowledgementEntity entity) throws Exception {
-        /*final String messageId = "1";
-        final Timestamp acknowledgeTimestamp = new Timestamp(System.currentTimeMillis());
-        final String from = "C3";
-        final String to = "C4";
-        final Map<String, String> properties = new HashMap<>();
-        properties.put("prop1", "value1");
-        final String user = "baciuco";
-
-
-        new Expectations(messageAcknowledgeDefaultService) {{
-            authUtils.getAuthenticatedUser();
-            result = user;
-
-            messageAcknowledgeConverter.create(user, messageId, acknowledgeTimestamp, from, to, properties);
-            result = entity;
-
-        }};
-
-        messageAcknowledgeDefaultService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, properties);
-
-        new Verifications() {{
-            messageAcknowledgementDao.create(entity);
-            messageAcknowledgeConverter.convert(entity);
-        }};*/
-    }
-
-    /*@Test
-    public void testAcknowledgeMessageWithNoProperties(@Injectable  final MessageAcknowledgementEntity entity) throws Exception {
+    public void testAcknowledgeMessageDelivered(@Injectable  final MessageAcknowledgementEntity entity) throws Exception {
         final String messageId = "1";
         final Timestamp acknowledgeTimestamp = new Timestamp(System.currentTimeMillis());
-        final String from = "C3";
-        final String to = "C4";
+        final String finalRecipient = "C4";
+        final Map<String, String> properties = new HashMap<>();
+        properties.put("prop1", "value1");
+
+        final UserMessage userMessage = new UserMessage();
+        final String localAccessPointId ="C3";
 
         new Expectations(messageAcknowledgeDefaultService) {{
-            messageAcknowledgeDefaultService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, null);
+            messageAcknowledgeDefaultService.getUserMessage(messageId);
+            result = userMessage;
+
+            messageAcknowledgeDefaultService.getLocalAccessPointId(userMessage);
+            result = localAccessPointId;
+
+            userMessageServiceHelper.getFinalRecipient(userMessage);
+            result = finalRecipient;
+
+            messageAcknowledgeDefaultService.acknowledgeMessage(userMessage, acknowledgeTimestamp, localAccessPointId, finalRecipient, properties);
 
         }};
 
-        messageAcknowledgeDefaultService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to);
+        messageAcknowledgeDefaultService.acknowledgeMessageDelivered(messageId, acknowledgeTimestamp, properties);
+    }
+
+
+    @Test
+    public void testAcknowledgeMessageDeliveredWithNoProperties(@Injectable  final MessageAcknowledgementEntity entity) throws Exception {
+        final String messageId = "1";
+        final Timestamp acknowledgeTimestamp = new Timestamp(System.currentTimeMillis());
+
+        new Expectations(messageAcknowledgeDefaultService) {{
+            messageAcknowledgeDefaultService.acknowledgeMessageDelivered(messageId, acknowledgeTimestamp, null);
+
+        }};
+
+        messageAcknowledgeDefaultService.acknowledgeMessageDelivered(messageId, acknowledgeTimestamp);
 
         new Verifications() {{
-            messageAcknowledgeDefaultService.acknowledgeMessage(messageId, acknowledgeTimestamp, from, to, null);
+            messageAcknowledgeDefaultService.acknowledgeMessageDelivered(messageId, acknowledgeTimestamp,null);
         }};
+    }
+
+    @Test
+    public void testAcknowledgeMessageProcessed(@Injectable  final MessageAcknowledgementEntity entity) throws Exception {
+        final UserMessage userMessage = new UserMessage();
+        final String localAccessPointId ="C3";
+
+        final String messageId = "1";
+        final Timestamp acknowledgeTimestamp = new Timestamp(System.currentTimeMillis());
+        final String finalRecipient = "C4";
+        final Map<String, String> properties = new HashMap<>();
+        properties.put("prop1", "value1");
+
+        new Expectations(messageAcknowledgeDefaultService) {{
+            messageAcknowledgeDefaultService.getUserMessage(messageId);
+            result = userMessage;
+
+            messageAcknowledgeDefaultService.getLocalAccessPointId(userMessage);
+            result = localAccessPointId;
+
+            userMessageServiceHelper.getFinalRecipient(userMessage);
+            result = finalRecipient;
+
+            messageAcknowledgeDefaultService.acknowledgeMessage(userMessage, acknowledgeTimestamp, finalRecipient, localAccessPointId, properties);
+
+        }};
+
+        messageAcknowledgeDefaultService.acknowledgeMessageProcessed(messageId, acknowledgeTimestamp, properties);
     }
 
     @Test
@@ -92,5 +137,37 @@ public class MessageAcknowledgeDefaultServiceTest {
         new Verifications() {{
             messageAcknowledgeConverter.convert(messageAcknowledgements);
         }};
-    }*/
+    }
+
+    @Test
+    public void testAcknowledgeMessage(@Injectable final UserMessage userMessage,
+                                       @Injectable final MessageAcknowledgementEntity entity) throws Exception {
+        final String messageId = "1";
+        final Timestamp acknowledgeTimestamp = new Timestamp(System.currentTimeMillis());
+        final String from = "C3";
+        final String to = "C4";
+        final Map<String, String> properties = new HashMap<>();
+        properties.put("prop1", "value1");
+        final String user = "baciuco";
+
+
+        new Expectations(messageAcknowledgeDefaultService) {{
+            authUtils.getAuthenticatedUser();
+            result = user;
+
+            userMessage.getMessageInfo().getMessageId();
+            result = messageId;
+
+            messageAcknowledgeConverter.create(user, messageId, acknowledgeTimestamp, from, to, properties);
+            result = entity;
+
+        }};
+
+        messageAcknowledgeDefaultService.acknowledgeMessage(userMessage, acknowledgeTimestamp, from, to, properties);
+
+        new Verifications() {{
+            messageAcknowledgementDao.create(entity);
+            messageAcknowledgeConverter.convert(entity);
+        }};
+    }
 }

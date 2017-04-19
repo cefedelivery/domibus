@@ -50,7 +50,7 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
         return acknowledgeMessage(userMessage, acknowledgeTimestamp, localAccessPointId, finalRecipient, properties);
     }
 
-    private UserMessage getUserMessage(String messageId) {
+    protected UserMessage getUserMessage(String messageId) {
         final UserMessage userMessage = userMessageService.getMessage(messageId);
         if (userMessage == null) {
             throw new MessageAcknowledgeException(DomibusCoreErrorCode.DOM_001, "Message with ID [" + messageId + "] does not exist");
@@ -90,7 +90,7 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
         return messageAcknowledgeConverter.convert(entities);
     }
 
-    private String getLocalAccessPointId(UserMessage userMessage) {
+    protected String getLocalAccessPointId(UserMessage userMessage) {
         return userMessageServiceHelper.getPartyTo(userMessage);
     }
 

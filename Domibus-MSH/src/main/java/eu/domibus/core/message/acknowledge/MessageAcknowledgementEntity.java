@@ -6,6 +6,9 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -18,7 +21,7 @@ import java.util.Set;
         @NamedQuery(name = "MessageAcknowledgement.findMessageAcknowledgementByMessageId",
                 query = "select messageAcknowledge from MessageAcknowledgementEntity messageAcknowledge where messageAcknowledge.messageId = :MESSAGE_ID")
 })
-public class  MessageAcknowledgementEntity extends AbstractBaseEntity {
+public class MessageAcknowledgementEntity extends AbstractBaseEntity {
 
     @Column(name = "MESSAGE_ID")
     private String messageId;
@@ -68,6 +71,32 @@ public class  MessageAcknowledgementEntity extends AbstractBaseEntity {
 
     public Set<MessageAcknowledgementProperty> getProperties() {
         return properties;
+    }
+
+    public Map<String, String> getPropertiesAsMap() {
+        if (properties == null) {
+            return null;
+        }
+        final HashMap<String, String> hashMap = new HashMap<>();
+        for (MessageAcknowledgementProperty property : properties) {
+            hashMap.put(property.getName(), property.getValue());
+        }
+        return hashMap;
+    }
+
+    public void setPropertiesWithMap(Map<String, String> properties) {
+        if (properties == null || properties.isEmpty()) {
+            return;
+        }
+
+        Set<MessageAcknowledgementProperty> acknowledgmentProperties = new HashSet<>();
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            MessageAcknowledgementProperty property = new MessageAcknowledgementProperty();
+            property.setName(entry.getKey());
+            property.setValue(entry.getValue());
+            acknowledgmentProperties.add(property);
+        }
+        this.properties = acknowledgmentProperties;
     }
 
     public void setProperties(Set<MessageAcknowledgementProperty> properties) {

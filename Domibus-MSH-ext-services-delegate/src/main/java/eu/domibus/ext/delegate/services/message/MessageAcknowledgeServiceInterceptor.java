@@ -21,7 +21,7 @@ public class MessageAcknowledgeServiceInterceptor {
     AOPUtil aopUtil;
 
     @Around(value = "execution(public * eu.domibus.ext.delegate.services.message.MessageAcknowledgeServiceDelegate.*(..))")
-    public Object process(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object intercept(ProceedingJoinPoint joinPoint) throws Throwable {
         final String methodSignature = aopUtil.getMethodSignature(joinPoint);
         LOG.debug("Preparing to execute method [{}]", methodSignature);
 

@@ -1,4 +1,4 @@
-package eu.domibus.ext.delegate.services;
+package eu.domibus.ext.delegate.services.authentication;
 
 import eu.domibus.ext.delegate.services.authentication.AuthenticationServiceDelegate;
 import eu.domibus.ext.exceptions.AuthenticationException;

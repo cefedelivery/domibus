@@ -13,6 +13,7 @@ import eu.domibus.ext.exceptions.MessageAcknowledgeException;
 import eu.domibus.ext.services.MessageAcknowledgeService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -81,7 +82,7 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
 
     }
 
-    private UserMessage getUserMessage(String messageId) {
+    protected UserMessage getUserMessage(String messageId) {
         final UserMessage userMessage = userMessageService.getMessage(messageId);
         if (userMessage == null) {
             throw new MessageAcknowledgeException(DomibusErrorCode.DOM_001, "Message with ID [" + messageId + "] does not exist");
@@ -117,8 +118,7 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
         final String originalUserFromSecurityContext = authUtils.getOriginalUserFromSecurityContext();
         final boolean sameFinalRecipient = userMessageServiceHelper.isSameFinalRecipient(userMessage, originalUserFromSecurityContext);
         if (!sameFinalRecipient) {
-            //TODO transform to security log
-            LOG.debug("User [{}] is trying to submit/access a message having as final recipient: [{}]", originalUserFromSecurityContext, userMessageServiceHelper.getFinalRecipient(userMessage));
+            LOG.securityInfo(DomibusMessageCode.SEC_UNAUTHORIZED_MESSAGE_ACCESS, originalUserFromSecurityContext, userMessageServiceHelper.getFinalRecipient(userMessage));
             throw new AuthenticationException(DomibusErrorCode.DOM_002, "You are not allowed to handle this message. You are authorized as [" + originalUserFromSecurityContext + "]");
         }
     }
