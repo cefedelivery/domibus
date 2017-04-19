@@ -1,4 +1,4 @@
-package eu.domibus.ext.delegate.services;
+package eu.domibus.ext.delegate.services.message;
 
 import eu.domibus.api.message.acknowledge.MessageAcknowledgement;
 import eu.domibus.api.message.ebms3.UserMessageService;
@@ -47,18 +47,12 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
     AuthUtils authUtils;
 
 
-
     @Override
     public MessageAcknowledgementDTO acknowledgeMessageDelivered(String messageId, Timestamp acknowledgeTimestamp, Map<String, String> properties) throws AuthenticationException, MessageAcknowledgeException {
         checkSecurity(messageId);
-        try {
-            final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessageDelivered(messageId, acknowledgeTimestamp, properties);
-            return domainConverter.convert(messageAcknowledgement, MessageAcknowledgementDTO.class);
-        } catch (eu.domibus.api.security.AuthenticationException e) {
-            throw new AuthenticationException(e);
-        } catch (Exception e) {
-            throw new MessageAcknowledgeException(e);
-        }
+
+        final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessageDelivered(messageId, acknowledgeTimestamp, properties);
+        return domainConverter.convert(messageAcknowledgement, MessageAcknowledgementDTO.class);
     }
 
     @Override
@@ -69,15 +63,9 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
     @Override
     public MessageAcknowledgementDTO acknowledgeMessageProcessed(String messageId, Timestamp acknowledgeTimestamp, Map<String, String> properties) throws AuthenticationException, MessageAcknowledgeException {
         checkSecurity(messageId);
-        //TODO move the exception mapping into an interceptor
-        try {
-            final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessageProcessed(messageId, acknowledgeTimestamp, properties);
-            return domainConverter.convert(messageAcknowledgement, MessageAcknowledgementDTO.class);
-        } catch (eu.domibus.api.security.AuthenticationException e) {
-            throw new AuthenticationException(e);
-        } catch (Exception e) {
-            throw new MessageAcknowledgeException(e);
-        }
+
+        final MessageAcknowledgement messageAcknowledgement = messageAcknowledgeCoreService.acknowledgeMessageProcessed(messageId, acknowledgeTimestamp, properties);
+        return domainConverter.convert(messageAcknowledgement, MessageAcknowledgementDTO.class);
     }
 
     @Override
@@ -88,14 +76,9 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
     @Override
     public List<MessageAcknowledgementDTO> getAcknowledgedMessages(String messageId) throws AuthenticationException, MessageAcknowledgeException {
         checkSecurity(messageId);
-        try {
-            final List<MessageAcknowledgement> messageAcknowledgement = messageAcknowledgeCoreService.getAcknowledgedMessages(messageId);
-            return domainConverter.convert(messageAcknowledgement, MessageAcknowledgementDTO.class);
-        } catch (eu.domibus.api.security.AuthenticationException e) {
-            throw new AuthenticationException(e);
-        } catch (Exception e) {
-            throw new MessageAcknowledgeException(e);
-        }
+        final List<MessageAcknowledgement> messageAcknowledgement = messageAcknowledgeCoreService.getAcknowledgedMessages(messageId);
+        return domainConverter.convert(messageAcknowledgement, MessageAcknowledgementDTO.class);
+
     }
 
     private UserMessage getUserMessage(String messageId) {
@@ -105,8 +88,6 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
         }
         return userMessage;
     }
-
-    //TODO move this into an interceptor so that it can be reusable
 
     /**
      * Checks if the authenticated user has the rights to perform an acknowledge on the message
@@ -138,7 +119,7 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
         if (!sameFinalRecipient) {
             //TODO transform to security log
             LOG.debug("User [{}] is trying to submit/access a message having as final recipient: [{}]", originalUserFromSecurityContext, userMessageServiceHelper.getFinalRecipient(userMessage));
-            throw new eu.domibus.api.security.AuthenticationException("You are not allowed to handle this message. You are authorized as [" + originalUserFromSecurityContext + "]");
+            throw new AuthenticationException(DomibusErrorCode.DOM_002, "You are not allowed to handle this message. You are authorized as [" + originalUserFromSecurityContext + "]");
         }
     }
 }

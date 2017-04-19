@@ -24,14 +24,30 @@
     </build>
 
     <dependencies>
+        <!-- Domibus modules -->
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-logging</artifactId>
         </dependency>
+        <!-- End Domibus modules -->
+
+        <!-- Spring -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
         </dependency>
+        <!-- End Spring -->
+
+        <!-- AspectJ -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+        </dependency>
+        <!-- End AspectJ -->
 
         <dependency>
             <groupId>commons-lang</groupId>

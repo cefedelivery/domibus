@@ -1,4 +1,4 @@
-package eu.domibus.ext.delegate.services;
+package eu.domibus.ext.delegate.services.authentication;
 
 import eu.domibus.ext.exceptions.AuthenticationException;
 import eu.domibus.ext.services.AuthenticationService;
@@ -27,7 +27,7 @@ public class AuthenticationServiceDelegate implements AuthenticationService {
         try {
             authenticationService.authenticate(httpRequest);
         } catch (Exception e) {
-            LOG.securityError(DomibusMessageCode.SEC_AUTHENTICATION_ERROR, e);
+            //already logged by the authentication service
             throw new AuthenticationException(e);
         }
 

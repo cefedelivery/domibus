@@ -1,5 +1,6 @@
 package eu.domibus.ext.delegate.services;
 
+import eu.domibus.ext.delegate.services.authentication.AuthenticationServiceDelegate;
 import eu.domibus.ext.exceptions.AuthenticationException;
 import mockit.Expectations;
 import mockit.Injectable;

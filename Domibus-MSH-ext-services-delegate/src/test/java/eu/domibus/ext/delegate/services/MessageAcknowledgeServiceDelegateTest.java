@@ -3,13 +3,12 @@ package eu.domibus.ext.delegate.services;
 import eu.domibus.api.message.acknowledge.MessageAcknowledgeService;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.ext.delegate.converter.DomibusDomainConverter;
+import eu.domibus.ext.delegate.services.message.MessageAcknowledgeServiceDelegate;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author  migueti, Cosmin Baciu

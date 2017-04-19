@@ -1,4 +1,4 @@
-package eu.domibus.util;
+package eu.domibus.api.util;
 
 import java.util.List;
 import java.util.Map;

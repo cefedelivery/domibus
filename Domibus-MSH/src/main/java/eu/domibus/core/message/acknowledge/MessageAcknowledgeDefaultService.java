@@ -6,7 +6,6 @@ import eu.domibus.api.message.acknowledge.MessageAcknowledgement;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.ebms3.UserMessageService;
 import eu.domibus.api.security.AuthUtils;
-import eu.domibus.api.security.AuthenticationException;
 import eu.domibus.api.message.ebms3.UserMessageServiceHelper;
 import eu.domibus.api.message.ebms3.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -44,7 +43,7 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
 
 
     @Override
-    public MessageAcknowledgement acknowledgeMessageDelivered(String messageId, Timestamp acknowledgeTimestamp, Map<String, String> properties) throws AuthenticationException, MessageAcknowledgeException {
+    public MessageAcknowledgement acknowledgeMessageDelivered(String messageId, Timestamp acknowledgeTimestamp, Map<String, String> properties) throws MessageAcknowledgeException {
         final UserMessage userMessage = getUserMessage(messageId);
         final String localAccessPointId = getLocalAccessPointId(userMessage);
         final String finalRecipient = userMessageServiceHelper.getFinalRecipient(userMessage);
@@ -60,12 +59,12 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
     }
 
     @Override
-    public MessageAcknowledgement acknowledgeMessageDelivered(String messageId, Timestamp acknowledgeTimestamp) throws AuthenticationException, MessageAcknowledgeException {
+    public MessageAcknowledgement acknowledgeMessageDelivered(String messageId, Timestamp acknowledgeTimestamp) throws MessageAcknowledgeException {
         return acknowledgeMessageDelivered(messageId, acknowledgeTimestamp, null);
     }
 
     @Override
-    public MessageAcknowledgement acknowledgeMessageProcessed(String messageId, Timestamp acknowledgeTimestamp, Map<String, String> properties) throws AuthenticationException, MessageAcknowledgeException {
+    public MessageAcknowledgement acknowledgeMessageProcessed(String messageId, Timestamp acknowledgeTimestamp, Map<String, String> properties) throws MessageAcknowledgeException {
         final UserMessage userMessage = getUserMessage(messageId);
         final String localAccessPointId = getLocalAccessPointId(userMessage);
         final String finalRecipient = userMessageServiceHelper.getFinalRecipient(userMessage);
@@ -73,7 +72,7 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
     }
 
     @Override
-    public MessageAcknowledgement acknowledgeMessageProcessed(String messageId, Timestamp acknowledgeTimestamp) throws AuthenticationException, MessageAcknowledgeException {
+    public MessageAcknowledgement acknowledgeMessageProcessed(String messageId, Timestamp acknowledgeTimestamp) throws MessageAcknowledgeException {
         return acknowledgeMessageProcessed(messageId, acknowledgeTimestamp, null);
     }
 

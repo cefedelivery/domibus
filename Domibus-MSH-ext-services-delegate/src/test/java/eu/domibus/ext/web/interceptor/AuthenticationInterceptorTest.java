@@ -1,4 +1,4 @@
-package eu.domibus.ext.rest.interceptor;
+package eu.domibus.ext.web.interceptor;
 
 import eu.domibus.ext.exceptions.AuthenticationException;
 import eu.domibus.ext.exceptions.DomibusErrorCode;

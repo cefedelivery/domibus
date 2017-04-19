@@ -1,5 +1,6 @@
 package eu.domibus.util;
 
+import eu.domibus.api.util.HttpUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import eu.domibus.logging.DomibusLogger;

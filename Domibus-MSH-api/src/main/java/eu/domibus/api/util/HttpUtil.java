@@ -1,4 +1,4 @@
-package eu.domibus.util;
+package eu.domibus.api.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
