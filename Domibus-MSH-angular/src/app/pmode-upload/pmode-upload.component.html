@@ -1,22 +1,25 @@
 <h1 md-dialog-title>PModes Upload</h1>
 
-<div md-dialog-content>
-  <input type="file" ng2FileSelect [uploader]="uploader"/>
-</div>
+<div class="divTable">
+  <div class="divTableBody">
 
-<div md-dialog-actions>
-
-  <div *ngFor="let item of uploader.queue">
-    <button md-raised-button color="primary" (click)="item.upload()" [disabled]="item.isReady || item.isUploading || item.isSuccess">Upload
-    </button>
+    <div class="divTableRow">
+      <div class="divTableCell">
+        <input #fileInput type="file" id="pmode" accept=".xml">
+      </div>
+      <div class="divTableCell">
+        <!--<label for="pmode">File</label>-->
+      </div>
+    </div>
+    <div class="divTableRow">
+      <div class="divTableCell">
+        <button md-raised-button color="primary" (click)="submit()">Upload</button>
+      </div>
+      <div class="divTableCell">
+        <button md-raised-button color="primary" (click)="dialogRef.close('Cancel')">Cancel</button>
+      </div>
+    </div>
   </div>
-
-  <div>
-    <button md-raised-button color="primary" (click)="dialogRef.close('Cancel')">Exit</button>
-  </div>
-
 </div>
 
-<div>
 
-</div>

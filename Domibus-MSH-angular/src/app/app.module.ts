@@ -31,7 +31,6 @@ import {AuthorizedAdminGuard} from "./guards/authorized-admin.guard";
 import {MessageLogComponent} from "./messagelog/messagelog.component";
 import {TruststoreComponent} from './truststore/truststore.component';
 import {PmodeUploadComponent} from './pmode-upload/pmode-upload.component';
-import {FileSelectDirective} from 'ng2-file-upload';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -50,8 +49,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     IsAuthorized,
     TruststoreComponent,
     PModeComponent,
-    PmodeUploadComponent,
-    FileSelectDirective
+    PmodeUploadComponent
   ],
   entryComponents: [
     AppComponent,

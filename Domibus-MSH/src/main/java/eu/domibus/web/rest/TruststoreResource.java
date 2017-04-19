@@ -4,6 +4,7 @@ import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,21 +21,19 @@ public class TruststoreResource {
     private CryptoService cryptoService;
 
     @RequestMapping(value = "/rest/truststore", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    String uploadTruststoreFile(@RequestPart("truststore") MultipartFile truststore, @RequestParam("password") String password) {
+    public ResponseEntity<String> uploadTruststoreFile(@RequestPart("truststore") MultipartFile truststore, @RequestParam("password") String password) {
 
         if (!truststore.isEmpty()) {
             try {
                 byte[] bytes = truststore.getBytes();
                 cryptoService.replaceTruststore(bytes, password);
-                return "Truststore file has been successfully replaced.";
+                return ResponseEntity.ok("Truststore file has been successfully replaced.");
             } catch (Exception e) {
                 LOG.error("Failed to upload the truststore file", e);
-                return "Failed to upload the truststore file due to => " + e.getMessage();
+                return ResponseEntity.badRequest().body("Failed to upload the truststore file due to => " + e.getMessage());
             }
         } else {
-            return "Failed to upload the truststore file since it was empty.";
+            return ResponseEntity.badRequest().body("Failed to upload the truststore file since it was empty.");
         }
     }
 }

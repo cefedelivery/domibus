@@ -1,6 +1,43 @@
-.ng-valid[required], .ng-valid.required  {
-  border-left: 5px solid #42A948; /* green */
+label:hover, label:active, input:hover + label, input:active + label {
+  color: #3f51b5;
 }
-.ng-invalid:not(form)  {
-  border-left: 5px solid #a94442; /* red */
+
+.divTable {
+  display: table;
+  width: 100%;
+}
+
+.divTableRow {
+  display: table-row;
+}
+
+.divTableHeading {
+  background-color: #EEE;
+  display: table-header-group;
+}
+
+.divTableCell, .divTableHead {
+  /*border: 1px solid #999999;*/
+  display: table-cell;
+  padding: 3px 3px;
+}
+
+.divTableHeading {
+  background-color: #EEE;
+  display: table-header-group;
+  font-weight: bold;
+}
+
+.divTableFoot {
+  background-color: #EEE;
+  display: table-footer-group;
+  font-weight: bold;
+}
+
+.divTableBody {
+  display: table-row-group;
+}
+
+.firstColumn {
+  width: 20%;
 }

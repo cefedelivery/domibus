@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,8 +95,8 @@ public class UploadPModeIT extends AbstractIT {
             File wrongPmode = new File("src/test/resources/SamplePModes/domibus-configuration-xsd-not-compliant.xml");
             FileInputStream fis = new FileInputStream(wrongPmode);
             MultipartFile pModeContent = new MockMultipartFile("wrong-domibus-configuration", wrongPmode.getName(), "text/xml", IOUtils.toByteArray(fis));
-            String response = adminGui.uploadPmodes(pModeContent);
-            Assert.assertTrue(response.contains("Failed to upload the PMode file due to"));
+            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent);
+            Assert.assertTrue(response.getBody().contains("Failed to upload the PMode file due to"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());
             throw ioEx;
@@ -111,7 +112,7 @@ public class UploadPModeIT extends AbstractIT {
 
     /**
      * Tests that a subset of the PMODE file content (given a fixed pModeKey) is correctly stored in the DB.
-     *
+     * <p>
      * PMODE Key  = Initiator Party: Responder Party: Service name: Action name: Agreement: Test case name
      */
     @Test
@@ -226,8 +227,8 @@ public class UploadPModeIT extends AbstractIT {
             File wrongPmode = new File("src/test/resources/SamplePModes/domibus-configuration-long-names.xml");
             FileInputStream fis = new FileInputStream(wrongPmode);
             MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-long-names", wrongPmode.getName(), "text/xml", IOUtils.toByteArray(fis));
-            String response = adminGui.uploadPmodes(pModeContent);
-            Assert.assertTrue(response.contains("is not facet-valid with respect to maxLength"));
+            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent);
+            Assert.assertTrue(response.getBody().contains("is not facet-valid with respect to maxLength"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());
             throw ioEx;

@@ -29,16 +29,19 @@ export class TruststoreComponent implements OnInit {
   ngOnInit() {
   }
 
-  public onSubmit(empForm: any, event: Event) {
-    event.preventDefault();
+  public submit() {
     let fi = this.fileInput.nativeElement;
     console.log(this.password.nativeElement);
     let input = new FormData();
     input.append('truststore', fi.files[0]);
     input.append('password', this.password.nativeElement.value);
     this.http.post(this.url, input).subscribe(res => {
-      console.log(res);
-    });
+        this.alertService.success(res.json(), false);
+      },
+      err => {
+        this.alertService.error(err.json(), false);
+      }
+    );
 
 
   }

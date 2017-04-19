@@ -6,6 +6,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,9 +31,9 @@ public class PModeResource {
     }
 
     @RequestMapping(value = "/rest/pmode", method = RequestMethod.POST)
-    public String uploadPmodes(@RequestPart("file") MultipartFile pmode) {
+    public ResponseEntity<String> uploadPmodes(@RequestPart("file") MultipartFile pmode) {
         if (pmode.isEmpty()) {
-            return "Failed to upload the PMode file since it was empty.";
+            return ResponseEntity.badRequest().body("Failed to upload the PMode file since it was empty.");
         }
         try {
             byte[] bytes = pmode.getBytes();
@@ -39,15 +41,15 @@ public class PModeResource {
             List<String> pmodeUpdateMessage = pModeProvider.updatePModes(bytes);
             String message = "PMode file has been successfully uploaded";
             if (pmodeUpdateMessage != null && pmodeUpdateMessage.size() > 0) {
-                message += " but some issues were detected: <br>" + StringUtils.join(pmodeUpdateMessage, "<br>");
+                message += " but some issues were detected: \n" + StringUtils.join(pmodeUpdateMessage, "\n");
             }
-            return message;
+            return ResponseEntity.ok(message);
         } catch (XmlProcessingException e) {
             LOG.error("Error uploading the PMode", e);
-            return "Failed to upload the PMode file due to: <br><br> " + StringUtils.join(e.getErrors(), "<br>");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + e.getMessage() + "\n" + StringUtils.join(e.getErrors(), "\n"));
         } catch (Exception e) {
             LOG.error("Error uploading the PMode", e);
-            return "Failed to upload the PMode file due to: <br><br> " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + e.getMessage());
         }
     }
 }
