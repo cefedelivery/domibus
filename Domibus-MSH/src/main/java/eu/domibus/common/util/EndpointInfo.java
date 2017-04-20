@@ -3,7 +3,8 @@ package eu.domibus.common.util;
 import java.security.cert.X509Certificate;
 
 /**
- * Created by idragusa on 3/29/17.
+ * @author Ioana Dragusanu (idragusa)
+ * @since 3.2.5
  */
 public class EndpointInfo {
 

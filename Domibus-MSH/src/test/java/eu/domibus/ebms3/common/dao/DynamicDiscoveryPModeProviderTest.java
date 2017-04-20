@@ -33,15 +33,9 @@ import org.mockito.Spy;
 import javax.xml.bind.JAXBContext;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.Properties;
@@ -68,6 +62,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
     private static final String ALIAS_CN_AVAILABLE = "cn_available";
     private static final String ALIAS_CN_NOT_AVAILABLE = "cn_not_available";
+    private static final String CERT_PASSWORD = "1234";
 
 
     private static final String TEST_ACTION_VALUE = "testAction";
@@ -279,7 +274,7 @@ public class DynamicDiscoveryPModeProviderTest {
     @Test
     public void testExtractCommonName_PublicKeyWithCommonNameAvailable_CorrectCommonNameExpected() throws Exception {
 
-        X509Certificate testData = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE);
+        X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, CERT_PASSWORD);
         assertNotNull(testData);
 
         String result = certificateService.extractCommonName(testData);
@@ -291,7 +286,7 @@ public class DynamicDiscoveryPModeProviderTest {
     public void testExtractCommonName_PublicKeyWithCommonNameNotAvailable_IllegalArgumentExceptionExpected() throws Exception {
         thrown.expect(IllegalArgumentException.class);
 
-        X509Certificate testData = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_NOT_AVAILABLE);
+        X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_NOT_AVAILABLE, CERT_PASSWORD);
         assertNotNull(testData);
 
         certificateService.extractCommonName(testData);
@@ -365,7 +360,7 @@ public class DynamicDiscoveryPModeProviderTest {
     private EndpointInfo buildAS4EndpointWithArguments(String processIdentifierId, String processIdentifierScheme, String address, String alias) {
         ProcessIdentifier processIdentifier = new ProcessIdentifier(processIdentifierId, processIdentifierScheme);
         TransportProfile transportProfile = TransportProfile.AS4;
-        X509Certificate x509Certificate = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, alias);
+        X509Certificate x509Certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, alias, CERT_PASSWORD);
 
         Endpoint endpoint = new Endpoint(processIdentifier, transportProfile, address, x509Certificate);
 
@@ -392,27 +387,4 @@ public class DynamicDiscoveryPModeProviderTest {
         return true;
     }
 
-    /**
-     * Load certificate with alias from JKS and return as {@code X509Certificate}.
-     * The password is always 1234 in this test.
-     *
-     * @param filePath
-     * @param alias
-     * @return
-     */
-    private X509Certificate loadCertificateFromJKS(String filePath, String alias) {
-        try {
-            FileInputStream fileInputStream = new FileInputStream(filePath);
-
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(fileInputStream, "1234".toCharArray());
-
-            Certificate cert = keyStore.getCertificate(alias);
-
-            return (X509Certificate) cert;
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }

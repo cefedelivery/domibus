@@ -3,7 +3,8 @@ package eu.domibus.common.services;
 import eu.domibus.common.util.EndpointInfo;
 
 /**
- * Created by idragusa on 3/29/17.
+ * @author Ioana Dragusanu (idragusa)
+ * @since 3.2.5
  */
 public interface DynamicDiscoveryService {
     String SMLZONE_KEY = "domibus.smlzone";

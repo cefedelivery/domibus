@@ -1,7 +1,8 @@
 package eu.domibus.ebms3.common.dao;
 
 /**
- * Created by idragusa on 4/14/17.
+ * @author Ioana Dragusanu (idragusa)
+ * @since 3.2.5
  */
 public enum DynamicDiscoveryClientSpecification {
     OASIS("OASIS"),

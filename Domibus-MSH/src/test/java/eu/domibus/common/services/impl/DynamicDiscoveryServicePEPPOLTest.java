@@ -2,9 +2,8 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
-import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
 import eu.domibus.common.util.EndpointInfo;
-import eu.domibus.common.util.TrustoreUtil;
+import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import no.difi.vefa.edelivery.lookup.LookupClient;
@@ -13,13 +12,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
@@ -49,6 +41,9 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
     @Injectable
     private Properties domibusProperties;
+
+    @Injectable
+    private CertificateService certificateService;
 
     @Tested
     private DynamicDiscoveryServicePEPPOL dynamicDiscoveryServicePEPPOL;
@@ -92,7 +87,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
     private ServiceMetadata buildServiceMetadata() {
 
         ServiceMetadata sm = new ServiceMetadata();
-        X509Certificate testData = TrustoreUtil.loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
+        X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
 
         ProcessIdentifier processIdentifier = new ProcessIdentifier(TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
 

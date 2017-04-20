@@ -664,7 +664,7 @@
         <dependency>
             <groupId>eu.europa.ec.dynamic-discovery</groupId>
             <artifactId>dynamic-discovery-client</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>1.2</version>
         </dependency>
 
         <!-- BouncyCastle: In order to enable gcm algorithms it was necessary to use a more recent version of bouncy castle (at least 1.49) -->

@@ -2,7 +2,6 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
-import eu.domibus.common.services.impl.DynamicDiscoveryServiceOASIS;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
@@ -29,7 +28,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
- * Created by idragusa on 3/27/17.
+ * @author Ioana Dragusanu (idragusa)
+ * @since 3.2.5
  */
 @RunWith(JMockit.class)
 public class DynamicDiscoveryServiceOASISTest {
