@@ -31,8 +31,8 @@ i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:908
 mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
 
 cd $SOURCE_CODE/../Domibus-MSH-soapui-tests
-cp src/main/soapui/domibus-gw-sample-pmode-blue.xml .
-cp src/main/soapui/domibus-gw-sample-pmode-red.xml .
+cp src/main/soapui/resources/PModes and Keystores Default/blue/domibus-gw-sample-pmode-blue.xml .
+cp src/main/soapui/resources/PModes and Keystores Default/red/domibus-gw-sample-pmode-red.xml .
 sed -i -e "s/localhost:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-blue.xml
 sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-blue.xml
 sed -i -e "s/localhost:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-red.xml
