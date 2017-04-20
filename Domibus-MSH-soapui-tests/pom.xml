@@ -54,8 +54,8 @@
                     <testSuite>PASSING TCs - Web Service Submission - Auto for Bamboo</testSuite>
                     <!--<testCase>Dom001-Submit Message-Basic Flow</testCase>-->
                     <projectProperties>
-                        <value>localUrl=http://localhost:8180/domibus</value>
-                        <value>remoteUrl=http://localhost:9080/domibus</value>
+                        <value>localUrl=http://localhost:8080/domibus</value>
+                        <value>remoteUrl=http://localhost:8180/domibus</value>
 
                         <value>databaseBlue=mysql</value>
                         <value>driverBlue=com.mysql.jdbc.Driver</value>
@@ -88,6 +88,8 @@
                         <value>pdfAttachment=${soapui.root.folder}/resources/fileSmall.pdf</value>
                         <value>reportFilePath=${soapui.root.folder}/reports/Domibus_3_2_2_test_results.xlsx</value>
                         <value>updateReport=false</value>
+                        <value>specialPModesPath=${soapui.root.folder}/resources/PModes and Keystores Special Tests</value>
+                        <value>defaultPModesPath=${soapui.root.folder}/resources/PModes and Keystores Default</value>
                     </projectProperties>
                     <soapuiProperties>
                         <property>
