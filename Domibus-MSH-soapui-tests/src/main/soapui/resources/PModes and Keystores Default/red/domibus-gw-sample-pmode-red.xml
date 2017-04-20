@@ -65,8 +65,8 @@
 			<security name="eSensPolicy" policy="eSensPolicy.xml" signatureMethod="RSA_SHA256"/>			
 		</securities>
 		<errorHandlings>
-			<errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="false" businessErrorNotifyConsumer="false" deliveryFailureNotifyProducer="false"/>
-			<!-- <errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="true" businessErrorNotifyConsumer="true" deliveryFailureNotifyProducer="true"/> -->
+			 <errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="false" businessErrorNotifyConsumer="false" deliveryFailureNotifyProducer="false"/> 
+			 <!-- <errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="true" businessErrorNotifyConsumer="true" deliveryFailureNotifyProducer="true"/> -->
 		</errorHandlings>
 		<agreements>
 			<agreement name="agreementEmpty" value="" type=""/>
