@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @deprecated  It will be removed in the future releases
+ * @deprecated  since 3.3. It will be removed in the future releases
  *
  * This adapter takes a List<String> containing a single element and maps it to the single String Node and vice versa.
  *
