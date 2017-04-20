@@ -11,7 +11,7 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Created by idragusa on 10/14/16.
  */
-public class HashUtilsTestImpl {
+public class HashUtilsImplTest {
 
     @Test
     public void testSHA256Hash() throws NoSuchAlgorithmException, UnsupportedEncodingException {
