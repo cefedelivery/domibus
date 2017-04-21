@@ -50,9 +50,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -91,6 +93,13 @@ public abstract class PModeProvider {
 
     public abstract void refresh();
 
+    public Configuration getConfiguration() {
+        if (!this.configurationDAO.configurationExists())
+            return null;
+
+        return this.configurationDAO.readEager();
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
     public List<String> updatePModes(byte[] bytes) throws XmlProcessingException {
         LOG.debug("Updating the PMode");
@@ -124,7 +133,7 @@ public abstract class PModeProvider {
         return resultMessage;
     }
 
-    protected UnmarshallerResult unmarshall(byte[] bytes, boolean ignoreWhitespaces) throws XmlProcessingException {
+    public UnmarshallerResult unmarshall(byte[] bytes, boolean ignoreWhitespaces) throws XmlProcessingException {
         Configuration configuration = null;
         UnmarshallerResult unmarshallerResult = null;
 
@@ -142,6 +151,13 @@ public abstract class PModeProvider {
             throw new XmlProcessingException("Error unmarshalling the PMode: could not process the PMode file");
         }
         return unmarshallerResult;
+    }
+
+    public ByteArrayOutputStream marshall(Configuration configuration) throws JAXBException {
+        final Marshaller marshaller = jaxbContext.createMarshaller();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        marshaller.marshal(configuration,baos);
+        return baos;
     }
 
     @Transactional(propagation = Propagation.REQUIRED, noRollbackFor = IllegalStateException.class)
