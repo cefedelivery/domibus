@@ -1,3 +1,5 @@
+Domibus 3.2.5
+- Dynamic discovery: integrate Domibus with OASIS compliant SMP
 Domibus 3.2.4
 - Default WS plugin: backwards compatibility fix for Domibus >3.2.2
 - Fix error when downloading a message with an empty payload

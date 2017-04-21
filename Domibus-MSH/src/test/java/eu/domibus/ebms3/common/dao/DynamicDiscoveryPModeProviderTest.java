@@ -7,6 +7,9 @@ import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.services.impl.DynamicDiscoveryServiceOASIS;
+import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
+import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.common.model.Property;
@@ -23,6 +26,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
@@ -41,6 +45,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -64,7 +69,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
     private static final String ALIAS_CN_AVAILABLE = "cn_available";
     private static final String ALIAS_CN_NOT_AVAILABLE = "cn_not_available";
-
+    private static final String CERT_PASSWORD = "1234";
 
     private static final String TEST_ACTION_VALUE = "testAction";
     private static final String TEST_SERVICE_VALUE = "serviceValue";
@@ -77,6 +82,12 @@ public class DynamicDiscoveryPModeProviderTest {
     private static final String PROCESSIDENTIFIER_ID = "testIdentifierId";
     private static final String PROCESSIDENTIFIER_SCHEME = "testIdentifierScheme";
     private static final String ADDRESS = "http://localhost:9090/anonymous/msh";
+
+    @Mock
+    private DynamicDiscoveryServicePEPPOL dynamicDiscoveryServicePEPPOL;
+
+    @Mock
+    private DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -96,6 +107,9 @@ public class DynamicDiscoveryPModeProviderTest {
     @Spy
     TrustStoreService trustStoreService;
 
+    @Spy
+    private Properties domibusProperties;
+
     @Before
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
@@ -113,6 +127,22 @@ public class DynamicDiscoveryPModeProviderTest {
         assertTrue(initializeConfiguration(testData));
 
         return testData;
+    }
+
+    @Test
+    public void testDynamicDiscoveryClientSelection() throws Exception {
+        Configuration testData = initializeConfiguration(DYNAMIC_DISCOVERY_ENABLED);
+        doReturn(true).when(configurationDAO).configurationExists();
+        doReturn(testData).when(configurationDAO).readEager();
+
+        /* test default selection of dynamic discovery client OASIS compliant*/
+        dynamicDiscoveryPModeProvider.init();
+        assertTrue(dynamicDiscoveryPModeProvider.dynamicDiscoveryService instanceof DynamicDiscoveryServiceOASIS);
+
+        /* test selection of dynamic discovery client Peppol compliant*/
+        doReturn(DynamicDiscoveryClientSpecification.PEPPOL.getName()).when(domibusProperties).getProperty(anyString(), anyString());
+        dynamicDiscoveryPModeProvider.init();
+        assertTrue(dynamicDiscoveryPModeProvider.dynamicDiscoveryService instanceof DynamicDiscoveryServicePEPPOL);
     }
 
     @Test
@@ -135,8 +165,8 @@ public class DynamicDiscoveryPModeProviderTest {
         doReturn(testData).when(configurationDAO).readEager();
         dynamicDiscoveryPModeProvider.init();
 
-        Endpoint testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, ADDRESS, ALIAS_CN_AVAILABLE);
-        doReturn(testDataEndpoint).when(dynamicDiscoveryService).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        EndpointInfo testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, ADDRESS, ALIAS_CN_AVAILABLE);
+        doReturn(testDataEndpoint).when(dynamicDiscoveryServiceOASIS).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
         doReturn(true).when(trustStoreService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
         UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
         dynamicDiscoveryPModeProvider.doDynamicDiscovery(userMessage, MSHRole.SENDING);
@@ -254,7 +284,7 @@ public class DynamicDiscoveryPModeProviderTest {
     @Test
     public void testExtractCommonName_PublicKeyWithCommonNameAvailable_CorrectCommonNameExpected() throws Exception {
 
-        X509Certificate testData = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE);
+        X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, CERT_PASSWORD);
         assertNotNull(testData);
 
         String result = certificateService.extractCommonName(testData);
@@ -266,7 +296,7 @@ public class DynamicDiscoveryPModeProviderTest {
     public void testExtractCommonName_PublicKeyWithCommonNameNotAvailable_IllegalArgumentExceptionExpected() throws Exception {
         thrown.expect(IllegalArgumentException.class);
 
-        X509Certificate testData = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_NOT_AVAILABLE);
+        X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_NOT_AVAILABLE, CERT_PASSWORD);
         assertNotNull(testData);
 
         certificateService.extractCommonName(testData);
@@ -337,14 +367,14 @@ public class DynamicDiscoveryPModeProviderTest {
         return userMessageToBuild;
     }
 
-    private Endpoint buildAS4EndpointWithArguments(String processIdentifierId, String processIdentifierScheme, String address, String alias) {
+    private EndpointInfo buildAS4EndpointWithArguments(String processIdentifierId, String processIdentifierScheme, String address, String alias) {
         ProcessIdentifier processIdentifier = new ProcessIdentifier(processIdentifierId, processIdentifierScheme);
         TransportProfile transportProfile = TransportProfile.AS4;
-        X509Certificate x509Certificate = loadCertificateFromJKS(RESOURCE_PATH + TEST_KEYSTORE, alias);
+        X509Certificate x509Certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, alias, CERT_PASSWORD);
 
         Endpoint endpoint = new Endpoint(processIdentifier, transportProfile, address, x509Certificate);
 
-        return endpoint;
+        return new EndpointInfo(endpoint.getAddress(), endpoint.getCertificate());
     }
 
 
