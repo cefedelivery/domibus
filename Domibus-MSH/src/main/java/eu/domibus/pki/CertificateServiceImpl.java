@@ -173,8 +173,8 @@ public class CertificateServiceImpl implements CertificateService {
 
             return (X509Certificate) cert;
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            LOG.warn("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password);
-            return null;
+            LOG.error("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password);
+            throw new DomibusCertificateException("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password, e);
         }
     }
 
