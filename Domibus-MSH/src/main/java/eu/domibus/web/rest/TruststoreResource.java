@@ -1,5 +1,7 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class TruststoreResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TruststoreResource.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TruststoreResource.class);
 
     @Autowired
     private CryptoService cryptoService;

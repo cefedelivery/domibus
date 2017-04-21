@@ -1,6 +1,8 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -18,19 +20,20 @@ import java.util.List;
  * @since 3.3
  */
 @RestController
+@RequestMapping(value = "/rest/pmode")
 public class PModeResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PModeResource.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeResource.class);
 
     @Autowired
     private PModeProvider pModeProvider;
 
-    @RequestMapping(value = "/rest/pmode", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public String downloadPmodes() {
         return "pmodetest";
     }
 
-    @RequestMapping(value = "/rest/pmode", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<String> uploadPmodes(@RequestPart("file") MultipartFile pmode) {
         if (pmode.isEmpty()) {
             return ResponseEntity.badRequest().body("Failed to upload the PMode file since it was empty.");
