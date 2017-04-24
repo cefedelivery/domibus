@@ -51,9 +51,6 @@ public class AdminGUIController {
     private ErrorLogDao eld; //TODO refactor, eliminate this.
 
     @Autowired
-    private PModeProvider pModeProvider;
-
-    @Autowired
     private DomibusPropertiesService domibusPropertiesService;
 
     @Autowired
@@ -61,9 +58,6 @@ public class AdminGUIController {
 
     @Autowired
     private List<NotificationListener> notificationListenerServices;
-
-    @Autowired
-    private CryptoService cryptoService;
 
     @Resource(name = "routingCriteriaFactories")
     private List<CriteriaFactory> routingCriteriaFactories;
@@ -267,52 +261,5 @@ public class AdminGUIController {
         Collections.sort(backendFilters);
         routingService.updateBackendFilters(backendFilters);
         return "Filters updated.";
-    }
-
-    /**
-     * Upload single file using Spring Controller
-     */
-    @RequestMapping(value = "/home/uploadPmodeFile", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    String uploadPmodeFile(@RequestParam("pmode") MultipartFile pmode) {
-        if (pmode.isEmpty()) {
-            return "Failed to upload the PMode file since it was empty.";
-        }
-
-        try {
-            byte[] bytes = pmode.getBytes();
-            List<String> pmodeUpdateMessage = pModeProvider.updatePModes(bytes);
-            String message = "PMode file has been successfully uploaded";
-            if (pmodeUpdateMessage != null && pmodeUpdateMessage.size() > 0) {
-                message += " but some issues were detected: <br>" + StringUtils.join(pmodeUpdateMessage, "<br>");
-            }
-            return message;
-        } catch (XmlProcessingException e) {
-            LOG.error("Error uploading the PMode", e);
-            return "Failed to upload the PMode file due to: <br><br> " + StringUtils.join(e.getErrors(), "<br>");
-        } catch (Exception e) {
-            LOG.error("Error uploading the PMode", e);
-            return "Failed to upload the PMode file due to: <br><br> " + e.getMessage();
-        }
-    }
-
-    @RequestMapping(value = "/home/uploadTruststoreFile", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    String uploadTruststoreFile(@RequestParam("truststore") MultipartFile truststore, @RequestParam("password") String password) {
-
-        if (!truststore.isEmpty()) {
-            try {
-                byte[] bytes = truststore.getBytes();
-                cryptoService.replaceTruststore(bytes, password);
-                return "Truststore file has been successfully replaced.";
-            } catch (Exception e) {
-                LOG.error("Failed to upload the truststore file", e);
-                return "Failed to upload the truststore file due to => " + e.getMessage();
-            }
-        } else {
-            return "Failed to upload the truststore file since it was empty.";
-        }
     }
 }
