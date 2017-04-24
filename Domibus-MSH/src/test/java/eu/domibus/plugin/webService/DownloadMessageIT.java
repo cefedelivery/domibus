@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -77,6 +78,7 @@ public class DownloadMessageIT extends AbstractIT {
      * @throws JMSException
      */
     @Test
+    @Transactional
     public void testDownloadMessageOk() throws Exception {
 
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
@@ -111,6 +113,7 @@ public class DownloadMessageIT extends AbstractIT {
      * @throws JMSException
      */
     @Test
+    @Transactional
     public void testDownloadMessageOkPayloadNok() throws Exception {
 
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
@@ -144,6 +147,7 @@ public class DownloadMessageIT extends AbstractIT {
      * @throws JMSException
      */
     @Test
+    @Transactional
     public void testDownloadMessageBodyLoad() throws Exception {
 
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");

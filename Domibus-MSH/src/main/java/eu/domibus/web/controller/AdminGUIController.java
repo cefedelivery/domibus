@@ -1,3 +1,22 @@
+/*
+ * Copyright 2015 e-CODEX Project
+ *
+ * Licensed under the EUPL, Version 1.1 or – as soon they
+ * will be approved by the European Commission - subsequent
+ * versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the
+ * Licence.
+ * You may obtain a copy of the Licence at:
+ * http://ec.europa.eu/idabc/eupl5
+ * Unless required by applicable law or agreed to in
+ * writing, software distributed under the Licence is
+ * distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
 package eu.domibus.web.controller;
 
 import eu.domibus.common.ErrorCode;
@@ -28,10 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -131,16 +147,42 @@ public class AdminGUIController {
         model.addObject("beginIndex", begin);
         model.addObject("endIndex", end);
         if (page <= pages) {
+            //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
+            convertDownloadedStatusToReceived(messageLogEntries);
             model.addObject("table", messageLogEntries);
         }
-        model.addObject("title", "Domibus - Messages DomibusLogger: ");
-        model.addObject("messagestatusvalues", MessageStatus.values());
+        model.addObject("title", "Domibus - Messages Log: ");
+
+        List<MessageStatus> messageStatuses = getMessageStatuses();
+
+        model.addObject("messagestatusvalues", messageStatuses);
         model.addObject("notificationstatusvalues", NotificationStatus.values());
         model.addObject("mshrolevalues", MSHRole.values());
         model.addObject("messagetypevalues", MessageType.values());
         model.setViewName("messagelog");
         return model;
 
+    }
+
+    //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
+    protected void convertDownloadedStatusToReceived(List<? extends MessageLog> messageLogEntries) {
+        if(messageLogEntries == null) {
+            return;
+        }
+        for (MessageLog messageLogEntry : messageLogEntries) {
+            if(MessageStatus.DOWNLOADED == messageLogEntry.getMessageStatus()) {
+                messageLogEntry.setMessageStatus(MessageStatus.RECEIVED);
+            }
+        }
+    }
+
+
+    protected List<MessageStatus> getMessageStatuses() {
+        List<MessageStatus> messageStatuses = new ArrayList<>();
+        messageStatuses.addAll(Arrays.asList(MessageStatus.values()));
+        //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
+        messageStatuses.remove(MessageStatus.DOWNLOADED);
+        return messageStatuses;
     }
 
     @RequestMapping(value = {"/home/errorlog**"}, method = GET)
@@ -200,7 +242,7 @@ public class AdminGUIController {
         if (page <= pages) {
             model.addObject("table", eld.findPaged(size * (page - 1), size, column, asc, filters));
         }
-        model.addObject("title", "Domibus - Error DomibusLogger:");
+        model.addObject("title", "Domibus - Error Log:");
         model.setViewName("errorlog");
         model.addObject("mshrolevalues", MSHRole.values());
         model.addObject("errorcodevalues", ErrorCode.values());

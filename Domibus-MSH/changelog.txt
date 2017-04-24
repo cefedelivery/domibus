@@ -22,6 +22,16 @@ Domibus 3.3-RC1
 - WS Plugin: the response list of ListPendingMessages operation can be limited using a new configuration property (domibus.listPendingMessages.maxCount).
 - Config: increased the value of the retry tolerance to 3 hours
 - Config: added new property "domibus.sendMessage.failure.delete.payload" to enable/disable the removal of the message payload on send failure.
+Domibus 3.2.4
+- Default WS plugin: backwards compatibility fix for Domibus >3.2.2
+- Fix error when downloading a message with an empty payload
+- CachingPModeProvider fix when Oracle database is used
+Domibus 3.2.3
+- JMS monitoring: extended the functionality for clustered installations.
+- Core: listPendingMessages and download operations behave correctly in case of a clustered installation.
+- The MSH WS endpoint returns 200 for the GET operation
+- Renamed the eSensPolicy.xml WS policy to eSensPolicy.v2.0.xml which supports the signing of the empty body
+- Added the domibus-plugins.xml file in the configuration of the Tomcat full installation
 Domibus 3.2.2
 - Possibility to configure the limit of downloaded/not-downloaded messages for the retention worker
 - Fixed the notifications sent by the JMS plugin
