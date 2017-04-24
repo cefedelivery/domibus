@@ -1,3 +1,22 @@
+/*
+ * Copyright 2015 e-CODEX Project
+ *
+ * Licensed under the EUPL, Version 1.1 or – as soon they
+ * will be approved by the European Commission - subsequent
+ * versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the
+ * Licence.
+ * You may obtain a copy of the Licence at:
+ * http://ec.europa.eu/idabc/eupl5
+ * Unless required by applicable law or agreed to in
+ * writing, software distributed under the Licence is
+ * distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
 package eu.domibus.plugin.webService.impl;
 
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
@@ -54,6 +73,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     private static final String BODYLOAD = "#bodyload";
 
     private static final String MESSAGE_NOT_FOUND_ID = "Message not found, id [";
+
+    private static final String ERROR_IS_PAYLOAD_DATA_HANDLER = "Error getting the input stream from the payload data handler";
 
     @Autowired
     private StubDtoTransformer defaultTransformer;
@@ -393,12 +414,13 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
             PayloadType payloadType = WEBSERVICE_OF.createPayloadType();
             try {
-                LOG.debug("payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
-                payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
-            } catch (IOException ioEx) {
-                String msgToShow = "Error getting the input stream from the payload data handler for the required message [" + msgId + "]";
-                LOG.error(msgToShow, ioEx);
-                throw new DownloadMessageFault(msgToShow, createDownloadMessageFault(ioEx));
+                if(extPartInfo.getPayloadDatahandler() != null ) {
+                    payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
+                    LOG.debug("downloadMessage - payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
+                }
+            } catch (final IOException ioEx) {
+                LOG.error(ERROR_IS_PAYLOAD_DATA_HANDLER, ioEx);
+                throw new DownloadMessageFault(ERROR_IS_PAYLOAD_DATA_HANDLER, createDownloadMessageFault(ioEx));
             }
             if (extPartInfo.isInBody()) {
                 extPartInfo.setHref(BODYLOAD);
