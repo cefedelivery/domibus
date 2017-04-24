@@ -5,8 +5,8 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.api.message.ebms3.model.AgreementRef;
-import eu.domibus.api.message.ebms3.model.PartyId;
+import eu.domibus.ebms3.common.model.AgreementRef;
+import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -97,7 +97,7 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
-    protected String findServiceName(final eu.domibus.api.message.ebms3.model.Service service) throws EbMS3Exception {
+    protected String findServiceName(final eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception {
         for (final Service service1 : this.getConfiguration().getBusinessProcesses().getServices()) {
             if ((StringUtils.equalsIgnoreCase(service1.getServiceType(), service.getType()) || (!StringUtils.isNotEmpty(service1.getServiceType()) && !StringUtils.isNotEmpty(service.getType()))))
                 if (StringUtils.equalsIgnoreCase(service1.getValue(), service.getValue())) {

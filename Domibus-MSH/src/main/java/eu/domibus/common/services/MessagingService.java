@@ -3,7 +3,7 @@ package eu.domibus.common.services;
 
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.configuration.Storage;
-import eu.domibus.api.message.ebms3.model.Messaging;
+import eu.domibus.ebms3.common.model.Messaging;
 
 
 /**

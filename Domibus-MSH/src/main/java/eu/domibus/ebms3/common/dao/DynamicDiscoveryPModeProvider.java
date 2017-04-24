@@ -5,8 +5,8 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.api.message.ebms3.model.*;
-import eu.domibus.api.message.ebms3.model.Property;
+import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.wss4j.common.crypto.CryptoService;
@@ -374,7 +374,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             return null;
         }
 
-        for (final eu.domibus.api.message.ebms3.model.Property p : userMessage.getMessageProperties().getProperty()) {
+        for (final eu.domibus.ebms3.common.model.Property p : userMessage.getMessageProperties().getProperty()) {
             if (p.getName() != null && p.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
                 return p;
             }

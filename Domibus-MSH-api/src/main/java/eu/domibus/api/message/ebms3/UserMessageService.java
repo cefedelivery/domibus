@@ -1,12 +1,11 @@
 package eu.domibus.api.message.ebms3;
 
-import eu.domibus.api.message.ebms3.model.UserMessage;
-
 /**
  * @author Cosmin Baciu
  * @since 3.3
  */
+//TODO create a model agnostic of peristence/JAXB annotations for exposing the UserMessage details
 public interface UserMessageService {
 
-    UserMessage getMessage(final String messageId);
+    String getFinalRecipient(final String messageId);
 }

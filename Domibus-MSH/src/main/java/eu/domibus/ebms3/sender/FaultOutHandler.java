@@ -4,7 +4,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.handler.AbstractFaultHandler;
-import eu.domibus.api.message.ebms3.model.Messaging;
+import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

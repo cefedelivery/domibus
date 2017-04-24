@@ -1,8 +1,9 @@
 package eu.domibus.core.message.acknowledge;
 
 import eu.domibus.api.message.ebms3.UserMessageService;
-import eu.domibus.api.message.ebms3.UserMessageServiceHelper;
-import eu.domibus.api.message.ebms3.model.UserMessage;
+import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.ebms3.common.UserMessageServiceHelper;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.api.security.AuthUtils;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -11,7 +12,6 @@ import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class MessageAcknowledgeDefaultServiceTest {
     MessageAcknowledgeConverter messageAcknowledgeConverter;
 
     @Injectable
-    UserMessageService userMessageService;
+    MessagingDao messagingDao;
 
     @Injectable
     UserMessageServiceHelper userMessageServiceHelper;

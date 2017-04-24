@@ -1,6 +1,6 @@
 package eu.domibus.common.model.logging;
 
-import eu.domibus.api.message.ebms3.model.MessageType;
+import eu.domibus.ebms3.common.model.MessageType;
 
 import javax.persistence.*;
 import java.util.Date;

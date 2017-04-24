@@ -2,8 +2,8 @@ package eu.domibus.common.exception;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.api.message.ebms3.model.Description;
-import eu.domibus.api.message.ebms3.model.Error;
+import eu.domibus.ebms3.common.model.Description;
+import eu.domibus.ebms3.common.model.Error;
 import org.apache.commons.lang.StringUtils;
 
 import javax.xml.ws.WebFault;

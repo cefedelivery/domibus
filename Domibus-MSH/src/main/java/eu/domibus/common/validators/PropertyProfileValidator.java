@@ -6,7 +6,7 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Property;
 import eu.domibus.common.model.configuration.PropertySet;
-import eu.domibus.api.message.ebms3.model.Messaging;
+import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -44,7 +44,7 @@ public class PropertyProfileValidator {
 
         modifiablePropertyList.addAll(profile);
 
-        for (final eu.domibus.api.message.ebms3.model.Property property : messaging.getUserMessage().getMessageProperties().getProperty()) {
+        for (final eu.domibus.ebms3.common.model.Property property : messaging.getUserMessage().getMessageProperties().getProperty()) {
             Property profiled = null;
             for (final Property profiledProperty : modifiablePropertyList) {
                 if (profiledProperty.getKey().equals(property.getName())) {

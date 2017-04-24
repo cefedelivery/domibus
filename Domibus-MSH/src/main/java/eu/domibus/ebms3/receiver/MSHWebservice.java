@@ -1,6 +1,6 @@
 package eu.domibus.ebms3.receiver;
 
-import eu.domibus.api.message.ebms3.model.*;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;

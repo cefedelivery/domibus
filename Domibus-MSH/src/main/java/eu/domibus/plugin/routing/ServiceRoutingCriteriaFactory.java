@@ -1,7 +1,7 @@
 package eu.domibus.plugin.routing;
 
-import eu.domibus.api.message.ebms3.model.Service;
-import eu.domibus.api.message.ebms3.model.UserMessage;
+import eu.domibus.ebms3.common.model.Service;
+import eu.domibus.ebms3.common.model.UserMessage;
 
 /**
  * Service criteria for user messages

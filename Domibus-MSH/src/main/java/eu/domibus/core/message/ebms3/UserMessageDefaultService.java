@@ -1,8 +1,11 @@
 package eu.domibus.core.message.ebms3;
 
 import eu.domibus.api.message.ebms3.UserMessageService;
-import eu.domibus.api.message.ebms3.model.UserMessage;
+import eu.domibus.ebms3.common.UserMessageServiceHelper;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +16,21 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserMessageDefaultService implements UserMessageService {
 
+    public static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageDefaultService.class);
 
     @Autowired
     private MessagingDao messagingDao;
 
+    @Autowired
+    UserMessageServiceHelper userMessageServiceHelper;
+
     @Override
-    public UserMessage getMessage(final String messageId) {
-        return messagingDao.findUserMessageByMessageId(messageId);
+    public String getFinalRecipient(String messageId) {
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        if(userMessage == null) {
+            LOG.debug("Message [{}] does not exist", messageId);
+            return null;
+        }
+        return userMessageServiceHelper.getFinalRecipient(userMessage);
     }
 }

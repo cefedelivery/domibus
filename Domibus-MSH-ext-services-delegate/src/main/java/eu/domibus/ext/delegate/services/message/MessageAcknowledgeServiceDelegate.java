@@ -2,8 +2,6 @@ package eu.domibus.ext.delegate.services.message;
 
 import eu.domibus.api.message.acknowledge.MessageAcknowledgement;
 import eu.domibus.api.message.ebms3.UserMessageService;
-import eu.domibus.api.message.ebms3.UserMessageServiceHelper;
-import eu.domibus.api.message.ebms3.model.UserMessage;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.ext.delegate.converter.DomibusDomainConverter;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;
@@ -14,6 +12,7 @@ import eu.domibus.ext.services.MessageAcknowledgeService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -33,9 +32,6 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
 
     @Autowired
     eu.domibus.api.message.acknowledge.MessageAcknowledgeService messageAcknowledgeCoreService;
-
-    @Autowired
-    UserMessageServiceHelper userMessageServiceHelper;
 
     @Autowired
     UserMessageService userMessageService;
@@ -82,14 +78,6 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
 
     }
 
-    protected UserMessage getUserMessage(String messageId) {
-        final UserMessage userMessage = userMessageService.getMessage(messageId);
-        if (userMessage == null) {
-            throw new MessageAcknowledgeException(DomibusErrorCode.DOM_001, "Message with ID [" + messageId + "] does not exist");
-        }
-        return userMessage;
-    }
-
     /**
      * Checks if the authenticated user has the rights to perform an acknowledge on the message
      *
@@ -97,7 +85,11 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
      * @throws eu.domibus.ext.exceptions.AuthenticationException
      */
     protected void checkSecurity(final String messageId) throws eu.domibus.ext.exceptions.AuthenticationException {
-        final UserMessage userMessage = getUserMessage(messageId);
+        final String finalRecipient = userMessageService.getFinalRecipient(messageId);
+        if (finalRecipient == null) {
+            throw new MessageAcknowledgeException(DomibusErrorCode.DOM_001, "Couldn't get the finalRecipient for message with ID [" + messageId + "]");
+        }
+
         if (authUtils.isUnsecureLoginAllowed()) {
             LOG.debug("Unsecured login allowed; no security checks will be done");
             return;
@@ -116,9 +108,10 @@ public class MessageAcknowledgeServiceDelegate implements MessageAcknowledgeServ
         }
 
         final String originalUserFromSecurityContext = authUtils.getOriginalUserFromSecurityContext();
-        final boolean sameFinalRecipient = userMessageServiceHelper.isSameFinalRecipient(userMessage, originalUserFromSecurityContext);
-        if (!sameFinalRecipient) {
-            LOG.securityInfo(DomibusMessageCode.SEC_UNAUTHORIZED_MESSAGE_ACCESS, originalUserFromSecurityContext, userMessageServiceHelper.getFinalRecipient(userMessage));
+        if (StringUtils.equals(finalRecipient, originalUserFromSecurityContext)) {
+            LOG.debug("For message [{}] the provided final recipient [{}] is the same as the message final recipient", messageId, originalUserFromSecurityContext);
+        } else {
+            LOG.securityInfo(DomibusMessageCode.SEC_UNAUTHORIZED_MESSAGE_ACCESS, originalUserFromSecurityContext, finalRecipient);
             throw new AuthenticationException(DomibusErrorCode.DOM_002, "You are not allowed to handle this message. You are authorized as [" + originalUserFromSecurityContext + "]");
         }
     }

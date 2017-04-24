@@ -4,7 +4,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.api.message.ebms3.model.UserMessage;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;

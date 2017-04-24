@@ -48,7 +48,7 @@
     <!-- JAXB Context for mapping of ebMS3 schema -->
     <bean id="jaxbContextEBMS" class="javax.xml.bind.JAXBContext" factory-method="newInstance">
         <constructor-arg type="java.lang.String"
-                         value="eu.domibus.api.message.ebms3.model"/>
+                         value="eu.domibus.ebms3.common.model"/>
     </bean>
 
     <!-- JAXB context for mapping of pMode XML configuration -->
@@ -71,6 +71,6 @@
     <bean id="xmlDateTimeFormat" class="java.text.SimpleDateFormat">
         <constructor-arg value="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"/>
     </bean>
-    <bean id="dateFormatter" class="eu.domibus.api.message.ebms3.model.TimestampDateFormatter"/>
+    <bean id="dateFormatter" class="eu.domibus.ebms3.common.model.TimestampDateFormatter"/>
 
 </beans>
