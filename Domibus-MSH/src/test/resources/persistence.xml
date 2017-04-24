@@ -61,10 +61,9 @@
         <class>eu.domibus.ebms3.common.model.UserMessage</class>
         <class>eu.domibus.plugin.routing.BackendFilter</class>
         <class>eu.domibus.plugin.routing.RoutingCriteria</class>
-
-        <!-- Comment this class if you don't use the default ws plugin.
-        Default ws plugin uses the same db config as the core for storing auth info-->
-        <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
+        <class>eu.domibus.core.security.AuthenticationEntry</class>
+        <class>eu.domibus.core.message.acknowledge.MessageAcknowledgementEntity</class>
+        <class>eu.domibus.core.message.acknowledge.MessageAcknowledgementProperty</class>
 
         <properties>
             <property name="hibernate.transaction.manager_lookup_class"

@@ -8,7 +8,7 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.api.security.AuthUtils;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;

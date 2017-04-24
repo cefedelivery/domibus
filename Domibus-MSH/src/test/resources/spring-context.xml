@@ -14,6 +14,8 @@
                            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
                            http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd" >
 
+    <import resource="classpath*:config/*-domibusContext.xml"/>
+
     <context:annotation-config/>
     <context:component-scan base-package="eu.domibus">
         <context:exclude-filter type="annotation" expression="org.springframework.context.annotation.Configuration"/>
@@ -23,7 +25,6 @@
     <jms:annotation-driven/>
 
     <tx:annotation-driven order="1" transaction-manager="transactionManager" proxy-target-class="true"/>
-
 
     <import resource="classpath*:config/*-jms-context.xml"/>
     <import resource="classpath*:config/*-taskexecutor-context.xml"/>

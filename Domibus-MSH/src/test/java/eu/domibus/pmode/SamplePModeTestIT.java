@@ -1,7 +1,7 @@
 package eu.domibus.pmode;
 
-import eu.domibus.api.xml.UnmarshallerResult;
-import eu.domibus.api.xml.XMLUtil;
+import eu.domibus.api.util.xml.UnmarshallerResult;
+import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Mpcs;
 import eu.domibus.xml.XMLUtilImpl;

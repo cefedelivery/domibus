@@ -1,6 +1,6 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.api.exceptions.DomibusCoreError;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
@@ -12,7 +12,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -192,7 +192,7 @@ public class MessageRetentionService {
                     }
                 } catch (JMSException jmsEx) {
                     LOG.error("Error trying to get the queue name", jmsEx);
-                    throw new DomibusCoreException(DomibusCoreError.DOM_001, "Could not get the queue name", jmsEx.getCause());
+                    throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not get the queue name", jmsEx.getCause());
                 }
             }
         }
