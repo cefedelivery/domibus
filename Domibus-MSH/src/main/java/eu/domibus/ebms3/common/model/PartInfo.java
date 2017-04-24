@@ -117,11 +117,19 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
 
     @PostLoad
     private void loadBinaray() {
-        if (fileName != null) {
+        if (fileName != null) { /* Create payload data handler from File */
+            LOG.debug("LoadBinary from file: " + fileName);
             payloadDatahandler = new DataHandler(new FileDataSource(fileName));
+            return;
+        }
+        /* Create payload data handler from binaryData (byte[]) */
+        if(binaryData == null) {
+            LOG.info("Payload is empty!");
+            payloadDatahandler = null;
         } else {
             payloadDatahandler = new DataHandler(new ByteArrayDataSource(binaryData, mime));
         }
+
     }
 
     /**

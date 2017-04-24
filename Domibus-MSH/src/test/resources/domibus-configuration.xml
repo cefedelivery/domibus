@@ -38,8 +38,8 @@
     <bean id="pModeProvider"
           class="eu.domibus.ebms3.common.dao.CachingPModeProvider"/>
 
-    <bean id="pModeDao"
-          class="eu.domibus.common.dao.PModeDao"/>
+    <!--<bean id="pModeDao"
+          class="eu.domibus.common.dao.PModeDao"/>-->
 
     <!-- General domibus properties -->
     <util:properties id="domibusProperties">

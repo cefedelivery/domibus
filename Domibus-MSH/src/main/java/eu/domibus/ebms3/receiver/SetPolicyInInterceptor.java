@@ -89,6 +89,15 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
+        final String httpMethod = (String) message.get("org.apache.cxf.request.method");
+        //TODO add the below logic to a separate interceptor
+        if(org.apache.commons.lang.StringUtils.containsIgnoreCase(httpMethod, "GET")) {
+            LOG.debug("Detected GET request on MSH: aborting the interceptor chain");
+            message.put(SoapMessage.RESPONSE_CODE, 200);
+            message.getInterceptorChain().abort();
+            return;
+        }
+
         final InputStream inputStream = message.getContent(InputStream.class);
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Messaging messaging = null;

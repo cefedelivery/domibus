@@ -23,7 +23,7 @@
 
     <!-- Comment this in case of a clustered environment -->
     <bean id="notifyBackendWebServiceQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
-        <property name="jndiName" value="jms/domibus.notification.webservice"/>
+        <property name="jndiName" value="jms/domibus.notification.webservice" />
     </bean>
 
     <bean id="backendWebservice"
