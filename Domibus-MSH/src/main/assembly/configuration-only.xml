@@ -70,14 +70,6 @@
         </file>
         <file>
             <source>
-                ${project.basedir}/src/main/conf/domibus/persistence.xml
-            </source>
-            <outputDirectory>/</outputDirectory>
-            <destName>persistence.xml</destName>
-            <filtered>false</filtered>
-        </file>
-        <file>
-            <source>
                 ${project.basedir}/src/main/conf/domibus/logback.xml
             </source>
             <outputDirectory>/</outputDirectory>
