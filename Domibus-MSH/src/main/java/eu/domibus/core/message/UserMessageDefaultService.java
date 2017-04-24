@@ -1,6 +1,6 @@
-package eu.domibus.core.message.ebms3;
+package eu.domibus.core.message;
 
-import eu.domibus.api.message.ebms3.UserMessageService;
+import eu.domibus.api.message.UserMessageService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.common.dao.MessagingDao;

@@ -1,4 +1,4 @@
-package eu.domibus.api.message.ebms3;
+package eu.domibus.api.message;
 
 /**
  * @author Cosmin Baciu

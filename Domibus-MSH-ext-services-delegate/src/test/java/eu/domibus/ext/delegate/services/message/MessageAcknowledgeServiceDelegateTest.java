@@ -2,7 +2,7 @@ package eu.domibus.ext.delegate.services.message;
 
 import eu.domibus.api.message.acknowledge.MessageAcknowledgeService;
 import eu.domibus.api.message.acknowledge.MessageAcknowledgement;
-import eu.domibus.api.message.ebms3.UserMessageService;
+import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.ext.delegate.converter.DomibusDomainConverter;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;

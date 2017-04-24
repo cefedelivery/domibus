@@ -4,7 +4,6 @@ import eu.domibus.api.message.acknowledge.MessageAcknowledgeException;
 import eu.domibus.api.message.acknowledge.MessageAcknowledgeService;
 import eu.domibus.api.message.acknowledge.MessageAcknowledgement;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.message.ebms3.UserMessageService;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
