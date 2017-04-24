@@ -49,6 +49,16 @@
         <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
         </wsdl:part>
     </wsdl:message>
+    <wsdl:message name="retrieveMessage">
+        <wsdl:part element="tns:retrieveMessageRequest" name="retrieveMessageRequest">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="retrieveMessageResponse">
+        <wsdl:part element="tns:retrieveMessageResponse" name="retrieveMessageResponse">
+        </wsdl:part>
+        <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
+        </wsdl:part>
+    </wsdl:message>
     <wsdl:message name="listPendingMessagesResponse">
         <wsdl:part element="tns:listPendingMessagesResponse" name="listPendingMessagesResponse">
         </wsdl:part>
@@ -75,6 +85,16 @@
         <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
         </wsdl:part>
     </wsdl:message>
+    <wsdl:message name="submitMessage">
+        <wsdl:part element="tns:submitRequest" name="submitRequest">
+        </wsdl:part>
+        <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="submitMessageResponse">
+        <wsdl:part element="tns:submitResponse" name="submitResponse">
+        </wsdl:part>
+    </wsdl:message>
     <wsdl:message name="SendMessageFault">
         <wsdl:part element="tns:FaultDetail" name="SendMessageFault">
         </wsdl:part>
@@ -88,6 +108,14 @@
             <wsdl:input message="tns:sendMessage" name="sendMessage">
             </wsdl:input>
             <wsdl:output message="tns:sendMessageResponse" name="sendMessageResponse">
+            </wsdl:output>
+            <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault">
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="submitMessage">
+            <wsdl:input message="tns:submitMessage" name="submitMessage">
+            </wsdl:input>
+            <wsdl:output message="tns:submitMessageResponse" name="submitMessageResponse">
             </wsdl:output>
             <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault">
             </wsdl:fault>
@@ -118,6 +146,14 @@
             <wsdl:fault message="tns:DownloadMessageFault" name="DownloadMessageFault">
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="retrieveMessage">
+            <wsdl:input message="tns:retrieveMessage" name="retrieveMessage">
+            </wsdl:input>
+            <wsdl:output message="tns:retrieveMessageResponse" name="retrieveMessageResponse">
+            </wsdl:output>
+            <wsdl:fault message="tns:DownloadMessageFault" name="DownloadMessageFault">
+            </wsdl:fault>
+        </wsdl:operation>
     </wsdl:portType>
 
     <wsdl:binding name="BackendService_1_1SoapBinding" type="tns:BackendInterface">
@@ -129,6 +165,19 @@
                 <soap12:body parts="sendRequest" use="literal"/>
             </wsdl:input>
             <wsdl:output name="sendMessageResponse">
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="SendMessageFault">
+                <soap12:fault name="SendMessageFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="submitMessage">
+            <soap12:operation soapAction="" style="document"/>
+            <wsdl:input name="submitMessage">
+                <soap12:header message="tns:submitMessage" part="ebMSHeaderInfo" use="literal"/>
+                <soap12:body parts="submitRequest" use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="submitMessageResponse">
                 <soap12:body use="literal"/>
             </wsdl:output>
             <wsdl:fault name="SendMessageFault">
@@ -170,6 +219,19 @@
             <wsdl:output name="downloadMessageResponse">
                 <soap12:header message="tns:downloadMessageResponse" part="ebMSHeaderInfo" use="literal"/>
                 <soap12:body parts="downloadMessageResponse" use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="DownloadMessageFault">
+                <soap12:fault name="DownloadMessageFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="retrieveMessage">
+            <soap12:operation soapAction="" style="document"/>
+            <wsdl:input name="downloadMessage">
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="retrieveMessageResponse">
+                <soap12:header message="tns:retrieveMessageResponse" part="ebMSHeaderInfo" use="literal"/>
+                <soap12:body parts="retrieveMessageResponse" use="literal"/>
             </wsdl:output>
             <wsdl:fault name="DownloadMessageFault">
                 <soap12:fault name="DownloadMessageFault" use="literal"/>

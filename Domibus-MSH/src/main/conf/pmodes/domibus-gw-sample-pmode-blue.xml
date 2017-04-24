@@ -76,7 +76,7 @@
 					  policy="doNothingPolicy.xml"
 					  signatureMethod="RSA_SHA256"/>
 			<security name="eSensPolicy"
-					  policy="eSensPolicy.xml"
+					  policy="eSensPolicy.v2.0.xml"
 					  signatureMethod="RSA_SHA256"/>
 		</securities>
 		<errorHandlings>

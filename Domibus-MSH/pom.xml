@@ -610,6 +610,13 @@
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-transports-http</artifactId>
         </dependency>
+
+        <!-- Overrides the version coming from CXF due to a bug related to large attachments; to be removed when CXF upgrades also the xmlsec version -->
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+            <version>2.0.8</version>
+        </dependency>
         <!-- End CXF -->
 
         <!-- Hibernate -->

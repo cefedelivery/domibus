@@ -1,5 +1,26 @@
+/*
+ * Copyright 2015 e-CODEX Project
+ *
+ * Licensed under the EUPL, Version 1.1 or – as soon they
+ * will be approved by the European Commission - subsequent
+ * versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the
+ * Licence.
+ * You may obtain a copy of the Licence at:
+ * http://ec.europa.eu/idabc/eupl5
+ * Unless required by applicable law or agreed to in
+ * writing, software distributed under the Licence is
+ * distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
 package eu.domibus.plugin;
 
+import eu.domibus.api.exceptions.DomibusCoreError;
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.*;
@@ -97,8 +118,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
             }
         } catch (JMSException jmsEx) {
             LOG.error("Error getting the property from JMS message", jmsEx);
-            // TODO to be changed with something like the new DomibusCoreException
-            throw new RuntimeException("Error getting the property from JMS message", jmsEx);
+            throw new DomibusCoreException(DomibusCoreError.DOM_001, "Error getting the property from JMS message", jmsEx.getCause());
         }
     }
 
@@ -166,8 +186,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
             messages = jmsManager.browseMessages(backendNotificationQueue.getQueueName());
         } catch (JMSException jmsEx) {
             LOG.error("Error trying to read the queue name", jmsEx);
-            // TODO to be changed with something like the new DomibusCoreException
-            throw new RuntimeException("Queue name error", jmsEx.getCause());
+            throw new DomibusCoreException(DomibusCoreError.DOM_001, "Could not get the queue name", jmsEx.getCause());
         }
 
         int countOfMessagesIncluded = 0;
@@ -206,8 +225,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
             queueName = backendNotificationQueue.getQueueName();
         } catch (JMSException jmsEx) {
             LOG.error("Error trying to get the queue name", jmsEx);
-            // TODO to be changed with something like the new DomibusCoreException
-            throw new RuntimeException("Queue name error", jmsEx.getCause());
+            throw new DomibusCoreException(DomibusCoreError.DOM_001, "Could not get the queue name", jmsEx.getCause());
         }
 
         JmsMessage message = jmsManager.consumeMessage(queueName, messageId);
