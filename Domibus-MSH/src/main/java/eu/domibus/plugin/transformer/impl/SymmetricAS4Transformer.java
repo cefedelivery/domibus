@@ -1,7 +1,7 @@
 package eu.domibus.plugin.transformer.impl;
 
-import eu.domibus.api.message.ebms3.model.Messaging;
-import eu.domibus.api.message.ebms3.model.UserMessage;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;

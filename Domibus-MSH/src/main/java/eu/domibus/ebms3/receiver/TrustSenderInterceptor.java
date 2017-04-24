@@ -3,7 +3,7 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.api.message.ebms3.model.MessageInfo;
+import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;

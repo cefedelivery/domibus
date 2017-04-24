@@ -5,7 +5,7 @@ import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Role;
-import eu.domibus.api.message.ebms3.model.PartyId;
+import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import mockit.Expectations;

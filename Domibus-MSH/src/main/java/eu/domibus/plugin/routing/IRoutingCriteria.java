@@ -1,6 +1,6 @@
 package eu.domibus.plugin.routing;
 
-import eu.domibus.api.message.ebms3.model.UserMessage;
+import eu.domibus.ebms3.common.model.UserMessage;
 
 /**
  * Routing Interface for incoming user messages

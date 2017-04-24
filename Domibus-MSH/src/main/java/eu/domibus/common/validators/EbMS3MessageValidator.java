@@ -3,7 +3,7 @@ package eu.domibus.common.validators;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.api.message.ebms3.model.*;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

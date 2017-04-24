@@ -1,7 +1,7 @@
 package eu.domibus.plugin.transformer.impl;
 
 import eu.domibus.common.services.impl.MessageIdGenerator;
-import eu.domibus.api.message.ebms3.model.*;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.plugin.Submission;
 import org.springframework.beans.factory.annotation.Autowired;
 

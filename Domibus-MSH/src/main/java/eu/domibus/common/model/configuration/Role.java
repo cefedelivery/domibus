@@ -1,6 +1,6 @@
 package eu.domibus.common.model.configuration;
 
-import eu.domibus.api.message.ebms3.model.AbstractBaseEntity;
+import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 

@@ -1,6 +1,6 @@
 package eu.domibus.common.dao;
 
-import eu.domibus.api.message.ebms3.model.SignalMessage;
+import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;

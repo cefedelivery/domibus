@@ -4,10 +4,10 @@ import eu.domibus.api.message.acknowledge.MessageAcknowledgeException;
 import eu.domibus.api.message.acknowledge.MessageAcknowledgeService;
 import eu.domibus.api.message.acknowledge.MessageAcknowledgement;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.message.ebms3.UserMessageService;
 import eu.domibus.api.security.AuthUtils;
-import eu.domibus.api.message.ebms3.UserMessageServiceHelper;
-import eu.domibus.api.message.ebms3.model.UserMessage;
+import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.ebms3.common.UserMessageServiceHelper;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
     AuthUtils authUtils;
 
     @Autowired
-    UserMessageService userMessageService;
+    MessagingDao messagingDao;
 
     @Autowired
     MessageAcknowledgeConverter messageAcknowledgeConverter;
@@ -51,7 +51,7 @@ public class MessageAcknowledgeDefaultService implements MessageAcknowledgeServi
     }
 
     protected UserMessage getUserMessage(String messageId) {
-        final UserMessage userMessage = userMessageService.getMessage(messageId);
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         if (userMessage == null) {
             throw new MessageAcknowledgeException(DomibusCoreErrorCode.DOM_001, "Message with ID [" + messageId + "] does not exist");
         }

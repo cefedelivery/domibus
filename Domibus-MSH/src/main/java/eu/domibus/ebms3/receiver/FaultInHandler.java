@@ -6,7 +6,7 @@ import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.handler.AbstractFaultHandler;
-import eu.domibus.api.message.ebms3.model.Messaging;
+import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.pmode.exception.NoMatchingPModeFoundException;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.logging.DomibusLogger;

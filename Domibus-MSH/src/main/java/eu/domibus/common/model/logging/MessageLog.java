@@ -3,8 +3,8 @@ package eu.domibus.common.model.logging;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
-import eu.domibus.api.message.ebms3.model.AbstractBaseEntity;
-import eu.domibus.api.message.ebms3.model.MessageType;
+import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import eu.domibus.ebms3.common.model.MessageType;
 
 import javax.persistence.*;
 import java.util.Date;

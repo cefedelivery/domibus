@@ -4,7 +4,7 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.services.MessagesLogService;
-import eu.domibus.api.message.ebms3.model.MessageType;
+import eu.domibus.ebms3.common.model.MessageType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

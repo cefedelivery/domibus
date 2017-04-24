@@ -2,12 +2,9 @@ package eu.domibus.ext.delegate.services.message;
 
 import eu.domibus.api.message.acknowledge.MessageAcknowledgeService;
 import eu.domibus.api.message.acknowledge.MessageAcknowledgement;
-import eu.domibus.api.message.ebms3.UserMessageService;
-import eu.domibus.api.message.ebms3.UserMessageServiceHelper;
-import eu.domibus.api.message.ebms3.model.UserMessage;
+import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.ext.delegate.converter.DomibusDomainConverter;
-import eu.domibus.ext.delegate.services.message.MessageAcknowledgeServiceDelegate;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;
 import eu.domibus.ext.exceptions.AuthenticationException;
 import mockit.Expectations;
@@ -17,7 +14,6 @@ import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.sql.Timestamp;
@@ -41,9 +37,6 @@ public class MessageAcknowledgeServiceDelegateTest {
 
     @Injectable
     DomibusDomainConverter domainConverter;
-
-    @Injectable
-    UserMessageServiceHelper userMessageServiceHelper;
 
     @Injectable
     UserMessageService userMessageService;
@@ -96,6 +89,9 @@ public class MessageAcknowledgeServiceDelegateTest {
     public void testCheckSecurityWithUnsecuredLoginAllowed() throws Exception {
         final String messageId = "1";
         new Expectations(messageAcknowledgeServiceDelegate) {{
+            userMessageService.getFinalRecipient(messageId);
+            result = messageId;
+
             //don't execute method
             authUtils.isUnsecureLoginAllowed();
             result = true;
@@ -113,6 +109,9 @@ public class MessageAcknowledgeServiceDelegateTest {
     public void testCheckSecurityWithAdminRole() throws Exception {
         final String messageId = "1";
         new Expectations(messageAcknowledgeServiceDelegate) {{
+            userMessageService.getFinalRecipient(messageId);
+            result = messageId;
+
             //don't execute method
             authUtils.isUnsecureLoginAllowed();
             result = false;
@@ -134,6 +133,9 @@ public class MessageAcknowledgeServiceDelegateTest {
     public void testCheckSecurityWithNoUserRole() throws Exception {
         final String messageId = "1";
         new Expectations(messageAcknowledgeServiceDelegate) {{
+            userMessageService.getFinalRecipient(messageId);
+            result = messageId;
+
             //don't execute method
             authUtils.isUnsecureLoginAllowed();
             result = false;
@@ -149,7 +151,6 @@ public class MessageAcknowledgeServiceDelegateTest {
     public void testCheckSecurityWhenOriginalUserFromSecurityContextIsDifferent() throws Exception {
         final String messageId = "1";
         final String originalUserFromSecurityContext = "C4";
-        final UserMessage userMessage = new UserMessage();
 
         new Expectations(messageAcknowledgeServiceDelegate) {{
             //don't execute method
@@ -162,11 +163,9 @@ public class MessageAcknowledgeServiceDelegateTest {
             authUtils.getOriginalUserFromSecurityContext();
             result = originalUserFromSecurityContext;
 
-            messageAcknowledgeServiceDelegate.getUserMessage(messageId);
-            result = userMessage;
 
-            userMessageServiceHelper.isSameFinalRecipient(userMessage, originalUserFromSecurityContext);
-            result = false;
+            userMessageService.getFinalRecipient(messageId);
+            result = "differentRecipientID";
         }};
 
         messageAcknowledgeServiceDelegate.checkSecurity(messageId);

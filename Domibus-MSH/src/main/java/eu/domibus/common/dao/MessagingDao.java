@@ -1,8 +1,8 @@
 package eu.domibus.common.dao;
 
-import eu.domibus.api.message.ebms3.model.Messaging;
-import eu.domibus.api.message.ebms3.model.PartInfo;
-import eu.domibus.api.message.ebms3.model.UserMessage;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.PartInfo;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
