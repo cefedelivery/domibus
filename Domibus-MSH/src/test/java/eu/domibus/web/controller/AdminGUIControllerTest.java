@@ -8,7 +8,7 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.CriteriaFactory;
 import eu.domibus.plugin.routing.RoutingService;
-import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
@@ -47,10 +47,10 @@ public class AdminGUIControllerTest {
     private List<NotificationListener> notificationListenerServices;
 
     @Injectable
-    private TrustStoreService trustStoreService;
+    private List<CriteriaFactory> routingCriteriaFactories;
 
     @Injectable
-    private List<CriteriaFactory> routingCriteriaFactories;
+    CryptoService cryptoService;
 
     @Test
     public void testGetMessageStatuses() throws Exception {
