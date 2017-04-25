@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings xmlns="http://dozer.sourceforge.net" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://dozer.sourceforge.net           http://dozer.sourceforge.net/schema/beanmapping.xsd">
+    <mapping>
+        <class-a>eu.domibus.common.model.configuration.Configuration</class-a>
+        <class-b>eu.domibus.common.model.configuration.Configuration</class-b>
+        <field>
+            <a>businessProcesses</a>
+            <b>businessProcesses</b>
+        </field>
+
+        <field>
+            <a>mpcs</a>
+            <b>mpcsXml.mpc</b>
+        </field>
+
+        <field>
+            <a>mpcs</a>
+            <b>partyXml</b>
+        </field>
+
+    </mapping>
+    <mapping>
+        <class-a>eu.domibus.common.model.configuration.BusinessProcesses
+        </class-a>
+        <class-b>eu.domibus.common.model.configuration.BusinessProcesses
+        </class-b>
+        <field>
+            <a is-accessible="true">roles</a>
+            <b is-accessible="true">rolesXml.role</b>
+        </field>
+
+        <field>
+            <a is-accessible="true">parties</a>
+            <b is-accessible="true">partiesXml.party</b>
+        </field>
+
+        <field>
+            <a is-accessible="true">partyIdTypes</a>
+            <b is-accessible="true">partiesXml.partyIdTypes.partyIdType</b>
+        </field>
+
+    </mapping>
+</mappings>

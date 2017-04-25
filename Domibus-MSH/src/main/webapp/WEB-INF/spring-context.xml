@@ -29,7 +29,8 @@
     </tx:advice>
     <aop:config proxy-target-class="true">
         <!-- all services from eu.domibus package which do not use a speicific @Transactional annotation; the implementations of the org.apache.cxf.phase.PhaseInterceptor are not taken into account due to final methods present in the CXF abstract class  -->
-        <aop:pointcut id="allMethods" expression="execution(public * eu.domibus..*(..)) and not @annotation(org.springframework.transaction.annotation.Transactional) and not within(@org.springframework.transaction.annotation.Transactional *) and not within(org.apache.cxf.phase.PhaseInterceptor+)"/>
+        <aop:pointcut id="allMethods"
+                      expression="execution(public * eu.domibus..*(..)) and not @annotation(org.springframework.transaction.annotation.Transactional) and not within(@org.springframework.transaction.annotation.Transactional *) and not within(org.apache.cxf.phase.PhaseInterceptor+)"/>
         <aop:advisor order="2" advice-ref="txAdvice" pointcut-ref="allMethods"/>
     </aop:config>
     <aop:aspectj-autoproxy proxy-target-class="true"/>
@@ -79,5 +80,13 @@
         <constructor-arg value="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"/>
     </bean>
     <bean id="dateFormatter" class="eu.domibus.ebms3.common.model.TimestampDateFormatter"/>
+
+    <bean id="org.dozer.Mapper" class="org.dozer.DozerBeanMapper">
+        <property name="mappingFiles">
+            <list>
+                <value>dozer-global-configuration.xml</value>
+            </list>
+        </property>
+    </bean>
 
 </beans>
