@@ -170,13 +170,6 @@ public abstract class PModeProvider {
         return unmarshallerResult;
     }
 
-    public ByteArrayOutputStream marshall(Configuration configuration) throws JAXBException {
-        final Marshaller marshaller = jaxbContext.createMarshaller();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        marshaller.marshal(configuration,baos);
-        return baos;
-    }
-
     @Transactional(propagation = Propagation.REQUIRED, noRollbackFor = IllegalStateException.class)
     public String findPModeKeyForUserMessage(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
 
