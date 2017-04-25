@@ -12,15 +12,15 @@ import java.util.List;
 
 @Repository
 @Transactional
-public class AuthenticationDAO extends BasicDao<AuthenticationEntry> {
+public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
 
     public AuthenticationDAO() {
-        super(AuthenticationEntry.class);
+        super(AuthenticationEntity.class);
     }
 
 
-    public AuthenticationEntry findByUser(final String username) {
-        final TypedQuery<AuthenticationEntry> query = this.em.createNamedQuery("AuthenticationEntry.findByUsername", AuthenticationEntry.class);
+    public AuthenticationEntity findByUser(final String username) {
+        final TypedQuery<AuthenticationEntity> query = this.em.createNamedQuery("AuthenticationEntry.findByUsername", AuthenticationEntity.class);
         query.setParameter("USERNAME", username);
 
         return query.getSingleResult();
@@ -39,8 +39,8 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntry> {
         return authRoles;
     }
 
-    public AuthenticationEntry findByCertificateId(final String certificateId) {
-        final TypedQuery<AuthenticationEntry> query = this.em.createNamedQuery("AuthenticationEntry.findByCertificateId", AuthenticationEntry.class);
+    public AuthenticationEntity findByCertificateId(final String certificateId) {
+        final TypedQuery<AuthenticationEntity> query = this.em.createNamedQuery("AuthenticationEntry.findByCertificateId", AuthenticationEntity.class);
         query.setParameter("CERTIFICATE_ID", certificateId);
 
         return query.getSingleResult();

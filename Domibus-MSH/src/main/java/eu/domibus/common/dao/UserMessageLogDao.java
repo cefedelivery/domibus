@@ -5,6 +5,7 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
@@ -42,6 +43,20 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         TypedQuery<String> query = this.em.createNamedQuery("UserMessageLog.findTimedoutMessages", String.class);
         query.setParameter("TIMESTAMP_WITH_TOLERANCE", new Date(System.currentTimeMillis() - timeoutTolerance));
 
+        return query.getResultList();
+    }
+
+    public List<String> findFailedMessages(String finalRecipient) {
+        String queryString = "select m.messageInfo.messageId from UserMessage m " +
+                "inner join m.messageProperties.property p, UserMessageLog ml " +
+                "where ml.messageId = m.messageInfo.messageId and ml.messageStatus = 'SEND_FAILURE' ";
+        if(StringUtils.isNotEmpty(finalRecipient)) {
+            queryString += " and p.name = 'finalRecipient' and p.value = :FINAL_RECIPIENT";
+        }
+        TypedQuery<String> query = this.em.createNamedQuery(queryString, String.class);
+        if(StringUtils.isNotEmpty(finalRecipient)) {
+            query.setParameter("FINAL_RECIPIENT", finalRecipient);
+        }
         return query.getResultList();
     }
 

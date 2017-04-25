@@ -43,30 +43,30 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 LOG.debug("Authenticating using the X509 certificate from the request");
                 authentication.setAuthenticated(x509CertificateService.isClientX509CertificateValid((X509Certificate[]) authentication.getCredentials()));
 
-                AuthenticationEntry authenticationEntry = authenticationDAO.findByCertificateId(authentication.getName());
-                ((X509CertificateAuthentication) authentication).setOriginalUser(authenticationEntry.getOriginalUser());
+                AuthenticationEntity authenticationEntity = authenticationDAO.findByCertificateId(authentication.getName());
+                ((X509CertificateAuthentication) authentication).setOriginalUser(authenticationEntity.getOriginalUser());
                 List<AuthRole> authRoles = authenticationDAO.getRolesForCertificateId(authentication.getName());
                 setAuthority(authentication, authRoles);
             } else if (authentication instanceof BlueCoatClientCertificateAuthentication) {
                 LOG.debug("Authenticating using the decoded certificate in the http header");
                 authentication.setAuthenticated(blueCoatCertificateService.isBlueCoatClientCertificateValid((CertificateDetails) authentication.getCredentials()));
 
-                AuthenticationEntry authenticationEntry = authenticationDAO.findByCertificateId(authentication.getName());
-                ((BlueCoatClientCertificateAuthentication) authentication).setOriginalUser(authenticationEntry.getOriginalUser());
+                AuthenticationEntity authenticationEntity = authenticationDAO.findByCertificateId(authentication.getName());
+                ((BlueCoatClientCertificateAuthentication) authentication).setOriginalUser(authenticationEntity.getOriginalUser());
                 List<AuthRole> authRoles = authenticationDAO.getRolesForCertificateId(authentication.getName());
                 setAuthority(authentication, authRoles);
             } else if (authentication instanceof BasicAuthentication) {
                 LOG.debug("Authenticating using the Basic authentication");
                 Boolean res = false;
-                AuthenticationEntry basicAuthenticationEntry = authenticationDAO.findByUser(authentication.getName());
+                AuthenticationEntity basicAuthenticationEntity = authenticationDAO.findByUser(authentication.getName());
                 try {
-                    res = hashUtil.getSHA256Hash((String) authentication.getCredentials()).equals(basicAuthenticationEntry.getPasswd());
+                    res = hashUtil.getSHA256Hash((String) authentication.getCredentials()).equals(basicAuthenticationEntity.getPasswd());
                 } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
                     LOG.error("Problem hashing the provided password", ex);
                 }
                 authentication.setAuthenticated(res);
 
-                ((BasicAuthentication) authentication).setOriginalUser(basicAuthenticationEntry.getOriginalUser());
+                ((BasicAuthentication) authentication).setOriginalUser(basicAuthenticationEntity.getOriginalUser());
                 List<AuthRole> authRoles = authenticationDAO.getRolesForUser(authentication.getName());
                 setAuthority(authentication, authRoles);
             }
