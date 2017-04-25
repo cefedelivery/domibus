@@ -99,13 +99,6 @@ public abstract class PModeProvider {
 
     public abstract void refresh();
 
-    public Configuration getConfiguration() {
-        if (!this.configurationDAO.configurationExists())
-            return null;
-
-        return this.configurationDAO.readEager();
-    }
-
     public byte[] getRawConfiguration() {
         if (!this.configurationDAO.configurationExists())
             return null;
@@ -157,7 +150,7 @@ public abstract class PModeProvider {
         return resultMessage;
     }
 
-    public UnmarshallerResult unmarshall(byte[] bytes, boolean ignoreWhitespaces) throws XmlProcessingException {
+    protected UnmarshallerResult unmarshall(byte[] bytes, boolean ignoreWhitespaces) throws XmlProcessingException {
         Configuration configuration = null;
         UnmarshallerResult unmarshallerResult = null;
 

@@ -32,7 +32,7 @@ public class CachingPModeProvider extends PModeProvider {
     //Dont access directly, use getter instead
     private Configuration configuration;
 
-    public synchronized Configuration getConfiguration() {
+    protected synchronized Configuration getConfiguration() {
         if (this.configuration == null) {
             this.init();
         }

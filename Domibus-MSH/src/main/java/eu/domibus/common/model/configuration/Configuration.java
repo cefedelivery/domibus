@@ -102,7 +102,7 @@ public class Configuration extends AbstractBaseEntity {
     }
 
     @PrePersist
-    public void preparePersist() {
+    protected void preparePersist() {
         this.initMpcs();
         this.businessProcesses.init(this);
 
