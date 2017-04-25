@@ -53,7 +53,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         if(StringUtils.isNotEmpty(finalRecipient)) {
             queryString += " and p.name = 'finalRecipient' and p.value = :FINAL_RECIPIENT";
         }
-        TypedQuery<String> query = this.em.createNamedQuery(queryString, String.class);
+        TypedQuery<String> query = this.em.createQuery(queryString, String.class);
         if(StringUtils.isNotEmpty(finalRecipient)) {
             query.setParameter("FINAL_RECIPIENT", finalRecipient);
         }

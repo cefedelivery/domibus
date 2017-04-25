@@ -22,7 +22,7 @@ public class MessageMonitoringResource {
     MessageMonitorService messageMonitorService;
 
     @RequestMapping(path = "/failed", method = RequestMethod.GET)
-    public List<String> getFailedMessages(@RequestParam(value = "finalRecipient") String finalRecipient) throws MessageMonitorException {
+    public List<String> getFailedMessages(@RequestParam(value = "finalRecipient", required = false) String finalRecipient) throws MessageMonitorException {
         return messageMonitorService.getFailedMessages(finalRecipient);
     }
 }

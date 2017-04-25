@@ -30,7 +30,7 @@ public class SecurityDefaultService implements SecurityService {
     @Override
     public void checkMessageAuthorization(String messageId) throws AuthenticationException, DomibusServiceException {
         final String finalRecipient = userMessageService.getFinalRecipient(messageId);
-        if (finalRecipient == null) {
+        if (StringUtils.isEmpty(finalRecipient)) {
             throw new DomibusServiceException(DomibusErrorCode.DOM_001, "Couldn't get the finalRecipient for message with ID [" + messageId + "]");
         }
         checkAuthorization(finalRecipient);
