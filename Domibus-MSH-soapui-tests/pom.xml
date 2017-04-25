@@ -54,8 +54,8 @@
                     <testSuite>PASSING TCs - Web Service Submission - Auto for Bamboo</testSuite>
                     <!--<testCase>Dom001-Submit Message-Basic Flow</testCase>-->
                     <projectProperties>
-                        <value>localUrl=http://localhost:8080/domibus</value>
-                        <value>remoteUrl=http://localhost:8180/domibus</value>
+                        <value>localUrl=http://localhost:8180/domibus</value>
+                        <value>remoteUrl=http://localhost:9080/domibus</value>
 
                         <value>databaseBlue=mysql</value>
                         <value>driverBlue=com.mysql.jdbc.Driver</value>
