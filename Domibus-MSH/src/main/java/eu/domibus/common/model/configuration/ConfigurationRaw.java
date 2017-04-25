@@ -21,27 +21,27 @@ package eu.domibus.common.model.configuration;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Calendar;
 
 @Entity
 @Table(name = "TB_CONFIGURATION_RAW")
+@NamedQueries({@NamedQuery(name = "ConfigurationRaw.getLatest", query = "select conf from ConfigurationRaw conf ORDER BY conf.configurationDate desc")})
 public class ConfigurationRaw extends AbstractBaseEntity {
 
     @Lob
-    String xml;
+    @Column(name = "XML")
+    byte[] xml;
 
-    @Column
+    @Column(name = "CONFIGURATION_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
     Calendar configurationDate;
 
-    public String getXml() {
+    public byte[] getXml() {
         return xml;
     }
 
-    public void setXml(String xml) {
+    public void setXml(byte[] xml) {
         this.xml = xml;
     }
 

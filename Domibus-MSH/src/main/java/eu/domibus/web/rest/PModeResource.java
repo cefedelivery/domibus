@@ -40,13 +40,11 @@ public class PModeResource {
     @Autowired
     private PModeProvider pModeProvider;
 
-    @RequestMapping(method = RequestMethod.GET,produces = "application/xml")
+    @RequestMapping(method = RequestMethod.GET, produces = "application/xml")
     public ResponseEntity<? extends Resource> downloadPmodes() throws IOException, JAXBException {
 
-        final Configuration config = pModeProvider.getConfiguration();
-        final ByteArrayOutputStream configuration = pModeProvider.marshall(config);
-
-        ByteArrayResource resource = new ByteArrayResource(configuration.toByteArray());
+        final byte[] rawConfiguration = pModeProvider.getRawConfiguration();
+        ByteArrayResource resource = new ByteArrayResource(rawConfiguration);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
