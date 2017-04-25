@@ -1,4 +1,3 @@
-
 package eu.domibus.plugin.handler;
 
 import eu.domibus.api.jms.JMSManager;
@@ -21,22 +20,19 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.common.model.Property;
-import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
-import eu.domibus.messaging.DuplicateMessageException;
-import eu.domibus.messaging.MessageConstants;
-import eu.domibus.messaging.MessageNotFoundException;
-import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.messaging.*;
+import eu.domibus.messaging.DispatchMessageCreator;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,8 +41,6 @@ import javax.jms.Queue;
 import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.stereotype.Service;
 
 /**
  * This class is responsible of handling the plugins requests for all the operations exposed.
@@ -118,7 +112,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasUserOrAdminRole();
 
-        String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+        String originalUser = authUtils.getOriginalUserFromSecurityContext();
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
         UserMessage userMessage;
@@ -215,7 +209,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             authUtils.hasUserOrAdminRole();
         }
 
-        String originalUser = authUtils.getOriginalUserFromSecurityContext(SecurityContextHolder.getContext());
+        String originalUser = authUtils.getOriginalUserFromSecurityContext();
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
         UserMessage userMessage = transformer.transformFromSubmission(messageData);
@@ -323,7 +317,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     private void fillMpc(UserMessage userMessage, LegConfiguration legConfiguration, Party to) {
         final Map<Party, Mpc> mpcMap = legConfiguration.getPartyMpcMap();
-        String mpc = Mpc.DEFAULT_MPC;
+        String mpc = Ebms3Constants.DEFAULT_MPC;
         if (legConfiguration.getDefaultMpc() != null) {
             mpc = legConfiguration.getDefaultMpc().getQualifiedName();
         }

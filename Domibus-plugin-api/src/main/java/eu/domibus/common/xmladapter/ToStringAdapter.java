@@ -1,27 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.domibus.common.xmladapter;
 
 import eu.domibus.logging.DomibusLogger;
@@ -47,10 +23,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @deprecated  since 3.3. It will be removed in the future releases
+ *
  * This adapter takes a List<String> containing a single element and maps it to the single String Node and vice versa.
  *
  * @author Christian Koch, Stefan Mueller
  */
+@Deprecated
 public class ToStringAdapter extends XmlAdapter<Node, List<String>> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ToStringAdapter.class);

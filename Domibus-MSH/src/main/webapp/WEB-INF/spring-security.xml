@@ -1,21 +1,4 @@
-<!--
-  ~ Copyright 2015 e-CODEX Project
-  ~
-  ~ Licensed under the EUPL, Version 1.1 or – as soon they
-  ~ will be approved by the European Commission - subsequent
-  ~ versions of the EUPL (the "Licence");
-  ~ You may not use this work except in compliance with the
-  ~ Licence.
-  ~ You may obtain a copy of the Licence at:
-  ~ http://ec.europa.eu/idabc/eupl5
-  ~ Unless required by applicable law or agreed to in
-  ~ writing, software distributed under the Licence is
-  ~ distributed on an "AS IS" basis,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  ~ express or implied.
-  ~ See the Licence for the specific language governing
-  ~ permissions and limitations under the Licence.
-  -->
+<?xml version="1.0" encoding="UTF-8"?>
 
 <beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -25,8 +8,12 @@
 	http://www.springframework.org/schema/security
 	http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
+    <!-- Skip the security; the REST services exposed in the domibus-ext-services-api are protected by an interceptor -->
+    <http pattern="/ext/**" security="none"/>
+
     <http auto-config="true" pattern="/services/**">
     </http>
+
 
     <http auto-config="true" authentication-manager-ref="authenticationManagerForAdminConsole">
         <intercept-url pattern="/home**" access="ROLE_USER"/>

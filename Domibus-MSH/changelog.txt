@@ -22,6 +22,8 @@ Domibus 3.3-RC1
 - WS Plugin: the response list of ListPendingMessages operation can be limited using a new configuration property (domibus.listPendingMessages.maxCount).
 - Config: increased the value of the retry tolerance to 3 hours
 - Config: added new property "domibus.sendMessage.failure.delete.payload" to enable/disable the removal of the message payload on send failure.
+- Core: the core exposes services via the new domibus-ext-services-api module
+- Core: possibility to register message acknowledgments
 Domibus 3.2.4
 - Default WS plugin: backwards compatibility fix for Domibus >3.2.2
 - Fix error when downloading a message with an empty payload
