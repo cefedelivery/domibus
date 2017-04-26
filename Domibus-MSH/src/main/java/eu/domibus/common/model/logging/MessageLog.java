@@ -67,6 +67,10 @@ public abstract class MessageLog extends AbstractBaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date downloaded;
 
+    @Column(name = "FAILED")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date failed;
+
     @Column(name = "SEND_ATTEMPTS")
     private int sendAttempts;
 
@@ -139,6 +143,14 @@ public abstract class MessageLog extends AbstractBaseEntity {
 
     public void setDownloaded(final Date downloaded) {
         this.downloaded = downloaded;
+    }
+
+    public Date getFailed() {
+        return failed;
+    }
+
+    public void setFailed(Date failed) {
+        this.failed = failed;
     }
 
     public Date getNextAttempt() {

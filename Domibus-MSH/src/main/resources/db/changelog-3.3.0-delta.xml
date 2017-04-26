@@ -95,25 +95,11 @@
                                  constraintName="FK_MSG_ACK_PROP_MSG_ACK" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_ACKNW"/>
-
-        <createTable tableName="TB_MSG_LOG_STATUS_HISTORY">
-            <column autoIncrement="true" name="ID_PK" type="INT">
-                <constraints primaryKey="true"/>
-            </column>
-            <column name="MESSAGE_STATUS" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="STATUS_DATE" type="DATETIME">
-                <constraints nullable="false"/>
-            </column>
-            <column name="FK_MSG_LOG" type="INT">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-        <addForeignKeyConstraint baseColumnNames="FK_MSG_LOG" baseTableName="TB_MSG_LOG_STATUS_HISTORY"
-                                 constraintName="FK_MSG_STS_LOG_MSG_LOG" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_LOG"/>
+    </changeSet>
+    <changeSet author="CosminBaciu" id="EDELIVERY_1941">
+        <addColumn tableName="TB_MESSAGE_LOG">
+            <column name="FAILED" type="datetime" afterColumn="DOWNLOADED"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

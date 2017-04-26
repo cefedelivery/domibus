@@ -53,7 +53,7 @@ public class UpdateRetryLoggingService {
             if (legConfiguration.getReceptionAwareness() != null) {
                 userMessageLog.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(userMessageLog.getNextAttempt(), userMessageLog.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
                 userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RETRY);
-                LOG.debug("Updatig status to [{}]", userMessageLog.getMessageStatus());
+                LOG.debug("Updating status to [{}]", userMessageLog.getMessageStatus());
                 userMessageLogDao.update(userMessageLog);
             }
 

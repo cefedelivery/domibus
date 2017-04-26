@@ -76,8 +76,19 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public Long getFailedMessageElapsedTime(String messageId) {
-        //TODO
-        return null;//messagingDao.getFailedMessageElapsedTime(messageId);
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        if (userMessageLog == null) {
+            throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Message [" + messageId + "] does not exist");
+        }
+        if (MessageStatus.SEND_FAILURE != userMessageLog.getMessageStatus()) {
+            throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Message [" + messageId + "] status is not [" + MessageStatus.SEND_FAILURE + "]");
+        }
+        final Date failedDate = userMessageLog.getFailed();
+        if(failedDate == null) {
+            throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Could not compute failed elapsed time for message [" + messageId + "]: failed date is empty");
+        }
+        return System.currentTimeMillis() - failedDate.getTime();
+
     }
 
     @Override
