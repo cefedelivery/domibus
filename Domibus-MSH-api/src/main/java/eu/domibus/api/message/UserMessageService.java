@@ -12,17 +12,17 @@ public interface UserMessageService {
 
     String getFinalRecipient(final String messageId);
 
-    List<String> getFailedMessages();
-
     List<String> getFailedMessages(String finalRecipient);
 
     Long getFailedMessageElapsedTime(String messageId);
 
     void restoreFailedMessage(String messageId);
 
-    List<String> restoreFailedMessagesDuringPeriod(Date begin, Date end);
-
     List<String> restoreFailedMessagesDuringPeriod(Date begin, Date end, String finalRecipient);
 
     void deleteFailedMessage(String messageId);
+
+    void delete(List<String> messageIds);
+
+    void deleteMessage(String messageId);
 }

@@ -2,11 +2,10 @@ package eu.domibus.ext.rest;
 
 import eu.domibus.ext.exceptions.MessageMonitorException;
 import eu.domibus.ext.services.MessageMonitorService;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,11 +17,18 @@ import java.util.List;
 @RequestMapping(value = "/ext/monitoring/messages")
 public class MessageMonitoringResource {
 
+    public static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageMonitoringResource.class);
+
     @Autowired
     MessageMonitorService messageMonitorService;
 
     @RequestMapping(path = "/failed", method = RequestMethod.GET)
     public List<String> getFailedMessages(@RequestParam(value = "finalRecipient", required = false) String finalRecipient) throws MessageMonitorException {
         return messageMonitorService.getFailedMessages(finalRecipient);
+    }
+
+    @RequestMapping(path = "/failed/{messageId:.+}", method = RequestMethod.DELETE)
+    public void deleteFailedMessage(@PathVariable(value = "messageId") String messageId) throws MessageMonitorException {
+        messageMonitorService.deleteFailedMessage(messageId);
     }
 }

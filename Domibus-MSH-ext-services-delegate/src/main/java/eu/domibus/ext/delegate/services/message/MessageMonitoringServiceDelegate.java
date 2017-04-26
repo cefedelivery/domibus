@@ -46,6 +46,7 @@ public class MessageMonitoringServiceDelegate implements MessageMonitorService {
 
     @Override
     public List<String> getFailedMessages(String finalRecipient) throws AuthenticationException, MessageMonitorException {
+        LOG.debug("Getting failed messages with finalRecipient [{}]", finalRecipient);
         securityService.checkAuthorization(finalRecipient);
         return userMessageService.getFailedMessages(finalRecipient);
     }
