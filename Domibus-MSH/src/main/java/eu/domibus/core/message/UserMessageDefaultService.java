@@ -6,7 +6,11 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.pmode.PModeService;
+import eu.domibus.api.pmode.PModeServiceHelper;
+import eu.domibus.api.pmode.domain.LegConfiguration;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
@@ -14,16 +18,19 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.messaging.DelayedDispatchMessageCreator;
+import eu.domibus.messaging.DispatchMessageCreator;
 import eu.domibus.plugin.NotificationListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.jms.JMSException;
+import javax.jms.Queue;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +42,10 @@ import java.util.List;
 public class UserMessageDefaultService implements UserMessageService {
 
     public static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageDefaultService.class);
+
+    @Autowired
+    @Qualifier("sendMessageQueue")
+    private Queue sendMessageQueue;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
@@ -57,6 +68,12 @@ public class UserMessageDefaultService implements UserMessageService {
     @Autowired
     private JMSManager jmsManager;
 
+    @Autowired
+    PModeService pModeService;
+
+    @Autowired
+    PModeServiceHelper pModeServiceHelper;
+
 
     @Override
     public String getFinalRecipient(String messageId) {
@@ -76,15 +93,9 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public Long getFailedMessageElapsedTime(String messageId) {
-        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
-        if (userMessageLog == null) {
-            throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Message [" + messageId + "] does not exist");
-        }
-        if (MessageStatus.SEND_FAILURE != userMessageLog.getMessageStatus()) {
-            throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Message [" + messageId + "] status is not [" + MessageStatus.SEND_FAILURE + "]");
-        }
+        final UserMessageLog userMessageLog = getFailedMessage(messageId);
         final Date failedDate = userMessageLog.getFailed();
-        if(failedDate == null) {
+        if (failedDate == null) {
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Could not compute failed elapsed time for message [" + messageId + "]: failed date is empty");
         }
         return System.currentTimeMillis() - failedDate.getTime();
@@ -93,7 +104,43 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public void restoreFailedMessage(String messageId) {
+        LOG.info("Restoring message [{}]", messageId);
+        final UserMessageLog userMessageLog = getFailedMessage(messageId);
 
+        if (MessageStatus.DELETED == userMessageLog.getMessageStatus()) {
+            throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Could not restore message [" + messageId + "]. Message status is [" + MessageStatus.DELETED + "]");
+        }
+
+        userMessageLog.setMessageStatus(MessageStatus.SEND_ENQUEUED);
+        final Date currentDate = new Date();
+        userMessageLog.setRestored(currentDate);
+        userMessageLog.setFailed(null);
+        userMessageLog.setNextAttempt(currentDate);
+
+        final LegConfiguration legConfiguration = pModeService.getLegConfiguration(messageId);
+        Integer maxAttemptsConfiguration = 1;
+        if (legConfiguration == null) {
+            LOG.warn("Could not get the leg configuration for message [{}]. Using the default maxAttempts configuration [{}]", messageId, maxAttemptsConfiguration);
+        } else {
+            maxAttemptsConfiguration = pModeServiceHelper.getMaxAttempts(legConfiguration);
+        }
+        Integer newMaxAttempts = userMessageLog.getSendAttemptsMax() + maxAttemptsConfiguration;
+        LOG.debug("Increasing the max attempts for message [{}] from [{}] to [{}]", messageId, userMessageLog.getSendAttemptsMax(), newMaxAttempts);
+        userMessageLog.setSendAttemptsMax(newMaxAttempts);
+
+        userMessageLogDao.update(userMessageLog);
+
+        scheduleSending(messageId);
+    }
+
+    @Override
+    public void scheduleSending(String messageId) {
+        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId).createMessage(), sendMessageQueue);
+    }
+
+    @Override
+    public void scheduleSending(String messageId, Long delay) {
+        jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, delay).createMessage(), sendMessageQueue);
     }
 
     @Override
@@ -103,6 +150,11 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public void deleteFailedMessage(String messageId) {
+        getFailedMessage(messageId);
+        deleteMessage(messageId);
+    }
+
+    protected UserMessageLog getFailedMessage(String messageId) {
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         if (userMessageLog == null) {
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Message [" + messageId + "] does not exist");
@@ -110,7 +162,7 @@ public class UserMessageDefaultService implements UserMessageService {
         if (MessageStatus.SEND_FAILURE != userMessageLog.getMessageStatus()) {
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Message [" + messageId + "] status is not [" + MessageStatus.SEND_FAILURE + "]");
         }
-        deleteMessage(messageId);
+        return userMessageLog;
     }
 
     @Override

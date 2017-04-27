@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Properties;
 
 @Service
@@ -46,8 +47,7 @@ public class UpdateRetryLoggingService {
         LOG.debug("Updating retry for message");
         final MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
         //userMessageLog.setMessageStatus(MessageStatus.SEND_ATTEMPT_FAILED); //This is not stored in the database
-        if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax() //handle that there are attempts left
-                && (userMessageLog.getReceived().getTime() + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis()) {// chek that there is time left
+        if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
             userMessageLog.setSendAttempts(userMessageLog.getSendAttempts() + 1);
             LOG.debug("Updating send attempts to [{}]", userMessageLog.getSendAttempts());
             if (legConfiguration.getReceptionAwareness() != null) {
@@ -71,4 +71,31 @@ public class UpdateRetryLoggingService {
             }
         }
     }
+
+    /**
+     * Check if the message can be sent again: there is time and attempts left
+     */
+    protected boolean hasAttemptsLeft(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
+        if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()
+                && (getScheduledStartTime(userMessageLog) + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Gets the scheduled start date of the message: if the message has been restored is returns the restored date otherwise it returns the received date
+     *
+     * @param userMessageLog
+     * @return
+     */
+    protected Long getScheduledStartTime(final MessageLog userMessageLog) {
+        Date result =  userMessageLog.getRestored();
+        if(result == null) {
+            LOG.debug("Using the received date for scheduled start time [{}]", userMessageLog.getReceived());
+            return userMessageLog.getReceived().getTime();
+        }
+        return result.getTime();
+    }
+
 }

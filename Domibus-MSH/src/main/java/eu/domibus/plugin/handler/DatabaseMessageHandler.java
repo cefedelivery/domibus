@@ -1,6 +1,7 @@
 package eu.domibus.plugin.handler;
 
-import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
@@ -20,24 +21,23 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.common.model.Property;
-import eu.domibus.api.security.AuthUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
-import eu.domibus.messaging.*;
-import eu.domibus.messaging.DispatchMessageCreator;
+import eu.domibus.messaging.DuplicateMessageException;
+import eu.domibus.messaging.MessageConstants;
+import eu.domibus.messaging.MessageNotFoundException;
+import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.jms.Queue;
 import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
@@ -56,13 +56,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DatabaseMessageHandler.class);
 
     private final ObjectFactory ebMS3Of = new ObjectFactory();
-
-    @Autowired
-    JMSManager jmsManager;
-
-    @Autowired
-    @Qualifier("sendMessageQueue")
-    private Queue sendMessageQueue;
 
     @Autowired
     private CompressionService compressionService;
@@ -105,6 +98,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     AuthUtils authUtils;
+
+    @Autowired
+    UserMessageService userMessageService;
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
@@ -264,7 +260,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             }
 
             // Sends message to the proper queue
-            jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, to.getEndpoint()).createMessage(), sendMessageQueue);
+            userMessageService.scheduleSending(messageId);
+
             // Builds the user message log
             UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
                     .setMessageId(userMessage.getMessageInfo().getMessageId())

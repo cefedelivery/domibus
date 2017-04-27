@@ -63,6 +63,10 @@ public abstract class MessageLog extends AbstractBaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date received;
 
+    @Column(name = "RESTORED")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date restored;
+
     @Column(name = "DOWNLOADED")
     @Temporal(TemporalType.TIMESTAMP)
     private Date downloaded;
@@ -135,6 +139,14 @@ public abstract class MessageLog extends AbstractBaseEntity {
 
     public void setReceived(final Date received) {
         this.received = received;
+    }
+
+    public Date getRestored() {
+        return restored;
+    }
+
+    public void setRestored(Date restored) {
+        this.restored = restored;
     }
 
     public Date getDownloaded() {

@@ -99,6 +99,7 @@
     <changeSet author="CosminBaciu" id="EDELIVERY_1941">
         <addColumn tableName="TB_MESSAGE_LOG">
             <column name="FAILED" type="datetime" afterColumn="DOWNLOADED"/>
+            <column name="RESTORED" type="datetime" afterColumn="RECEIVED"/>
         </addColumn>
     </changeSet>
 

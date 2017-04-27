@@ -1,6 +1,6 @@
 package eu.domibus.ebms3.sender;
 
-import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.message.UserMessageService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
@@ -10,7 +10,6 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.messaging.DelayedDispatchMessageCreator;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
@@ -20,7 +19,6 @@ import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import javax.jms.Queue;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 
@@ -47,11 +44,7 @@ public class MessageSender implements MessageListener {
     private final String UNRECOVERABLE_ERROR_RETRY = "domibus.dispatch.ebms.error.unrecoverable.retry";
 
     @Autowired
-    JMSManager jmsManager;
-
-    @Autowired
-    @Qualifier("sendMessageQueue")
-    private Queue sendMessageQueue;
+    UserMessageService userMessageService;
 
     @Autowired
     private ErrorLogDao errorLogDao;
@@ -179,7 +172,7 @@ public class MessageSender implements MessageListener {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
             delay = message.getLongProperty(MessageConstants.DELAY);
             if (delay > 0) {
-                jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, message.getStringProperty(MessageConstants.ENDPOINT), delay).createMessage(), sendMessageQueue);
+                userMessageService.scheduleSending(messageId, delay);
                 return;
             }
         } catch (final NumberFormatException nfe) {

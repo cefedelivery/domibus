@@ -25,4 +25,8 @@ public interface UserMessageService {
     void delete(List<String> messageIds);
 
     void deleteMessage(String messageId);
+
+    void scheduleSending(String messageId);
+
+    void scheduleSending(String messageId, Long delay);
 }

@@ -32,6 +32,11 @@ public class MessageMonitoringResource {
         return messageMonitorService.getFailedMessageInterval(messageId);
     }
 
+    @RequestMapping(path = "/failed/{messageId:.+}/restore", method = RequestMethod.PUT)
+    public void restoreFailedMessage(@PathVariable(value = "messageId") String messageId) throws MessageMonitorException {
+        messageMonitorService.restoreFailedMessage(messageId);
+    }
+
     @RequestMapping(path = "/failed/{messageId:.+}", method = RequestMethod.DELETE)
     public void deleteFailedMessage(@PathVariable(value = "messageId") String messageId) throws MessageMonitorException {
         messageMonitorService.deleteFailedMessage(messageId);
