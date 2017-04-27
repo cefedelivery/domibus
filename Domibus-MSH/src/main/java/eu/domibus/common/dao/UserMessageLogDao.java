@@ -47,15 +47,31 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
     }
 
     public List<String> findFailedMessages(String finalRecipient) {
-        String queryString = "select m.messageInfo.messageId from UserMessage m " +
+        return findFailedMessages(finalRecipient, null, null);
+    }
+
+    public List<String> findFailedMessages(String finalRecipient, Date failedStartDate, Date failedEndDate) {
+        String queryString = "select distinct m.messageInfo.messageId from UserMessage m " +
                 "inner join m.messageProperties.property p, UserMessageLog ml " +
-                "where ml.messageId = m.messageInfo.messageId and ml.messageStatus = 'SEND_FAILURE' ";
-        if(StringUtils.isNotEmpty(finalRecipient)) {
+                "where ml.messageId = m.messageInfo.messageId and ml.messageStatus = 'SEND_FAILURE' and ml.messageType = 'USER_MESSAGE' and ml.deleted is null ";
+        if (StringUtils.isNotEmpty(finalRecipient)) {
             queryString += " and p.name = 'finalRecipient' and p.value = :FINAL_RECIPIENT";
         }
+        if (failedStartDate != null) {
+            queryString += " and ml.failed >= :START_DATE";
+        }
+        if (failedEndDate != null) {
+            queryString += " and ml.failed <= :END_DATE";
+        }
         TypedQuery<String> query = this.em.createQuery(queryString, String.class);
-        if(StringUtils.isNotEmpty(finalRecipient)) {
+        if (StringUtils.isNotEmpty(finalRecipient)) {
             query.setParameter("FINAL_RECIPIENT", finalRecipient);
+        }
+        if (failedStartDate != null) {
+            query.setParameter("START_DATE", failedStartDate);
+        }
+        if (failedEndDate != null) {
+            query.setParameter("END_DATE", failedEndDate);
         }
         return query.getResultList();
     }

@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import javax.jms.JMSException;
 import javax.jms.Queue;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -144,8 +145,24 @@ public class UserMessageDefaultService implements UserMessageService {
     }
 
     @Override
-    public List<String> restoreFailedMessagesDuringPeriod(Date begin, Date end, String finalRecipient) {
-        return null;
+    public List<String> restoreFailedMessagesDuringPeriod(Date start, Date end, String finalRecipient) {
+        final List<String> failedMessages = userMessageLogDao.findFailedMessages(finalRecipient, start, end);
+        if (failedMessages == null) {
+            return null;
+        }
+        LOG.debug("Found failed messages [{}] using start date [{}], end date [{}] and final recipient", failedMessages, start, end, finalRecipient);
+
+        final List<String> restoredMessages = new ArrayList<>();
+        for (String messageId : failedMessages) {
+            try {
+                restoreFailedMessage(messageId);
+                restoredMessages.add(messageId);
+            } catch (Exception e) {
+                LOG.error("Failed to restore message [" + messageId + "]", e);
+            }
+
+        }
+        return restoredMessages;
     }
 
     @Override
