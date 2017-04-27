@@ -1,18 +1,30 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.xml.bind.JAXBException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -28,9 +40,16 @@ public class PModeResource {
     @Autowired
     private PModeProvider pModeProvider;
 
-    @RequestMapping(method = RequestMethod.GET)
-    public String downloadPmodes() {
-        return "pmodetest";
+    @RequestMapping(method = RequestMethod.GET, produces = "application/xml")
+    public ResponseEntity<? extends Resource> downloadPmodes() throws IOException, JAXBException {
+
+        final byte[] rawConfiguration = pModeProvider.getRawConfiguration();
+        ByteArrayResource resource = new ByteArrayResource(rawConfiguration);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .header("content-disposition", "attachment; filename=Pmodes.xml")
+                .body(resource);
     }
 
     @RequestMapping(method = RequestMethod.POST)

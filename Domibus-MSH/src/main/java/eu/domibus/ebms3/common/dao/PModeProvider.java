@@ -25,6 +25,7 @@ import eu.domibus.clustering.Command;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.dao.ConfigurationRawDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.model.AgreementRef;
@@ -50,11 +51,15 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
@@ -72,6 +77,9 @@ public abstract class PModeProvider {
 
     @Autowired
     protected ConfigurationDAO configurationDAO;
+
+    @Autowired
+    protected ConfigurationRawDAO configurationRawDAO;
 
     @PersistenceContext
     protected EntityManager entityManager;
@@ -91,8 +99,13 @@ public abstract class PModeProvider {
 
     public abstract void refresh();
 
+    public byte[] getRawConfiguration() {
+        final ConfigurationRaw latest = this.configurationRawDAO.getLatest();
+        return (latest != null) ? latest.getXml() : new byte[0];
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<String> updatePModes(byte[] bytes) throws XmlProcessingException {
+    public List<String> updatePModes(byte[] bytes) throws XmlProcessingException, IOException {
         LOG.debug("Updating the PMode");
 
         //unmarshall the PMode with whitespaces ignored
@@ -117,6 +130,13 @@ public abstract class PModeProvider {
 
         Configuration configuration = unmarshalledConfiguration.getResult();
         configurationDAO.updateConfiguration(configuration);
+
+        //save the raw configuration
+        final ConfigurationRaw configurationRaw = new ConfigurationRaw();
+        configurationRaw.setConfigurationDate(Calendar.getInstance().getTime());
+        configurationRaw.setXml(bytes);
+        configurationRawDAO.create(configurationRaw);
+
         LOG.info("Configuration successfully updated");
         // Sends a message into the topic queue in order to refresh all the singleton instances of the PModeProvider.
         jmsOperations.send(new ReloadPmodeMessageCreator());
