@@ -10,12 +10,14 @@
             <tr>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="Message Id" name="messageId" [(ngModel)]="filter.messageId" #messageId="ngModel">
+                  <input mdInput placeholder="Message Id" name="messageId" [(ngModel)]="filter.messageId"
+                         #messageId="ngModel">
                 </md-input-container>
               </td>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="Conversation Id" name="conversationId" [(ngModel)]="filter.conversationId" #conversationId="ngModel">
+                  <input mdInput placeholder="Conversation Id" name="conversationId" [(ngModel)]="filter.conversationId"
+                         #conversationId="ngModel">
                 </md-input-container>
               </td>
               <td>
@@ -48,7 +50,8 @@
                 </md-select>
               </td>
               <td>
-                <md-select placeholder="Notification Status" [(ngModel)]="filter.notificationStatus" name="notificationStatus">
+                <md-select placeholder="Notification Status" [(ngModel)]="filter.notificationStatus"
+                           name="notificationStatus">
                   <md-option [value]="''">
                   </md-option>
                   <md-option *ngFor="let nstatus of notifStatus" [value]="nstatus">
@@ -60,29 +63,34 @@
             <tr>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="From Party Id" name="fromPartyId" [(ngModel)]="filter.fromPartyId" #fromPartyId="ngModel">
+                  <input mdInput placeholder="From Party Id" name="fromPartyId" [(ngModel)]="filter.fromPartyId"
+                         #fromPartyId="ngModel">
                 </md-input-container>
               </td>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId" #toPartyId="ngModel">
+                  <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId"
+                         #toPartyId="ngModel">
                 </md-input-container>
               </td>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="refToMessageId" name="refToMessageId" [(ngModel)]="filter.refToMessageId" #refToMessageId="ngModel">
+                  <input mdInput placeholder="refToMessageId" name="refToMessageId" [(ngModel)]="filter.refToMessageId"
+                         #refToMessageId="ngModel">
                 </md-input-container>
               </td>
             </tr>
             <tr>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="Original Sender" name="originalSender" [(ngModel)]="filter.originalSender" #originalSender="ngModel">
+                  <input mdInput placeholder="Original Sender" name="originalSender" [(ngModel)]="filter.originalSender"
+                         #originalSender="ngModel">
                 </md-input-container>
               </td>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient" #finalRecipient="ngModel">
+                  <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient"
+                         #finalRecipient="ngModel">
                 </md-input-container>
               </td>
             </tr>
@@ -154,147 +162,147 @@
     (sort)="onSort($event)">
     <!-- Message Id -->
     <ngx-datatable-column name="Message Id" [width]="500">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template >
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- Conversation Id -->
     <ngx-datatable-column name="Conversation Id" [width]="400" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template >
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- From Party Id -->
     <ngx-datatable-column name="From Party Id" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- To Party Id -->
     <ngx-datatable-column name="To Party Id" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- Status -->
     <ngx-datatable-column name="Message Status" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- Notification Status -->
     <ngx-datatable-column name="Notification Status" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- MSH Role -->
     <ngx-datatable-column name="MSH Role" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- Message Type -->
     <ngx-datatable-column name="Message Type" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- Deleted -->
     <ngx-datatable-column name="Deleted" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value | date: dateFormat}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- Received -->
     <ngx-datatable-column name="Received" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value | date: dateFormat}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- Failed Send Attempts -->
     <ngx-datatable-column name="Send Attempts" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- Send Attempts Max -->
     <ngx-datatable-column name="Send Attempts Max" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- Next Attempt -->
     <ngx-datatable-column name="Next Attempt" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value | date: dateFormat}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- Original Sender -->
     <ngx-datatable-column name="Original Sender" [width]="400" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- Final Recipient -->
     <ngx-datatable-column name="Final Recipient" [width]="400" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <!-- Ref To Message Id -->
     <ngx-datatable-column name="Ref To Message Id" [canAutoResize]="true">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
   </ngx-datatable>
 

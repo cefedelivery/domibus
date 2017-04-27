@@ -10,7 +10,8 @@
             <tr>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="Signal Message Id" name="errorSignalMessageId" [(ngModel)]="filter.errorSignalMessageId" #errorSignalMessageId="ngModel">
+                  <input mdInput placeholder="Signal Message Id" name="errorSignalMessageId"
+                         [(ngModel)]="filter.errorSignalMessageId" #errorSignalMessageId="ngModel">
                 </md-input-container>
               </td>
               <td>
@@ -52,7 +53,8 @@
             <tr>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId" #messageInErrorId="ngModel">
+                  <input mdInput placeholder="Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId"
+                         #messageInErrorId="ngModel">
                 </md-input-container>
               </td>
               <td>
@@ -94,7 +96,8 @@
             <tr>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="Error detail" name="ErrorDetail" [(ngModel)]="filter.errorDetail" #errorDetail="ngModel">
+                  <input mdInput placeholder="Error detail" name="ErrorDetail" [(ngModel)]="filter.errorDetail"
+                         #errorDetail="ngModel">
                 </md-input-container>
               </td>
               <td></td>
@@ -141,61 +144,61 @@
     [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
     (page)='onPage($event)'
     (sort)="onSort($event)">
-    <ngx-datatable-column name="ErrorSignalMessageId" >
-      <template let-column="column">
+    <ngx-datatable-column name="ErrorSignalMessageId">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template >
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column name="MshRole"  [width]="50">
-      <template let-column="column">
+    <ngx-datatable-column name="MshRole" [width]="50">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column name="MessageInErrorId" >
-      <template let-column="column">
+    <ngx-datatable-column name="MessageInErrorId">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column name="ErrorCode"  [width]="50">
-      <template let-column="column">
+    <ngx-datatable-column name="ErrorCode" [width]="50">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <ngx-datatable-column name="ErrorDetail" [width]="250">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column name="Timestamp"  [width]="180">
-      <template let-column="column">
+    <ngx-datatable-column name="Timestamp" [width]="180">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value | date: dateFormat}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <ngx-datatable-column name="Notified" [width]="180">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value | date: dateFormat}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
   </ngx-datatable>
 
