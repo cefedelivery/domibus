@@ -72,10 +72,6 @@
     </changeSet>
 
     <changeSet author="Mircea" id="Add raw configuration table">
-        <addColumn tableName="TB_MESSAGE_LOG">
-            <column name="DOWNLOADED" type="datetime" afterColumn="RECEIVED"/>
-        </addColumn>
-
         <createTable tableName="TB_CONFIGURATION_RAW">
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>

@@ -100,14 +100,8 @@ public abstract class PModeProvider {
     public abstract void refresh();
 
     public byte[] getRawConfiguration() {
-        if (!this.configurationDAO.configurationExists())
-            return null;
-        final List<ConfigurationRaw> latest = this.configurationRawDAO.getLatest();
-
-        if(latest.size() > 0){
-            return latest.get(0).getXml();
-        }
-        return new byte[0];
+        final ConfigurationRaw latest = this.configurationRawDAO.getLatest();
+        return (latest != null) ? latest.getXml() : new byte[0];
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -139,7 +133,7 @@ public abstract class PModeProvider {
 
         //save the raw configuration
         final ConfigurationRaw configurationRaw = new ConfigurationRaw();
-        configurationRaw.setConfigurationDate(Calendar.getInstance());
+        configurationRaw.setConfigurationDate(Calendar.getInstance().getTime());
         configurationRaw.setXml(bytes);
         configurationRawDAO.create(configurationRaw);
 
