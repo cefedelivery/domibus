@@ -101,6 +101,24 @@
             <column name="FAILED" type="datetime" afterColumn="DOWNLOADED"/>
             <column name="RESTORED" type="datetime" afterColumn="RECEIVED"/>
         </addColumn>
+        <createTable tableName="TB_SEND_ATTEMPT">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="MESSAGE_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="START_DATE" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="END_DATE" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATUS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ERROR" type="VARCHAR(255)"/>
+        </createTable>
     </changeSet>
 
 </databaseChangeLog>

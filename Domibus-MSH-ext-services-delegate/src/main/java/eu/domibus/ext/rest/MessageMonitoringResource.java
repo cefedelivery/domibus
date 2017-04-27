@@ -1,5 +1,6 @@
 package eu.domibus.ext.rest;
 
+import eu.domibus.ext.domain.MessageAttemptDTO;
 import eu.domibus.ext.exceptions.MessageMonitorException;
 import eu.domibus.ext.services.MessageMonitorService;
 import eu.domibus.logging.DomibusLogger;
@@ -45,5 +46,10 @@ public class MessageMonitoringResource {
     @RequestMapping(path = "/failed/{messageId:.+}", method = RequestMethod.DELETE)
     public void deleteFailedMessage(@PathVariable(value = "messageId") String messageId) throws MessageMonitorException {
         messageMonitorService.deleteFailedMessage(messageId);
+    }
+
+    @RequestMapping(path = "/{messageId:.+}/attempts", method = RequestMethod.GET)
+    public List<MessageAttemptDTO> getMessageAttempts(@PathVariable(value = "messageId") String messageId) throws MessageMonitorException {
+        return messageMonitorService.getAttemptsHistory(messageId);
     }
 }

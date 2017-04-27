@@ -1,4 +1,4 @@
-package eu.domibus.ext.delegate.converter;
+package eu.domibus.core.converter;
 
 import org.dozer.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,14 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author migueti, Cosmin Baciu
+ * @author Cosmin Baciu
  * @since 3.3
  */
 @Component
-public class DomibusDomainDefaultConverter implements DomibusDomainConverter {
+public class DomainCoreDefaultConverter implements DomainCoreConverter {
 
     @Autowired
-    @Qualifier("domainExtConverter")
+    @Qualifier("domainCoreConverter")
     Mapper mapper;
 
     @Override
