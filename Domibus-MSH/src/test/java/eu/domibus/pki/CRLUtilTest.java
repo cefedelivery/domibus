@@ -1,6 +1,6 @@
 package eu.domibus.pki;
 
-import eu.domibus.util.HttpUtil;
+import eu.domibus.api.util.HttpUtil;
 import eu.domibus.util.HttpUtilImpl;
 import mockit.Expectations;
 import mockit.Injectable;

@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -77,6 +78,7 @@ public class DownloadMessageIT extends AbstractIT {
      * @throws JMSException
      */
     @Test
+    @Transactional
     public void testDownloadMessageOk() throws Exception {
 
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
@@ -96,11 +98,11 @@ public class DownloadMessageIT extends AbstractIT {
             Assert.assertEquals(message, dmf.getMessage());
             throw dmf;
         }
-        Assert.assertFalse(downloadMessageResponse.value.getContent().isEmpty());
-        JAXBElement<AnyPayloadType> payloadElement = (JAXBElement<AnyPayloadType>) downloadMessageResponse.value.getContent().iterator().next();
-        String payload = new String(payloadElement.getValue().getAny().getTagName() + " " + payloadElement.getValue().getAny().getTextContent());
-        LOG.info("Payload returned [" + payload + "]");
-        Assert.assertEquals("hello world", payload);
+        Assert.assertFalse(downloadMessageResponse.value.getPayload().isEmpty());
+        PayloadType payloadType = downloadMessageResponse.value.getPayload().iterator().next();
+        String payload = new String(payloadType.getValue());
+        System.out.println("Payload returned [" + payload +"]");
+        Assert.assertEquals(payload, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>");
     }
 
     /**
@@ -111,6 +113,7 @@ public class DownloadMessageIT extends AbstractIT {
      * @throws JMSException
      */
     @Test
+    @Transactional
     public void testDownloadMessageOkPayloadNok() throws Exception {
 
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
@@ -130,11 +133,11 @@ public class DownloadMessageIT extends AbstractIT {
             Assert.assertEquals(message, dmf.getMessage());
             throw dmf;
         }
-        Assert.assertFalse(downloadMessageResponse.value.getContent().isEmpty());
-        JAXBElement<AnyPayloadType> payloadElement = (JAXBElement<AnyPayloadType>) downloadMessageResponse.value.getContent().iterator().next();
-        String payload = new String(payloadElement.getValue().getAny().getTagName() + " " + payloadElement.getValue().getAny().getTextContent());
-        LOG.info("Payload returned [" + payload + "]");
-        Assert.assertNotEquals(" ", payload);
+        Assert.assertFalse(downloadMessageResponse.value.getPayload().isEmpty());
+        PayloadType payloadType = downloadMessageResponse.value.getPayload().iterator().next();
+        String payload = new String(payloadType.getValue());
+        System.out.println("Payload returned [" + payload +"]");
+        Assert.assertNotEquals(payload, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     }
 
     /**
@@ -144,6 +147,7 @@ public class DownloadMessageIT extends AbstractIT {
      * @throws JMSException
      */
     @Test
+    @Transactional
     public void testDownloadMessageBodyLoad() throws Exception {
 
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
@@ -163,13 +167,11 @@ public class DownloadMessageIT extends AbstractIT {
             Assert.assertEquals(message, dmf.getMessage());
             throw dmf;
         }
-        Assert.assertFalse(downloadMessageResponse.value.getContent().isEmpty());
-        JAXBElement<PayloadType> payloadElement = (JAXBElement<PayloadType>) downloadMessageResponse.value.getContent().iterator().next();
-        Assert.assertNotNull(payloadElement.getValue());
-        Assert.assertTrue(payloadElement.getName().getLocalPart().equals("bodyload"));
-        String payload = new String(payloadElement.getValue().getValue());
-        LOG.info("Payload returned [" + payload + "]");
-        Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>", payload);
+        Assert.assertNotNull(downloadMessageResponse.value.getBodyload());
+        PayloadType payloadType = downloadMessageResponse.value.getBodyload();
+        String payload = new String(payloadType.getValue());
+        System.out.println("Payload returned [" + payload + "]");
+        Assert.assertEquals(payload, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>");
     }
 
     private void pushMessage(ActiveMQConnection connection, String messageId) throws Exception {

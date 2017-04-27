@@ -73,6 +73,7 @@ public class BackendNotificationService {
     @Autowired
     private ApplicationContext applicationContext;
 
+    //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
 
 
@@ -203,7 +204,9 @@ public class BackendNotificationService {
 
         validateSubmission(userMessage, backendName, notificationType);
         String finalRecipient = getFinalRecipient(userMessage);
-        properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
+        if (properties != null) {
+            properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
+        }
         notify(userMessage.getMessageInfo().getMessageId(), backendName, notificationType, properties);
     }
 

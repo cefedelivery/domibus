@@ -4,10 +4,7 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <!--
-    While it would be perfectly fine (and probably easier) to inherit from the Domibus parent pom, we want this to be
-    compilable as a stand-alone example, with the only domibus dependency being the plugin-api
-    -->
+
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
@@ -16,7 +13,14 @@
     <artifactId>domibus-default-ws-plugin</artifactId>
     <packaging>jar</packaging>
 
+
+
     <dependencies>
+        <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-ext-services-api</artifactId>
+            <version>${domibus-ext-services-api.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxws</artifactId>

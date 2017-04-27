@@ -1,7 +1,7 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.common.dao.ConfigurationDAO;
-import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.quartz.DisallowConcurrentExecution;
