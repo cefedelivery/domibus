@@ -20,25 +20,5 @@ html, body {
   user-select: text;
 }
 
-.domibusTextRegular {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18pt;
-
-}
-
-.domibusTextSpace {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 15pt;
-}
-
-.domibusTextHeading {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 48pt;
-}
-
-.domibusTextSmall {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 13pt;
-}
 
 

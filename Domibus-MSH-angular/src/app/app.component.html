@@ -1,13 +1,11 @@
-<div id="domibusTemplate">
-
-
-  <div id="sideNav">
-
+<md-sidenav-container>
+  <md-sidenav mode="side" opened="true">
+    <!-- sidenav content -->
     <div id="topLogo">
-      <div>
+      <div style="border: blue">
         <img src="assets/images/Domibus_logo_icon.svg" height="74px" width="74px"/>
       </div>
-      <div>
+      <div id="topLogoText">
         <p class="domibusTextSmall ">Domibus
           <br class="domibusTextSmall"><b>Administration</b>
           <br class="domibusTextSmall"><b>Console</b>
@@ -15,51 +13,45 @@
       </div>
     </div>
 
-    <div id="middleContent">
-      <md-sidenav-container>
-        <md-sidenav mode="side" opened="true" class="app-sidenav" id="sideMenu">
-          <button md-raised-button class="sideNavButton" [routerLink]="['/']">
-            <md-icon>message</md-icon>
-            <span>Messages</span>
-          </button>
-          <button md-raised-button class="sideNavButton">
-            <md-icon>filter_list</md-icon>
-            <span>Message Filter</span>
-          </button>
-          <button md-raised-button class="sideNavButton" [routerLink]="['/errorlog']">
-            <md-icon>sms_failed</md-icon>
-            <span>Error Log</span>
-          </button>
-          <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="isAdmin">
-            <md-icon>description</md-icon>
-            <span>PMode</span>
-          </button>
-          <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="isAdmin">
-            <md-icon>vpn_key</md-icon>
-            <span>Truststore</span>
-          </button>
-          <button md-raised-button class="sideNavButton">
-            <md-icon>show_chart</md-icon>
-            <span>JMS Monitoring</span>
-          </button>
-        </md-sidenav>
-      </md-sidenav-container>
-    </div>
+    <button md-raised-button class="sideNavButton" [routerLink]="['/']">
+      <md-icon>message</md-icon>
+      <span>Messages</span>
+    </button>
+    <button md-raised-button class="sideNavButton">
+      <md-icon>filter_list</md-icon>
+      <span>Message Filter</span>
+    </button>
+    <button md-raised-button class="sideNavButton" [routerLink]="['/errorlog']">
+      <md-icon>sms_failed</md-icon>
+      <span>Error Log</span>
+    </button>
+    <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="isAdmin">
+      <md-icon>description</md-icon>
+      <span>PMode</span>
+    </button>
+    <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="isAdmin">
+      <md-icon>vpn_key</md-icon>
+      <span>Truststore</span>
+    </button>
+    <button md-raised-button class="sideNavButton">
+      <md-icon>show_chart</md-icon>
+      <span>JMS Monitoring</span>
+    </button>
 
     <div id="bottomLogo">
       <div>
         <img src="assets/images/EC+Logo2.png"/>
       </div>
-      <div>
-        <p class="domibusTextSmall" style="color:#004494">CEF Digital
-          <br>Connecting Europe</p>
+      <div style="text-align: left;padding-left: 10px">
+        <p style="font-family: 'Open Sans', sans-serif;color:#004494;font-size:10pt;line-height: 50%">CEF Digital</p>
+        <p style="font-family: 'Open Sans', sans-serif;color:#004494;font-size:13pt;line-height: 50%">Connecting Europe</p>
       </div>
     </div>
 
-  </div>
+  </md-sidenav>
 
-
-  <div id="mainContent">
+  <!-- primary content -->
+  <div id=".my-content">
     <alert></alert>
     <div id="sandwichMenuHolder">
       <div id="sandwichMenu">
@@ -79,7 +71,4 @@
     </div>
   </div>
 
-</div>
-<footer></footer>
-
-
+</md-sidenav-container>
