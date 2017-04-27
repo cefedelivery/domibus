@@ -56,7 +56,7 @@ public abstract class PModeProvider {
     @Autowired
     protected ConfigurationDAO configurationDAO;
 
-    @PersistenceContext(unitName = "domibusJTA")
+    @PersistenceContext(unitName = "domibusJTA2")
     protected EntityManager entityManager;
 
     @Autowired()
