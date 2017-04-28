@@ -14,9 +14,11 @@ import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidato
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.*;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,7 @@ import java.util.regex.Pattern;
  * certificate of the receiver.
  */
 @Service
+@Qualifier("dynamicDiscoveryServiceOASIS")
 public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
     private static final Log LOG = LogFactory.getLog(DynamicDiscoveryServiceOASIS.class);
@@ -129,7 +132,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
         String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
         String httpProxyPassword = domibusProperties.getProperty("domibus.proxy.password");
 
-        if(httpProxyHost == null || httpProxyPort == null) {
+        if(StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)) {
             return null;
         }
 

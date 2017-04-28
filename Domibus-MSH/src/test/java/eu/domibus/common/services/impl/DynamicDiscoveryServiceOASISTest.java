@@ -133,6 +133,6 @@ public class DynamicDiscoveryServiceOASISTest {
         EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("urn:romania:ncpb", "ehealth-actorid-qns", "ehealth-resid-qns::urn::epsos##services:extended:epsos::107", "urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
         System.out.println(endpointInfo.getAddress());
         Assert.assertNotNull(endpointInfo);
-        Assert.assertEquals("http://localhost:8180/domibus/services/msh ", endpointInfo.getAddress());
+        Assert.assertEquals("http://localhost:8180/domibus/services/msh", endpointInfo.getAddress());
     }
 }

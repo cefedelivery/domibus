@@ -3,18 +3,18 @@ package eu.domibus.common.services.impl;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
-import no.difi.vefa.edelivery.lookup.LookupClient;
-import no.difi.vefa.edelivery.lookup.LookupClientBuilder;
-import no.difi.vefa.edelivery.lookup.api.LookupException;
-import no.difi.vefa.edelivery.lookup.locator.BusdoxLocator;
-import no.difi.vefa.edelivery.lookup.model.DocumentIdentifier;
-import no.difi.vefa.edelivery.lookup.model.Endpoint;
-import no.difi.vefa.edelivery.lookup.model.ParticipantIdentifier;
-import no.difi.vefa.edelivery.lookup.model.ProcessIdentifier;
-import no.difi.vefa.edelivery.lookup.model.ServiceMetadata;
-import no.difi.vefa.edelivery.lookup.model.TransportProfile;
+import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
+import no.difi.vefa.peppol.common.model.*;
+import no.difi.vefa.peppol.lookup.LookupClient;
+import no.difi.vefa.peppol.lookup.LookupClientBuilder;
+import no.difi.vefa.peppol.lookup.api.LookupException;
+import no.difi.vefa.peppol.lookup.fetcher.ApacheFetcher;
+import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
+import no.difi.vefa.peppol.security.Mode;
+import no.difi.vefa.peppol.security.api.PeppolSecurityException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +31,7 @@ import java.util.Properties;
  * Upon a successful lookup, the result contains the endpoint address and also othe public certificate of the receiver.
  */
 @Service
+@Qualifier("dynamicDiscoveryServicePEPPOL")
 public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
     private static final Log LOG = LogFactory.getLog(DynamicDiscoveryServicePEPPOL.class);
@@ -46,14 +47,16 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
         if (smlInfo == null) {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
         }
-        final LookupClient smpClient = LookupClientBuilder.newInstance()
+        String mode = domibusProperties.getProperty(DYNAMIC_DISCOVERY_MODE, Mode.TEST);
+        final LookupClient smpClient = LookupClientBuilder.forMode(mode)
                 .locator(new BusdoxLocator(smlInfo))
+                .fetcher(new ApacheFetcher())
                 .build();
         try {
-            final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(receiverId, receiverIdType);
-            final DocumentIdentifier documentIdentifier = new DocumentIdentifier(documentId);
+            final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(receiverId, new Scheme(receiverIdType));
+            final DocumentTypeIdentifier documentIdentifier = new DocumentTypeIdentifier(documentId);
 
-            final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, processIdType);
+            final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, new Scheme(processIdType));
             LOG.debug("smpClient.getServiceMetadata");
             final ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
             LOG.debug("sm.getEndpoint");
@@ -66,9 +69,9 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
             return new EndpointInfo(endpoint.getAddress(), endpoint.getCertificate());
 
-        } catch (final LookupException e) {
+        } catch (final PeppolSecurityException | LookupException e) {
             throw new ConfigurationException("Receiver does not support reception of " + documentId + " for process " + processId + " using the AS4 Protocol", e);
-        } catch (final no.difi.vefa.edelivery.lookup.api.SecurityException e) {
+        } catch (final EndpointNotFoundException e) {
             throw new ConfigurationException("Could not fetch metadata from SMP", e);
         }
     }

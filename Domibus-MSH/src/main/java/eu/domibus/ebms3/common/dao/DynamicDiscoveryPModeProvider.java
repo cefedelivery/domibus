@@ -57,10 +57,12 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     private java.util.Properties domibusProperties;
 
     @Autowired
-    private DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
+    @Qualifier("dynamicDiscoveryServiceOASIS")
+    private DynamicDiscoveryService dynamicDiscoveryServiceOASIS;
 
     @Autowired
-    private DynamicDiscoveryServicePEPPOL dynamicDiscoveryServicePEPPOL;
+    @Qualifier("dynamicDiscoveryServicePEPPOL")
+    private DynamicDiscoveryService dynamicDiscoveryServicePEPPOL;
 
     protected DynamicDiscoveryService dynamicDiscoveryService = null;
     @Autowired
@@ -129,7 +131,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         try {
             return super.findPModeKeyForUserMessage(userMessage, mshRole);
         } catch (final EbMS3Exception e) {
-            LOG.info("Start the dynamic discovery process", e);
+            LOG.info("PmodeKey not found, starting the dynamic discovery process");
             doDynamicDiscovery(userMessage, mshRole);
 
         }
@@ -307,7 +309,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         String cn = null;
         try {
             //parse certificate for common name = toPartyId
-            cn = certificateService.extractCommonName(certificate);
+            cn = StringUtils.lowerCase(certificateService.extractCommonName(certificate));
             LOG.debug("Extracted the common name: " + cn);
         } catch (final InvalidNameException e) {
             LOG.error("Error while extracting CommonName from certificate", e);

@@ -7,6 +7,7 @@ import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.services.impl.DynamicDiscoveryServiceOASIS;
 import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
 import eu.domibus.common.util.EndpointInfo;
@@ -18,9 +19,9 @@ import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateServiceImpl;
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import eu.domibus.xml.XMLUtilImpl;
-import no.difi.vefa.edelivery.lookup.model.Endpoint;
-import no.difi.vefa.edelivery.lookup.model.ProcessIdentifier;
-import no.difi.vefa.edelivery.lookup.model.TransportProfile;
+import eu.europa.ec.dynamicdiscovery.model.Endpoint;
+import eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.TransportProfile;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -100,9 +101,6 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Spy
     ConfigurationDAO configurationDAO;
-
-    @Spy
-    DynamicDiscoveryService dynamicDiscoveryService;
 
     @Spy
     TrustStoreService trustStoreService;
@@ -369,7 +367,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
     private EndpointInfo buildAS4EndpointWithArguments(String processIdentifierId, String processIdentifierScheme, String address, String alias) {
         ProcessIdentifier processIdentifier = new ProcessIdentifier(processIdentifierId, processIdentifierScheme);
-        TransportProfile transportProfile = TransportProfile.AS4;
+        TransportProfile transportProfile = new TransportProfile(DynamicDiscoveryService.transportProfileAS4);
         X509Certificate x509Certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, alias, CERT_PASSWORD);
 
         Endpoint endpoint = new Endpoint(processIdentifier, transportProfile, address, x509Certificate);

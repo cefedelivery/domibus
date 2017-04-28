@@ -6,8 +6,9 @@ import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
-import no.difi.vefa.edelivery.lookup.LookupClient;
-import no.difi.vefa.edelivery.lookup.model.*;
+import no.difi.vefa.peppol.common.model.*;
+import no.difi.vefa.peppol.lookup.LookupClient;
+import no.difi.vefa.peppol.security.Mode;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +26,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
     private static final String TEST_KEYSTORE = "testkeystore.jks";
 
-    private static final String TEST_SML_ZONE = "acc.edelivery.tech.ec.europa.eu";
+    private static final String TEST_SML_ZONE = "isaitb.acc.edelivery.tech.ec.europa.eu";
 
     private static final String ALIAS_CN_AVAILABLE = "cn_available";
     private static final String TEST_KEYSTORE_PASSWORD = "1234";
@@ -55,7 +56,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
             result = TEST_SML_ZONE;
 
             ServiceMetadata sm = buildServiceMetadata();
-            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentIdentifier)any);
+            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
             result = sm;
 
         }};
@@ -65,7 +66,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
         assertEquals(ADDRESS, endpoint.getAddress());
 
         new Verifications() {{
-            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentIdentifier)any);
+            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
         }};
     }
 
@@ -75,7 +76,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
             domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
             ServiceMetadata sm = buildServiceMetadata();
-            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentIdentifier)any);
+            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
             result = sm;
 
         }};
@@ -89,7 +90,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
         ServiceMetadata sm = new ServiceMetadata();
         X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
 
-        ProcessIdentifier processIdentifier = new ProcessIdentifier(TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        ProcessIdentifier processIdentifier = new ProcessIdentifier(TEST_SERVICE_VALUE, new Scheme(TEST_SERVICE_TYPE));
 
         Endpoint endpoint = new Endpoint(processIdentifier, new TransportProfile(DynamicDiscoveryService.transportProfileAS4), ADDRESS, testData);
         sm.addEndpoint(endpoint);
@@ -105,10 +106,14 @@ public class DynamicDiscoveryServicePEPPOLTest {
             domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
+            domibusProperties.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
+            result = Mode.TEST;
         }};
 
-        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:2111100000666", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
+        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:9311100000666", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
         assertNotNull(endpoint);
+        System.out.println(endpoint.getAddress());
 
     }
+
 }
