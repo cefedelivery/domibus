@@ -3,7 +3,7 @@ package eu.domibus.ext.delegate.services.message;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.message.acknowledge.MessageAcknowledgeService;
 import eu.domibus.api.message.acknowledge.MessageAcknowledgement;
-import eu.domibus.ext.delegate.converter.DomibusDomainConverter;
+import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.ext.delegate.services.security.SecurityService;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;
 import mockit.Expectations;
@@ -34,7 +34,7 @@ public class MessageAcknowledgeServiceDelegateTest {
     MessageAcknowledgeService messageAcknowledgeService;
 
     @Injectable
-    DomibusDomainConverter domainConverter;
+    DomainExtConverter domainConverter;
 
     @Injectable
     UserMessageService userMessageService;

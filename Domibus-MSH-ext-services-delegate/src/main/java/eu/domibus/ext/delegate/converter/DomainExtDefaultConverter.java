@@ -13,7 +13,7 @@ import java.util.List;
  * @since 3.3
  */
 @Component
-public class DomibusDomainDefaultConverter implements DomibusDomainConverter {
+public class DomainExtDefaultConverter implements DomainExtConverter {
 
     @Autowired
     @Qualifier("domainExtConverter")

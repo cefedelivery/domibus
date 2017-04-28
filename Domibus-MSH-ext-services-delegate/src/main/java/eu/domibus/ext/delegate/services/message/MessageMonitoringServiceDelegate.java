@@ -3,7 +3,7 @@ package eu.domibus.ext.delegate.services.message;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
-import eu.domibus.ext.delegate.converter.DomibusDomainConverter;
+import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.ext.delegate.services.security.SecurityService;
 import eu.domibus.ext.domain.MessageAttemptDTO;
 import eu.domibus.ext.exceptions.AuthenticationException;
@@ -30,7 +30,7 @@ public class MessageMonitoringServiceDelegate implements MessageMonitorService {
     UserMessageService userMessageService;
 
     @Autowired
-    DomibusDomainConverter domibusDomainConverter;
+    DomainExtConverter domibusDomainConverter;
 
     @Autowired
     MessageAttemptService messageAttemptService;
