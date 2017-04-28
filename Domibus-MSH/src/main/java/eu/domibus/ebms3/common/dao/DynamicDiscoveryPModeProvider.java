@@ -309,7 +309,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         String cn = null;
         try {
             //parse certificate for common name = toPartyId
-            cn = StringUtils.lowerCase(certificateService.extractCommonName(certificate));
+            cn = certificateService.extractCommonName(certificate);
             LOG.debug("Extracted the common name: " + cn);
         } catch (final InvalidNameException e) {
             LOG.error("Error while extracting CommonName from certificate", e);
