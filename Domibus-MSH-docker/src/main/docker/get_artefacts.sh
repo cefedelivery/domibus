@@ -42,7 +42,7 @@ sed -i -e "s/localhost:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-red.xm
 sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-red.xml
 
 result1 = curl --user $ADMIN_USER:$ADMIN_PASSW -X POST -F pmode=@./domibus-gw-sample-pmode-blue.xml http://localhost:8180/domibus/home/uploadPmodeFile
-result2 curl --user $ADMIN_USER:$ADMIN_PASSW -X POST -F pmode=@./domibus-gw-sample-pmode-red.xml http://localhost:9080/domibus/home/uploadPmodeFile
+result2 = curl --user $ADMIN_USER:$ADMIN_PASSW -X POST -F pmode=@./domibus-gw-sample-pmode-red.xml http://localhost:9080/domibus/home/uploadPmodeFile
 echo particular step
 echo result1
 echo result2
