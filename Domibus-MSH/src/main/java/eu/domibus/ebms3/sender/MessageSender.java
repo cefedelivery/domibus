@@ -1,6 +1,9 @@
 package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.message.attempt.MessageAttempt;
+import eu.domibus.api.message.attempt.MessageAttemptService;
+import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
@@ -28,6 +31,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
+import java.sql.Timestamp;
 
 
 /**
@@ -76,9 +80,20 @@ public class MessageSender implements MessageListener {
     @Autowired
     private UpdateRetryLoggingService updateRetryLoggingService;
 
+    @Autowired
+    private MessageAttemptService messageAttemptService;
+
 
     private void sendUserMessage(final String messageId) {
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
+
+        MessageAttempt attempt = new MessageAttempt();
+        attempt.setMessageId(messageId);
+        attempt.setStartDate(new Timestamp(System.currentTimeMillis()));
+        MessageAttemptStatus attemptStatus = MessageAttemptStatus.SUCCESS;
+        String attemptError = null;
+
+
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
         // Assuming that everything goes fine
         ResponseHandler.CheckResult isOk = ResponseHandler.CheckResult.OK;
@@ -108,11 +123,28 @@ public class MessageSender implements MessageListener {
             } else {
                 LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
             }
-
+            attemptError = soapFEx.getMessage();
+            attemptStatus = MessageAttemptStatus.ERROR;
         } catch (final EbMS3Exception e) {
             this.handleEbms3Exception(e, messageId);
+            attemptError = e.getMessage();
+            attemptStatus = MessageAttemptStatus.ERROR;
+        } catch (Throwable e) {
+            attemptError = e.getMessage();
+            attemptStatus = MessageAttemptStatus.ERROR;
+            throw e;
         } finally {
             handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+
+            try {
+                attempt.setError(attemptError);
+                attempt.setStatus(attemptStatus);
+                attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
+                messageAttemptService.create(attempt);
+            } catch (Exception e) {
+                LOG.error("Could not create the message attempt", e);
+            }
+
         }
     }
 

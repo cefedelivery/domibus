@@ -9,4 +9,6 @@ import java.util.List;
 public interface MessageAttemptService {
 
     List<MessageAttempt> getAttemptsHistory(String messageId);
+
+    MessageAttempt create(MessageAttempt attempt);
 }

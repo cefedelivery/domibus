@@ -3,13 +3,15 @@ package eu.domibus.api.message.attempt;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 /**
  * @author Cosmin Baciu
  * @since 3.3
  */
 public class MessageAttempt {
+
+    private Integer id;
 
     /**
      * Id of the message for which the delivery attempt has been performed.
@@ -19,12 +21,12 @@ public class MessageAttempt {
     /**
      * When the attempt has started
      */
-    private Date start;
+    private Timestamp startDate;
 
     /**
      * When the attempt has finished
      */
-    private Date end;
+    private Timestamp endDate;
 
     private MessageAttemptStatus status;
 
@@ -32,7 +34,7 @@ public class MessageAttempt {
      * Cause of the failing attempt.
      * It is null whenever the attempt has succeeded.
      */
-    private String failingCause;
+    private String error;
 
     public String getMessageId() {
         return messageId;
@@ -42,28 +44,28 @@ public class MessageAttempt {
         this.messageId = messageId;
     }
 
-    public Date getStart() {
-        return start;
+    public Timestamp getStartDate() {
+        return startDate;
     }
 
-    public void setStart(Date start) {
-        this.start = start;
+    public void setStartDate(Timestamp startDate) {
+        this.startDate = startDate;
     }
 
-    public Date getEnd() {
-        return end;
+    public Timestamp getEndDate() {
+        return endDate;
     }
 
-    public void setEnd(Date end) {
-        this.end = end;
+    public void setEndDate(Timestamp endDate) {
+        this.endDate = endDate;
     }
 
-    public String getFailingCause() {
-        return failingCause;
+    public String getError() {
+        return error;
     }
 
-    public void setFailingCause(String failingCause) {
-        this.failingCause = failingCause;
+    public void setError(String error) {
+        this.error = error;
     }
 
     public MessageAttemptStatus getStatus() {
@@ -72,6 +74,14 @@ public class MessageAttempt {
 
     public void setStatus(MessageAttemptStatus status) {
         this.status = status;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     @Override
@@ -84,10 +94,10 @@ public class MessageAttempt {
 
         return new EqualsBuilder()
                 .append(messageId, that.messageId)
-                .append(start, that.start)
-                .append(end, that.end)
+                .append(startDate, that.startDate)
+                .append(endDate, that.endDate)
                 .append(status, that.status)
-                .append(failingCause, that.failingCause)
+                .append(error, that.error)
                 .isEquals();
     }
 
@@ -95,10 +105,10 @@ public class MessageAttempt {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(messageId)
-                .append(start)
-                .append(end)
+                .append(startDate)
+                .append(endDate)
                 .append(status)
-                .append(failingCause)
+                .append(error)
                 .toHashCode();
     }
 }

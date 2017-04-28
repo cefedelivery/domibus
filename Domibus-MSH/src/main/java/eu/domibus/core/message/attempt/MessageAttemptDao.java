@@ -3,6 +3,7 @@ package eu.domibus.core.message.attempt;
 import eu.domibus.common.dao.BasicDao;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.NoResultException;
@@ -31,5 +32,11 @@ public class MessageAttemptDao extends BasicDao<MessageAttemptEntity> {
             LOG.debug("Could not find any message attempts for message id[" + messageId + "]");
             return null;
         }
+    }
+
+    @Override
+    public void create(MessageAttemptEntity entity) {
+        entity.setError(StringUtils.abbreviate(entity.getError(), 255));
+        super.create(entity);
     }
 }

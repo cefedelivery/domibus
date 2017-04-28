@@ -2,7 +2,6 @@ package eu.domibus.core.message.attempt;
 
 import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -30,6 +29,7 @@ public class MessageAttemptEntity extends AbstractBaseEntity {
     @Column(name = "END_DATE")
     private Timestamp endDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "STATUS")
     private MessageAttemptStatus status;
 
@@ -73,7 +73,7 @@ public class MessageAttemptEntity extends AbstractBaseEntity {
     }
 
     public void setError(String error) {
-        this.error = StringUtils.abbreviate(error, 255);
+        this.error = error;
     }
 
     @Override
