@@ -31,8 +31,8 @@ public class DynamicDiscoveryServicePEPPOLTest {
     private static final String ALIAS_CN_AVAILABLE = "cn_available";
     private static final String TEST_KEYSTORE_PASSWORD = "1234";
 
-    private static final String TEST_RECEIVER_ID = "unknownRecipient";
-    private static final String TEST_RECEIVER_ID_TYPE = "unknownRecipientType";
+    private static final String TEST_RECEIVER_ID = "0088:unknownRecipient";
+    private static final String TEST_RECEIVER_ID_TYPE = "iso6523-actorid-upis";
     private static final String TEST_ACTION_VALUE = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1";
     private static final String TEST_SERVICE_VALUE = "serviceValue";
     private static final String TEST_SERVICE_TYPE = "serviceType";
@@ -55,6 +55,9 @@ public class DynamicDiscoveryServicePEPPOLTest {
             domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
+            domibusProperties.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
+            result = Mode.TEST;
+
             ServiceMetadata sm = buildServiceMetadata();
             smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
             result = sm;
@@ -75,6 +78,10 @@ public class DynamicDiscoveryServicePEPPOLTest {
         new NonStrictExpectations() {{
             domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
+
+            domibusProperties.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
+            result = Mode.TEST;
+
             ServiceMetadata sm = buildServiceMetadata();
             smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
             result = sm;
