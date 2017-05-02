@@ -24,7 +24,7 @@ import java.util.List;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
-public class DomibusDomainDefaultConverterTest {
+public class DomainExtDefaultConverterTest {
 
     @Configuration
     @ComponentScan(basePackageClasses = {MessageAcknowledgement.class, MessageAcknowledgementDTO.class, DomainExtDefaultConverter.class})
