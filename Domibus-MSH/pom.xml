@@ -512,6 +512,11 @@
             <artifactId>domibus-logging</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-ext-services-delegate</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- End Domibus modules -->
 
         <!-- AspectJ -->
@@ -616,6 +621,13 @@
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-transports-http</artifactId>
+        </dependency>
+
+        <!-- Overrides the version coming from CXF due to a bug related to large attachments; to be removed when CXF upgrades also the xmlsec version -->
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+            <version>2.0.8</version>
         </dependency>
         <!-- End CXF -->
 
@@ -1183,64 +1195,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.agilejava.docbkx</groupId>
-                <artifactId>docbkx-maven-plugin</artifactId>
-                <version>2.0.15</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate-pdf</goal>
-                        </goals>
-                        <phase>verify</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <includes>Domibus.xml</includes>
-                    <xincludeSupported>true</xincludeSupported>
-                    <sectionAutolabel>true</sectionAutolabel>
-                    <sectionLabelIncludesComponentLabel>true
-                    </sectionLabelIncludesComponentLabel>
-                    <highlightSource>true</highlightSource>
-                    <shadeVerbatim>true</shadeVerbatim>
-                    <useExtensions>true</useExtensions>
-                    <paperType>A4</paperType>
-                    <highlightXslthlConfig>${project.basedir}/src/docbkx/xslthl/xslthl-config.xml
-                    </highlightXslthlConfig>
-                    <foCustomization>
-                        src/docbkx/customization/foCustomization.xml
-                    </foCustomization>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.xmlgraphics</groupId>
-                        <artifactId>fop</artifactId>
-                        <version>1.1</version>
-                        <scope>runtime</scope>
-                    </dependency>
-
-                    <dependency>
-                        <groupId>net.sf.docbook</groupId>
-                        <artifactId>docbook-xml</artifactId>
-                        <version>5.0-all</version>
-                        <classifier>resources</classifier>
-                        <type>zip</type>
-                        <scope>runtime</scope>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sf.offo</groupId>
-                        <artifactId>fop-hyph</artifactId>
-                        <version>2.0</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sf.xslthl</groupId>
-                        <artifactId>xslthl</artifactId>
-                        <version>2.1.0</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

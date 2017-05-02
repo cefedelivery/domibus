@@ -1,32 +1,12 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.ebms3.common.model.DispatchMessageCreator;
+import eu.domibus.messaging.DispatchMessageCreator;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.logging.DomibusLogger;
@@ -50,6 +30,7 @@ import java.util.Properties;
 @Service
 public class RetryService {
     public static final String TIMEOUT_TOLERANCE = "domibus.msh.retry.tolerance";
+    private static final String DELETE_PAYLOAD_ON_SEND_FAILURE = "domibus.sendMessage.failure.delete.payload";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RetryService.class);
     @Autowired
     private BackendNotificationService backendNotificationService;
@@ -100,6 +81,12 @@ public class RetryService {
         }
     }
 
+    /**
+     * Notifies send failure, updates the message status and deletes the payload (if required) for messages that failed to be sent and expired
+     *
+     * @param messageIdToPurge is the messageId of the expired message
+     *
+     */
     private void purgeTimedoutMessage(final String messageIdToPurge) {
         final MessageLog userMessageLog = userMessageLogDao.findByMessageId(messageIdToPurge, MSHRole.SENDING);
 
@@ -107,12 +94,14 @@ public class RetryService {
 
         if (notify) {
             backendNotificationService.notifyOfSendFailure(messageIdToPurge);
-            messagingDao.delete(messageIdToPurge, MessageStatus.SEND_FAILURE, NotificationStatus.NOTIFIED);
-        } else {
-            messagingDao.clearPayloadData(messageIdToPurge);
-            userMessageLogDao.setMessageAsSendFailure(messageIdToPurge);
+            userMessageLogDao.setAsNotified(messageIdToPurge);
         }
-    }
+        userMessageLogDao.setMessageAsSendFailure(messageIdToPurge);
+
+        if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
+            messagingDao.clearPayloadData(messageIdToPurge);
+        }
+}
 
     private void sendJmsMessage(final String messageId) {
         jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, userMessageLogDao.findEndpointForMessageId(messageId)).createMessage(), dispatchQueue);

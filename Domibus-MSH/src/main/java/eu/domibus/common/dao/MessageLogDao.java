@@ -3,12 +3,15 @@ package eu.domibus.common.dao;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.sql.Timestamp;
@@ -76,7 +79,7 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         try {
             return findByMessageId(messageId).getMessageStatus();
         } catch (NoResultException nrEx) {
-            LOG.debug("No result for message with id [" + messageId + "]", nrEx);
+            LOG.debug("No result for message with id [" + messageId + "]");
             return MessageStatus.NOT_FOUND;
         }
     }
@@ -96,14 +99,21 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
                 if (filter.getValue() instanceof String) {
                     if (!filter.getValue().toString().isEmpty()) {
                         switch (filter.getKey()) {
+                            case "":
+                                break;
+                            default:
+                                predicates.add(cb.like(mle.<String>get(filter.getKey()), (String) filter.getValue()));
+                                break;
+                        }
+                    }
+                } else if (filter.getValue() instanceof Date) {
+                    if (!filter.getValue().toString().isEmpty()) {
+                        switch (filter.getKey()) {
                             case "receivedFrom":
                                 predicates.add(cb.greaterThanOrEqualTo(mle.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
                                 break;
                             case "receivedTo":
                                 predicates.add(cb.lessThanOrEqualTo(mle.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
-                                break;
-                            default:
-                                predicates.add(cb.like(mle.<String>get(filter.getKey()), (String) filter.getValue()));
                                 break;
                         }
                     }
@@ -114,6 +124,5 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         }
         return predicates;
     }
-
 
 }

@@ -1,15 +1,17 @@
 package eu.domibus.ebms3.common.dao;
 
-import eu.domibus.api.xml.UnmarshallerResult;
-import eu.domibus.api.xml.XMLUtil;
+import eu.domibus.api.util.xml.UnmarshallerResult;
+import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.dao.ConfigurationRawDAO;
 import eu.domibus.common.dao.PModeDao;
 import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.common.model.configuration.ConfigurationRaw;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.xml.XMLUtilImpl;
 import org.apache.commons.io.IOUtils;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,6 +55,16 @@ public class PModeDaoTestIT {
         }
 
         @Bean
+        public ConfigurationRawDAO configurationRawDAO() {
+            return Mockito.mock(ConfigurationRawDAO.class);
+        }
+
+        @Bean(name = "domibusJTA")
+        public EntityManagerFactory getdomibusJTA() {
+            return Mockito.mock(EntityManagerFactory.class);
+        }
+
+        @Bean
         public EntityManagerFactory entityManagerFactory() {
             return Mockito.mock(EntityManagerFactory.class);
         }
@@ -89,11 +101,15 @@ public class PModeDaoTestIT {
     ConfigurationDAO configurationDAO;
 
     @Autowired
+    ConfigurationRawDAO configurationRawDAO;
+
+    @Autowired
     JAXBContext jaxbContext;
 
     @Before
     public void resetMocks() {
         Mockito.reset(configurationDAO);
+        Mockito.reset(configurationRawDAO);
     }
 
 
@@ -116,6 +132,14 @@ public class PModeDaoTestIT {
         Configuration original = unmarshallerResult.getResult();
         assertEquals(saved.getMpcsXml().getMpc().size(), original.getMpcsXml().getMpc().size());
         assertEquals(saved.getBusinessProcesses(), original.getBusinessProcesses());
+
+        ArgumentCaptor<ConfigurationRaw> rawConfig = ArgumentCaptor.forClass(ConfigurationRaw.class);
+        Mockito.verify(configurationRawDAO).create(rawConfig.capture());
+
+        final ConfigurationRaw raw = rawConfig.getValue();
+        assertNotNull(raw.getConfigurationDate());
+        assertEquals(raw.getXml(), pModeBytes);
+
     }
 
     @Test

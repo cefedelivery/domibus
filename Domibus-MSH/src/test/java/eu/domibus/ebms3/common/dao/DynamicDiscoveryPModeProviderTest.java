@@ -1,7 +1,7 @@
 package eu.domibus.ebms3.common.dao;
 
-import eu.domibus.api.xml.UnmarshallerResult;
-import eu.domibus.api.xml.XMLUtil;
+import eu.domibus.api.util.xml.UnmarshallerResult;
+import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;

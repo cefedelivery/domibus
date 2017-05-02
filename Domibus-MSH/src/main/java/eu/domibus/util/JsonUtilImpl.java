@@ -2,6 +2,7 @@ package eu.domibus.util;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import eu.domibus.api.util.JsonUtil;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;

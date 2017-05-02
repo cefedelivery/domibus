@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * // TODO Documentation
- *
  * @author Cosmin Baciu
  * @since 3.2
  */

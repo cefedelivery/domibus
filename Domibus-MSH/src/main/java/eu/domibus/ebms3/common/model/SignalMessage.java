@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.common.model;
 
 import org.w3c.dom.Element;
@@ -42,7 +23,7 @@ import java.util.Set;
  * @since 3.0
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SignalMessage", propOrder = {"messageInfo", "pullRequest", "receipt", "error", "any"})
+@XmlType(name = "SignalMessage", propOrder = {"messageInfo", "partyInfo", "messageProperties", "pullRequest", "receipt", "error", "any"})
 @Entity
 @Table(name = "TB_SIGNAL_MESSAGE")
 @NamedQueries({
@@ -56,6 +37,12 @@ public class SignalMessage extends AbstractBaseEntity {
     @XmlElement(name = "MessageInfo", required = true)
     @OneToOne(cascade = CascadeType.ALL)
     protected MessageInfo messageInfo;
+    @XmlElement(name = "PartyInfo", required = true)
+    @Embedded
+    protected PartyInfo partyInfo;
+    @XmlElement(name = "MessageProperties")
+    @Embedded
+    protected MessageProperties messageProperties;
     @XmlElement(name = "PullRequest")
     @Embedded
     protected PullRequest pullRequest;

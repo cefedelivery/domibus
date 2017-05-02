@@ -1,6 +1,6 @@
 package eu.domibus.pki;
 
-import eu.domibus.util.HttpUtil;
+import eu.domibus.api.util.HttpUtil;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;

@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.jms.JMSManager;
@@ -29,7 +10,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.DelayedDispatchMessageCreator;
+import eu.domibus.messaging.DelayedDispatchMessageCreator;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
@@ -187,7 +168,7 @@ public class MessageSender implements MessageListener {
         // The backends are notified that an error occurred in the UpdateRetryLoggingService
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void onMessage(final Message message) {
         LOG.debug("Processing message [{}]", message);

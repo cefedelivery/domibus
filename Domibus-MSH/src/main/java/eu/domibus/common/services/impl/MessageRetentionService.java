@@ -1,5 +1,7 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.util.CollectionUtil;
@@ -10,7 +12,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.ebms3.security.util.AuthUtils;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -96,7 +98,7 @@ public class MessageRetentionService {
         final List<String> mpcs = pModeProvider.getMpcURIList();
         final Integer expiredDownloadedMessagesLimit = Integer.MAX_VALUE;
         final Integer expiredNotDownloadedMessagesLimit = Integer.MAX_VALUE;
-        ;
+
         for (final String mpc : mpcs) {
             deleteExpiredMessages(mpc, expiredDownloadedMessagesLimit, expiredNotDownloadedMessagesLimit);
         }
@@ -110,7 +112,7 @@ public class MessageRetentionService {
         deleteExpiredNotDownloadedMessages(mpc, expiredNotDownloadedMessagesLimit);
     }
 
-    public void deleteExpiredDownloadedMessages(String mpc, Integer expiredDownloadedMessagesLimit) {
+    protected void deleteExpiredDownloadedMessages(String mpc, Integer expiredDownloadedMessagesLimit) {
         LOG.debug("Deleting expired downloaded messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]");
         final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
         String fileLocation = domibusProperties.getProperty("domibus.attachment.storage.location");
@@ -125,7 +127,7 @@ public class MessageRetentionService {
         }
     }
 
-    public void deleteExpiredNotDownloadedMessages(String mpc, Integer expiredNotDownloadedMessagesLimit) {
+    protected void deleteExpiredNotDownloadedMessages(String mpc, Integer expiredNotDownloadedMessagesLimit) {
         LOG.debug("Deleting expired not-downloaded messages for MPC [" + mpc + "] using expiredNotDownloadedMessagesLimit [" + expiredNotDownloadedMessagesLimit + "]");
         final int messageRetentionNotDownloaded = pModeProvider.getRetentionUndownloadedByMpcURI(mpc);
         if (messageRetentionNotDownloaded > -1) { // if -1 the messages will be kept indefinetely and if 0, although it makes no sense, is legal
@@ -138,7 +140,7 @@ public class MessageRetentionService {
         }
     }
 
-    public Integer getRetentionValue(String propertyName, Integer defaultValue) {
+    protected Integer getRetentionValue(String propertyName, Integer defaultValue) {
         final String propertyValueString = domibusProperties.getProperty(propertyName);
         if (propertyValueString == null) {
             LOG.debug("Could not find property [" + propertyName + "]. Using the default value [" + defaultValue + "]");
@@ -154,7 +156,7 @@ public class MessageRetentionService {
 
     /* TODO it is not the responsibility of the MessageRetentionService to delete messages, the actual delete of the message should be delegated;
     move this method in the MessageService;*/
-    public Integer delete(List<String> messageIds, Integer limit) {
+    protected Integer delete(List<String> messageIds, Integer limit) {
         List<String> toDelete = messageIds;
         if (messageIds.size() > limit) {
             LOG.debug("Only the first [" + limit + "] will be deleted");
@@ -190,8 +192,7 @@ public class MessageRetentionService {
                     }
                 } catch (JMSException jmsEx) {
                     LOG.error("Error trying to get the queue name", jmsEx);
-                    // TODO to be changed with something like the new DomibusCoreException
-                    throw new RuntimeException("Queue name error", jmsEx.getCause());
+                    throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not get the queue name", jmsEx.getCause());
                 }
             }
         }

@@ -59,11 +59,11 @@ public class TLSReader {
 
         } catch (final FileNotFoundException fnfEx) {
             LOG.warn("No tls configuration file " + domibusConfigurationService.getConfigLocation() + CLIENTAUTHENTICATION_XML + " found. Mutual authentication will not be supported.");
-            LOG.debug("", fnfEx);
+            LOG.trace("", fnfEx);
             return null;
         } catch (IOException | RuntimeException ex) {
             LOG.warn("Mutual authentication will not be supported.");
-            LOG.debug("", ex);
+            LOG.trace("", ex);
             return null;
         }
     }

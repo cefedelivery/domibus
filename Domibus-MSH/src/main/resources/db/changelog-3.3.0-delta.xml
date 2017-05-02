@@ -71,4 +71,41 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="TiagoMiguel" id="EDelivery_1940">
+        <createTable tableName="TB_MESSAGE_ACKNW">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="MESSAGE_ID" type="VARCHAR(255)"/>
+            <column name="FROM_VALUE" type="VARCHAR(255)"/>
+            <column name="TO_VALUE" type="VARCHAR(255)"/>
+            <column name="CREATE_DATE" type="DATETIME"/>
+            <column name="CREATE_USER" type="VARCHAR(255)"/>
+            <column name="ACKNOWLEDGE_DATE" type="DATETIME"/>
+        </createTable>
+        <createTable tableName="TB_MESSAGE_ACKNW_PROP">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="PROPERTY_NAME" type="VARCHAR(255)"/>
+            <column name="PROPERTY_VALUE" type="VARCHAR(255)"/>
+            <column name="FK_MSG_ACKNOWLEDGE" type="INT"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="FK_MSG_ACKNOWLEDGE" baseTableName="TB_MESSAGE_ACKNW_PROP"
+                                 constraintName="FK_MSG_ACK_PROP_MSG_ACK" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_ACKNW"/>
+    </changeSet>
+
+    <changeSet author="Mircea" id="Add raw configuration table">
+        <createTable tableName="TB_CONFIGURATION_RAW">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="CONFIGURATION_DATE" type="DATETIME"/>
+            <column name="XML" type="BLOB"/>
+        </createTable>
+    </changeSet>
+
+
 </databaseChangeLog>

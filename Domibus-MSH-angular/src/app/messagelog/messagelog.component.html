@@ -1,0 +1,301 @@
+<div>
+
+  <div class="selectionCriteria">
+    <md-card style="margin:0;padding:10px;">
+      <md-card-content>
+        <h2 style="margin:0;">Selection criteria for Message Log</h2>
+
+        <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
+          <table class="filterTable">
+            <tr>
+              <td>
+                <md-input-container class="inputField">
+                  <input mdInput placeholder="Message Id" name="messageId" [(ngModel)]="filter.messageId" #messageId="ngModel">
+                </md-input-container>
+              </td>
+              <td>
+                <md-input-container class="inputField">
+                  <input mdInput placeholder="Conversation Id" name="conversationId" [(ngModel)]="filter.conversationId" #conversationId="ngModel">
+                </md-input-container>
+              </td>
+              <td>
+                <md-select placeholder="MSH Role" name="mshRole" [(ngModel)]="filter.mshRole">
+                  <md-option [value]="''">
+                  </md-option>
+                  <md-option *ngFor="let role of mshRoles" [value]="role">
+                    {{role}}
+                  </md-option>
+                </md-select>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <md-select placeholder="Message Type" name="messageType" [(ngModel)]="filter.messageType">
+                  <md-option [value]="''">
+                  </md-option>
+                  <md-option *ngFor="let type of msgTypes" [value]="type">
+                    {{type}}
+                  </md-option>
+                </md-select>
+              </td>
+              <td>
+                <md-select placeholder="Message Status" [(ngModel)]="filter.messageStatus" name="messageStatus">
+                  <md-option [value]="''">
+                  </md-option>
+                  <md-option *ngFor="let mstatus of msgStatus" [value]="mstatus">
+                    {{mstatus}}
+                  </md-option>
+                </md-select>
+              </td>
+              <td>
+                <md-select placeholder="Notification Status" [(ngModel)]="filter.notificationStatus" name="notificationStatus">
+                  <md-option [value]="''">
+                  </md-option>
+                  <md-option *ngFor="let nstatus of notifStatus" [value]="nstatus">
+                    {{nstatus}}
+                  </md-option>
+                </md-select>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <md-input-container class="inputField">
+                  <input mdInput placeholder="From Party Id" name="fromPartyId" [(ngModel)]="filter.fromPartyId" #fromPartyId="ngModel">
+                </md-input-container>
+              </td>
+              <td>
+                <md-input-container class="inputField">
+                  <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId" #toPartyId="ngModel">
+                </md-input-container>
+              </td>
+              <td>
+                <md-input-container class="inputField">
+                  <input mdInput placeholder="refToMessageId" name="refToMessageId" [(ngModel)]="filter.refToMessageId" #refToMessageId="ngModel">
+                </md-input-container>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <md-input-container class="inputField">
+                  <input mdInput placeholder="Original Sender" name="originalSender" [(ngModel)]="filter.originalSender" #originalSender="ngModel">
+                </md-input-container>
+              </td>
+              <td>
+                <md-input-container class="inputField">
+                  <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient" #finalRecipient="ngModel">
+                </md-input-container>
+              </td>
+            </tr>
+            <tr>
+              <table>
+                <tr>
+                  <td class="dateTimeTitle">Sent/Receive time period:</td>
+                  <td>
+                    <md2-datepicker placeholder="From:"
+                                    [(ngModel)]="filter.receivedFrom"
+                                    name="receivedFrom"
+                                    [type]="'datetime'"
+                                    [max]="timestampFromMaxDate"
+                                    (change)='onTimestampFromChange($event)'
+                                    #timestampControl="ngModel">
+                    </md2-datepicker>
+                  </td>
+                  <td>
+                    <md2-datepicker placeholder="To:"
+                                    [(ngModel)]="filter.receivedTo"
+                                    name="receivedTo"
+                                    [min]="timestampToMinDate"
+                                    [max]="timestampToMaxDate"
+                                    (change)='onTimestampToChange($event)'
+                                    [type]="'datetime'"
+                                    #timestampControl="ngModel">
+                    </md2-datepicker>
+                  </td>
+                </tr>
+              </table>
+              <td>
+                <button md-raised-button color="primary" [disabled]="!filterForm.form.valid">
+                  <md-icon>search</md-icon>
+                  <span>Search</span>
+                </button>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </md-card-content>
+    </md-card>
+  </div>
+
+  <div class="rowsDiv">
+    <md-select placeholder="Rows" [(ngModel)]="pageSize" name="pageSize" (change)="changeRowLimits($event)">
+      <md-option *ngFor="let rowLimit of rowLimits" [value]="rowLimit.value">
+        {{rowLimit.key}}
+      </md-option>
+    </md-select>
+  </div>
+
+  <ngx-datatable
+    id="messageLogTable"
+    class="material striped"
+    [rows]="rows"
+    [columnMode]="'auto'"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    [rowHeight]="'auto'"
+    [scrollbarH]="true"
+    [externalPaging]="true"
+    [externalSorting]="true"
+    [loadingIndicator]="loading"
+    [count]="count"
+    [offset]="offset"
+    [limit]="pageSize"
+    [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
+    (page)='onPage($event)'
+    (sort)="onSort($event)">
+    <!-- Message Id -->
+    <ngx-datatable-column name="Message Id" [width]="500">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template >
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- Conversation Id -->
+    <ngx-datatable-column name="Conversation Id" [width]="400" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template >
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- From Party Id -->
+    <ngx-datatable-column name="From Party Id" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- To Party Id -->
+    <ngx-datatable-column name="To Party Id" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- Status -->
+    <ngx-datatable-column name="Message Status" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- Notification Status -->
+    <ngx-datatable-column name="Notification Status" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- MSH Role -->
+    <ngx-datatable-column name="MSH Role" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- Message Type -->
+    <ngx-datatable-column name="Message Type" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- Deleted -->
+    <ngx-datatable-column name="Deleted" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value | date: dateFormat}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- Received -->
+    <ngx-datatable-column name="Received" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value | date: dateFormat}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- Failed Send Attempts -->
+    <ngx-datatable-column name="Send Attempts" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- Send Attempts Max -->
+    <ngx-datatable-column name="Send Attempts Max" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- Next Attempt -->
+    <ngx-datatable-column name="Next Attempt" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value | date: dateFormat}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- Original Sender -->
+    <ngx-datatable-column name="Original Sender" [width]="400" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- Final Recipient -->
+    <ngx-datatable-column name="Final Recipient" [width]="400" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+    <!-- Ref To Message Id -->
+    <ngx-datatable-column name="Ref To Message Id" [canAutoResize]="true">
+      <template let-column="column">
+        {{column.name}}
+      </template>
+      <template let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value}}</span>
+      </template>
+    </ngx-datatable-column>
+  </ngx-datatable>
+
+</div>

@@ -1,12 +1,13 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
 import {HttpModule, Http, XHRBackend, RequestOptions} from '@angular/http';
-import { MaterialModule } from '@angular/material';
+import {MaterialModule} from '@angular/material';
+import {MdButtonModule} from '@angular/material';
 import 'hammerjs';
 
-import { NgxDatatableModule } from '@swimlane/ngx-datatable';
-import { Md2Module }  from 'md2';
+import {NgxDatatableModule} from '@swimlane/ngx-datatable';
+import {Md2Module}  from 'md2';
 
 import {AppComponent} from './app.component';
 import {LoginComponent} from "./login/login.component";
@@ -28,8 +29,11 @@ import {FooterComponent} from "./footer/footer.component";
 import {DomibusInfoService} from "./appinfo/domibusinfo.service";
 import {AuthorizedAdminGuard} from "./guards/authorized-admin.guard";
 import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
+import {MessageLogComponent} from "./messagelog/messagelog.component";
+import {TruststoreComponent} from './truststore/truststore.component';
+import {PmodeUploadComponent} from './pmode-upload/pmode-upload.component';
 
-export function extendedHttpClientFactory (xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
+export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
 }
 
@@ -39,21 +43,26 @@ export function extendedHttpClientFactory (xhrBackend: XHRBackend, requestOption
     LoginComponent,
     HomeComponent,
     MessageFilterComponent,
+    MessageLogComponent,
     ErrorLogComponent,
     AlertComponent,
     FooterComponent,
     PModeComponent,
-    IsAuthorized
+    IsAuthorized,
+    TruststoreComponent,
+    PModeComponent,
+    PmodeUploadComponent
   ],
   entryComponents: [
-    AppComponent
+    AppComponent,
+    PmodeUploadComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpModule,
     NgxDatatableModule,
-
+    MdButtonModule,
     MaterialModule.forRoot(),
     Md2Module.forRoot(),
     routing
@@ -76,4 +85,5 @@ export function extendedHttpClientFactory (xhrBackend: XHRBackend, requestOption
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

@@ -38,8 +38,8 @@
     <bean id="pModeProvider"
           class="eu.domibus.ebms3.common.dao.CachingPModeProvider"/>
 
-    <bean id="pModeDao"
-          class="eu.domibus.common.dao.PModeDao"/>
+    <!--<bean id="pModeDao"
+          class="eu.domibus.common.dao.PModeDao"/>-->
 
     <!-- General domibus properties -->
     <util:properties id="domibusProperties">
@@ -48,8 +48,8 @@
         <prop key="domibus.msh.messageid.suffix">domibus.eu</prop>
         <!-- Retry Worker execution interval as a cron expression -->
         <prop key="domibus.msh.retry.cron">0/5 * * * * ?</prop>
-        <!-- Timeout tolerance for retry messages. Should be set to double the retry worker execution interval -->
-        <prop key="domibus.msh.retry.tolerance">10000</prop>
+        <!-- Timeout tolerance for retry messages (in miliseconds). Scheduled retries that, due to any reason, were not performed within this period will be timeout -->
+        <prop key="domibus.msh.retry.tolerance">10800000</prop>
         <!-- Should unrecoverable errors should be retried or not -->
         <prop key="domibus.dispatch.ebms.error.unrecoverable.retry">true</prop>
         <prop key="domibus.smlzone">acc.edelivery.tech.ec.europa.eu</prop>
@@ -65,6 +65,9 @@
 
         <!--Accepted Format for MessageId-->
         <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
+
+        <!-- Whether to delete the message payload on send failure. Defaults to false (the admin could put the message back in the send queue) -->
+        <prop key="domibus.sendMessage.failure.delete.payload">false</prop>
 
         <!--Maximum number of pending messages to be listed -->
         <prop key="domibus.listPendingMessages.maxCount">500</prop>

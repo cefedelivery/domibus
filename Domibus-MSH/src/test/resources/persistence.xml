@@ -30,6 +30,7 @@
         <class>eu.domibus.common.model.configuration.Binding</class>
         <class>eu.domibus.common.model.configuration.BusinessProcesses</class>
         <class>eu.domibus.common.model.configuration.Configuration</class>
+        <class>eu.domibus.common.model.configuration.ConfigurationRaw</class>
         <class>eu.domibus.common.model.configuration.ErrorHandling</class>
         <class>eu.domibus.common.model.configuration.Identifier</class>
         <class>eu.domibus.common.model.configuration.LegConfiguration</class>

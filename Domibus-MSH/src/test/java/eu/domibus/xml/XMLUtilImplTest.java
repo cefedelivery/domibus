@@ -1,6 +1,6 @@
 package eu.domibus.xml;
 
-import eu.domibus.api.xml.UnmarshallerResult;
+import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import mockit.Tested;

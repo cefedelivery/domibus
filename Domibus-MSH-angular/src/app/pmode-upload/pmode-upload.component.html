@@ -1,0 +1,25 @@
+<h1 md-dialog-title>PModes Upload</h1>
+
+<div class="divTable">
+  <div class="divTableBody">
+
+    <div class="divTableRow">
+      <div class="divTableCell">
+        <input #fileInput type="file" id="pmode" accept=".xml">
+      </div>
+      <div class="divTableCell">
+        <!--<label for="pmode">File</label>-->
+      </div>
+    </div>
+    <div class="divTableRow">
+      <div class="divTableCell">
+        <button md-raised-button color="primary" (click)="submit()">Upload</button>
+      </div>
+      <div class="divTableCell">
+        <button md-raised-button color="primary" (click)="dialogRef.close('Cancel')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
