@@ -118,20 +118,29 @@ public class UserMessageDefaultService implements UserMessageService {
         userMessageLog.setFailed(null);
         userMessageLog.setNextAttempt(currentDate);
 
-        final LegConfiguration legConfiguration = pModeService.getLegConfiguration(messageId);
-        Integer maxAttemptsConfiguration = 1;
-        if (legConfiguration == null) {
-            LOG.warn("Could not get the leg configuration for message [{}]. Using the default maxAttempts configuration [{}]", messageId, maxAttemptsConfiguration);
-        } else {
-            maxAttemptsConfiguration = pModeServiceHelper.getMaxAttempts(legConfiguration);
-        }
-        Integer newMaxAttempts = userMessageLog.getSendAttemptsMax() + maxAttemptsConfiguration;
+        Integer newMaxAttempts = computeNewMaxAttempts(userMessageLog, messageId);
         LOG.debug("Increasing the max attempts for message [{}] from [{}] to [{}]", messageId, userMessageLog.getSendAttemptsMax(), newMaxAttempts);
         userMessageLog.setSendAttemptsMax(newMaxAttempts);
 
         userMessageLogDao.update(userMessageLog);
 
         scheduleSending(messageId);
+    }
+
+    protected Integer getMaxAttemptsConfiguration(final String messageId) {
+        final LegConfiguration legConfiguration = pModeService.getLegConfiguration(messageId);
+        Integer result = 1;
+        if (legConfiguration == null) {
+            LOG.warn("Could not get the leg configuration for message [{}]. Using the default maxAttempts configuration [{}]", messageId, result);
+        } else {
+            result = pModeServiceHelper.getMaxAttempts(legConfiguration);
+        }
+        return result;
+    }
+
+    protected Integer computeNewMaxAttempts(final UserMessageLog userMessageLog, final String messageId) {
+        Integer maxAttemptsConfiguration = getMaxAttemptsConfiguration(messageId);
+        return userMessageLog.getSendAttemptsMax() + maxAttemptsConfiguration;
     }
 
     @Override
@@ -160,8 +169,10 @@ public class UserMessageDefaultService implements UserMessageService {
             } catch (Exception e) {
                 LOG.error("Failed to restore message [" + messageId + "]", e);
             }
-
         }
+
+        LOG.debug("Restored messages [{}] using start date [{}], end date [{}] and final recipient", restoredMessages, start, end, finalRecipient);
+
         return restoredMessages;
     }
 
@@ -217,7 +228,7 @@ public class UserMessageDefaultService implements UserMessageService {
         handleSignalMessageDelete(messageId);
     }
 
-    private void handleSignalMessageDelete(String messageId) {
+    protected void handleSignalMessageDelete(String messageId) {
         List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
         if (!signalMessages.isEmpty()) {
             for (SignalMessage signalMessage : signalMessages) {
