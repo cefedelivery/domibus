@@ -13,10 +13,13 @@ public class ConfigurationRawDAO extends BasicDao<ConfigurationRaw> {
         super(ConfigurationRaw.class);
     }
 
-    public List<ConfigurationRaw> getLatest(){
+    public ConfigurationRaw getLatest() {
         final TypedQuery<ConfigurationRaw> query = this.em.createNamedQuery("ConfigurationRaw.getLatest", ConfigurationRaw.class);
         query.setMaxResults(1);
-        return query.getResultList();
+        final List<ConfigurationRaw> resultList = query.getResultList();
+        if (resultList.size() > 0)
+            return resultList.get(0);
+        return null;
     }
 
 }

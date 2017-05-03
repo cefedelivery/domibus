@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.common.model;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -53,7 +34,7 @@ public class Service {
 
     @XmlValue
     @Column(name = "SERVICE_VALUE")
-    protected String value = eu.domibus.common.model.configuration.Service.TEST_SERVICE;
+    protected String value = Ebms3Constants.TEST_SERVICE;
     @XmlAttribute(name = "type")
     @Column(name = "SERVICE_TYPE")
     protected String type;

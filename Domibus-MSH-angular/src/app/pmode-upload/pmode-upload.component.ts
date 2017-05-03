@@ -10,7 +10,7 @@ import {Http} from "@angular/http";
 })
 export class PmodeUploadComponent implements OnInit {
 
-  private url = "/rest/pmode";
+  private url = "rest/pmode";
 
   constructor(public dialogRef: MdDialogRef<PmodeUploadComponent>, private http: Http, private alertService: AlertService) {
   }

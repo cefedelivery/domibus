@@ -1,7 +1,7 @@
 package eu.domibus.ebms3.common.dao;
 
-import eu.domibus.api.xml.UnmarshallerResult;
-import eu.domibus.api.xml.XMLUtil;
+import eu.domibus.api.util.xml.UnmarshallerResult;
+import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
 import eu.domibus.common.dao.PModeDao;
@@ -17,7 +17,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -58,6 +57,11 @@ public class PModeDaoTestIT {
         @Bean
         public ConfigurationRawDAO configurationRawDAO() {
             return Mockito.mock(ConfigurationRawDAO.class);
+        }
+
+        @Bean(name = "domibusJTA")
+        public EntityManagerFactory getdomibusJTA() {
+            return Mockito.mock(EntityManagerFactory.class);
         }
 
         @Bean

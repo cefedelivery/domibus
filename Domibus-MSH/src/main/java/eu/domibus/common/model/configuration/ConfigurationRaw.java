@@ -23,6 +23,7 @@ import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
 import javax.persistence.*;
 import java.util.Calendar;
+import java.util.Date;
 
 @Entity
 @Table(name = "TB_CONFIGURATION_RAW")
@@ -35,7 +36,7 @@ public class ConfigurationRaw extends AbstractBaseEntity {
 
     @Column(name = "CONFIGURATION_DATE")
     @Temporal(TemporalType.TIMESTAMP)
-    Calendar configurationDate;
+    Date configurationDate;
 
     public byte[] getXml() {
         return xml;
@@ -45,11 +46,11 @@ public class ConfigurationRaw extends AbstractBaseEntity {
         this.xml = xml;
     }
 
-    public Calendar getConfigurationDate() {
+    public Date getConfigurationDate() {
         return configurationDate;
     }
 
-    public void setConfigurationDate(Calendar configurationDate) {
+    public void setConfigurationDate(Date configurationDate) {
         this.configurationDate = configurationDate;
     }
 }

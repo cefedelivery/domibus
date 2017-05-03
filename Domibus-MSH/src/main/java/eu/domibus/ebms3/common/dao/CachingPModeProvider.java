@@ -1,3 +1,22 @@
+/*
+ * Copyright 2015 e-CODEX Project
+ *
+ * Licensed under the EUPL, Version 1.1 or – as soon they
+ * will be approved by the European Commission - subsequent
+ * versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the
+ * Licence.
+ * You may obtain a copy of the Licence at:
+ * http://ec.europa.eu/idabc/eupl5
+ * Unless required by applicable law or agreed to in
+ * writing, software distributed under the Licence is
+ * distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
 package eu.domibus.ebms3.common.dao;
 
 import eu.domibus.common.ErrorCode;
@@ -59,9 +78,9 @@ public class CachingPModeProvider extends PModeProvider {
                     for (final Party responder : process.getResponderParties()) {
                         if (StringUtils.equalsIgnoreCase(responder.getName(), receiverParty)) {
                             if (process.getAgreement() != null && StringUtils.equalsIgnoreCase(process.getAgreement().getName(), agreementName)
-                                    || (agreementName.equals(OPTIONAL_AND_EMPTY) && process.getAgreement() == null)
+                                    || (StringUtils.equalsIgnoreCase(agreementName, OPTIONAL_AND_EMPTY) && process.getAgreement() == null)
                                     // Please notice that this is only for backward compatibility and will be removed ASAP!
-                                    || (agreementName.equals(OPTIONAL_AND_EMPTY) && process.getAgreement() != null && process.getAgreement().getValue().equals(""))
+                                    || (StringUtils.equalsIgnoreCase(agreementName, OPTIONAL_AND_EMPTY) && process.getAgreement() != null && StringUtils.isEmpty(process.getAgreement().getValue()))
                                     ) {
                                 /**
                                  * The Process is a candidate because either has an Agreement and its name matches the Agreement name found previously

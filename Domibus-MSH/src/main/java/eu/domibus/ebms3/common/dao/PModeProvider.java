@@ -19,8 +19,8 @@
 
 package eu.domibus.ebms3.common.dao;
 
-import eu.domibus.api.xml.UnmarshallerResult;
-import eu.domibus.api.xml.XMLUtil;
+import eu.domibus.api.util.xml.UnmarshallerResult;
+import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.clustering.Command;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
@@ -29,6 +29,7 @@ import eu.domibus.common.dao.ConfigurationRawDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.model.AgreementRef;
+import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
@@ -51,11 +53,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public abstract class PModeProvider {
     @Autowired
     protected ConfigurationRawDAO configurationRawDAO;
 
-    @PersistenceContext
+    @PersistenceContext(unitName = "domibusJTA")
     protected EntityManager entityManager;
 
     @Autowired()
@@ -100,17 +100,12 @@ public abstract class PModeProvider {
     public abstract void refresh();
 
     public byte[] getRawConfiguration() {
-        if (!this.configurationDAO.configurationExists())
-            return null;
-        final List<ConfigurationRaw> latest = this.configurationRawDAO.getLatest();
-
-        if(latest.size() > 0){
-            return latest.get(0).getXml();
-        }
-        return new byte[0];
+        final ConfigurationRaw latest = this.configurationRawDAO.getLatest();
+        return (latest != null) ? latest.getXml() : new byte[0];
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<String> updatePModes(byte[] bytes) throws XmlProcessingException, IOException {
         LOG.debug("Updating the PMode");
 
@@ -139,7 +134,7 @@ public abstract class PModeProvider {
 
         //save the raw configuration
         final ConfigurationRaw configurationRaw = new ConfigurationRaw();
-        configurationRaw.setConfigurationDate(Calendar.getInstance());
+        configurationRaw.setConfigurationDate(Calendar.getInstance().getTime());
         configurationRaw.setXml(bytes);
         configurationRawDAO.create(configurationRaw);
 
@@ -194,8 +189,8 @@ public abstract class PModeProvider {
             leg = findLegName(agreementName, senderParty, receiverParty, service, action);
             LOG.businessInfo(DomibusMessageCode.BUS_LEG_NAME_FOUND, leg, agreementName, senderParty, receiverParty, service, action);
 
-            if ((action.equals(Action.TEST_ACTION) && (!service.equals(Service.TEST_SERVICE)))) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Service.TEST_SERVICE + " and ebMS3 Test Action: " + Action.TEST_ACTION + " can only be used together [CORE] 5.2.2.9", userMessage.getMessageInfo().getMessageId(), null);
+            if ((action.equals(Ebms3Constants.TEST_ACTION) && (!service.equals(Ebms3Constants.TEST_SERVICE)))) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Ebms3Constants.TEST_SERVICE + " and ebMS3 Test Action: " + Ebms3Constants.TEST_ACTION + " can only be used together [CORE] 5.2.2.9", userMessage.getMessageInfo().getMessageId(), null);
             }
 
             final String pmodeKey = senderParty + ":" + receiverParty + ":" + service + ":" + action + ":" + agreementName + ":" + leg;

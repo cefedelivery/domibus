@@ -1,8 +1,5 @@
 package eu.domibus.spring;
 
-import eu.domibus.api.xml.XMLUtil;
-import eu.domibus.xml.XMLUtilImpl;
-import mockit.Tested;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

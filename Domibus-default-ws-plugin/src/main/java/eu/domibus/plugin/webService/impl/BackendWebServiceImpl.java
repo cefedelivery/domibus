@@ -1,8 +1,33 @@
+/*
+ * Copyright 2015 e-CODEX Project
+ *
+ * Licensed under the EUPL, Version 1.1 or – as soon they
+ * will be approved by the European Commission - subsequent
+ * versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the
+ * Licence.
+ * You may obtain a copy of the Licence at:
+ * http://ec.europa.eu/idabc/eupl5
+ * Unless required by applicable law or agreed to in
+ * writing, software distributed under the Licence is
+ * distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
 package eu.domibus.plugin.webService.impl;
 
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
+import eu.domibus.ext.exceptions.AuthenticationException;
+import eu.domibus.ext.exceptions.DomibusServiceException;
+import eu.domibus.ext.exceptions.MessageAcknowledgeException;
+import eu.domibus.ext.services.MessageAcknowledgeService;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.AbstractBackendConnector;
@@ -11,24 +36,18 @@ import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.webService.generated.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
-import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.*;
 
 
@@ -55,13 +74,26 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     private static final String MESSAGE_NOT_FOUND_ID = "Message not found, id [";
 
+    private static final String ERROR_IS_PAYLOAD_DATA_HANDLER = "Error getting the input stream from the payload data handler";
+
     @Autowired
     private StubDtoTransformer defaultTransformer;
+
+    @Autowired
+    private MessageAcknowledgeService messageAcknowledgeService;
 
     public BackendWebServiceImpl(final String name) {
         super(name);
     }
 
+    /**
+     * @param sendRequest
+     * @param ebMSHeaderInfo
+     * @return
+     * @throws SendMessageFault
+     * @deprecated Use sendMessageWithLargeFilesSupport
+     */
+    @Deprecated
     @SuppressWarnings("ValidExternallyBoundObject")
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -82,11 +114,11 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
             boolean foundPayload = false;
             final String href = extendedPartInfo.getHref();
-            BackendWebServiceImpl.LOG.debug("Looking for payload: " + href);
+            LOG.debug("Looking for payload: " + href);
             for (final PayloadType payload : sendRequest.getPayload()) {
-                BackendWebServiceImpl.LOG.debug("comparing with payload id: " + payload.getPayloadId());
+                LOG.debug("comparing with payload id: " + payload.getPayloadId());
                 if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
-                    this.copyPartProperties(payload, extendedPartInfo);
+                    this.copyPartProperties(payload.getContentType(), extendedPartInfo);
                     extendedPartInfo.setInBody(false);
                     LOG.debug("sendMessage - payload Content Type: " + payload.getContentType());
                     extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(payload.getValue(), payload.getContentType() == null ? DEFAULT_MT : payload.getContentType())));
@@ -101,7 +133,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                 }
                 // It can only be in body load, href MAY be null!
                 if (href == null && bodyload.getPayloadId() == null || href != null && StringUtils.equalsIgnoreCase(href, bodyload.getPayloadId())) {
-                    this.copyPartProperties(bodyload, extendedPartInfo);
+                    this.copyPartProperties(bodyload.getContentType(), extendedPartInfo);
                     extendedPartInfo.setInBody(true);
                     LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
                     extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(bodyload.getValue(), bodyload.getContentType() == null ? DEFAULT_MT : bodyload.getContentType())));
@@ -120,11 +152,87 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         try {
             messageId = this.submit(ebMSHeaderInfo);
         } catch (final MessagingProcessingException mpEx) {
-            BackendWebServiceImpl.LOG.error("Message submission failed", mpEx);
+            LOG.error("Message submission failed", mpEx);
             throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
         }
         LOG.info("Received message from backend to send, assigning messageID" + messageId);
-        final SendResponse response = BackendWebServiceImpl.WEBSERVICE_OF.createSendResponse();
+        final SendResponse response = WEBSERVICE_OF.createSendResponse();
+        response.getMessageID().add(messageId);
+        return response;
+    }
+
+
+    /**
+     * Add support for large files using DataHandler instead of byte[]
+     *
+     * @param submitRequest
+     * @param ebMSHeaderInfo
+     * @return
+     * @throws SendMessageFault
+     */
+    @SuppressWarnings("ValidExternallyBoundObject")
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
+    public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SendMessageFault {
+        LOG.info("Received message");
+
+        final LargePayloadType bodyload = submitRequest.getBodyload();
+
+        List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
+
+        List<ExtendedPartInfo> partInfosToAdd = new ArrayList<>();
+
+        for (Iterator<PartInfo> i = partInfoList.iterator(); i.hasNext(); ) {
+
+            ExtendedPartInfo extendedPartInfo = new ExtendedPartInfo(i.next());
+            partInfosToAdd.add(extendedPartInfo);
+            i.remove();
+
+            boolean foundPayload = false;
+            final String href = extendedPartInfo.getHref();
+            LOG.debug("Looking for payload: " + href);
+            for (final LargePayloadType payload : submitRequest.getPayload()) {
+                LOG.debug("comparing with payload id: " + payload.getPayloadId());
+                if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
+                    this.copyPartProperties(payload.getContentType(), extendedPartInfo);
+                    extendedPartInfo.setInBody(false);
+                    LOG.debug("sendMessage - payload Content Type: " + payload.getContentType());
+                    extendedPartInfo.setPayloadDatahandler(payload.getValue());
+                    foundPayload = true;
+                    break;
+                }
+            }
+            if (!foundPayload) {
+                if (bodyload == null) {
+                    // in this case the payload referenced in the partInfo was neither an external payload nor a bodyload
+                    throw new SendMessageFault("No Payload or Bodyload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+                }
+                // It can only be in body load, href MAY be null!
+                if (href == null && bodyload.getPayloadId() == null || href != null && StringUtils.equalsIgnoreCase(href, bodyload.getPayloadId())) {
+                    this.copyPartProperties(bodyload.getContentType(), extendedPartInfo);
+                    extendedPartInfo.setInBody(true);
+                    LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
+                    extendedPartInfo.setPayloadDatahandler(bodyload.getValue());
+                } else {
+                    throw new SendMessageFault("No payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+                }
+            }
+        }
+        partInfoList.addAll(partInfosToAdd);
+        if (ebMSHeaderInfo.getUserMessage().getMessageInfo() == null) {
+            MessageInfo messageInfo = new MessageInfo();
+            messageInfo.setTimestamp(getXMLTimeStamp());
+            ebMSHeaderInfo.getUserMessage().setMessageInfo(messageInfo);
+        }
+        final String messageId;
+        try {
+            messageId = this.submit(ebMSHeaderInfo);
+        } catch (final MessagingProcessingException mpEx) {
+            LOG.error("Message submission failed", mpEx);
+            throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
+        }
+        LOG.info("Received message from backend to send, assigning messageID" + messageId);
+        final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
         response.getMessageID().add(messageId);
         return response;
     }
@@ -148,7 +256,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         return fd;
     }
 
-    private void copyPartProperties(final PayloadType payload, final ExtendedPartInfo partInfo) {
+    private void copyPartProperties(final String payloadContentType, final ExtendedPartInfo partInfo) {
         final PartProperties partProperties = new PartProperties();
         Property prop;
 
@@ -171,24 +279,31 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             }
         }
         // in case there was no property with name {@value Property.MIME_TYPE} and xmime:contentType attribute was set noinspection SuspiciousMethodCalls
-        if (!mimeTypePropFound && payload.getContentType() != null) {
+        if (!mimeTypePropFound && payloadContentType != null) {
             prop = new Property();
             prop.setName(MIME_TYPE);
-            prop.setValue(payload.getContentType());
+            prop.setValue(payloadContentType);
             partProperties.getProperty().add(prop);
         }
         partInfo.setPartProperties(partProperties);
     }
 
-
     @Override
     public ListPendingMessagesResponse listPendingMessages(final Object listPendingMessagesRequest) {
-        final ListPendingMessagesResponse response = BackendWebServiceImpl.WEBSERVICE_OF.createListPendingMessagesResponse();
+        final ListPendingMessagesResponse response = WEBSERVICE_OF.createListPendingMessagesResponse();
         final Collection<String> pending = this.listPendingMessages();
         response.getMessageID().addAll(pending);
         return response;
     }
 
+    /**
+     * @param downloadMessageRequest
+     * @param downloadMessageResponse
+     * @param ebMSHeaderInfo
+     * @throws DownloadMessageFault
+     * @deprecated Use downloadMessageWithLargeFilesSupport
+     */
+    @Deprecated
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
     public void downloadMessage(final DownloadMessageRequest downloadMessageRequest, Holder<DownloadMessageResponse> downloadMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
@@ -208,7 +323,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", createDownloadMessageFault(mnfEx));
         }
 
-        if(userMessage == null) {
+        if (userMessage == null) {
             LOG.error(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]");
             throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", createFault("UserMessage not found"));
         }
@@ -217,17 +332,79 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         if (StringUtils.isEmpty(userMessage.getCollaborationInfo().getAgreementRef().getValue())) {
             userMessage.getCollaborationInfo().setAgreementRef(null);
         }
-        Messaging messaging = BackendWebServiceImpl.EBMS_OBJECT_FACTORY.createMessaging();
+        Messaging messaging = EBMS_OBJECT_FACTORY.createMessaging();
         messaging.setUserMessage(userMessage);
         ebMSHeaderInfo.value = messaging;
-        downloadMessageResponse.value = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponse();
+        downloadMessageResponse.value = WEBSERVICE_OF.createDownloadMessageResponse();
 
-        if (isMessageIdNotEmpty) {
-            fillInfoParts(downloadMessageResponse, messaging);
-        } else {
-            LOG.info("Returning an empty response because the message id was empty.");
+        fillInfoParts(downloadMessageResponse, messaging);
+
+        try {
+            messageAcknowledgeService.acknowledgeMessageDelivered(downloadMessageRequest.getMessageID(), new Timestamp(System.currentTimeMillis()));
+        } catch (AuthenticationException | MessageAcknowledgeException e) {
+            //if an error occurs related to the message acknowledgement do not block the download message operation
+            LOG.error("Error acknowledging message [" + downloadMessageRequest.getMessageID() + "]", e);
         }
     }
+
+    protected DownloadMessageFault createFault(String message, DomibusServiceException e) {
+        FaultDetail detail = WEBSERVICE_OF.createFaultDetail();
+        detail.setCode(e.getErrorCode().getErrorCode());
+        detail.setMessage(e.getMessage());
+        return new DownloadMessageFault(message, detail);
+    }
+
+    /**
+     * Add support for large files using DataHandler instead of byte[]
+     *
+     * @param retrieveMessageRequest
+     * @param retrieveMessageResponse
+     * @param ebMSHeaderInfo
+     * @throws DownloadMessageFault
+     */
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
+    public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
+
+        UserMessage userMessage = null;
+        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(retrieveMessageRequest.getMessageID());
+
+        try {
+            if (isMessageIdNotEmpty) {
+                userMessage = downloadMessage(retrieveMessageRequest.getMessageID(), null);
+            }
+        } catch (final MessageNotFoundException mnfEx) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]", mnfEx);
+            }
+            LOG.error(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]");
+            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]", createDownloadMessageFault(mnfEx));
+        }
+
+        if (userMessage == null) {
+            LOG.error(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]");
+            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]", createFault("UserMessage not found"));
+        }
+
+        // To avoid blocking errors during the Header's response validation
+        if (StringUtils.isEmpty(userMessage.getCollaborationInfo().getAgreementRef().getValue())) {
+            userMessage.getCollaborationInfo().setAgreementRef(null);
+        }
+        Messaging messaging = EBMS_OBJECT_FACTORY.createMessaging();
+        messaging.setUserMessage(userMessage);
+        ebMSHeaderInfo.value = messaging;
+        retrieveMessageResponse.value = WEBSERVICE_OF.createRetrieveMessageResponse();
+
+        fillInfoPartsForLargeFiles(retrieveMessageResponse, messaging);
+
+        try {
+            messageAcknowledgeService.acknowledgeMessageDelivered(retrieveMessageRequest.getMessageID(), new Timestamp(System.currentTimeMillis()));
+        } catch (AuthenticationException | MessageAcknowledgeException e) {
+            //if an error occurs related to the message acknowledgement do not block the download message operation
+            LOG.error("Error acknowledging message [" + retrieveMessageRequest.getMessageID() + "]", e);
+        }
+    }
+
 
     private void fillInfoParts(Holder<DownloadMessageResponse> downloadMessageResponse, Messaging messaging) throws DownloadMessageFault {
 
@@ -235,41 +412,41 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
-            PayloadType payloadType = BackendWebServiceImpl.WEBSERVICE_OF.createPayloadType();
+            PayloadType payloadType = WEBSERVICE_OF.createPayloadType();
             try {
-                LOG.debug("payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
-                payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
-            } catch (IOException ioEx) {
-                String msgToShow = "Error getting the input stream from the payload data handler for the required message [" + msgId + "]";
-                LOG.error(msgToShow, ioEx);
-                throw new DownloadMessageFault(msgToShow, createDownloadMessageFault(ioEx));
+                if(extPartInfo.getPayloadDatahandler() != null ) {
+                    payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
+                    LOG.debug("downloadMessage - payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
+                }
+            } catch (final IOException ioEx) {
+                LOG.error(ERROR_IS_PAYLOAD_DATA_HANDLER, ioEx);
+                throw new DownloadMessageFault(ERROR_IS_PAYLOAD_DATA_HANDLER, createDownloadMessageFault(ioEx));
             }
             if (extPartInfo.isInBody()) {
                 extPartInfo.setHref(BODYLOAD);
                 payloadType.setPayloadId(BODYLOAD);
-                JAXBElement<PayloadType> payloadElement = BackendWebServiceImpl.WEBSERVICE_OF.createDownloadMessageResponseBodyload(payloadType);
-                downloadMessageResponse.value.getContent().add(payloadElement);
+                downloadMessageResponse.value.setBodyload(payloadType);
             } else {
                 payloadType.setPayloadId(partInfo.getHref());
-                AnyPayloadType anyPayloadType = BackendWebServiceImpl.WEBSERVICE_OF.createAnyPayloadType();
-                setAnyPayload(msgId, payloadType, anyPayloadType);
-                JAXBElement<AnyPayloadType> anyPayloadTypeElement = BackendWebServiceImpl.WEBSERVICE_OF.createPayload(anyPayloadType);
-                downloadMessageResponse.value.getContent().add(anyPayloadTypeElement);
+                downloadMessageResponse.value.getPayload().add(payloadType);
             }
         }
     }
 
-    private void setAnyPayload(String msgId, PayloadType payloadType, AnyPayloadType anyPayloadType) throws DownloadMessageFault {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document root = builder.parse(new ByteArrayInputStream(payloadType.getValue()));
-            anyPayloadType.setAny(root.getDocumentElement());
-        } catch (Exception ex) {
-            String msgToShow = "Payload bytes could not be correctly parsed for the required message [" + msgId + "]";
-            LOG.error(msgToShow, ex);
-            throw new DownloadMessageFault(msgToShow, createDownloadMessageFault(ex));
+    private void fillInfoPartsForLargeFiles(Holder<RetrieveMessageResponse> retrieveMessageResponse, Messaging messaging) throws DownloadMessageFault {
+        for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
+            ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
+            LargePayloadType payloadType = WEBSERVICE_OF.createLargePayloadType();
+            LOG.debug("payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
+            payloadType.setValue(extPartInfo.getPayloadDatahandler());
+            if (extPartInfo.isInBody()) {
+                extPartInfo.setHref(BODYLOAD);
+                payloadType.setPayloadId(BODYLOAD);
+                retrieveMessageResponse.value.setBodyload(payloadType);
+            } else {
+                payloadType.setPayloadId(partInfo.getHref());
+                retrieveMessageResponse.value.getPayload().add(payloadType);
+            }
         }
     }
 

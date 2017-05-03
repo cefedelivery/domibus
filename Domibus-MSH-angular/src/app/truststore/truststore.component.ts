@@ -14,7 +14,7 @@ import 'rxjs/add/operator/catch';
 })
 export class TruststoreComponent implements OnInit {
 
-  private url = "/rest/truststore";
+  private url = "rest/truststore";
 
 
   @ViewChild('fileInput')

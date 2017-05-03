@@ -74,11 +74,9 @@
 
     <bean id="entityManagerFactory" primary="true"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="persistenceXmlLocation">
-            <value>file:///${domibus.config.location}/persistence.xml</value>
-        </property>
         <property name="persistenceUnitName" value="domibusJTA"/>
-        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="eu.domibus"/>
+        <property name="jtaDataSource" ref="dataSource"/>
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
                 <property name="showSql" value="false"/>
@@ -86,6 +84,16 @@
                 <property name="databasePlatform"
                           value="org.hibernate.dialect.H2Dialect"/>
             </bean>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.H2Dialect</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="transaction.factory_class">org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory</prop>
+                <prop key="hibernate.transaction.manager_lookup_class">com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup</prop>
+                <prop key="hibernate.hbm2ddl.auto">create-drop</prop>
+                <prop key="hibernate.hbm2ddl.import_files">dataset/database/quartz.sql</prop>
+            </props>
         </property>
     </bean>
 
