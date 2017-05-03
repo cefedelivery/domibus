@@ -20,10 +20,6 @@ import java.util.Date;
 })
 public class SignalMessageLog extends MessageLog {
 
-    @ManyToOne
-    @JoinColumn(name = "MESSAGE_ID", referencedColumnName = "MESSAGE_ID", updatable = false, insertable = false)
-    protected MessageInfo messageInfo;
-
     public SignalMessageLog() {
         setMessageType(MessageType.SIGNAL_MESSAGE);
         setReceived(new Date());

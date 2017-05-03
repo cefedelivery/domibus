@@ -32,6 +32,7 @@ import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
 import {MessageLogComponent} from "./messagelog/messagelog.component";
 import {TruststoreComponent} from './truststore/truststore.component';
 import {PmodeUploadComponent} from './pmode-upload/pmode-upload.component';
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -59,6 +60,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     FormsModule,
     HttpModule,
     NgxDatatableModule,

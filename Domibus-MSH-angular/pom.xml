@@ -18,10 +18,6 @@
     <frontend-maven-plugin.version>1.3</frontend-maven-plugin.version>
     <node.version>v6.9.4</node.version>
     <npm.version>4.1.1</npm.version>
-    <angular-material2.version>@angular/material@2.0.0-beta.2</angular-material2.version>
-    <hammerjs.version>hammerjs@2.0.8</hammerjs.version>
-    <ngx-datatable.version>@swimlane/ngx-datatable@6.3.0</ngx-datatable.version>
-    <md2.version>md2@0.0.16</md2.version>
   </properties>
 
   <build>
@@ -52,44 +48,6 @@
                 <arguments>install --unsafe-perm</arguments>
               </configuration>
             </execution>
-
-            <execution>
-              <id>angular material2 install</id>
-              <goals>
-                <goal>npm</goal>
-              </goals>
-              <configuration>
-                <arguments>install ${angular-material2.version}</arguments>
-              </configuration>
-            </execution>
-            <execution>
-              <id>HammerJS install</id>
-              <goals>
-                <goal>npm</goal>
-              </goals>
-              <configuration>
-                <arguments>install ${hammerjs.version}</arguments>
-              </configuration>
-            </execution>
-            <execution>
-              <id>ngx-datatable install</id>
-              <goals>
-                <goal>npm</goal>
-              </goals>
-              <configuration>
-                <arguments>install ${ngx-datatable.version}</arguments>
-              </configuration>
-            </execution>
-            <execution>
-              <id>md2 install</id>
-              <goals>
-                <goal>npm</goal>
-              </goals>
-              <configuration>
-                <arguments>install ${md2.version}</arguments>
-              </configuration>
-            </execution>
-
           </executions>
         </plugin>
       </plugins>

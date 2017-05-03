@@ -7,11 +7,15 @@
 }
 
 .inputField {
-  width:350px;
+  width:100%;
 }
 
 .filterTable {
   width:100%;
+
+}
+.filterTable td {
+  width :30%
 }
 
 .dateTimeTitle {

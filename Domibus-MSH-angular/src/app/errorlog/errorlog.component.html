@@ -3,24 +3,55 @@
   <div class="selectionCriteria">
     <md-card style="margin:0;padding:10px;">
       <md-card-content>
-        <h2 style="margin:0;">Selection criteria</h2>
+        <p class="domibusTextHeadingBold">Error Log</p>
 
         <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
           <table class="filterTable">
             <tr>
               <td>
                 <md-input-container class="inputField">
-                  <input mdInput placeholder="Signal Message Id" name="errorSignalMessageId" [(ngModel)]="filter.errorSignalMessageId" #errorSignalMessageId="ngModel">
+                  <input mdInput placeholder="Signal Message Id" name="errorSignalMessageId"
+                         [(ngModel)]="filter.errorSignalMessageId" #errorSignalMessageId="ngModel">
                 </md-input-container>
               </td>
               <td>
-                <md-select placeholder="MSH Role" [(ngModel)]="filter.mshRole" name="mshRole">
-                  <md-option [value]="''">
-                  </md-option>
-                  <md-option *ngFor="let role of mshRoles" [value]="role">
-                    {{role}}
-                  </md-option>
-                </md-select>
+                <md-input-container class="inputField">
+                  <input mdInput placeholder="Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId"
+                         #messageInErrorId="ngModel">
+                </md-input-container>
+              </td>
+              <td>
+                <md-input-container class="inputField">
+                  <input mdInput placeholder="Error detail" name="ErrorDetail" [(ngModel)]="filter.errorDetail"
+                         #errorDetail="ngModel">
+                </md-input-container>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>
+                <table>
+                  <tr>
+                    <td>
+                      <md-select placeholder="MSH Role" [(ngModel)]="filter.mshRole" name="mshRole">
+                        <md-option [value]="''">
+                        </md-option>
+                        <md-option *ngFor="let role of mshRoles" [value]="role">
+                          {{role}}
+                        </md-option>
+                      </md-select>
+                    </td>
+                    <td>
+                      <md-select placeholder="Error Code" [(ngModel)]="filter.errorCode" name="errorCode">
+                        <md-option [value]="''">
+                        </md-option>
+                        <md-option *ngFor="let code of errorCodes" [value]="code">
+                          {{code}}
+                        </md-option>
+                      </md-select>
+                    </td>
+                  </tr>
+                </table>
               </td>
               <td>
                 <table>
@@ -48,22 +79,6 @@
                   </tr>
                 </table>
               </td>
-            </tr>
-            <tr>
-              <td>
-                <md-input-container class="inputField">
-                  <input mdInput placeholder="Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId" #messageInErrorId="ngModel">
-                </md-input-container>
-              </td>
-              <td>
-                <md-select placeholder="Error Code" [(ngModel)]="filter.errorCode" name="errorCode">
-                  <md-option [value]="''">
-                  </md-option>
-                  <md-option *ngFor="let code of errorCodes" [value]="code">
-                    {{code}}
-                  </md-option>
-                </md-select>
-              </td>
               <td>
                 <table>
                   <tr>
@@ -90,25 +105,15 @@
                   </tr>
                 </table>
               </td>
-            </tr>
-            <tr>
-              <td>
-                <md-input-container class="inputField">
-                  <input mdInput placeholder="Error detail" name="ErrorDetail" [(ngModel)]="filter.errorDetail" #errorDetail="ngModel">
-                </md-input-container>
-              </td>
-              <td></td>
-            </tr>
-            <tr>
               <td>
                 <button md-raised-button color="primary" [disabled]="!filterForm.form.valid">
                   <md-icon>search</md-icon>
                   <span>Search</span>
                 </button>
               </td>
-              <td></td>
             </tr>
           </table>
+
         </form>
 
       </md-card-content>
@@ -141,61 +146,61 @@
     [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
     (page)='onPage($event)'
     (sort)="onSort($event)">
-    <ngx-datatable-column name="ErrorSignalMessageId" >
-      <template let-column="column">
+    <ngx-datatable-column name="ErrorSignalMessageId">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template >
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column name="MshRole"  [width]="50">
-      <template let-column="column">
+    <ngx-datatable-column name="MshRole" [width]="50">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column name="MessageInErrorId" >
-      <template let-column="column">
+    <ngx-datatable-column name="MessageInErrorId">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column name="ErrorCode"  [width]="50">
-      <template let-column="column">
+    <ngx-datatable-column name="ErrorCode" [width]="50">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <ngx-datatable-column name="ErrorDetail" [width]="250">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column name="Timestamp"  [width]="180">
-      <template let-column="column">
+    <ngx-datatable-column name="Timestamp" [width]="180">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value | date: dateFormat}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
     <ngx-datatable-column name="Notified" [width]="180">
-      <template let-column="column">
+      <ng-template let-column="column">
         {{column.name}}
-      </template>
-      <template let-value="value" ngx-datatable-cell-template>
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
         <span class="text-select">{{value | date: dateFormat}}</span>
-      </template>
+      </ng-template>
     </ngx-datatable-column>
   </ngx-datatable>
 
