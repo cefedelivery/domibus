@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="1215px" height="1428px" viewBox="0 0 1215 1428" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>Domibus_logo_icon_2</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#00A3F2" offset="0%"></stop>
+            <stop stop-color="#007AB5" offset="100%"></stop>
+        </linearGradient>
+        <path d="M0,1176.56366 C0,1193.12908 13.4346393,1206.55801 29.9903675,1206.55801 L411.249349,1206.55801 C783.413017,1206.55801 1026.424,982.240182 1026.424,601.579627 C1026.424,220.919072 783.413017,0 411.249349,0 L29.9903675,0 C13.4271449,0 0,13.4339463 0,29.9943485 L0,1176.56366 Z" id="path-2"></path>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="filter-3">
+            <feOffset dx="0" dy="20" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="15" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.2 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <linearGradient x1="50%" y1="75.6563983%" x2="50%" y2="100%" id="linearGradient-4">
+            <stop stop-color="#FFFFFF" offset="0%"></stop>
+            <stop stop-color="#E8E8E8" offset="100%"></stop>
+        </linearGradient>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="filter-5">
+            <feOffset dx="0" dy="5" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feColorMatrix values="0 0 0 0 0.771710247   0 0 0 0 0.771710247   0 0 0 0 0.771710247  0 0 0 1 0" type="matrix" in="shadowOffsetOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-6">
+            <stop stop-color="#FFFFFF" offset="0%"></stop>
+            <stop stop-color="#E8E8E8" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Logo-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Domibus_logo_icon_2">
+            <g id="Group-2" transform="translate(94.000000, 111.000000)">
+                <g id="D">
+                    <use fill="black" fill-opacity="1" filter="url(#filter-3)" xlink:href="#path-2"></use>
+                    <use fill="url(#linearGradient-1)" fill-rule="evenodd" xlink:href="#path-2"></use>
+                </g>
+                <g id="Group-7" filter="url(#filter-5)" transform="translate(252.783728, 351.147271)" fill="url(#linearGradient-6)">
+                    <path d="M486.112782,389.677453 L486.112782,578.456636 C486.112782,583.977097 482.429521,585.920073 477.867499,582.783683 L317.216769,472.336306 L9.99987857,472.336306 C4.47709813,472.336306 0,467.85039 0,462.334579 L0,10.0017275 C0,4.47792593 4.48291327,-1.70530257e-13 9.99987857,-1.70530257e-13 L476.112903,-1.70530257e-13 C481.635684,-1.70530257e-13 486.112782,4.4859166 486.112782,10.0017275 L486.112782,389.677453 Z M303.303776,197.131806 C303.303776,163.584273 276.157359,136.439753 242.611723,136.439753 C209.066088,136.439753 181.91967,163.58617 181.91967,197.131806 C181.91967,219.358373 194.484822,237.968074 212.265697,248.519008 L212.265697,348.861937 C212.265697,365.635704 225.837957,379.207964 242.611723,379.207964 C259.385489,379.207964 272.95775,365.635704 272.95775,348.861937 L272.95775,248.519008 C290.738624,237.968074 303.303776,219.358373 303.303776,197.131806 Z" id="Combined-Shape"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
