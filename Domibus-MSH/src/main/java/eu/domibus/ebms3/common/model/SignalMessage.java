@@ -23,7 +23,7 @@ import java.util.Set;
  * @since 3.0
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SignalMessage", propOrder = {"messageInfo", "partyInfo", "messageProperties", "pullRequest", "receipt", "error", "any"})
+@XmlType(name = "SignalMessage", propOrder = {"messageInfo", "pullRequest", "receipt", "error", "any"})
 @Entity
 @Table(name = "TB_SIGNAL_MESSAGE")
 @NamedQueries({
@@ -37,12 +37,6 @@ public class SignalMessage extends AbstractBaseEntity {
     @XmlElement(name = "MessageInfo", required = true)
     @OneToOne(cascade = CascadeType.ALL)
     protected MessageInfo messageInfo;
-    @XmlElement(name = "PartyInfo", required = true)
-    @Embedded
-    protected PartyInfo partyInfo;
-    @XmlElement(name = "MessageProperties")
-    @Embedded
-    protected MessageProperties messageProperties;
     @XmlElement(name = "PullRequest")
     @Embedded
     protected PullRequest pullRequest;
