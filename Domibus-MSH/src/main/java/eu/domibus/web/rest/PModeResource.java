@@ -37,14 +37,22 @@ public class PModeResource {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeResource.class);
 
-    @Autowired
     private PModeProvider pModeProvider;
+
+    @Autowired
+    public PModeResource(PModeProvider pModeProvider) {
+        this.pModeProvider = pModeProvider;
+    }
 
     @RequestMapping(method = RequestMethod.GET, produces = "application/xml")
     public ResponseEntity<? extends Resource> downloadPmodes() throws IOException, JAXBException {
 
         final byte[] rawConfiguration = pModeProvider.getRawConfiguration();
-        ByteArrayResource resource = new ByteArrayResource(rawConfiguration);
+        ByteArrayResource resource = new ByteArrayResource(new byte[0]);
+        if (rawConfiguration != null) {
+            resource = new ByteArrayResource(rawConfiguration);
+        }
+
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
