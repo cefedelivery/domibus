@@ -29,6 +29,12 @@ public class SecurityDefaultService implements SecurityService {
 
     @Override
     public void checkMessageAuthorization(String messageId) throws AuthenticationException, DomibusServiceException {
+        /* unsecured login allowed */
+        if (authUtils.isUnsecureLoginAllowed()) {
+            LOG.debug("Unsecured login is allowed");
+            return;
+        }
+
         final String finalRecipient = userMessageService.getFinalRecipient(messageId);
         if (StringUtils.isEmpty(finalRecipient)) {
             throw new DomibusServiceException(DomibusErrorCode.DOM_001, "Couldn't get the finalRecipient for message with ID [" + messageId + "]");
@@ -38,6 +44,12 @@ public class SecurityDefaultService implements SecurityService {
 
     @Override
     public void checkAuthorization(String finalRecipient) throws AuthenticationException, DomibusServiceException {
+        /* unsecured login allowed */
+        if (authUtils.isUnsecureLoginAllowed()) {
+            LOG.debug("Unsecured login is allowed");
+            return;
+        }
+
         final String originalUserFromSecurityContext = authUtils.getOriginalUserFromSecurityContext();
         if (StringUtils.isEmpty(originalUserFromSecurityContext)) {
             LOG.debug("finalRecipient from the security context is empty, user has permission to access finalRecipient [{}]", finalRecipient);
