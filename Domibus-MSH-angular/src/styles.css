@@ -37,6 +37,13 @@ html, body {
   font-size: 38pt;
 }
 
+.domibusTextHeadingBold {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 38pt;
+  margin:0;
+  font-weight: bold
+}
+
 .domibusTextSmall {
   font-family: 'Open Sans', sans-serif;
   font-size: 13pt;
