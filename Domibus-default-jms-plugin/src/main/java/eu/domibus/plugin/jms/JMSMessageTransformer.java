@@ -66,6 +66,10 @@ public class JMSMessageTransformer
 
     private Properties properties;
 
+    public JMSMessageTransformer(){
+        properties=new Properties();
+    }
+
     public JMSMessageTransformer(String defaultProperties) throws IOException {
         properties=new Properties();
         properties.load(new FileReader(defaultProperties));
