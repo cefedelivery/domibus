@@ -1,6 +1,7 @@
 Domibus 3.2.5
 - Dynamic discovery: integrate Domibus with OASIS compliant SMP
 - Added new security policy file, eSensPolicy.v2.0_CA.xml to support embedded public certificate
+- Fixed the JMS property names used in the default-jms-plugin
 Domibus 3.2.4
 - Default WS plugin: backwards compatibility fix for Domibus >3.2.2
 - Fix error when downloading a message with an empty payload
