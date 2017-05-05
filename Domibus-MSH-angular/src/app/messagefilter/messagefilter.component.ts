@@ -16,6 +16,7 @@ export class MessageFilterComponent {
 
   editing = {};
   rows = [];
+  selected = [];
 
   enableCancel = false;
   enableSave = false;
@@ -23,6 +24,15 @@ export class MessageFilterComponent {
 
   enableMoveUp = false;
   enableMoveDown = false;
+
+  ROW_LIMITS = [
+    {key: '10', value: 10},
+    {key: '25', value: 25},
+    {key: '50', value: 50},
+    {key: '100', value: 100}
+  ];
+  rowLimits: Array<any> = this.ROW_LIMITS;
+  pageSize: number = this.ROW_LIMITS[0].value;
 
   constructor() {
     this.rows.push({
@@ -89,37 +99,27 @@ export class MessageFilterComponent {
 
   }
 
-
-  /*plugins: Array<String>;
-
-  enableCancel = false;
-  enableSave = false;
-  enableDelete = false;
-
-  constructor(private http: Http, private alertService: AlertService) {
-
+  changeRowLimits(event) {
+    let newPageLimit = event.value;
+    console.log('New page limit:', newPageLimit);
+    this.page(newPageLimit);
   }
 
-  buttonNew() {
-    this.enableCancel = true;
-    this.enableSave = true;
-    this.enableDelete = false;
+  page(pageSize) {
+    this.pageSize = pageSize;
   }
 
-  buttonCancel() {
-    this.enableCancel = false;
-    this.enableSave = false;
-    this.enableDelete = false;
+  onSelect({ selected }) {
+    console.log('Select Event', selected, this.selected);
+
+    this.selected.splice(0, this.selected.length);
+    this.selected.push(...selected);
+    this.enableMoveDown = true;
+    this.enableMoveUp = true;
   }
 
-  buttonSave() {
-    this.enableCancel = false;
-    this.enableSave = false;
-    this.enableDelete = false;
+  onActivate(event) {
+    console.log('Activate Event', event);
   }
-
-  buttonDelete() {
-    this.enableDelete = false;
-  }*/
 
 }

@@ -7,11 +7,15 @@
           #mydatatable
           class="material"
           [headerHeight]="50"
-          [limit]="5"
+          [limit]="pageSize"
           [columnMode]="'force'"
           [footerHeight]="50"
           [rowHeight]="'auto'"
-          [rows]="rows">
+          [rows]="rows"
+          [selected]="selected"
+          [selectionType]="'multiClick'"
+          (activate)="onActivate($event)"
+          (select)='onSelect($event)'>
           <ngx-datatable-column name="Plugin">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
@@ -115,6 +119,13 @@
             </td>
           </tr>
         </table>
+        <div class="rowsDiv">
+          <md-select placeholder="Rows" [(ngModel)]="pageSize" name="pageSize" (change)="changeRowLimits($event)">
+            <md-option *ngFor="let rowLimit of rowLimits" [value]="rowLimit.value">
+              {{rowLimit.key}}
+            </md-option>
+          </md-select>
+        </div>
         <div> </div>
         <table class="buttonsRow">
           <tr>
