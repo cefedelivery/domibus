@@ -31,7 +31,7 @@ public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
     }
 
     public String filterSignalMessageLogQuery(String column, boolean asc, HashMap<String, Object> filters) {
-        String query = "select new eu.domibus.common.model.logging.MessageLogInfo(log, partyFrom.value, partyTo.value, propsFrom.value, propsTo.value, info.refToMessageId) from SignalMessageLog log, " +
+        String query = "select distinct new eu.domibus.common.model.logging.MessageLogInfo(log, partyFrom.value, partyTo.value, propsFrom.value, propsTo.value, info.refToMessageId) from SignalMessageLog log, " +
                 "Messaging messaging inner join messaging.signalMessage signal " +
                 "inner join messaging.userMessage message " +
                 "left join message.messageInfo info " +
@@ -39,9 +39,8 @@ public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
                 "left join message.messageProperties.property propsTo " +
                 "left join message.partyInfo.from.partyId partyFrom " +
                 "left join message.partyInfo.to.partyId partyTo " +
-                "where message.messageInfo = info and propsFrom.name = 'originalSender'" +
-                "and propsTo.name = 'finalRecipient' " +
-                "and log.messageId = info.messageId ";
+                "where propsFrom.name = 'originalSender'" +
+                "and propsTo.name = 'finalRecipient' " ;
         StringBuilder result = filterQuery(query, column, asc, filters);
         return result.toString();
     }

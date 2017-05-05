@@ -1,5 +1,8 @@
 package eu.domibus.common.model.logging;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 /**
  * @author Tiago Miguel
  * @since 3.3
@@ -104,5 +107,39 @@ public class MessageLogInfo {
 
     public void setRefToMessageId(String refToMessageId) {
         this.refToMessageId = refToMessageId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MessageLogInfo that = (MessageLogInfo) o;
+
+        return new EqualsBuilder()
+                .append(userMessageLog, that.userMessageLog)
+                .append(signalMessageLog, that.signalMessageLog)
+                .append(conversationId, that.conversationId)
+                .append(fromPartyId, that.fromPartyId)
+                .append(toPartyId, that.toPartyId)
+                .append(originalSender, that.originalSender)
+                .append(finalRecipient, that.finalRecipient)
+                .append(refToMessageId, that.refToMessageId)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(userMessageLog)
+                .append(signalMessageLog)
+                .append(conversationId)
+                .append(fromPartyId)
+                .append(toPartyId)
+                .append(originalSender)
+                .append(finalRecipient)
+                .append(refToMessageId)
+                .toHashCode();
     }
 }
