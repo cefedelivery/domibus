@@ -7,7 +7,15 @@
 }
 
 .inputField {
-  width:100%;
+  width:33%;
+}
+
+.optionField {
+  width:15%;
+}
+
+.dateField {
+  width:15%;
 }
 
 .filterTable {
@@ -15,7 +23,7 @@
 
 }
 .filterTable td {
-  width :30%
+  width :33%
 }
 
 .dateTimeTitle {
