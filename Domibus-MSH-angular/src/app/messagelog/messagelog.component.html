@@ -304,6 +304,20 @@
         <span class="text-select">{{value}}</span>
       </ng-template>
     </ngx-datatable-column>
+
+    <!--Resend-->
+    <ngx-datatable-column name="Resend" [canAutoResize]="true">
+      <ng-template let-column="column">
+        {{column.name}}
+      </ng-template>
+      <ng-template let-value="value" ngx-datatable-cell-template>
+        <!--<span class="text-select">{{value}}</span>-->
+        <!--<ng-if>-->
+          <button md-raised-button color="primary">Resend</button>
+        <!--</ng-if>-->
+
+      </ng-template>
+    </ngx-datatable-column>
   </ngx-datatable>
 
 </div>
