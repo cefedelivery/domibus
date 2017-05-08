@@ -10,18 +10,15 @@ import eu.domibus.api.jms.JmsMessage;
 public class DispatchMessageCreator {
 
     private final String messageId;
-    private final String endpoint;
 
-    public DispatchMessageCreator(final String messageId, final String endpoint) {
+    public DispatchMessageCreator(final String messageId) {
         this.messageId = messageId;
-        this.endpoint = endpoint;
     }
 
     public JmsMessage createMessage() {
         return JMSMessageBuilder
                 .create()
                 .property(MessageConstants.MESSAGE_ID, messageId)
-                .property(MessageConstants.ENDPOINT, endpoint)
                 .build();
     }
 }

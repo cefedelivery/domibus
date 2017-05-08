@@ -50,6 +50,7 @@
         <dozer.version>5.5.1</dozer.version>
         <jackson.version>2.8.6</jackson.version>
         <domibus-ext-services-api.version>1.0-SNAPSHOT</domibus-ext-services-api.version>
+        <commons-test.version>4.2</commons-test.version>
 
         <!-- Sonar properties -->
         <sonar.binaries>target/classes</sonar.binaries>
@@ -414,6 +415,12 @@
                 <groupId>org.jmockit</groupId>
                 <artifactId>jmockit</artifactId>
                 <version>1.22</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.digit.commons</groupId>
+                <artifactId>commons-test</artifactId>
+                <version>${commons-test.version}</version>
                 <scope>test</scope>
             </dependency>
             <!-- End Test dependencies -->

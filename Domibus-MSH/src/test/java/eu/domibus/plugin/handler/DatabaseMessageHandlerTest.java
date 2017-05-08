@@ -1,6 +1,7 @@
 package eu.domibus.plugin.handler;
 
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.message.UserMessageService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MSHRole;
@@ -116,6 +117,9 @@ public class DatabaseMessageHandlerTest {
 
     @Injectable
     AuthUtils authUtils;
+
+    @Injectable
+    private UserMessageService userMessageService;
 
 
     protected Property createProperty(String name, String value, String type) {

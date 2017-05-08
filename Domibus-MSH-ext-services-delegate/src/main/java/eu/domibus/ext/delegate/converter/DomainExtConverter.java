@@ -8,7 +8,7 @@ import java.util.List;
  * @author migueti, Cosmin Baciu
  * @since 3.3
  */
-public interface DomibusDomainConverter {
+public interface DomainExtConverter {
 
     <T, U> T convert(U source, Class<T> typeOfT);
 

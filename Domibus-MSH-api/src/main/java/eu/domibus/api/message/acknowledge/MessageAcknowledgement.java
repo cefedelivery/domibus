@@ -1,5 +1,8 @@
 package eu.domibus.api.message.acknowledge;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import java.sql.Timestamp;
 import java.util.Map;
 
@@ -108,5 +111,37 @@ public class MessageAcknowledgement {
 
     public void setCreateDate(Timestamp createDate) {
         this.createDate = createDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MessageAcknowledgement that = (MessageAcknowledgement) o;
+
+        return new EqualsBuilder()
+                .append(messageId, that.messageId)
+                .append(from, that.from)
+                .append(to, that.to)
+                .append(properties, that.properties)
+                .append(acknowledgeDate, that.acknowledgeDate)
+                .append(createDate, that.createDate)
+                .append(createUser, that.createUser)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(messageId)
+                .append(from)
+                .append(to)
+                .append(properties)
+                .append(acknowledgeDate)
+                .append(createDate)
+                .append(createUser)
+                .toHashCode();
     }
 }

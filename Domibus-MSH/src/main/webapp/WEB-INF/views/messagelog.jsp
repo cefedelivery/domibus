@@ -179,6 +179,12 @@
         <c:url value="${order}" var="downloaded"><c:param name="orderby" value="downloaded"/></c:url>
         <th>Downloaded <a href="<c:url value="${downloaded}"><c:param name="asc" value = "true"/></c:url>">&#9650;</a> \ <a
                 href="<c:url value="${downloaded}"><c:param name="asc" value = "false"/></c:url>">&#9660;</a></th>
+        <c:url value="${order}" var="failed"><c:param name="orderby" value="failed"/></c:url>
+        <th>Failed <a href="<c:url value="${failed}"><c:param name="asc" value = "true"/></c:url>">&#9650;</a> \ <a
+                href="<c:url value="${failed}"><c:param name="asc" value = "false"/></c:url>">&#9660;</a></th>
+        <c:url value="${order}" var="restored"><c:param name="orderby" value="restored"/></c:url>
+        <th>Restored <a href="<c:url value="${restored}"><c:param name="asc" value = "true"/></c:url>">&#9650;</a> \ <a
+                href="<c:url value="${restored}"><c:param name="asc" value = "false"/></c:url>">&#9660;</a></th>
         <c:url value="${order}" var="sendAttempts"><c:param name="orderby" value="sendAttempts"/></c:url>
         <th>FailedSendAttempts <a href="<c:url value="${sendAttempts}"><c:param name="asc" value = "true"/></c:url>">
             &#9650;</a> \ <a href="<c:url value="${sendAttempts}"><c:param name="asc" value = "false"/></c:url>">
@@ -201,6 +207,8 @@
             <td>${o.deleted}</td>
             <td>${o.received}</td>
             <td>${o.downloaded}</td>
+            <td>${o.failed}</td>
+            <td>${o.restored}</td>
             <td>${o.sendAttempts}</td>
             <td>${o.sendAttemptsMax}</td>
             <td>${o.nextAttempt}</td>
