@@ -15,7 +15,7 @@ import java.util.List;
  * @since 3.3
  */
 @RestController
-@RequestMapping(value = "/ext/messageAcknowledgments")
+@RequestMapping(value = "/ext/messages/acknowledgments")
 public class MessageAcknowledgementResource {
 
     @Autowired
@@ -51,9 +51,9 @@ public class MessageAcknowledgementResource {
      * @param messageId The message id for which message acknowledgments are retrieved
      * @return All acknowledgments registered for a specific message
      */
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(path = "/{messageId:.+}", method = RequestMethod.GET)
     @ResponseBody
-    public List<MessageAcknowledgementDTO> getAcknowledgedMessages(@RequestParam(value = "messageId") String messageId) throws MessageAcknowledgeException {
+    public List<MessageAcknowledgementDTO> getAcknowledgedMessages(@PathVariable(value = "messageId") String messageId) throws MessageAcknowledgeException {
         return messageAcknowledgeService.getAcknowledgedMessages(messageId);
     }
 

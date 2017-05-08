@@ -10,8 +10,8 @@ public class DelayedDispatchMessageCreator extends DispatchMessageCreator {
 
     private final long delay;
 
-    public DelayedDispatchMessageCreator(final String messageId, final String endpoint, final long delay) {
-        super(messageId, endpoint);
+    public DelayedDispatchMessageCreator(final String messageId, final long delay) {
+        super(messageId);
         this.delay = delay;
     }
 

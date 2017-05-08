@@ -1,16 +1,15 @@
 package eu.domibus.ebms3.sender;
 
-import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.message.UserMessageService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.messaging.DispatchMessageCreator;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.messaging.MessageConstants;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.BrowserCallback;
@@ -44,11 +43,11 @@ public class RetryService {
     private JmsOperations jmsOperations;
 
     @Autowired
-    JMSManager jmsManager;
-
-    @Autowired
     @Qualifier("sendMessageQueue")
     private Queue dispatchQueue;
+
+    @Autowired
+    UserMessageService userMessageService;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
@@ -76,7 +75,7 @@ public class RetryService {
                 }
             });
             for (final String messageId : messageIdsToSend) {
-                sendJmsMessage(messageId);
+                userMessageService.scheduleSending(messageId);
             }
         }
     }
@@ -85,7 +84,6 @@ public class RetryService {
      * Notifies send failure, updates the message status and deletes the payload (if required) for messages that failed to be sent and expired
      *
      * @param messageIdToPurge is the messageId of the expired message
-     *
      */
     private void purgeTimedoutMessage(final String messageIdToPurge) {
         final MessageLog userMessageLog = userMessageLogDao.findByMessageId(messageIdToPurge, MSHRole.SENDING);
@@ -101,9 +99,6 @@ public class RetryService {
         if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
             messagingDao.clearPayloadData(messageIdToPurge);
         }
-}
-
-    private void sendJmsMessage(final String messageId) {
-        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, userMessageLogDao.findEndpointForMessageId(messageId)).createMessage(), dispatchQueue);
     }
+
 }
