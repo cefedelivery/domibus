@@ -7,12 +7,12 @@ import javax.persistence.*;
 @Entity
 @Table(name = "TB_AUTHENTICATION_ENTRY")
 @NamedQueries({
-        @NamedQuery(name = "AuthenticationEntry.findByUsername", query = "select bae from AuthenticationEntry bae where bae.username=:USERNAME"),
-        @NamedQuery(name = "AuthenticationEntry.findByCertificateId", query = "select bae from AuthenticationEntry bae where bae.certificateId=:CERTIFICATE_ID"),
-        @NamedQuery(name = "AuthenticationEntry.getRolesForUsername", query = "select bae.authRoles from AuthenticationEntry bae where bae.username=:USERNAME"),
-        @NamedQuery(name = "AuthenticationEntry.getRolesForCertificateId", query = "select bae.authRoles from AuthenticationEntry bae where bae.certificateId=:CERTIFICATE_ID")})
+        @NamedQuery(name = "AuthenticationEntry.findByUsername", query = "select bae from AuthenticationEntity bae where bae.username=:USERNAME"),
+        @NamedQuery(name = "AuthenticationEntry.findByCertificateId", query = "select bae from AuthenticationEntity bae where bae.certificateId=:CERTIFICATE_ID"),
+        @NamedQuery(name = "AuthenticationEntry.getRolesForUsername", query = "select bae.authRoles from AuthenticationEntity bae where bae.username=:USERNAME"),
+        @NamedQuery(name = "AuthenticationEntry.getRolesForCertificateId", query = "select bae.authRoles from AuthenticationEntity bae where bae.certificateId=:CERTIFICATE_ID")})
 
-public class AuthenticationEntry extends AbstractBaseEntity {
+public class AuthenticationEntity extends AbstractBaseEntity {
 
     @Column(name = "CERTIFICATE_ID")
     private String certificateId;

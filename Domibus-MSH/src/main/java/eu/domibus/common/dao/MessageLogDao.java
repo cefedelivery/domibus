@@ -69,6 +69,9 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
             case DOWNLOADED:
                 messageLog.setDownloaded(new Date());
                 break;
+            case SEND_FAILURE:
+                messageLog.setFailed(new Date());
+                break;
             default:
         }
         super.update(messageLog);

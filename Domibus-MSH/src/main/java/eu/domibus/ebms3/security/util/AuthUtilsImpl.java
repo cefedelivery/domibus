@@ -28,20 +28,21 @@ public class AuthUtilsImpl implements AuthUtils {
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
 
-    /* Returns the original user passed via the security context OR
-    * null when the user has the role ROLE_ADMIN or unsecure authorizations is allowed
-    * */
+    /**
+     * Returns the original user passed via the security context OR
+     * null value when the user has the role ROLE_ADMIN or unsecured authorization is allowed
+     */
     @Override
     public String getOriginalUserFromSecurityContext() throws AuthenticationException {
-
         /* unsecured login allowed */
         if (isUnsecureLoginAllowed()) {
+            LOG.debug("Unsecured login is allowed");
             return null;
         }
 
         if (SecurityContextHolder.getContext() == null || SecurityContextHolder.getContext().getAuthentication() == null) {
-            LOG.error("Authentication is missing from the security context. Unsecure login is not allowed");
-            throw new AuthenticationException("Authentication is missing from the security context. Unsecure login is not allowed");
+            LOG.error("Authentication is missing from the security context. Unsecured login is not allowed");
+            throw new AuthenticationException("Authentication is missing from the security context. Unsecured login is not allowed");
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -49,7 +50,9 @@ public class AuthUtilsImpl implements AuthUtils {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         if (!authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))) {
             originalUser = (String) authentication.getPrincipal();
-            LOG.debug("Security context OriginalUser is " + originalUser);
+            LOG.debug("User [{}] has user role and finalRecipient [{}]", getAuthenticatedUser(), originalUser);
+        } else {
+            LOG.debug("User [{}] has admin role", getAuthenticatedUser());
         }
 
         return originalUser;

@@ -2,6 +2,7 @@ package eu.domibus.ext.delegate.converter;
 
 import org.dozer.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -12,9 +13,10 @@ import java.util.List;
  * @since 3.3
  */
 @Component
-public class DomibusDomainDefaultConverter implements DomibusDomainConverter {
+public class DomainExtDefaultConverter implements DomainExtConverter {
 
     @Autowired
+    @Qualifier("domainExtConverter")
     Mapper mapper;
 
     @Override

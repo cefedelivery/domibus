@@ -37,6 +37,14 @@
 
     <cache:annotation-driven/>
 
+    <bean id="domainCoreConverter" class="org.dozer.DozerBeanMapper">
+        <property name="mappingFiles">
+            <list>
+                <value>config/DomainCoreBeanMapping.xml</value>
+            </list>
+        </property>
+    </bean>
+
     <!-- Security Policy caching -->
     <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
         <property name="cacheManager" ref="ehcache"/>

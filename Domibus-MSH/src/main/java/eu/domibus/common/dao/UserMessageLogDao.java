@@ -7,6 +7,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogInfoFilter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -48,6 +49,36 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         TypedQuery<String> query = this.em.createNamedQuery("UserMessageLog.findTimedoutMessages", String.class);
         query.setParameter("TIMESTAMP_WITH_TOLERANCE", new Date(System.currentTimeMillis() - timeoutTolerance));
 
+        return query.getResultList();
+    }
+
+    public List<String> findFailedMessages(String finalRecipient) {
+        return findFailedMessages(finalRecipient, null, null);
+    }
+
+    public List<String> findFailedMessages(String finalRecipient, Date failedStartDate, Date failedEndDate) {
+        String queryString = "select distinct m.messageInfo.messageId from UserMessage m " +
+                "inner join m.messageProperties.property p, UserMessageLog ml " +
+                "where ml.messageId = m.messageInfo.messageId and ml.messageStatus = 'SEND_FAILURE' and ml.messageType = 'USER_MESSAGE' and ml.deleted is null ";
+        if (StringUtils.isNotEmpty(finalRecipient)) {
+            queryString += " and p.name = 'finalRecipient' and p.value = :FINAL_RECIPIENT";
+        }
+        if (failedStartDate != null) {
+            queryString += " and ml.failed >= :START_DATE";
+        }
+        if (failedEndDate != null) {
+            queryString += " and ml.failed <= :END_DATE";
+        }
+        TypedQuery<String> query = this.em.createQuery(queryString, String.class);
+        if (StringUtils.isNotEmpty(finalRecipient)) {
+            query.setParameter("FINAL_RECIPIENT", finalRecipient);
+        }
+        if (failedStartDate != null) {
+            query.setParameter("START_DATE", failedStartDate);
+        }
+        if (failedEndDate != null) {
+            query.setParameter("END_DATE", failedEndDate);
+        }
         return query.getResultList();
     }
 

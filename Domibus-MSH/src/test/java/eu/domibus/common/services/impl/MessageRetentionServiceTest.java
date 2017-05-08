@@ -1,14 +1,9 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.util.CollectionUtil;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.api.security.AuthUtils;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -43,22 +38,7 @@ public class MessageRetentionServiceTest {
     private UserMessageLogDao userMessageLogDao;
 
     @Injectable
-    private MessagingDao messagingDao;
-
-    @Injectable
-    private SignalMessageDao signalMessageDao;
-
-    @Injectable
-    private SignalMessageLogDao signalMessageLogDao;
-
-    @Injectable
-    private BackendNotificationService backendNotificationService;
-
-    @Injectable
-    private JMSManager jmsManager;
-
-    @Injectable
-    AuthUtils authUtils;
+    private UserMessageService userMessageService;
 
     @Tested
     MessageRetentionService messageRetentionService;

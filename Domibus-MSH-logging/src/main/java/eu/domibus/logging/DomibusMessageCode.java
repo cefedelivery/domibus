@@ -80,7 +80,7 @@ public enum DomibusMessageCode implements MessageCode {
     SEC_CERTIFICATE_EXPIRED("SEC-008", "Certificate is not valid at the current date [{}]. Certificate valid from [{}] to [{}]"),
     SEC_CERTIFICATE_NOT_YET_VALID("SEC-009", "Certificate is not yet valid at the current date [{}]. Certificate valid from [{}] to [{}]"),
     SEC_NO_SECURITY_POLICY_USED("SEC-010", "No security policy (intended for testing alone) is used. Security certificate validations will be bypassed!"),
-    SEC_UNAUTHORIZED_MESSAGE_ACCESS("SEC-011", "User [{}] is trying to access a message having as final recipient: [{}]");
+    SEC_UNAUTHORIZED_MESSAGE_ACCESS("SEC-011", "User [{}] is trying to access a message having final recipient: [{}]");
 
     String code;
     String message;

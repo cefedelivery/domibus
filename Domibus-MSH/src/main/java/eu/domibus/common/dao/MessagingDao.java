@@ -81,5 +81,4 @@ public class MessagingDao extends BasicDao<Messaging> {
         }
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DATA_CLEARED, messageId);
     }
-
 }
