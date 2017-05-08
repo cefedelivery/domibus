@@ -3,6 +3,8 @@ import {Http, URLSearchParams, Response} from "@angular/http";
 import {MessageLogResult} from "./messagelogresult";
 import {Observable} from "rxjs";
 import {AlertService} from "../alert/alert.service";
+import {MessagelogDialogComponent} from "app/messagelog/messagelog-dialog/messagelog-dialog.component";
+import {MdDialog} from "@angular/material";
 
 @Component({
   moduleId: module.id,
@@ -12,6 +14,12 @@ import {AlertService} from "../alert/alert.service";
 })
 
 export class MessageLogComponent {
+
+  static readonly RESEND_URL: string = 'rest/';
+  static readonly MESSAGE_LOG_URL: string = 'rest/messagelog';
+
+  selected = [];
+
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
   timestampFromMaxDate: Date = new Date();
@@ -46,7 +54,7 @@ export class MessageLogComponent {
   msgStatus: Array<String>;
   notifStatus: Array<String>;
 
-  constructor(private http: Http, private alertService: AlertService) {
+  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   ngOnInit() {
@@ -60,63 +68,63 @@ export class MessageLogComponent {
     params.set('orderBy', orderBy);
 
     //filters
-    if(this.filter.messageId) {
+    if (this.filter.messageId) {
       params.set('messageId', this.filter.messageId);
     }
 
-    if(this.filter.mshRole) {
+    if (this.filter.mshRole) {
       params.set('mshRole', this.filter.mshRole);
     }
 
-    if(this.filter.conversationId) {
+    if (this.filter.conversationId) {
       params.set('conversationId', this.filter.conversationId);
     }
 
-    if(this.filter.messageType) {
+    if (this.filter.messageType) {
       params.set('messageType', this.filter.messageType);
     }
 
-    if(this.filter.messageStatus) {
+    if (this.filter.messageStatus) {
       params.set('messageStatus', this.filter.messageStatus);
     }
 
-    if(this.filter.notificationStatus) {
+    if (this.filter.notificationStatus) {
       params.set('notificationStatus', this.filter.notificationStatus);
     }
 
-    if(this.filter.fromPartyId) {
+    if (this.filter.fromPartyId) {
       params.set('fromPartyId', this.filter.fromPartyId);
     }
 
-    if(this.filter.toPartyId) {
+    if (this.filter.toPartyId) {
       params.set('toPartyId', this.filter.toPartyId);
     }
 
-    if(this.filter.originalSender) {
+    if (this.filter.originalSender) {
       params.set('originalSender', this.filter.originalSender);
     }
 
-    if(this.filter.finalRecipient) {
+    if (this.filter.finalRecipient) {
       params.set('finalRecipient', this.filter.finalRecipient);
     }
 
-    if(this.filter.refToMessageId) {
+    if (this.filter.refToMessageId) {
       params.set('refToMessageId', this.filter.refToMessageId);
     }
 
-    if(this.filter.receivedFrom) {
+    if (this.filter.receivedFrom) {
       params.set('receivedFrom', this.filter.receivedFrom.getTime());
     }
 
-    if(this.filter.receivedTo) {
+    if (this.filter.receivedTo) {
       params.set('receivedTo', this.filter.receivedTo.getTime());
     }
 
-    if(asc != null) {
+    if (asc != null) {
       params.set('asc', asc.toString());
     }
 
-    return this.http.get('rest/messagelog', {
+    return this.http.get(MessageLogComponent.MESSAGE_LOG_URL, {
       search: params
     }).map((response: Response) =>
       response.json()
@@ -173,10 +181,18 @@ export class MessageLogComponent {
   onSort(event) {
     console.log('Sort Event', event);
     let ascending = true;
-    if(event.newValue === 'desc') {
+    if (event.newValue === 'desc') {
       ascending = false;
     }
     this.page(this.offset, this.pageSize, event.column.prop, ascending);
+  }
+
+  onSelect({selected}) {
+    console.log('Select Event', selected, this.selected);
+  }
+
+  onActivate(event) {
+    console.log('Activate Event', event);
   }
 
   changeRowLimits(event) {
@@ -188,6 +204,41 @@ export class MessageLogComponent {
   search() {
     console.log("Searching using filter:" + this.filter);
     this.page(0, this.pageSize, this.orderBy, this.asc);
+  }
+
+  resendDialog() {
+    let dialogRef = this.dialog.open(MessagelogDialogComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      switch (result) {
+        case 'Resend' :
+          this.resend(this.selected[0].messageId);
+          break;
+        case 'Cancel' :
+        //do nothing
+      }
+    });
+  }
+
+  resend(messageId: string) {
+    console.log('Resending message with id ', messageId);
+  }
+
+  isResendButtonEnabled() {
+    if (this.selected && this.selected[0] && !this.selected[0].deleted && this.selected[0].messageStatus === "SEND_FAILURE")
+      return true;
+
+    return false;
+  }
+
+  isDownloadButtonEnabled(): boolean {
+    if (this.selected && this.selected[0] && !this.selected[0].deleted)
+      return true;
+
+    return false;
+  }
+
+  downloadMessage() {
+
   }
 
   onTimestampFromChange(event) {

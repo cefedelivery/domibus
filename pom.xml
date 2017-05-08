@@ -20,10 +20,9 @@
         <module>Domibus-MSH-jms-weblogic</module>
         <module>Domibus-MSH-jms-activemq</module>
         <module>Domibus-MSH-jms-wildfly</module>
-		<module>Domibus-MSH-taskexecutor-weblogic</module>
-		<module>Domibus-MSH-taskexecutor-wildfly</module>
+        <module>Domibus-MSH-taskexecutor-weblogic</module>
+        <module>Domibus-MSH-taskexecutor-wildfly</module>
         <module>Domibus-MSH-taskexecutor-tomcat</module>
-
         <module>Domibus-MSH-soapui-tests</module>
         <module>Domibus-MSH-docker</module>
         <module>Domibus-plugin-api</module>
@@ -60,7 +59,8 @@
         <sonar.exclusions>
             **/validators/EbMS3MessageValidator.java, **/controller/AdminGUIController.java,
             **/discovery/PartyIndentifierResolverService.java,
-            **/quartz/**, **/target/**, **/eu/domibus/spring/SpringContextProvider.java, **/eu/domibus/taskexecutor/weblogic/DomibusDelegatingWork.java
+            **/quartz/**, **/target/**, **/eu/domibus/spring/SpringContextProvider.java,
+            **/eu/domibus/taskexecutor/weblogic/DomibusDelegatingWork.java
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
         <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar/</sonar.host.url>
@@ -166,14 +166,6 @@
                 <version>${logback.version}</version>
             </dependency>
             <!-- End SL4J + Logback -->
-
-            <!-- Jackson -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson-databind.version}</version>
-            </dependency>
-            <!-- End Jackson -->
 
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -494,7 +486,8 @@
                         <execution>
                             <id>default-test</id>
                             <configuration>
-                                <argLine>-server -ea -Duser.language=en -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m
+                                <argLine>-server -ea -Duser.language=en -XX:-UseSplitVerifier -Xms512m -Xmx1024m
+                                    -XX:MaxPermSize=512m
                                     ${surefire.argLine}
                                 </argLine>
                                 <excludes>
@@ -546,7 +539,8 @@
                                 <skipTests>${skipITs}</skipTests>
                                 <systemPropertyVariables>
                                     <attachment.mode>FILESYSTEM</attachment.mode>
-                                    <storage.location>${project.build.testOutputDirectory}/dataset/storage</storage.location>
+                                    <storage.location>${project.build.testOutputDirectory}/dataset/storage
+                                    </storage.location>
                                 </systemPropertyVariables>
                             </configuration>
                         </execution>
