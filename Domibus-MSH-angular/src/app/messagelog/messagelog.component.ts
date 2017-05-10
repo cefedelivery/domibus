@@ -15,7 +15,7 @@ import {MdDialog} from "@angular/material";
 
 export class MessageLogComponent {
 
-  static readonly RESEND_URL: string = 'rest/';
+  static readonly RESEND_URL: string = 'rest/message/${messageId}/restore';
   static readonly MESSAGE_LOG_URL: string = 'rest/messagelog';
 
   selected = [];
@@ -212,6 +212,8 @@ export class MessageLogComponent {
       switch (result) {
         case 'Resend' :
           this.resend(this.selected[0].messageId);
+          this.selected = [];
+          this.search();
           break;
         case 'Cancel' :
         //do nothing
@@ -221,6 +223,16 @@ export class MessageLogComponent {
 
   resend(messageId: string) {
     console.log('Resending message with id ', messageId);
+
+    let url = MessageLogComponent.RESEND_URL.replace("${messageId}", messageId);
+
+    console.log('URL is  ', url);
+
+    this.http.put(url, {}, {}).subscribe(res => {
+      this.alertService.success("The operation resend message completed successfully");
+    }, err => {
+      this.alertService.error("The message " + messageId + " could not be resent.");
+    });
   }
 
   isResendButtonEnabled() {

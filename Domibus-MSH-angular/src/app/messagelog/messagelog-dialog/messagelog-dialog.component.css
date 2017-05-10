@@ -20,6 +20,7 @@ label:hover, label:active, input:hover + label, input:active + label {
   /*border: 1px solid #999999;*/
   display: table-cell;
   padding: 3px 3px;
+  text-align: center;
 }
 
 .divTableHeading {
