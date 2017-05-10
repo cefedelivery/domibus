@@ -6,7 +6,7 @@
     <!-- Domibus 3.2.4 - 3.2.5 -->
     <changeSet author="Cosmin Baciu" id="EDELIVERY-2117">
         <addColumn tableName="TB_BACKEND_FILTER">
-            <column name="CRITERIA_OPERATION" type="VARCHAR(255)" defaultValue="AND">
+            <column name="CRITERIA_OPERATOR" type="VARCHAR(255)" defaultValue="AND">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
