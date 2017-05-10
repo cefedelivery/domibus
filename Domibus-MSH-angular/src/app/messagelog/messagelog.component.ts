@@ -5,6 +5,7 @@ import {Observable} from "rxjs";
 import {AlertService} from "../alert/alert.service";
 import {MessagelogDialogComponent} from "app/messagelog/messagelog-dialog/messagelog-dialog.component";
 import {MdDialog} from "@angular/material";
+import * as FileSaver from "file-saver";
 
 @Component({
   moduleId: module.id,
@@ -16,6 +17,7 @@ import {MdDialog} from "@angular/material";
 export class MessageLogComponent {
 
   static readonly RESEND_URL: string = 'rest/message/${messageId}/restore';
+  static readonly DOWNLOAD_MESSAGE_URL: string = 'rest/message/${messageId}/download';
   static readonly MESSAGE_LOG_URL: string = 'rest/messagelog';
 
   selected = [];
@@ -249,8 +251,19 @@ export class MessageLogComponent {
     return false;
   }
 
-  downloadMessage() {
+  download() {
+    const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace("${messageId}", this.selected[0].messageId);
+    this.http.get(url).subscribe(res => {
+      this.downloadFile(res);
+    }, err => {
+      this.alertService.error(err.json());
+    });
 
+  }
+
+  private downloadFile(data: any) {
+    var blob = new Blob([data._body], {type: 'text/xml'});
+    FileSaver.saveAs(blob, "message.xml");
   }
 
   onTimestampFromChange(event) {

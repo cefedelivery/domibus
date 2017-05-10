@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+
 /**
  * Created by musatmi on 10/05/2017.
  */
@@ -24,13 +27,13 @@ public class MessageResource {
 
 
     @RequestMapping(path = "{messageId:.+}/restore", method = RequestMethod.PUT)
-    public void resend(@PathVariable(value = "messageId") String messageId) throws MessageMonitorException {
+    public void resend(@PathVariable(value = "messageId") String messageId) {
         userMessageService.restoreFailedMessage(messageId);
     }
 
     @RequestMapping(path = "{messageId:.+}/download", method = RequestMethod.GET)
-    public ResponseEntity<ByteArrayResource> download(@PathVariable(value = "messageId") String messageId) throws MessageMonitorException {
-        userMessageService.downloadMessage(messageId);
+    public ResponseEntity<ByteArrayResource> download(@PathVariable(value = "messageId") String messageId) throws JAXBException {
+
 
         final byte[] content = userMessageService.downloadMessage(messageId);
         ByteArrayResource resource = new ByteArrayResource(new byte[0]);
@@ -41,7 +44,7 @@ public class MessageResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .header("content-disposition", "attachment; filename=Pmodes.xml")
+                .header("content-disposition", "attachment; filename=" + messageId + ".xml")
                 .body(resource);
     }
 

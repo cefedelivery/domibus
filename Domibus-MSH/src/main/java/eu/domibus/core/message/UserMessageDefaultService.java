@@ -32,6 +32,10 @@ import org.springframework.stereotype.Service;
 
 import javax.jms.JMSException;
 import javax.jms.Queue;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -69,6 +73,10 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Autowired
     private JMSManager jmsManager;
+
+    @Autowired
+    @Qualifier("jaxbContextEBMS")
+    private JAXBContext jaxbContext;
 
     @Autowired
     PModeService pModeService;
@@ -232,9 +240,20 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public byte[] downloadMessage(String messageId) {
-        final Messaging message = messagingDao.findMessageByMessageId(messageId);
 
-        return new byte[0];
+        final Messaging message = messagingDao.findMessageByMessageId(messageId);
+        final Marshaller marshaller;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            marshaller = jaxbContext.createMarshaller();
+            marshaller.marshal(message, baos);
+        } catch (JAXBException e) {
+            LOG.error("Error marshalling the message with id {}", messageId);
+            return new byte[0];
+        }
+
+
+        return baos.toByteArray();
 
     }
 
