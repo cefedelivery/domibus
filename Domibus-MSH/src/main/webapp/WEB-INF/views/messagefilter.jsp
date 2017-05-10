@@ -53,6 +53,19 @@
             addFilterButton.setAttribute("onclick", "addFilter('" + backendConnector.replace(/ /g,'') + "','','');");
             fieldset.appendChild(addFilterButton);
 
+            var backendOperatorLabel = document.createTextNode(' Operator: ');
+            fieldset.appendChild(backendOperatorLabel);
+            var backendOperator = document.createElement("SELECT");
+            backendOperator.setAttribute("name", backendConnector + "operator");
+            <c:forEach var="operator" items="${routingOperators}">
+                var option = document.createElement("OPTION");
+                var text = document.createTextNode("${operator}");
+                option.appendChild(text);
+                option.selected = "${operator}" == "${bc.criteriaOperator}";
+                backendOperator.appendChild(option);
+            </c:forEach>
+            fieldset.appendChild(backendOperator);
+
             <c:forEach var="rt" items="${bc.routingCriterias}">
                 var routingCriteria = "${rt.name}";
                 var rule = "${rt.expression}";
