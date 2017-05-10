@@ -23,11 +23,11 @@
         xmlns:security="http://cxf.apache.org/configuration/security">
     <security:trustManagers>
         <security:keyStore type="JKS" password="123456"
-                           file="${domibus.config.location}/client_trust.jks"/>
+                           file="${domibus.config.location2}/client_trust.jks"/>
     </security:trustManagers>
     <security:keyManagers keyPassword="1234">
         <security:keyStore type="JKS" password="123456"
-                           file="${domibus.config.location}/keystore_blue.jks"/>
+                           file="${domibus.config.location2}/keystore_blue.jks"/>
     </security:keyManagers>
 </http-conf:tlsClientParameters>
 

@@ -36,7 +36,7 @@
 	</bean>
 
 	<bean id="jmsMessageTransformer" class="eu.domibus.plugin.jms.JMSMessageTransformer">
-		<constructor-arg name="defaultProperties" value="${domibus.config.location}/plugins/config/jms-business-defaults.properties"/>
+		<constructor-arg name="defaultProperties" value="${domibus.config.location2}/plugins/config/jms-business-defaults.properties"/>
 	</bean>
 
 	<bean id="jmsNotificationListenerService"
@@ -102,7 +102,7 @@
           p:sessionTransacted="true"
           p:sessionAcknowledgeMode="0"/>
 
-	<!--util:properties id="defaultValues" location="${domibus.config.location}/plugins/config/jms-business-defaults.properties"/-->
+	<!--util:properties id="defaultValues" location="${domibus.config.location2}/plugins/config/jms-business-defaults.properties"/-->
 	<!-- Example ends here -->
 
 </beans>

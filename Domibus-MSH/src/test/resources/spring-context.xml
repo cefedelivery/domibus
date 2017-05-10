@@ -29,7 +29,7 @@
     <import resource="classpath*:config/*-jms-context.xml"/>
     <import resource="classpath*:config/*-taskexecutor-context.xml"/>
 
-    <import resource="file:///${domibus.config.location}/domibus-plugins.xml"/>
+    <import resource="file:///${domibus.config.location2}/domibus-plugins.xml"/>
     <import resource="msh-config.xml"/>
     <import resource="cxf-endpoint.xml"/>
     <import resource="spring-security.xml"/>
@@ -50,7 +50,7 @@
         <property name="cacheManager" ref="ehcache"/>
     </bean>
     <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
-        <property name="configLocation" value="file:///${domibus.config.location}/internal/ehcache.xml"/>
+        <property name="configLocation" value="file:///${domibus.config.location2}/internal/ehcache.xml"/>
     </bean>
 
     <!-- JAXB Context for mapping of ebMS3 schema -->

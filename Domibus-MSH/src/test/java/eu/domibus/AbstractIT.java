@@ -93,7 +93,7 @@ public abstract class AbstractIT {
     public static void init() throws IOException {
         if (!initialized) {
             FileUtils.deleteDirectory(new File("target/temp"));
-            System.setProperty("domibus.config.location", new File("target/test-classes").getAbsolutePath());
+            System.setProperty("domibus.config.location2", new File("target/test-classes").getAbsolutePath());
             initialized = true;
         }
         SecurityContextHolder.getContext()

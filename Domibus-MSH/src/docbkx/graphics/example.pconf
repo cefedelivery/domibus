@@ -63,7 +63,7 @@ AS4{
 
 Securities{
 	Security exampleSecurity {
-		// WS-SecurityPolicy file in ${domibus.config.location}
+		// WS-SecurityPolicy file in ${domibus.config.location2}
 		Policy : 'exampleSecurityPolicy.xml' 
 		// Allowed values are: RSA_SHA256, RSA_SHA1
 		SignatureMethod : RSA_SHA256 

@@ -9,7 +9,7 @@
 
 
 
-    <import resource="file:///${domibus.config.location}/domibus-datasources.xml"/>
+    <import resource="file:///${domibus.config.location2}/domibus-datasources.xml"/>
 
     <bean id="dispatchContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
         <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>

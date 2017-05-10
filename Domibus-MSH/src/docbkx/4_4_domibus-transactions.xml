@@ -28,7 +28,7 @@
     <para>The
         <computeroutput>domibus-transactions.xml</computeroutput>
         file located in
-        <computeroutput>$domibus.config.location</computeroutput>
+        <computeroutput>$domibus.config.location2</computeroutput>
         is the central configuration file for the Domibus gateway.
     </para>
 
@@ -49,14 +49,14 @@
 
         uncomment the following lines:
         <computeroutput>
-            <prop key="com.atomikos.icatch.output_dir">${domibus.work.location:${domibus.config.location}}/work/transactions/${domibus.node.id}</prop>
-            <prop key="com.atomikos.icatch.log_base_dir">${domibus.work.location:${domibus.config.location}}/work/transactions/${domibus.node.id}/log</prop>
+            <prop key="com.atomikos.icatch.output_dir">${domibus.work.location:${domibus.config.location2}}/work/transactions/${domibus.node.id}</prop>
+            <prop key="com.atomikos.icatch.log_base_dir">${domibus.work.location:${domibus.config.location2}}/work/transactions/${domibus.node.id}/log</prop>
         </computeroutput>
 
         comment the following line:
         <computeroutput>
-            <prop key="com.atomikos.icatch.output_dir">${domibus.work.location:${domibus.config.location}}/work/transactions</prop>
-            <prop key="com.atomikos.icatch.log_base_dir">${domibus.work.location:${domibus.config.location}}/work/transactions/log</prop>
+            <prop key="com.atomikos.icatch.output_dir">${domibus.work.location:${domibus.config.location2}}/work/transactions</prop>
+            <prop key="com.atomikos.icatch.log_base_dir">${domibus.work.location:${domibus.config.location2}}/work/transactions/log</prop>
         </computeroutput>
 
     </para>

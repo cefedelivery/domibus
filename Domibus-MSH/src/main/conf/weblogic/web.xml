@@ -51,7 +51,7 @@
     </context-param>
     <context-param>
         <param-name>pluginsLocation</param-name>
-        <param-value>${domibus.config.location}/plugins/lib</param-value>
+        <param-value>${domibus.config.location2}/plugins/lib</param-value>
     </context-param>
 
     <!-- Spring Security -->

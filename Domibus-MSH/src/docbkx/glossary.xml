@@ -34,7 +34,7 @@
         </glossdef>
     </glossentry>
     <glossentry>
-        <glossterm>$domibus.config.location</glossterm>
+        <glossterm>$domibus.config.location2</glossterm>
         <glossdef>
             <para>The absolute path of the domibus configuration folder.</para>
         </glossdef>

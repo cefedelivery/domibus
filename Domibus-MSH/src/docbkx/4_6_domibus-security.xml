@@ -28,7 +28,7 @@
     <para>The
         <computeroutput>domibus-security.xml</computeroutput>
         file located in
-        <computeroutput>$domibus.config.location</computeroutput>
+        <computeroutput>$domibus.config.location2</computeroutput>
         is the security configuration file for the Domibus gateway.
     </para>
 

@@ -262,7 +262,7 @@
             Each plugin brings its
             own configuration file named<computeroutput>${pluginName}-plugin.xml</computeroutput>. Those must be
             deployed to
-            <computeroutput>${domibus.config.location}/plugins/config</computeroutput>. All bundled plugins come with a
+            <computeroutput>${domibus.config.location2}/plugins/config</computeroutput>. All bundled plugins come with a
             ${pluginName}-example.xml, providing a
             configuration example for the plugin.
         </para>

@@ -53,7 +53,7 @@ public class TLSReader {
             encoded = Files.readAllBytes(Paths.get(domibusConfigurationService.getConfigLocation(), CLIENTAUTHENTICATION_XML));
             config = new String(encoded, "UTF-8");
             //TODO this replacement should be extracted into a service method
-            config = config.replaceAll("\\Q${domibus.config.location}\\E", domibusConfigurationService.getConfigLocation().replace('\\', '/'));
+            config = config.replaceAll("\\Q${domibus.config.location2}\\E", domibusConfigurationService.getConfigLocation().replace('\\', '/'));
 
             return (TLSClientParameters) TLSClientParametersConfig.createTLSClientParameters(config);
 

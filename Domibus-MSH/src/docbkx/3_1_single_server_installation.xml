@@ -131,7 +131,7 @@
                 <step>
                     <title>Set up the environment variables</title>
                     <para>Domibus expects a single JVM-parameter<computeroutput>
-                        domibus.config.location</computeroutput>, pointing towards the
+                        domibus.config.location2</computeroutput>, pointing towards the
                         <computeroutput>conf/domibus/</computeroutput>
                         folder copied in the previous step. If using the Tomcat distribution
                         of Domibus documentation on how to do this can be found

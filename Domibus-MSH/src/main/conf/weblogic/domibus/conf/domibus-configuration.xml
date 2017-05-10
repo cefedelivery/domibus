@@ -27,7 +27,7 @@
     http://www.springframework.org/schema/util/spring-util.xsd">
 
 
-    <import resource="file:///${domibus.config.location}/domibus-security.xml"/>
+    <import resource="file:///${domibus.config.location2}/domibus-security.xml"/>
 
     <!--TODO remove this; it is equivalent with <context:annotation-config /> which is already declared -->
     <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor" />

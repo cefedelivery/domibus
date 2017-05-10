@@ -28,7 +28,7 @@
     <para>The
         <computeroutput>domibus-plugins.xml</computeroutput>
         file located in
-        <computeroutput>$domibus.config.location</computeroutput>
+        <computeroutput>$domibus.config.location2</computeroutput>
         is the starting point for the backend plugin configuration in the Domibus gateway.
         Further details on how to write custome plugins can be found: //TODO:link
     </para>

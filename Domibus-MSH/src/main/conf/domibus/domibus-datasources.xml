@@ -26,7 +26,7 @@
     http://activemq.apache.org/schema/core/activemq-core.xsd">
 
 
-    <import resource="file:///${domibus.config.location}/domibus-transactions.xml"/>
+    <import resource="file:///${domibus.config.location2}/domibus-transactions.xml"/>
 
     <!-- JMS Configuration -->
     <!-- Connection Pool -->
@@ -52,7 +52,7 @@
     <bean id="broker"
           class="org.apache.activemq.xbean.BrokerFactoryBean">
         <property name="config"
-                  value="file:///${domibus.config.location}/internal/activemq.xml"/>
+                  value="file:///${domibus.config.location2}/internal/activemq.xml"/>
     </bean>
 
     <amq:queue id="sendMessageQueue"
@@ -104,7 +104,7 @@
 
     <bean id="entityManagerFactory" primary="true"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="persistenceUnitName" value="domibusJTA"/>
+        <property name="persistenceUnitName" value="domibusJTA2"/>
         <property name="packagesToScan" value="eu.domibus"/>
         <property name="jtaDataSource" ref="domibusJDBC-XADataSource"/>
         <property name="jpaVendorAdapter">

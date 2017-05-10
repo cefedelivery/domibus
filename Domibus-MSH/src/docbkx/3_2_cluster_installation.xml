@@ -248,7 +248,7 @@
                     <title>Set up the environment variables</title>
                     <para>In clustered environment Domibus expects two JVM-parameters on startup:
 
-                        The first parameter is <computeroutput>$domibus.config.location</computeroutput>, pointing towards the
+                        The first parameter is <computeroutput>$domibus.config.location2</computeroutput>, pointing towards the
                         the shared folder copied in the previous step.
 
                         The second parameter <computeroutput>$domibus.node.id</computeroutput> defines the name of the node and is unique per node.

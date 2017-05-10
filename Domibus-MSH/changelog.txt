@@ -80,7 +80,7 @@ Domibus 3.1.1
 - Set BINARY_DATA type to LONGBLOB on mysql (migration scripts created)
 - Fixed the issue with the missing "value" in the <env:Code> when an error response is returned
 - Fixed the issue when checking the agreementRef sent in the header's message and the agreement configured in the PMode
-- Fixed the environment variable domibus.config.location for WildFly distribution running on Linux
+- Fixed the environment variable domibus.config.location2 for WildFly distribution running on Linux
 Domibus 3.1.0
 - Fixed issue when sending a message with an ID that is over 255 characters long
 - Fixed issue when sending a message with an ID that was already used

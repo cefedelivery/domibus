@@ -27,7 +27,7 @@
     http://www.springframework.org/schema/util/spring-util.xsd">
 
 
-    <import resource="file:///${domibus.config.location}/domibus-security.xml"/>
+    <import resource="file:///${domibus.config.location2}/domibus-security.xml"/>
 
     <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor" />
 

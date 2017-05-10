@@ -26,7 +26,7 @@
        http://www.springframework.org/schema/util
        http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <import resource="file:///${domibus.config.location}/plugins/config/*-plugin.xml" />
+    <import resource="file:///${domibus.config.location2}/plugins/config/*-plugin.xml" />
 
     <util:list id="routingCriteriaFactories"
                value-type="eu.domibus.plugin.routing.CriteriaFactory">

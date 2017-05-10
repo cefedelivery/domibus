@@ -31,7 +31,7 @@
 
     <context:property-placeholder system-properties-mode="ENVIRONMENT" />
 
-    <broker useJmx="true" brokerName="localhost"  persistent="true" schedulerSupport="true" dataDirectory="${domibus.work.location:${domibus.config.location}}/work/activemq_data" tmpDataDirectory="${domibus.work.location:${domibus.config.location}}/temp">
+    <broker useJmx="true" brokerName="localhost"  persistent="true" schedulerSupport="true" dataDirectory="${domibus.work.location:${domibus.config.location2}}/work/activemq_data" tmpDataDirectory="${domibus.work.location:${domibus.config.location2}}/temp">
         <managementContext>
             <managementContext createConnector="true" connectorPort="1199" rmiServerPort="1200"/>
         </managementContext>
@@ -39,7 +39,7 @@
             <transportConnector uri="tcp://localhost:61616" disableAsyncDispatch="true"/>
         </transportConnectors>
         <persistenceAdapter>
-            <kahaDB directory="${domibus.work.location:${domibus.config.location}}/work/kahadb" />
+            <kahaDB directory="${domibus.work.location:${domibus.config.location2}}/work/kahadb" />
         </persistenceAdapter>
         <systemUsage>
             <systemUsage>

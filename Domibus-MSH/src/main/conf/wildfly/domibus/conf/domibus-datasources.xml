@@ -25,7 +25,7 @@
 	http://www.springframework.org/schema/jee 
     http://www.springframework.org/schema/jee/spring-jee.xsd">
 
-    <import resource="file:///${domibus.config.location}/domibus-transactions.xml"/>
+    <import resource="file:///${domibus.config.location2}/domibus-transactions.xml"/>
 
     <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
     <jee:jndi-lookup id="domibusJMS-XAConnectionFactory" jndi-name="jms/ConnectionFactory"/>
@@ -54,7 +54,7 @@
 
     <bean id="entityManagerFactory" primary="true"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="persistenceUnitName" value="domibusJTA"/>
+        <property name="persistenceUnitName" value="domibusJTA2"/>
         <property name="packagesToScan" value="eu.domibus"/>
         <property name="jtaDataSource" ref="domibusJDBC-XADataSource"/>
         <property name="jpaVendorAdapter">

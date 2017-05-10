@@ -6,7 +6,7 @@ package eu.domibus.api.configuration;
  */
 public interface DomibusConfigurationService {
 
-    String DOMIBUS_CONFIG_LOCATION = "domibus.config.location";
+    String DOMIBUS_CONFIG_LOCATION = "domibus.config.location2";
 
     String getConfigLocation();
 }

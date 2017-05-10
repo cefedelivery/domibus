@@ -126,7 +126,7 @@ public class MSHDispatcherTest {
      */
     @Test
     public void testDispatch_DoNothingSecurityPolicy_HappyFlow(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
-        System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
+        System.setProperty("domibus.config.location2", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:noSecService:noSecAction:OAE:pushNoSecnoSecAction";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
@@ -213,7 +213,7 @@ public class MSHDispatcherTest {
      */
     @Test
     public void testDispatch_tc1Process_HappyFlow(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
-        System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
+        System.setProperty("domibus.config.location2", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
@@ -310,7 +310,7 @@ public class MSHDispatcherTest {
 
     @Test
     public void testDispatch_SecurityPolicyException(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
-        System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
+        System.setProperty("domibus.config.location2", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:noSecService:noSecAction:OAE:pushNoSecnoSecAction";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
@@ -362,7 +362,7 @@ public class MSHDispatcherTest {
 
     @Test
     public void testDispatch_SenderCertificateException(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
-        System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
+        System.setProperty("domibus.config.location2", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
@@ -429,7 +429,7 @@ public class MSHDispatcherTest {
      */
     @Test
     public void testDispatch_ReceiverCertificateException(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
-        System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
+        System.setProperty("domibus.config.location2", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).
@@ -523,7 +523,7 @@ public class MSHDispatcherTest {
 
     @Test
     public void testDispatch_ExceptionDuringDispatch(@Injectable final SOAPMessage requestSoapMessage, @Injectable final SOAPMessage responseSoapMessage) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, IOException, ParserConfigurationException, SAXException {
-        System.setProperty("domibus.config.location", TEST_RESOURCES_DIR);
+        System.setProperty("domibus.config.location2", TEST_RESOURCES_DIR);
 
         //"blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final String pModeKey = new StringBuilder(SENDER_BLUE_GW).append(COLON_SEPARATOR).append(RECEIVER_RED_GW).append(COLON_SEPARATOR).

@@ -29,7 +29,7 @@
     <para>The
         <computeroutput>domibus-datasources.xml</computeroutput>
         file located in
-        <computeroutput>$domibus.config.location</computeroutput>
+        <computeroutput>$domibus.config.location2</computeroutput>
         is the datasource (database and JMS) configuration file for the Domibus gateway.
     </para>
 

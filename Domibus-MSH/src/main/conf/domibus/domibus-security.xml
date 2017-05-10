@@ -65,7 +65,7 @@
         </prop>
         <!-- The location of the keystore -->
         <prop key="org.apache.ws.security.crypto.merlin.file">
-            ${domibus.config.location}/keystores/gateway_keystore.jks
+            ${domibus.config.location2}/keystores/gateway_keystore.jks
         </prop>
     </util:properties>
 
@@ -91,7 +91,7 @@
         </prop>
         <!-- The location and name of the trustStore -->
         <prop key="org.apache.ws.security.crypto.merlin.trustStore.file">
-            ${domibus.config.location}/keystores/gateway_truststore.jks
+            ${domibus.config.location2}/keystores/gateway_truststore.jks
         </prop>
     </util:properties>
 
