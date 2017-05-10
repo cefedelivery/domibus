@@ -16,6 +16,7 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
+import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -227,6 +228,16 @@ public class UserMessageDefaultService implements UserMessageService {
         userMessageLogDao.setMessageAsDeleted(messageId);
         handleSignalMessageDelete(messageId);
     }
+
+
+    @Override
+    public byte[] downloadMessage(String messageId) {
+        final Messaging message = messagingDao.findMessageByMessageId(messageId);
+
+        return new byte[0];
+
+    }
+
 
     protected void handleSignalMessageDelete(String messageId) {
         List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
