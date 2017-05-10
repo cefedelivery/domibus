@@ -20,12 +20,18 @@ public class BackendFilter extends AbstractBaseEntity implements Comparable<Back
 
     @Column(name = "PRIORITY")
     private int index;
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "FK_BACKEND_FILTER")
     @OrderColumn(name = "PRIORITY")
     private List<RoutingCriteria> routingCriterias = new ArrayList<>();
+
     @Column(name = "BACKEND_NAME")
     private String backendName;
+
+    @Column(name = "CRITERIA_OPERATION")
+    @Enumerated(EnumType.STRING)
+    private CriteriaOperation criteriaOperation;
 
     public void setIndex(final int index) {
         this.index = index;
