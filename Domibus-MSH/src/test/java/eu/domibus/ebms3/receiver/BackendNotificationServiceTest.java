@@ -8,9 +8,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
-import eu.domibus.plugin.routing.CriteriaFactory;
-import eu.domibus.plugin.routing.IRoutingCriteria;
-import eu.domibus.plugin.routing.RoutingService;
+import eu.domibus.plugin.routing.*;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.plugin.validation.SubmissionValidationException;
@@ -185,8 +183,8 @@ public class BackendNotificationServiceTest {
 
     @Test
     public void testNotifyWithNoConfiguredNoficationListener(
-                           @Injectable final NotificationType notificationType,
-                           @Injectable final Queue queue) throws Exception {
+            @Injectable final NotificationType notificationType,
+            @Injectable final Queue queue) throws Exception {
         final String backendName = "customPlugin";
         new Expectations(backendNotificationService) {{
             backendNotificationService.getNotificationListener(backendName);
@@ -225,6 +223,152 @@ public class BackendNotificationServiceTest {
 
             Assert.assertEquals(jmsMessage.getProperty(MessageConstants.MESSAGE_ID), messageId);
             Assert.assertEquals(jmsMessage.getProperty(MessageConstants.NOTIFICATION_TYPE), notificationType.name());
+        }};
+    }
+
+    @Test
+    public void testIsBackendFilterMatchingWithFromAndActionMatching(@Injectable final BackendFilter filter,
+                                                                     @Injectable final Map<String, IRoutingCriteria> criteriaMap,
+                                                                     @Injectable final UserMessage userMessage,
+                                                                     @Injectable final IRoutingCriteria fromRoutingCriteriaConfiguration, //configured in the domibus-plugins.xml
+                                                                     @Injectable final IRoutingCriteria actionRoutingCriteriaConfiguration, //configured in the domibus-plugins.xml
+                                                                     @Injectable final RoutingCriteria fromRoutingCriteria, //contains the FROM filter defined by the user
+                                                                     @Injectable final RoutingCriteria actionRoutingCriteria) { //contains the ACTION filter defined by the user
+
+        // these 2 filters are defined by the user in the Message Filter screen
+        final List<RoutingCriteria> criteriaList = new ArrayList<>();
+        criteriaList.add(fromRoutingCriteria);
+        criteriaList.add(actionRoutingCriteria);
+
+        final String fromCriteriaName = "FROM";
+        final String actionCriteriaName = "ACTION";
+
+        new Expectations() {{
+            filter.getRoutingCriterias();
+            result = criteriaList;
+
+            fromRoutingCriteria.getName();
+            result = fromCriteriaName;
+
+            fromRoutingCriteria.getExpression();
+            result = "domibus-blue:partyType";
+
+            criteriaMap.get(fromCriteriaName);
+            result = fromRoutingCriteriaConfiguration;
+
+            actionRoutingCriteria.getName();
+            result = actionCriteriaName;
+
+            actionRoutingCriteria.getExpression();
+            result = "myAction";
+
+            criteriaMap.get(actionCriteriaName);
+            result = actionRoutingCriteriaConfiguration;
+
+            fromRoutingCriteriaConfiguration.matches(userMessage, fromRoutingCriteria.getExpression());
+            result = true;
+
+            actionRoutingCriteriaConfiguration.matches(userMessage, actionRoutingCriteria.getExpression());
+            result = true;
+        }};
+
+        final boolean backendFilterMatching = backendNotificationService.isBackendFilterMatching(filter, criteriaMap, userMessage);
+        Assert.assertTrue(backendFilterMatching);
+    }
+
+    @Test
+    public void testIsBackendFilterMatchingWithFromMatchingAndActionNotMatching(@Injectable final BackendFilter filter,
+                                                                                @Injectable final Map<String, IRoutingCriteria> criteriaMap,
+                                                                                @Injectable final UserMessage userMessage,
+                                                                                @Injectable final IRoutingCriteria fromRoutingCriteriaConfiguration, //configured in the domibus-plugins.xml
+                                                                                @Injectable final IRoutingCriteria actionRoutingCriteriaConfiguration, //configured in the domibus-plugins.xml
+                                                                                @Injectable final RoutingCriteria fromRoutingCriteria, //contains the FROM filter defined by the user
+                                                                                @Injectable final RoutingCriteria actionRoutingCriteria) { //contains the ACTION filter defined by the user
+
+        // these 2 filters are defined by the user in the Message Filter screen
+        final List<RoutingCriteria> criteriaList = new ArrayList<>();
+        criteriaList.add(fromRoutingCriteria);
+        criteriaList.add(actionRoutingCriteria);
+
+        final String fromCriteriaName = "FROM";
+        final String actionCriteriaName = "ACTION";
+
+        new Expectations() {{
+            filter.getRoutingCriterias();
+            result = criteriaList;
+
+            fromRoutingCriteria.getName();
+            result = fromCriteriaName;
+
+            fromRoutingCriteria.getExpression();
+            result = "domibus-blue:partyType";
+
+            criteriaMap.get(fromCriteriaName);
+            result = fromRoutingCriteriaConfiguration;
+
+            actionRoutingCriteria.getName();
+            result = actionCriteriaName;
+
+            actionRoutingCriteria.getExpression();
+            result = "myAction";
+
+            criteriaMap.get(actionCriteriaName);
+            result = actionRoutingCriteriaConfiguration;
+
+            fromRoutingCriteriaConfiguration.matches(userMessage, fromRoutingCriteria.getExpression());
+            result = true;
+
+            actionRoutingCriteriaConfiguration.matches(userMessage, actionRoutingCriteria.getExpression());
+            result = false;
+        }};
+
+        final boolean backendFilterMatching = backendNotificationService.isBackendFilterMatching(filter, criteriaMap, userMessage);
+        Assert.assertFalse(backendFilterMatching);
+    }
+
+    @Test
+    public void testIsBackendFilterMatchingWithFromNotMatching(@Injectable final BackendFilter filter,
+                                                                                @Injectable final Map<String, IRoutingCriteria> criteriaMap,
+                                                                                @Injectable final UserMessage userMessage,
+                                                                                @Injectable final IRoutingCriteria fromRoutingCriteriaConfiguration, //configured in the domibus-plugins.xml
+                                                                                @Injectable final IRoutingCriteria actionRoutingCriteriaConfiguration, //configured in the domibus-plugins.xml
+                                                                                @Injectable final RoutingCriteria fromRoutingCriteria, //contains the FROM filter defined by the user
+                                                                                @Injectable final RoutingCriteria actionRoutingCriteria) { //contains the ACTION filter defined by the user
+
+        // these 2 filters are defined by the user in the Message Filter screen
+        final List<RoutingCriteria> criteriaList = new ArrayList<>();
+        criteriaList.add(fromRoutingCriteria);
+        criteriaList.add(actionRoutingCriteria);
+
+        final String fromCriteriaName = "FROM";
+        final String actionCriteriaName = "ACTION";
+
+        new Expectations() {{
+            filter.getRoutingCriterias();
+            result = criteriaList;
+
+            fromRoutingCriteria.getName();
+            result = fromCriteriaName;
+
+            fromRoutingCriteria.getExpression();
+            result = "domibus-blue:partyType";
+
+            criteriaMap.get(fromCriteriaName);
+            result = fromRoutingCriteriaConfiguration;
+
+            fromRoutingCriteriaConfiguration.matches(userMessage, fromRoutingCriteria.getExpression());
+            result = false;
+        }};
+
+        final boolean backendFilterMatching = backendNotificationService.isBackendFilterMatching(filter, criteriaMap, userMessage);
+        Assert.assertFalse(backendFilterMatching);
+
+        new Verifications() {{
+            criteriaMap.get(actionCriteriaName);
+            times = 0;
+
+            actionRoutingCriteriaConfiguration.matches(userMessage, anyString);
+            times = 0;
         }};
     }
 }
