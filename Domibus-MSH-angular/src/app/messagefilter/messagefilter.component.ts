@@ -15,6 +15,7 @@ import {AlertService} from "../alert/alert.service";
 export class MessageFilterComponent {
 
   editing = {};
+  previous = [];
   rows = [];
   selected = [];
 
@@ -67,6 +68,14 @@ export class MessageFilterComponent {
     this.enableCancel = true;
     this.enableSave = true;
     this.enableDelete = false;
+    this.previous = [];
+    this.previous.push({
+      "plugin": "a",
+      "from": "a",
+      "to": "a",
+      "action": "a",
+      "service": "a"
+    });
     this.rows.push({
       "plugin": "<>",
       "from": "<>",
@@ -79,16 +88,23 @@ export class MessageFilterComponent {
     this.enableCancel = false;
     this.enableSave = false;
     this.enableDelete = false;
+
+    this.rows = [];
+    this.rows.push(this.previous);
   }
 
   buttonSave() {
     this.enableCancel = false;
     this.enableSave = false;
     this.enableDelete = false;
+
+    this.previous = [];
+    this.previous.push(this.rows);
   }
 
-  buttonDelete() {
+  buttonDelete(row) {
     this.enableDelete = false;
+    this.rows[row.$$index].delete();
   }
 
   buttonMoveUp() {
@@ -114,8 +130,15 @@ export class MessageFilterComponent {
 
     this.selected.splice(0, this.selected.length);
     this.selected.push(...selected);
-    this.enableMoveDown = true;
-    this.enableMoveUp = true;
+    this.enableMoveDown = selected.length > 0 && this.rows.length > 1;
+    this.enableMoveUp = selected.length > 0 && this.rows.length > 1;
+    this.enableDelete = selected.length == 1;
+  }
+
+  onDeselect( { selected }) {
+    this.enableMoveDown = selected.length > 0;
+    this.enableMoveUp = selected.length > 0;
+    this.enableDelete = selected.length == 1;
   }
 
   onActivate(event) {

@@ -15,7 +15,8 @@
           [selected]="selected"
           [selectionType]="'multiClick'"
           (activate)="onActivate($event)"
-          (select)='onSelect($event)'>
+          (select)='onSelect($event)'
+          (deselect)='onDeselect($event)'>
           <ngx-datatable-column name="Plugin">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
@@ -142,7 +143,7 @@
                 <md-icon>add</md-icon>
                 <span>New</span>
               </button>
-              <button md-raised-button color="primary" [disabled]="!enableDelete" (click)="buttonDelete()">
+              <button md-raised-button color="primary" [disabled]="!enableDelete" (click)="buttonDelete(row)">
                 <md-icon>delete</md-icon>
                 <span>Delete</span>
               </button>
