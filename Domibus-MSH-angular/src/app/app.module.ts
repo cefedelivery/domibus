@@ -28,6 +28,7 @@ import {ErrorLogComponent} from "./errorlog/errorlog.component";
 import {FooterComponent} from "./footer/footer.component";
 import {DomibusInfoService} from "./appinfo/domibusinfo.service";
 import {AuthorizedAdminGuard} from "./guards/authorized-admin.guard";
+import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
 import {MessageLogComponent} from "./messagelog/messagelog.component";
 import {TruststoreComponent} from './truststore/truststore.component';
 import {PmodeUploadComponent} from './pmode-upload/pmode-upload.component';
@@ -42,6 +43,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     AppComponent,
     LoginComponent,
     HomeComponent,
+    MessageFilterComponent,
     MessageLogComponent,
     ErrorLogComponent,
     AlertComponent,
