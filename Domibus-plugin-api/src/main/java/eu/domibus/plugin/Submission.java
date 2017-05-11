@@ -707,6 +707,36 @@ public class Submission {
             this.type = type;
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            TypedProperty that = (TypedProperty) o;
+
+            if (key != null ? !key.equals(that.key) : that.key != null) return false;
+            if (value != null ? !value.equals(that.value) : that.value != null) return false;
+            return type != null ? type.equals(that.type) : that.type == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = key != null ? key.hashCode() : 0;
+            result = 31 * result + (value != null ? value.hashCode() : 0);
+            result = 31 * result + (type != null ? type.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuffer sb = new StringBuffer("TypedProperty{");
+            sb.append("key='").append(key).append('\'');
+            sb.append(", value='").append(value).append('\'');
+            sb.append(", type='").append(type).append('\'');
+            sb.append('}');
+            return sb.toString();
+        }
+
         public String getKey() {
             return key;
         }
