@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import javax.jms.JMSException;
 import javax.jms.Queue;
+import javax.transaction.Transactional;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -73,10 +74,6 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Autowired
     private JMSManager jmsManager;
-
-    @Autowired
-    @Qualifier("jaxbContextEBMS")
-    private JAXBContext jaxbContext;
 
     @Autowired
     PModeService pModeService;
@@ -236,27 +233,6 @@ public class UserMessageDefaultService implements UserMessageService {
         userMessageLogDao.setMessageAsDeleted(messageId);
         handleSignalMessageDelete(messageId);
     }
-
-
-    @Override
-    public byte[] downloadMessage(String messageId) {
-
-        final Messaging message = messagingDao.findMessageByMessageId(messageId);
-        final Marshaller marshaller;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            marshaller = jaxbContext.createMarshaller();
-            marshaller.marshal(message, baos);
-        } catch (JAXBException e) {
-            LOG.error("Error marshalling the message with id {}", messageId);
-            return new byte[0];
-        }
-
-
-        return baos.toByteArray();
-
-    }
-
 
     protected void handleSignalMessageDelete(String messageId) {
         List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);

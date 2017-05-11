@@ -30,6 +30,4 @@ public interface UserMessageService {
     void scheduleSending(String messageId);
 
     void scheduleSending(String messageId, Long delay);
-
-    byte[] downloadMessage(String messageId);
 }
