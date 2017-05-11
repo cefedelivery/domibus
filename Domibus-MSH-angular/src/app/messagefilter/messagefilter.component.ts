@@ -15,9 +15,9 @@ import {AlertService} from "../alert/alert.service";
 export class MessageFilterComponent {
 
   editing = {};
-  previous = [];
   rows = [];
   selected = [];
+  rollback = [];
 
   enableCancel = false;
   enableSave = false;
@@ -25,15 +25,6 @@ export class MessageFilterComponent {
 
   enableMoveUp = false;
   enableMoveDown = false;
-
-  ROW_LIMITS = [
-    {key: '10', value: 10},
-    {key: '25', value: 25},
-    {key: '50', value: 50},
-    {key: '100', value: 100}
-  ];
-  rowLimits: Array<any> = this.ROW_LIMITS;
-  pageSize: number = this.ROW_LIMITS[0].value;
 
   constructor() {
     this.rows.push({
@@ -43,21 +34,9 @@ export class MessageFilterComponent {
       "action": "a",
       "service": "a"
     });
-    // this.fetch((data) => {
-    //   this.rows = data;
-    // });
-  }
 
-  // fetch(cb) {
-  //   const req = new XMLHttpRequest();
-  //   req.open('GET', `https://github.com/swimlane/ngx-datatable/tree/master/assets/data/company.json`);
-  //
-  //   req.onload = () => {
-  //     cb(JSON.parse(req.response));
-  //   };
-  //
-  //   req.send();
-  // }
+    this.rollback = this.rows.slice();
+  }
 
   updateValue(event, cell, cellValue, row) {
     this.editing[row.$$index + '-' + cell] = false;
@@ -68,14 +47,6 @@ export class MessageFilterComponent {
     this.enableCancel = true;
     this.enableSave = true;
     this.enableDelete = false;
-    this.previous = [];
-    this.previous.push({
-      "plugin": "a",
-      "from": "a",
-      "to": "a",
-      "action": "a",
-      "service": "a"
-    });
     this.rows.push({
       "plugin": "<>",
       "from": "<>",
@@ -89,8 +60,10 @@ export class MessageFilterComponent {
     this.enableSave = false;
     this.enableDelete = false;
 
-    this.rows = [];
-    this.rows.push(this.previous);
+    this.enableMoveUp = false;
+    this.enableMoveDown = false;
+
+    this.rows = this.rollback.slice();
   }
 
   buttonSave() {
@@ -98,13 +71,19 @@ export class MessageFilterComponent {
     this.enableSave = false;
     this.enableDelete = false;
 
-    this.previous = [];
-    this.previous.push(this.rows);
+    this.enableMoveUp = false;
+    this.enableMoveDown = false;
+
+    this.rollback = this.rows.slice();
   }
 
-  buttonDelete(row) {
+  buttonDelete() {
+    this.enableCancel = false;
+    this.enableSave = false;
     this.enableDelete = false;
-    this.rows[row.$$index].delete();
+
+    this.enableMoveUp = false;
+    this.enableMoveDown = false;
   }
 
   buttonMoveUp() {
@@ -113,16 +92,6 @@ export class MessageFilterComponent {
 
   buttonMoveDown() {
 
-  }
-
-  changeRowLimits(event) {
-    let newPageLimit = event.value;
-    console.log('New page limit:', newPageLimit);
-    this.page(newPageLimit);
-  }
-
-  page(pageSize) {
-    this.pageSize = pageSize;
   }
 
   onSelect({ selected }) {
@@ -144,5 +113,4 @@ export class MessageFilterComponent {
   onActivate(event) {
     console.log('Activate Event', event);
   }
-
 }

@@ -120,14 +120,14 @@
             </td>
           </tr>
         </table>
-        <div class="rowsDiv">
+        <!--<div class="rowsDiv">
           <md-select placeholder="Rows" [(ngModel)]="pageSize" name="pageSize" (change)="changeRowLimits($event)">
             <md-option *ngFor="let rowLimit of rowLimits" [value]="rowLimit.value">
               {{rowLimit.key}}
             </md-option>
           </md-select>
         </div>
-        <div> </div>
+        <div> </div>-->
         <table class="buttonsRow">
           <tr>
             <td>
@@ -143,7 +143,7 @@
                 <md-icon>add</md-icon>
                 <span>New</span>
               </button>
-              <button md-raised-button color="primary" [disabled]="!enableDelete" (click)="buttonDelete(row)">
+              <button md-raised-button color="primary" [disabled]="!enableDelete" (click)="buttonDelete()">
                 <md-icon>delete</md-icon>
                 <span>Delete</span>
               </button>
@@ -154,114 +154,3 @@
     </md-card>
   </div>
 </div>
-  <!--<div class="messageFilter">
-    <md-card style="margin:0;padding:10px;">
-      <md-card-content>
-        <h2 style="margin:0;">Message Filter</h2>
-
-        <form name="messageFilterForm" #messageFilterForm="ngForm">
-          <table class="pluginRow">
-            <tr>
-              <td>
-                <md-select placeholder="Plugin" [(ngModel)]="plugin" name="plugin">
-                  <md-option [value]="''">
-                  </md-option>
-                  <md-option *ngFor="let plugin of plugins" [value]="plugin">
-                    {{plugin}}
-                  </md-option>
-                </md-select>
-              </td>
-            </tr>
-          </table>
-
-          <ngx-datatable
-            id="messageFilterTable"
-            class="material striped"
-            [rows]="rows"
-            [columnMode]="'force'"
-            [headerHeight]="50"
-            [footerHeight]="50"
-            [rowHeight]="'auto'"
-            [scrollbarH]="true"
-            [externalPaging]="true"
-            [externalSorting]="true"
-            [loadingIndicator]="loading"
-            [count]="count"
-            [offset]="offset"
-            [limit]="pageSize"
-            [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
-            (page)='onPage($event)'
-            (sort)="onSort($event)">
-            <ngx-datatable-column name="Plugin" >
-              <ng-template let-column="column">
-                {{column.name}}
-              </ng-template>
-              <ng-template let-value="value" ngx-datatable-cell-template >
-                <span class="text-select">{{value}}</span>
-              </ng-template>
-            </ngx-datatable-column>
-            <ngx-datatable-column name="From" >
-              <ng-template let-column="column">
-                {{column.name}}
-              </ng-template>
-              <ng-template let-value="value" ngx-datatable-cell-template>
-                <span class="text-select">{{value}}</span>
-              </ng-template>
-            </ngx-datatable-column>
-            <ngx-datatable-column name="To" >
-              <ng-template let-column="column">
-                {{column.name}}
-              </ng-template>
-              <ng-template let-value="value" ngx-datatable-cell-template>
-                <span class="text-select">{{value}}</span>
-              </ng-template>
-            </ngx-datatable-column>
-            <ngx-datatable-column name="Action" >
-              <ng-template let-column="column">
-                {{column.name}}
-              </ng-template>
-              <ng-template let-value="value" ngx-datatable-cell-template>
-                <span class="text-select">{{value}}</span>
-              </ng-template>
-            </ngx-datatable-column>
-            <ngx-datatable-column name="Service" >
-              <ng-template let-column="column">
-                {{column.name}}
-              </ng-template>
-              <ng-template let-value="value" ngx-datatable-cell-template>
-                <span class="text-select">{{value}}</span>
-              </ng-template>
-            </ngx-datatable-column>
-          </ngx-datatable>
-
-          <table class="buttonsRow">
-            <tr>
-              <td>
-                &lt;!&ndash; CANCEL BUTTON &ndash;&gt;
-                <button md-raised-button color="primary" [disabled]="!enableCancel" (click)="buttonCancel()">>
-                  <md-icon>cancel</md-icon>
-                  <span>Cancel</span>
-                </button>
-                &lt;!&ndash; SAVE BUTTON &ndash;&gt;
-                <button md-raised-button color="primary" [disabled]="!enableSave" (click)="buttonSave()">>
-                  <md-icon>save</md-icon>
-                  <span>Save</span>
-                </button>
-                &lt;!&ndash; NEW BUTTON &ndash;&gt;
-                <button md-raised-button color="primary" (click)="buttonNew()">
-                  <md-icon>add</md-icon>
-                  <span>New</span>
-                </button>
-                &lt;!&ndash; DELETE BUTTON &ndash;&gt;
-                <button md-raised-button color="primary" [disabled]="!enableDelete" (click)="buttonDelete()">
-                  <md-icon>delete</md-icon>
-                  <span>Delete</span>
-                </button>
-              </td>
-            </tr>
-          </table>
-        </form>
-      </md-card-content>
-    </md-card>
-  </div>-->
-
