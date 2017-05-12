@@ -1,0 +1,51 @@
+
+<ngx-datatable
+  id="JMSTable"
+  class="material striped"
+  [rows]="rows"
+  [columnMode]="'auto'"
+  [headerHeight]="50"
+  [footerHeight]="50"
+  [rowHeight]="'auto'"
+  [scrollbarH]="true"
+  [externalPaging]="true"
+  [externalSorting]="true"
+  [loadingIndicator]="loading"
+  [count]="count"
+  [offset]="offset"
+  [limit]="pageSize"
+  [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
+  (page)='onPage($event)'
+  (sort)="onSort($event)"
+  [selected]="selected"
+  [selectionType]="'single'"
+  (activate)="onActivate($event)"
+  (select)="onSelect($event)">
+  <!-- Message Id -->
+  <ngx-datatable-column name="Message Id" [width]="500">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+  <!-- Conversation Id -->
+  <ngx-datatable-column name="Conversation Id" [width]="400" [canAutoResize]="true">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+  <!-- From Party Id -->
+  <ngx-datatable-column name="From Party Id" [canAutoResize]="true">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+</ngx-datatable>
