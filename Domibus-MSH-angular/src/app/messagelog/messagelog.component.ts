@@ -5,7 +5,6 @@ import {Observable} from "rxjs";
 import {AlertService} from "../alert/alert.service";
 import {MessagelogDialogComponent} from "app/messagelog/messagelog-dialog/messagelog-dialog.component";
 import {MdDialog} from "@angular/material";
-import * as FileSaver from "file-saver";
 
 @Component({
   moduleId: module.id,
@@ -253,45 +252,15 @@ export class MessageLogComponent {
 
   download() {
     const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace("${messageId}", this.selected[0].messageId);
-    this.http.get(url).subscribe(res => {
-      this.downloadFile(res);
-    }, err => {
-      this.alertService.error(err.json());
-    });
-
+    this.downloadNative(url);
   }
 
-  private downloadFile(response: any) {
-    const headers: Headers = response.headers;
-    const contentDisposition = headers.get("content-disposition");
-    const contentType = headers.get("content-type");
-    const fileName = contentDisposition.split(';')[1].split('=')[1];
-
-    const blob = new Blob([response._body], {type: contentType});
-    // saveAs(response.blob(), fileName);
-    // console.log("plm");
-
-    FileSaver.saveAs( response._body, fileName);
-
-    // this.downloadNative(fileName,response,contentType);
-  }
-
-  // private downloadFile(data: any) {
-  //   var blob = new Blob([data._body], {});
-  //   FileSaver.saveAs(data._body, "Pmodes.zip");
-  // }
-
-  private downloadNative(filename, content, contentType) {
+  private downloadNative(content) {
     var element = document.createElement('a');
-    element.setAttribute('href', 'data:' + contentType + ',' + encodeURIComponent(content));
-    element.setAttribute('download', filename);
-
+    element.setAttribute('href', content);
     element.style.display = 'none';
-
     document.body.appendChild(element);
-
     element.click();
-
     document.body.removeChild(element);
   }
 
