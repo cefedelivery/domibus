@@ -32,6 +32,7 @@ import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.*;
+import eu.domibus.plugin.routing.operation.LogicalOperator;
 import eu.domibus.wss4j.common.crypto.TrustStoreService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -166,11 +167,11 @@ public class AdminGUIController {
 
     //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
     protected void convertDownloadedStatusToReceived(List<? extends MessageLog> messageLogEntries) {
-        if(messageLogEntries == null) {
+        if (messageLogEntries == null) {
             return;
         }
         for (MessageLog messageLogEntry : messageLogEntries) {
-            if(MessageStatus.DOWNLOADED == messageLogEntry.getMessageStatus()) {
+            if (MessageStatus.DOWNLOADED == messageLogEntry.getMessageStatus()) {
                 messageLogEntry.setMessageStatus(MessageStatus.RECEIVED);
             }
         }
@@ -265,6 +266,7 @@ public class AdminGUIController {
         model.addObject("title", "Domibus - Message Filter: Routing Criteria");
         List<String> routingCriteriaNames = new ArrayList<>();
         model.addObject("routingcriterias", routingCriteriaFactories);
+        model.addObject("routingOperators", LogicalOperator.values());
         model.addObject("backendConnectors", routingService.getBackendFilters());
         model.setViewName("messagefilter");
         return model;
@@ -290,6 +292,11 @@ public class AdminGUIController {
 
                     List<String> mappedRoutingCrierias = map.get(backendName.replaceAll(" ", "") + "filter");
                     List<String> mappedExpression = map.get(backendName.replaceAll(" ", "") + "selection");
+                    List<String> operator = map.get(backendName.replaceAll(" ", "") + "operator");
+
+                    if (operator != null && !operator.isEmpty()) {
+                        backendFilter.setCriteriaOperator(LogicalOperator.valueOf(operator.get(0)));
+                    }
 
                     backendFilter.getRoutingCriterias().clear();
                     if (mappedRoutingCrierias != null) {
