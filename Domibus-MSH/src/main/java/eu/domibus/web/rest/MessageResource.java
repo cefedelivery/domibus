@@ -89,7 +89,7 @@ public class MessageResource {
 
         final Set<PartInfo> partInfo = userMessage.getPayloadInfo().getPartInfo();
         for (PartInfo info : partInfo) {
-            ret.put(UUID.randomUUID().toString(), info.getBinaryData());
+            ret.put(info.getHref().replace("cid:",""), info.getBinaryData());
         }
 
         ret.put("message.xml", getMessage(userMessage));
