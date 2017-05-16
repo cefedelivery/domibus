@@ -36,8 +36,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.WebServiceException;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -55,7 +53,7 @@ public class MSHDispatcherTest {
 
     private static final Log LOG = LogFactory.getLog(MSHDispatcherTest.class);
     private static final String TEST_RESOURCES_DIR = "./src/test/resources";
-    private static final String VALID_PMODE_CONFIG_URI = "SamplePModes/domibus-configuration-valid.xml";
+    private static final String VALID_PMODE_CONFIG_URI = "samplePModes/domibus-configuration-valid.xml";
     private static final String COLON_SEPARATOR = ":";
     private static final String SENDER_BLUE_GW = "blue_gw";
     private static final String RECEIVER_RED_GW = "red_gw";
@@ -137,7 +135,7 @@ public class MSHDispatcherTest {
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
         legConfiguration = getLegFromConfiguration(configuration, LEG_NO_SECNO_SEC_ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy doNothingPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/doNothingPolicy.xml")));
+        final Policy doNothingPolicy = pb.getPolicy(getClass().getClassLoader().getResourceAsStream("policies/doNothingPolicy.xml"));
         final String endPoint = getPartyFromConfiguration(configuration, RECEIVER_RED_GW).getEndpoint();
         final Map requestContextMap = new HashMap();
 
@@ -224,7 +222,7 @@ public class MSHDispatcherTest {
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
         legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy signOnlyPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
+        final Policy signOnlyPolicy = pb.getPolicy(getClass().getClassLoader().getResourceAsStream("policies/signOnly.xml"));
         //replace receiver end point as https: to enable setting TLS client params.
         final Party receiverParty = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
         final String endPoint = receiverParty.getEndpoint().replace("http:", "https:");
@@ -373,7 +371,7 @@ public class MSHDispatcherTest {
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
         legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy signOnlyPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
+        final Policy signOnlyPolicy = pb.getPolicy(getClass().getClassLoader().getResourceAsStream("policies/signOnly.xml"));
         //replace receiver end point as https: to enable setting TLS client params.
 
         new Expectations(mshDispatcher) {{
@@ -440,7 +438,7 @@ public class MSHDispatcherTest {
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
         legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy signOnlyPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
+        final Policy signOnlyPolicy = pb.getPolicy(getClass().getClassLoader().getResourceAsStream("policies/signOnly.xml"));
         //replace receiver end point as https: to enable setting TLS client params.
         final Party receiverParty = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
         final String endPoint = receiverParty.getEndpoint().replace("http:", "https:");
@@ -534,7 +532,7 @@ public class MSHDispatcherTest {
         configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
         legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
-        final Policy signOnlyPolicy = pb.getPolicy(new FileInputStream(new File(TEST_RESOURCES_DIR, "policies/signOnly.xml")));
+        final Policy signOnlyPolicy = pb.getPolicy(getClass().getClassLoader().getResourceAsStream("policies/signOnly.xml"));
         //replace receiver end point as https: to enable setting TLS client params.
         final Party receiverParty = getPartyFromConfiguration(configuration, RECEIVER_RED_GW);
         final String endPoint = receiverParty.getEndpoint().replace("http:", "https:");

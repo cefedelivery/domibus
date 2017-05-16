@@ -38,7 +38,7 @@
         <info>
             <title>domibus-plugins.xml</title>
         </info>
-        <xi:include href="../main/conf/domibus/domibus-plugins.xml"
+        <xi:include href="../../../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-plugins.xml"
                     parse="text"/>
     </programlisting>
 

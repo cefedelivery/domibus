@@ -37,7 +37,7 @@
         <info>
             <title>domibus-transactions.xml</title>
         </info>
-        <xi:include href="../main/conf/domibus/domibus-transactions.xml"
+        <xi:include href="../../../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-transactions.xml"
                     parse="text"/>
     </programlisting>
 

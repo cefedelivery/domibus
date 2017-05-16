@@ -11,6 +11,7 @@
     <name>Domibus MSH</name>
     <modules>
         <module>Domibus-MSH</module>
+        <module>Domibus-MSH-tomcat</module>
         <module>Domibus-MSH-api</module>
         <module>Domibus-MSH-ext-services-delegate</module>
         <module>Domibus-MSH-logging</module>
@@ -30,7 +31,7 @@
         <module>Domibus-default-ws-plugin</module>
         <module>Domibus-default-jms-plugin</module>
         <module>Domibus-MSH-fiware</module>
-        <!--<module>Domibus-ActiveMQ-ThroughputLimiter</module>-->
+        <module>Domibus-MSH-test</module>
     </modules>
     <properties>
         <cxf.version>3.1.7</cxf.version>

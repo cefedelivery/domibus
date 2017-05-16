@@ -37,7 +37,7 @@
         <info>
             <title>domibus-security.xml</title>
         </info>
-        <xi:include href="../main/conf/domibus/domibus-security.xml"
+        <xi:include href="../../../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-security.xml"
                     parse="text"/>
     </programlisting>
 

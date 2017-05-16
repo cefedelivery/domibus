@@ -38,7 +38,7 @@
         <info>
             <title>domibus-datasources.xml</title>
         </info>
-        <xi:include href="../main/conf/domibus/domibus-datasources.xml"
+        <xi:include href="../../../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-datasources.xml"
                     parse="text"/>
     </programlisting>
 

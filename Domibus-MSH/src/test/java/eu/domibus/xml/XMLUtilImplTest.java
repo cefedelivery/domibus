@@ -30,7 +30,7 @@ public class XMLUtilImplTest {
     @Test
     public void testUnmarshalWithNoWhiteSpaces() throws Exception {
         InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(PModeProvider.SCHEMAS_DIR + PModeProvider.DOMIBUS_PMODE_XSD);
-        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("SamplePModes/domibus-configuration-valid.xml");
+        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-valid.xml");
         JAXBContext jaxbContext = JAXBContext.newInstance("eu.domibus.common.model.configuration");
         UnmarshallerResult unmarshal = xmlUtil.unmarshal(false, jaxbContext, xmlStream, xsdStream);
         assertNotNull(unmarshal.getResult());
@@ -42,7 +42,7 @@ public class XMLUtilImplTest {
     @Test
     public void testUnmarshalWithWhiteSpaces() throws Exception {
         InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(PModeProvider.SCHEMAS_DIR + PModeProvider.DOMIBUS_PMODE_XSD);
-        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("SamplePModes/domibus-configuration-with-whitespaces.xml");
+        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-with-whitespaces.xml");
         JAXBContext jaxbContext = JAXBContext.newInstance("eu.domibus.common.model.configuration");
         UnmarshallerResult unmarshal = xmlUtil.unmarshal(false, jaxbContext, xmlStream, xsdStream);
         assertNotNull(unmarshal.getResult());
@@ -55,7 +55,7 @@ public class XMLUtilImplTest {
     @Test
     public void testUnmarshalWithWhiteSpacesIgnored() throws Exception {
         InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(PModeProvider.SCHEMAS_DIR + PModeProvider.DOMIBUS_PMODE_XSD);
-        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("SamplePModes/domibus-configuration-with-whitespaces.xml");
+        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-with-whitespaces.xml");
         JAXBContext jaxbContext = JAXBContext.newInstance("eu.domibus.common.model.configuration");
         UnmarshallerResult unmarshal = xmlUtil.unmarshal(true, jaxbContext, xmlStream, xsdStream);
         assertNotNull(unmarshal.getResult());

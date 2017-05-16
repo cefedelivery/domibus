@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+                           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+                           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+                           http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
+
+    <import resource="classpath*:config/ext-services-delegate-domibusContext.xml"/>
+
+    <context:annotation-config/>
+    <context:component-scan base-package="eu.domibus"/>
+    <context:property-placeholder properties-ref="domibusProperties" ignore-resource-not-found="false"/>
+
+    <jms:annotation-driven/>
+
+
+    <tx:annotation-driven order="1" transaction-manager="transactionManager" proxy-target-class="true"/>
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+    <aop:config proxy-target-class="true">
+        <!-- all services from eu.domibus package which do not use a speicific @Transactional annotation; the implementations of the org.apache.cxf.phase.PhaseInterceptor are not taken into account due to final methods present in the CXF abstract class  -->
+        <aop:pointcut id="allMethods" expression="execution(public * eu.domibus..*(..)) and not @annotation(org.springframework.transaction.annotation.Transactional) and not within(@org.springframework.transaction.annotation.Transactional *) and not within(org.apache.cxf.phase.PhaseInterceptor+)"/>
+        <aop:advisor order="2" advice-ref="txAdvice" pointcut-ref="allMethods"/>
+    </aop:config>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+
+    <import resource="classpath*:config/activemq-jms-context.xml"/>
+    <import resource="classpath*:config/tomcat-taskexecutor-context.xml"/>
+
+    <import resource="file:///${domibus.config.location}/domibus-plugins.xml"/>
+    <import resource="msh-config.xml"/>
+    <import resource="cxf-endpoint.xml"/>
+    <import resource="spring-security.xml"/>
+
+
+    <cache:annotation-driven/>
+
+    <bean id="domainCoreConverter" class="org.dozer.DozerBeanMapper">
+        <property name="mappingFiles">
+            <list>
+                <value>config/DomainCoreBeanMapping.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Security Policy caching -->
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager" ref="ehcache"/>
+    </bean>
+    <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation" value="file:///${domibus.config.location}/internal/ehcache.xml"/>
+    </bean>
+
+    <!-- JAXB Context for mapping of ebMS3 schema -->
+    <bean id="jaxbContextEBMS" class="javax.xml.bind.JAXBContext" factory-method="newInstance">
+        <constructor-arg type="java.lang.String" value="eu.domibus.ebms3.common.model"/>
+        <!--value="eu.domibus.common.model.org.oasis_open.docs.ebxml_bp.ebbp_signals_2_0:eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704:eu.domibus.common.model.org.w3._2003._05.soap_envelope:eu.domibus.common.model.org.w3._2005._05.xmlmime:eu.domibus.common.model.org.xmlsoap.schemas.soap.envelope"/>-->
+    </bean>
+
+    <!-- JAXB context for mapping of pMode XML configuration -->
+    <bean id="jaxbContextConfig" class="javax.xml.bind.JAXBContext" factory-method="newInstance">
+        <constructor-arg type="java.lang.String"
+                         value="eu.domibus.common.model.configuration"/>
+    </bean>
+
+    <bean id="documentBuilderFactory" class="javax.xml.parsers.DocumentBuilderFactory" factory-method="newInstance"
+          scope="prototype"/>
+
+    <bean id="transformerFactory" class="javax.xml.transform.TransformerFactory" factory-method="newInstance"/>
+
+    <!-- Factory for creating requests and responses-->
+    <bean id="messageFactory" class="${messageFactoryClass}"/>
+
+    <!-- datetimeformat to be used inside the ebXML message -->
+    <bean id="xmlDateTimeFormat" class="java.text.SimpleDateFormat">
+        <constructor-arg value="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"/>
+    </bean>
+    <bean id="dateFormatter" class="eu.domibus.ebms3.common.model.TimestampDateFormatter"/>
+
+</beans>

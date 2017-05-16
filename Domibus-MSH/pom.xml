@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>domibus-MSH</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>Domibus MSH Core</name>
 
     <properties>
@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jstl.version>1.2</jstl.version>
-        <atomikos.version>3.9.3</atomikos.version>
+
         <dom4j.version>1.6.1</dom4j.version>
         <webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
         <timestamp>${maven.build.timestamp}</timestamp>
@@ -127,8 +127,8 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/wildfly/wildfly-full.xml</descriptor>
                                 <descriptor>src/main/assembly/wildfly/wildfly-configuration-only.xml</descriptor>
-                                <descriptor>src/main/assembly/sample-configuration-and-testing.xml</descriptor>
-                                <descriptor>src/main/assembly/sql-scripts.xml</descriptor>
+                                <descriptor>../Domibus-MSH-tomcat/src/main/assembly/sample-configuration-and-testing.xml</descriptor>
+                                <descriptor>../Domibus-MSH-tomcat/src/main/assembly/sql-scripts.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>
@@ -240,8 +240,8 @@
                         <configuration>
                             <descriptors>
                                 <descriptor>src/main/assembly/weblogic/weblogic-configuration-only.xml</descriptor>
-                                <descriptor>src/main/assembly/sample-configuration-and-testing.xml</descriptor>
-                                <descriptor>src/main/assembly/sql-scripts.xml</descriptor>
+                                <descriptor>../Domibus-MSH-tomcat/src/main/assembly/sample-configuration-and-testing.xml</descriptor>
+                                <descriptor>../Domibus-MSH-tomcat/src/main/assembly/sql-scripts.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>
@@ -325,166 +325,6 @@
                 </dependency>
             </dependencies>
         </profile>
-        <profile>
-            <id>tomcat-mysql</id>
-            <properties>
-                <filesToExclude>logback.xml</filesToExclude>
-                <domibus.classifier>tomcat</domibus.classifier>
-                <tomcat.version>8.0.24</tomcat.version>
-            </properties>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>eu.domibus</groupId>
-                    <artifactId>domibus-taskexecutor-tomcat</artifactId>
-                    <version>${project.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>eu.domibus</groupId>
-                    <artifactId>domibus-jms-activemq</artifactId>
-                    <version>${project.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-spring</artifactId>
-                    <version>${activemq.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-jaas</artifactId>
-                    <version>${activemq.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-kahadb-store</artifactId>
-                    <version>${activemq.version}</version>
-                </dependency>
-
-                <!-- Atokimos Library for distributed transactions -->
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-jta</artifactId>
-                    <version>${atomikos.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-jdbc</artifactId>
-                    <version>${atomikos.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-jms</artifactId>
-                    <version>${atomikos.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-hibernate3</artifactId>
-                    <version>${atomikos.version}</version>
-                    <exclusions>
-                        <exclusion>
-                            <artifactId>hibernate</artifactId>
-                            <groupId>org.hibernate</groupId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-            </dependencies>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>true</filtering>
-                    </resource>
-                </resources>
-
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.cargo</groupId>
-                        <artifactId>cargo-maven2-plugin</artifactId>
-                        <version>1.4.12</version>
-                        <executions>
-                            <execution>
-                                <id>build-tomcat</id>
-                                <goals>
-                                    <goal>configure</goal>
-                                    <goal>package</goal>
-                                </goals>
-                                <phase>pre-integration-test</phase>
-                                <configuration>
-                                    <container>
-                                        <containerId>tomcat8x</containerId>
-                                        <zipUrlInstaller>
-                                            <url>
-                                                https://joinup.ec.europa.eu/nexus/service/local/repositories/central/content/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip
-                                            </url>
-                                        </zipUrlInstaller>
-                                    </container>
-                                    <packager>
-                                        <outputLocation>
-                                            ${project.build.directory}/artifacts/domibus-container
-                                        </outputLocation>
-                                    </packager>
-                                    <deployables>
-                                        <deployable/>
-                                    </deployables>
-                                    <configuration>
-                                        <files>
-                                            <file>
-                                                <file>${project.basedir}/src/main/conf/domibus
-                                                </file>
-                                                <todir>conf/domibus</todir>
-                                            </file>
-                                        </files>
-                                    </configuration>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.4</version>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/assembly/tomcat-full.xml
-                                </descriptor>
-                                <descriptor>src/main/assembly/default-jms-plugin.xml
-                                </descriptor>
-                                <descriptor>src/main/assembly/default-ws-plugin.xml
-                                </descriptor>
-                                <descriptor>src/main/assembly/sample-configuration-and-testing.xml
-                                </descriptor>
-                                <descriptor>src/main/assembly/configuration-only.xml
-                                </descriptor>
-                                <descriptor>src/main/assembly/sql-scripts.xml
-                                </descriptor>
-                            </descriptors>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>make-assembly</id>
-                                <!-- bound to verify because we need to execute cargo-package first
-                                    which is in pre-integration-test -->
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
     </profiles>
     <dependencies>
         <!-- Domibus modules -->
@@ -768,6 +608,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.jmockit</groupId>
             <artifactId>jmockit</artifactId>
             <scope>test</scope>
@@ -779,93 +625,10 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                <excludes>
-                    <exclude>${filesToExclude}</exclude>
-                </excludes>
+                <filtering>true</filtering>
             </resource>
         </resources>
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-        </testResources>
         <plugins>
-            <plugin>
-                <groupId>com.smartbear.soapui</groupId>
-                <artifactId>soapui-pro-maven-plugin</artifactId>
-                <version>5.1.2</version>
-                <executions>
-                    <execution>
-                    <phase>none</phase>
-                    <goals>
-                        <goal>test</goal>
-                    </goals>
-                    </execution>
-                </executions>
-                    <configuration>
-                        <outputFolder>${project.build.directory}/surefire-reports</outputFolder>
-                        <junitReport>true</junitReport>
-                        <printReport>true</printReport>
-                        <testSuite>Web Service Submission</testSuite>
-                        <projectProperties>
-                                <value>localUrl=${soapui.localUrl}</value>
-                                <value>remoteUrl=${soapui.remoteUrl}</value>
-                        </projectProperties>
-                        <soapuiProperties>
-                            <property>
-                                <name>soapui.logroot</name>
-                                <value>${project.build.directory}/soapui/logs/</value>
-                            </property>
-                            <property>
-                                <name>http.nonProxyHosts</name>
-                                <value>localhost|127.*|[::1]</value>
-                            </property>
-                        </soapuiProperties>
-                        <testFailIgnore>false</testFailIgnore>
-                        <projectFile>${projectFile}</projectFile>
-                    </configuration>
-
-                <dependencies>
-                    <dependency>
-                        <groupId>org.reflections</groupId>
-                        <artifactId>reflections</artifactId>
-                        <version>0.9.8</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>net.ju-n.maven.plugins</groupId>
-                <artifactId>checksum-maven-plugin</artifactId>
-                <version>1.2</version>
-                <executions>
-                    <execution>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>files</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <algorithms>
-                        <algorithm>SHA-256</algorithm>
-                    </algorithms>
-                    <fileSets>
-                        <fileSet>
-                            <directory>${project.basedir}/src/main/conf/domibus</directory>
-                            <includes>
-                                <include>domibus-datasources.xml</include>
-                            </includes>
-                        </fileSet>
-                        <fileSet>
-                            <directory>${project.basedir}/src/main/conf/domibus</directory>
-                            <includes>
-                                <include>domibus-security.xml</include>
-                            </includes>
-                        </fileSet>
-                    </fileSets>
-                    <individualFilesOutputDirectory>${project.build.outputDirectory}</individualFilesOutputDirectory>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -877,17 +640,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.3</version>
-                <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <webXml>${webXmlPath}</webXml>
-                    <warName>${project.artifactId}-${project.version}</warName>
-                    <classifier>${domibus.classifier}</classifier>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -916,12 +668,6 @@
                 </executions>
                 <configuration>
                     <failOnError>false</failOnError>
-                    <!--doclet>org.dbdoclet.doclet.docbook.DocBookDoclet</doclet>
-                    <docletArtifact>
-                        <groupId>org.dbdoclet</groupId>
-                        <artifactId>dbdoclet</artifactId>
-                        <version>8.0.2</version>
-                    </docletArtifact-->
                 </configuration>
 
             </plugin>
