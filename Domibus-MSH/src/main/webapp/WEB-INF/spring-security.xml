@@ -42,6 +42,7 @@
         <intercept-url pattern="/rest/application/info" access="permitAll"/>
         <intercept-url pattern="/rest/pmode/**" access="hasRole('ROLE_ADMIN')"/>
         <intercept-url pattern="/rest/truststore/**" access="hasRole('ROLE_ADMIN')"/>
+        <intercept-url pattern="/rest/jms/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')"/>
         <intercept-url pattern="/rest/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')"/>
 
         <!-- Enable CSRF protection -->

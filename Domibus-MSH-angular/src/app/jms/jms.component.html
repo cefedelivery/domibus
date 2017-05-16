@@ -1,51 +1,87 @@
+<div style="margin:15px">
 
-<ngx-datatable
-  id="JMSTable"
-  class="material striped"
-  [rows]="rows"
-  [columnMode]="'auto'"
-  [headerHeight]="50"
-  [footerHeight]="50"
-  [rowHeight]="'auto'"
-  [scrollbarH]="true"
-  [externalPaging]="true"
-  [externalSorting]="true"
-  [loadingIndicator]="loading"
-  [count]="count"
-  [offset]="offset"
-  [limit]="pageSize"
-  [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
-  (page)='onPage($event)'
-  (sort)="onSort($event)"
-  [selected]="selected"
-  [selectionType]="'single'"
-  (activate)="onActivate($event)"
-  (select)="onSelect($event)">
-  <!-- Message Id -->
-  <ngx-datatable-column name="Message Id" [width]="500">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Conversation Id -->
-  <ngx-datatable-column name="Conversation Id" [width]="400" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- From Party Id -->
-  <ngx-datatable-column name="From Party Id" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-</ngx-datatable>
+  <md-select placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector" style="width: 35%">
+    <md-option *ngFor="let queue of queues" [value]="queue">
+      {{queue.internal ? "[internal]" :""}} {{queue.name}} ({{queue.numberOfMessages}})
+    </md-option>
+  </md-select>
+
+  <md-input-container>
+    <input mdInput placeholder="Selector">
+  </md-input-container>
+
+  <md2-datepicker placeholder="From:"
+                  [(ngModel)]="fromDateTime"
+                  name="receivedFrom"
+                  [type]="'datetime'"
+                  [max]="timestampFromMaxDate"
+                  (change)='onTimestampFromChange($event)'
+                  #timestampControl="ngModel">
+  </md2-datepicker>
+  <md2-datepicker placeholder="To:"
+                  [(ngModel)]="toDateTime"
+                  name="receivedTo"
+                  [min]="timestampToMinDate"
+                  [max]="timestampToMaxDate"
+                  (change)='onTimestampToChange($event)'
+                  [type]="'datetime'"
+                  #timestampControl="ngModel">
+  </md2-datepicker>
+
+
+  <md-input-container>
+    <input mdInput placeholder="JMS Type">
+  </md-input-container>
+
+  <button md-raised-button color="primary" (click)="apply()"><span>Apply</span></button>
+
+
+  <ngx-datatable
+    id="errorLogTable"
+    class="material striped"
+    [rows]="rows"
+    [columnMode]="'force'"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    [rowHeight]="'auto'"
+    [scrollbarH]="true"
+    [externalPaging]="true"
+    [externalSorting]="true"
+    [loadingIndicator]="loading"
+    [count]="count"
+    [offset]="offset"
+    [limit]="pageSize"
+    [sorts]="[{prop: 'name', dir: 'desc'}]"
+    (page)='onPage($event)'
+    (sort)="onSort($event)">
+
+    <ngx-datatable-column name="ID" prop="id">
+    </ngx-datatable-column>
+
+    <ngx-datatable-column name="JMS Type" prop="type">
+    </ngx-datatable-column>
+
+    <ngx-datatable-column name="Time" prop="timestamp">
+      <ng-template let-value="value" ngx-datatable-cell-template>
+        {{value | date: dateFormat}}
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column name="Content" prop="content">
+    </ngx-datatable-column>
+
+    <ngx-datatable-column name="Custop prop" prop="customProperties">
+      <ng-template let-value="value" ngx-datatable-cell-template>
+        {{value | json}}
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column name="JMS prop" prop="jmsproperties">
+      <ng-template let-value="value" ngx-datatable-cell-template>
+        {{value | json}}
+      </ng-template>
+    </ngx-datatable-column>
+
+  </ngx-datatable>
+
+</div>

@@ -30,16 +30,12 @@
       <span>PMode</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/jms']" *ngIf="isAdmin">
-      <md-icon>description</md-icon>
+      <md-icon>computer</md-icon>
       <span>JMS</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="isAdmin">
       <md-icon>vpn_key</md-icon>
       <span>Truststore</span>
-    </button>
-    <button md-raised-button class="sideNavButton">
-      <md-icon>show_chart</md-icon>
-      <span>JMS Monitoring</span>
     </button>
 
     <div id="bottomLogo">
