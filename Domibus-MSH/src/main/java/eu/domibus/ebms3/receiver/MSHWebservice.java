@@ -33,10 +33,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
@@ -285,7 +282,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     private void saveResponse(final SOAPMessage responseMessage) {
         try {
-            Messaging messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
+            Messaging messaging = getMessaging(responseMessage);
             final SignalMessage signalMessage = messaging.getSignalMessage();
             // Stores the signal message
             signalMessageDao.create(signalMessage);
@@ -324,6 +321,11 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging) throws SOAPException, JAXBException, TransformerException, EbMS3Exception {
 
         UserMessage userMessage = messaging.getUserMessage();
+
+        /* persist security header for non repudiation purposes */
+        SecurityHeader securityHeader = getSecurityHeader(request);
+        userMessage.setSecurityHeader(securityHeader);
+        LOG.debug("Security header of the request: " + securityHeader.getAny().iterator().next().toString());
 
         handlePayloads(request, userMessage);
 
@@ -424,10 +426,16 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
     }
 
-    private Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
-        final Node messagingXml = (Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
+    private Messaging getMessaging(final SOAPMessage soapMessage) throws SOAPException, JAXBException {
+        final Node messagingXml = (Node) soapMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
         final Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
         @SuppressWarnings("unchecked") final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);
         return root.getValue();
+    }
+
+    private SecurityHeader getSecurityHeader(final SOAPMessage soapMessage) throws SOAPException, JAXBException {
+        final Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
+        @SuppressWarnings("unchecked") final SecurityHeader securityHeader = unmarshaller.unmarshal(soapMessage.getSOAPHeader(), SecurityHeader.class).getValue();
+        return securityHeader;
     }
 }

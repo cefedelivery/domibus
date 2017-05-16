@@ -42,7 +42,7 @@ import java.util.Set;
  * @since 3.0
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SignalMessage", propOrder = {"messageInfo", "pullRequest", "receipt", "error", "any"})
+@XmlType(name = "SignalMessage", propOrder = {"messageInfo", "pullRequest", "securityHeader", "receipt", "error", "any"})
 @Entity
 @Table(name = "TB_SIGNAL_MESSAGE")
 @NamedQueries({
@@ -59,6 +59,9 @@ public class SignalMessage extends AbstractBaseEntity {
     @XmlElement(name = "PullRequest")
     @Embedded
     protected PullRequest pullRequest;
+    @XmlElement(name = "SecurityHeader")
+    @OneToOne(cascade = CascadeType.ALL)
+    protected SecurityHeader securityHeader;
     @XmlElement(name = "Receipt")
     @OneToOne(cascade = CascadeType.ALL)
     protected Receipt receipt;
@@ -107,6 +110,20 @@ public class SignalMessage extends AbstractBaseEntity {
      */
     public void setPullRequest(final PullRequest value) {
         this.pullRequest = value;
+    }
+
+    /**
+     * The SecurityHeader element encapsulates the wsse:Security header.
+     */
+    public SecurityHeader getSecurityHeader() {
+        return securityHeader;
+    }
+
+    /**
+     * The SecurityHeader element encapsulates the wsse:Security header.
+     */
+    public void setSecurityHeader(SecurityHeader securityHeader) {
+        this.securityHeader = securityHeader;
     }
 
     /**

@@ -30,10 +30,8 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Error;
-import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.common.model.ObjectFactory;
-import eu.domibus.ebms3.common.model.SignalMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +40,9 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
@@ -73,15 +73,21 @@ public class ResponseHandler {
     public CheckResult handle(final SOAPMessage response) throws EbMS3Exception {
 
         final Messaging messaging;
+        final SecurityHeader securityHeader;
 
         try {
-            messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) response.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
+            messaging = getMessaging(response);
+            securityHeader = getSecurityHeader(response);
         } catch (JAXBException | SOAPException ex) {
             logger.error("Unable to read message due to error: ", ex);
             return CheckResult.UNMARSHALL_ERROR;
         }
 
         final SignalMessage signalMessage = messaging.getSignalMessage();
+        /* persist security header for non repudiation purposes */
+        signalMessage.setSecurityHeader(securityHeader);
+        logger.info("Security header of the response: " + securityHeader.getAny().iterator().next().toString());
+
         // Stores the signal message
         signalMessageDao.create(signalMessage);
         // Updating the reference to the signal message
@@ -129,5 +135,19 @@ public class ResponseHandler {
 
     public enum CheckResult {
         OK, WARNING, UNMARSHALL_ERROR
+    }
+
+
+    private Messaging getMessaging(final SOAPMessage soapMessage) throws SOAPException, JAXBException {
+        final Node messagingXml = (Node) soapMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
+        final Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
+        @SuppressWarnings("unchecked") final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);
+        return root.getValue();
+    }
+
+    private SecurityHeader getSecurityHeader(final SOAPMessage soapMessage) throws SOAPException, JAXBException {
+        final Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
+        @SuppressWarnings("unchecked") final SecurityHeader securityHeader = unmarshaller.unmarshal(soapMessage.getSOAPHeader(), SecurityHeader.class).getValue();
+        return securityHeader;
     }
 }

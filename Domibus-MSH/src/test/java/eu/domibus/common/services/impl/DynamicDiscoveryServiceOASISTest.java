@@ -36,7 +36,7 @@ public class DynamicDiscoveryServiceOASISTest {
 
     private static final String TEST_SML_ZONE = "ehealth.acc.edelivery.tech.ec.europa.eu";
 
-    private static final String TEST_KEYSTORE_PASSWORD = "ehealth";
+    private static final String TEST_KEYSTORE_PASSWORD = "test123";
 
     private static final String TEST_RECEIVER_ID = "urn:romania:ncpb";
     private static final String TEST_RECEIVER_ID_TYPE = "ehealth-actorid-qns";
@@ -115,7 +115,7 @@ public class DynamicDiscoveryServiceOASISTest {
     * This is not a unit tests but the code is useful to test real SMP entries.
      */
     @Test
-    @Ignore
+    //@Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
             domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
@@ -130,7 +130,8 @@ public class DynamicDiscoveryServiceOASISTest {
 
         }};
 
-        EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("urn:romania:ncpb", "ehealth-actorid-qns", "ehealth-resid-qns::urn::epsos##services:extended:epsos::107", "urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
+        //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("urn:romania:ncpb", "ehealth-actorid-qns", "ehealth-resid-qns::urn::epsos##services:extended:epsos::107", "urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
+        EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0007:9340033829test2", "ehealth-actorid-qns", "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
         System.out.println(endpointInfo.getAddress());
         Assert.assertNotNull(endpointInfo);
         Assert.assertEquals("http://localhost:8180/domibus/services/msh", endpointInfo.getAddress());
