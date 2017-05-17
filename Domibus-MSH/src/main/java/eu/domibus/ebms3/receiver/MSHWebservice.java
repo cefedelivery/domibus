@@ -325,7 +325,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         UserMessage userMessage = messaging.getUserMessage();
 
         String rawXMLMessage = SoapUtil.getRawXMLMessage(request);
-        LOG.info("Persist raw XML envelope: " + rawXMLMessage);
+        LOG.debug("Persist raw XML envelope: " + rawXMLMessage);
         RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
         rawEnvelopeLog.setRawXML(rawXMLMessage);
         rawEnvelopeLog.setUserMessage(userMessage);

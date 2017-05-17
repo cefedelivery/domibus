@@ -89,7 +89,7 @@ public class ResponseHandler {
         }
 
         String rawXMLMessage = SoapUtil.getRawXMLMessage(response);
-        logger.info("Persist raw XML envelope: " + rawXMLMessage);
+        logger.debug("Persist raw XML envelope: " + rawXMLMessage);
         final SignalMessage signalMessage = messaging.getSignalMessage();
         RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
         rawEnvelopeLog.setRawXML(rawXMLMessage);
