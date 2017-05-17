@@ -13,6 +13,7 @@
         <module>Domibus-MSH</module>
         <module>Domibus-MSH-tomcat</module>
         <module>Domibus-MSH-weblogic</module>
+        <module>Domibus-MSH-wildfly</module>
         <module>Domibus-MSH-api</module>
         <module>Domibus-MSH-ext-services-delegate</module>
         <module>Domibus-MSH-logging</module>

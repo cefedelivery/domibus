@@ -43,7 +43,7 @@
         </file>
         <!-- WildFly -->
         <file>
-            <source>${project.basedir}/../domibus-MSH/src/main/conf/wildfly/domibus/conf/plugins/config/ws-plugin.xml</source>
+            <source>${project.basedir}/../domibus-MSH-wildfly/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
             <outputDirectory>conf/domibus/plugins/config/wildfly</outputDirectory>
             <filtered>false</filtered>
         </file>
