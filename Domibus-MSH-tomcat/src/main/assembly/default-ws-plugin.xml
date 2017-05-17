@@ -37,7 +37,7 @@
         </file>
         <!-- WebLogic -->
         <file>
-            <source>${project.basedir}/../domibus-MSH/src/main/conf/weblogic/domibus/conf/plugins/config/ws-plugin.xml</source>
+            <source>${project.basedir}/../domibus-MSH-weblogic/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
             <outputDirectory>conf/domibus/plugins/config/weblogic</outputDirectory>
             <filtered>false</filtered>
         </file>

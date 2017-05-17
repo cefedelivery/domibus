@@ -40,14 +40,14 @@
             <outputDirectory>conf/domibus/plugins/config/tomcat</outputDirectory>
             <filtered>false</filtered>
         </file>
-        <!-- WebLogic -->
+        <!-- TODO move it to a dedicated module WebLogic -->
         <file>
-            <source>${project.basedir}/../domibus-MSH/src/main/conf/weblogic/domibus/conf/plugins/config/jms-plugin.xml</source>
+            <source>${project.basedir}/../domibus-MSH-weblogic/src/main/conf/domibus/plugins/config/jms-plugin.xml</source>
             <outputDirectory>conf/domibus/plugins/config/weblogic</outputDirectory>
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.basedir}/../domibus-MSH/src/main/conf/weblogic/domibus/conf/plugins/config/jms-business-defaults.properties</source>
+            <source>${project.basedir}/../domibus-MSH-weblogic/src/main/conf/domibus/plugins/config/jms-business-defaults.properties</source>
             <outputDirectory>conf/domibus/plugins/config/weblogic</outputDirectory>
             <filtered>false</filtered>
         </file>
