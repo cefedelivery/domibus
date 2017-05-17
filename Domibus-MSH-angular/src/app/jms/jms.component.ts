@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Http, Headers, Response} from "@angular/http";
 import {AlertService} from "../alert/alert.service";
+import {MessagesRequestRO} from "./ro/messages-request-ro";
 
 @Component({
   selector: 'app-jms',
@@ -16,14 +17,20 @@ export class JmsComponent implements OnInit {
 
   private queues = [];
 
-  private selectedSource: any;
-  private fromDateTime: string;
-  private toDateTime: string;
+  private _selectedSource: any;
+  get selectedSource(): any {
+    return this._selectedSource;
+  }
 
-  private selected = [];
+  set selectedSource(value: any) {
+    this._selectedSource = value;
+    this.request.source = value.name;
+  }
+
+  private selectedMessages: Array<any> = [];
   private loading: boolean = false;
 
-  rows = [];
+  private rows: Array<any> = [];
   private pageSizes: Array<any> = [
     {key: '5', value: 5},
     {key: '10', value: 10},
@@ -32,6 +39,8 @@ export class JmsComponent implements OnInit {
     {key: '100', value: 100}
   ];
   private pageSize: number = this.pageSizes[0].value;
+
+  private request = new MessagesRequestRO()
 
   constructor(private http: Http, private alertService: AlertService) {
   }
@@ -43,7 +52,7 @@ export class JmsComponent implements OnInit {
         let destinations = response.json().jmsDestinations;
         for (let key in destinations) {
           this.queues.push(destinations[key])
-          if(key.match('domibus\.DLQ')){
+          if (key.match('domibus\.DLQ')) {
             this.selectedSource = destinations[key];
           }
         }
@@ -62,9 +71,9 @@ export class JmsComponent implements OnInit {
   }
 
   onSelect({selected}) {
-    // console.log('Select Event', selected, this.selected);
-    this.selected.splice(0, this.selected.length);
-    this.selected.push(...selected);
+    // console.log('Select Event', selectedMessages, this.selectedMessages);
+    this.selectedMessages.splice(0, this.selectedMessages.length);
+    this.selectedMessages.push(...selected);
   }
 
   onActivate(event) {
@@ -82,8 +91,8 @@ export class JmsComponent implements OnInit {
   search() {
     let headers = new Headers({'Content-Type': 'application/json'});
     this.loading = true;
-    this.selected = [];
-    this.http.post("rest/jms/messages", {"source": "domibus.notification.webservice"}, {headers: headers}).subscribe(
+    this.selectedMessages = [];
+    this.http.post("rest/jms/messages", JSON.stringify(this.request), {headers: headers}).subscribe(
       (response: Response) => {
         let messages = response.json().messages;
         this.rows = messages;

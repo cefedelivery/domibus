@@ -1,5 +1,5 @@
 #jmsQueueSelector {
-  width: 35%;
+  width: 40%;
 }
 
 #jmsFromDatePicker {
@@ -16,4 +16,8 @@
 
 #jmsType {
   width: 35%
+}
+
+.selectionCriteria {
+  margin-top:5px;
 }

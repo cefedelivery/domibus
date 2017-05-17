@@ -25,15 +25,15 @@
       <md-icon>sms_failed</md-icon>
       <span>Error Log</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="isAdmin">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="hasAdmin()">
       <md-icon>description</md-icon>
       <span>PMode</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/jms']" *ngIf="isAdmin">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/jms']" *ngIf="hasAdmin()">
       <md-icon>computer</md-icon>
-      <span>JMS</span>
+      <span>JMS Monitoring</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="isAdmin">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="hasAdmin()">
       <md-icon>vpn_key</md-icon>
       <span>Truststore</span>
     </button>

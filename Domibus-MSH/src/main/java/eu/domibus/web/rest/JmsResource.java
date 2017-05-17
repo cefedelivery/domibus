@@ -52,8 +52,7 @@ public class JmsResource {
 
     public static class CustomJsonDateDeserializer extends JsonDeserializer<Date> {
         @Override
-        public Date deserialize(JsonParser jsonparser,
-                                DeserializationContext deserializationcontext) throws IOException {
+        public Date deserialize(JsonParser jsonparser, DeserializationContext deserializationcontext) throws IOException {
 
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String date = jsonparser.getText();

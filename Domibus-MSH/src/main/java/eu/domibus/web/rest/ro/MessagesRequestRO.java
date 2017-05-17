@@ -37,6 +37,7 @@ public class MessagesRequestRO {
         return fromDate;
     }
 
+    @JsonDeserialize(using = JmsResource.CustomJsonDateDeserializer.class)
     public void setFromDate(Date fromDate) {
         this.fromDate = fromDate;
     }

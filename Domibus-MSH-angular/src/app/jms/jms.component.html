@@ -1,49 +1,53 @@
-<md-card>
-  <md-card-content>
-    <div style="width:100%">
-      <div style="display: inline-block;width: 90%;height: auto;">
-        <div>
-          <md-select placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector" id="jmsQueueSelector">
-            <md-option *ngFor="let queue of queues" [value]="queue">
-              {{queue.internal ? "[internal]" :""}} {{queue.name}} ({{queue.numberOfMessages}})
-            </md-option>
-          </md-select>
+<div class="selectionCriteria">
+  <md-card>
+    <md-card-content>
+      <p class="domibusTextHeading" style="margin:0;font-weight: bold">JMS Monitoring</p>
+      <div style="width:100%">
+        <div style="display: inline-block;width: 90%;height: auto;">
+          <div>
+            <md-select placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector" id="jmsQueueSelector">
+              <md-option *ngFor="let queue of queues" [value]="queue">
+                {{queue.internal ? "[internal]" :""}} {{queue.name}} ({{queue.numberOfMessages}})
+              </md-option>
+            </md-select>
 
-          <md2-datepicker id="jmsFromDatePicker" placeholder="From:"
-                          [(ngModel)]="fromDateTime"
-                          name="receivedFrom"
-                          [type]="'datetime'"
-                          [max]="timestampFromMaxDate"
-                          (change)='onTimestampFromChange($event)'
-                          #timestampControl="ngModel">
-          </md2-datepicker>
-          <md2-datepicker id="jmsToDatePicker" placeholder="To:"
-                          [(ngModel)]="toDateTime"
-                          name="receivedTo"
-                          [min]="timestampToMinDate"
-                          [max]="timestampToMaxDate"
-                          (change)='onTimestampToChange($event)'
-                          [type]="'datetime'"
-                          #timestampControl="ngModel">
-          </md2-datepicker>
+            <md2-datepicker id="jmsFromDatePicker"
+                            placeholder="From:"
+                            [(ngModel)]="request.fromDate"
+                            name="receivedFrom"
+                            [type]="'datetime'"
+                            [max]="timestampFromMaxDate"
+                            (change)='onTimestampFromChange($event)'
+                            #timestampControl="ngModel">
+            </md2-datepicker>
+            <md2-datepicker id="jmsToDatePicker"
+                            placeholder="To:"
+                            [(ngModel)]="request.toDate"
+                            name="receivedTo"
+                            [min]="timestampToMinDate"
+                            [max]="timestampToMaxDate"
+                            (change)='onTimestampToChange($event)'
+                            [type]="'datetime'"
+                            #timestampControl="ngModel">
+            </md2-datepicker>
+          </div>
+          <div>
+            <md-input-container id="jmsSelector">
+              <input id="jmsSelectorinput" mdInput placeholder="Selector" [(ngModel)]="request.selector">
+            </md-input-container>
+            <md-input-container id="jmsType">
+              <input id="jmsTypeInput" mdInput placeholder="JMS Type" [(ngModel)]="request.jmsType">
+            </md-input-container>
+          </div>
         </div>
-        <div>
-          <md-input-container id="jmsSelector">
-            <input id="jmsSelectorinput" mdInput placeholder="Selector">
-          </md-input-container>
-          <md-input-container id="jmsType">
-            <input id="jmsTypeInput" mdInput placeholder="JMS Type">
-          </md-input-container>
+
+        <div style="display: inline-block;width:auto">
+          <button id="jmsSearchButton" md-raised-button color="primary" (click)="search()">Search</button>
         </div>
       </div>
-
-      <div style="display: inline-block;width:auto">
-        <button id="jmsSearchButton" md-raised-button color="primary" (click)="search()">Search</button>
-      </div>
-    </div>
-  </md-card-content>
-</md-card>
-
+    </md-card-content>
+  </md-card>
+</div>
 <app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event)"></app-row-limiter>
 
 <ngx-datatable
