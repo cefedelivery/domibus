@@ -254,6 +254,10 @@ public class JMSMessageTransformer
                 target.addMessageProperty(PROPERTY_ORIGINAL_SENDER, messageIn.getStringProperty(PROPERTY_ORIGINAL_SENDER));
             }
 
+            if (hasLength(messageIn.getStringProperty(PROPERTY_ENDPOINT))) {
+                target.addMessageProperty(PROPERTY_ENDPOINT, messageIn.getStringProperty(PROPERTY_ENDPOINT));
+            }
+
             //not part of ebMS3, eCODEX legacy property
             if (hasLength(messageIn.getStringProperty(PROPERTY_FINAL_RECIPIENT))) {
                 target.addMessageProperty(PROPERTY_FINAL_RECIPIENT, messageIn.getStringProperty(PROPERTY_FINAL_RECIPIENT));
