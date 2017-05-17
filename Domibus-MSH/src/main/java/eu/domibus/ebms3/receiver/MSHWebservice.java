@@ -1,15 +1,13 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.common.*;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
+import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.validators.PayloadProfileValidator;
@@ -19,6 +17,7 @@ import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.validation.SubmissionValidationException;
+import eu.domibus.util.SoapUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -105,6 +104,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     @Autowired
     private PropertyProfileValidator propertyProfileValidator;
+
+    @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
@@ -322,10 +324,12 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         UserMessage userMessage = messaging.getUserMessage();
 
-        /* persist security header for non repudiation purposes */
-        SecurityHeader securityHeader = getSecurityHeader(request);
-        userMessage.setSecurityHeader(securityHeader);
-        LOG.debug("Security header of the request: " + securityHeader.getAny().iterator().next().toString());
+        String rawXMLMessage = SoapUtil.getRawXMLMessage(request);
+        LOG.info("Persist raw XML envelope: " + rawXMLMessage);
+        RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+        rawEnvelopeLog.setRawXML(rawXMLMessage);
+        rawEnvelopeLog.setUserMessage(userMessage);
+        rawEnvelopeLogDao.create(rawEnvelopeLog);
 
         handlePayloads(request, userMessage);
 
@@ -431,11 +435,5 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         final Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
         @SuppressWarnings("unchecked") final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);
         return root.getValue();
-    }
-
-    private SecurityHeader getSecurityHeader(final SOAPMessage soapMessage) throws SOAPException, JAXBException {
-        final Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
-        @SuppressWarnings("unchecked") final SecurityHeader securityHeader = unmarshaller.unmarshal(soapMessage.getSOAPHeader(), SecurityHeader.class).getValue();
-        return securityHeader;
     }
 }

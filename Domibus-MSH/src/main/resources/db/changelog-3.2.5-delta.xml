@@ -13,58 +13,28 @@
                 </column>
             </addColumn>
         </changeSet>
-    </databaseChangeLog>
-
 
     <changeSet author="idragusa" id="changelog-nonrepudiation">
-        <createTable tableName="TB_SECURITYHEADER">
+        <createTable tableName="TB_RAWENVELOPE_LOG">
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>
             </column>
-        </createTable>
-        <createTable tableName="TB_SECURITYHEADER_DATA">
-            <column name="SECURITYHEADER_ID" type="INT">
-                <constraints nullable="false"/>
-            </column>
+            <column name="USERMESSAGE_ID_FK" type="INT"/>
+            <column name="SIGNALMESSAGE_ID_FK" type="INT"/>
             <column name="RAW_XML" type="CLOB"/>
         </createTable>
 
-        <addColumn tableName="TB_USER_MESSAGE">
-            <column name="SECURITYHEADER_ID_PK" type="INT"/>
-        </addColumn>
-
-        <addColumn tableName="TB_SIGNAL_MESSAGE">
-            <column name="SECURITYHEADER_ID_PK" type="INT"/>
-        </addColumn>
-
-        <addForeignKeyConstraint baseColumnNames="SECURITYHEADER_ID" baseTableName="TB_SECURITYHEADER_DATA"
-                                 constraintName="FK_11ccae214mvs1kh5sgcj3y5oy" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="ID_PK" referencedTableName="TB_SECURITYHEADER"/>
-
-        <addForeignKeyConstraint baseColumnNames="SECURITYHEADER_ID_PK" baseTableName="TB_SIGNAL_MESSAGE"
-                                 constraintName="FK_11ss2y6g9buet3o3k1n4qxwec" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="ID_PK" referencedTableName="TB_SECURITYHEADER"/>
-
-        <addForeignKeyConstraint baseColumnNames="SECURITYHEADER_ID_PK" baseTableName="TB_USER_MESSAGE"
-                                 constraintName="FK_22uu2y6g9buet3o3k1n4qxwec" deferrable="false"
+        <addForeignKeyConstraint baseColumnNames="USERMESSAGE_ID_FK" baseTableName="TB_RAWENVELOPE_LOG"
+                                 constraintName="FK_uuuuae214mvs1kh5sgcj3y5oy" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="ID_PK" referencedTableName="TB_USER_MESSAGE"/>
 
-        <createIndex indexName="FK_11ccae214mvs1kh5sgcj3y5oy" tableName="TB_SECURITYHEADER_DATA">
-            <column name="SECURITYHEADER_ID"/>
-        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="SIGNALMESSAGE_ID_FK" baseTableName="TB_RAWENVELOPE_LOG"
+                                 constraintName="FK_ssssae214mvs1kh5sgcj3y5oy" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_SIGNAL_MESSAGE"/>
 
-        <createIndex indexName="FK_11ss2y6g9buet3o3k1n4qxwec" tableName="TB_SIGNAL_MESSAGE">
-            <column name="SECURITYHEADER_ID_PK"/>
-        </createIndex>
-
-        <createIndex indexName="FK_22uu2y6g9buet3o3k1n4qxwec" tableName="TB_USER_MESSAGE">
-            <column name="SECURITYHEADER_ID_PK"/>
-        </createIndex>
 
     </changeSet>
 </databaseChangeLog>
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 

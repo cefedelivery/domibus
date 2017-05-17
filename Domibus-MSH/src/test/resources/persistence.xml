@@ -48,6 +48,7 @@
         <class>eu.domibus.common.model.configuration.Security</class>
         <class>eu.domibus.common.model.configuration.Service</class>
         <class>eu.domibus.common.model.logging.ErrorLogEntry</class>
+        <class>eu.domibus.common.model.logging.RawEnvelopeLog</class>
         <class>eu.domibus.common.model.logging.UserMessageLog</class>
         <class>eu.domibus.common.model.logging.SignalMessageLog</class>
         <class>eu.domibus.ebms3.common.model.Error</class>
@@ -61,7 +62,6 @@
         <class>eu.domibus.ebms3.common.model.UserMessage</class>
         <class>eu.domibus.plugin.routing.BackendFilter</class>
         <class>eu.domibus.plugin.routing.RoutingCriteria</class>
-        <class>eu.domibus.ebms3.common.model.SecurityHeader</class>
 
         <!-- Comment this class if you don't use the default ws plugin.
         Default ws plugin uses the same db config as the core for storing auth info-->

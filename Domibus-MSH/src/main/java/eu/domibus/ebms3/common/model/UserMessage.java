@@ -58,7 +58,7 @@ import javax.xml.bind.annotation.*;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "UserMessage",
-        propOrder = {"messageInfo", "partyInfo", "collaborationInfo", "messageProperties", "payloadInfo", "securityHeader"})
+        propOrder = {"messageInfo", "partyInfo", "collaborationInfo", "messageProperties", "payloadInfo"})
 @Entity
 @Table(name = "TB_USER_MESSAGE")
 public class UserMessage extends AbstractBaseEntity {
@@ -82,9 +82,6 @@ public class UserMessage extends AbstractBaseEntity {
     @XmlSchemaType(name = "anyURI")
     @Column(name = "MPC")
     protected String mpc = Mpc.DEFAULT_MPC;
-    @XmlElement(name = "SecurityHeader")
-    @OneToOne(cascade = CascadeType.ALL)
-    protected SecurityHeader securityHeader;
 
     /**
      * This REQUIRED element occurs once,
@@ -225,20 +222,6 @@ public class UserMessage extends AbstractBaseEntity {
      */
     public void setMpc(final String value) {
         this.mpc = value;
-    }
-
-    /**
-     * The Security header element encapsulates the wsse:Security header.
-     */
-    public SecurityHeader getSecurityHeader() {
-        return securityHeader;
-    }
-
-    /**
-     * The Security header element encapsulates the wsse:Security header.
-     */
-    public void setSecurityHeader(SecurityHeader securityHeader) {
-        this.securityHeader = securityHeader;
     }
 
     /**
