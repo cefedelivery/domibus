@@ -1,8 +1,10 @@
 package eu.domibus.plugin.routing;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import eu.domibus.plugin.routing.operation.LogicalOperator;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -20,12 +22,18 @@ public class BackendFilter extends AbstractBaseEntity implements Comparable<Back
 
     @Column(name = "PRIORITY")
     private int index;
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "FK_BACKEND_FILTER")
     @OrderColumn(name = "PRIORITY")
     private List<RoutingCriteria> routingCriterias = new ArrayList<>();
+
     @Column(name = "BACKEND_NAME")
     private String backendName;
+
+    @Column(name = "CRITERIA_OPERATOR")
+    @Enumerated(EnumType.STRING)
+    private LogicalOperator criteriaOperator;
 
     public void setIndex(final int index) {
         this.index = index;
@@ -61,6 +69,14 @@ public class BackendFilter extends AbstractBaseEntity implements Comparable<Back
 
     public void setBackendName(final String backendName) {
         this.backendName = backendName;
+    }
+
+    public LogicalOperator getCriteriaOperator() {
+        return criteriaOperator;
+    }
+
+    public void setCriteriaOperator(LogicalOperator criteriaOperation) {
+        this.criteriaOperator = criteriaOperation;
     }
 
     /**
@@ -129,4 +145,13 @@ public class BackendFilter extends AbstractBaseEntity implements Comparable<Back
         return hashBuilder.hashCode();
     }
 
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("index", index)
+                .append("routingCriterias", routingCriterias)
+                .append("backendName", backendName)
+                .append("criteriaOperator", criteriaOperator)
+                .toString();
+    }
 }

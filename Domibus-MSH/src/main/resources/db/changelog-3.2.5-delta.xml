@@ -4,6 +4,18 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+
+        <!-- Domibus 3.2.4 - 3.2.5 -->
+    <changeSet author="Cosmin Baciu" id="EDELIVERY-2117">
+            <addColumn tableName="TB_BACKEND_FILTER">
+                <column name="CRITERIA_OPERATOR" type="VARCHAR(255)" defaultValue="AND">
+                    <constraints nullable="false"/>
+                </column>
+            </addColumn>
+        </changeSet>
+    </databaseChangeLog>
+
+
     <changeSet author="idragusa" id="changelog-nonrepudiation">
         <createTable tableName="TB_SECURITYHEADER">
             <column autoIncrement="true" name="ID_PK" type="INT">
@@ -54,3 +66,5 @@
 
     </changeSet>
 </databaseChangeLog>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
