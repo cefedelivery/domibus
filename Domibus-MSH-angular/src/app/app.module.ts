@@ -34,6 +34,7 @@ import {PmodeUploadComponent} from './pmode-upload/pmode-upload.component';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MessagelogDialogComponent} from './messagelog/messagelog-dialog/messagelog-dialog.component';
 import {JmsComponent} from './jms/jms.component';
+import { RowLimiterComponent } from './common/row-limiter/row-limiter.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -54,7 +55,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     PModeComponent,
     PmodeUploadComponent,
     MessagelogDialogComponent,
-    JmsComponent
+    JmsComponent,
+    RowLimiterComponent
   ],
   entryComponents: [
     AppComponent,

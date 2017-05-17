@@ -14,27 +14,24 @@ export class JmsComponent implements OnInit {
   timestampFromMaxDate: Date = new Date();
   timestampToMinDate: Date = null;
 
-  private selectedSource: any;
   private queues = [];
+
+  private selectedSource: any;
   private fromDateTime: string;
   private toDateTime: string;
 
-  private selected: string;
+  private selected = [];
   private loading: boolean = false;
 
-  rows = [
-    {name: 'Austin', gender: 'Male', company: 'Swimlane'},
-    {name: 'Dany', gender: 'Male', company: 'KFC'},
-    {name: 'Molly', gender: 'Female', company: 'Burger King'},
+  rows = [];
+  private pageSizes: Array<any> = [
+    {key: '5', value: 5},
+    {key: '10', value: 10},
+    {key: '25', value: 25},
+    {key: '50', value: 50},
+    {key: '100', value: 100}
   ];
-  // columns = [
-  //   {name: 'Name 1', prop: 'name'},
-  //   {name: 'Gender 1', prop: 'gender'},
-  //   {name: 'Company 1', prop: 'company'}
-  // ];
-  private count: number = 3;
-  private offset: number = 1;
-  private pageSize: number = 10;
+  private pageSize: number = this.pageSizes[0].value;
 
   constructor(private http: Http, private alertService: AlertService) {
   }
@@ -46,9 +43,12 @@ export class JmsComponent implements OnInit {
         let destinations = response.json().jmsDestinations;
         for (let key in destinations) {
           this.queues.push(destinations[key])
+          if(key.match('domibus\.DLQ')){
+            this.selectedSource = destinations[key];
+          }
         }
 
-        console.log(this.queues);
+        // console.log(this.queues);
       },
       (error: Response) => {
         this.alertService.error('Could not load queues: ' + error);
@@ -56,28 +56,19 @@ export class JmsComponent implements OnInit {
     )
   }
 
-  page() {
-    let headers = new Headers({'Content-Type': 'application/json'});
-    this.http.post("rest/jms/messages", {"source": "domibus.notification.webservice"}, {headers: headers}).subscribe(
-      (response: Response) => {
-        let messages = response.json().messages;
-        this.rows = messages;
-        this.count= this.rows.length;
-        console.log(messages);
-      },
-      error => {
-        this.alertService.error('Could not load messages: ' + error);
-      }
-    )
+  changePageSize(newPageSize: number) {
+    this.pageSize = newPageSize;
+    this.search();
   }
 
-
   onSelect({selected}) {
-    console.log('Select Event', selected);
+    // console.log('Select Event', selected, this.selected);
+    this.selected.splice(0, this.selected.length);
+    this.selected.push(...selected);
   }
 
   onActivate(event) {
-    console.log('Activate Event', event);
+    // console.log('Activate Event', event);
   }
 
   onTimestampFromChange(event) {
@@ -88,23 +79,38 @@ export class JmsComponent implements OnInit {
     this.timestampFromMaxDate = event.value;
   }
 
-  apply() {
-    this.page();
+  search() {
+    let headers = new Headers({'Content-Type': 'application/json'});
+    this.loading = true;
+    this.selected = [];
+    this.http.post("rest/jms/messages", {"source": "domibus.notification.webservice"}, {headers: headers}).subscribe(
+      (response: Response) => {
+        let messages = response.json().messages;
+        this.rows = messages;
+        this.loading = false;
+        // console.log(messages);
+      },
+      error => {
+        this.alertService.error('Could not load messages: ' + error);
+        this.loading = false;
+      }
+    )
   }
 
-  onPage(event) {
-    console.log('Page Event', event);
-    // this.page(event.offset, event.pageSize, this.orderBy, this.asc);
+  cancel() {
+
   }
 
-  onSort(event) {
-    console.log('Sort Event', event);
-    // let ascending = true;
-    // if(event.newValue === 'desc') {
-    //   ascending = false;
-    // }
-    // this.page(this.offset, this.pageSize, event.column.prop, ascending);
+  save() {
+
   }
 
+  move() {
+
+  }
+
+  delete() {
+
+  }
 
 }

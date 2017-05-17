@@ -134,13 +134,7 @@
     </md-card>
   </div>
 
-  <div class="rowsDiv">
-    <md-select placeholder="Rows" [(ngModel)]="pageSize" name="pageSize" (change)="changeRowLimits($event)">
-      <md-option *ngFor="let rowLimit of rowLimits" [value]="rowLimit.value">
-        {{rowLimit.key}}
-      </md-option>
-    </md-select>
-  </div>
+  <app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event)"></app-row-limiter>
 
   <ngx-datatable
     id="messageLogTable"

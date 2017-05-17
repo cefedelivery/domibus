@@ -1,87 +1,101 @@
-<div style="margin:15px">
+<md-card>
+  <md-card-content>
+    <div style="width:100%">
+      <div style="display: inline-block;width: 90%;height: auto;">
+        <div>
+          <md-select placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector" id="jmsQueueSelector">
+            <md-option *ngFor="let queue of queues" [value]="queue">
+              {{queue.internal ? "[internal]" :""}} {{queue.name}} ({{queue.numberOfMessages}})
+            </md-option>
+          </md-select>
 
-  <md-select placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector" style="width: 35%">
-    <md-option *ngFor="let queue of queues" [value]="queue">
-      {{queue.internal ? "[internal]" :""}} {{queue.name}} ({{queue.numberOfMessages}})
-    </md-option>
-  </md-select>
+          <md2-datepicker id="jmsFromDatePicker" placeholder="From:"
+                          [(ngModel)]="fromDateTime"
+                          name="receivedFrom"
+                          [type]="'datetime'"
+                          [max]="timestampFromMaxDate"
+                          (change)='onTimestampFromChange($event)'
+                          #timestampControl="ngModel">
+          </md2-datepicker>
+          <md2-datepicker id="jmsToDatePicker" placeholder="To:"
+                          [(ngModel)]="toDateTime"
+                          name="receivedTo"
+                          [min]="timestampToMinDate"
+                          [max]="timestampToMaxDate"
+                          (change)='onTimestampToChange($event)'
+                          [type]="'datetime'"
+                          #timestampControl="ngModel">
+          </md2-datepicker>
+        </div>
+        <div>
+          <md-input-container id="jmsSelector">
+            <input id="jmsSelectorinput" mdInput placeholder="Selector">
+          </md-input-container>
+          <md-input-container id="jmsType">
+            <input id="jmsTypeInput" mdInput placeholder="JMS Type">
+          </md-input-container>
+        </div>
+      </div>
 
-  <md-input-container>
-    <input mdInput placeholder="Selector">
-  </md-input-container>
+      <div style="display: inline-block;width:auto">
+        <button id="jmsSearchButton" md-raised-button color="primary" (click)="search()">Search</button>
+      </div>
+    </div>
+  </md-card-content>
+</md-card>
 
-  <md2-datepicker placeholder="From:"
-                  [(ngModel)]="fromDateTime"
-                  name="receivedFrom"
-                  [type]="'datetime'"
-                  [max]="timestampFromMaxDate"
-                  (change)='onTimestampFromChange($event)'
-                  #timestampControl="ngModel">
-  </md2-datepicker>
-  <md2-datepicker placeholder="To:"
-                  [(ngModel)]="toDateTime"
-                  name="receivedTo"
-                  [min]="timestampToMinDate"
-                  [max]="timestampToMaxDate"
-                  (change)='onTimestampToChange($event)'
-                  [type]="'datetime'"
-                  #timestampControl="ngModel">
-  </md2-datepicker>
+<app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event)"></app-row-limiter>
 
+<ngx-datatable
+  id="errorLogTable"
+  class="material striped"
+  [rows]="rows"
+  [columnMode]="'force'"
+  [headerHeight]="50"
+  [footerHeight]="50"
+  [rowHeight]="'auto'"
+  [scrollbarH]="true"
+  [loadingIndicator]="loading"
+  [selectionType]="'multiClick'"
+  [selected]="selected"
+  [limit]="pageSize"
+  [sorts]="[{prop: 'name', dir: 'desc'}]"
+  (activate)="onActivate($event)"
+  (select)="onSelect($event)">
 
-  <md-input-container>
-    <input mdInput placeholder="JMS Type">
-  </md-input-container>
+  <ngx-datatable-column name="ID" prop="id">
+  </ngx-datatable-column>
 
-  <button md-raised-button color="primary" (click)="apply()"><span>Apply</span></button>
+  <ngx-datatable-column name="JMS Type" prop="type">
+  </ngx-datatable-column>
 
+  <ngx-datatable-column name="Time" prop="timestamp">
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      {{value | date: dateFormat}}
+    </ng-template>
+  </ngx-datatable-column>
 
-  <ngx-datatable
-    id="errorLogTable"
-    class="material striped"
-    [rows]="rows"
-    [columnMode]="'force'"
-    [headerHeight]="50"
-    [footerHeight]="50"
-    [rowHeight]="'auto'"
-    [scrollbarH]="true"
-    [externalPaging]="true"
-    [externalSorting]="true"
-    [loadingIndicator]="loading"
-    [count]="count"
-    [offset]="offset"
-    [limit]="pageSize"
-    [sorts]="[{prop: 'name', dir: 'desc'}]"
-    (page)='onPage($event)'
-    (sort)="onSort($event)">
+  <ngx-datatable-column name="Content" prop="content">
+  </ngx-datatable-column>
 
-    <ngx-datatable-column name="ID" prop="id">
-    </ngx-datatable-column>
+  <ngx-datatable-column name="Custom prop" prop="customProperties">
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      {{value | json}}
+    </ng-template>
+  </ngx-datatable-column>
 
-    <ngx-datatable-column name="JMS Type" prop="type">
-    </ngx-datatable-column>
+  <ngx-datatable-column name="JMS prop" prop="jmsproperties">
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      {{value | json}}
+    </ng-template>
+  </ngx-datatable-column>
 
-    <ngx-datatable-column name="Time" prop="timestamp">
-      <ng-template let-value="value" ngx-datatable-cell-template>
-        {{value | date: dateFormat}}
-      </ng-template>
-    </ngx-datatable-column>
+</ngx-datatable>
 
-    <ngx-datatable-column name="Content" prop="content">
-    </ngx-datatable-column>
-
-    <ngx-datatable-column name="Custop prop" prop="customProperties">
-      <ng-template let-value="value" ngx-datatable-cell-template>
-        {{value | json}}
-      </ng-template>
-    </ngx-datatable-column>
-
-    <ngx-datatable-column name="JMS prop" prop="jmsproperties">
-      <ng-template let-value="value" ngx-datatable-cell-template>
-        {{value | json}}
-      </ng-template>
-    </ngx-datatable-column>
-
-  </ngx-datatable>
-
+<div style="margin-top: 10px">
+  <button id="jmsCancelButton" md-raised-button color="primary" (click)="cancel()">Cancel</button>
+  <button id="jmsSaveButton" md-raised-button color="primary" (click)="save()">Save</button>
+  <button id="jmsMoveButton" md-raised-button color="primary" (click)="move()">Move</button>
+  <button id="jmsDeleteButton" md-raised-button color="primary" (click)="delete()">Delete</button>
 </div>
+
