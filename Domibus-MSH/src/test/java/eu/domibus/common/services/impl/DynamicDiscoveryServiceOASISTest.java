@@ -115,7 +115,7 @@ public class DynamicDiscoveryServiceOASISTest {
     * This is not a unit tests but the code is useful to test real SMP entries.
      */
     @Test
-    //@Ignore
+    @Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
             domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
