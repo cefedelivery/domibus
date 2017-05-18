@@ -17,18 +17,13 @@ import java.io.StringWriter;
 public class SoapUtil {
     private static final Log logger = LogFactory.getLog(SoapUtil.class);
 
-    public static String getRawXMLMessage(SOAPMessage soapMessage) {
+    public static String getRawXMLMessage(SOAPMessage soapMessage) throws TransformerException {
         String rawXMLMessage = null;
         final StringWriter sw = new StringWriter();
 
-        try {
-            TransformerFactory.newInstance().newTransformer().transform(
-                    new DOMSource(soapMessage.getSOAPPart()),
-                    new StreamResult(sw));
-        } catch (TransformerException e) {
-            logger.error("Unable to log the raw message XML due to error: ", e);
-            return rawXMLMessage;
-        }
+        TransformerFactory.newInstance().newTransformer().transform(
+                new DOMSource(soapMessage.getSOAPPart()),
+                new StreamResult(sw));
 
         rawXMLMessage = sw.toString();
         return rawXMLMessage;

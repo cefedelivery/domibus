@@ -88,13 +88,18 @@ public class ResponseHandler {
             return CheckResult.UNMARSHALL_ERROR;
         }
 
-        String rawXMLMessage = SoapUtil.getRawXMLMessage(response);
-        logger.debug("Persist raw XML envelope: " + rawXMLMessage);
         final SignalMessage signalMessage = messaging.getSignalMessage();
-        RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
-        rawEnvelopeLog.setRawXML(rawXMLMessage);
-        rawEnvelopeLog.setSignalMessage(signalMessage);
-        rawEnvelopeLogDao.create(rawEnvelopeLog);
+
+        try {
+            String rawXMLMessage = SoapUtil.getRawXMLMessage(response);
+            logger.debug("Persist raw XML envelope: " + rawXMLMessage);
+            RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+            rawEnvelopeLog.setRawXML(rawXMLMessage);
+            rawEnvelopeLog.setSignalMessage(signalMessage);
+            rawEnvelopeLogDao.create(rawEnvelopeLog);
+        } catch (TransformerException e) {
+            logger.warn("Unable to log the raw message XML due to: ", e);
+        }
 
         // Stores the signal message
         signalMessageDao.create(signalMessage);

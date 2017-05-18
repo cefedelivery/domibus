@@ -324,13 +324,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
         UserMessage userMessage = messaging.getUserMessage();
 
-        String rawXMLMessage = SoapUtil.getRawXMLMessage(request);
-        LOG.debug("Persist raw XML envelope: " + rawXMLMessage);
-        RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
-        rawEnvelopeLog.setRawXML(rawXMLMessage);
-        rawEnvelopeLog.setUserMessage(userMessage);
-        rawEnvelopeLogDao.create(rawEnvelopeLog);
-
         handlePayloads(request, userMessage);
 
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
@@ -370,6 +363,17 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 throw ex;
             }
             throw exc;
+        }
+
+        try {
+            String rawXMLMessage = SoapUtil.getRawXMLMessage(request);
+            LOG.debug("Persist raw XML envelope: " + rawXMLMessage);
+            RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+            rawEnvelopeLog.setRawXML(rawXMLMessage);
+            rawEnvelopeLog.setUserMessage(userMessage);
+            rawEnvelopeLogDao.create(rawEnvelopeLog);
+        } catch (TransformerException e) {
+            LOG.warn("Unable to log the raw message XML due to: ", e);
         }
 
         return userMessage.getMessageInfo().getMessageId();

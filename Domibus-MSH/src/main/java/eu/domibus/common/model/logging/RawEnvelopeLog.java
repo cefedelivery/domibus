@@ -7,6 +7,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Error;
+import org.hibernate.annotations.Cascade;
 import org.w3c.dom.Element;
 
 import javax.persistence.*;
@@ -21,7 +22,6 @@ import java.util.List;
 @Entity
 @Table(name = "TB_RAWENVELOPE_LOG")
 public class RawEnvelopeLog extends AbstractBaseEntity {
-
     @OneToOne
     @JoinColumn(name = "USERMESSAGE_ID_FK")
     protected UserMessage userMessage;
@@ -30,6 +30,7 @@ public class RawEnvelopeLog extends AbstractBaseEntity {
     @JoinColumn(name = "SIGNALMESSAGE_ID_FK")
     protected SignalMessage signalMessage;
 
+    @Lob
     @Column(name = "RAW_XML")
     protected String rawXML;
 

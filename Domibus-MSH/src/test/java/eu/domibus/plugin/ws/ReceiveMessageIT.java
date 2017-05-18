@@ -4,6 +4,8 @@ import eu.domibus.AbstractIT;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.ebms3.receiver.SetPolicyInInterceptor;
 import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.util.SoapUtil;
+import eu.domibus.util.SoapUtilTest;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.cxf.Bus;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -104,38 +106,12 @@ public class ReceiveMessageIT extends AbstractIT {
     public void testReceiveMessage() throws SOAPException, IOException, SQLException, ParserConfigurationException, SAXException {
         String filename = "SOAPMessage2.xml";
         String messageId = "43bb6883-77d2-4a41-bac4-52a485d50084@domibus.eu";
-        SOAPMessage soapMessage = createSOAPMessage(filename);
+        SOAPMessage soapMessage = SoapUtilTest.createSOAPMessage(filename);
         mshWebservice.invoke(soapMessage);
         verifyMessageStatus(messageId);
         verifySignalMessageStatus(messageId);
     }
 
-    protected SOAPMessage createSOAPMessage(String dataset) throws SOAPException, IOException, ParserConfigurationException, SAXException {
-
-        MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL);
-        SOAPMessage message = factory.createMessage();
-
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        dbFactory.setNamespaceAware(true);
-        DocumentBuilder builder = dbFactory.newDocumentBuilder();
-        Document document = builder.parse(new File("target/test-classes/dataset/as4/" + dataset).getAbsolutePath());
-        DOMSource domSource = new DOMSource(document);
-        SOAPPart soapPart = message.getSOAPPart();
-        soapPart.setContent(domSource);
-
-        AttachmentPart attachment = message.createAttachmentPart();
-        attachment.setContent(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()), "text/xml");
-        attachment.setContentId("sbdh-order");
-        message.addAttachmentPart(attachment);
-
-        message.setProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
-        try {
-            SOAPHeader soapHeader = message.getSOAPHeader();
-        } catch (Exception e) {
-
-        }
-        return message;
-    }
 
     /**
      * This test invokes the MSHWebService with a mocked SOAPMessage and verifies that the message is stored
@@ -167,7 +143,7 @@ public class ReceiveMessageIT extends AbstractIT {
     public void testReceivePingMessage() throws IOException, SOAPException, SQLException, ParserConfigurationException, SAXException {
         String filename = "SOAPPingMessage.xml";
         String messageId = "ping123@domibus.eu";
-        SOAPMessage soapMessage = createSOAPMessage(filename);
+        SOAPMessage soapMessage = SoapUtilTest.createSOAPMessage(filename);
         SOAPMessage responseMessage = mshWebservice.invoke(soapMessage);
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         responseMessage.writeTo(out);
@@ -196,7 +172,7 @@ public class ReceiveMessageIT extends AbstractIT {
 
         //return sm.getContent(SOAPMessage.class); // TODO is returns null
 
-        SOAPMessage message = createSOAPMessage("SOAPMessage.xml");
+        SOAPMessage message = SoapUtilTest.createSOAPMessage("SOAPMessage.xml");
         return message;
     }
 }

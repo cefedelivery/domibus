@@ -50,7 +50,9 @@ public class JMSMessageTransformerTest {
         assertEquals(submission.getFromParties(), transformedSubmission.getFromParties());
         assertEquals(submission.getToParties(), transformedSubmission.getToParties());
         assertEquals(submission.getPayloads(), transformedSubmission.getPayloads());
-        assertEquals(submission.getMessageProperties(), transformedSubmission.getMessageProperties());
+        for(Submission.TypedProperty tp : transformedSubmission.getMessageProperties()) {
+            assertTrue(submission.getMessageProperties().contains(tp));
+        }
     }
 
     protected Submission createSubmission() {
