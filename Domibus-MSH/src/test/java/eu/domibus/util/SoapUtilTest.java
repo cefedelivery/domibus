@@ -4,6 +4,7 @@ import eu.domibus.ebms3.sender.MSHDispatcher;
 import junit.framework.Assert;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOExceptionWithCause;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -27,7 +28,7 @@ public class SoapUtilTest {
     @Test
     public void getRawXMLMessageTest() throws Exception {
 
-        final String expectedRawMessage = readFile(new File("target/test-classes/dataset/as4/RawXMLMessage.xml"));
+        final String expectedRawMessage =  FileUtils.readFileToString(new File("target/test-classes/dataset/as4/RawXMLMessage.xml"));
 
         SOAPMessage soapMessage = SoapUtilTest.createSOAPMessage("SOAPMessage.xml");
         String rawXMLMessage = SoapUtil.getRawXMLMessage(soapMessage);
@@ -60,17 +61,6 @@ public class SoapUtilTest {
 
         }
         return message;
-    }
-
-    public String readFile(File file) throws IOException {
-        Reader input = new FileReader(file);
-        StringWriter output = new StringWriter();
-        try {
-            IOUtils.copy(input, output);
-        } finally {
-            input.close();
-        }
-        return output.toString();
     }
 
 }
