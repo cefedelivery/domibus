@@ -23,17 +23,14 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.dao.ErrorLogDao;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
+import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Error;
-import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.common.model.ObjectFactory;
-import eu.domibus.ebms3.common.model.SignalMessage;
+import eu.domibus.util.SoapUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +39,16 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringWriter;
 
 /**
  * @author Christian Koch, Stefan Mueller, Federico Martini
@@ -68,6 +72,9 @@ public class ResponseHandler {
     private SignalMessageLogDao signalMessageLogDao;
 
     @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
+
+    @Autowired
     private MessagingDao messagingDao;
 
     public CheckResult handle(final SOAPMessage response) throws EbMS3Exception {
@@ -75,13 +82,25 @@ public class ResponseHandler {
         final Messaging messaging;
 
         try {
-            messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) response.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
+            messaging = getMessaging(response);
         } catch (JAXBException | SOAPException ex) {
             logger.error("Unable to read message due to error: ", ex);
             return CheckResult.UNMARSHALL_ERROR;
         }
 
         final SignalMessage signalMessage = messaging.getSignalMessage();
+
+        try {
+            String rawXMLMessage = SoapUtil.getRawXMLMessage(response);
+            logger.debug("Persist raw XML envelope: " + rawXMLMessage);
+            RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+            rawEnvelopeLog.setRawXML(rawXMLMessage);
+            rawEnvelopeLog.setSignalMessage(signalMessage);
+            rawEnvelopeLogDao.create(rawEnvelopeLog);
+        } catch (TransformerException e) {
+            logger.warn("Unable to log the raw message XML due to: ", e);
+        }
+
         // Stores the signal message
         signalMessageDao.create(signalMessage);
         // Updating the reference to the signal message
@@ -129,5 +148,13 @@ public class ResponseHandler {
 
     public enum CheckResult {
         OK, WARNING, UNMARSHALL_ERROR
+    }
+
+
+    private Messaging getMessaging(final SOAPMessage soapMessage) throws SOAPException, JAXBException {
+        final Node messagingXml = (Node) soapMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
+        final Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
+        @SuppressWarnings("unchecked") final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);
+        return root.getValue();
     }
 }
