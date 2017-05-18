@@ -1,9 +1,10 @@
 export class MessagesRequestRO {
-  public  source: string;
+
+  public source: string;
   public jmsType: string;
   public fromDate: Date;
   public toDate: Date;
-  public selector: String;
+  public selector: string;
 
   constructor() {
 

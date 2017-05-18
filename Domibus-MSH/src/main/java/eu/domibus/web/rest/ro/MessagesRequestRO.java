@@ -32,12 +32,10 @@ public class MessagesRequestRO {
         this.jmsType = jmsType;
     }
 
-    @JsonDeserialize(using = JmsResource.CustomJsonDateDeserializer.class)
     public Date getFromDate() {
         return fromDate;
     }
 
-    @JsonDeserialize(using = JmsResource.CustomJsonDateDeserializer.class)
     public void setFromDate(Date fromDate) {
         this.fromDate = fromDate;
     }

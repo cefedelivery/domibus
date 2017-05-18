@@ -35,11 +35,11 @@ export class AppComponent implements OnInit {
       });
   }
 
-  hasAdmin():boolean{
+  hasAdmin(): boolean {
     return this.securityService.isCurrentUserAdmin();
   }
 
-  logout(event:Event):void {
+  logout(event: Event): void {
     event.preventDefault();
     this.securityService.logout();
   }

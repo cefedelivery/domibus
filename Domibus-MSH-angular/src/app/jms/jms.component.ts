@@ -2,6 +2,9 @@ import {Component, OnInit} from '@angular/core';
 import {Http, Headers, Response} from "@angular/http";
 import {AlertService} from "../alert/alert.service";
 import {MessagesRequestRO} from "./ro/messages-request-ro";
+import {isNullOrUndefined} from "util";
+import {MdDialog, MdDialogRef} from "@angular/material";
+import {MoveDialogComponent} from "./move-dialog/move-dialog.component";
 
 @Component({
   selector: 'app-jms',
@@ -23,11 +26,16 @@ export class JmsComponent implements OnInit {
   }
 
   set selectedSource(value: any) {
+    //poor man's binding between 2 objects;
+    //whenever selectedSource is set the request.source is also set
     this._selectedSource = value;
     this.request.source = value.name;
   }
 
+  private currentSearchSelectedSource;
+
   private selectedMessages: Array<any> = [];
+  private markedForDeletionMessages: Array<any> = [];
   private loading: boolean = false;
 
   private rows: Array<any> = [];
@@ -41,11 +49,16 @@ export class JmsComponent implements OnInit {
   private pageSize: number = this.pageSizes[0].value;
 
   private request = new MessagesRequestRO()
+  private headers = new Headers({'Content-Type': 'application/json'});
 
-  constructor(private http: Http, private alertService: AlertService) {
+  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   ngOnInit() {
+    this.getDestinations();
+  }
+
+  private getDestinations() {
     this.http.get("rest/jms/destinations").subscribe(
       (response: Response) => {
         this.queues = [];
@@ -88,16 +101,23 @@ export class JmsComponent implements OnInit {
     this.timestampFromMaxDate = event.value;
   }
 
-  search() {
-    let headers = new Headers({'Content-Type': 'application/json'});
+  private search() {
     this.loading = true;
     this.selectedMessages = [];
-    this.http.post("rest/jms/messages", JSON.stringify(this.request), {headers: headers}).subscribe(
+    this.markedForDeletionMessages = [];
+    this.currentSearchSelectedSource = this.request.source;
+    this.http.post("rest/jms/messages", {
+      source: this.request.source,
+      jmsType: this.request.jmsType,
+      fromDate: !isNullOrUndefined(this.request.fromDate) ? this.request.fromDate.getTime() : undefined,
+      toDate: !isNullOrUndefined(this.request.toDate) ? this.request.toDate.getTime() : undefined,
+      selector: this.request.selector,
+    }, {headers: this.headers}).subscribe(
       (response: Response) => {
         let messages = response.json().messages;
         this.rows = messages;
         this.loading = false;
-        // console.log(messages);
+        //console.log(messages);
       },
       error => {
         this.alertService.error('Could not load messages: ' + error);
@@ -106,20 +126,80 @@ export class JmsComponent implements OnInit {
     )
   }
 
-  cancel() {
-
+  private cancel() {
+    this.search();
+    this.alertService.success("The operation 'message updates cancelled' completed successfully");
   }
 
-  save() {
-
+  private save() {
+    let messageIds = this.markedForDeletionMessages.map((message) => message.id);
+    //because the user can change the source after pressing search and then select the messages and press delete
+    //in this case I need to use currentSearchSelectedSource
+    this.serverRemove(this.currentSearchSelectedSource.name, messageIds);
   }
 
-  move() {
-
+  private move() {
+    let dialogRef: MdDialogRef<MoveDialogComponent> = this.dialog.open(MoveDialogComponent);
+    dialogRef.componentInstance.queues = this.queues;
+    dialogRef.afterClosed().subscribe(result => {
+      if (!isNullOrUndefined(result) && !isNullOrUndefined(result.destination)) {
+        let messageIds = this.selectedMessages.map((message) => message.id);
+        this.serverMove(this.selectedSource.name, result.destination, messageIds);
+      }
+    });
   }
 
-  delete() {
-
+  private delete() {
+    this.markedForDeletionMessages.push(...this.selectedMessages);
+    let newRows = this.rows.filter((element) => {
+      return !this.selectedMessages.includes(element);
+    })
+    this.selectedMessages = [];
+    this.rows = newRows;
   }
+
+  private serverMove(source: string, destination: string, messageIds: Array<any>) {
+    this.http.post("rest/jms/messages/action", {
+      source: source,
+      destination: destination,
+      selectedMessages: messageIds,
+      action: "MOVE"
+    }, {headers: this.headers}).subscribe(
+      (response: Response) => {
+        this.alertService.success("The operation 'move messages' completed successfully.");
+
+        //refresh destinations
+        this.getDestinations();
+
+        //remove the selected rows
+        let newRows = this.rows.filter((element) => {
+          return !this.selectedMessages.includes(element);
+        })
+        this.selectedMessages = [];
+        this.rows = newRows;
+      },
+      error => {
+        this.alertService.error("The operation 'move messages' could not be completed: " + error);
+      }
+    )
+  }
+
+  private serverRemove(source: string, messageIds: Array<any>) {
+    this.http.post("rest/jms/messages/action", {
+      source: source,
+      selectedMessages: messageIds,
+      action: "REMOVE"
+    }, {headers: this.headers}).subscribe(
+      (response: Response) => {
+        this.alertService.success("The operation 'updates on message(s)' completed successfully.");
+        this.getDestinations();
+        this.markedForDeletionMessages = [];
+      },
+      error => {
+        this.alertService.error("The operation 'updates on message(s)' could not be completed: " + error);
+      }
+    )
+  }
+
 
 }
