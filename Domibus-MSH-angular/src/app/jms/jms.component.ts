@@ -105,7 +105,7 @@ export class JmsComponent implements OnInit {
     this.loading = true;
     this.selectedMessages = [];
     this.markedForDeletionMessages = [];
-    this.currentSearchSelectedSource = this.request.source;
+    this.currentSearchSelectedSource = this.selectedSource;
     this.http.post("rest/jms/messages", {
       source: this.request.source,
       jmsType: this.request.jmsType,
