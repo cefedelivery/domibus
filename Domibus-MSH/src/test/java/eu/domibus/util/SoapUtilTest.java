@@ -3,12 +3,10 @@ package eu.domibus.util;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import junit.framework.Assert;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOExceptionWithCause;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
-import org.mockito.internal.util.io.IOUtil;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -24,6 +22,7 @@ import java.io.*;
  * @since 3.2.5
  */
 public class SoapUtilTest {
+    private static final Log LOG = LogFactory.getLog(SoapUtilTest.class);
 
     @Test
     public void getRawXMLMessageTest() throws Exception {
@@ -58,7 +57,7 @@ public class SoapUtilTest {
         try {
             SOAPHeader soapHeader = message.getSOAPHeader();
         } catch (Exception e) {
-
+            LOG.error("Could not get SOAPHeader", e);
         }
         return message;
     }
