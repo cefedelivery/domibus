@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  */
 @Entity
 @Table(name = "TB_ROUTING_CRITERIA")
-public class RoutingCriteria extends AbstractBaseEntity implements IRoutingCriteria {
+public class RoutingCriteriaEntity extends AbstractBaseEntity implements IRoutingCriteria {
 
     @Column(name = "NAME")
     private String name;
@@ -36,14 +36,14 @@ public class RoutingCriteria extends AbstractBaseEntity implements IRoutingCrite
      *
      * @param name of Routing Criteria
      */
-    public RoutingCriteria(final String name, final String tooltip, final String inputPattern) {
+    public RoutingCriteriaEntity(final String name, final String tooltip, final String inputPattern) {
         this.name = name;
         this.tooltip = tooltip;
         this.inputPattern = inputPattern;
         patternHashMap = new HashMap<>();
     }
 
-    protected RoutingCriteria() {
+    protected RoutingCriteriaEntity() {
     }
 
     @Override

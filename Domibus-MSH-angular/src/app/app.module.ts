@@ -33,6 +33,7 @@ import {MessageLogComponent} from "./messagelog/messagelog.component";
 import {TruststoreComponent} from './truststore/truststore.component';
 import {PmodeUploadComponent} from './pmode-upload/pmode-upload.component';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {MessagefilterDialogComponent} from "./messagefilter/messagefilter-dialog/messagefilter-dialog.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -52,11 +53,13 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     IsAuthorized,
     TruststoreComponent,
     PModeComponent,
-    PmodeUploadComponent
+    PmodeUploadComponent,
+    MessagefilterDialogComponent
   ],
   entryComponents: [
     AppComponent,
-    PmodeUploadComponent
+    PmodeUploadComponent,
+    MessagefilterDialogComponent
   ],
   imports: [
     BrowserModule,

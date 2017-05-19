@@ -7,17 +7,15 @@
           #mydatatable
           class="material"
           [headerHeight]="50"
-          [limit]="pageSize"
           [columnMode]="'force'"
           [footerHeight]="50"
           [rowHeight]="'auto'"
           [rows]="rows"
           [selected]="selected"
-          [selectionType]="'multiClick'"
+          [selectionType]="'single'"
           (activate)="onActivate($event)"
-          (select)='onSelect($event)'
-          (deselect)='onDeselect($event)'>
-          <ngx-datatable-column name="Plugin">
+          (select)='onSelect($event)'>
+          <ngx-datatable-column name="Plugin" [canAutoResize]="true" orderable="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
@@ -32,9 +30,16 @@
                 type="text"
                 [value]="value"
               />
+              <!--<select
+                *ngIf="!editing[row.$$index + '-plugin']"
+                (change)="updateValue($event, 'plugin', value, row)"
+                [value]="value">
+                <option value="backendWebservice">backendWebservice</option>
+                <option value="backendWebservice2">backendWebservice2</option>
+              </select>-->
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="From">
+          <ngx-datatable-column name="From" [canAutoResize]="true" orderable="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
@@ -51,7 +56,7 @@
               />
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="To">
+          <ngx-datatable-column name="To" [canAutoResize]="true" orderable="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
@@ -68,7 +73,7 @@
               />
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="Action">
+          <ngx-datatable-column name="Action" [canAutoResize]="true" orderable="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
@@ -85,7 +90,7 @@
               />
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="Service">
+          <ngx-datatable-column name="Service" [canAutoResize]="true" orderable="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
@@ -107,13 +112,13 @@
         <table class="buttonsMoveRow">
           <tr>
             <td>
-              <button md-raised-button color="primary" [disabled]="!enableMoveUp" (click)="buttonMoveUp()">
+              <button md-raised-button color="primary" type="button" [disabled]="!enableMoveUp" (click)="buttonMoveUp()">
                 <md-icon>arrow_upwards</md-icon>
                 <span>Move Up</span>
               </button>
             </td>
             <td>
-              <button md-raised-button color="primary" [disabled]="!enableMoveDown" (click)="buttonMoveDown()">
+              <button md-raised-button color="primary" type="button" [disabled]="!enableMoveDown" (click)="buttonMoveDown()">
                 <md-icon>arrow_downwards</md-icon>
                 <span>Move Down</span>
               </button>
@@ -131,19 +136,19 @@
         <table class="buttonsRow">
           <tr>
             <td>
-              <button md-raised-button color="primary" [disabled]="!enableCancel" (click)="buttonCancel()">
+              <button md-raised-button color="primary" type="button" [disabled]="!enableCancel" (click)="buttonCancel()">
                 <md-icon>cancel</md-icon>
                 <span>Cancel</span>
               </button>
-              <button md-raised-button color="primary" [disabled]="!enableSave" (click)="buttonSave()">
+              <button md-raised-button color="primary" type="button" [disabled]="!enableSave" (click)="saveDialog()">
                 <md-icon>save</md-icon>
                 <span>Save</span>
               </button>
-              <button md-raised-button color="primary" (click)="buttonNew()">
+              <button md-raised-button color="primary" type="button" (click)="buttonNew()">
                 <md-icon>add</md-icon>
                 <span>New</span>
               </button>
-              <button md-raised-button color="primary" [disabled]="!enableDelete" (click)="buttonDelete()">
+              <button md-raised-button color="primary" type="button" [disabled]="!enableDelete" (click)="buttonDelete()">
                 <md-icon>delete</md-icon>
                 <span>Delete</span>
               </button>

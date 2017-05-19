@@ -18,7 +18,7 @@ public class ServiceRoutingCriteriaFactory implements CriteriaFactory {
 
     @Override
     public IRoutingCriteria getInstance() {
-        return new ServiceRoutingCriteria(NAME, TOOLTIP, INPUTPATTERN);
+        return new ServiceRoutingCriteriaEntity(NAME, TOOLTIP, INPUTPATTERN);
     }
 
     @Override
@@ -36,8 +36,8 @@ public class ServiceRoutingCriteriaFactory implements CriteriaFactory {
         return INPUTPATTERN;
     }
 
-    private class ServiceRoutingCriteria extends RoutingCriteria {
-        private ServiceRoutingCriteria(final String name, final String tooltip, final String inputPattern) {
+    private class ServiceRoutingCriteriaEntity extends RoutingCriteriaEntity {
+        private ServiceRoutingCriteriaEntity(final String name, final String tooltip, final String inputPattern) {
             super(name, tooltip, inputPattern);
         }
 

@@ -1,5 +1,7 @@
 package eu.domibus.plugin.routing;
 
+import eu.domibus.api.routing.BackendFilter;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ public class RoutingService {
     @Autowired
     private List<NotificationListener> notificationListeners;
 
+    @Autowired
+    private DomainCoreConverter coreConverter;
+
     /**
      * Returns the configured backend filters present in the classpath
      *
@@ -31,12 +36,12 @@ public class RoutingService {
      */
     @Cacheable(value = "backendFilterCache")
     public List<BackendFilter> getBackendFilters() {
-        final List<BackendFilter> filters = new ArrayList<>(backendFilterDao.findAll());
+        final List<BackendFilterEntity> filters = new ArrayList<>(backendFilterDao.findAll());
         final List<NotificationListener> backendsTemp = new ArrayList<>(notificationListeners);
 
-        final Iterator<BackendFilter> backendFilterIterator = filters.iterator();
+        final Iterator<BackendFilterEntity> backendFilterIterator = filters.iterator();
         while (backendFilterIterator.hasNext()) {
-            BackendFilter filter = backendFilterIterator.next();
+            BackendFilterEntity filter = backendFilterIterator.next();
 
             boolean filterExists = false;
             for (final NotificationListener backend : backendsTemp) {
@@ -52,22 +57,23 @@ public class RoutingService {
         }
 
         for (final NotificationListener backend : backendsTemp) {
-            final BackendFilter filter = new BackendFilter();
+            final BackendFilterEntity filter = new BackendFilterEntity();
             filter.setBackendName(backend.getBackendName());
             filters.add(filter);
         }
-        return filters;
+        return coreConverter.convert(filters, BackendFilter.class);
     }
 
     @CacheEvict(value = "backendFilterCache", allEntries = true)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateBackendFilters(final List<BackendFilter> filters) {
-        backendFilterDao.update(filters);
+        List<BackendFilterEntity> backendFilterEntities = coreConverter.convert(filters, BackendFilterEntity.class);
+        backendFilterDao.update(backendFilterEntities);
     }
 
 /*    public BackendConnector findResponsibleBackend(UserMessage message){
-        for(BackendFilter filter:getBackendFilters()){
-            for (RoutingCriteria routingCriteria: filter.getRoutingCriterias()) {
+        for(BackendFilterEntity filter:getBackendFilters()){
+            for (RoutingCriteriaEntity routingCriteria: filter.getRoutingCriteriaEntities()) {
                 if (routingCriteria.matches(message, )){
                     for (BackendConnector backend:backends){
                         if (backend.getName().equals(filter.getBackendName())){
