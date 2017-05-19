@@ -12,7 +12,7 @@
     </parent>
     <packaging>pom</packaging>
     <artifactId>domibus-distribution</artifactId>
-	<name>Domibus MSH distribution</name>
+	<name>Domibus MSH Distribution</name>
 
     <build>
         <pluginManagement>
@@ -59,7 +59,7 @@
             </build>
         </profile>
         <profile>
-            <id>tomcat-mysql</id>
+            <id>tomcat</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -133,10 +133,8 @@
             </build>
         </profile>
         <profile>
-            <id>weblogic-oracle</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
+            <id>weblogic</id>
+
             <build>
                 <plugins>
                     <plugin>
@@ -164,14 +162,11 @@
             </build>
         </profile>
         <profile>
-            <id>wildfly-mysql</id>
+            <id>wildfly</id>
             <properties>
                 <wildfly.version>9.0.2.Final</wildfly.version>
             </properties>
 
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <build>
                 <plugins>
                     <plugin>

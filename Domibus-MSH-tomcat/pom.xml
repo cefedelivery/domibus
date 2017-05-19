@@ -19,7 +19,6 @@
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
         <atomikos.version>3.9.3</atomikos.version>
-        <webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
         <projectFile>${project.basedir}/src/test/resources/soapUI/AS4-test-guide-soapui-project.xml</projectFile>
         <soapui.root.folder>${project.basedir}/src/test</soapui.root.folder>
         <soapui.localUrl>http://localhost:8180</soapui.localUrl>
@@ -283,39 +282,16 @@
                 <version>2.3</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <webXml>${webXmlPath}</webXml>
                     <warName>${project.artifactId}-${project.version}</warName>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.3</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <failOnError>false</failOnError>
-                </configuration>
-
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
