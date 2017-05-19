@@ -18,7 +18,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-        <domibus.classifier>wildfly</domibus.classifier>
     </properties>
 
     <dependencies>
@@ -145,7 +144,6 @@
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <warName>${project.artifactId}-${project.version}</warName>
-                    <classifier>${domibus.classifier}</classifier>
                 </configuration>
             </plugin>
             <plugin>

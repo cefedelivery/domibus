@@ -31,7 +31,7 @@
 
     <files>
         <file>
-            <source>${project.basedir}/../domibus-MSH-weblogic/target/domibus-MSH-weblogic-${project.version}-weblogic.war</source>
+            <source>${project.basedir}/../domibus-MSH-weblogic/target/domibus-MSH-weblogic-${project.version}.war</source>
             <outputDirectory></outputDirectory>
             <filtered>false</filtered>
         </file>

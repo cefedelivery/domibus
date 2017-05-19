@@ -26,7 +26,6 @@
         <soapui.remoteUrl>http://localhost:9080</soapui.remoteUrl>
 
         <filesToExclude>logback.xml</filesToExclude>
-        <domibus.classifier>tomcat</domibus.classifier>
     </properties>
 
     <dependencies>
@@ -286,7 +285,6 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <webXml>${webXmlPath}</webXml>
                     <warName>${project.artifactId}-${project.version}</warName>
-                    <classifier>${domibus.classifier}</classifier>
                 </configuration>
             </plugin>
             <plugin>

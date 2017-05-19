@@ -44,7 +44,7 @@
             <filtered>false</filtered>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/../domibus-MSH-wildfly/target/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}</directory>
+            <directory>${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}</directory>
             <outputDirectory>domibus</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>
@@ -110,7 +110,7 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.basedir}/../domibus-MSH-wildfly/target/domibus-MSH-wildfly-${project.version}-wildfly.war</source>
+            <source>${project.basedir}/../domibus-MSH-wildfly/target/domibus-MSH-wildfly-${project.version}.war</source>
             <outputDirectory>domibus/standalone/deployments</outputDirectory>
             <destName>domibus-wildfly.war</destName>
             <filtered>false</filtered>
