@@ -113,7 +113,11 @@
     [limit]="pageSize"
     [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
     (page)='onPage($event)'
-    (sort)="onSort($event)">
+    (sort)="onSort($event)"
+    [selected]="selected"
+    [selectionType]="'single'"
+    (activate)="onActivate($event)"
+    (select)="onSelect($event)">
     <!-- Message Id -->
     <ngx-datatable-column name="Message Id" [width]="500">
       <ng-template let-column="column">
@@ -259,5 +263,12 @@
       </ng-template>
     </ngx-datatable-column>
   </ngx-datatable>
+
+  <div style="margin:5px">
+    <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()">Download</button>
+    <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()">
+      Resend
+    </button>
+  </div>
 
 </div>
