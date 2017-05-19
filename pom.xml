@@ -656,7 +656,7 @@
             </modules>
         </profile>
         <profile>
-            <id>wildlfy</id>
+            <id>wildfly</id>
             <modules>
                 <module>Domibus-MSH-jms-wildfly</module>
                 <module>Domibus-MSH-taskexecutor-wildfly</module>
@@ -672,6 +672,15 @@
                 <module>Domibus-ws-stubs</module>
                 <module>Domibus-default-ws-plugin</module>
                 <module>Domibus-default-jms-plugin</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>database</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>Domibus-MSH-db</module>
             </modules>
         </profile>
         <profile>

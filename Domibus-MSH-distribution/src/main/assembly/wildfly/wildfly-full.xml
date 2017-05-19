@@ -30,7 +30,7 @@
     <includeSiteDirectory>false</includeSiteDirectory>
     <fileSets>
         <fileSet>
-            <directory>${project.basedir}/../Domibus-MSH/target/sql-scripts</directory>
+            <directory>${project.basedir}/../Domibus-MSH-db/target/sql-scripts</directory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <outputDirectory>sql-scripts</outputDirectory>
             <includes>

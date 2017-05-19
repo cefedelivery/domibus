@@ -285,7 +285,7 @@
             </build>
         </profile>
         <profile>
-            <id>sqlscripts</id>
+            <id>database</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
