@@ -1,0 +1,129 @@
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<assembly xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>tomcat-configuration</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <baseDirectory>config</baseDirectory>
+    <includeSiteDirectory>false</includeSiteDirectory>
+    <files>
+        <file>
+            <source>
+                ${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/domibus-configuration.xml
+            </source>
+            <outputDirectory>/</outputDirectory>
+            <destName>domibus-configuration.xml</destName>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>
+                ${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/domibus-plugins.xml
+            </source>
+            <outputDirectory>/</outputDirectory>
+            <destName>domibus-plugins.xml</destName>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>
+                ${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/domibus-datasources.xml
+            </source>
+            <outputDirectory>/</outputDirectory>
+            <destName>domibus-datasources.xml</destName>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>
+                ${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/domibus-security.xml
+            </source>
+            <outputDirectory>/</outputDirectory>
+            <destName>domibus-security.xml</destName>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>
+                ${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/domibus-transactions.xml
+            </source>
+            <outputDirectory>/</outputDirectory>
+            <destName>domibus-transactions.xml</destName>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>
+                ${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/logback.xml
+            </source>
+            <outputDirectory>/</outputDirectory>
+            <destName>logback.xml</destName>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/../domibus-MSH/src/main/conf/domibus/policies/eDeliveryPolicy.xml</source>
+            <outputDirectory>policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/../domibus-MSH/src/main/conf/domibus/policies/eDeliveryPolicy_CA.xml</source>
+            <outputDirectory>policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/../domibus-MSH/src/main/conf/domibus/policies/eSensPolicy.xml</source>
+            <outputDirectory>policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/../domibus-MSH/src/main/conf/domibus/policies/eSensPolicy.v2.0.xml</source>
+            <outputDirectory>policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/../domibus-MSH//src/main/conf/domibus/internal/ehcache.xml</source>
+            <outputDirectory>internal</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+    </files>
+    <fileSets>
+        <fileSet>
+            <directory>${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/internal</directory>
+            <useDefaultExcludes>false</useDefaultExcludes>
+            <outputDirectory>internal</outputDirectory>
+            <!-- excludes/-->
+            <fileMode>0444</fileMode>
+            <directoryMode>0555</directoryMode>
+            <!-- directory/-->
+            <lineEnding>unix</lineEnding>
+            <filtered>false</filtered>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../domibus-MSH/src/main/conf/domibus/example/</directory>
+            <useDefaultExcludes>false</useDefaultExcludes>
+            <outputDirectory>example</outputDirectory>
+            <!-- excludes/-->
+            <fileMode>0444</fileMode>
+            <directoryMode>0555</directoryMode>
+            <!-- directory/-->
+            <lineEnding>unix</lineEnding>
+            <filtered>false</filtered>
+        </fileSet>
+    </fileSets>
+</assembly>

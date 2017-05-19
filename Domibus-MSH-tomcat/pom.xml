@@ -27,9 +27,7 @@
 
         <filesToExclude>logback.xml</filesToExclude>
         <domibus.classifier>tomcat</domibus.classifier>
-        <tomcat.version>8.0.24</tomcat.version>
     </properties>
-
 
     <dependencies>
         <!-- Domibus modules -->
@@ -192,113 +190,39 @@
         </testResources>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.cargo</groupId>
-                <artifactId>cargo-maven2-plugin</artifactId>
-                <version>1.4.12</version>
-                <executions>
-                    <execution>
-                        <id>build-tomcat</id>
-                        <goals>
-                            <goal>configure</goal>
-                            <goal>package</goal>
-                        </goals>
-                        <phase>pre-integration-test</phase>
-                        <configuration>
-                            <container>
-                                <containerId>tomcat8x</containerId>
-                                <zipUrlInstaller>
-                                    <url>
-                                        https://joinup.ec.europa.eu/nexus/service/local/repositories/central/content/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip
-                                    </url>
-                                </zipUrlInstaller>
-                            </container>
-                            <packager>
-                                <outputLocation>
-                                    ${project.build.directory}/artifacts/domibus-container
-                                </outputLocation>
-                            </packager>
-                            <deployables>
-                                <deployable/>
-                            </deployables>
-                            <configuration>
-                                <files>
-                                    <file>
-                                        <file>${project.basedir}/src/main/conf/domibus
-                                        </file>
-                                        <todir>conf/domibus</todir>
-                                    </file>
-                                </files>
-                            </configuration>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/main/assembly/tomcat-full.xml
-                        </descriptor>
-                        <descriptor>src/main/assembly/default-jms-plugin.xml
-                        </descriptor>
-                        <descriptor>src/main/assembly/default-ws-plugin.xml
-                        </descriptor>
-                        <descriptor>src/main/assembly/sample-configuration-and-testing.xml
-                        </descriptor>
-                        <descriptor>src/main/assembly/configuration-only.xml
-                        </descriptor>
-                        <descriptor>src/main/assembly/sql-scripts.xml
-                        </descriptor>
-                    </descriptors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <!-- bound to verify because we need to execute cargo-package first
-                            which is in pre-integration-test -->
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>com.smartbear.soapui</groupId>
                 <artifactId>soapui-pro-maven-plugin</artifactId>
                 <version>5.1.2</version>
                 <executions>
                     <execution>
-                    <phase>none</phase>
-                    <goals>
-                        <goal>test</goal>
-                    </goals>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
                     </execution>
                 </executions>
-                    <configuration>
-                        <outputFolder>${project.build.directory}/surefire-reports</outputFolder>
-                        <junitReport>true</junitReport>
-                        <printReport>true</printReport>
-                        <testSuite>Web Service Submission</testSuite>
-                        <projectProperties>
-                                <value>localUrl=${soapui.localUrl}</value>
-                                <value>remoteUrl=${soapui.remoteUrl}</value>
-                        </projectProperties>
-                        <soapuiProperties>
-                            <property>
-                                <name>soapui.logroot</name>
-                                <value>${project.build.directory}/soapui/logs/</value>
-                            </property>
-                            <property>
-                                <name>http.nonProxyHosts</name>
-                                <value>localhost|127.*|[::1]</value>
-                            </property>
-                        </soapuiProperties>
-                        <testFailIgnore>false</testFailIgnore>
-                        <projectFile>${projectFile}</projectFile>
-                    </configuration>
+                <configuration>
+                    <outputFolder>${project.build.directory}/surefire-reports</outputFolder>
+                    <junitReport>true</junitReport>
+                    <printReport>true</printReport>
+                    <testSuite>Web Service Submission</testSuite>
+                    <projectProperties>
+                        <value>localUrl=${soapui.localUrl}</value>
+                        <value>remoteUrl=${soapui.remoteUrl}</value>
+                    </projectProperties>
+                    <soapuiProperties>
+                        <property>
+                            <name>soapui.logroot</name>
+                            <value>${project.build.directory}/soapui/logs/</value>
+                        </property>
+                        <property>
+                            <name>http.nonProxyHosts</name>
+                            <value>localhost|127.*|[::1]</value>
+                        </property>
+                    </soapuiProperties>
+                    <testFailIgnore>false</testFailIgnore>
+                    <projectFile>${projectFile}</projectFile>
+                </configuration>
 
                 <dependencies>
                     <dependency>
