@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {MdDialogRef} from "@angular/material";
+import {isNullOrUndefined} from "util";
 
 @Component({
   selector: 'app-move-dialog',
@@ -16,6 +17,10 @@ export class MoveDialogComponent implements OnInit {
   }
 
   ngOnInit() {
+  }
+
+  private canOk(): boolean {
+    return !isNullOrUndefined(this.selectedSource);
   }
 
 }
