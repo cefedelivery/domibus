@@ -3,9 +3,9 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
@@ -121,7 +121,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             //set the messageId in the MDC context
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
 
-            final String pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(messaging.getUserMessage(), MSHRole.RECEIVING); // FIXME: This does not work for signalmessages
+            final String pmodeKey = this.pModeProvider.findUserMessageExchangeContext(messaging.getUserMessage(), MSHRole.RECEIVING).getPmodeKey(); // FIXME: This does not work for signalmessages
             final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();

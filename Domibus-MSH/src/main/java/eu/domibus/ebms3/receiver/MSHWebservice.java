@@ -1,6 +1,5 @@
 package eu.domibus.ebms3.receiver;
 
-import eu.domibus.ebms3.common.model.*;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
@@ -19,6 +18,7 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -129,69 +129,87 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     public SOAPMessage invoke(final SOAPMessage request) {
         LOG.info("Receiving message");
 
-        final SOAPMessage responseMessage;
-
-        String pmodeKey = null;
-        try {
-            //FIXME: use a consistent way of property exchange between JAXWS and CXF message model. This: PropertyExchangeInterceptor
-            pmodeKey = (String) request.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
-        } catch (final SOAPException soapEx) {
-            //this error should never occur because pmode handling is done inside the in-interceptorchain
-            LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
-            assert false;
-        }
-
-        LOG.info("Using pmodeKey {}", pmodeKey);
-
-        final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
-        Messaging messaging = null;
-        boolean pingMessage = false;
-
-        String messageId = null;
-        try (StringWriter sw = new StringWriter()) {
-            if (LOG.isDebugEnabled()) {
-
-                transformerFactory.newTransformer().transform(new DOMSource(request.getSOAPPart()), new StreamResult(sw));
-
-                LOG.debug(sw.toString());
-                LOG.debug("received attachments:");
-                final Iterator i = request.getAttachments();
-                while (i.hasNext()) {
-                    LOG.debug("attachment: "+i.next());
-                }
-            }
-            messaging = getMessaging(request);
-            messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
-
-            checkCharset(messaging);
-            pingMessage = checkPingMessage(messaging.getUserMessage());
-            final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
-            LOG.debug("Message duplication status:{}", messageExists);
-            if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
-                persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
-                try {
-                    backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
-                } catch(SubmissionValidationException e) {
-                    LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
-                }
-            }
-            responseMessage = generateReceipt(request, legConfiguration, messageExists);
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
-        } catch (TransformerException | SOAPException | JAXBException | IOException e) {
-            throw new RuntimeException(e);
-        } catch (final EbMS3Exception e) {
+        SOAPMessage responseMessage=null;
+        Messaging messaging;
+        messaging = getMessage(request);
+        if (messaging.getSignalMessage() != null & messaging.getSignalMessage().getPullRequest() != null) {
+                //validate signature of message
+                //store current request with signalMessageDAO
+                //retrieve a message of the sender corresponding to mpc in fifo order
+                //sign message and encrypt message.
+                //return a UserMessage
+        } else {
+            String pmodeKey = null;
             try {
-                if (!pingMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
-                    backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), createErrorResult(e));
-                }
-            } catch (Exception ex) {
-                LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex,  messageId);
+                //FIXME: use a consistent way of property exchange between JAXWS and CXF message model. This: PropertyExchangeInterceptor
+                pmodeKey = (String) request.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
+            } catch (final SOAPException soapEx) {
+                //this error should never occur because pmode handling is done inside the in-interceptorchain
+                LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
+                assert false;
             }
-            throw new WebServiceException(e);
+
+            LOG.info("Using pmodeKey {}", pmodeKey);
+
+            final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
+            boolean pingMessage = false;
+
+            String messageId = null;
+            try (StringWriter sw = new StringWriter()) {
+                if (LOG.isDebugEnabled()) {
+
+                    transformerFactory.newTransformer().transform(new DOMSource(request.getSOAPPart()), new StreamResult(sw));
+
+                    LOG.debug(sw.toString());
+                    LOG.debug("received attachments:");
+                    final Iterator i = request.getAttachments();
+                    while (i.hasNext()) {
+                        LOG.debug("attachment: " + i.next());
+                    }
+                }
+
+                messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
+
+                checkCharset(messaging);
+                pingMessage = checkPingMessage(messaging.getUserMessage());
+                final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
+                LOG.debug("Message duplication status:{}", messageExists);
+                if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
+                    persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
+                    try {
+                        backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
+                    } catch (SubmissionValidationException e) {
+                        LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
+                        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
+                    }
+                }
+                responseMessage = generateReceipt(request, legConfiguration, messageExists);
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
+            } catch (TransformerException | SOAPException | JAXBException | IOException e) {
+                throw new RuntimeException(e);
+            } catch (final EbMS3Exception e) {
+                try {
+                    if (!pingMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
+                        backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), createErrorResult(e));
+                    }
+                } catch (Exception ex) {
+                    LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, messageId);
+                }
+                throw new WebServiceException(e);
+            }
         }
 
         return responseMessage;
+    }
+
+    private Messaging getMessage(SOAPMessage request) {
+        Messaging messaging;
+        try {
+            messaging = getMessaging(request);
+        } catch (SOAPException | JAXBException e) {
+            throw new RuntimeException(e);
+        }
+        return messaging;
     }
 
     private ErrorResult createErrorResult(EbMS3Exception ebm3Exception) {
@@ -423,8 +441,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 transformer.transform(source, result);
                 partInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(out.toByteArray(), "text/xml")));
             }
-            @SuppressWarnings("unchecked") final
-            Iterator<AttachmentPart> attachmentIterator = request.getAttachments();
+            @SuppressWarnings("unchecked") final Iterator<AttachmentPart> attachmentIterator = request.getAttachments();
             AttachmentPart attachmentPart;
             while (attachmentIterator.hasNext() && !payloadFound) {
 
@@ -453,6 +470,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
         @SuppressWarnings("unchecked") final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);
         return root.getValue();
+    }
+
+    static class PullRequestContext{
+
     }
 
 }

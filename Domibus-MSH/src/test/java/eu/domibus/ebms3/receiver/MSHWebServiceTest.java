@@ -964,6 +964,43 @@ public class MSHWebServiceTest {
         Assert.assertEquals(JAXBContext.newInstance(Messaging.class).createUnmarshaller().unmarshal(messagingNode, Messaging.class).getValue(), mshWebservice.getMessaging(soapRequestMessage));
     }
 
+    @Test
+    public void testInvoke_PullRequest() throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
+
+        final Messaging messaging = createPullRequestMessaging();
+
+        new Expectations(mshWebservice) {{
+            /*soapRequestMessage.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
+            result = pmodeKey;
+
+            pModeProvider.getLegConfiguration(withSubstring(PUSH_TESTCASE1_TC1ACTION));
+            result = legConfiguration;
+
+            mshWebservice.getMessaging(withAny(soapRequestMessage));
+            result = messaging;
+
+            mshWebservice.checkDuplicate(messaging);
+            result = false;
+
+            mshWebservice.handlePayloads(soapRequestMessage, userMessage);
+            result = any;
+
+            compressionService.handleDecompression(userMessage, legConfiguration);
+            result = true;
+
+            pModeProvider.getReceiverParty(pmodeKey);
+            result = receiverParty;
+
+            mshWebservice.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
+            result = soapResponseMessage;*/
+        }};
+
+        mshWebservice.invoke(soapRequestMessage);
+
+        new Verifications() {{
+        }};
+    }
+
 
     public Configuration loadSamplePModeConfiguration(String samplePModeFileRelativeURI) throws JAXBException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         LOG.debug("Inside sample PMode configuration");
@@ -1005,6 +1042,18 @@ public class MSHWebServiceTest {
         messaging.getUserMessage().getMessageInfo().setMessageId("1234");
         return messaging;
     }
+
+    protected Messaging createPullRequestMessaging() {
+        Messaging messaging = new ObjectFactory().createMessaging();
+        SignalMessage signalMessage = new SignalMessage();
+        signalMessage.setMessageInfo(new MessageInfo());
+        PullRequest pullRequest = new PullRequest();
+        pullRequest.setMpc("MPC");
+        signalMessage.setPullRequest(pullRequest);
+        messaging.setSignalMessage(signalMessage);
+        return messaging;
+    }
+
 
     protected UserMessage createSampleUserMessage() {
         UserMessage userMessage = new UserMessage();

@@ -123,6 +123,8 @@ public class PModeDaoTestIT {
         assertEquals(saved.getBusinessProcesses(), original.getBusinessProcesses());
     }
 
+
+
     @Test
     public void testUpdatePModeWithValidPmode() throws Exception {
         InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("SamplePModes/domibus-configuration-valid.xml");

@@ -103,7 +103,7 @@ public class MessageSender implements MessageListener {
 
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         try {
-            pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
+            pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);

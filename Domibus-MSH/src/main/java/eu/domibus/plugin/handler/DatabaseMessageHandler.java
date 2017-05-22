@@ -11,12 +11,14 @@ import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
+import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.ebms3.common.context.MessageExchangeContext;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.ObjectFactory;
@@ -41,6 +43,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.stereotype.Service;
 
 /**
  * This class is responsible of handling the plugins requests for all the operations exposed.
@@ -95,6 +99,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     private BackendMessageValidator backendMessageValidator;
+
+    @Autowired
+    private MessageExchangeService messageExchangeService;
 
     @Autowired
     AuthUtils authUtils;
@@ -237,7 +244,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             Messaging message = ebMS3Of.createMessaging();
             message.setUserMessage(userMessage);
 
-            String pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
+            MessageExchangeContext userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            String pModeKey = userMessageExchangeContext.getPmodeKey();
             Party to = messageValidations(userMessage, pModeKey, backendName);
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
@@ -259,13 +267,16 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 throw ex;
             }
 
-            // Sends message to the proper queue
-            userMessageService.scheduleSending(messageId);
+            messageExchangeService.upgradeMessageExchangeStatus(userMessageExchangeContext);
+            if(MessageStatus.READY_TO_PULL!=userMessageExchangeContext.getMessageStatus()) {
+                // Sends message to the proper queue if not a message to be pulled.
+                userMessageService.scheduleSending(messageId);
+            }
 
             // Builds the user message log
             UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
                     .setMessageId(userMessage.getMessageInfo().getMessageId())
-                    .setMessageStatus(MessageStatus.SEND_ENQUEUED)
+                    .setMessageStatus(userMessageExchangeContext.getMessageStatus())
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(getNotificationStatus(legConfiguration))
                     .setMpc(message.getUserMessage().getMpc())

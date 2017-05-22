@@ -7,6 +7,8 @@ import javax.xml.bind.annotation.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import static eu.domibus.common.model.configuration.Process.RETRIEVE_FROM_MESSAGE_CONTEXT;
+
 /**
  * @author Christian Koch, Stefan Mueller
  */
@@ -18,9 +20,11 @@ import java.util.Set;
 })
 @Entity
 @Table(name = "TB_PROCESS")
+@NamedQueries({@NamedQuery(name = RETRIEVE_FROM_MESSAGE_CONTEXT, query = "SELECT p FROM Process as p left join p.agreement as a left join p.legs as l left join p.initiatorParties init left join p.responderParties resp  where l.action.name=:action and l.service.name=:service and (a is null  or a.name=:agreement) and l.name=:leg and init.name=:initiatorName and resp.name=:responderName")})
 public class Process extends AbstractBaseEntity {
-
-
+    @Transient
+    @XmlTransient
+    public final static String RETRIEVE_FROM_MESSAGE_CONTEXT="Process.retrieveFromMessageContext";
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME")
     protected String name;
@@ -221,5 +225,29 @@ public class Process extends AbstractBaseEntity {
 
     public boolean isDynamicInitiator() {
         return dynamicInitiator;
+    }
+
+    public static String getMepValue(Process process){
+            String mepVal="";
+            Mep mep = process.getMep();
+            if(mep !=null){
+                String name = mep.getName();
+                if(name !=null){
+                    mepVal=name;
+                }
+            }
+            return mepVal;
+    }
+
+    public static String getBindingValue(Process process){
+        String bindingVal="";
+        Binding binding = process.getMepBinding();
+        if(binding !=null){
+            String name = binding.getName();
+            if(name !=null){
+                bindingVal=name;
+            }
+        }
+        return bindingVal;
     }
 }

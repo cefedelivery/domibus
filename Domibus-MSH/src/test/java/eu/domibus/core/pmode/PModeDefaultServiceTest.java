@@ -39,7 +39,7 @@ public class PModeDefaultServiceTest {
             messagingDao.findUserMessageByMessageId(messageId);
             result = userMessage;
 
-            pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
+            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             result = pmodeKey;
 
             pModeProvider.getLegConfiguration(pmodeKey);
