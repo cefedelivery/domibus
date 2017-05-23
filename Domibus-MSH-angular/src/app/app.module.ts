@@ -2,7 +2,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {HttpModule, Http, XHRBackend, RequestOptions} from '@angular/http';
-import {MaterialModule} from '@angular/material';
+import {MaterialModule, MdNativeDateModule, MdSelectModule} from '@angular/material';
 import {MdButtonModule} from '@angular/material';
 import 'hammerjs';
 
@@ -32,7 +32,10 @@ import {MessageLogComponent} from "./messagelog/messagelog.component";
 import {TruststoreComponent} from './truststore/truststore.component';
 import {PmodeUploadComponent} from './pmode-upload/pmode-upload.component';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import { MessagelogDialogComponent } from './messagelog/messagelog-dialog/messagelog-dialog.component';
+import {MessagelogDialogComponent} from './messagelog/messagelog-dialog/messagelog-dialog.component';
+import {JmsComponent} from './jms/jms.component';
+import {RowLimiterComponent} from './common/row-limiter/row-limiter.component';
+import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -52,12 +55,16 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TruststoreComponent,
     PModeComponent,
     PmodeUploadComponent,
-    MessagelogDialogComponent
+    MessagelogDialogComponent,
+    JmsComponent,
+    RowLimiterComponent,
+    MoveDialogComponent
   ],
   entryComponents: [
     AppComponent,
     PmodeUploadComponent,
-    MessagelogDialogComponent
+    MessagelogDialogComponent,
+    MoveDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -65,8 +72,9 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     FormsModule,
     HttpModule,
     NgxDatatableModule,
+    MaterialModule,
     MdButtonModule,
-    MaterialModule.forRoot(),
+    MdSelectModule,
     Md2Module.forRoot(),
     routing
   ],
