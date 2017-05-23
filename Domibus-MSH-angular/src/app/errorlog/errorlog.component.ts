@@ -52,46 +52,46 @@ export class ErrorLogComponent {
   }
 
   getErrorLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<ErrorLogResult> {
-    let params: URLSearchParams = new URLSearchParams();
-    params.set('page', offset.toString());
-    params.set('pageSize', pageSize.toString());
-    params.set('orderBy', orderBy);
+    let searchParams: URLSearchParams = new URLSearchParams();
+    searchParams.set('page', offset.toString());
+    searchParams.set('pageSize', pageSize.toString());
+    searchParams.set('orderBy', orderBy);
 
     //filter
     if(this.filter.errorSignalMessageId) {
-      params.set('errorSignalMessageId', this.filter.errorSignalMessageId);
+      searchParams.set('errorSignalMessageId', this.filter.errorSignalMessageId);
     }
     if(this.filter.mshRole) {
-      params.set('mshRole', this.filter.mshRole);
+      searchParams.set('mshRole', this.filter.mshRole);
     }
     if(this.filter.messageInErrorId) {
-      params.set('messageInErrorId', this.filter.messageInErrorId);
+      searchParams.set('messageInErrorId', this.filter.messageInErrorId);
     }
     if(this.filter.errorCode) {
-      params.set('errorCode', this.filter.errorCode);
+      searchParams.set('errorCode', this.filter.errorCode);
     }
     if(this.filter.errorDetail) {
-      params.set('errorDetail', this.filter.errorDetail);
+      searchParams.set('errorDetail', this.filter.errorDetail);
     }
     if(this.filter.timestampFrom != null) {
-      params.set('timestampFrom', this.filter.timestampFrom.getTime());
+      searchParams.set('timestampFrom', this.filter.timestampFrom.getTime());
     }
     if(this.filter.timestampTo != null) {
-      params.set('timestampTo', this.filter.timestampTo.getTime());
+      searchParams.set('timestampTo', this.filter.timestampTo.getTime());
     }
     if(this.filter.notifiedFrom != null) {
-      params.set('notifiedFrom', this.filter.notifiedFrom.getTime());
+      searchParams.set('notifiedFrom', this.filter.notifiedFrom.getTime());
     }
     if(this.filter.notifiedTo != null) {
-      params.set('notifiedTo', this.filter.notifiedTo.getTime());
+      searchParams.set('notifiedTo', this.filter.notifiedTo.getTime());
     }
 
     if(asc != null) {
-      params.set('asc', asc.toString());
+      searchParams.set('asc', asc.toString());
     }
 
     return this.http.get('rest/errorlogs', {
-      search: params
+      search: searchParams
     }).map((response: Response) =>
       response.json()
      );

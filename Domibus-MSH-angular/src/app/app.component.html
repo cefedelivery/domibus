@@ -13,27 +13,27 @@
       </div>
     </div>
 
-    <button md-raised-button class="sideNavButton" [routerLink]="['/']">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/']" id="messages_id">
       <md-icon>message</md-icon>
       <span>Messages</span>
     </button>
-    <button md-raised-button class="sideNavButton">
+    <button md-raised-button class="sideNavButton" id="messagefilter_id">
       <md-icon>filter_list</md-icon>
       <span>Message Filter</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/errorlog']">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/errorlog']" id="errorlog_id">
       <md-icon>sms_failed</md-icon>
       <span>Error Log</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="isAdmin">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="isAdmin" id="pmode_id">
       <md-icon>description</md-icon>
       <span>PMode</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="isAdmin">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="isAdmin" id="truststore_id">
       <md-icon>vpn_key</md-icon>
       <span>Truststore</span>
     </button>
-    <button md-raised-button class="sideNavButton">
+    <button md-raised-button class="sideNavButton" id="jmsmonitoring_id">
       <md-icon>show_chart</md-icon>
       <span>JMS Monitoring</span>
     </button>
@@ -51,7 +51,6 @@
         </div>
       </div>
     </div>
-
   </md-sidenav>
 
   <!-- primary content -->
@@ -74,5 +73,4 @@
       <router-outlet></router-outlet>
     </div>
   </div>
-
 </md-sidenav-container>
