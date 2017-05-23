@@ -1,6 +1,7 @@
 package eu.domibus.common.dao;
 
 import eu.domibus.api.util.xml.XMLUtil;
+import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.context.MessageExchangeContext;
 import eu.domibus.ebms3.common.dao.DefaultDaoTestConfiguration;
@@ -26,6 +27,7 @@ import java.io.FileInputStream;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by dussath on 5/18/17.
@@ -34,6 +36,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class ProcessDaoImplTestIt{
+
 
     static class ContextConfiguration extends DefaultDaoTestConfiguration {
         @Bean
@@ -63,6 +66,8 @@ public class ProcessDaoImplTestIt{
     private PModeDao pModeProvider;
     @Autowired
     private ProcessDao processDao;
+    @Autowired
+    private ConfigurationDAO configurationDAO;
     @Test
     @Transactional
     @Rollback
@@ -85,5 +90,23 @@ public class ProcessDaoImplTestIt{
         assertEquals("pushAndPush",process.getMepBinding().getName());
         assertEquals("twoway",process.getMep().getName());
     }
+
+    @Test
+    @Transactional
+    @Rollback
+    public void findPullProcessesByIniator() throws Exception {
+        File pModeFile = new File("src/test/resources/SamplePModes/domibus-configuration-blue-pull.xml");
+        FileInputStream fis = new FileInputStream(pModeFile);
+        pModeProvider.updatePModes(IOUtils.toByteArray(fis));
+        Configuration configuration = configurationDAO.read();
+        List<Process> pullProcessesByIniator = processDao.findPullProcessesByIniator(configuration.getParty());
+        assertEquals(1,pullProcessesByIniator.size());
+
+        Process process = pullProcessesByIniator.get(0);
+        assertNull(process.getAgreement());
+        assertEquals("pull",process.getMepBinding().getName());
+        assertEquals("oneway",process.getMep().getName());
+    }
+
 
 }

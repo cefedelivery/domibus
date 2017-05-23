@@ -132,7 +132,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         SOAPMessage responseMessage=null;
         Messaging messaging;
         messaging = getMessage(request);
-        if (messaging.getSignalMessage() != null & messaging.getSignalMessage().getPullRequest() != null) {
+        if (messaging.getSignalMessage() != null && messaging.getSignalMessage().getPullRequest() != null) {
                 //validate signature of message
                 //store current request with signalMessageDAO
                 //retrieve a message of the sender corresponding to mpc in fifo order

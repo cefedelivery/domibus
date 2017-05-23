@@ -1,5 +1,6 @@
 package eu.domibus.common.dao;
 
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.context.MessageExchangeContext;
 
@@ -15,5 +16,12 @@ public interface ProcessDao {
      * @param messageExchangeContext contains information about the exchange.
      * @return the corresponding processes.
      */
-    List<Process> findProcessForMessageContext(MessageExchangeContext messageExchangeContext);
+    List<Process> findProcessForMessageContext(final MessageExchangeContext messageExchangeContext);
+
+    /**
+     * Retrieve Process with pull binding having party as an initiator.
+     * @param party the initiator.
+     * @return the matching processes.
+     */
+    List<Process> findPullProcessesByIniator(final Party party);
 }
