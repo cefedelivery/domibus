@@ -41,14 +41,13 @@ export class MessageLogComponent {
   //default value
   asc: boolean = false;
 
-  ROW_LIMITS = [
+  pageSizes: Array<any> = [
     {key: '10', value: 10},
     {key: '25', value: 25},
     {key: '50', value: 50},
     {key: '100', value: 100}
   ];
-  rowLimits: Array<any> = this.ROW_LIMITS;
-  pageSize: number = this.ROW_LIMITS[0].value;
+  pageSize: number = this.pageSizes[0].value;
 
   mshRoles: Array<String>;
   msgTypes: Array<String>;
@@ -196,8 +195,7 @@ export class MessageLogComponent {
     console.log('Activate Event', event);
   }
 
-  changeRowLimits(event) {
-    let newPageLimit = event.value;
+  changePageSize(newPageLimit: number) {
     console.log('New page limit:', newPageLimit);
     this.page(0, newPageLimit, this.orderBy, this.asc);
   }

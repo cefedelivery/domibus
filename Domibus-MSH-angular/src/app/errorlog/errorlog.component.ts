@@ -32,14 +32,13 @@ export class ErrorLogComponent {
   //default value
   asc: boolean = false;
 
-  ROW_LIMITS = [
+  pageSizes: Array<any> = [
     {key: '10', value: 10},
     {key: '25', value: 25},
     {key: '50', value: 50},
     {key: '100', value: 100}
   ];
-  rowLimits: Array<any> = this.ROW_LIMITS;
-  pageSize: number = this.ROW_LIMITS[0].value;
+  pageSize: number = this.pageSizes[0].value;
 
   mshRoles: Array<String>;
   errorCodes: Array<String>;
@@ -58,35 +57,35 @@ export class ErrorLogComponent {
     searchParams.set('orderBy', orderBy);
 
     //filter
-    if(this.filter.errorSignalMessageId) {
+    if (this.filter.errorSignalMessageId) {
       searchParams.set('errorSignalMessageId', this.filter.errorSignalMessageId);
     }
-    if(this.filter.mshRole) {
+    if (this.filter.mshRole) {
       searchParams.set('mshRole', this.filter.mshRole);
     }
-    if(this.filter.messageInErrorId) {
+    if (this.filter.messageInErrorId) {
       searchParams.set('messageInErrorId', this.filter.messageInErrorId);
     }
-    if(this.filter.errorCode) {
+    if (this.filter.errorCode) {
       searchParams.set('errorCode', this.filter.errorCode);
     }
-    if(this.filter.errorDetail) {
+    if (this.filter.errorDetail) {
       searchParams.set('errorDetail', this.filter.errorDetail);
     }
-    if(this.filter.timestampFrom != null) {
+    if (this.filter.timestampFrom != null) {
       searchParams.set('timestampFrom', this.filter.timestampFrom.getTime());
     }
-    if(this.filter.timestampTo != null) {
+    if (this.filter.timestampTo != null) {
       searchParams.set('timestampTo', this.filter.timestampTo.getTime());
     }
-    if(this.filter.notifiedFrom != null) {
+    if (this.filter.notifiedFrom != null) {
       searchParams.set('notifiedFrom', this.filter.notifiedFrom.getTime());
     }
-    if(this.filter.notifiedTo != null) {
+    if (this.filter.notifiedTo != null) {
       searchParams.set('notifiedTo', this.filter.notifiedTo.getTime());
     }
 
-    if(asc != null) {
+    if (asc != null) {
       searchParams.set('asc', asc.toString());
     }
 
@@ -94,7 +93,7 @@ export class ErrorLogComponent {
       search: searchParams
     }).map((response: Response) =>
       response.json()
-     );
+    );
   }
 
   page(offset, pageSize, orderBy, asc) {
@@ -119,16 +118,16 @@ export class ErrorLogComponent {
 
       this.rows = newRows;
 
-      if(result.filter.timestampFrom != null) {
+      if (result.filter.timestampFrom != null) {
         result.filter.timestampFrom = new Date(result.filter.timestampFrom);
       }
-      if(result.filter.timestampTo != null) {
+      if (result.filter.timestampTo != null) {
         result.filter.timestampTo = new Date(result.filter.timestampTo);
       }
-      if(result.filter.notifiedFrom != null) {
+      if (result.filter.notifiedFrom != null) {
         result.filter.notifiedFrom = new Date(result.filter.notifiedFrom);
       }
-      if(result.filter.notifiedTo != null) {
+      if (result.filter.notifiedTo != null) {
         result.filter.notifiedTo = new Date(result.filter.notifiedTo);
       }
 
@@ -153,14 +152,13 @@ export class ErrorLogComponent {
   onSort(event) {
     console.log('Sort Event', event);
     let ascending = true;
-    if(event.newValue === 'desc') {
+    if (event.newValue === 'desc') {
       ascending = false;
     }
     this.page(this.offset, this.pageSize, event.column.prop, ascending);
   }
 
-  changeRowLimits(event) {
-    let newPageLimit = event.value;
+  changePageSize(newPageLimit: number) {
     console.log('New page limit:', newPageLimit);
     this.page(0, newPageLimit, this.orderBy, this.asc);
   }

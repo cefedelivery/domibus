@@ -1,9 +1,7 @@
-﻿<div>
-
-  <div class="selectionCriteria">
-    <md-card style="margin:0;padding:10px;">
-      <md-card-content>
-        <p class="domibusTextHeadingBold">Error Log</p>
+﻿<div class="selectionCriteria">
+  <md-card style="margin:0;padding:10px;">
+    <md-card-content>
+      <p class="domibusTextHeadingBold">Error Log</p>
 
         <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
           <md-input-container class="inputField">
@@ -32,8 +30,7 @@
               {{code}}
             </md-option>
           </md-select>
-          Error Time Period
-          <md2-datepicker placeholder="From:"
+          Error Time Period<md2-datepicker placeholder="From:"
                           [(ngModel)]="filter.timestampFrom"
                           name="fromTimestmap"
                           [type]="'datetime'"
@@ -48,8 +45,7 @@
                           (change)='onTimestampToChange($event)'
                           [type]="'datetime'"
                           #timestampControl="ngModel" id="totimestamp_id" class="dateTableField"></md2-datepicker>
-          Notified Time Period
-          <md2-datepicker placeholder="From:"
+          Notified Time Period<md2-datepicker placeholder="From:"
                           [(ngModel)]="filter.notifiedFrom"
                           name="notifiedFrom"
                           [type]="'datetime'"
@@ -70,92 +66,85 @@
           </button>
         </form>
 
-      </md-card-content>
-    </md-card>
-  </div>
-
-  <div class="rowsDiv">
-    <md-select placeholder="Rows" [(ngModel)]="pageSize" name="pageSize" (change)="changeRowLimits($event)" id="pagesize_id">
-      <md-option *ngFor="let rowLimit of rowLimits" [value]="rowLimit.value">
-        {{rowLimit.key}}
-      </md-option>
-    </md-select>
-  </div>
-
-  <ngx-datatable
-    id="errorLogTable"
-    class="material striped"
-    [rows]="rows"
-    [columnMode]="'force'"
-    [headerHeight]="50"
-    [footerHeight]="50"
-    [rowHeight]="'auto'"
-    [scrollbarH]="true"
-    [externalPaging]="true"
-    [externalSorting]="true"
-    [loadingIndicator]="loading"
-    [count]="count"
-    [offset]="offset"
-    [limit]="pageSize"
-    [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
-    (page)='onPage($event)'
-    (sort)="onSort($event)">
-    <ngx-datatable-column name="ErrorSignalMessageId">
-      <ng-template let-column="column">
-        {{column.name}}
-      </ng-template>
-      <ng-template let-value="value" ngx-datatable-cell-template>
-        <span class="text-select">{{value}}</span>
-      </ng-template>
-    </ngx-datatable-column>
-    <ngx-datatable-column name="AP Role" prop="mshRole" [width]="50">
-      <ng-template let-column="column">
-        {{column.name}}
-      </ng-template>
-      <ng-template let-value="value" ngx-datatable-cell-template>
-        <span class="text-select">{{value}}</span>
-      </ng-template>
-    </ngx-datatable-column>
-    <ngx-datatable-column name="MessageInErrorId">
-      <ng-template let-column="column">
-        {{column.name}}
-      </ng-template>
-      <ng-template let-value="value" ngx-datatable-cell-template>
-        <span class="text-select">{{value}}</span>
-      </ng-template>
-    </ngx-datatable-column>
-    <ngx-datatable-column name="ErrorCode" [width]="50">
-      <ng-template let-column="column">
-        {{column.name}}
-      </ng-template>
-      <ng-template let-value="value" ngx-datatable-cell-template>
-        <span class="text-select">{{value}}</span>
-      </ng-template>
-    </ngx-datatable-column>
-    <ngx-datatable-column name="ErrorDetail" [width]="250">
-      <ng-template let-column="column">
-        {{column.name}}
-      </ng-template>
-      <ng-template let-value="value" ngx-datatable-cell-template>
-        <span class="text-select">{{value}}</span>
-      </ng-template>
-    </ngx-datatable-column>
-    <ngx-datatable-column name="Timestamp" [width]="180">
-      <ng-template let-column="column">
-        {{column.name}}
-      </ng-template>
-      <ng-template let-value="value" ngx-datatable-cell-template>
-        <span class="text-select">{{value | date: dateFormat}}</span>
-      </ng-template>
-    </ngx-datatable-column>
-    <ngx-datatable-column name="Notified" [width]="180">
-      <ng-template let-column="column">
-        {{column.name}}
-      </ng-template>
-      <ng-template let-value="value" ngx-datatable-cell-template>
-        <span class="text-select">{{value | date: dateFormat}}</span>
-      </ng-template>
-    </ngx-datatable-column>
-  </ngx-datatable>
-
+    </md-card-content>
+  </md-card>
 </div>
+
+<app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event)"></app-row-limiter>
+
+<ngx-datatable
+  id="errorLogTable"
+  class="material striped"
+  [rows]="rows"
+  [columnMode]="'force'"
+  [headerHeight]="50"
+  [footerHeight]="50"
+  [rowHeight]="'auto'"
+  [scrollbarH]="true"
+  [externalPaging]="true"
+  [externalSorting]="true"
+  [loadingIndicator]="loading"
+  [count]="count"
+  [offset]="offset"
+  [limit]="pageSize"
+  [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
+  (page)='onPage($event)'
+  (sort)="onSort($event)">
+  <ngx-datatable-column name="ErrorSignalMessageId">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+  <ngx-datatable-column name="AP Role" prop="mshRole" [width]="50">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+  <ngx-datatable-column name="MessageInErrorId">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+  <ngx-datatable-column name="ErrorCode" [width]="50">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+  <ngx-datatable-column name="ErrorDetail" [width]="250">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+  <ngx-datatable-column name="Timestamp" [width]="180">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value | date: dateFormat}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+  <ngx-datatable-column name="Notified" [width]="180">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value | date: dateFormat}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+</ngx-datatable>
+

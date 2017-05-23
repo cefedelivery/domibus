@@ -25,24 +25,25 @@
       <md-icon>sms_failed</md-icon>
       <span>Error Log</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="isAdmin" id="pmode_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="hasAdmin()" id="pmode_id">
       <md-icon>description</md-icon>
       <span>PMode</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="isAdmin" id="truststore_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/jms']" *ngIf="hasAdmin()" id="jmsmonitoring_id">
+      <md-icon>computer</md-icon>
+      <span>JMS Monitoring</span>
+    </button>
+    <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="hasAdmin()" id="truststore_id">
       <md-icon>vpn_key</md-icon>
       <span>Truststore</span>
-    </button>
-    <button md-raised-button class="sideNavButton" id="jmsmonitoring_id">
-      <md-icon>show_chart</md-icon>
-      <span>JMS Monitoring</span>
     </button>
 
     <div id="bottomLogo">
       <div>
         <img src="assets/images/EC+Logo2.png"/>
       </div>
-      <div class= "domibusTextSmall" style="display: flex;flex-direction: column-reverse;text-align: left;color:#004494;padding-left: 5px;">
+      <div class="domibusTextSmall"
+           style="display: flex;flex-direction: column-reverse;text-align: left;color:#004494;padding-left: 5px;">
         <div>
           Connecting Europe
         </div>
@@ -51,6 +52,7 @@
         </div>
       </div>
     </div>
+
   </md-sidenav>
 
   <!-- primary content -->
@@ -70,7 +72,10 @@
       </div>
     </div>
     <div id="routerHolder">
-      <router-outlet></router-outlet>
+      <div style="margin:15px">
+        <router-outlet></router-outlet>
+      </div>
     </div>
   </div>
+
 </md-sidenav-container>
