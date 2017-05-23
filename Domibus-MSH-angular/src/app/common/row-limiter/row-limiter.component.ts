@@ -8,12 +8,12 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 export class RowLimiterComponent implements OnInit {
 
   @Input()
-  private pageSizes: Array<any>;
+  pageSizes: Array<any>;
 
   @Output()
   private onPageSizeChanged = new EventEmitter<number>();
 
-  private pageSize: number;
+  pageSize: number;
 
   constructor() {
   }

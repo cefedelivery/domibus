@@ -17,8 +17,9 @@ export class JmsComponent implements OnInit {
 
   timestampFromMaxDate: Date = new Date();
   timestampToMinDate: Date = null;
+  timestampToMaxDate: Date = new Date();
 
-  private queues = [];
+  queues = [];
 
   private _selectedSource: any;
   get selectedSource(): any {
@@ -32,23 +33,23 @@ export class JmsComponent implements OnInit {
     this.request.source = value.name;
   }
 
-  private currentSearchSelectedSource;
+  currentSearchSelectedSource;
 
-  private selectedMessages: Array<any> = [];
-  private markedForDeletionMessages: Array<any> = [];
-  private loading: boolean = false;
+  selectedMessages: Array<any> = [];
+  markedForDeletionMessages: Array<any> = [];
+  loading: boolean = false;
 
-  private rows: Array<any> = [];
-  private pageSizes: Array<any> = [
+  rows: Array<any> = [];
+  pageSizes: Array<any> = [
     {key: '5', value: 5},
     {key: '10', value: 10},
     {key: '25', value: 25},
     {key: '50', value: 50},
     {key: '100', value: 100}
   ];
-  private pageSize: number = this.pageSizes[0].value;
+  pageSize: number = this.pageSizes[0].value;
 
-  private request = new MessagesRequestRO()
+  request = new MessagesRequestRO()
   private headers = new Headers({'Content-Type': 'application/json'});
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
@@ -101,7 +102,7 @@ export class JmsComponent implements OnInit {
     this.timestampFromMaxDate = event.value;
   }
 
-  private search() {
+  search() {
     this.loading = true;
     this.selectedMessages = [];
     this.markedForDeletionMessages = [];
@@ -126,19 +127,19 @@ export class JmsComponent implements OnInit {
     )
   }
 
-  private cancel() {
+  cancel() {
     this.search();
     this.alertService.success("The operation 'message updates cancelled' completed successfully");
   }
 
-  private save() {
+  save() {
     let messageIds = this.markedForDeletionMessages.map((message) => message.id);
     //because the user can change the source after pressing search and then select the messages and press delete
     //in this case I need to use currentSearchSelectedSource
     this.serverRemove(this.currentSearchSelectedSource.name, messageIds);
   }
 
-  private move() {
+  move() {
     let dialogRef: MdDialogRef<MoveDialogComponent> = this.dialog.open(MoveDialogComponent);
     dialogRef.componentInstance.queues = this.queues;
     dialogRef.afterClosed().subscribe(result => {
@@ -149,7 +150,7 @@ export class JmsComponent implements OnInit {
     });
   }
 
-  private delete() {
+  delete() {
     this.markedForDeletionMessages.push(...this.selectedMessages);
     let newRows = this.rows.filter((element) => {
       return !this.selectedMessages.includes(element);
@@ -158,7 +159,7 @@ export class JmsComponent implements OnInit {
     this.rows = newRows;
   }
 
-  private serverMove(source: string, destination: string, messageIds: Array<any>) {
+  serverMove(source: string, destination: string, messageIds: Array<any>) {
     this.http.post("rest/jms/messages/action", {
       source: source,
       destination: destination,
@@ -184,7 +185,7 @@ export class JmsComponent implements OnInit {
     )
   }
 
-  private serverRemove(source: string, messageIds: Array<any>) {
+  serverRemove(source: string, messageIds: Array<any>) {
     this.http.post("rest/jms/messages/action", {
       source: source,
       selectedMessages: messageIds,
