@@ -3,7 +3,6 @@ package eu.domibus.pki;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -30,6 +29,8 @@ public class CRLServiceImpl implements CRLService {
         for (String crlDistributionPoint : crlDistributionPoints) {
             if (crlUtil.isURLSupported(crlDistributionPoint)) {
                 supportedCrlDistributionPoints.add(crlDistributionPoint);
+            } else {
+                LOG.debug("The protocol of the distribution endpoint is not supported: " + crlDistributionPoint);
             }
         }
 
@@ -49,7 +50,7 @@ public class CRLServiceImpl implements CRLService {
     protected boolean isCertificateRevoked(X509Certificate cert, String crlDistributionPointURL) {
         X509CRL crl = crlUtil.downloadCRL(crlDistributionPointURL);
         if (crl.isRevoked(cert)) {
-            LOG.debug("The pki is revoked by CRL: " + crlDistributionPointURL);
+            LOG.warn("The certificate is revoked by CRL: " + crlDistributionPointURL);
             return true;
         }
         return false;
