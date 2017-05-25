@@ -25,12 +25,12 @@
         </createTable>
 
         <addForeignKeyConstraint baseColumnNames="USERMESSAGE_ID_FK" baseTableName="TB_RAWENVELOPE_LOG"
-                                 constraintName="FK_usermessage_id_fk_rawenvelope_id" deferrable="false"
+                                 constraintName="FK_usermsg_id_fk_rawenv_id" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="ID_PK" referencedTableName="TB_USER_MESSAGE"/>
 
         <addForeignKeyConstraint baseColumnNames="SIGNALMESSAGE_ID_FK" baseTableName="TB_RAWENVELOPE_LOG"
-                                 constraintName="FK_signalmessage_id_fk_rawenvelope_id" deferrable="false"
+                                 constraintName="FK_signalmsg_id_fk_rawenv_id" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="ID_PK" referencedTableName="TB_SIGNAL_MESSAGE"/>
 
