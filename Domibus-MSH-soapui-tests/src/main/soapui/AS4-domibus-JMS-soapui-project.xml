@@ -903,13 +903,13 @@ messageMap.setStringProperty("protocol", "AS4");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -976,12 +976,12 @@ messageMap.setStringProperty("messageId", "-DomJMS002-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1032,12 +1032,12 @@ messageMap.setStringProperty("messageId", "-DomJMS006-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1095,12 +1095,12 @@ messageMap.setStringProperty("messageId", "-DomJMS006-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1165,12 +1165,12 @@ messageMap.setStringProperty("messageId", "-DomJMS007-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1235,12 +1235,12 @@ messageMap.setStringProperty("messageId", "-DomJMS008-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1305,12 +1305,12 @@ messageMap.setStringProperty("messageId", "-DomJMS009-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1375,12 +1375,12 @@ messageMap.setStringProperty("messageId", "-DomJMS012-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1445,12 +1445,12 @@ messageMap.setStringProperty("messageId", "-DomJMS015-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1512,12 +1512,12 @@ messageMap.setStringProperty("conversationId", "123");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1558,12 +1558,12 @@ messageMap.setStringProperty("conversationId", "123");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1603,12 +1603,12 @@ messageMap.setStringProperty("messageId", "-DomJMS017-3-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1671,12 +1671,12 @@ messageMap.setStringProperty("messageId", "-DomJMS018-1-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1717,12 +1717,12 @@ messageMap.setStringProperty("refToMessageId", "-DomJMS018-1-");
  
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1762,12 +1762,12 @@ messageMap.setStringProperty("messageId", "-DomJMS018-3-");
 messageMap.setStringProperty("refToMessageId", "-random-");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1830,12 +1830,12 @@ messageMap.setStringProperty("messageId", "-DomJMS024-1-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1875,12 +1875,12 @@ messageMap.setStringProperty("messageId", "-DomJMS024-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -1942,12 +1942,12 @@ messageMap.setStringProperty("messageId", "-DomJMS025-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2012,12 +2012,12 @@ messageMap.setStringProperty("messageId", "-DomJMS029-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2079,12 +2079,12 @@ messageMap.setStringProperty("messageId", "-DomJMS032-1-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2124,12 +2124,12 @@ messageMap.setStringProperty("messageId", "-DomJMS032-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2191,12 +2191,12 @@ messageMap.setStringProperty("messageId", "-DomJMS034-1-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2236,12 +2236,12 @@ messageMap.setStringProperty("messageId", "-DomJMS034-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2303,12 +2303,12 @@ messageMap.setStringProperty("messageId", "-DomJMS036-1-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2348,12 +2348,12 @@ messageMap.setStringProperty("messageId", "-DomJMS036-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2415,12 +2415,12 @@ messageMap.setStringProperty("messageId", "-DomJMS038-1-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2460,12 +2460,12 @@ messageMap.setStringProperty("messageId", "-DomJMS038-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2527,12 +2527,12 @@ messageMap.setStringProperty("messageId", "-DomJMS044-1-");
 
 
 //messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2572,12 +2572,12 @@ messageMap.setStringProperty("messageId", "-DomJMS044-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2591,7 +2591,7 @@ test.cleanDBMessageIDStartsWith("-DomJMS044-")
 test.finalize()
 ExcelReporting.reportTestCase(testRunner, log)
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS048-Submit Message-Payload-contentId" searchProperties="true" id="ec8a55f1-b57d-4c64-812a-41cb4a8afcbb">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS048-Submit Message-payload_contentId" searchProperties="true" id="ec8a55f1-b57d-4c64-812a-41cb4a8afcbb">
             <con:settings/>
             
             
@@ -2639,12 +2639,12 @@ messageMap.setStringProperty("messageId", "-DomJMS048-1-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:whatever");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:whatever");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2684,12 +2684,12 @@ messageMap.setStringProperty("messageId", "-DomJMS048-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2729,12 +2729,12 @@ messageMap.setStringProperty("messageId", "-DomJMS048-3-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-//messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+//messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2845,26 +2845,26 @@ messageMap.setStringProperty("messageId", "-DomJMS050-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "2");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload1 = pay1.getBytes();
-messageMap.setBytes("payload-1", payload1);
+messageMap.setBytes("payload_1", payload1);
 
-messageMap.setStringProperty("payload-2-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-2-mimeType", "text/xml");
-messageMap.setStringProperty("payload-2-description", "message");
+messageMap.setStringProperty("payload_2_mimeContentId", "cid:attachment");
+messageMap.setStringProperty("payload_2_mimeType", "application/pdf");
+messageMap.setStringProperty("payload_2_description", "message");
 String pay2 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload2 = pay2.getBytes();
-messageMap.setBytes("payload-2", payload2);
+messageMap.setBytes("payload_2", payload2);
 
-/*messageMap.setStringProperty("payload-3-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-3-mimeType", "text/xml");
-messageMap.setStringProperty("payload-3-description", "message");
+/*messageMap.setStringProperty("payload_3-mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_3-mimeType", "text/xml");
+messageMap.setStringProperty("payload_3-description", "message");
 String pay3 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload3 = pay3.getBytes();
-messageMap.setBytes("payload-3", payload3);*/
+messageMap.setBytes("payload_3", payload3);*/
 
 log.info "sending message"
 producer.send(messageMap);
@@ -2978,12 +2978,12 @@ messageMap.setStringProperty("messageId", "-DomJMS051-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "	cid:message	");
-messageMap.setStringProperty("payload-1-mimeType", "	text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "	cid:message	");
+messageMap.setStringProperty("payload_1_mimeType", "	text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3048,12 +3048,12 @@ messageMap.setStringProperty("messageId", "-DomJMS003-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3119,12 +3119,12 @@ messageMap.setStringProperty("messageId", "-DomJMS004-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3191,12 +3191,12 @@ messageMap.setStringProperty("protocol", "AS4");
 messageMap.setStringProperty("messageId", "-DomJMS052-1-");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3236,12 +3236,12 @@ messageMap.setStringProperty("protocol", "AS4");
 messageMap.setStringProperty("messageId", "-DomJMS052-2-");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3301,12 +3301,12 @@ messageMap.setStringProperty("protocol", "AS4");
 messageMap.setStringProperty("messageId", "-DomJMS054-");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3344,12 +3344,12 @@ messageMap.setStringProperty("protocol", "AS4");
 messageMap.setStringProperty("messageId", "-DomJMS054-"); // intentionally send second message with same ID the messgae should end in [internal] domibus.DLQ queue
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3478,12 +3478,12 @@ messageMap.setStringProperty("messageId", "-DomJMS005-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3605,12 +3605,12 @@ messageMap.setStringProperty("messageId", "-DomJMS014-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3672,12 +3672,12 @@ messageMap.setStringProperty("agreementRef", "agreementForDomJMS020Value");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3718,12 +3718,12 @@ messageMap.setStringProperty("messageId", "-DomJMS020-2-eee");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3789,12 +3789,12 @@ messageMap.setStringProperty("agreementRefType", "random");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3837,12 +3837,12 @@ messageMap.setStringProperty("agreementRefType", "useless");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3904,12 +3904,12 @@ messageMap.setStringProperty("messageId", "-DomJMS043-1-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3949,12 +3949,12 @@ messageMap.setStringProperty("messageId", "-DomJMS043-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -3994,12 +3994,12 @@ messageMap.setStringProperty("messageId", "-DomJMS043-3-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4039,12 +4039,12 @@ messageMap.setStringProperty("messageId", "-DomJMS043-4-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4112,12 +4112,12 @@ messageMap.setStringProperty("JMScorrelationId", "-DomJMS040-JMScorrelationId-")
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4155,12 +4155,12 @@ messageMap.setStringProperty("protocol", "AS4");
 messageMap.setStringProperty("messageId", "-DomJMS040-2-");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4230,12 +4230,12 @@ messageMap.setStringProperty("messageId", "-DomJMS045-1-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "0");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4275,12 +4275,12 @@ messageMap.setStringProperty("messageId", "-DomJMS045-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "0");
-//messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-//messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-//messageMap.setStringProperty("payload-1-description", "message");
+//messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+//messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+//messageMap.setStringProperty("payload_1_description", "message");
 //String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 //byte[] payload = pay1.getBytes();
-//messageMap.setBytes("payload-1", payload);
+//messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4345,12 +4345,12 @@ messageMap.setStringProperty("protocol", "AS4");
 messageMap.setStringProperty("messageId", "-DomJMS046-1-");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4389,12 +4389,12 @@ messageMap.setStringProperty("protocol", "AS4");
 messageMap.setStringProperty("messageId", "-DomJMS046-2-");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "application/octet-stream");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "application/octet-stream");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4439,12 +4439,12 @@ messageMap.setStringProperty("messageId", "-DomJMS046-3-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4489,12 +4489,12 @@ messageMap.setStringProperty("messageId", "-DomJMS046-4-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4507,7 +4507,7 @@ test.cleanDBMessageIDStartsWith("-DomJMS046-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b716cb5e-a59e-4e27-87eb-33e933d748c5</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS047-Submit Message-Payload-Description" searchProperties="true" id="5ff64e41-2dc8-49f0-bc88-b42aca061f6d">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b716cb5e-a59e-4e27-87eb-33e933d748c5</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS047-Submit Message-payload_Description" searchProperties="true" id="5ff64e41-2dc8-49f0-bc88-b42aca061f6d">
             <con:settings/>
             
             
@@ -4555,12 +4555,12 @@ messageMap.setStringProperty("messageId", "-DomJMS047-1-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "Random Description");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "Random Description");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4600,12 +4600,12 @@ messageMap.setStringProperty("messageId", "-DomJMS047-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4645,12 +4645,12 @@ messageMap.setStringProperty("messageId", "-DomJMS047-3-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-//messageMap.setStringProperty("payload-1-description", "");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+//messageMap.setStringProperty("payload_1_description", "");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4713,12 +4713,12 @@ messageMap.setStringProperty("protocol", "AS4");
 messageMap.setStringProperty("messageId", "-DomJMS049-1-");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4773,18 +4773,18 @@ messageMap.setStringProperty("messageId", "-DomJMS049-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "2");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
-messageMap.setStringProperty("payload-2-mimeContentId", "cid:attachment");
-messageMap.setStringProperty("payload-2-mimeType", "application/pdf");
-messageMap.setStringProperty("payload-2-description", "message");
+messageMap.setBytes("payload_1", payload);
+messageMap.setStringProperty("payload_2-mimeContentId", "cid:attachment");
+messageMap.setStringProperty("payload_2-mimeType", "application/pdf");
+messageMap.setStringProperty("payload_2-description", "message");
 String pay2 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload2 = pay2.getBytes();
-messageMap.setBytes("payload-2", payload2);
+messageMap.setBytes("payload_2", payload2);
 
 
 log.info "sending message"
@@ -4840,18 +4840,18 @@ messageMap.setStringProperty("messageId", "-DomJMS049-3-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "2");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
-messageMap.setStringProperty("payload-2-mimeContentId", "cid:attachment");
-//messageMap.setStringProperty("payload-2-mimeType", "application/pdf");
-messageMap.setStringProperty("payload-2-description", "message");
+messageMap.setBytes("payload_1", payload);
+messageMap.setStringProperty("payload_2-mimeContentId", "cid:attachment");
+//messageMap.setStringProperty("payload_2-mimeType", "application/pdf");
+messageMap.setStringProperty("payload_2-description", "message");
 String pay2 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload2 = pay2.getBytes();
-messageMap.setBytes("payload-2", payload2);
+messageMap.setBytes("payload_2", payload2);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4933,12 +4933,12 @@ messageMap.setStringProperty("messageId", "-DomJMS028-1-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -4982,12 +4982,12 @@ messageMap.setStringProperty("messageId", "-DomJMS028-2-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5054,12 +5054,12 @@ messageMap.setStringProperty("messageId", "-DomJMS010-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5124,12 +5124,12 @@ messageMap.setStringProperty("messageId", "-DomJMS019-1-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5173,12 +5173,12 @@ messageMap.setStringProperty("refToMessageId", "-DomJMS018-1-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5222,12 +5222,12 @@ messageMap.setStringProperty("messageId", "-DomJMS019-3-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5293,12 +5293,12 @@ messageMap.setStringProperty("agreementRef", "messageAgreementRef");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5363,12 +5363,12 @@ messageMap.setStringProperty("messageId", "-DomJMS027-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5433,12 +5433,12 @@ messageMap.setStringProperty("messageId", "-DomJMS031-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5499,12 +5499,12 @@ messageMap.setStringProperty("messageId", "-DomJMS041-1-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5544,12 +5544,12 @@ messageMap.setStringProperty("messageId", "-DomJMS041-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5612,12 +5612,12 @@ messageMap.setStringProperty("messageId", "-DomJMS042-1-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5657,12 +5657,12 @@ messageMap.setStringProperty("messageId", "-DomJMS042-2-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5710,12 +5710,12 @@ messageMap.setStringProperty("protocol", "AS4");
 
 // Optional
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 def int i = 0;
 while (i&lt;601){
@@ -5820,12 +5820,12 @@ messageMap.setStringProperty("messageId", "-DomJMS011-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5899,12 +5899,12 @@ messageMap.setStringProperty("messageId", "-DomJMS013-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -5978,12 +5978,12 @@ messageMap.setStringProperty("messageId", "-DomJMS016-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -6055,12 +6055,12 @@ messageMap.setStringProperty("messageId", "-DomJMS021-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -6134,12 +6134,12 @@ messageMap.setStringProperty("messageId", "-DomJMS026-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -6213,12 +6213,12 @@ messageMap.setStringProperty("messageId", "-DomJMS030-");
 // messageMap.setJMSCorrelationID("12345");
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -6288,12 +6288,12 @@ messageMap.setStringProperty("messageId", "-DomJMS033-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -6363,12 +6363,12 @@ messageMap.setStringProperty("messageId", "-DomJMS035-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -6438,12 +6438,12 @@ messageMap.setStringProperty("messageId", "-DomJMS037-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -6513,12 +6513,12 @@ messageMap.setStringProperty("messageId", "-DomJMS039-");
 
 
 messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-messageMap.setStringProperty("payload-1-description", "message");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
 String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload-1", payload);
+messageMap.setBytes("payload_1", payload);
 
 log.info "sending message"
 producer.send(messageMap);
@@ -6531,4 +6531,4 @@ test.cleanDBMessageID("-DomJMS039-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:requirements/><con:properties><con:property><con:name>localUrl</con:name><con:value>http://localhost:8080/domibus</con:value></con:property><con:property><con:name>remoteUrl</con:name><con:value>http://localhost:8180/domibus</con:value></con:property><con:property><con:name>pathExeSender</con:name><con:value>c:/domibus/sender/domibus/bin/</con:value></con:property><con:property><con:name>pathExeReceiver</con:name><con:value>c:/domibus/receiver/domibus/bin/</con:value></con:property><con:property><con:name>updateReport</con:name><con:value>true</con:value></con:property><con:property><con:name>databaseBlue</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverBlue</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlBlue</con:name><con:value>jdbc:mysql://localhost:3306/domibus_blue</con:value></con:property><con:property><con:name>blueDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>blueDbPassword</con:name><con:value>adminroot</con:value></con:property><con:property><con:name>databaseRed</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverRed</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlRed</con:name><con:value>jdbc:mysql://localhost:3306/domibus_red</con:value></con:property><con:property><con:name>redDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>redDbPassword</con:name><con:value>adminroot</con:value></con:property><con:property><con:name>pathExeGreen</con:name><con:value>c:/domibus/greenReceiver/domibus/bin/</con:value></con:property><con:property><con:name>jdbcUrl3</con:name><con:value>jdbc:mysql://localhost:3306/domibus_green</con:value></con:property><con:property><con:name>greenUrl</con:name><con:value>http://localhost:8280</con:value></con:property><con:property><con:name>reportFilePath</con:name><con:value>${projectDir}\\reports\\Domibus_3_2_4_test_results.xlsx</con:value></con:property><con:property><con:name>pdfAttachment</con:name><con:value>C:/SoapUIProjects/sampleFiles/fileSmall.pdf</con:value></con:property><con:property><con:name>specialPModesPath</con:name><con:value>${projectDir}\\resources\\PModesandKeystoresSpecialTests</con:value></con:property><con:property><con:name>defaultPModesPath</con:name><con:value>${projectDir}\\resources\\PModesandKeystoresDefault</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:requirements/><con:properties><con:property><con:name>localUrl</con:name><con:value>http://localhost:8080/domibus</con:value></con:property><con:property><con:name>remoteUrl</con:name><con:value>http://localhost:8180/domibus</con:value></con:property><con:property><con:name>pathExeSender</con:name><con:value>c:/domibus/sender/domibus/bin/</con:value></con:property><con:property><con:name>pathExeReceiver</con:name><con:value>c:/domibus/receiver/domibus/bin/</con:value></con:property><con:property><con:name>updateReport</con:name><con:value>true</con:value></con:property><con:property><con:name>databaseBlue</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverBlue</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlBlue</con:name><con:value>jdbc:mysql://localhost:3306/domibus_blue</con:value></con:property><con:property><con:name>blueDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>blueDbPassword</con:name><con:value>adminroot</con:value></con:property><con:property><con:name>databaseRed</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverRed</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlRed</con:name><con:value>jdbc:mysql://localhost:3306/domibus_red</con:value></con:property><con:property><con:name>redDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>redDbPassword</con:name><con:value>adminroot</con:value></con:property><con:property><con:name>pathExeGreen</con:name><con:value>c:/domibus/greenReceiver/domibus/bin/</con:value></con:property><con:property><con:name>jdbcUrl3</con:name><con:value>jdbc:mysql://localhost:3306/domibus_green</con:value></con:property><con:property><con:name>greenUrl</con:name><con:value>http://localhost:8280</con:value></con:property><con:property><con:name>reportFilePath</con:name><con:value>${projectDir}\\reports\\Domibus_3_2_5_test_results.xlsx</con:value></con:property><con:property><con:name>pdfAttachment</con:name><con:value>C:/SoapUIProjects/sampleFiles/fileSmall.pdf</con:value></con:property><con:property><con:name>specialPModesPath</con:name><con:value>${projectDir}\\resources\\PModesandKeystoresSpecialTests</con:value></con:property><con:property><con:name>defaultPModesPath</con:name><con:value>${projectDir}\\resources\\PModesandKeystoresDefault</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>

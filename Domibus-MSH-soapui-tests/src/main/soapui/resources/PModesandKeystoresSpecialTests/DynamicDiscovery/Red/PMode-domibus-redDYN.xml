@@ -199,6 +199,7 @@
 			<security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
 			<security name="eSensPolicy" policy="eSensPolicy.v2.0.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eSensPolicy_CA" policy="eSensPolicy.v2.0_CA.xml" signatureMethod="RSA_SHA256"/>
 		</securities>
 		<errorHandlings>
 			<errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="false" businessErrorNotifyConsumer="false" deliveryFailureNotifyProducer="false"/>
@@ -232,7 +233,8 @@
 					errorHandling="demoErrorHandling"
 					compressPayloads="true"/>		
 			<legConfiguration name="pushTestcase3tc1Action" service="testService1" action="tc3Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
-		</legConfigurations>		
+			<legConfiguration name="pushTestcase4tc1Action" service="testService1" action="tc3Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eSensPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			</legConfigurations>		
 			
 		
 		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
@@ -314,6 +316,14 @@
 			</responderParties>
 			<legs>
 				<leg name="pushTestcase3tc1Action"/>
+			</legs>
+		</process>
+		<process name="tc4Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<responderParties>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase4tc1Action"/>
 			</legs>
 		</process>
 	</businessProcesses>

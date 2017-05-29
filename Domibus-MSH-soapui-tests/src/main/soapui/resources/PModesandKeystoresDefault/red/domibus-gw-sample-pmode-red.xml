@@ -88,7 +88,8 @@
 			<service name="testService9" value="bdx:noprocess" type="tc9"/>					
 			<service name="testService10" value="bdx:noprocess" type="tc10"/>	
 			<service name="testService11" value="bdx:noprocess" type="tc11"/>					
-			<service name="testService12" value="bdx:noprocess" type="tc12"/>					
+			<service name="testService12" value="bdx:noprocess" type="tc12"/>	
+			<service name="connectivityservice" value="http://ec.europa.eu/e-delivery/services/connectivity-service" type="edelivery"/>				
 		</services>
 		<actions>
 			<action name="tc1Action" value="TC1Leg1"/>
@@ -101,7 +102,8 @@
 			<action name="tc9Action" value="TC9Leg1"/>									
 			<action name="tc10Action" value="TC10Leg1"/>	
 			<action name="tc11Action" value="TC11Leg1"/>					
-			<action name="tc12Action" value="TC12Leg1"/>								
+			<action name="tc12Action" value="TC12Leg1"/>
+			<action name="submitMessage" value="submitMessage"/>			
 		</actions>
 		<as4>
 			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
@@ -120,7 +122,8 @@
 			<legConfiguration name="pushTestcase10tc10Action" service="testService10" action="tc10Action" defaultMpc="defaultMpcJMS" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			<legConfiguration name="pushTestcase11tc11Action" service="testService11" action="tc11Action" defaultMpc="defaultMpcWSDom109" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>					
 			<legConfiguration name="pushTestcase12tc12Action" service="testService12" action="tc12Action" defaultMpc="defaultMpcWSDom123" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>				
-		</legConfigurations>
+			<legConfiguration name="pushConnectivityTest" service="connectivityservice" action="submitMessage" defaultMpc="defaultMpc" reliability="noReliability" security="noSigNoEnc" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="false"/>
+			</legConfigurations>
 		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="blue_gw"/>
@@ -274,5 +277,18 @@
 				<leg name="pushTestcase12tc12Action"/>
 			</legs>
 		</process>
+		<process name="tc0Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="blue_gw"/>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushConnectivityTest"/>
+			</legs>
+		</process>	
 		</businessProcesses>
 </db:configuration>
