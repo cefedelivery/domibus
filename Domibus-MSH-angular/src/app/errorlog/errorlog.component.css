@@ -1,7 +1,3 @@
-.rowsDiv {
-  margin-top:30px;
-}
-
 .selectionCriteria {
   margin-top:5px;
 }
@@ -16,6 +12,10 @@
 
 .dateField {
   width:15%;
+}
+
+.dateTableField {
+  width:30%;
 }
 
 .filterTable {

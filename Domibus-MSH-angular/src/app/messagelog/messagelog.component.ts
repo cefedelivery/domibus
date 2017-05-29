@@ -41,14 +41,13 @@ export class MessageLogComponent {
   //default value
   asc: boolean = false;
 
-  ROW_LIMITS = [
+  pageSizes: Array<any> = [
     {key: '10', value: 10},
     {key: '25', value: 25},
     {key: '50', value: 50},
     {key: '100', value: 100}
   ];
-  rowLimits: Array<any> = this.ROW_LIMITS;
-  pageSize: number = this.ROW_LIMITS[0].value;
+  pageSize: number = this.pageSizes[0].value;
 
   mshRoles: Array<String>;
   msgTypes: Array<String>;
@@ -63,70 +62,70 @@ export class MessageLogComponent {
   }
 
   getMessageLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<MessageLogResult> {
-    let params: URLSearchParams = new URLSearchParams();
-    params.set('page', offset.toString());
-    params.set('pageSize', pageSize.toString());
-    params.set('orderBy', orderBy);
+    let searchParams: URLSearchParams = new URLSearchParams();
+    searchParams.set('page', offset.toString());
+    searchParams.set('pageSize', pageSize.toString());
+    searchParams.set('orderBy', orderBy);
 
     //filters
     if (this.filter.messageId) {
-      params.set('messageId', this.filter.messageId);
+      searchParams.set('messageId', this.filter.messageId);
     }
 
     if (this.filter.mshRole) {
-      params.set('mshRole', this.filter.mshRole);
+      searchParams.set('mshRole', this.filter.mshRole);
     }
 
     if (this.filter.conversationId) {
-      params.set('conversationId', this.filter.conversationId);
+      searchParams.set('conversationId', this.filter.conversationId);
     }
 
     if (this.filter.messageType) {
-      params.set('messageType', this.filter.messageType);
+      searchParams.set('messageType', this.filter.messageType);
     }
 
     if (this.filter.messageStatus) {
-      params.set('messageStatus', this.filter.messageStatus);
+      searchParams.set('messageStatus', this.filter.messageStatus);
     }
 
     if (this.filter.notificationStatus) {
-      params.set('notificationStatus', this.filter.notificationStatus);
+      searchParams.set('notificationStatus', this.filter.notificationStatus);
     }
 
     if (this.filter.fromPartyId) {
-      params.set('fromPartyId', this.filter.fromPartyId);
+      searchParams.set('fromPartyId', this.filter.fromPartyId);
     }
 
     if (this.filter.toPartyId) {
-      params.set('toPartyId', this.filter.toPartyId);
+      searchParams.set('toPartyId', this.filter.toPartyId);
     }
 
     if (this.filter.originalSender) {
-      params.set('originalSender', this.filter.originalSender);
+      searchParams.set('originalSender', this.filter.originalSender);
     }
 
     if (this.filter.finalRecipient) {
-      params.set('finalRecipient', this.filter.finalRecipient);
+      searchParams.set('finalRecipient', this.filter.finalRecipient);
     }
 
     if (this.filter.refToMessageId) {
-      params.set('refToMessageId', this.filter.refToMessageId);
+      searchParams.set('refToMessageId', this.filter.refToMessageId);
     }
 
     if (this.filter.receivedFrom) {
-      params.set('receivedFrom', this.filter.receivedFrom.getTime());
+      searchParams.set('receivedFrom', this.filter.receivedFrom.getTime());
     }
 
     if (this.filter.receivedTo) {
-      params.set('receivedTo', this.filter.receivedTo.getTime());
+      searchParams.set('receivedTo', this.filter.receivedTo.getTime());
     }
 
     if (asc != null) {
-      params.set('asc', asc.toString());
+      searchParams.set('asc', asc.toString());
     }
 
     return this.http.get(MessageLogComponent.MESSAGE_LOG_URL, {
-      search: params
+      search: searchParams
     }).map((response: Response) =>
       response.json()
     );
@@ -196,8 +195,7 @@ export class MessageLogComponent {
     console.log('Activate Event', event);
   }
 
-  changeRowLimits(event) {
-    let newPageLimit = event.value;
+  changePageSize(newPageLimit: number) {
     console.log('New page limit:', newPageLimit);
     this.page(0, newPageLimit, this.orderBy, this.asc);
   }
