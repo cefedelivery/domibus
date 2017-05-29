@@ -13,27 +13,27 @@
       </div>
     </div>
 
-    <button md-raised-button class="sideNavButton" [routerLink]="['/']">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/']" id="messages_id">
       <md-icon>message</md-icon>
       <span>Messages</span>
     </button>
-    <button md-raised-button class="sideNavButton">
+    <button md-raised-button class="sideNavButton" id="messagefilter_id">
       <md-icon>filter_list</md-icon>
       <span>Message Filter</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/errorlog']">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/errorlog']" id="errorlog_id">
       <md-icon>sms_failed</md-icon>
       <span>Error Log</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="hasAdmin()">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="hasAdmin()" id="pmode_id">
       <md-icon>description</md-icon>
       <span>PMode</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/jms']" *ngIf="hasAdmin()">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/jms']" *ngIf="hasAdmin()" id="jmsmonitoring_id">
       <md-icon>computer</md-icon>
       <span>JMS Monitoring</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="hasAdmin()">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="hasAdmin()" id="truststore_id">
       <md-icon>vpn_key</md-icon>
       <span>Truststore</span>
     </button>

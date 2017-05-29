@@ -9,7 +9,7 @@ import {isNullOrUndefined} from "util";
 })
 export class MoveDialogComponent implements OnInit {
 
-  private selectedSource: any;
+  selectedSource: any;
   public queues: Array<any>;
 
   constructor(public dialogRef: MdDialogRef<MoveDialogComponent>) {
@@ -19,7 +19,7 @@ export class MoveDialogComponent implements OnInit {
   ngOnInit() {
   }
 
-  private canOk(): boolean {
+  canOk(): boolean {
     return !isNullOrUndefined(this.selectedSource);
   }
 
