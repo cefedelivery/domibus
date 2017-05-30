@@ -5,6 +5,7 @@ import {MessagesRequestRO} from "./ro/messages-request-ro";
 import {isNullOrUndefined} from "util";
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {MoveDialogComponent} from "./move-dialog/move-dialog.component";
+import {MessageDialogComponent} from "./message-dialog/message-dialog.component";
 
 @Component({
   selector: 'app-jms',
@@ -85,13 +86,17 @@ export class JmsComponent implements OnInit {
   }
 
   onSelect({selected}) {
-    // console.log('Select Event', selectedMessages, this.selectedMessages);
+    console.log('Select Event');
     this.selectedMessages.splice(0, this.selectedMessages.length);
     this.selectedMessages.push(...selected);
   }
 
   onActivate(event) {
-    // console.log('Activate Event', event);
+    console.log('Activate Event', event);
+
+    if ("dblclick" === event.type) {
+      this.details(event.row);
+    }
   }
 
   onTimestampFromChange(event) {
@@ -147,6 +152,15 @@ export class JmsComponent implements OnInit {
         let messageIds = this.selectedMessages.map((message) => message.id);
         this.serverMove(this.selectedSource.name, result.destination, messageIds);
       }
+    });
+  }
+
+  details(selectedRow: any) {
+    let dialogRef: MdDialogRef<MessageDialogComponent> = this.dialog.open(MessageDialogComponent);
+    dialogRef.componentInstance.message = selectedRow;
+    dialogRef.componentInstance.currentSearchSelectedSource = this.currentSearchSelectedSource;
+    dialogRef.afterClosed().subscribe(result => {
+      //Todo:
     });
   }
 

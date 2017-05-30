@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {MdDialogRef} from "@angular/material";
 
 @Component({
   selector: 'app-message-dialog',
@@ -7,7 +8,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MessageDialogComponent implements OnInit {
 
-  constructor() { }
+  message: any;
+  currentSearchSelectedSource: any;
+
+  constructor(public dialogRef: MdDialogRef<MessageDialogComponent>) {
+  }
 
   ngOnInit() {
   }

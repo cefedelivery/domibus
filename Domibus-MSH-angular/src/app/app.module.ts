@@ -66,7 +66,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     AppComponent,
     PmodeUploadComponent,
     MessagelogDialogComponent,
-    MoveDialogComponent
+    MoveDialogComponent,
+    MessageDialogComponent
   ],
   imports: [
     BrowserModule,
