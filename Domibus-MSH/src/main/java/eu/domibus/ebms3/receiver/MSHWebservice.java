@@ -133,10 +133,11 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         Messaging messaging;
         messaging = getMessage(request);
         if (messaging.getSignalMessage() != null && messaging.getSignalMessage().getPullRequest() != null) {
-                //validate signature of message
-                //store current request with signalMessageDAO
-                //retrieve a message of the sender corresponding to mpc in fifo order
-                //sign message and encrypt message.
+                //@question Should we store pullrequest?
+                //retrieve a message in READY_TO_PULL mode, with a to corresponding to the pullrequest party and with the same MPC. In fifo order.
+                //sign and encrypt message.
+                //@question how do I sign and encrypt the message..
+                //@question shoul I pass the implementation to a specific method of NotificationService.
                 //return a UserMessage
         } else {
             String pmodeKey = null;
@@ -472,8 +473,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return root.getValue();
     }
 
-    static class PullRequestContext{
 
-    }
 
 }

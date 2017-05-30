@@ -16,4 +16,9 @@ public interface MessageExchangeService {
      */
     void upgradeMessageExchangeStatus(final MessageExchangeContext messageExchangeContext);
 
+    /**
+     * Load pmode and find pull process in order to initialize pull request.
+     */
+    void initiatePullRequest();
+
 }

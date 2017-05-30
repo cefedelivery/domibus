@@ -13,7 +13,7 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @ImportResource("classpath:/spring-dao-context.xml")
 @PropertySource("classpath:domibustest.properties")
-//@dussath I do not have a relative path in the domibutest.properties. Fix this before commit.
+//@thom I do not have a relative path in the domibutest.properties. Fix this before commit.
 public class DefaultDaoTestConfiguration {
 
 }

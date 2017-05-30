@@ -14,13 +14,13 @@ public class ProcessTest {
     @Test
     public void testGetMepValue() throws Exception {
         assertEquals("",Process.getMepValue(new Process()));
-        assertEquals("Mock", Process.getMepValue(PojoInstaciatorUtil.instanciateProcess(Process.class)));
+        assertEquals("Mock", Process.getMepValue(PojoInstaciatorUtil.instanciate(Process.class)));
     }
 
     @Test
     public void testGetBindingValue() throws Exception {
         assertNull("",Process.getBindingValue(new Process()));
-        assertEquals("Mock", Process.getBindingValue(PojoInstaciatorUtil.instanciateProcess(Process.class)));
+        assertEquals("Mock", Process.getBindingValue(PojoInstaciatorUtil.instanciate(Process.class)));
     }
 
 

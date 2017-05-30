@@ -7,8 +7,7 @@ import javax.xml.bind.annotation.*;
 import java.util.HashSet;
 import java.util.Set;
 
-import static eu.domibus.common.model.configuration.Process.FIND_PULL_PROCESS;
-import static eu.domibus.common.model.configuration.Process.RETRIEVE_FROM_MESSAGE_CONTEXT;
+import static eu.domibus.common.model.configuration.Process.*;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -23,12 +22,15 @@ import static eu.domibus.common.model.configuration.Process.RETRIEVE_FROM_MESSAG
 @Table(name = "TB_PROCESS")
 @NamedQueries({
         @NamedQuery(name = RETRIEVE_FROM_MESSAGE_CONTEXT, query = "SELECT p FROM Process as p left join p.agreement as a left join p.legs as l left join p.initiatorParties init left join p.responderParties resp  where l.action.name=:action and l.service.name=:service and (a is null  or a.name=:agreement) and l.name=:leg and init.name=:initiatorName and resp.name=:responderName"),
-        @NamedQuery(name = FIND_PULL_PROCESS, query = "SELECT p FROM Process as p join p.initiatorParties as ini WHERE p.mepBinding.name=:mepBinding and ini in(:initiator)")})
+        //@thom this is the place to swith initiator and responder.
+        @NamedQuery(name = FIND_PULL_PROCESS_TO_INITIATE, query = "SELECT p FROM Process as p join p.initiatorParties as ini WHERE p.mepBinding.name=:mepBinding and ini in(:initiator)"),
+        @NamedQuery(name = FIND_PULL_PROCESS_TO_ANSWER, query = "SELECT p FROM Process as p left join p.legs as l left join p.initiatorParties init where p.mepBinding.name=:mepBinding and l.defaultMpc.qualifiedName=:mpcName and init.name=:initiator")})
 public class Process extends AbstractBaseEntity {
     @Transient
     @XmlTransient
     public final static String RETRIEVE_FROM_MESSAGE_CONTEXT = "Process.retrieveFromMessageContext";
-    public final static String FIND_PULL_PROCESS = "Process.findPullProcess";
+    public final static String FIND_PULL_PROCESS_TO_INITIATE = "Process.findPullProcessToInitiate";
+    public final static String FIND_PULL_PROCESS_TO_ANSWER = "Process.findPullProcessToAnswer";
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME")
     protected String name;

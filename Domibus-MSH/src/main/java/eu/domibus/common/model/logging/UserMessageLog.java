@@ -14,6 +14,7 @@ import java.util.Date;
 @DiscriminatorValue("USER_MESSAGE")
 @NamedQueries({
         @NamedQuery(name = "UserMessageLog.findRetryMessages", query = "select userMessageLog.messageId from UserMessageLog userMessageLog where userMessageLog.messageStatus = eu.domibus.common.MessageStatus.WAITING_FOR_RETRY and userMessageLog.nextAttempt < CURRENT_TIMESTAMP and 1 <= userMessageLog.sendAttempts and userMessageLog.sendAttempts <= userMessageLog.sendAttemptsMax"),
+        @NamedQuery(name = "UserMessageLog.findReadyToPullMessages", query = "SELECT mi.messageId,mi.timestamp FROM UserMessageLog as um ,MessageInfo mi where um.messageStatus=eu.domibus.common.MessageStatus.READY_TO_PULL and um.messageId=mi.messageId order by mi.timestamp desc"),
         @NamedQuery(name = "UserMessageLog.findTimedoutMessages", query = "select userMessageLog.messageId from UserMessageLog userMessageLog where userMessageLog.messageStatus = eu.domibus.common.MessageStatus.WAITING_FOR_RETRY and userMessageLog.nextAttempt < :TIMESTAMP_WITH_TOLERANCE"),
         @NamedQuery(name = "UserMessageLog.findByMessageId", query = "select userMessageLog from UserMessageLog userMessageLog where userMessageLog.messageId=:MESSAGE_ID"),
         @NamedQuery(name = "UserMessageLog.findByMessageIdAndRole", query = "select userMessageLog from UserMessageLog userMessageLog where userMessageLog.messageId=:MESSAGE_ID and userMessageLog.mshRole=:MSH_ROLE"),

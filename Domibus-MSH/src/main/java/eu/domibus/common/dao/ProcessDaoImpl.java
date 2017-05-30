@@ -11,8 +11,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
-import static eu.domibus.common.model.configuration.Process.FIND_PULL_PROCESS;
-import static eu.domibus.common.model.configuration.Process.RETRIEVE_FROM_MESSAGE_CONTEXT;
+import static eu.domibus.common.model.configuration.Process.*;
 
 /**
  * Created by dussath on 5/18/17.
@@ -29,6 +28,7 @@ public class ProcessDaoImpl implements ProcessDao{
     private final static String RESPONDER_NAME = "responderName";
     private final static String MEP_BINDING = "mepBinding";
     private final static String INITIATOR = "initiator";
+    private final static String MPC_NAME = "mpcName";
     @PersistenceContext(unitName = "domibusJTA")
     private EntityManager entityManager;
 
@@ -52,9 +52,21 @@ public class ProcessDaoImpl implements ProcessDao{
      */
     @Override
     public List<Process> findPullProcessesByIniator(final Party party){
-        TypedQuery<Process> processQuery= entityManager.createNamedQuery(FIND_PULL_PROCESS,Process.class);
+        TypedQuery<Process> processQuery= entityManager.createNamedQuery(FIND_PULL_PROCESS_TO_INITIATE,Process.class);
         processQuery.setParameter(MEP_BINDING,BackendConnector.Mode.PULL.getFileMapping());
         processQuery.setParameter(INITIATOR,party);
+        return processQuery.getResultList();
+    }
+
+    /**
+     *{@inheritDoc}
+     */
+    @Override
+    public List<Process> findPullProcessFromRequestPartyAndMpc(final String initiator, final String mpc){
+        TypedQuery<Process> processQuery= entityManager.createNamedQuery(FIND_PULL_PROCESS_TO_ANSWER,Process.class);
+        processQuery.setParameter(MEP_BINDING,BackendConnector.Mode.PULL.getFileMapping());
+        processQuery.setParameter(INITIATOR, initiator);
+        processQuery.setParameter(MPC_NAME, mpc);
         return processQuery.getResultList();
     }
 

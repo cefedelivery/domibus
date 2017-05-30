@@ -5,6 +5,7 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.common.model.Messaging;
@@ -69,6 +70,9 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
 
+    @Autowired
+    private MessageExchangeService messageExchangeService;
+
     public SetPolicyInInterceptor() {
         super(Phase.RECEIVE);
         this.addBefore(PolicyInInterceptor.class.getName());
@@ -116,6 +120,10 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             //message.setContent(XMLStreamReader.class, XMLInputFactory.newInstance().createXMLStreamReader(message.getContent(InputStream.class)));
             final Node messagingNode = soapEnvelope.getElementsByTagNameNS(ObjectFactory._Messaging_QNAME.getNamespaceURI(), ObjectFactory._Messaging_QNAME.getLocalPart()).item(0);
             messaging = ((JAXBElement<Messaging>) this.jaxbContext.createUnmarshaller().unmarshal(messagingNode)).getValue();
+            if(messaging.getSignalMessage()!=null && messaging.getSignalMessage().getPullRequest()!=null){
+                return;
+            }
+            //@question why is this interceptor always called? It does not support SignalMessages. How are acknowledgement send then?
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
 
             //set the messageId in the MDC context

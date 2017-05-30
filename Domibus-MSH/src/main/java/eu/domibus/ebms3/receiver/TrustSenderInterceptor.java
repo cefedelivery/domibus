@@ -77,9 +77,10 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
         try {
             LOG.debug("Verifying sender trust for message [" + msgId + "]");
-            String senderPartyName = getSenderPartyName(message);
             X509Certificate certificate = getSenderCertificate(message);
             String dnSubject = certificate.getSubjectDN().getName();
+            message.put(MSHDispatcher.MESSAGE_SENDER,dnSubject);
+            String senderPartyName = getSenderPartyName(message);
             if (org.apache.commons.lang.StringUtils.containsIgnoreCase(dnSubject, senderPartyName)) {
                 LOG.info("Sender [" + senderPartyName + "] is trusted for message [" + msgId + "]");
                 return;

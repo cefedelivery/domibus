@@ -5,6 +5,7 @@ import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.context.MessageExchangeContext;
 import eu.domibus.ebms3.common.dao.DefaultDaoTestConfiguration;
+import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.xml.XMLUtilImpl;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -24,6 +25,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -106,6 +108,17 @@ public class ProcessDaoImplTestIt{
         assertNull(process.getAgreement());
         assertEquals("pull",process.getMepBinding().getName());
         assertEquals("oneway",process.getMep().getName());
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    public void findPullProcessFromRequestPartyAndMpc() throws IOException, XmlProcessingException {
+        File pModeFile = new File("src/test/resources/SamplePModes/domibus-configuration-blue-pull.xml");
+        FileInputStream fis = new FileInputStream(pModeFile);
+        pModeProvider.updatePModes(IOUtils.toByteArray(fis));
+        List<Process> pullProcessFromRequestPartyAndMpc = processDao.findPullProcessFromRequestPartyAndMpc("red_gw", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC");
+        assertEquals(1,pullProcessFromRequestPartyAndMpc.size());
     }
 
 
