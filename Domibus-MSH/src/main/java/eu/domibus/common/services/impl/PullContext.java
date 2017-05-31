@@ -14,14 +14,14 @@ import static eu.domibus.common.services.impl.PullRequestStatus.ONE_MATCHING_PRO
 /**
  * Created by dussath on 5/24/17.
  */
-class PullContext {
+public class PullContext {
 
     private Process process;
     private Party currentMsh;
     private Party toBePulled;
     private SOAPMessage pullMessage;
     private String pModeKey;
-    private Set<PullRequestStatus> pullRequestStatuses;
+    private Set<PullRequestStatus> pullRequestStatuses=new HashSet<>();
     private String initiatorName;
     private String mpcName;
 

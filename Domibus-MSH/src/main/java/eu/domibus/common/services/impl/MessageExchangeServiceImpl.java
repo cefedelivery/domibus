@@ -125,6 +125,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         PullContext pullContext = new PullContext();
         Configuration configuration = configurationDAO.read();
         pullContext.setCurrentMsh(configuration.getParty());
+        pullContext.addRequestStatus(ONE_MATCHING_PROCESS);
         return pullContext;
     }
 
@@ -156,6 +157,11 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         return null;
     }
 
+    /**
+     *{@inheritDoc}
+     * @thom test this method
+     */
+    @Override
     public PullContext extractPullRequestProcessInformation(final String initiatorName, final String mpcQualifiedName){
         PullContext pullContext = new PullContext();
         pullContext.addRequestStatus(ONE_MATCHING_PROCESS);
@@ -172,6 +178,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     /**
      * Retrieve process information based on the information contained in the pullRequest.
      * @param pullContext the context of the request.
+     *                    @thom test this method
      */
      void configureProcess(PullContext pullContext) {
         List<Process> processes = processDao.findPullProcessFromRequestPartyAndMpc(pullContext.getInitiatorName(), pullContext.getMpcName());
@@ -190,6 +197,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     /**
      * Extract initiator and responder information based on the pullrequest.
      * @param pullContext
+     * @thom test this method
      */
     void configureParties(PullContext pullContext) {
         Configuration configuration = configurationDAO.read();

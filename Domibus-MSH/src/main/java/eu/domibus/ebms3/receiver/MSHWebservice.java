@@ -133,6 +133,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         Messaging messaging;
         messaging = getMessage(request);
         if (messaging.getSignalMessage() != null && messaging.getSignalMessage().getPullRequest() != null) {
+           // backendNotificationService.notifyPullRequest(request.get())
                 //@question Should we store pullrequest?
                 //retrieve a message in READY_TO_PULL mode, with a to corresponding to the pullrequest party and with the same MPC. In fifo order.
                 //sign and encrypt message.
