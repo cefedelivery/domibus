@@ -109,7 +109,6 @@ public class RoutingCriteria extends AbstractBaseEntity implements IRoutingCrite
     public boolean matches(final String candidate) {
 
         final Matcher m = getPattern(expression).matcher(candidate);
-
         return m.matches();
     }
 

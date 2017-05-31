@@ -6,7 +6,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.2.4</version>
+        <version>3.2.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>domibus-MSH</artifactId>
@@ -648,7 +648,14 @@
         <dependency>
             <groupId>no.difi.vefa</groupId>
             <artifactId>peppol-lookup</artifactId>
-            <version>0.9.2</version>
+            <version>0.9.6</version>
+        </dependency>
+
+        <!-- e-SENS OASIS BDX SMP  -->
+        <dependency>
+            <groupId>eu.europa.ec.dynamic-discovery</groupId>
+            <artifactId>dynamic-discovery-client</artifactId>
+            <version>1.2</version>
         </dependency>
 
 
@@ -991,43 +998,80 @@
                     <outputFileEncoding>UTF-8</outputFileEncoding>
                 </configuration>
                 <executions>
-                    <!-- 3.2.4 -->
+                    <!-- 3.2.5 -->
                     <execution>
-                        <id>generate-mysql-script-full-3.2.4</id>
+                        <id>generate-mysql-script-full-3.2.5</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>updateSQL</goal>
                         </goals>
                         <configuration>
                             <changeLogFile>
-                                src/main/resources/db/changelog-3.2.4.xml
+                                src/main/resources/db/changelog-3.2.5.xml
                             </changeLogFile>
                             <url>
-                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.2.4.mysql
+                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.2.5.mysql
                             </url>
                             <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.2.4.ddl
+                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.2.5.ddl
                             </migrationSqlOutputFile>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-oracle-script-full-3.2.4</id>
+                        <id>generate-oracle-script-full-3.2.5</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>updateSQL</goal>
                         </goals>
                         <configuration>
                             <changeLogFile>
-                                src/main/resources/db/changelog-3.2.4.xml
+                                src/main/resources/db/changelog-3.2.5.xml
                             </changeLogFile>
                             <url>
-                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.2.4.oracle
+                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.2.5.oracle
                             </url>
                             <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/oracle10g-3.2.4.ddl
+                                ${project.build.directory}/sql-scripts/oracle10g-3.2.5.ddl
                             </migrationSqlOutputFile>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-mysql-script-delta-3.2.5</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>updateSQL</goal>
+                        </goals>
+                        <configuration>
+                            <changeLogFile>
+                                src/main/resources/db/changelog-3.2.5-delta.xml
+                            </changeLogFile>
+                            <url>
+                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.2.5-delta.mysql
+                            </url>
+                            <migrationSqlOutputFile>
+                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.2.4-to-3.2.5-migration.ddl
+                            </migrationSqlOutputFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-oracle-script-delta-3.2.5</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>updateSQL</goal>
+                        </goals>
+                        <configuration>
+                            <changeLogFile>
+                                src/main/resources/db/changelog-3.2.5-delta.xml
+                            </changeLogFile>
+                            <url>
+                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.2.5-delta.oracle
+                            </url>
+                            <migrationSqlOutputFile>
+                                ${project.build.directory}/sql-scripts/oracle10g-3.2.4-to-3.2.5-migration.ddl
+                            </migrationSqlOutputFile>
+                        </configuration>
+                    </execution>
+                    <!-- 3.2.5 end-->
 
                     <execution>
                         <id>generate-mysql-script-delta-3.1</id>

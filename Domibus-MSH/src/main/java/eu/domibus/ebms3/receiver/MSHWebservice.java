@@ -1,15 +1,13 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.common.*;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
+import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.validators.PayloadProfileValidator;
@@ -19,6 +17,7 @@ import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.validation.SubmissionValidationException;
+import eu.domibus.util.SoapUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,10 +32,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
@@ -108,6 +104,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     @Autowired
     private PropertyProfileValidator propertyProfileValidator;
+
+    @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
@@ -285,7 +284,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     private void saveResponse(final SOAPMessage responseMessage) {
         try {
-            Messaging messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
+            Messaging messaging = getMessaging(responseMessage);
             final SignalMessage signalMessage = messaging.getSignalMessage();
             // Stores the signal message
             signalMessageDao.create(signalMessage);
@@ -366,6 +365,17 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             throw exc;
         }
 
+        try {
+            String rawXMLMessage = SoapUtil.getRawXMLMessage(request);
+            LOG.debug("Persist raw XML envelope: " + rawXMLMessage);
+            RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+            rawEnvelopeLog.setRawXML(rawXMLMessage);
+            rawEnvelopeLog.setUserMessage(userMessage);
+            rawEnvelopeLogDao.create(rawEnvelopeLog);
+        } catch (TransformerException e) {
+            LOG.warn("Unable to log the raw message XML due to: ", e);
+        }
+
         return userMessage.getMessageInfo().getMessageId();
     }
 
@@ -424,8 +434,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
     }
 
-    private Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
-        final Node messagingXml = (Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
+    private Messaging getMessaging(final SOAPMessage soapMessage) throws SOAPException, JAXBException {
+        final Node messagingXml = (Node) soapMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
         final Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
         @SuppressWarnings("unchecked") final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);
         return root.getValue();

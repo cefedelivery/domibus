@@ -1808,12 +1808,12 @@ iOQvLqT/2Q==
    messageMap.setJMSCorrelationID("12345");
 
    messageMap.setStringProperty("totalNumberOfPayloads", "1");
-   messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-   messageMap.setStringProperty("payload-1-mimeType", "text/xml");
-   messageMap.setStringProperty("payload-1-description", "message");
+   messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+   messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+   messageMap.setStringProperty("payload_1_description", "message");
    String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
    byte[] payload = pay1.getBytes();
-   messageMap.setBytes("payload-1", payload);
+   messageMap.setBytes("payload_1", payload);
 
    log.info "sending message"
    producer.send(messageMap);

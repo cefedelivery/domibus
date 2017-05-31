@@ -45,7 +45,7 @@ public class CRLServiceImplTest {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
     }
 
-//    @Test
+    //    @Test
     public void testCreateCertificate() throws Exception {
         BigInteger serial = new BigInteger("0400000000011E44A5E404", 16);
         X509Certificate certificate = pkiUtil.createCertificate(serial, Arrays.asList(new String[]{"test.crl", "test1.crl"}));
@@ -69,6 +69,9 @@ public class CRLServiceImplTest {
         new Expectations(crlService) {{
             crlUtil.getCrlDistributionPoints(certificate);
             returns(crlUrlList, crlUrlList);
+
+            crlUtil.isURLSupported(anyString);
+            returns(true, true);
 
             crlService.isCertificateRevoked(certificate, crlUrl1);
             returns(false, true, false);

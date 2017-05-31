@@ -53,6 +53,8 @@
         <!-- Should unrecoverable errors should be retried or not -->
         <prop key="domibus.dispatch.ebms.error.unrecoverable.retry">true</prop>
         <prop key="domibus.smlzone">acc.edelivery.tech.ec.europa.eu</prop>
+        <!-- Select PEPPOL or OASIS specification for the dynamic discovery client. The OASIS compliant client is used by default. -->
+        <!-- <prop key="domibus.dynamic.discovery.client.specification">PEPPOL</prop> -->
         <prop key="domibus.backend.jmsInQueue">domibus.backend.jms.inQueue</prop>
         <prop key="domibus.deployment.clustered">false</prop>
         <prop key="messageFactoryClass">com.sun.xml.internal.messaging.saaj.soap.ver1_2.SOAPMessageFactory1_2Impl</prop>
