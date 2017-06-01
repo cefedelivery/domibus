@@ -97,9 +97,7 @@ public class ProcessDaoImplTestIt{
     @Transactional
     @Rollback
     public void findPullProcessesByIniator() throws Exception {
-        File pModeFile = new File("src/test/resources/SamplePModes/domibus-configuration-blue-pull.xml");
-        FileInputStream fis = new FileInputStream(pModeFile);
-        pModeProvider.updatePModes(IOUtils.toByteArray(fis));
+        loadBluePullPmodeFile();
         Configuration configuration = configurationDAO.read();
         List<Process> pullProcessesByIniator = processDao.findPullProcessesByIniator(configuration.getParty());
         assertEquals(1,pullProcessesByIniator.size());
@@ -110,14 +108,27 @@ public class ProcessDaoImplTestIt{
         assertEquals("oneway",process.getMep().getName());
     }
 
+    private void loadBluePullPmodeFile() throws XmlProcessingException, IOException {
+        File pModeFile = new File("src/test/resources/SamplePModes/domibus-configuration-blue-pull.xml");
+        FileInputStream fis = new FileInputStream(pModeFile);
+        pModeProvider.updatePModes(IOUtils.toByteArray(fis));
+    }
+
     @Test
     @Transactional
     @Rollback
     public void findPullProcessFromRequestPartyAndMpc() throws IOException, XmlProcessingException {
-        File pModeFile = new File("src/test/resources/SamplePModes/domibus-configuration-blue-pull.xml");
-        FileInputStream fis = new FileInputStream(pModeFile);
-        pModeProvider.updatePModes(IOUtils.toByteArray(fis));
-        List<Process> pullProcessFromRequestPartyAndMpc = processDao.findPullProcessFromRequestPartyAndMpc("red_gw", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC");
+        loadBluePullPmodeFile();
+        List<Process> pullProcessFromRequestPartyAndMpc = processDao.findPullProcessFromRequestPartyAndMpc("red_gw","http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC");
+        assertEquals(1,pullProcessFromRequestPartyAndMpc.size());
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    public void findPullProcessFromRequestMpc() throws IOException, XmlProcessingException {
+        loadBluePullPmodeFile();
+        List<Process> pullProcessFromRequestPartyAndMpc = processDao.findPullProcessFromRequestMpc("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC");
         assertEquals(1,pullProcessFromRequestPartyAndMpc.size());
     }
 

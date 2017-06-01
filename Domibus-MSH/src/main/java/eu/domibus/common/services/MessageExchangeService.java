@@ -1,7 +1,9 @@
 package eu.domibus.common.services;
 
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.context.MessageExchangeContext;
+import eu.domibus.ebms3.common.model.UserMessage;
 
 /**
  * Created by dussath on 5/19/17.
@@ -22,14 +24,13 @@ public interface MessageExchangeService {
      */
     void initiatePullRequest();
 
+    UserMessage retrieveUserReadyToPullMessages(String mpc, Party responder);
+
     /**
-     * When a pull request comes in, there is very litle information. Basicaly the mpc, and if there is
-     * a certificate the possibility to retrieve the name of the sender from it. From this information we retrieve
-     * the initiator, the responder and the pull process configuration. This will allow us to create a Pmode key and
-     * link the request to a policiy.
-     * @param initiatorName the access point that initiate the request.
+     * When a pull request comes in, there is very litle information.  From this information we retrieve
+     * the initiator, the responder and the pull process leg configuration from wich we can retrieve security information
      * @param mpcQualifiedName the mpc attribute within the pull request.
      * @return a pullcontext with all the information needed to continue with the pull process.
      */
-    PullContext extractPullRequestProcessInformation(String initiatorName, String mpcQualifiedName);
+    PullContext extractProcessOnMpc(String mpcQualifiedName);
 }

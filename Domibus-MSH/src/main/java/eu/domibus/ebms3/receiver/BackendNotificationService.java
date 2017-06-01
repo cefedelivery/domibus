@@ -5,7 +5,10 @@ import eu.domibus.common.ErrorResult;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.model.Property;
+import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -72,6 +75,8 @@ public class BackendNotificationService {
 
     @Autowired
     private ApplicationContext applicationContext;
+    @Autowired
+    private MessageExchangeService messageExchangeService;
 
     //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
@@ -242,4 +247,6 @@ public class BackendNotificationService {
     public List<NotificationListener> getNotificationListenerServices() {
         return notificationListenerServices;
     }
+
+
 }

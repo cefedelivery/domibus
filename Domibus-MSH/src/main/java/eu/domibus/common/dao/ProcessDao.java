@@ -26,10 +26,17 @@ public interface ProcessDao {
     List<Process> findPullProcessesByIniator(final Party party);
 
     /**
-     * Returns a list of pullProcess from the side that get pulled based on requester name and mpc.
+     * Returns a list of pullProcess based on requester name and mpc.
      * @param initiator the requester name.
      * @param mpc the message partition channeL
      * @return the matching processes.
      */
     List<Process> findPullProcessFromRequestPartyAndMpc(String initiator, String mpc);
+
+    /**
+     * Returns a list of pullProcess based on an mpc.
+     * @param mpc the message partition channeL
+     * @return the matching processes.
+     */
+    List<Process> findPullProcessFromRequestMpc(String mpc);
 }

@@ -6,11 +6,9 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.MessageInfo;
-import eu.domibus.ebms3.common.model.MessageType;
-import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.common.model.ObjectFactory;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -66,13 +64,10 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     private JAXBContext jaxbContext;
 
     @Autowired
-    private PModeProvider pModeProvider;
-
-    @Autowired
     private DomibusConfigurationService domibusConfigurationService;
 
     @Autowired
-    private MessageExchangeService messageExchangeService;
+    private PolicyInSetupVisitor policyInSetupVisitor;
 
     public SetPolicyInInterceptor() {
         super(Phase.RECEIVE);
@@ -121,32 +116,13 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             //message.setContent(XMLStreamReader.class, XMLInputFactory.newInstance().createXMLStreamReader(message.getContent(InputStream.class)));
             final Node messagingNode = soapEnvelope.getElementsByTagNameNS(ObjectFactory._Messaging_QNAME.getNamespaceURI(), ObjectFactory._Messaging_QNAME.getLocalPart()).item(0);
             messaging = ((JAXBElement<Messaging>) this.jaxbContext.createUnmarshaller().unmarshal(messagingNode)).getValue();
-            if(messaging.getUserMessage()!=null){
-                message.put(MSHDispatcher.MESSAGE_TYPE, MessageType.USER_MESSAGE);
-            }
-            else if(messaging.getSignalMessage()!=null){
-                message.put(MSHDispatcher.MESSAGE_TYPE, MessageType.SIGNAL_MESSAGE);
-                return;
-            }
-            //@question why is this interceptor always called? It does not support SignalMessages. How are acknowledgement send then?
-            messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
+            MessagePolicyInSetup messagePolicyInSetup = getMessagePolicyInSetup(message, messaging);
 
-            //set the messageId in the MDC context
-            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
-
-            final String pmodeKey = this.pModeProvider.findUserMessageExchangeContext(messaging.getUserMessage(), MSHRole.RECEIVING).getPmodeKey(); // FIXME: This does not work for signalmessages
-            final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
+            final LegConfiguration legConfiguration=messagePolicyInSetup.extractMessageConfiguration();
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();
             final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));
             LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
-
-            message.put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
-            //FIXME: Test!!!!
-            message.getExchange().put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
-            //FIXME: Consistent way! If properties are added to the exchange you will have access via PhaseInterceptorChain
-
-            message.getExchange().put(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY, messageId);
 
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want
             message.getExchange().put(PolicyConstants.POLICY_OVERRIDE, policy);
@@ -238,6 +214,24 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             }
 
         }
+    }
+
+    public MessagePolicyInSetup getMessagePolicyInSetup(final SoapMessage soapMessage,final Messaging messaging){
+        MessagePolicyInSetup messagePolicyInSetup=null;
+        if(messaging.getUserMessage()!=null){
+            UserMessagePolicyInSetup userMessagePolicyInSetup = new UserMessagePolicyInSetup(soapMessage, messaging);
+            userMessagePolicyInSetup.accept(policyInSetupVisitor);
+            messagePolicyInSetup=userMessagePolicyInSetup;
+        }
+        else if(messaging.getSignalMessage()!=null){
+            PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
+            if(pullRequest !=null){
+                PullRequestMessagePolicyInSetup policyInSetup=new PullRequestMessagePolicyInSetup(soapMessage,messaging);
+                policyInSetup.accept(policyInSetupVisitor);
+                messagePolicyInSetup=policyInSetup;
+            }
+        }
+        return messagePolicyInSetup;
     }
 }
 

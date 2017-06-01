@@ -1,6 +1,8 @@
 package eu.domibus.util;
 
 
+import org.springframework.util.ClassUtils;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
@@ -36,16 +38,18 @@ public class PojoInstaciatorUtil {
         try {
             T instance = clazz.newInstance();
             Field[] fields = clazz.getDeclaredFields();
-            logger.info(clazz.getName());
             for (Field f : fields) {
                 Class fieldClass = f.getType();
-                if (!fieldClass.isPrimitive()) {
                     if (!java.lang.reflect.Modifier.isStatic(f.getModifiers())
                             && !java.lang.reflect.Modifier.isTransient(f.getModifiers())) {
                         f.setAccessible(true);
                         Object o = parameters.get(f.getName());
-                        if (fieldClass.isAssignableFrom(String.class)) {
-                            logger.info("String " + f.getName());
+                        if (ClassUtils.isPrimitiveOrWrapper(fieldClass)) {
+                            if(fieldClass.isAssignableFrom(Number.class)){
+
+                            }
+                        }
+                        else if (fieldClass.isAssignableFrom(String.class)) {
                             String fieldValue = "Mock";
                             if (o != null) {
                                 fieldValue = (String) o;
@@ -64,10 +68,8 @@ public class PojoInstaciatorUtil {
                                         set.add(instanciate);
                                     }
                                 }
-                                logger.info("Set " + f.getName());
                                 f.set(instance, set);
                             } else if (fieldClass.isAssignableFrom(List.class)) {
-                                logger.info("List " + f.getName());
                                 f.set(instance, new ArrayList<>());
                             } else if (fieldClass.isAssignableFrom(Map.class)) {
                             } else if (fieldClass.isEnum()) {
@@ -76,14 +78,12 @@ public class PojoInstaciatorUtil {
                                 if (o != null) {
                                     tmpMap = (Map<String, Object>) o;
                                 }
-                                logger.info("Other " + f.getName());
                                 f.set(instance, instanciate(fieldClass, tmpMap));
                             }
                         }
                         f.setAccessible(false);
                     }
                 }
-            }
             return instance;
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
@@ -147,7 +147,6 @@ public class PojoInstaciatorUtil {
             if (" ".equals(entity)) {
                 String parameters = entityMatcher.group("parameter");
                 String[] fields = parameters.split(",");
-                logger.info("Entity " + entity);
                 for (String field : fields) {
                     entityMatcher = fieldPatern.matcher(field);
                     if (entityMatcher.find()) {

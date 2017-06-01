@@ -12,13 +12,16 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
+import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
+import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -30,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Node;
 
@@ -120,6 +124,12 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Autowired
     CertificateService certificateService;
 
+    @Autowired
+    private MessageExchangeService messageExchangeService;
+
+    @Autowired
+    private EbMS3MessageBuilder messageBuilder;
+
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
     }
@@ -132,13 +142,31 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         SOAPMessage responseMessage=null;
         Messaging messaging;
         messaging = getMessage(request);
-        if (messaging.getSignalMessage() != null && messaging.getSignalMessage().getPullRequest() != null) {
-           // backendNotificationService.notifyPullRequest(request.get())
-                //@question Should we store pullrequest?
+        PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
+        if (messaging.getSignalMessage() != null && pullRequest != null) {
+                //@thom throw an exception here. It means the certificate was present but it could not extract the name of the puller
+
+                PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
+                if(!pullContext.isValid()){
+                    //@thom make this better.
+                    throw new WebServiceException(pullContext.createWarningMessageForIncomingPullRequest());
+                }
+                UserMessage userMessage = messageExchangeService.retrieveUserReadyToPullMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
+            try {
+                if(userMessage!=null) {
+                    return messageBuilder.buildSOAPMessage(userMessage, pullContext.filterLegOnMpc());
+                }
+                else{
+                    //@thom return special signal found in the doc to say empty stuff.
+                }
+            } catch (EbMS3Exception e) {
+                throw new WebServiceException(e);
+            }
+            // backendNotificationService.notifyPullRequest(request.get())
+                //@question Should we store pullrequest and on which side?
                 //retrieve a message in READY_TO_PULL mode, with a to corresponding to the pullrequest party and with the same MPC. In fifo order.
                 //sign and encrypt message.
-                //@question how do I sign and encrypt the message..
-                //@question shoul I pass the implementation to a specific method of NotificationService.
+                //@question what contains the acknowledgment return with the user message. In comparaison with the non repudiation one.
                 //return a UserMessage
         } else {
             String pmodeKey = null;

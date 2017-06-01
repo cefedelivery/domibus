@@ -141,7 +141,7 @@ public class MessageExchangeServiceImplTest {
         PullContext pullContext = new PullContext();
         pullContext.setProcess(process);
         pullContext.setCurrentMsh(PojoInstaciatorUtil.instanciate(Party.class," [name:from]"));
-        pullContext.setToBePulled(PojoInstaciatorUtil.instanciate(Party.class," [name:to]"));
+        pullContext.setResponder(PojoInstaciatorUtil.instanciate(Party.class," [name:to]"));
         ArgumentCaptor<SignalMessage> signalMessageCaptor = ArgumentCaptor.forClass(SignalMessage.class);
         ArgumentCaptor<LegConfiguration> legConfigurationCaptor = ArgumentCaptor.forClass(LegConfiguration.class);
         messageExchangeService.instantiateSoapMessage(pullContext);
@@ -158,7 +158,7 @@ public class MessageExchangeServiceImplTest {
         PullContext pullContext = new PullContext();
         pullContext.setProcess(process);
         pullContext.setCurrentMsh(PojoInstaciatorUtil.instanciate(Party.class," [name:from]"));
-        pullContext.setToBePulled(PojoInstaciatorUtil.instanciate(Party.class," [name:to]"));
+        pullContext.setResponder(PojoInstaciatorUtil.instanciate(Party.class," [name:to]"));
         when(messageBuilder.buildSOAPMessage(any(SignalMessage.class),any(LegConfiguration.class))).thenThrow(
                 new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "An error occurred while processing your request. Please check the message header for more details.", null,null));
         messageExchangeService.instantiateSoapMessage(pullContext);
@@ -169,29 +169,7 @@ public class MessageExchangeServiceImplTest {
     public void extractConfigurationInfo() throws Exception {
     }
 
-    @Test
-    public void checkProcessValidityWithMoreThanOneLeg() throws Exception {
-        PullContext pullContext = new PullContext();
-        pullContext.setProcess(PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1];[name:leg2]}"));
-        messageExchangeService.checkProcessValidity(pullContext);
-        assertEquals(false, pullContext.isValid());
-    }
 
-    @Test
-    public void checkProcessValidityWithZeroLeg() throws Exception {
-        PullContext pullContext = new PullContext();
-        pullContext.setProcess(PojoInstaciatorUtil.instanciate(Process.class));
-        messageExchangeService.checkProcessValidity(pullContext);
-        assertEquals(false, pullContext.isValid());
-    }
-
-    @Test
-    public void checkProcessValidityWithOneLeg() throws Exception {
-        PullContext pullContext = new PullContext();
-        pullContext.setProcess(PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1]}"));
-        messageExchangeService.checkProcessValidity(pullContext);
-        assertEquals(true, pullContext.isValid());
-    }
 
 
 

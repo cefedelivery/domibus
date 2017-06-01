@@ -3,6 +3,7 @@ package eu.domibus.util;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.ebms3.common.model.Messaging;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -71,10 +72,18 @@ public class PojoInstaciatorUtilTest {
 
     @Test
     public void testInstanciateProcesWithSubClassesInCollections(){
-        Process process = PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1,defaultMpc[name:mpcName,qualifiedName:qualifiedName]}", "responderParties{[name:endPoint1];[name:endPoint2]}");
+        Process process = PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1,defaultMpc[name:mpcName,qualifiedName:qualifiedName]]}", "responderParties{[name:endPoint1];[name:endPoint2]}");
         Mpc defaultMpc = process.getLegs().iterator().next().getDefaultMpc();
         assertEquals("mpcName",defaultMpc.getName());
         assertEquals("qualifiedName",defaultMpc.getQualifiedName());
+    }
+
+    @Test
+    public void testMultipleSubClasesWithCollection(){
+        Messaging instanciate = PojoInstaciatorUtil.instanciate(Messaging.class, "userMessage[partyInfo[to[role:test,partyId{[value:testParty]}]]]");
+        assertEquals("test",instanciate.getUserMessage().getPartyInfo().getTo().getRole());
+        assertEquals(1,instanciate.getUserMessage().getPartyInfo().getTo().getPartyId().size());
+        assertEquals("testParty",instanciate.getUserMessage().getPartyInfo().getTo().getPartyId().iterator().next().getValue());
     }
 
 }

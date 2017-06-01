@@ -5,7 +5,8 @@ package eu.domibus.common.services.impl;
  */
 public enum PullRequestStatus {
     TOO_MANY_PROCESSES,
-    TOO_MANY_PROCESS_LEGS,
+    TOO_MANY_RESPONDER,
+    MORE_THAN_ONE_LEG_FOR_THE_SAME_MPC,
     NO_PROCESSES,
     NO_PROCESS_LEG,
     INVALID_SOAP_MESSAGE,
