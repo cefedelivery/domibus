@@ -37,14 +37,6 @@ export class MessageFilterComponent {
   loading: boolean = false;
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
-    this.rows.push({
-      "plugin": "a",
-      "from": "a",
-      "to": "a",
-      "action": "a",
-      "service": "a"
-    });
-
     this.rollback = this.rows.slice();
   }
 
@@ -87,12 +79,6 @@ export class MessageFilterComponent {
         })
       }
 
-
-      /*const newRows = [...result.messageFilterEntries];
-      let index = 0;
-      for(let i = 0; i < 10; i++) {
-        newRows[i] = result.messageFilterEntries[index++];
-      }*/
       this.rows = newRows;
     }, (error: any) => {
       console.log("error getting the message filter: " + error);
@@ -156,15 +142,13 @@ export class MessageFilterComponent {
         case 'Save' :
           this.enableCancel = false;
           this.enableSave = false;
-          /*var item, prop;
-          for(item in this.rows) {
-            for (prop in this.rows[item]) {
-              if (this.rows[item][prop] == MessageFilterComponent.NEW_VALUE) {
-                this.rows[item][prop] = '';
-              }
-            }
-          }*/
           this.rollback = this.rows.slice();
+          this.http.put('rest/messagefilters',this.rows);
+          /*.subscribe(res => {
+            this.alertService.success(res.json(), false);
+          }, err => {
+            this.alertService.error(err.json(), false);
+          });*/
           break;
         case 'Cancel':
           // do nothing

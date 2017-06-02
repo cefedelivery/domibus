@@ -39,20 +39,12 @@ public class RoutingService {
         final List<BackendFilterEntity> filters = new ArrayList<>(backendFilterDao.findAll());
         final List<NotificationListener> backendsTemp = new ArrayList<>(notificationListeners);
 
-        final Iterator<BackendFilterEntity> backendFilterIterator = filters.iterator();
-        while (backendFilterIterator.hasNext()) {
-            BackendFilterEntity filter = backendFilterIterator.next();
-
-            boolean filterExists = false;
+        for (BackendFilterEntity filter : filters) {
             for (final NotificationListener backend : backendsTemp) {
                 if (filter.getBackendName().equals(backend.getBackendName())) {
-                    filterExists = true;
                     backendsTemp.remove(backend);
                     break;
                 }
-            }
-            if (!filterExists) {
-                backendFilterIterator.remove();
             }
         }
 
