@@ -24,18 +24,15 @@ public class CRLServiceImpl implements CRLService {
     @Override
     public boolean isCertificateRevoked(X509Certificate cert) throws DomibusCRLException {
         List<String> crlDistributionPoints = crlUtil.getCrlDistributionPoints(cert);
-        List<String> supportedCrlDistributionPoints = new ArrayList<>();
 
-        for (String crlDistributionPoint : crlDistributionPoints) {
-            if (crlUtil.isURLSupported(crlDistributionPoint)) {
-                supportedCrlDistributionPoints.add(crlDistributionPoint);
-            } else {
-                LOG.debug("The protocol of the distribution endpoint is not supported: " + crlDistributionPoint);
-            }
+        if (crlDistributionPoints == null || crlDistributionPoints.isEmpty()) {
+            LOG.debug("No CRL distribution points found for certificate: [" + getSubjectDN(cert) + "]");
+            return false;
         }
 
-        if (supportedCrlDistributionPoints.size() == 0) {
-            throw new DomibusCRLException("No supported CRL distribution point found for certificate " + cert.getSubjectDN().getName());
+        List<String> supportedCrlDistributionPoints = getSupportedCrlDistributionPoints(crlDistributionPoints);
+        if (supportedCrlDistributionPoints.isEmpty()) {
+            throw new DomibusCRLException("No supported CRL distribution point found for certificate " + getSubjectDN(cert));
         }
 
         for (String crlDistributionPointUrl : supportedCrlDistributionPoints) {
@@ -45,6 +42,30 @@ public class CRLServiceImpl implements CRLService {
         }
 
         return false;
+    }
+
+    protected String getSubjectDN(X509Certificate cert) {
+        if (cert != null && cert.getSubjectDN() != null) {
+            return cert.getSubjectDN().getName();
+        }
+        return null;
+    }
+
+    protected List<String> getSupportedCrlDistributionPoints(List<String> crlDistributionPoints) {
+        List<String> result = new ArrayList<>();
+        if (crlDistributionPoints == null || crlDistributionPoints.isEmpty()) {
+            return result;
+        }
+
+        for (String crlDistributionPoint : crlDistributionPoints) {
+            if (crlUtil.isURLSupported(crlDistributionPoint)) {
+                result.add(crlDistributionPoint);
+            } else {
+                LOG.debug("The protocol of the distribution endpoint is not supported: " + crlDistributionPoint);
+            }
+        }
+
+        return result;
     }
 
     protected boolean isCertificateRevoked(X509Certificate cert, String crlDistributionPointURL) {
