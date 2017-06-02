@@ -1,0 +1,33 @@
+<h1 id="messageDialogTitle" md-dialog-title>
+  Click on "Ok" to confirm that you want to move the selected messages<br>
+  WARNING: This operation will be executed immediately and cannot be reverted.<br>
+  Click on "Cancel" to leave the message untouched.
+</h1>
+
+<div style="width:100%;margin-bottom: 15px;">
+  <md-select placeholder="Destination" [(ngModel)]="selectedSource" name="jmsQueueSelector" id="jmsQueueSelector"
+             style="width:100%">
+    <md-option *ngFor="let queue of queues" [value]="queue" style="width:100%">
+      {{queue.internal ? "[internal]" :""}} {{queue.name}} ({{queue.numberOfMessages}})
+    </md-option>
+  </md-select>
+</div>
+
+<div class="divTable">
+  <div class="divTableBody">
+    <div class="divTableRow">
+      <div class="divTableCell" style="width:50%">
+        <button id="messageDialogResendButton" md-raised-button color="primary" (click)="dialogRef.close({destination:selectedSource.name})" [disabled]="!canOk()">
+          <md-icon>check circle</md-icon>
+          <span>Ok</span>
+        </button>
+      </div>
+      <div class="divTableCell" style="width:50%">
+        <button id="messageDialogCancelButton" md-raised-button color="primary" (click)="dialogRef.close({})">
+          <md-icon>cancel</md-icon>
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
