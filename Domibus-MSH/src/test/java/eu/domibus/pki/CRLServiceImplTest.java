@@ -99,7 +99,6 @@ public class CRLServiceImplTest {
             crlUtil.getCrlDistributionPoints(certificate);
             returns(crlUrlList);
         }};
-        //certificate is valid in both CRLs
         boolean certificateRevoked = crlService.isCertificateRevoked(certificate);
         assertFalse(certificateRevoked);
     }
