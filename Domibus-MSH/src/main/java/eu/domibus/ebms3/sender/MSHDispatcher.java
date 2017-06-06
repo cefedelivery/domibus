@@ -93,7 +93,9 @@ public class MSHDispatcher {
             try {
                 boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
                 if (!certificateChainValid) {
-                    warnOutput("Certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
+                    EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Certificate is not valid or it has been revoked [" + receiverParty.getName() + "]", null, null);
+                    ex.setMshRole(MSHRole.SENDING);
+                    throw ex;
                 }
             } catch (Exception e) {
                 LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
@@ -172,13 +174,6 @@ public class MSHDispatcher {
             policy.setPassword(httpProxyPassword);
             httpConduit.setProxyAuthorization(policy);
         }
-    }
-
-    private void warnOutput(String message) {
-        LOG.warn("\n\n\n");
-        LOG.warn("**************** WARNING **************** WARNING **************** WARNING **************** ");
-        LOG.warn(message);
-        LOG.warn("*******************************************************************************************\n\n\n");
     }
 }
 
