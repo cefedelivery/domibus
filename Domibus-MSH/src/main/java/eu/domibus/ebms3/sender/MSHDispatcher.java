@@ -97,6 +97,8 @@ public class MSHDispatcher {
                     ex.setMshRole(MSHRole.SENDING);
                     throw ex;
                 }
+            } catch (EbMS3Exception e) {
+                throw  e;
             } catch (Exception e) {
                 LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
             }
