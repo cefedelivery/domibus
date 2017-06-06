@@ -48,13 +48,9 @@ public class MessagingDaoTestIt {
     @Test
     @Transactional
     @Rollback
-    public void findMessagingOnStatusAndReceiver() throws Exception {
-  /*      Party party=new Party();
-        party.setName("blabla");
-        Identifier identifier = new Identifier();
-        identifier.setPartyId("testParty");
-        party.getIdentifiers().add(identifier);
-    */  Party party = PojoInstaciatorUtil.instanciate(Party.class, " [name:blabla,identifiers{[partyId:testParty]}]");
+    public void findMessagingOnStatusReceiverAndMpc() throws Exception {
+
+       Party party = PojoInstaciatorUtil.instanciate(Party.class, " [name:blabla,identifiers{[partyId:testParty]}]");
         party.getIdentifiers().iterator().next().setPartyIdType(null);
         partyDao.create(party);
         Messaging firstMessage = PojoInstaciatorUtil.instanciate(Messaging.class, "userMessage[partyInfo[to[role:test,partyId{[value:testParty]}]]]");
@@ -80,17 +76,9 @@ public class MessagingDaoTestIt {
                 ;
         userMessageLogDao.create(umlBuilder.build());
 
-      /*  umlBuilder = UserMessageLogBuilder.create()
-                .setMessageId(secondMessageInfo.getMessageId())
-                .setMessageStatus(MessageStatus.READY_TO_PULL)
-                .setMshRole(MSHRole.SENDING)
-                ;
-        userMessageLogDao.create(umlBuilder.build());
-*/
         List<MessagePullDto> testParty = messagingDao.findMessagingOnStatusReceiverAndMpc(party.getEntityId(), MessageStatus.READY_TO_PULL,"http://mpc" );
         assertEquals(1,testParty.size());
         assertEquals("123456",testParty.get(0).getMessageId());
-  //      assertEquals("78910",testParty.get(1).getMessageId());
     }
 
 }

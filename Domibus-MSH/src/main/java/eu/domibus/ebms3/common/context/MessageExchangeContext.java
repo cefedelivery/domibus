@@ -15,6 +15,7 @@ public class MessageExchangeContext {
     private final String action;
     private final String leg;
     private final String pmodeKey;
+    private final String reversePmodeKey;
     final static String SEPARATOR=":";
     private MessageStatus messageStatus;
 
@@ -26,6 +27,7 @@ public class MessageExchangeContext {
         this.action = action;
         this.leg = leg;
         this.pmodeKey=senderParty + SEPARATOR + receiverParty + SEPARATOR+ service + SEPARATOR+ action + SEPARATOR+ agreementName + SEPARATOR+ leg;
+        this.reversePmodeKey=receiverParty+ SEPARATOR + senderParty+ SEPARATOR+ service + SEPARATOR+ action + SEPARATOR+ agreementName + SEPARATOR+ leg;
     }
 
     public String getAgreementName() {
@@ -54,6 +56,10 @@ public class MessageExchangeContext {
 
     public String getPmodeKey() {
         return pmodeKey;
+    }
+
+    public String getReversePmodeKey() {
+        return reversePmodeKey;
     }
 
     public void updateStatus(MessageStatus messageStatus){

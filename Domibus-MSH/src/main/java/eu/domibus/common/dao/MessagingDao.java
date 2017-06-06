@@ -98,7 +98,7 @@ public class MessagingDao extends BasicDao<Messaging> {
         TypedQuery<MessagePullDto> processQuery= em.createQuery(FIND_MESSAGING_ON_STATUS_AND_RECEIVER,MessagePullDto.class);
         processQuery.setParameter(PARTY_ID, partyId);
         processQuery.setParameter(MESSAGE_STATUS, messageStatus);
-        processQuery.setParameter(MPC, messageStatus);
+        processQuery.setParameter(MPC, mpc);
         return processQuery.getResultList();
     }
 }

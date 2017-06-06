@@ -16,14 +16,14 @@ public interface ProcessDao {
      * @param messageExchangeContext contains information about the exchange.
      * @return the corresponding processes.
      */
-    List<Process> findProcessForMessageContext(final MessageExchangeContext messageExchangeContext);
+    List<Process> findProcessByMessageContext(final MessageExchangeContext messageExchangeContext);
 
     /**
      * Retrieve Process with pull binding having party as an initiator.
      * @param party the initiator.
      * @return the matching processes.
      */
-    List<Process> findPullProcessesByIniator(final Party party);
+    List<Process> findPullProcessesByResponder(final Party party);
 
     /**
      * Returns a list of pullProcess based on requester name and mpc.
@@ -31,12 +31,12 @@ public interface ProcessDao {
      * @param mpc the message partition channeL
      * @return the matching processes.
      */
-    List<Process> findPullProcessFromRequestPartyAndMpc(String initiator, String mpc);
+    List<Process> findPullProcessByRequestPartyAndMpc(String initiator, String mpc);
 
     /**
      * Returns a list of pullProcess based on an mpc.
      * @param mpc the message partition channeL
      * @return the matching processes.
      */
-    List<Process> findPullProcessFromRequestMpc(String mpc);
+    List<Process> findPullProcessBytMpc(String mpc);
 }

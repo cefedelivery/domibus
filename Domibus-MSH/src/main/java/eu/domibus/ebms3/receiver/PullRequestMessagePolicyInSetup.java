@@ -39,7 +39,7 @@ public class PullRequestMessagePolicyInSetup extends AbstractMessagePolicyInSetu
          */
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
         if (!pullContext.isValid()) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Incoming pull request :" + pullContext.createWarningMessageForIncomingPullRequest(), messaging != null ? getMessageId() : "unknown", null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Incoming pull request :" + pullContext.createProcessWarningMessage(), messaging != null ? getMessageId() : "unknown", null);
         }
         return pullContext.getProcess().getLegs().iterator().next();
     }

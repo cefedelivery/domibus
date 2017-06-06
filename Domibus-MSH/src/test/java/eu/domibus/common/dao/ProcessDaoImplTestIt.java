@@ -78,14 +78,14 @@ public class ProcessDaoImplTestIt{
         FileInputStream fis = new FileInputStream(pModeFile);
         pModeProvider.updatePModes(IOUtils.toByteArray(fis));
 
-        List<Process> processesForMessageContext = processDao.findProcessForMessageContext(new MessageExchangeContext("agreement1110", "blue_gw", "red_gw", "noSecService", "noSecAction", "pushNoSecnoSecAction"));
+        List<Process> processesForMessageContext = processDao.findProcessByMessageContext(new MessageExchangeContext("agreement1110", "blue_gw", "red_gw", "noSecService", "noSecAction", "pushNoSecnoSecAction"));
         assertEquals(1,processesForMessageContext.size());
         Process process = processesForMessageContext.get(0);
         assertEquals("agreement1110",process.getAgreement().getName());
         assertEquals("push",process.getMepBinding().getName());
         assertEquals("oneway",process.getMep().getName());
 
-        processesForMessageContext = processDao.findProcessForMessageContext(new MessageExchangeContext("agreement1110", "domibus_de", "ibmgw", "testService3", "tc3ActionLeg1", "pushTestcase3Leg1tc3ActionLeg1"));
+        processesForMessageContext = processDao.findProcessByMessageContext(new MessageExchangeContext("agreement1110", "domibus_de", "ibmgw", "testService3", "tc3ActionLeg1", "pushTestcase3Leg1tc3ActionLeg1"));
         assertEquals(1,processesForMessageContext.size());
         process = processesForMessageContext.get(0);
         assertEquals("agreement1110",process.getAgreement().getName());
@@ -99,7 +99,7 @@ public class ProcessDaoImplTestIt{
     public void findPullProcessesByIniator() throws Exception {
         loadBluePullPmodeFile();
         Configuration configuration = configurationDAO.read();
-        List<Process> pullProcessesByIniator = processDao.findPullProcessesByIniator(configuration.getParty());
+        List<Process> pullProcessesByIniator = processDao.findPullProcessesByResponder(configuration.getParty());
         assertEquals(1,pullProcessesByIniator.size());
 
         Process process = pullProcessesByIniator.get(0);
@@ -119,7 +119,7 @@ public class ProcessDaoImplTestIt{
     @Rollback
     public void findPullProcessFromRequestPartyAndMpc() throws IOException, XmlProcessingException {
         loadBluePullPmodeFile();
-        List<Process> pullProcessFromRequestPartyAndMpc = processDao.findPullProcessFromRequestPartyAndMpc("red_gw","http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC");
+        List<Process> pullProcessFromRequestPartyAndMpc = processDao.findPullProcessByRequestPartyAndMpc("red_gw","http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC");
         assertEquals(1,pullProcessFromRequestPartyAndMpc.size());
     }
 
@@ -128,7 +128,7 @@ public class ProcessDaoImplTestIt{
     @Rollback
     public void findPullProcessFromRequestMpc() throws IOException, XmlProcessingException {
         loadBluePullPmodeFile();
-        List<Process> pullProcessFromRequestPartyAndMpc = processDao.findPullProcessFromRequestMpc("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC");
+        List<Process> pullProcessFromRequestPartyAndMpc = processDao.findPullProcessBytMpc("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC");
         assertEquals(1,pullProcessFromRequestPartyAndMpc.size());
     }
 

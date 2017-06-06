@@ -29,11 +29,11 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.plugin.validation.SubmissionValidationException;
+import eu.domibus.util.MessageUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Node;
 
@@ -139,35 +139,12 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     public SOAPMessage invoke(final SOAPMessage request) {
         LOG.info("Receiving message");
 
-        SOAPMessage responseMessage=null;
+        SOAPMessage responseMessage = null;
         Messaging messaging;
-        messaging = getMessage(request);
-        PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
-        if (messaging.getSignalMessage() != null && pullRequest != null) {
-                //@thom throw an exception here. It means the certificate was present but it could not extract the name of the puller
+        messaging = MessageUtil.getMessage(request,jaxbContext);
 
-                PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
-                if(!pullContext.isValid()){
-                    //@thom make this better.
-                    throw new WebServiceException(pullContext.createWarningMessageForIncomingPullRequest());
-                }
-                UserMessage userMessage = messageExchangeService.retrieveUserReadyToPullMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
-            try {
-                if(userMessage!=null) {
-                    return messageBuilder.buildSOAPMessage(userMessage, pullContext.filterLegOnMpc());
-                }
-                else{
-                    //@thom return special signal found in the doc to say empty stuff.
-                }
-            } catch (EbMS3Exception e) {
-                throw new WebServiceException(e);
-            }
-            // backendNotificationService.notifyPullRequest(request.get())
-                //@question Should we store pullrequest and on which side?
-                //retrieve a message in READY_TO_PULL mode, with a to corresponding to the pullrequest party and with the same MPC. In fifo order.
-                //sign and encrypt message.
-                //@question what contains the acknowledgment return with the user message. In comparaison with the non repudiation one.
-                //return a UserMessage
+        if (messaging.getSignalMessage() != null && messaging.getSignalMessage().getPullRequest() != null) {
+            return handlePullRequest(messaging);
         } else {
             String pmodeKey = null;
             try {
@@ -230,6 +207,26 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
 
         return responseMessage;
+    }
+
+    private SOAPMessage handlePullRequest(Messaging messaging) {
+        PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
+        PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
+        if (!pullContext.isValid()) {
+            throw new WebServiceException("Pmode configuration " + pullContext.createProcessWarningMessage());
+        }
+        UserMessage userMessage = messageExchangeService.retrieveUserReadyToPullMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
+        try {
+            if (userMessage != null) {
+                return messageBuilder.buildSOAPMessage(userMessage, pullContext.filterLegOnMpc(pullRequest.getMpc()));
+            } else {
+                EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0006, "There is no message available for\n" +
+                        "pulling from this MPC at this moment.", null, null);
+                return messageBuilder.buildSOAPFaultMessage(ebMS3Exception.getFaultInfo());
+            }
+        } catch (EbMS3Exception e) {
+            throw new WebServiceException(e);
+        }
     }
 
     private Messaging getMessage(SOAPMessage request) {
@@ -496,12 +493,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     protected Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
         LOG.debug("Unmarshalling the Messaging instance from the request");
-        final Node messagingXml = (Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
-        final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
-        @SuppressWarnings("unchecked") final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);
-        return root.getValue();
+        return MessageUtil.getMessaging(request, jaxbContext);
     }
-
 
 
 }

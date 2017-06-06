@@ -22,6 +22,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.xml.soap.SOAPMessage;
+import javax.xml.ws.handler.MessageContext;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -53,7 +55,7 @@ public class MessageExchangeServiceImplTest {
 
     @Before
     public void init() {
-        Party correctParty = PojoInstaciatorUtil.instanciate(Party.class, "[name:party1]");
+        Party correctParty = PojoInstaciatorUtil.instanciate(Party.class, " [name:party1]");
         process = PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1,action[name:action]]}", "responderParties{[name:endPoint1];[name:endPoint2]}");
         LegConfiguration uniqueLeg = process.getLegs().iterator().next();
         Service service = new Service();
@@ -66,13 +68,13 @@ public class MessageExchangeServiceImplTest {
         configuration.setParty(correctParty);
         when(configurationDao.read()).thenReturn(configuration);
         List<Process> processes = Lists.newArrayList(process);
-        when(processDao.findPullProcessesByIniator(correctParty)).thenReturn(processes);
+        when(processDao.findPullProcessesByResponder(correctParty)).thenReturn(processes);
     }
     
     @Test
     public void testSuccessFullOneWayPullConfiguration() throws Exception {
 
-        Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]");
+        Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]","legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}","responderParties{[name:resp1]}");
         MessageExchangeContext messageExchangeContext = getMessageExchangeContext(process);
         assertEquals(MessageStatus.READY_TO_PULL,messageExchangeContext.getMessageStatus());
 
@@ -93,7 +95,7 @@ public class MessageExchangeServiceImplTest {
         List<Process> processes= Lists.newArrayList();
         processes.add(process);
         MessageExchangeContext messageExchangeContext = new MessageExchangeContext("agreementName", "senderParty", "receiverParty", "service", "action", "leg");
-        when(processDao.findProcessForMessageContext(messageExchangeContext)).thenReturn(processes);
+        when(processDao.findProcessByMessageContext(messageExchangeContext)).thenReturn(processes);
         messageExchangeService.upgradeMessageExchangeStatus(messageExchangeContext);
         return messageExchangeContext;
     }
@@ -106,7 +108,7 @@ public class MessageExchangeServiceImplTest {
         processes.add(process);
         process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:push]");
         processes.add(process);
-        when(processDao.findProcessForMessageContext(messageExchangeContext)).thenReturn(processes);
+        when(processDao.findProcessByMessageContext(messageExchangeContext)).thenReturn(processes);
         try {
             messageExchangeService.upgradeMessageExchangeStatus(messageExchangeContext);
             assertTrue(false);
@@ -130,43 +132,20 @@ public class MessageExchangeServiceImplTest {
     public void testInvalidRequest() throws Exception {
         when(messageBuilder.buildSOAPMessage(any(SignalMessage.class),any(LegConfiguration.class))).thenThrow(
                 new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "An error occurred while processing your request. Please check the message header for more details.", null,null));
+        Process process = PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1,action[name:action]]}", "responderParties{[name:endPoint1]}");
+        when(processDao.findProcessByMessageContext(any(MessageExchangeContext.class))).thenReturn(Lists.newArrayList(process));
         messageExchangeService.initiatePullRequest();
         verify(mshDispatcher,times(0)).dispatch(any(SOAPMessage.class), any(String.class));
     }
 
-
-
     @Test
-    public void testInstantiateSoapMessage() throws Exception {
-        PullContext pullContext = new PullContext();
-        pullContext.setProcess(process);
-        pullContext.setCurrentMsh(PojoInstaciatorUtil.instanciate(Party.class," [name:from]"));
-        pullContext.setResponder(PojoInstaciatorUtil.instanciate(Party.class," [name:to]"));
-        ArgumentCaptor<SignalMessage> signalMessageCaptor = ArgumentCaptor.forClass(SignalMessage.class);
-        ArgumentCaptor<LegConfiguration> legConfigurationCaptor = ArgumentCaptor.forClass(LegConfiguration.class);
-        messageExchangeService.instantiateSoapMessage(pullContext);
-        verify(messageBuilder,times(1)).buildSOAPMessage(signalMessageCaptor.capture(),legConfigurationCaptor.capture());
-        SignalMessage value = signalMessageCaptor.getValue();
-        LegConfiguration legConfiguration=legConfigurationCaptor.getValue();
-        assertEquals("mpcName",value.getPullRequest().getMpc());
-        assertEquals("leg1",legConfiguration.getName());
-        assertEquals("from:to:service:action:Mock:leg1",pullContext.getpModeKey());
-    }
-
-    @Test
-    public void testInstantiateSoapMessageWithError() throws Exception {
-        PullContext pullContext = new PullContext();
-        pullContext.setProcess(process);
-        pullContext.setCurrentMsh(PojoInstaciatorUtil.instanciate(Party.class," [name:from]"));
-        pullContext.setResponder(PojoInstaciatorUtil.instanciate(Party.class," [name:to]"));
-        when(messageBuilder.buildSOAPMessage(any(SignalMessage.class),any(LegConfiguration.class))).thenThrow(
-                new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "An error occurred while processing your request. Please check the message header for more details.", null,null));
-        messageExchangeService.instantiateSoapMessage(pullContext);
-        assertFalse(pullContext.isValid());
-    }
-
-    @Test
-    public void extractConfigurationInfo() throws Exception {
+    public void extractProcessOnMpc() throws Exception {
+        List<Process> processes = Lists.newArrayList(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "responderParties{[name:resp1]}"));
+        when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(processes);
+        PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
+        assertEquals("resp1",pullContext.getResponder().getName());
+        assertEquals("party1",pullContext.getInitiator().getName());
+        assertEquals("oneway",pullContext.getProcess().getMep().getName());
     }
 
 

@@ -36,7 +36,7 @@ public class ProcessDaoImpl implements ProcessDao{
      *{@inheritDoc}
      */
     @Override
-    public List<Process> findProcessForMessageContext(final MessageExchangeContext messageExchangeContext){
+    public List<Process> findProcessByMessageContext(final MessageExchangeContext messageExchangeContext){
         TypedQuery<Process> processQuery= entityManager.createNamedQuery(RETRIEVE_FROM_MESSAGE_CONTEXT,Process.class);
         processQuery.setParameter(ACTION,messageExchangeContext.getAction());
         processQuery.setParameter(SERVICE,messageExchangeContext.getService());
@@ -51,7 +51,7 @@ public class ProcessDaoImpl implements ProcessDao{
      *{@inheritDoc}
      */
     @Override
-    public List<Process> findPullProcessesByIniator(final Party party){
+    public List<Process> findPullProcessesByResponder(final Party party){
         TypedQuery<Process> processQuery= entityManager.createNamedQuery(FIND_PULL_PROCESS_TO_INITIATE,Process.class);
         processQuery.setParameter(MEP_BINDING,BackendConnector.Mode.PULL.getFileMapping());
         processQuery.setParameter(RESPONDER,party);
@@ -62,7 +62,7 @@ public class ProcessDaoImpl implements ProcessDao{
      *{@inheritDoc}
      */
     @Override
-    public List<Process> findPullProcessFromRequestPartyAndMpc(final String initiator, final String mpc){
+    public List<Process> findPullProcessByRequestPartyAndMpc(final String initiator, final String mpc){
         TypedQuery<Process> processQuery= entityManager.createNamedQuery(FIND_PULL_PROCESS_FROM_INITIATOR_AND_MPC,Process.class);
         processQuery.setParameter(MEP_BINDING,BackendConnector.Mode.PULL.getFileMapping());
         processQuery.setParameter(RESPONDER, initiator);
@@ -74,7 +74,7 @@ public class ProcessDaoImpl implements ProcessDao{
      *{@inheritDoc}
      */
     @Override
-    public List<Process> findPullProcessFromRequestMpc(final String mpc){
+    public List<Process> findPullProcessBytMpc(final String mpc){
         TypedQuery<Process> processQuery= entityManager.createNamedQuery(FIND_PULL_PROCESS_FROM_MPC,Process.class);
         processQuery.setParameter(MEP_BINDING,BackendConnector.Mode.PULL.getFileMapping());
         processQuery.setParameter(MPC_NAME, mpc);

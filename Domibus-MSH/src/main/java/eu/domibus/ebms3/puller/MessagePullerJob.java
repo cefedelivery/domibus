@@ -13,10 +13,10 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 @DisallowConcurrentExecution //Only one SenderWorker runs at any time
 public class MessagePullerJob extends QuartzJobBean {
     @Autowired
-    private MessageExchangeService messagePullerService;
+    private MessageExchangeService messageExchangeService;
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        messagePullerService.initiatePullRequest();
+        messageExchangeService.initiatePullRequest();
     }
 }
