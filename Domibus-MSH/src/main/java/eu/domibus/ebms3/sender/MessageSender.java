@@ -27,12 +27,14 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.DelayedDispatchMessageCreator;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.pki.CertificateService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
@@ -100,6 +102,12 @@ public class MessageSender implements MessageListener {
     @Autowired
     private UpdateRetryLoggingService updateRetryLoggingService;
 
+    @Autowired
+    CertificateService certificateService;
+
+    @Autowired
+    RetryService retryService;
+
 
     private void sendUserMessage(final String messageId) {
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
@@ -109,17 +117,33 @@ public class MessageSender implements MessageListener {
         LegConfiguration legConfiguration = null;
         final String pModeKey;
 
+        Boolean abortSending = false;
         final UserMessage userMessage = this.messagingDao.findUserMessageByMessageId(messageId);
         try {
             pModeKey = this.pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
             legConfiguration = this.pModeProvider.getLegConfiguration(pModeKey);
+
+            if (certificateService.isCertificateValidationEnabled()) {
+                Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+                try {
+                    boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
+                    if (!certificateChainValid) {
+                        LOG.error("Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
+                        retryService.purgeTimedoutMessage(messageId);
+                        abortSending = true;
+                        return;
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
+                }
+            }
 
             LOG.debug("PMode found : " + pModeKey);
             final SOAPMessage soapMessage = this.messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             final SOAPMessage response = this.mshDispatcher.dispatch(soapMessage, pModeKey);
             isOk = responseHandler.handle(response);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
-                EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occured during marshalling", messageId, null);
+                EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occurred during marshalling", messageId, null);
                 e.setMshRole(MSHRole.SENDING);
                 throw e;
             }
@@ -132,6 +156,11 @@ public class MessageSender implements MessageListener {
         } catch (final EbMS3Exception e) {
             this.handleEbms3Exception(e, messageId);
         } finally {
+            if (abortSending) {
+                LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
+                return;
+            }
+
             switch (reliabilityCheckSuccessful) {
                 case OK:
                     switch (isOk) {
