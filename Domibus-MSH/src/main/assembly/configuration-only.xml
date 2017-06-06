@@ -96,6 +96,11 @@
             <outputDirectory>policies</outputDirectory>
             <filtered>false</filtered>
         </file>
+        <file>
+            <source>${project.basedir}/src/main/conf/domibus/policies/eSensPolicy.v2.0_CA.xml</source>
+            <outputDirectory>policies</outputDirectory>
+            <filtered>false</filtered>
+        </file>
     </files>
     <fileSets>
         <fileSet>

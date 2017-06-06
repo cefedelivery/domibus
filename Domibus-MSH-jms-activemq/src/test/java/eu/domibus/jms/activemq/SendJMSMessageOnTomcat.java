@@ -56,14 +56,14 @@ public class SendJMSMessageOnTomcat {
             messageMap.setJMSCorrelationID("12345");
             //Set up the payload properties
             messageMap.setStringProperty("totalNumberOfPayloads", "1");
-            messageMap.setStringProperty("payload-1-description", "message");
-            messageMap.setStringProperty("payload-1-mimeContentId", "cid:message");
-            messageMap.setStringProperty("payload-1-mimeType", "application/xml");
-            //messageMap.setStringProperty("p1InBody", "true"); // If true payload-1 will be sent in the body of the AS4 message. Only XML payloads may be sent in the AS4 message body. Optional
+            messageMap.setStringProperty("payload_1_description", "message");
+            messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+            messageMap.setStringProperty("payload_1_mimeType", "application/xml");
+            //messageMap.setStringProperty("p1InBody", "true"); // If true payload_1 will be sent in the body of the AS4 message. Only XML payloads may be sent in the AS4 message body. Optional
 
             String pay1 = "<test>FedeMar</test>";
             byte[] payload = pay1.getBytes();
-            messageMap.setBytes("payload-1", payload);
+            messageMap.setBytes("payload_1", payload);
 
             producer.send(messageMap);
 

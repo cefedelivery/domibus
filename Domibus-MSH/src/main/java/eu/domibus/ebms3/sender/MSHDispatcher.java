@@ -27,6 +27,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.PolicyFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -79,9 +80,6 @@ public class MSHDispatcher {
     private PModeProvider pModeProvider;
 
     @Autowired
-    CertificateService certificateService;
-
-    @Autowired
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
 
@@ -114,18 +112,6 @@ public class MSHDispatcher {
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, msg, null, dcEx);
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
-            }
-
-            // Verifies the validity of receiver's certificate.
-            if (certificateService.isCertificateValidationEnabled()) {
-                try {
-                    boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
-                    if (!certificateChainValid) {
-                        warnOutput("Certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
-                    }
-                } catch (Exception e) {
-                    LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
-                }
             }
         }
 
@@ -195,13 +181,6 @@ public class MSHDispatcher {
             policy.setPassword(httpProxyPassword);
             httpConduit.setProxyAuthorization(policy);
         }
-    }
-
-    private void warnOutput(String message) {
-        LOG.warn("\n\n\n");
-        LOG.warn("**************** WARNING **************** WARNING **************** WARNING **************** ");
-        LOG.warn(message);
-        LOG.warn("*******************************************************************************************\n\n\n");
     }
 }
 
