@@ -28,7 +28,6 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.PolicyFactory;
-import eu.domibus.pki.CertificateService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
@@ -74,9 +73,6 @@ public class MSHDispatcher {
     private PModeProvider pModeProvider;
 
     @Autowired
-    CertificateService certificateService;
-
-    @Autowired
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
 
@@ -87,22 +83,6 @@ public class MSHDispatcher {
         final QName portName = new QName("http://domibus.eu", "msh-dispatch");
         final javax.xml.ws.Service service = javax.xml.ws.Service.create(serviceName);
         Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
-
-
-        if(certificateService.isCertificateValidationEnabled()) {
-            try {
-                boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
-                if (!certificateChainValid) {
-                    EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Certificate is not valid or it has been revoked [" + receiverParty.getName() + "]", null, null);
-                    ex.setMshRole(MSHRole.SENDING);
-                    throw ex;
-                }
-            } catch (EbMS3Exception e) {
-                throw  e;
-            } catch (Exception e) {
-                LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
-            }
-        }
 
         final String endpoint = receiverParty.getEndpoint();
         service.addPort(portName, SOAPBinding.SOAP12HTTP_BINDING, endpoint);
