@@ -28,7 +28,7 @@ import static org.springframework.util.StringUtils.hasLength;
 @Repository
 public class MessagingDao extends BasicDao<Messaging> {
 
-    final static String FIND_MESSAGING_ON_STATUS_AND_RECEIVER="select new eu.domibus.ebms3.common.model.MessagePullDto(ul.messageId,ul.received) from UserMessageLog ul where ul.messageId in (SELECT m.userMessage.messageInfo.messageId as id FROM  Messaging m left join m.userMessage.partyInfo.to.partyId as pids where pids.id=:PARTY_ID and m.userMessage.mpc=:MPC) and ul.messageStatus=:MESSAGE_STATUS ORDER BY ul.received";
+    final static String FIND_MESSAGING_ON_STATUS_AND_RECEIVER="select new eu.domibus.ebms3.common.model.MessagePullDto(ul.messageId,ul.received) from UserMessageLog ul where ul.messageId in (SELECT m.userMessage.messageInfo.messageId as id FROM  Messaging m left join m.userMessage.partyInfo.to.partyId as pids where pids.value=:PARTY_ID and m.userMessage.mpc=:MPC) and ul.messageStatus=:MESSAGE_STATUS ORDER BY ul.received";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingDao.class);
     private static final String PARTY_ID = "PARTY_ID";
     private static final String MESSAGE_STATUS = "MESSAGE_STATUS";
@@ -94,9 +94,9 @@ public class MessagingDao extends BasicDao<Messaging> {
      * @param mpc
      * @return a list of class containing the date and the messageId.
      */
-    public List<MessagePullDto> findMessagingOnStatusReceiverAndMpc(final Integer partyId, final MessageStatus messageStatus, final String mpc){
+    public List<MessagePullDto> findMessagingOnStatusReceiverAndMpc(final String partyIdentifier, final MessageStatus messageStatus, final String mpc){
         TypedQuery<MessagePullDto> processQuery= em.createQuery(FIND_MESSAGING_ON_STATUS_AND_RECEIVER,MessagePullDto.class);
-        processQuery.setParameter(PARTY_ID, partyId);
+        processQuery.setParameter(PARTY_ID, partyIdentifier);
         processQuery.setParameter(MESSAGE_STATUS, messageStatus);
         processQuery.setParameter(MPC, mpc);
         return processQuery.getResultList();

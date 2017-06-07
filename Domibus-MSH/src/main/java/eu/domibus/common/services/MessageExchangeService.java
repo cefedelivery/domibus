@@ -24,7 +24,7 @@ public interface MessageExchangeService {
      */
     void initiatePullRequest();
 
-    UserMessage retrieveUserReadyToPullMessages(String mpc, Party responder);
+    UserMessage retrieveReadyToPullUserMessages(String mpc, Party responder);
 
     /**
      * When a pull request comes in, there is very litle information.  From this information we retrieve

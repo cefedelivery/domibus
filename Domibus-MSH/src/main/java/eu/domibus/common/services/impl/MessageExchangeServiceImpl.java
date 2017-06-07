@@ -5,6 +5,7 @@ import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.MessageExchangeService;
@@ -27,8 +28,10 @@ import javax.annotation.PostConstruct;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static eu.domibus.common.MessageStatus.READY_TO_PULL;
 import static eu.domibus.common.services.impl.PullContext.MPC;
@@ -128,8 +131,13 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
 
     @Override
-    public UserMessage retrieveUserReadyToPullMessages(final String mpc, final Party responder) {
-        List<MessagePullDto> messagingOnStatusReceiverAndMpc = messagingDao.findMessagingOnStatusReceiverAndMpc(responder.getEntityId(), MessageStatus.READY_TO_PULL, mpc);
+    public UserMessage retrieveReadyToPullUserMessages(final String mpc, final Party responder) {
+        Set<Identifier> identifiers = responder.getIdentifiers();
+        List<MessagePullDto> messagingOnStatusReceiverAndMpc=new ArrayList<>();
+        for (Identifier identifier : identifiers) {
+            messagingOnStatusReceiverAndMpc.addAll(messagingDao.findMessagingOnStatusReceiverAndMpc(identifier.getPartyId(), MessageStatus.READY_TO_PULL, mpc));
+        }
+
         if (!messagingOnStatusReceiverAndMpc.isEmpty()) {
             MessagePullDto messagePullDto = messagingOnStatusReceiverAndMpc.get(0);
             return messagingDao.findUserMessageByMessageId(messagePullDto.getMessageId());

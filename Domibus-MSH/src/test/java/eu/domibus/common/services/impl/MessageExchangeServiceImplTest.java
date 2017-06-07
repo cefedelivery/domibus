@@ -37,9 +37,6 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class MessageExchangeServiceImplTest {
 
-    
-    
-
     @Mock
     private ProcessDao processDao;
     @Mock
@@ -73,11 +70,9 @@ public class MessageExchangeServiceImplTest {
     
     @Test
     public void testSuccessFullOneWayPullConfiguration() throws Exception {
-
         Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]","legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}","responderParties{[name:resp1]}");
         MessageExchangeContext messageExchangeContext = getMessageExchangeContext(process);
         assertEquals(MessageStatus.READY_TO_PULL,messageExchangeContext.getMessageStatus());
-
     }
 
     @Test

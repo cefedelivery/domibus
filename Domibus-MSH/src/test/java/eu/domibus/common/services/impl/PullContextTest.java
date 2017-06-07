@@ -10,6 +10,8 @@ import org.mockito.Mockito;
 
 import java.util.Map;
 
+import static eu.domibus.common.services.impl.PullContext.MPC;
+import static eu.domibus.common.services.impl.PullContext.NOTIFY_BUSINNES_ON_ERROR;
 import static eu.domibus.common.services.impl.PullRequestStatus.*;
 import static org.junit.Assert.*;
 
@@ -99,17 +101,21 @@ public class PullContextTest {
         pullContext.send(mock);
         Mockito.verify(mock,Mockito.times(4)).execute(argument.capture());
         Map pullMessage = argument.getAllValues().get(0);
-        assertEquals("qn1", pullMessage.get(PullContext.MPC));
-        assertEquals("init1:resp1:Mock:Mock:agr1:leg1", pullMessage.get(PullContext.PMODE_KEY));
+        assertEquals("qn1", pullMessage.get(MPC));
+        assertEquals("resp1:init1:Mock:Mock:agr1:leg1", pullMessage.get(PullContext.PMODE_KEY));
+        assertEquals("false", pullMessage.get(NOTIFY_BUSINNES_ON_ERROR));
         pullMessage = argument.getAllValues().get(1);
-        assertEquals("qn1", pullMessage.get(PullContext.MPC));
-        assertEquals("init2:resp1:Mock:Mock:agr1:leg1",pullMessage.get(PullContext.PMODE_KEY));
+        assertEquals("qn1", pullMessage.get(MPC));
+        assertEquals("resp1:init2:Mock:Mock:agr1:leg1",pullMessage.get(PullContext.PMODE_KEY));
+        assertEquals("false", pullMessage.get(NOTIFY_BUSINNES_ON_ERROR));
         pullMessage = argument.getAllValues().get(2);
-        assertEquals("qn2",pullMessage.get(PullContext.MPC));
-        assertEquals("init1:resp1:Mock:Mock:agr1:leg2",pullMessage.get(PullContext.PMODE_KEY));
+        assertEquals("qn2",pullMessage.get(MPC));
+        assertEquals("resp1:init1:Mock:Mock:agr1:leg2",pullMessage.get(PullContext.PMODE_KEY));
+        assertEquals("false", pullMessage.get(NOTIFY_BUSINNES_ON_ERROR));
         pullMessage = argument.getAllValues().get(3);
-        assertEquals("qn2",pullMessage.get(PullContext.MPC));
-        assertEquals("init2:resp1:Mock:Mock:agr1:leg2",pullMessage.get(PullContext.PMODE_KEY));
+        assertEquals("qn2",pullMessage.get(MPC));
+        assertEquals("resp1:init2:Mock:Mock:agr1:leg2",pullMessage.get(PullContext.PMODE_KEY));
+        assertEquals("false", pullMessage.get(NOTIFY_BUSINNES_ON_ERROR));
     }
 
 }

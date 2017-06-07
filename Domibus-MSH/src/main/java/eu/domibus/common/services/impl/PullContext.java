@@ -29,6 +29,7 @@ public class PullContext {
     private LegConfiguration currentLegConfiguration;
     public static final String MPC = "mpc";
     public static final String PMODE_KEY = "pmodKey";
+    public static final String NOTIFY_BUSINNES_ON_ERROR = "notifyOnError";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PullContext.class);
 
@@ -150,7 +151,7 @@ public class PullContext {
         } else throw new IllegalArgumentException("Method should be called after correct context setup.");
     }
 
-    void checkProcessValidity() {
+    public void checkProcessValidity() {
         if (process == null) {
             throw new IllegalArgumentException("Process should be set before calling checkProcessValidity.");
         }
@@ -207,6 +208,7 @@ public class PullContext {
                 Map<String, String> map = Maps.newHashMap();
                 map.put(MPC,getMpcQualifiedName());
                 map.put(PMODE_KEY,getpModeKey());
+                map.put(NOTIFY_BUSINNES_ON_ERROR,String.valueOf(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()));
                 command.execute(map);
             }
         }

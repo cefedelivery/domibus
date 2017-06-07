@@ -2,7 +2,9 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.PartyIdType;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.ebms3.common.dao.DefaultDaoTestConfiguration;
 import eu.domibus.ebms3.common.model.MessageInfo;
@@ -19,6 +21,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -45,16 +49,21 @@ public class MessagingDaoTestIt {
     private PartyDao partyDao;
     @Autowired
     private UserMessageLogDao userMessageLogDao;
+    @PersistenceContext(unitName = "domibusJTA")
+    private EntityManager entityManager;
     @Test
     @Transactional
     @Rollback
     public void findMessagingOnStatusReceiverAndMpc() throws Exception {
 
-       Party party = PojoInstaciatorUtil.instanciate(Party.class, " [name:blabla,identifiers{[partyId:testParty]}]");
-        party.getIdentifiers().iterator().next().setPartyIdType(null);
+        Party party = PojoInstaciatorUtil.instanciate(Party.class, " [name:blabla,identifiers{[partyId:testParty]}]");
+        Identifier next = party.getIdentifiers().iterator().next();
+        next.setPartyId("RED_MSH");
+        PartyIdType partyIdType = next.getPartyIdType();
+        partyIdType.setValue("party_id_value");
+        entityManager.persist(partyIdType);
         partyDao.create(party);
-        Messaging firstMessage = PojoInstaciatorUtil.instanciate(Messaging.class, "userMessage[partyInfo[to[role:test,partyId{[value:testParty]}]]]");
-        //firstMessage.setId("123456");
+        Messaging firstMessage = PojoInstaciatorUtil.instanciate(Messaging.class, "userMessage[partyInfo[to[role:test,partyId{[value:RED_MSH]}]]]");
         MessageInfo messageInfo = firstMessage.getUserMessage().getMessageInfo();
         messageInfo.setRefToMessageId(null);
         messageInfo.setMessageId("123456");
@@ -68,7 +77,7 @@ public class MessagingDaoTestIt {
         secondMessage.setId(null);
         messagingDao.create(firstMessage);
         //@thom fix this late because their is a weird contraint exception here.
-     //   messagingDao.create(secondMessage);
+    //    messagingDao.create(secondMessage);
         UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
                 .setMessageId(messageInfo.getMessageId())
                 .setMessageStatus(MessageStatus.READY_TO_PULL)
@@ -76,7 +85,7 @@ public class MessagingDaoTestIt {
                 ;
         userMessageLogDao.create(umlBuilder.build());
 
-        List<MessagePullDto> testParty = messagingDao.findMessagingOnStatusReceiverAndMpc(party.getEntityId(), MessageStatus.READY_TO_PULL,"http://mpc" );
+        List<MessagePullDto> testParty = messagingDao.findMessagingOnStatusReceiverAndMpc("RED_MSH", MessageStatus.READY_TO_PULL,"http://mpc" );
         assertEquals(1,testParty.size());
         assertEquals("123456",testParty.get(0).getMessageId());
     }
