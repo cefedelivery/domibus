@@ -31,7 +31,7 @@ sudo docker-compose up -d
 cd $SOURCE_CODE/
 i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:8180/domibus/home; do sleep $((i++)) && echo -n . && if [ $i -eq 100 ]; then break; fi ;   done
 i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:9080/domibus/home; do sleep $((i++)) && echo -n . && if [ $i -eq 100 ]; then break; fi ;   done
-#mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
+mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
 
 cd $SOURCE_CODE/../Domibus-MSH-soapui-tests
 cp src/main/soapui/domibus-gw-sample-pmode-blue.xml .
