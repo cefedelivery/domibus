@@ -27,7 +27,6 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.PolicyFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -72,6 +71,9 @@ public class MSHDispatcher {
 
     @Autowired
     PolicyService policyService;
+
+    @Autowired
+    CertificateService certificateService;
 
     @Autowired
     private TLSReader tlsReader;

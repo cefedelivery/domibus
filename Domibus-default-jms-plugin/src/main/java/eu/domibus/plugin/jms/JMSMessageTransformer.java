@@ -258,7 +258,8 @@ public class JMSMessageTransformer
                 target.addMessageProperty(PROPERTY_ORIGINAL_SENDER, strOriginalSender);
             }
 
-            if (hasLength(messageIn.getStringProperty(PROPERTY_ENDPOINT))) {
+            String endpoint = trim(messageIn.getStringProperty(PROPERTY_ENDPOINT));
+            if (!isEmpty(endpoint)) {
                 target.addMessageProperty(PROPERTY_ENDPOINT, messageIn.getStringProperty(PROPERTY_ENDPOINT));
             }
 
