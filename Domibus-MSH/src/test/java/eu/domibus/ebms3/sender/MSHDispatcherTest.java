@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.ErrorCode;
+import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
@@ -75,6 +76,9 @@ public class MSHDispatcherTest {
 
     @Injectable
     PModeProvider pModeProvider;
+
+    @Injectable
+    RawEnvelopeLogDao rawEnvelopeLogDao;
 
     @Injectable
     CertificateService certificateService;

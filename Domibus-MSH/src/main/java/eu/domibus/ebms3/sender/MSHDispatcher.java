@@ -73,13 +73,13 @@ public class MSHDispatcher {
     PolicyService policyService;
 
     @Autowired
-    CertificateService certificateService;
-
-    @Autowired
     private TLSReader tlsReader;
 
     @Autowired
     private PModeProvider pModeProvider;
+
+    @Autowired
+    CertificateService certificateService;
 
     @Autowired
     @Qualifier("domibusProperties")
@@ -114,6 +114,18 @@ public class MSHDispatcher {
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, msg, null, dcEx);
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
+            }
+
+            // Verifies the validity of receiver's certificate.
+            if (certificateService.isCertificateValidationEnabled()) {
+                try {
+                    boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
+                    if (!certificateChainValid) {
+                        warnOutput("Certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
+                }
             }
         }
 
@@ -183,6 +195,13 @@ public class MSHDispatcher {
             policy.setPassword(httpProxyPassword);
             httpConduit.setProxyAuthorization(policy);
         }
+    }
+
+    private void warnOutput(String message) {
+        LOG.warn("\n\n\n");
+        LOG.warn("**************** WARNING **************** WARNING **************** WARNING **************** ");
+        LOG.warn(message);
+        LOG.warn("*******************************************************************************************\n\n\n");
     }
 }
 
