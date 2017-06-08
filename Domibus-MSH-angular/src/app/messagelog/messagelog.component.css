@@ -30,6 +30,10 @@
   width:30%;
 }
 
+.filterTable td {
+  width :33%
+}
+
 .dateTimeTitle {
   width:100px;
   text-align:right;

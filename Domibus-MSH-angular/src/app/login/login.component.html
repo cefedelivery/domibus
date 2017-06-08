@@ -6,7 +6,7 @@
           <td>
             <md-input-container>
               <input mdInput placeholder="Username" name="username" [(ngModel)]="model.username" #username="ngModel"
-                     required>
+                     required id="username_id">
             </md-input-container>
           </td>
         </tr>
@@ -14,13 +14,13 @@
           <td>
             <md-input-container>
               <input type="password" mdInput placeholder="Password" name="password" [(ngModel)]="model.password"
-                     #password="ngModel" required>
+                     #password="ngModel" required id="password_id">
             </md-input-container>
           </td>
         </tr>
         <tr>
           <td>
-            <button md-raised-button color="primary" [disabled]="!loginForm.form.valid">
+            <button md-raised-button color="primary" [disabled]="!loginForm.form.valid" id="loginbutton_id">
               <md-icon>input</md-icon>
               <span>Login</span>
             </button>
