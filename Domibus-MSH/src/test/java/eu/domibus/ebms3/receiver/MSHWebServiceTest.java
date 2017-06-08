@@ -539,17 +539,9 @@ public class MSHWebServiceTest {
 
         final Messaging responseMessaging = createValidSampleResponseMessaging();
         final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
-        new Expectations() {{
-            soapResponseMessage.getSOAPHeader();
-            result = soapHeader;
+        new Expectations(mshWebservice) {{
 
-            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
-            result = messagingIterator;
-
-            messagingIterator.next();
-            result = node;
-
-            jaxbContext.createUnmarshaller().unmarshal(node, Messaging.class).getValue();
+            mshWebservice.getMessaging(withAny(soapRequestMessage));
             result = responseMessaging;
 
             messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId());
@@ -601,17 +593,9 @@ public class MSHWebServiceTest {
 
         final Messaging responseMessaging = createValidSampleResponseMessaging();
         final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
-        new Expectations() {{
-            soapResponseMessage.getSOAPHeader();
-            result = soapHeader;
+        new Expectations(mshWebservice) {{
 
-            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
-            result = messagingIterator;
-
-            messagingIterator.next();
-            result = node;
-
-            jaxbContext.createUnmarshaller().unmarshal(node, Messaging.class).getValue();
+            mshWebservice.getMessaging(withAny(soapRequestMessage));
             result = responseMessaging;
 
             messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId());
