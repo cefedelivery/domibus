@@ -67,6 +67,10 @@ public class JMSMessageTransformer
 
     private Properties properties;
 
+    public JMSMessageTransformer(){
+        properties=new Properties();
+    }
+
     public JMSMessageTransformer(String defaultProperties) throws IOException {
         properties=new Properties();
         properties.load(new FileReader(defaultProperties));
@@ -252,6 +256,11 @@ public class JMSMessageTransformer
             String strOriginalSender = trim(messageIn.getStringProperty(PROPERTY_ORIGINAL_SENDER));
             if (!isEmpty(strOriginalSender)) {
                 target.addMessageProperty(PROPERTY_ORIGINAL_SENDER, strOriginalSender);
+            }
+
+            String endpoint = trim(messageIn.getStringProperty(PROPERTY_ENDPOINT));
+            if (!isEmpty(endpoint)) {
+                target.addMessageProperty(PROPERTY_ENDPOINT, messageIn.getStringProperty(PROPERTY_ENDPOINT));
             }
 
             //not part of ebMS3, eCODEX legacy property

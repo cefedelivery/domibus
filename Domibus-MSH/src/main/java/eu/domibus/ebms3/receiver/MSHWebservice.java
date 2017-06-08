@@ -2,6 +2,7 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.common.*;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
@@ -11,6 +12,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
+import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
@@ -26,6 +28,7 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.plugin.validation.SubmissionValidationException;
+import eu.domibus.util.SoapUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.cxf.attachment.AttachmentUtil;
@@ -39,10 +42,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
@@ -116,6 +116,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     @Autowired
     private PropertyProfileValidator propertyProfileValidator;
+
+    @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
 
     @Autowired
     CertificateService certificateService;
@@ -308,7 +311,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     protected void saveResponse(final SOAPMessage responseMessage) {
         try {
-            Messaging messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
+            Messaging messaging = getMessaging(responseMessage);
             final SignalMessage signalMessage = messaging.getSignalMessage();
             // Stores the signal message
             signalMessageDao.create(signalMessage);
@@ -385,6 +388,17 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         userMessageLogDao.create(umlBuilder.build());
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
+
+        try {
+            String rawXMLMessage = SoapUtil.getRawXMLMessage(request);
+            LOG.debug("Persist raw XML envelope: " + rawXMLMessage);
+            RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+            rawEnvelopeLog.setRawXML(rawXMLMessage);
+            rawEnvelopeLog.setUserMessage(userMessage);
+            rawEnvelopeLogDao.create(rawEnvelopeLog);
+        } catch (TransformerException e) {
+            LOG.warn("Unable to log the raw message XML due to: ", e);
+        }
 
         return userMessage.getMessageInfo().getMessageId();
     }

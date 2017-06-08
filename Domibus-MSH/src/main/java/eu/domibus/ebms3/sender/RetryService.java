@@ -85,7 +85,8 @@ public class RetryService {
      *
      * @param messageIdToPurge is the messageId of the expired message
      */
-    private void purgeTimedoutMessage(final String messageIdToPurge) {
+    //TODO in Domibus 3.3 extract the logic below into a method of the MessageService and re-use it here and in the UpdateRetryLoggingService
+    public void purgeTimedoutMessage(final String messageIdToPurge) {
         final MessageLog userMessageLog = userMessageLogDao.findByMessageId(messageIdToPurge, MSHRole.SENDING);
 
         final boolean notify = NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus());
