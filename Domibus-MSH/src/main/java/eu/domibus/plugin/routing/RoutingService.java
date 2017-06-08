@@ -62,20 +62,4 @@ public class RoutingService {
         List<BackendFilterEntity> backendFilterEntities = coreConverter.convert(filters, BackendFilterEntity.class);
         backendFilterDao.update(backendFilterEntities);
     }
-
-/*    public BackendConnector findResponsibleBackend(UserMessage message){
-        for(BackendFilterEntity filter:getBackendFilters()){
-            for (RoutingCriteriaEntity routingCriteria: filter.getRoutingCriteriaEntities()) {
-                if (routingCriteria.matches(message, )){
-                    for (BackendConnector backend:backends){
-                        if (backend.getName().equals(filter.getBackendName())){
-                            return backend;
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }*/
-
 }

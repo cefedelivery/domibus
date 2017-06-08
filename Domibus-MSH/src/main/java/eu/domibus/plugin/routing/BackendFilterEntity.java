@@ -20,13 +20,14 @@ public class BackendFilterEntity extends AbstractBaseEntity implements Comparabl
 
     @Column(name = "PRIORITY")
     private int index;
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "FK_BACKEND_FILTER")
     @OrderColumn(name = "PRIORITY")
-    private List<RoutingCriteriaEntity> routingCriteriaEntities = new ArrayList<>();
+    private List<RoutingCriteriaEntity> routingCriterias = new ArrayList<>();
+
     @Column(name = "BACKEND_NAME")
     private String backendName;
-
     public void setIndex(final int index) {
         this.index = index;
     }
@@ -52,7 +53,11 @@ public class BackendFilterEntity extends AbstractBaseEntity implements Comparabl
      * {@link RoutingCriteriaEntity }
      */
     public List<RoutingCriteriaEntity> getRoutingCriterias() {
-        return routingCriteriaEntities;
+        return routingCriterias;
+    }
+
+    public void setRoutingCriterias(List<RoutingCriteriaEntity> routingCriterias) {
+        this.routingCriterias = routingCriterias;
     }
 
     public String getBackendName() {

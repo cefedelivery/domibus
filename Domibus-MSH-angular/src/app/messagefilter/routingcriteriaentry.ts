@@ -1,3 +1,9 @@
-/**
- * Created by tiago on 06/06/2017.
- */
+export class RoutingCriteriaEntry {
+
+  public constructor(
+    public entityId: number,
+    public name: string,
+    public expression: string
+  ) {
+  }
+}

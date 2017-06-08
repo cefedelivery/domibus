@@ -2,9 +2,11 @@ import {Component} from "@angular/core";
 import {MessagefilterDialogComponent} from "./messagefilter-dialog/messagefilter-dialog.component";
 import {MdDialog} from "@angular/material";
 import {AlertService} from "../alert/alert.service";
-import {Http, Response} from "@angular/http";
+import {Http, Headers, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
 import {MessageFilterResult} from "./messagefilterresult";
+import {BackendFilterEntry} from "./backendfilterentry";
+import {RoutingCriteriaEntry} from "./routingcriteriaentry";
 /**
  * Created by tiago on 10/04/2017.
  */
@@ -40,43 +42,22 @@ export class MessageFilterComponent {
     this.rollback = this.rows.slice();
   }
 
+
+
   ngOnInit() {
     this.loading = true;
 
     this.getMessageFilterEntries().subscribe((result: MessageFilterResult) => {
       console.log("messagefilter response: " + result);
 
-      const newRows = [];
-      for(let i = 0; i < 10; i++) {
-        var from = '<>', to = '<>', action = '<>', service = '<>';
-        if (result[i] == null) {
+      let newRows = [];
+      for(let i = 0 ; i < result.length; i++) {
+        if(result[i] == null) {
           continue;
         }
-        for (let j = 0; j < result[i].routingCriterias.length; j++) {
-          if (result[i].routingCriterias[j] != null) {
-            switch (result[i].routingCriterias[j].name) {
-              case 'from':
-                from = result[i].routingCriterias[j].expression;
-                break;
-              case 'to':
-                to = result[i].routingCriterias[j].expression;
-                break;
-              case 'action':
-                action = result[i].routingCriterias[j].expression;
-                break;
-              case 'service':
-                service = result[i].routingCriterias[j].expression;
-                break;
-            }
-          }
-        }
-        newRows.push({
-          'plugin': result[i]['backendName'],
-          'from': from,
-          'to': to,
-          'action': action,
-          'service': service
-        })
+        let currentFilter = result[i];
+        let backendEntry = new BackendFilterEntry(currentFilter.entityId, currentFilter.index, currentFilter.backendName, currentFilter.routingCriterias);
+        newRows.push(backendEntry);
       }
 
       this.rows = newRows;
@@ -95,22 +76,40 @@ export class MessageFilterComponent {
 
   updateValue(event, cell, cellValue, row) {
     this.editing[row.$$index + '-' + cell] = false;
-    this.rows[row.$$index][cell] = event.target.value;
 
-    this.enableSave = true;
-    this.enableCancel = true;
+    let edited = false;
+
+    let numRoutingCriterias = this.rows[row.$$index].routingCriterias.length;
+    for(let i = 0; i < numRoutingCriterias; i++) {
+      if(this.rows[row.$$index].routingCriterias[i].name == cell) {
+        this.rows[row.$$index].routingCriterias[i].expression = event.target.value;
+        edited = true;
+        break;
+      }
+    }
+
+    if(cell == 'plugin') {
+      this.rows[row.$$index].backendName = event.target.value;
+      edited = true;
+    }
+
+    if(!edited) {
+      let newRC = new RoutingCriteriaEntry(null,cell,event.target.value);
+      this.rows[row.$$index].routingCriterias.push(newRC);
+      edited = true;
+    }
+
+    if (edited) {
+      this.enableSave = true;
+      this.enableCancel = true;
+    }
   }
 
   buttonNew() {
     this.enableCancel = true;
     this.enableSave = true;
     this.enableDelete = false;
-    this.rows.push({
-      "plugin": MessageFilterComponent.NEW_VALUE,
-      "from": MessageFilterComponent.NEW_VALUE,
-      "to": MessageFilterComponent.NEW_VALUE,
-      "action": MessageFilterComponent.NEW_VALUE,
-      "service": MessageFilterComponent.NEW_VALUE});
+    this.rows.push( {"backendName" : 'NEW'});
   }
 
   buttonCancel() {
@@ -124,18 +123,8 @@ export class MessageFilterComponent {
     this.rows = this.rollback.slice();
   }
 
-  buttonSave() {
-    this.enableCancel = false;
-    this.enableSave = false;
-    this.enableDelete = false;
-
-    this.enableMoveUp = false;
-    this.enableMoveDown = false;
-
-    this.rollback = this.rows.slice();
-  }
-
   saveDialog() {
+    let headers = new Headers({'Content-Type': 'application/json'});
     let dialogRef = this.dialog.open(MessagefilterDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       switch(result) {
@@ -143,12 +132,11 @@ export class MessageFilterComponent {
           this.enableCancel = false;
           this.enableSave = false;
           this.rollback = this.rows.slice();
-          this.http.put('rest/messagefilters',this.rows);
-          /*.subscribe(res => {
+          this.http.put('rest/messagefilters', JSON.stringify(this.rows), { headers: headers }).subscribe(res => {
             this.alertService.success(res.json(), false);
           }, err => {
             this.alertService.error(err.json(), false);
-          });*/
+          });
           break;
         case 'Cancel':
           // do nothing
@@ -218,15 +206,7 @@ export class MessageFilterComponent {
     this.enableMoveDown = selected.length > 0 && this.rowNumber < this.rows.length - 1;
     this.enableMoveUp = selected.length > 0 && this.rowNumber > 0;
     this.enableDelete = selected.length == 1;
-
-
   }
-
-  /*onDeselect( { selected }) {
-    this.enableMoveDown = selected.length > 0;
-    this.enableMoveUp = selected.length > 0;
-    this.enableDelete = selected.length == 1;
-  }*/
 
   onActivate(event) {
     console.log('Activate Event', event);

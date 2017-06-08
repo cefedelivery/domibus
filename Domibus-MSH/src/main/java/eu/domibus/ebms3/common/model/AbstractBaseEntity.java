@@ -19,12 +19,16 @@ public abstract class AbstractBaseEntity implements Serializable {
     @Column(name = "ID_PK")
     private int entityId;
 
-
     /**
      * @return the primary key of the entity
      */
     public int getEntityId() {
         return this.entityId;
+    }
+
+
+    public void setEntityId(int entityId) {
+        this.entityId = entityId;
     }
 
     @Override

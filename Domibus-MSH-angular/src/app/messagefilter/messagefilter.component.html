@@ -15,21 +15,29 @@
           [selectionType]="'single'"
           (activate)="onActivate($event)"
           (select)='onSelect($event)'>
-          <ngx-datatable-column name="Plugin" [canAutoResize]="true" orderable="false">
+          <ngx-datatable-column name="Plugin" prop="backendName" [canAutoResize]="true" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-plugin'] = true"
                 *ngIf="!editing[row.$$index + '-plugin']">
-                {{value}}
+                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
-              <input
+              <input autofocus
+                     list="backendFilters"
+                     (blur)="updateValue($event, 'plugin', value, row)" *ngIf="editing[row.$$index + '-plugin']">
+
+              <datalist id="backendFilters">
+                <option value="backendWebservice">
+                <option value="backendWebservice2">
+              </datalist>
+              <!--<input
                 autofocus
                 (blur)="updateValue($event, 'plugin', value, row)"
                 *ngIf="editing[row.$$index + '-plugin']"
                 type="text"
                 [value]="value"
-              />
+              />-->
               <!--<select
                 *ngIf="!editing[row.$$index + '-plugin']"
                 (change)="updateValue($event, 'plugin', value, row)"
@@ -39,13 +47,13 @@
               </select>-->
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="From" [canAutoResize]="true" orderable="false">
+          <ngx-datatable-column name="From" prop="from.expression" [canAutoResize]="true" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-from'] = true"
                 *ngIf="!editing[row.$$index + '-from']">
-                {{value}}
+                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
               <input
                 autofocus
@@ -56,13 +64,13 @@
               />
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="To" [canAutoResize]="true" orderable="false">
+          <ngx-datatable-column name="To" prop="to.expression" [canAutoResize]="true" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-to'] = true"
                 *ngIf="!editing[row.$$index + '-to']">
-                {{value}}
+                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
               <input
                 autofocus
@@ -73,13 +81,13 @@
               />
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="Action" [canAutoResize]="true" orderable="false">
+          <ngx-datatable-column name="Action" prop="action.expression" [canAutoResize]="true" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-action'] = true"
                 *ngIf="!editing[row.$$index + '-action']">
-                {{value}}
+                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
               <input
                 autofocus
@@ -90,13 +98,13 @@
               />
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="Service" [canAutoResize]="true" orderable="false">
+          <ngx-datatable-column name="Service" prop="service.expression" [canAutoResize]="true" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-service'] = true"
                 *ngIf="!editing[row.$$index + '-service']">
-                {{value}}
+                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
               <input
                 autofocus
