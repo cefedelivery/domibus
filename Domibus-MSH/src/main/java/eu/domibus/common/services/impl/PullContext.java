@@ -29,7 +29,7 @@ public class PullContext {
     private LegConfiguration currentLegConfiguration;
     public static final String MPC = "mpc";
     public static final String PMODE_KEY = "pmodKey";
-    public static final String NOTIFY_BUSINNES_ON_ERROR = "notifyOnError";
+    public static final String NOTIFY_BUSINNES_ON_ERROR = "not";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PullContext.class);
 

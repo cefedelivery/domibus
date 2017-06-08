@@ -6,6 +6,7 @@ import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
@@ -17,11 +18,13 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.util.MessageUtil;
+import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,8 +123,22 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         Messaging messaging;
         messaging = getMessage(request);
         UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
-        if (messaging.getSignalMessage() != null && messaging.getSignalMessage().getPullRequest() != null) {
-            return handlePullRequest(messaging);
+        if (messaging.getSignalMessage() != null ) {
+            if(messaging.getSignalMessage().getPullRequest()!=null) {
+                return handlePullRequest(messaging);
+            }
+            else if(messaging.getSignalMessage().getReceipt()!=null){
+                String messageId = messaging.getSignalMessage().getMessageInfo().getMessageId();
+                final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+                try {
+                    String pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
+                    LOG.debug("PMode key found : " + pModeKey);
+                    LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+                    LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
+                    final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
+
+            }
+
         } else {
             String pmodeKey = null;
             try {
@@ -164,7 +181,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         UserMessage userMessage = messageExchangeService.retrieveReadyToPullUserMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
         try {
             if (userMessage != null) {
-               return messageBuilder.buildSOAPMessage(userMessage, pullContext.filterLegOnMpc(pullRequest.getMpc()));
+                SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, pullContext.filterLegOnMpc(pullRequest.getMpc()));
+                PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
+                return soapMessage;
             } else {
                 LOG.info("No message for incoming request for mpc "+pullContext.getMpcQualifiedName());
                 EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0006, "There is no message available for\n" +

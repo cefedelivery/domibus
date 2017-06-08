@@ -11,6 +11,8 @@ import org.apache.cxf.binding.soap.SoapMessage;
 
 /**
  * Created by dussath on 5/31/17.
+ *
+ * Loading legconfiguration for an incoming usermessage.
  */
 
 public class UserMessagePolicyInSetup extends AbstractMessagePolicyInSetup {
@@ -18,7 +20,7 @@ public class UserMessagePolicyInSetup extends AbstractMessagePolicyInSetup {
 
     private PModeProvider pModeProvider;
 
-    public UserMessagePolicyInSetup(SoapMessage message, Messaging messaging) {
+    UserMessagePolicyInSetup(SoapMessage message, Messaging messaging) {
         super(message, messaging);
     }
 
@@ -29,14 +31,10 @@ public class UserMessagePolicyInSetup extends AbstractMessagePolicyInSetup {
 
     @Override
     public LegConfiguration extractMessageConfiguration() throws EbMS3Exception {
-        message.put(MSHDispatcher.MESSAGE_TYPE, MessageType.USER_MESSAGE);
-        addMessageId();
+        message.put(MSHDispatcher.MESSAGE_TYPE_IN, MessageType.USER_MESSAGE);
         final String pmodeKey = this.pModeProvider.findUserMessageExchangeContext(messaging.getUserMessage(), MSHRole.RECEIVING).getPmodeKey(); // FIXME: This does not work for signalmessages
-        LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
-        message.put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
-        //FIXME: Test!!!!
-        message.getExchange().put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
-        return legConfiguration;
+        setUpMessage(pmodeKey);
+        return this.pModeProvider.getLegConfiguration(pmodeKey);
     }
 
     @Override

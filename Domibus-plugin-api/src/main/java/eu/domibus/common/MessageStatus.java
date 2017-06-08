@@ -32,6 +32,10 @@
          */
         READY_TO_PULL,
         /**
+         * The message is being pulled.
+         */
+        BEING_PULLED,
+        /**
          * The message is in the send queue.
          */
         SEND_ENQUEUED,

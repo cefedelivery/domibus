@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Node;
 
@@ -90,8 +91,9 @@ public class UserMessageHandler {
     private MessagingDao messagingDao;
     @Autowired
     private SignalMessageLogDao signalMessageLogDao;
-
-    private JAXBContext jaxbContext;
+    @Qualifier("jaxbContextEBMS")
+    @Autowired
+    protected JAXBContext jaxbContext;
 
     public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging,final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);

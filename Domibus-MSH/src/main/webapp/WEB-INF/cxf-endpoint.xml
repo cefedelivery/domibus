@@ -56,8 +56,9 @@
           class="eu.domibus.ebms3.sender.SetSignatureAlgorithmInInterceptor"/>
 
     <bean id="propertyValueExchangeInterceptor" class="eu.domibus.ebms3.receiver.PropertyValueExchangeInterceptor"/>
-
     <bean id="setPolicyOutInterceptor" class="eu.domibus.ebms3.sender.SetPolicyOutInterceptor"/>
+
+    <bean id="setPolicyOutInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyOutInterceptorServer"/>
 
     <bean id="attachmentCleanupInterceptor" class="eu.domibus.ebms3.common.AttachmentCleanupInterceptor"/>
 
@@ -91,6 +92,7 @@
         <jaxws:outInterceptors>
             <bean class="org.apache.cxf.jaxws.handler.SetCodeValueFaultOutInterceptor"/>
             <ref bean="clearMDCInterceptor"/>
+           <ref bean="setPolicyOutInterceptorServer"/>
         </jaxws:outInterceptors>
 
         <jaxws:outFaultInterceptors>

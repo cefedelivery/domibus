@@ -1,6 +1,5 @@
 package eu.domibus.ebms3.receiver;
 
-import com.ctc.wstx.io.EBCDICCodec;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -9,7 +8,6 @@ import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.activemq.command.MessageDispatch;
 import org.apache.cxf.binding.soap.SoapFault;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.SoapVersion;
@@ -40,8 +38,6 @@ import javax.xml.soap.SOAPMessage;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This interceptor is responsible of the trust of an incoming messages.
@@ -84,7 +80,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             LOG.debug("Verifying sender trust for message [" + msgId + "]");
             X509Certificate certificate = getSenderCertificate(message);
             String dnSubject = certificate.getSubjectDN().getName();
-            Object o = message.get(MSHDispatcher.MESSAGE_TYPE);
+            Object o = message.get(MSHDispatcher.MESSAGE_TYPE_IN);
             if(o!=null && MessageType.SIGNAL_MESSAGE.equals(o)){
                 return;
             }

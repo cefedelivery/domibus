@@ -70,7 +70,11 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     private PolicyInSetupVisitor policyInSetupVisitor;
 
     public SetPolicyInInterceptor() {
-        super(Phase.RECEIVE);
+        this(Phase.RECEIVE);
+    }
+
+    protected SetPolicyInInterceptor(String phase) {
+        super(phase);
         this.addBefore(PolicyInInterceptor.class.getName());
         this.addAfter(AttachmentInInterceptor.class.getName());
     }
@@ -230,7 +234,13 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
                 policyInSetup.accept(policyInSetupVisitor);
                 messagePolicyInSetup=policyInSetup;
             }
+            else if(messaging.getSignalMessage().getReceipt()!=null){
+                ReceiptMessagePolicyInSetup receiptMessagePolicyInSetup = new ReceiptMessagePolicyInSetup(soapMessage, messaging);
+                receiptMessagePolicyInSetup.accept(policyInSetupVisitor);
+                messagePolicyInSetup=receiptMessagePolicyInSetup;
+            }
         }
+
         return messagePolicyInSetup;
     }
 }

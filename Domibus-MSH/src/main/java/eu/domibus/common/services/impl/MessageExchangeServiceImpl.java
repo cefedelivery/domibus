@@ -1,9 +1,7 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.dao.ConfigurationDAO;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.ProcessDao;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
@@ -58,6 +56,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private Queue pullMessageQueue;
     @Autowired
     private JmsTemplate jmsPullTemplate;
+    @Autowired
+    private UserMessageLogDao messageLogDao;
 
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageExchangeService.class);
@@ -140,8 +140,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
         if (!messagingOnStatusReceiverAndMpc.isEmpty()) {
             MessagePullDto messagePullDto = messagingOnStatusReceiverAndMpc.get(0);
-            return messagingDao.findUserMessageByMessageId(messagePullDto.getMessageId());
-            //@thom change the status of the message in a new transaction. Set it back to ready_to_pull after a time.
+            UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(messagePullDto.getMessageId());
+            messageLogDao.setIntermediaryPullStatus(messagePullDto.getMessageId());
+            return userMessageByMessageId;
         }
         return null;
 
