@@ -32,7 +32,7 @@ public class CheckReleaseSQLScriptsGenerationIT {
     private static final String ORACLE_DDL_PREFIX = "oracle10g-";
     private static final String RELEASE_DDL_SUFFIX = ".ddl";
     private static final String MIGRATION_DDL_SUFFIX = "-migration.ddl";
-    private static final String SQL_SCRIPTS_DIRECTORY_PATH = "../domibus-MSH-db/target/sql-scripts";
+    private static final String SQL_SCRIPTS_DIRECTORY_PATH = "../Domibus-MSH-db/target/sql-scripts";
 
 
     /**
