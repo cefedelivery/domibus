@@ -231,7 +231,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     protected Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
         LOG.debug("Unmarshalling the Messaging instance from the request");
-        return MessageUtil.getMessaging(request, jaxbContext);
+        return userMessageHandler.getMessaging(request);
     }
 
 

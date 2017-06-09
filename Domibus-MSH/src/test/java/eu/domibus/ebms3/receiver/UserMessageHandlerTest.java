@@ -3,10 +3,7 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
@@ -85,7 +82,7 @@ public class UserMessageHandlerTest {
     UserMessageLogDao userMessageLogDao;
 
     @Injectable
-    JAXBContext jaxbContext;
+    JAXBContext jaxbContextEBMS;
 
     @Injectable
     TransformerFactory transformerFactory;
@@ -116,6 +113,10 @@ public class UserMessageHandlerTest {
 
     @Injectable
     SOAPMessage soapResponseMessage;
+
+    @Injectable
+    RawEnvelopeLogDao rawEnvelopeLogDao;
+
 
     @Tested
     UserMessageHandler userMessageHandler;
@@ -516,17 +517,9 @@ public class UserMessageHandlerTest {
 
         final Messaging responseMessaging = createValidSampleResponseMessaging();
         final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
-        new Expectations() {{
-            soapResponseMessage.getSOAPHeader();
-            result = soapHeader;
+        new Expectations(userMessageHandler) {{
 
-            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
-            result = messagingIterator;
-
-            messagingIterator.next();
-            result = node;
-
-            jaxbContext.createUnmarshaller().unmarshal(node, Messaging.class).getValue();
+            userMessageHandler.getMessaging(withAny(soapRequestMessage));
             result = responseMessaging;
 
             messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId());
@@ -578,17 +571,9 @@ public class UserMessageHandlerTest {
 
         final Messaging responseMessaging = createValidSampleResponseMessaging();
         final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
-        new Expectations() {{
-            soapResponseMessage.getSOAPHeader();
-            result = soapHeader;
+        new Expectations(userMessageHandler) {{
 
-            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
-            result = messagingIterator;
-
-            messagingIterator.next();
-            result = node;
-
-            jaxbContext.createUnmarshaller().unmarshal(node, Messaging.class).getValue();
+            userMessageHandler.getMessaging(withAny(soapRequestMessage));
             result = responseMessaging;
 
             messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId());
@@ -613,6 +598,7 @@ public class UserMessageHandlerTest {
             times = 1;
         }};
     }
+
 
 
 

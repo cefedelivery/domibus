@@ -392,19 +392,9 @@ public class UserMessageHandler {
 
     }
 
-    /*protected Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
+    public Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
         LOG.debug("Unmarshalling the Messaging instance from the request");
-        return MessageUtil.getMessaging(request,jaxbContext);
-    }*/
-   /* private Messaging getMessage(SOAPMessage request) {
-        Messaging messaging;
-        try {
-            messaging = getMessaging(request);
-        } catch (SOAPException | JAXBException e) {
-            throw new RuntimeException(e);
-        }
-        return messaging;
-    }*/
-
+        return MessageUtil.getMessaging(request, jaxbContext);
+    }
 
 }

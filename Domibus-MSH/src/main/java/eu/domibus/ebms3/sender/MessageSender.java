@@ -10,7 +10,6 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
-import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -19,8 +18,6 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -70,16 +67,10 @@ public class MessageSender implements MessageListener {
     private ResponseHandler responseHandler;
 
     @Autowired
-    private BackendNotificationService backendNotificationService;
+    private CertificateService certificateService;
 
     @Autowired
-    private UpdateRetryLoggingService updateRetryLoggingService;
-
-    @Autowired
-    CertificateService certificateService;
-
-    @Autowired
-    RetryService retryService;
+    private RetryService retryService;
 
     @Autowired
     private MessageAttemptService messageAttemptService;
