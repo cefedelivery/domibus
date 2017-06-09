@@ -98,7 +98,7 @@
                                     <configuration>
                                         <files>
                                             <file>
-                                                <file>${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus</file>
+                                                <file>${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus</file>
                                                 <todir>conf/domibus</todir>
                                             </file>
                                         </files>

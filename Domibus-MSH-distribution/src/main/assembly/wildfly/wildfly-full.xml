@@ -53,7 +53,7 @@
             <filtered>false</filtered>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/../domibus-MSH-wildfly/src/main/conf/domibus</directory>
+            <directory>${project.basedir}/../Domibus-MSH-wildfly/src/main/conf/domibus</directory>
             <outputDirectory>domibus/conf/domibus</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <filtered>false</filtered>
@@ -95,17 +95,17 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.basedir}/../domibus-MSH-wildfly/src/main/conf/standalone-full.xml</source>
+            <source>${project.basedir}/../Domibus-MSH-wildfly/src/main/conf/standalone-full.xml</source>
             <outputDirectory>domibus/standalone/configuration</outputDirectory>
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.basedir}/../domibus-MSH-wildfly/src/main/conf/modules/com/mysql/main/module.xml</source>
+            <source>${project.basedir}/../Domibus-MSH-wildfly/src/main/conf/modules/com/mysql/main/module.xml</source>
             <outputDirectory>domibus/modules/system/layers/base/com/mysql/main</outputDirectory>
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.basedir}/../domibus-MSH-wildfly/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
+            <source>${project.basedir}/../Domibus-MSH-wildfly/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
             <outputDirectory>domibus/conf/domibus/plugins/config</outputDirectory>
             <filtered>false</filtered>
         </file>
@@ -115,7 +115,7 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.basedir}/../domibus-MSH-wildfly/target/domibus-MSH-wildfly-${project.version}.war</source>
+            <source>${project.basedir}/../Domibus-MSH-wildfly/target/domibus-MSH-wildfly-${project.version}.war</source>
             <outputDirectory>domibus/standalone/deployments</outputDirectory>
             <destName>domibus-wildfly.war</destName>
             <filtered>false</filtered>

@@ -30,7 +30,7 @@
     <includeSiteDirectory>false</includeSiteDirectory>
     <fileSets>
         <fileSet>
-            <directory>${project.basedir}/../domibus-MSH-wildfly/src/main/conf/domibus</directory>
+            <directory>${project.basedir}/../Domibus-MSH-wildfly/src/main/conf/domibus</directory>
             <outputDirectory>/</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>
