@@ -31,19 +31,19 @@
     <files>
         <!-- Tomcat -->
         <file>
-            <source>${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
+            <source>${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
             <outputDirectory>conf/domibus/plugins/config/tomcat</outputDirectory>
             <filtered>false</filtered>
         </file>
         <!-- WebLogic -->
         <file>
-            <source>${project.basedir}/../domibus-MSH-weblogic/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
+            <source>${project.basedir}/../Domibus-MSH-weblogic/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
             <outputDirectory>conf/domibus/plugins/config/weblogic</outputDirectory>
             <filtered>false</filtered>
         </file>
         <!-- WildFly -->
         <file>
-            <source>${project.basedir}/../domibus-MSH-wildfly/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
+            <source>${project.basedir}/../Domibus-MSH-wildfly/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
             <outputDirectory>conf/domibus/plugins/config/wildfly</outputDirectory>
             <filtered>false</filtered>
         </file>

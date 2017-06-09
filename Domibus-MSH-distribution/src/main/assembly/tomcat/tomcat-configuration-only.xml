@@ -30,7 +30,7 @@
     <files>
         <file>
             <source>
-                ${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/domibus-configuration.xml
+                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-configuration.xml
             </source>
             <outputDirectory>/</outputDirectory>
             <destName>domibus-configuration.xml</destName>
@@ -38,7 +38,7 @@
         </file>
         <file>
             <source>
-                ${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/domibus-plugins.xml
+                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-plugins.xml
             </source>
             <outputDirectory>/</outputDirectory>
             <destName>domibus-plugins.xml</destName>
@@ -46,7 +46,7 @@
         </file>
         <file>
             <source>
-                ${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/domibus-datasources.xml
+                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-datasources.xml
             </source>
             <outputDirectory>/</outputDirectory>
             <destName>domibus-datasources.xml</destName>
@@ -54,7 +54,7 @@
         </file>
         <file>
             <source>
-                ${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/domibus-security.xml
+                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-security.xml
             </source>
             <outputDirectory>/</outputDirectory>
             <destName>domibus-security.xml</destName>
@@ -62,7 +62,7 @@
         </file>
         <file>
             <source>
-                ${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/domibus-transactions.xml
+                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-transactions.xml
             </source>
             <outputDirectory>/</outputDirectory>
             <destName>domibus-transactions.xml</destName>
@@ -70,7 +70,7 @@
         </file>
         <file>
             <source>
-                ${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/logback.xml
+                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/logback.xml
             </source>
             <outputDirectory>/</outputDirectory>
             <destName>logback.xml</destName>
@@ -109,7 +109,7 @@
     </files>
     <fileSets>
         <fileSet>
-            <directory>${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/internal</directory>
+            <directory>${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/internal</directory>
             <useDefaultExcludes>false</useDefaultExcludes>
             <outputDirectory>internal</outputDirectory>
             <!-- excludes/-->

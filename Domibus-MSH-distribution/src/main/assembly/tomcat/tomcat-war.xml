@@ -31,7 +31,7 @@
 
     <files>
         <file>
-            <source>${project.basedir}/../domibus-MSH-tomcat/target/domibus-MSH-tomcat-${project.version}.war</source>
+            <source>${project.basedir}/../Domibus-MSH-tomcat/target/domibus-MSH-tomcat-${project.version}.war</source>
             <outputDirectory></outputDirectory>
             <filtered>false</filtered>
         </file>

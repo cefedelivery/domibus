@@ -30,7 +30,7 @@
     <files>
         <!-- testing -->
         <file>
-            <source>${project.basedir}/../domibus-MSH-tomcat/src/test/resources/soapUI/AS4-test-guide-soapui-project.xml</source>
+            <source>${project.basedir}/../Domibus-MSH-tomcat/src/test/resources/soapUI/AS4-test-guide-soapui-project.xml</source>
             <outputDirectory>test/soapui/</outputDirectory>
             <filtered>false</filtered>
         </file>

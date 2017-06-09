@@ -54,7 +54,7 @@
             </excludes>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus</directory>
+            <directory>${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus</directory>
             <outputDirectory>domibus/conf/domibus</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <filtered>false</filtered>
@@ -75,7 +75,7 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.basedir}/../domibus-MSH-tomcat/target/domibus-MSH-tomcat-${project.version}.war</source>
+            <source>${project.basedir}/../Domibus-MSH-tomcat/target/domibus-MSH-tomcat-${project.version}.war</source>
             <outputDirectory>domibus/webapps</outputDirectory>
             <destName>domibus.war</destName>
             <filtered>false</filtered>
@@ -91,7 +91,7 @@
             <filtered>false</filtered>
         </file>
         <file>
-            <source>${project.basedir}/../domibus-MSH-tomcat/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
+            <source>${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/plugins/config/ws-plugin.xml</source>
             <outputDirectory>domibus/conf/domibus/plugins/config</outputDirectory>
             <filtered>false</filtered>
         </file>
