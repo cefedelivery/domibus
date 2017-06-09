@@ -73,15 +73,16 @@ public class CRLUtil {
     }
 
     public URL getCrlURL(String crlURL) throws MalformedURLException {
-        URL result = null;
-        if (crlURL.startsWith("http://") || crlURL.startsWith("https://")
-                || crlURL.startsWith("ftp://") || crlURL.startsWith("file:/")) {
-            result = new URL(crlURL);
-        } else {
-            // try to load from the classpath
-            result = getResourceFromClasspath(crlURL);
-        }
-        return result;
+        return isURLSupported(crlURL) ? new URL(crlURL) : getResourceFromClasspath(crlURL);
+    }
+
+    public boolean isURLSupported(String crlURL) {
+        if (crlURL.startsWith("http://") ||
+                crlURL.startsWith("https://") ||
+                crlURL.startsWith("ftp://") ||
+                crlURL.startsWith("file:/"))
+            return true;
+        return false;
     }
 
     public URL getResourceFromClasspath(String url) {
@@ -114,7 +115,7 @@ public class CRLUtil {
             derObj2 = oAsnInStream2.readObject();
         } catch (IOException e) {
             throw new DomibusCRLException("Error while extracting CRL distribution point URLs", e);
-        }finally {
+        } finally {
             IOUtils.closeQuietly(oAsnInStream2);
         }
         CRLDistPoint distPoint = CRLDistPoint.getInstance(derObj2);

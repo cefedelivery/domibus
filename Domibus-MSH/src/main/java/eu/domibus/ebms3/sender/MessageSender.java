@@ -9,6 +9,8 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -16,6 +18,9 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.pki.CertificateService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,6 +70,18 @@ public class MessageSender implements MessageListener {
     private ResponseHandler responseHandler;
 
     @Autowired
+    private BackendNotificationService backendNotificationService;
+
+    @Autowired
+    private UpdateRetryLoggingService updateRetryLoggingService;
+
+    @Autowired
+    CertificateService certificateService;
+
+    @Autowired
+    RetryService retryService;
+
+    @Autowired
     private MessageAttemptService messageAttemptService;
 
 
@@ -85,6 +102,7 @@ public class MessageSender implements MessageListener {
         LegConfiguration legConfiguration = null;
         final String pModeKey;
 
+        Boolean abortSending = false;
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         try {
             pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
@@ -92,6 +110,22 @@ public class MessageSender implements MessageListener {
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
 
+            if (certificateService.isCertificateValidationEnabled()) {
+                Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+                try {
+                    boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
+                    if (!certificateChainValid) {
+                        LOG.error("Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
+                        retryService.purgeTimedoutMessage(messageId);
+                        abortSending = true;
+                        return;
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
+                }
+            }
+
+            LOG.debug("PMode found : " + pModeKey);
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             final SOAPMessage response = mshDispatcher.dispatch(soapMessage, pModeKey);
             isOk = responseHandler.handle(response);
@@ -118,8 +152,11 @@ public class MessageSender implements MessageListener {
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
         } finally {
+            if (abortSending) {
+                LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
+                return;
+            }
             reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
-
             try {
                 attempt.setError(attemptError);
                 attempt.setStatus(attemptStatus);

@@ -56,15 +56,15 @@
                     <sp:EncryptedParts>
                         <sp:Attachments/>
                     </sp:EncryptedParts>
-			 <sp:Wss11>
-        		<wsp:Policy>
-                     <sp:MustSupportRefKeyIdentifier />
-                     <sp:MustSupportRefIssuerSerial />
-                     <sp:MustSupportRefThumbprint />
-                     <sp:MustSupportRefEncryptedKey />
-                     <sp:RequireSignatureConfirmation />
-               </wsp:Policy>
-            </sp:Wss11>
+                    <sp:Wss11>
+                        <wsp:Policy>
+                             <sp:MustSupportRefKeyIdentifier />
+                             <sp:MustSupportRefIssuerSerial />
+                             <sp:MustSupportRefThumbprint />
+                             <sp:MustSupportRefEncryptedKey />
+                             <sp:RequireSignatureConfirmation />
+                        </wsp:Policy>
+                    </sp:Wss11>
         </wsp:All>
     </wsp:ExactlyOne>
 </wsp:Policy>

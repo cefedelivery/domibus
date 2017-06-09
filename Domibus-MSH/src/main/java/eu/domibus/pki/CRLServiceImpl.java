@@ -3,13 +3,13 @@ package eu.domibus.pki;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,18 +24,54 @@ public class CRLServiceImpl implements CRLService {
     @Override
     public boolean isCertificateRevoked(X509Certificate cert) throws DomibusCRLException {
         List<String> crlDistributionPoints = crlUtil.getCrlDistributionPoints(cert);
-        for (String crlDistributionPointUrl : crlDistributionPoints) {
-            if(isCertificateRevoked(cert, crlDistributionPointUrl)) {
+
+        if (crlDistributionPoints == null || crlDistributionPoints.isEmpty()) {
+            LOG.debug("No CRL distribution points found for certificate: [" + getSubjectDN(cert) + "]");
+            return false;
+        }
+
+        List<String> supportedCrlDistributionPoints = getSupportedCrlDistributionPoints(crlDistributionPoints);
+        if (supportedCrlDistributionPoints.isEmpty()) {
+            throw new DomibusCRLException("No supported CRL distribution point found for certificate " + getSubjectDN(cert));
+        }
+
+        for (String crlDistributionPointUrl : supportedCrlDistributionPoints) {
+            if (isCertificateRevoked(cert, crlDistributionPointUrl)) {
                 return true;
             }
         }
+
         return false;
     }
 
-    protected boolean isCertificateRevoked(X509Certificate cert, String crlDistributionPointURL)  {
+    protected String getSubjectDN(X509Certificate cert) {
+        if (cert != null && cert.getSubjectDN() != null) {
+            return cert.getSubjectDN().getName();
+        }
+        return null;
+    }
+
+    protected List<String> getSupportedCrlDistributionPoints(List<String> crlDistributionPoints) {
+        List<String> result = new ArrayList<>();
+        if (crlDistributionPoints == null || crlDistributionPoints.isEmpty()) {
+            return result;
+        }
+
+        for (String crlDistributionPoint : crlDistributionPoints) {
+            if (crlUtil.isURLSupported(crlDistributionPoint)) {
+                result.add(crlDistributionPoint);
+            } else {
+                LOG.debug("The protocol of the distribution endpoint is not supported: " + crlDistributionPoint);
+            }
+        }
+
+        return result;
+    }
+
+    protected boolean isCertificateRevoked(X509Certificate cert, String crlDistributionPointURL) {
         X509CRL crl = crlUtil.downloadCRL(crlDistributionPointURL);
         if (crl.isRevoked(cert)) {
-            LOG.debug("The pki is revoked by CRL: " + crlDistributionPointURL);
+            LOG.warn("The certificate is revoked by CRL: " + crlDistributionPointURL);
             return true;
         }
         return false;

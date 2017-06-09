@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.common.*;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
@@ -25,6 +26,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.util.MessageUtil;
+import eu.domibus.util.SoapUtil;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +84,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private UserMessageHandler userMessageHandler;
     @Autowired
     private ResponseHandler responseHandler;
+
+    @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
 
     @Autowired
     private ReliabilityChecker reliabilityChecker;
