@@ -16,9 +16,12 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.ebms3.sender.ReliabilityChecker;
+import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
+import eu.domibus.plugin.validation.SubmissionValidationException;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -44,6 +47,7 @@ import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.ws.WebServiceException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -136,6 +140,12 @@ public class MSHWebServiceTest {
     @Injectable
     UserMessageHandler userMessageHandler;
 
+    @Injectable
+    ResponseHandler responseHandler;
+
+    @Injectable
+    ReliabilityChecker reliabilityChecker;
+
     @Tested
     MSHWebservice mshWebservice;
 
@@ -212,31 +222,43 @@ public class MSHWebServiceTest {
      * @throws IOException
      * @throws SAXException
      */
+
     @Test
-    public void testGetMessaging(@Injectable final SOAPHeader soapHeader, @Injectable final Iterator soapChildElementsIterator, @Injectable final Node messagingXml) throws JAXBException, SOAPException, ParserConfigurationException, IOException, SAXException {
+    public void testInvoke_ErrorInNotifyingIncomingMessage(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
 
-        File validRequestFile = new File(TEST_RESOURCES_DIR + "/dataset/as4/blue2redGoodMessage.xml");
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document responseFileDocument = documentBuilder.parse(validRequestFile);
-        final Node messagingNode = responseFileDocument.getElementsByTagName("ns:Messaging").item(0);
+        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
 
-        new Expectations() {{
-            soapRequestMessage.getSOAPHeader();
-            result = soapHeader;
+        new Expectations(mshWebservice) {{
 
-            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
-            result = soapChildElementsIterator;
+            userMessageHandler.getMessaging(withAny(soapRequestMessage));
+            result=messaging;
 
-            soapChildElementsIterator.next();
-            result = messagingNode;
+            messaging.getSignalMessage();
+            result=null;
 
-            jaxbContext.createUnmarshaller();
-            result = JAXBContext.newInstance(Messaging.class).createUnmarshaller();
+            UserMessageHandlerContext arg = new UserMessageHandlerContext();
+            arg.setLegConfiguration(legConfiguration);
+            mshWebservice.getMessageHandler();
+            result=arg;
+
+            legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer();
+            result = true;
+
+
+            userMessageHandler.handleNewUserMessage(withAny(pmodeKey),withAny(soapRequestMessage), withAny(messaging),withAny(arg));
+            result=new EbMS3Exception(null,null,null,null);
+
         }};
 
-        Assert.assertEquals(JAXBContext.newInstance(Messaging.class).createUnmarshaller().unmarshal(messagingNode, Messaging.class).getValue(), mshWebservice.getMessaging(soapRequestMessage));
+        try {
+            mshWebservice.invoke(soapRequestMessage);
+        } catch (Exception e) {
+            Assert.assertTrue("Expecting Webservice exception!", e instanceof WebServiceException);
+        }
+
+        new Verifications() {{
+            backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), (ErrorResult) any);
+        }};
     }
 
 

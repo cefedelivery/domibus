@@ -157,6 +157,33 @@ public class PullContext {
         }
         pullRequestStatuses.clear();
         LOG.info("Checking process configuration for pullrequest with mpc " + getMpcQualifiedName());
+        checkMpcConfiguration();
+        checkLegConfiguration();
+        checkResponderConfiguration();
+        if (pullRequestStatuses.isEmpty()) {
+            addRequestStatus(ONE_MATCHING_PROCESS);
+        }
+    }
+
+    private void checkResponderConfiguration() {
+        if (getProcess().getResponderParties().size() > 1) {
+            LOG.error("Pull process should only have one responder configured for mpc");
+            addRequestStatus(TOO_MANY_RESPONDER);
+        }
+        if (getProcess().getResponderParties().size() == 0) {
+            LOG.error("No responder configured.");
+            addRequestStatus(NO_RESPONDER);
+        }
+    }
+
+    private void checkLegConfiguration() {
+        if (getProcess().getLegs().size() == 0) {
+            LOG.error("No legs configured. PMode skipped!");
+            addRequestStatus(NO_PROCESS_LEG);
+        }
+    }
+
+    private void checkMpcConfiguration() {
         Multiset<String> mpcs = HashMultiset.create();
         for (LegConfiguration legConfiguration : process.getLegs()) {
             mpcs.add(legConfiguration.getDefaultMpc().getQualifiedName());
@@ -169,24 +196,7 @@ public class PullContext {
                 break;
             }
         }
-
-        if (getProcess().getLegs().size() == 0) {
-            LOG.error("No legs configured. PMode skipped!");
-            addRequestStatus(NO_PROCESS_LEG);
-        }
-        if (getProcess().getResponderParties().size() > 1) {
-            LOG.error("Pull process should only have one responder configured for mpc");
-            addRequestStatus(TOO_MANY_RESPONDER);
-        }
-        if (getProcess().getResponderParties().size() == 0) {
-            LOG.error("No responder configured.");
-            addRequestStatus(NO_RESPONDER);
-        }
-        if (pullRequestStatuses.isEmpty()) {
-            addRequestStatus(ONE_MATCHING_PROCESS);
-        }
     }
-
 
 
     Set<PullRequestStatus> getPullRequestStatuses() {

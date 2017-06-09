@@ -513,7 +513,7 @@ public class UserMessageHandlerTest {
 
 
     @Test
-    public void testSaveResponse(@Injectable final SOAPHeader soapHeader, @Injectable final Iterator messagingIterator, @Injectable final Node node, @Injectable final Messaging receiptMessage) throws SOAPException, ParserConfigurationException, JAXBException, SAXException, IOException {
+    public void testSaveResponse(@Injectable final Messaging receiptMessage) throws SOAPException, ParserConfigurationException, JAXBException, SAXException, IOException {
 
         final Messaging responseMessaging = createValidSampleResponseMessaging();
         final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
@@ -850,9 +850,6 @@ public class UserMessageHandlerTest {
             pModeProvider.getLegConfiguration(withSubstring(PUSH_TESTCASE1_TC1ACTION));
             result = legConfiguration;
 
-            messaging.getSignalMessage();
-            result=null;
-
             messaging.getUserMessage().getMessageInfo().getMessageId();
             result = "TestMessage123";
 
@@ -871,23 +868,49 @@ public class UserMessageHandlerTest {
             backendNotificationService.notifyMessageReceived(withAny(userMessage));
             result = new SubmissionValidationException("Error while submitting the message!!");
 
-            legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer();
-            result = true;
 
         }};
-
         try {
-            userMessageHandler.handleNewUserMessage(pmodeKey,soapRequestMessage,messaging,new UserMessageHandlerContext());
+            UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
+            userMessageHandlerContext.setPingMessage(true);
+            userMessageHandlerContext.setLegConfiguration(legConfiguration);
+            userMessageHandler.handleNewUserMessage(pmodeKey,soapRequestMessage,messaging, userMessageHandlerContext);
         } catch (Exception e) {
-            Assert.assertTrue("Expecting Webservice exception!", e instanceof WebServiceException);
+            Assert.assertTrue("Expecting Ebms3exception!", e instanceof EbMS3Exception);
         }
 
         new Verifications() {{
             backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
             userMessageHandler.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
             times = 0;
-            backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), (ErrorResult) any);
+    //        backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), (ErrorResult) any);
         }};
+    }
+    @Test
+    public void testGetMessaging(@Injectable final SOAPHeader soapHeader, @Injectable final Iterator soapChildElementsIterator, @Injectable final Node messagingXml) throws JAXBException, SOAPException, ParserConfigurationException, IOException, SAXException {
+
+        File validRequestFile = new File(TEST_RESOURCES_DIR + "/dataset/as4/blue2redGoodMessage.xml");
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setNamespaceAware(true);
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document responseFileDocument = documentBuilder.parse(validRequestFile);
+        final Node messagingNode = responseFileDocument.getElementsByTagName("ns:Messaging").item(0);
+
+        new Expectations() {{
+            soapRequestMessage.getSOAPHeader();
+            result = soapHeader;
+
+            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
+            result = soapChildElementsIterator;
+
+            soapChildElementsIterator.next();
+            result = messagingNode;
+
+            jaxbContextEBMS.createUnmarshaller();
+            result = JAXBContext.newInstance(Messaging.class).createUnmarshaller();
+        }};
+
+        Assert.assertEquals(JAXBContext.newInstance(Messaging.class).createUnmarshaller().unmarshal(messagingNode, Messaging.class).getValue(), userMessageHandler.getMessaging(soapRequestMessage));
     }
 
     public Configuration loadSamplePModeConfiguration(String samplePModeFileRelativeURI) throws JAXBException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {

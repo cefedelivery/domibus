@@ -103,7 +103,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         SOAPMessage responseMessage = null;
         Messaging messaging;
         messaging = getMessage(request);
-        UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
+        UserMessageHandlerContext userMessageHandlerContext = getMessageHandler();
         if (messaging.getSignalMessage() != null) {
             if (messaging.getSignalMessage().getPullRequest() != null) {
                 return handlePullRequest(messaging);
@@ -129,7 +129,11 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 throw new RuntimeException(e);
             } catch (final EbMS3Exception e) {
                 try {
+                    System.out.println(e.getStackTrace());
+                    System.out.println("messaging "+messaging);
+                    System.out.println("userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer() "+userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer());
                     if (!userMessageHandlerContext.isPingMessage() && userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
+                        System.out.println("error "+messaging);
                         backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandler.createErrorResult(e));
                     }
                 } catch (Exception ex) {
@@ -140,6 +144,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
 
         return responseMessage;
+    }
+
+    UserMessageHandlerContext getMessageHandler() {
+        return new UserMessageHandlerContext();
     }
 
     private SOAPMessage handlePullRequestReceipt(SOAPMessage request, Messaging messaging) {

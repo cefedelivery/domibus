@@ -368,7 +368,7 @@ public class UserMessageHandler {
 
     void saveResponse(final SOAPMessage responseMessage) {
         try {
-            Messaging messaging = MessageUtil.getMessaging(responseMessage,jaxbContext);
+            Messaging messaging = getMessaging(responseMessage);
             final SignalMessage signalMessage = messaging.getSignalMessage();
             // Stores the signal message
             signalMessageDao.create(signalMessage);
@@ -392,7 +392,7 @@ public class UserMessageHandler {
 
     }
 
-    public Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
+    Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
         LOG.debug("Unmarshalling the Messaging instance from the request");
         return MessageUtil.getMessaging(request, jaxbContext);
     }
