@@ -10,6 +10,7 @@ import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
+import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -21,7 +22,6 @@ import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
-import eu.domibus.plugin.validation.SubmissionValidationException;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -31,29 +31,22 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.ws.WebServiceException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Iterator;
 
 /**
  * @author Arun Raj
@@ -138,7 +131,7 @@ public class MSHWebServiceTest {
     EbMS3MessageBuilder messageBuilder;
 
     @Injectable
-    UserMessageHandler userMessageHandler;
+    UserMessageHandlerService userMessageHandlerService;
 
     @Injectable
     ResponseHandler responseHandler;
@@ -177,7 +170,7 @@ public class MSHWebServiceTest {
             messaging.getSignalMessage();
             result=null;
 
-            userMessageHandler.handleNewUserMessage(withEqual(pmodeKey),withEqual(soapRequestMessage), withEqual(messaging),withAny(new UserMessageHandlerContext()));
+            userMessageHandlerService.handleNewUserMessage(withEqual(pmodeKey),withEqual(soapRequestMessage), withEqual(messaging),withAny(new UserMessageHandlerContext()));
             result = soapResponseMessage;
         }};
 
@@ -230,7 +223,7 @@ public class MSHWebServiceTest {
 
         new Expectations(mshWebservice) {{
 
-            userMessageHandler.getMessaging(withAny(soapRequestMessage));
+            userMessageHandlerService.getMessaging(withAny(soapRequestMessage));
             result=messaging;
 
             messaging.getSignalMessage();
@@ -245,7 +238,7 @@ public class MSHWebServiceTest {
             result = true;
 
 
-            userMessageHandler.handleNewUserMessage(withAny(pmodeKey),withAny(soapRequestMessage), withAny(messaging),withAny(arg));
+            userMessageHandlerService.handleNewUserMessage(withAny(pmodeKey),withAny(soapRequestMessage), withAny(messaging),withAny(arg));
             result=new EbMS3Exception(null,null,null,null);
 
         }};

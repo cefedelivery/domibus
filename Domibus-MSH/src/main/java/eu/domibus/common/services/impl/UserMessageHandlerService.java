@@ -1,4 +1,4 @@
-package eu.domibus.ebms3.receiver;
+package eu.domibus.common.services.impl;
 
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
@@ -11,12 +11,12 @@ import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
-import eu.domibus.common.services.impl.CompressionService;
-import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.receiver.BackendNotificationService;
+import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -29,7 +29,6 @@ import org.apache.commons.lang.Validate;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import org.w3c.dom.Node;
 
 import javax.activation.DataHandler;
@@ -55,11 +54,11 @@ import java.util.Iterator;
  * Created by dussath on 6/6/17.
  *
  */
-@Component
-public class UserMessageHandler {
+@org.springframework.stereotype.Service
+public class UserMessageHandlerService {
 
     private static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageHandler.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageHandlerService.class);
     @Autowired
     private PModeProvider pModeProvider;
     @Autowired
@@ -392,7 +391,7 @@ public class UserMessageHandler {
 
     }
 
-    Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
+    public Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
         LOG.debug("Unmarshalling the Messaging instance from the request");
         return MessageUtil.getMessaging(request, jaxbContext);
     }

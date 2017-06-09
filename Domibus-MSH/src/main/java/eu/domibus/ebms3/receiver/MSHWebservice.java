@@ -3,18 +3,12 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.common.services.MessagingService;
-import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.common.validators.PayloadProfileValidator;
-import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
@@ -24,9 +18,6 @@ import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
-import eu.domibus.pki.CertificateService;
-import eu.domibus.util.MessageUtil;
-import eu.domibus.util.SoapUtil;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.*;
@@ -57,7 +47,6 @@ import java.util.Date;
 @BindingType(SOAPBinding.SOAP12HTTP_BINDING)
 public class MSHWebservice implements Provider<SOAPMessage> {
 
-    public static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHWebservice.class);
 
@@ -81,7 +70,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Autowired
     private EbMS3MessageBuilder messageBuilder;
     @Autowired
-    private UserMessageHandler userMessageHandler;
+    private UserMessageHandlerService userMessageHandlerService;
     @Autowired
     private ResponseHandler responseHandler;
 
@@ -122,7 +111,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             }
             try {
                 LOG.info("Using pmodeKey {}", pmodeKey);
-                responseMessage = userMessageHandler.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
+                responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, userMessageHandlerContext.getMessageId());
                 LOG.info("Ping message " + userMessageHandlerContext.isPingMessage());
             } catch (TransformerException | SOAPException | JAXBException | IOException e) {
@@ -134,7 +123,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     System.out.println("userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer() "+userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer());
                     if (!userMessageHandlerContext.isPingMessage() && userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
                         System.out.println("error "+messaging);
-                        backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandler.createErrorResult(e));
+                        backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
                     }
                 } catch (Exception ex) {
                     LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, userMessageHandlerContext.getMessageId());
@@ -161,7 +150,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
-
+           // rawEnvelopeLogDao.findById()
+          //  SOAPMessage message = factory.createMessage(new MimeHeaders(), new ByteArrayInputStream(xml.getBytes(Charset.forName("UTF-8"))));
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             isOk = responseHandler.handle(request);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
@@ -239,7 +229,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     protected Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
         LOG.debug("Unmarshalling the Messaging instance from the request");
-        return userMessageHandler.getMessaging(request);
+        return userMessageHandlerService.getMessaging(request);
     }
 
 

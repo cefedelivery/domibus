@@ -20,4 +20,5 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
         super(RawEnvelopeLog.class);
     }
 
+
 }

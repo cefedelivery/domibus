@@ -15,12 +15,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static eu.domibus.common.model.configuration.Process.*;
+
 /**
  * @author idragusa
  * @since 3.2.5
  */
 @Entity
 @Table(name = "TB_RAWENVELOPE_LOG")
+/*@NamedQueries({
+        @NamedQuery(name = RETRIEVE_FROM_MESSAGE_CONTEXT, query = "SELECT p FROM Process as p left join p.agreement as a left join p.legs as l left join p.initiatorParties init left join p.responderParties resp  where l.action.name=:action and l.service.name=:service and (a is null  or a.name=:agreement) and l.name=:leg and init.name=:initiatorName and resp.name=:responderName")})*/
 public class RawEnvelopeLog extends AbstractBaseEntity {
     @OneToOne
     @JoinColumn(name = "USERMESSAGE_ID_FK")

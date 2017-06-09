@@ -7,7 +7,7 @@ import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.ebms3.receiver.UserMessageHandler;
+import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.xml.bind.JAXBContext;
@@ -47,7 +46,7 @@ public class PullMessageSender {
     @Autowired
     private JAXBContext jaxbContext;
     @Autowired
-    private UserMessageHandler userMessageHandler;
+    private UserMessageHandlerService userMessageHandlerService;
     @Autowired
     private BackendNotificationService backendNotificationService;
 
@@ -79,7 +78,7 @@ public class PullMessageSender {
             }
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
             UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
-            SOAPMessage acknowlegement = userMessageHandler.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
+            SOAPMessage acknowlegement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
             //send receipt
             mshDispatcher.dispatch(acknowlegement, pMode);
 
@@ -90,7 +89,7 @@ public class PullMessageSender {
             try {
 
                 if (notifiyBusinessOnError && messaging != null) {
-                    backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandler.createErrorResult(e));
+                    backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
                 }
             } catch (Exception ex) {
                 LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, messageId);
