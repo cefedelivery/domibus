@@ -166,7 +166,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
             if (cert == null) { // check for certificate embedded in the message under BinarySecurityToken tag
                 LOG.info("Check for message embedded certificate in the BinarySecurityToken tag");
-                cert = getCertificateFromBinarySecurityToken(msg);
+                cert = getCertificateFromBinarySecurityToken(getSecurityHeader(msg));
             }
             return cert;
         } catch (CertificateException certEx) {
@@ -178,18 +178,13 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         }
     }
 
-    private X509Certificate getCertificateFromBinarySecurityToken(SoapMessage soapMessage) throws WSSecurityException, CertificateException {
-        SOAPMessage doc = soapMessage.getContent(SOAPMessage.class);
-
-        Element elem = WSSecurityUtil.getSecurityHeader(doc.getSOAPPart(), "");
-        Node binarySecurityTokenTag = elem.getElementsByTagName("wsse:BinarySecurityToken").item(0).getFirstChild();
-
+    private X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader) throws WSSecurityException, CertificateException {
+        Node binarySecurityTokenTag = securityHeader.getElementsByTagName("wsse:BinarySecurityToken").item(0).getFirstChild();
         if(binarySecurityTokenTag == null || !( binarySecurityTokenTag instanceof TextImpl) ) {
             return null;
         }
 
         String certStr = ( "-----BEGIN CERTIFICATE-----\n" + ((TextImpl)binarySecurityTokenTag).getData() + "\n-----END CERTIFICATE-----\n" );
-
         InputStream in = new ByteArrayInputStream(certStr.getBytes());
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
         X509Certificate cert = (X509Certificate)certFactory.generateCertificate(in);
