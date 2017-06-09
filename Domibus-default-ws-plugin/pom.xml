@@ -13,8 +13,6 @@
     <artifactId>domibus-default-ws-plugin</artifactId>
     <packaging>jar</packaging>
 
-
-
     <dependencies>
         <dependency>
             <groupId>eu.domibus</groupId>

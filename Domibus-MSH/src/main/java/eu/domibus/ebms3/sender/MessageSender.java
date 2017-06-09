@@ -9,6 +9,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
@@ -22,9 +23,11 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.pki.DomibusCertificateException;
+import eu.domibus.pki.PolicyService;
+import org.apache.commons.lang.Validate;
 import org.apache.cxf.interceptor.Fault;
+import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -91,6 +94,9 @@ public class MessageSender implements MessageListener {
     RetryService retryService;
 
     @Autowired
+    PolicyService policyService;
+
+    @Autowired
     private MessageAttemptService messageAttemptService;
 
 
@@ -119,24 +125,52 @@ public class MessageSender implements MessageListener {
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
 
-            if (certificateService.isCertificateValidationEnabled()) {
-                Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+            Policy policy;
+            try {
+                policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+            } catch (final ConfigurationException e) {
+
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
+                ex.setMshRole(MSHRole.SENDING);
+                throw ex;
+            }
+
+            Party sendingParty = pModeProvider.getSenderParty(pModeKey);
+            Validate.notNull(sendingParty, "Initiator party was not found");
+            Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+            Validate.notNull(receiverParty, "Responder party was not found");
+
+            if (!policyService.isNoSecurityPolicy(policy)) {
+                // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
                 try {
-                    boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
-                    if (!certificateChainValid) {
-                        LOG.error("Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
-                        retryService.purgeTimedoutMessage(messageId);
-                        abortSending = true;
-                        return;
+                    certificateService.isCertificateValid(sendingParty.getName());
+                    LOG.info("Sender certificate exists and is valid [" + sendingParty.getName() + "]");
+                } catch (DomibusCertificateException dcEx) {
+                    String msg = "Could not find and verify sender's certificate [" + sendingParty.getName() + "]";
+                    LOG.error(msg, dcEx);
+                    EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, msg, null, dcEx);
+                    ex.setMshRole(MSHRole.SENDING);
+                    throw ex;
+                }
+
+                if (certificateService.isCertificateValidationEnabled()) {
+                    try {
+                        boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
+                        if (!certificateChainValid) {
+                            LOG.error("Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
+                            retryService.purgeTimedoutMessage(messageId);
+                            abortSending = true;
+                            return;
+                        }
+                    } catch (Exception e) {
+                        LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
                     }
-                } catch (Exception e) {
-                    LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
                 }
             }
 
             LOG.debug("PMode found : " + pModeKey);
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
-            final SOAPMessage response = mshDispatcher.dispatch(soapMessage, pModeKey);
+            final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
             isOk = responseHandler.handle(response);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
                 EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occurred during marshalling", messageId, null);

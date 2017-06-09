@@ -38,6 +38,8 @@ import org.apache.commons.lang.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,6 +62,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 public class AdminGUIController {
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(AdminGUIController.class);
+
+    @Autowired
+    private CacheManager cacheManager;
 
     @Autowired
     private MessagesLogService messagesLogService;
@@ -355,6 +360,8 @@ public class AdminGUIController {
             try {
                 byte[] bytes = truststore.getBytes();
                 cryptoService.replaceTruststore(bytes, password);
+                //clear the cache used for certificate validation as it uses the truststore to get the certificate details
+                clearCache("certValidationByAlias");
                 return "Truststore file has been successfully replaced.";
             } catch (Exception e) {
                 LOG.error("Failed to upload the truststore file", e);
@@ -362,6 +369,20 @@ public class AdminGUIController {
             }
         } else {
             return "Failed to upload the truststore file since it was empty.";
+        }
+    }
+
+    //TODO move it to a newly created class DomibusCacheService
+    protected void clearCache(String refreshCacheName) {
+        Collection<String> cacheNames = cacheManager.getCacheNames();
+        for (String cacheName : cacheNames) {
+            if (StringUtils.equals(cacheName, refreshCacheName)) {
+                final Cache cache = cacheManager.getCache(cacheName);
+                if (cache != null) {
+                    LOG.debug("Clearing cache [" + refreshCacheName + "]");
+                    cache.clear();
+                }
+            }
         }
     }
 }

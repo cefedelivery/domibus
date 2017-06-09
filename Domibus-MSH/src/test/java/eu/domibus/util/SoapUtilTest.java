@@ -1,11 +1,11 @@
 package eu.domibus.util;
 
 import eu.domibus.ebms3.sender.MSHDispatcher;
-import junit.framework.Assert;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -43,7 +43,7 @@ public class SoapUtilTest {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setNamespaceAware(true);
         DocumentBuilder builder = dbFactory.newDocumentBuilder();
-        Document document = builder.parse(new File("target/test-classes/dataset/as4/" + dataset).getAbsolutePath());
+        Document document = builder.parse(SoapUtilTest.class.getClassLoader().getResourceAsStream("dataset/as4/" + dataset));
         DOMSource domSource = new DOMSource(document);
         SOAPPart soapPart = message.getSOAPPart();
         soapPart.setContent(domSource);
