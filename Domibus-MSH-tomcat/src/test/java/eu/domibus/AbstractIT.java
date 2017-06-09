@@ -1,12 +1,13 @@
 package eu.domibus;
 
-import eu.domibus.common.AuthRole;
 import eu.domibus.common.NotificationType;
 import eu.domibus.configuration.Storage;
-import eu.domibus.messaging.MessageConstants;
-import org.apache.commons.io.FileUtils;
+import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -20,12 +21,14 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.jms.*;
 import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.soap.*;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -258,6 +261,34 @@ public abstract class AbstractIT {
 
     protected Mode getMode() {
         return Mode.valueOf(System.getProperty("attachment.mode", Mode.DATABASE.name()));
+    }
+
+    //TODO move this method into a class in the domibus-MSH-test module in order to be reused
+    public SOAPMessage createSOAPMessage(String dataset) throws SOAPException, IOException, ParserConfigurationException, SAXException {
+
+        MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL);
+        SOAPMessage message = factory.createMessage();
+
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        dbFactory.setNamespaceAware(true);
+        DocumentBuilder builder = dbFactory.newDocumentBuilder();
+        Document document = builder.parse(getClass().getClassLoader().getResourceAsStream("dataset/as4/" + dataset));
+        DOMSource domSource = new DOMSource(document);
+        SOAPPart soapPart = message.getSOAPPart();
+        soapPart.setContent(domSource);
+
+        AttachmentPart attachment = message.createAttachmentPart();
+        attachment.setContent(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()), "text/xml");
+        attachment.setContentId("sbdh-order");
+        message.addAttachmentPart(attachment);
+
+        message.setProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
+        try {
+            SOAPHeader soapHeader = message.getSOAPHeader();
+        } catch (Exception e) {
+            LOG.error("Could not get SOAPHeader", e);
+        }
+        return message;
     }
 
 }

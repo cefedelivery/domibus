@@ -4,8 +4,6 @@ import eu.domibus.AbstractIT;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.ebms3.receiver.SetPolicyInInterceptor;
 import eu.domibus.ebms3.sender.MSHDispatcher;
-import eu.domibus.util.SoapUtil;
-import eu.domibus.util.SoapUtilTest;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.cxf.Bus;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -23,16 +21,16 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.soap.*;
-import javax.xml.transform.dom.DOMSource;
+import javax.xml.soap.AttachmentPart;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Provider;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -106,7 +104,7 @@ public class ReceiveMessageIT extends AbstractIT {
     public void testReceiveMessage() throws SOAPException, IOException, SQLException, ParserConfigurationException, SAXException {
         String filename = "SOAPMessage2.xml";
         String messageId = "43bb6883-77d2-4a41-bac4-52a485d50084@domibus.eu";
-        SOAPMessage soapMessage = SoapUtilTest.createSOAPMessage(filename);
+        SOAPMessage soapMessage = createSOAPMessage(filename);
         mshWebservice.invoke(soapMessage);
         verifyMessageStatus(messageId);
         verifySignalMessageStatus(messageId);
@@ -143,7 +141,7 @@ public class ReceiveMessageIT extends AbstractIT {
     public void testReceivePingMessage() throws IOException, SOAPException, SQLException, ParserConfigurationException, SAXException {
         String filename = "SOAPPingMessage.xml";
         String messageId = "ping123@domibus.eu";
-        SOAPMessage soapMessage = SoapUtilTest.createSOAPMessage(filename);
+        SOAPMessage soapMessage = createSOAPMessage(filename);
         SOAPMessage responseMessage = mshWebservice.invoke(soapMessage);
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         responseMessage.writeTo(out);
@@ -172,7 +170,7 @@ public class ReceiveMessageIT extends AbstractIT {
 
         //return sm.getContent(SOAPMessage.class); // TODO is returns null
 
-        SOAPMessage message = SoapUtilTest.createSOAPMessage("SOAPMessage.xml");
+        SOAPMessage message = createSOAPMessage("SOAPMessage.xml");
         return message;
     }
 }
