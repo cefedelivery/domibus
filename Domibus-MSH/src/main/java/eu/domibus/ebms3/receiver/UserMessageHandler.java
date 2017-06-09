@@ -1,15 +1,13 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.common.*;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
+import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
@@ -25,6 +23,7 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import eu.domibus.util.MessageUtil;
+import eu.domibus.util.SoapUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.cxf.attachment.AttachmentUtil;
@@ -36,9 +35,7 @@ import org.w3c.dom.Node;
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
@@ -61,7 +58,7 @@ import java.util.Iterator;
 @Component
 public class UserMessageHandler {
 
-    public static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
+    private static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageHandler.class);
     @Autowired
     private PModeProvider pModeProvider;
@@ -94,6 +91,8 @@ public class UserMessageHandler {
     @Qualifier("jaxbContextEBMS")
     @Autowired
     protected JAXBContext jaxbContext;
+    @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
 
     public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging,final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
@@ -157,10 +156,10 @@ public class UserMessageHandler {
     /**
      * Check if this message is a ping message
      *
-     * @param message
+     * @param message the message
      * @return result of ping service and action handle
      */
-    protected Boolean checkPingMessage(final UserMessage message) {
+    Boolean checkPingMessage(final UserMessage message) {
         LOG.debug("Checking if it is a ping message");
         return Ebms3Constants.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
                 && Ebms3Constants.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
@@ -179,7 +178,7 @@ public class UserMessageHandler {
      * @throws EbMS3Exception
      */
     //TODO: improve error handling
-    protected String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging) throws SOAPException, JAXBException, TransformerException, EbMS3Exception {
+    String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging) throws SOAPException, JAXBException, TransformerException, EbMS3Exception {
         LOG.info("Persisting received message");
         UserMessage userMessage = messaging.getUserMessage();
 
@@ -220,6 +219,16 @@ public class UserMessageHandler {
         userMessageLogDao.create(umlBuilder.build());
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
+        try {
+            String rawXMLMessage = SoapUtil.getRawXMLMessage(request);
+            LOG.debug("Persist raw XML envelope: " + rawXMLMessage);
+            RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+            rawEnvelopeLog.setRawXML(rawXMLMessage);
+            rawEnvelopeLog.setUserMessage(userMessage);
+            rawEnvelopeLogDao.create(rawEnvelopeLog);
+        } catch (TransformerException e) {
+            LOG.warn("Unable to log the raw message XML due to: ", e);
+        }
 
         return userMessage.getMessageInfo().getMessageId();
     }
@@ -227,15 +236,15 @@ public class UserMessageHandler {
     /**
      * If message with same messageId is already in the database return <code>true</code> else <code>false</code>
      *
-     * @param messaging
+     * @param messaging the message
      * @return result of duplicate handle
      */
-    protected Boolean checkDuplicate(final Messaging messaging) {
+    Boolean checkDuplicate(final Messaging messaging) {
         LOG.debug("Checking for duplicate messages");
         return userMessageLogDao.findByMessageId(messaging.getUserMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
     }
 
-    protected void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
+    void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
         boolean bodyloadFound = false;
         for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
             final String cid = partInfo.getHref();
@@ -283,7 +292,7 @@ public class UserMessageHandler {
         }
     }
 
-    protected String getFinalRecipientName(UserMessage userMessage) {
+    String getFinalRecipientName(UserMessage userMessage) {
         for (Property property : userMessage.getMessageProperties().getProperty()) {
             if (property.getName() != null && property.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
                 return property.getValue();
@@ -301,7 +310,7 @@ public class UserMessageHandler {
      * @return the response message to the incoming request message
      * @throws EbMS3Exception if generation of receipt was not successful
      */
-    protected SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate) throws EbMS3Exception {
+    SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate) throws EbMS3Exception {
 
         SOAPMessage responseMessage = null;
         assert legConfiguration != null;
@@ -357,9 +366,9 @@ public class UserMessageHandler {
         return result;
     }
 
-    protected void saveResponse(final SOAPMessage responseMessage) {
+    void saveResponse(final SOAPMessage responseMessage) {
         try {
-            Messaging messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
+            Messaging messaging = MessageUtil.getMessaging(responseMessage,jaxbContext);
             final SignalMessage signalMessage = messaging.getSignalMessage();
             // Stores the signal message
             signalMessageDao.create(signalMessage);
