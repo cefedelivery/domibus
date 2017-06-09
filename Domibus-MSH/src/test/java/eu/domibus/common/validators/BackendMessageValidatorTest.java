@@ -35,7 +35,8 @@ import java.util.Properties;
 @RunWith(JMockit.class)
 public class BackendMessageValidatorTest {
 
-    private static final String DOMIBUS_CONFIGURATION_FILE = "domibus-configuration.xml";
+//    private static final String DOMIBUS_CONFIGURATION_FILE = "domibus-configuration.xml";
+    private static final String MESSAGE_ID_PATTERN = "^[\\x20-\\x7E]*$";
     private static final String RED = "red_gw";
     private static final String BLUE = "blue_gw";
     private static final String INITIATOR_ROLE = "defaultInitiatorRole";
@@ -53,7 +54,7 @@ public class BackendMessageValidatorTest {
 
         new Expectations() {{
             domibusProperties.getProperty(BackendMessageValidator.KEY_MESSAGEID_PATTERN);
-            result = loadMessageIdPatternFromConfigurationFile();
+            result = MESSAGE_ID_PATTERN;
 
         }};
 
@@ -138,7 +139,7 @@ public class BackendMessageValidatorTest {
 
         new Expectations() {{
             domibusProperties.getProperty(BackendMessageValidator.KEY_MESSAGEID_PATTERN);
-            result = loadMessageIdPatternFromConfigurationFile();
+            result = MESSAGE_ID_PATTERN;
 
         }};
 
@@ -391,7 +392,8 @@ public class BackendMessageValidatorTest {
     }
 
 
-    protected String loadMessageIdPatternFromConfigurationFile() throws URISyntaxException, IOException, ParserConfigurationException, SAXException {
+    //TODO use this when the domibus-configuration.xml is moved in the domibus-test module classpath
+    /*protected String loadMessageIdPatternFromConfigurationFile() throws URISyntaxException, IOException, ParserConfigurationException, SAXException {
         MessageIdPatternRetriever messageIdPatternRetriever = new MessageIdPatternRetriever();
         if (messageIdPatternRetriever.getMessageIdPattern() == null) {
             File f = new File(getClass().getClassLoader().getResource(DOMIBUS_CONFIGURATION_FILE).toURI());
@@ -404,7 +406,7 @@ public class BackendMessageValidatorTest {
             xmlReader.parse(is);
         }
         return messageIdPatternRetriever.getMessageIdPattern();
-    }
+    }*/
 }
 
 class MessageIdPatternRetriever extends DefaultHandler {

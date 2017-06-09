@@ -20,6 +20,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
@@ -78,6 +79,7 @@ public class SamplePModeTestIT {
 
     protected eu.domibus.common.model.configuration.Configuration  readPMode(String location) throws Exception {
         File pmodeFile = new File(location);
+        InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/" + location);
         String pmodeContent = FileUtils.readFileToString(pmodeFile);
         pmodeContent = StringUtils.replaceEach(pmodeContent, new String[]{"<red_hostname>", "<blue_hostname>"}, new String[]{"red_hostname", "blue_hostname"});
 

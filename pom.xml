@@ -35,21 +35,11 @@
         <module>Domibus-MSH-logging</module>
         <module>Domibus-MSH-jms-spi</module>
         <module>Domibus-MSH-jms-spi-helper</module>
-        <module>Domibus-MSH-jms-weblogic</module>
-        <module>Domibus-MSH-jms-activemq</module>
-        <module>Domibus-MSH-jms-wildfly</module>
-		<module>Domibus-MSH-taskexecutor-weblogic</module>
-		<module>Domibus-MSH-taskexecutor-wildfly</module>
-        <module>Domibus-MSH-taskexecutor-tomcat</module>
-
+        <module>Domibus-plugin-api</module>
         <module>Domibus-MSH-soapui-tests</module>
         <module>Domibus-MSH-docker</module>
-        <module>Domibus-plugin-api</module>
-        <module>Domibus-ws-stubs</module>
-        <module>Domibus-default-ws-plugin</module>
-        <module>Domibus-default-jms-plugin</module>
         <module>Domibus-MSH-fiware</module>
-        <!--<module>Domibus-ActiveMQ-ThroughputLimiter</module>-->
+        <module>Domibus-MSH-test</module>
     </modules>
     <properties>
         <cxf.version>3.1.7</cxf.version>
@@ -587,6 +577,35 @@
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>2.4.3</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.3</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.10.3</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <failOnError>false</failOnError>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -634,4 +653,63 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>tomcat</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>Domibus-MSH-jms-activemq</module>
+                <module>Domibus-MSH-taskexecutor-tomcat</module>
+                <module>Domibus-MSH-tomcat</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>weblogic</id>
+            <modules>
+                <module>Domibus-MSH-taskexecutor-weblogic</module>
+                <module>Domibus-MSH-jms-weblogic</module>
+                <module>Domibus-MSH-weblogic</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>wildfly</id>
+            <modules>
+                <module>Domibus-MSH-jms-wildfly</module>
+                <module>Domibus-MSH-taskexecutor-wildfly</module>
+                <module>Domibus-MSH-wildfly</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>default-plugins</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>Domibus-ws-stubs</module>
+                <module>Domibus-default-ws-plugin</module>
+                <module>Domibus-default-jms-plugin</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>database</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>Domibus-MSH-db</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>distribution</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>Domibus-MSH-distribution</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

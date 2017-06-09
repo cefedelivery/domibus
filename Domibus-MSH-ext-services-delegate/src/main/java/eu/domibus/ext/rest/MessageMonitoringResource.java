@@ -5,6 +5,7 @@ import eu.domibus.ext.exceptions.MessageMonitorException;
 import eu.domibus.ext.services.MessageMonitorService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,11 @@ public class MessageMonitoringResource {
 
     @RequestMapping(path = "/failed", method = RequestMethod.GET)
     public List<String> getFailedMessages(@RequestParam(value = "finalRecipient", required = false) String finalRecipient) throws MessageMonitorException {
-        return messageMonitorService.getFailedMessages(finalRecipient);
+        if (StringUtils.isNotEmpty(finalRecipient)) {
+            return messageMonitorService.getFailedMessages(finalRecipient);
+        } else {
+            return messageMonitorService.getFailedMessages();
+        }
     }
 
     @RequestMapping(path = "/failed/{messageId:.+}/elapsedtime", method = RequestMethod.GET)
