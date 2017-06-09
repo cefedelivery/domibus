@@ -49,7 +49,7 @@
         </file>
         <!-- Plugin jar -->
         <file>
-            <source>${project.basedir}/../domibus-default-ws-plugin/target/domibus-default-ws-plugin-${project.version}.jar</source>
+            <source>${project.basedir}/../Domibus-default-ws-plugin/target/domibus-default-ws-plugin-${project.version}.jar</source>
             <outputDirectory>conf/domibus/plugins/lib</outputDirectory>
             <filtered>false</filtered>
         </file>
