@@ -205,7 +205,14 @@
         <dependency>
             <groupId>no.difi.vefa</groupId>
             <artifactId>peppol-lookup</artifactId>
-            <version>0.9.2</version>
+            <version>0.9.6</version>
+        </dependency>
+
+        <!-- e-SENS OASIS BDX SMP  -->
+        <dependency>
+            <groupId>eu.europa.ec.dynamic-discovery</groupId>
+            <artifactId>dynamic-discovery-client</artifactId>
+            <version>1.2</version>
         </dependency>
         <!-- End Difi libraries -->
 

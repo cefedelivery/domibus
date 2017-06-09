@@ -3,10 +3,7 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
@@ -82,6 +79,9 @@ public class MSHWebServiceTest {
 
     @Injectable
     MessagingDao messagingDao;
+
+    @Injectable
+    RawEnvelopeLogDao rawEnvelopeLogDao;
 
     @Injectable
     MessagingService messagingService;
@@ -538,17 +538,9 @@ public class MSHWebServiceTest {
 
         final Messaging responseMessaging = createValidSampleResponseMessaging();
         final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
-        new Expectations() {{
-            soapResponseMessage.getSOAPHeader();
-            result = soapHeader;
+        new Expectations(mshWebservice) {{
 
-            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
-            result = messagingIterator;
-
-            messagingIterator.next();
-            result = node;
-
-            jaxbContext.createUnmarshaller().unmarshal(node, Messaging.class).getValue();
+            mshWebservice.getMessaging(withAny(soapRequestMessage));
             result = responseMessaging;
 
             messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId());
@@ -600,17 +592,9 @@ public class MSHWebServiceTest {
 
         final Messaging responseMessaging = createValidSampleResponseMessaging();
         final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
-        new Expectations() {{
-            soapResponseMessage.getSOAPHeader();
-            result = soapHeader;
+        new Expectations(mshWebservice) {{
 
-            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
-            result = messagingIterator;
-
-            messagingIterator.next();
-            result = node;
-
-            jaxbContext.createUnmarshaller().unmarshal(node, Messaging.class).getValue();
+            mshWebservice.getMessaging(withAny(soapRequestMessage));
             result = responseMessaging;
 
             messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId());

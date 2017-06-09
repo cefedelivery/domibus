@@ -15,6 +15,8 @@ import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.routing.*;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
+import eu.domibus.plugin.routing.operation.LogicalOperation;
+import eu.domibus.plugin.routing.operation.LogicalOperationFactory;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
@@ -123,9 +125,11 @@ public class BackendNotificationService {
     }
 
     protected BackendFilter getMatchingBackendFilter(final List<BackendFilter> backendFilters, final Map<String, IRoutingCriteria> criteriaMap, final UserMessage userMessage) {
+        LOG.debug("Getting the backend filter for message [" + userMessage.getMessageInfo().getMessageId() + "]");
         for (final BackendFilter filter : backendFilters) {
             final boolean backendFilterMatching = isBackendFilterMatching(filter, criteriaMap, userMessage);
             if (backendFilterMatching) {
+                LOG.debug("Filter [" + filter + "] matched for message [" + userMessage.getMessageInfo().getMessageId() + "]");
                 return filter;
             }
         }
@@ -133,15 +137,26 @@ public class BackendNotificationService {
     }
 
     protected boolean isBackendFilterMatching(BackendFilter filter, Map<String, IRoutingCriteria> criteriaMap, final UserMessage userMessage) {
+        LOG.debug("Verifying if filter [" + filter.getBackendName() + "] is matching for message [" + userMessage.getMessageInfo().getMessageId() + "]");
+
+        if (filter.getRoutingCriterias() == null || filter.getRoutingCriterias().isEmpty()) {
+            LOG.debug("Filter [" + filter.getBackendName() + "] is matching for message [" + userMessage.getMessageInfo().getMessageId() + "]: matched filter as no routing criteria are defined");
+            return true;
+        }
+
+        final LogicalOperation logicalOperation = new LogicalOperationFactory().create(filter.getCriteriaOperator());
+
         for (final RoutingCriteria routingCriteria : filter.getRoutingCriterias()) {
             final IRoutingCriteria criteria = criteriaMap.get(routingCriteria.getName());
             boolean matches = criteria.matches(userMessage, routingCriteria.getExpression());
-            //if at least one criteria does not match it means the filter is not matching
-            if (!matches) {
-                return false;
+
+            logicalOperation.addIntermediateResult(matches);
+            if (logicalOperation.canShortCircuitOperation()) {
+                LOG.debug("Short-circuiting for operator [" + filter.getCriteriaOperator() + "]: criteria [" + criteria.getName() + "] matched for backend criteria [" + routingCriteria.getExpression() + "] and message [" + userMessage.getMessageInfo().getMessageId() + "]");
+                return logicalOperation.getResult();
             }
         }
-        return true;
+        return logicalOperation.getResult();
     }
 
     protected List<BackendFilter> getBackendFilters() {
