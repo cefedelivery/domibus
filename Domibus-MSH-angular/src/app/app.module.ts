@@ -36,6 +36,7 @@ import {MessagelogDialogComponent} from './messagelog/messagelog-dialog/messagel
 import {JmsComponent} from './jms/jms.component';
 import {RowLimiterComponent} from './common/row-limiter/row-limiter.component';
 import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
+import {MessageDialogComponent} from './jms/message-dialog/message-dialog.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -58,13 +59,15 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessagelogDialogComponent,
     JmsComponent,
     RowLimiterComponent,
-    MoveDialogComponent
+    MoveDialogComponent,
+    MessageDialogComponent
   ],
   entryComponents: [
     AppComponent,
     PmodeUploadComponent,
     MessagelogDialogComponent,
-    MoveDialogComponent
+    MoveDialogComponent,
+    MessageDialogComponent
   ],
   imports: [
     BrowserModule,
