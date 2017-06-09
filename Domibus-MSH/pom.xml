@@ -325,6 +325,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-db</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.jmockit</groupId>
             <artifactId>jmockit</artifactId>
             <scope>test</scope>
