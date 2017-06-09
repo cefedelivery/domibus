@@ -15,10 +15,7 @@ import java.security.Security;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -90,6 +87,32 @@ public class CRLServiceImplTest {
         //certificate is revoked in the second CRL
         certificateRevoked = crlService.isCertificateRevoked(certificate);
         assertTrue(certificateRevoked);
+    }
+
+    @Test(expected = DomibusCRLException.class)
+    public void testIsCertificateRevokedWithNotSupportedCRLURLs(@Injectable final X509Certificate certificate) throws Exception {
+        final String crlUrl1 = "ldap://domain1.crl";
+        final String crlUrl2 = "ldap://domain2.crl";
+        final List<String> crlUrlList = Arrays.asList(new String[]{crlUrl1, crlUrl2});
+
+        new Expectations(crlService) {{
+            crlUtil.getCrlDistributionPoints(certificate);
+            returns(crlUrlList);
+        }};
+        boolean certificateRevoked = crlService.isCertificateRevoked(certificate);
+        assertFalse(certificateRevoked);
+    }
+
+    @Test
+    public void testIsCertificateRevokedWhenCertificateHasNoCRLURLs(@Injectable final X509Certificate certificate) throws Exception {
+        final List<String> crlUrlList = new ArrayList<>();
+
+        new Expectations(crlService) {{
+            crlUtil.getCrlDistributionPoints(certificate);
+            returns(crlUrlList);
+        }};
+        boolean certificateRevoked = crlService.isCertificateRevoked(certificate);
+        assertFalse(certificateRevoked);
     }
 
     @Test
