@@ -37,7 +37,7 @@ public class ReceiptMessagePolicyInSetup extends AbstractSignalMessagePolicyInSe
     @Override
     public LegConfiguration process() throws EbMS3Exception {
         LOG.debug("Extracting configuration for receipt");
-        String messageId = messaging.getSignalMessage().getMessageInfo().getMessageId();
+        String messageId = messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         String pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
         setUpMessage(pModeKey);

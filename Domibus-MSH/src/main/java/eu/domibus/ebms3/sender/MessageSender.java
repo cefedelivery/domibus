@@ -6,15 +6,11 @@ import eu.domibus.api.message.attempt.MessageAttemptService;
 import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -42,22 +38,16 @@ import java.sql.Timestamp;
  */
 @Service(value = "messageSenderService")
 public class MessageSender implements MessageListener {
-
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageSender.class);
 
-    private final String UNRECOVERABLE_ERROR_RETRY = "domibus.dispatch.ebms.error.unrecoverable.retry";
+
 
     @Autowired
-    UserMessageService userMessageService;
-
-    @Autowired
-    private ErrorLogDao errorLogDao;
+    private UserMessageService userMessageService;
 
     @Autowired
     private MessagingDao messagingDao;
 
-    @Autowired
-    private UserMessageLogDao userMessageLogDao;
 
     @Autowired
     private PModeProvider pModeProvider;
@@ -73,12 +63,6 @@ public class MessageSender implements MessageListener {
 
     @Autowired
     private ResponseHandler responseHandler;
-
-    @Autowired
-    private BackendNotificationService backendNotificationService;
-
-    @Autowired
-    private UpdateRetryLoggingService updateRetryLoggingService;
 
     @Autowired
     private MessageAttemptService messageAttemptService;
@@ -119,14 +103,14 @@ public class MessageSender implements MessageListener {
             reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, response, pModeKey);
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
-                this.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
+                reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
             } else {
                 LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
             }
             attemptError = soapFEx.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
         } catch (final EbMS3Exception e) {
-            this.handleEbms3Exception(e, messageId);
+            reliabilityChecker.handleEbms3Exception(e, messageId);
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
         } catch (Throwable e) {
@@ -134,7 +118,7 @@ public class MessageSender implements MessageListener {
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
         } finally {
-            handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+            reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
 
             try {
                 attempt.setError(attemptError);
@@ -148,56 +132,13 @@ public class MessageSender implements MessageListener {
         }
     }
 
-    private void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
-        switch (reliabilityCheckSuccessful) {
-            case OK:
-                switch (isOk) {
-                    case OK:
-                        userMessageLogDao.setMessageAsAcknowledged(messageId);
-                        break;
-                    case WARNING:
-                        userMessageLogDao.setMessageAsAckWithWarnings(messageId);
-                        break;
-                    default:
-                        assert false;
-                }
-                backendNotificationService.notifyOfSendSuccess(messageId);
-                userMessageLogDao.setAsNotified(messageId);
-                messagingDao.clearPayloadData(messageId);
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS);
-                break;
-            case WAITING_FOR_CALLBACK:
-                userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
-                break;
-            case FAIL:
-                updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
-        }
-    }
 
-    /**
-     * This method is responsible for the ebMS3 error handling (creation of errorlogs and marking message as sent)
-     *
-     * @param exceptionToHandle the exception {@link eu.domibus.common.exception.EbMS3Exception} that needs to be handled
-     * @param messageId         id of the message the exception belongs to
-     */
-    private void handleEbms3Exception(final EbMS3Exception exceptionToHandle, final String messageId) {
-        exceptionToHandle.setRefToMessageId(messageId);
-        if (!exceptionToHandle.isRecoverable() && !Boolean.parseBoolean(System.getProperty(UNRECOVERABLE_ERROR_RETRY))) {
-            userMessageLogDao.setMessageAsAcknowledged(messageId);
-            // TODO Shouldn't clear the payload data here ?
-        }
-
-        exceptionToHandle.setMshRole(MSHRole.SENDING);
-        LOG.error("Error sending message with ID [" + messageId + "]", exceptionToHandle);
-        this.errorLogDao.create(new ErrorLogEntry(exceptionToHandle));
-        // The backends are notified that an error occurred in the UpdateRetryLoggingService
-    }
 
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void onMessage(final Message message) {
         LOG.debug("Processing message [{}]", message);
-        Long delay = null;
+        Long delay;
         String messageId = null;
         try {
             messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);

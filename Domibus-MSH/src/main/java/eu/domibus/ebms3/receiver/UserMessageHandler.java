@@ -98,9 +98,8 @@ public class UserMessageHandler {
     public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging,final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
         userMessageHandlerContext.setLegConfiguration(legConfiguration);
-        boolean pingMessage = false;
-        SOAPMessage responseMessage = null;
-        String messageId = null;
+        boolean pingMessage;
+        String messageId;
         try (StringWriter sw = new StringWriter()) {
             if (LOG.isDebugEnabled()) {
 
@@ -138,7 +137,7 @@ public class UserMessageHandler {
     /**
      * Required for AS4_TA_12
      *
-     * @param messaging
+     * @param messaging the UserMessage received
      * @throws EbMS3Exception
      */
     protected void checkCharset(final Messaging messaging) throws EbMS3Exception {
