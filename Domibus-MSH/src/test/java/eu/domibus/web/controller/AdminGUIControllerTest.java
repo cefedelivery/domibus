@@ -15,6 +15,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.cache.CacheManager;
 
 import java.util.List;
 
@@ -30,6 +31,9 @@ public class AdminGUIControllerTest {
 
     @Injectable
     private MessagesLogService messagesLogService;
+
+    @Injectable
+    private CacheManager cacheManager;
 
     @Injectable
     private ErrorLogDao eld; //TODO refactor, eliminate this.

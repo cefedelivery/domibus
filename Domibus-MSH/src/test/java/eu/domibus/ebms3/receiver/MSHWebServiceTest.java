@@ -58,7 +58,7 @@ public class MSHWebServiceTest {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHWebServiceTest.class);
     private static final String TEST_RESOURCES_DIR = "./src/test/resources";
-    private static final String VALID_PMODE_CONFIG_URI = "SamplePModes/domibus-configuration-valid.xml";
+    private static final String VALID_PMODE_CONFIG_URI = "samplePModes/domibus-configuration-valid.xml";
     private static final String LEG_NO_SECNO_SEC_ACTION = "pushNoSecnoSecAction";
     private static final String PUSH_TESTCASE1_TC1ACTION = "pushTestcase1tc1Action";
     private static final String STRING_TYPE = "string";
@@ -369,5 +369,12 @@ public class MSHWebServiceTest {
     }
 
 
+    public Messaging createValidSampleResponseMessaging() throws ParserConfigurationException, IOException, SAXException, JAXBException {
+        InputStream validAS4ResponseFile = getClass().getClassLoader().getResourceAsStream("dataset/as4/validAS4Response.xml");
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setNamespaceAware(true);
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document responseFileDocument = documentBuilder.parse(validAS4ResponseFile);
+        Node messagingNode = responseFileDocument.getElementsByTagName("eb3:Messaging").item(0);
 
 }

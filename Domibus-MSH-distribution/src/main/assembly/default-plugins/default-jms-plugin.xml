@@ -1,0 +1,72 @@
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<assembly
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+        xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>default-jms-plugin</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <baseDirectory></baseDirectory>
+    <includeSiteDirectory>false</includeSiteDirectory>
+    <files>
+        <!-- Tomcat -->
+        <file>
+            <source>${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/plugins/config/jms-plugin.xml</source>
+            <outputDirectory>conf/domibus/plugins/config/tomcat</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/plugins/config/jms-business-defaults.properties</source>
+            <outputDirectory>conf/domibus/plugins/config/tomcat</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <!-- WebLogic -->
+        <file>
+            <source>${project.basedir}/../Domibus-MSH-weblogic/src/main/conf/domibus/plugins/config/jms-plugin.xml</source>
+            <outputDirectory>conf/domibus/plugins/config/weblogic</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/../Domibus-MSH-weblogic/src/main/conf/domibus/plugins/config/jms-business-defaults.properties</source>
+            <outputDirectory>conf/domibus/plugins/config/weblogic</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <!-- WildFly -->
+        <file>
+            <source>${project.basedir}/../Domibus-MSH-wildfly/src/main/conf/domibus/plugins/config/jms-plugin.xml</source>
+            <outputDirectory>conf/domibus/plugins/config/wildfly</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/../Domibus-MSH-wildfly/src/main/conf/domibus/plugins/config/jms-business-defaults.properties</source>
+            <outputDirectory>conf/domibus/plugins/config/wildfly</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <!-- Plugin jar -->
+        <file>
+            <source>${project.basedir}/../Domibus-default-jms-plugin/target/domibus-default-jms-plugin-${project.version}.jar</source>
+            <outputDirectory>conf/domibus/plugins/lib</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+    </files>
+</assembly>
