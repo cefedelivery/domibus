@@ -55,6 +55,13 @@ public abstract class BasicDao<T extends AbstractBaseEntity> {
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
+    public void deleteAll(final Collection<T> delete) {
+        for (final T t : delete) {
+            this.delete(t);
+        }
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
     public void update(final T entity) {
         em.merge(entity);
     }

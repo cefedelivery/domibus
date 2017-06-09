@@ -7,6 +7,7 @@ import {Observable} from "rxjs/Observable";
 import {MessageFilterResult} from "./messagefilterresult";
 import {BackendFilterEntry} from "./backendfilterentry";
 import {RoutingCriteriaEntry} from "./routingcriteriaentry";
+import {DeleteMessagefilterDialogComponent} from "./deletemessagefilter-dialog/deletemessagefilter-dialog.component";
 /**
  * Created by tiago on 10/04/2017.
  */
@@ -20,12 +21,12 @@ import {RoutingCriteriaEntry} from "./routingcriteriaentry";
 
 export class MessageFilterComponent {
 
-  private static NEW_VALUE = '<>';
-
   editing = {};
   rows = [];
   selected = [];
   rollback = [];
+
+  backendFilterNames = [];
 
   rowNumber = -1;
 
@@ -51,20 +52,24 @@ export class MessageFilterComponent {
       console.log("messagefilter response: " + result);
 
       let newRows = [];
+      this.backendFilterNames = [];
       for(let i = 0 ; i < result.length; i++) {
         if(result[i] == null) {
           continue;
         }
         let currentFilter = result[i];
-        let backendEntry = new BackendFilterEntry(currentFilter.entityId, currentFilter.index, currentFilter.backendName, currentFilter.routingCriterias);
+        let backendEntry = new BackendFilterEntry(currentFilter.entityId, i, currentFilter.backendName, currentFilter.routingCriterias);
         newRows.push(backendEntry);
+        if(this.backendFilterNames.indexOf(backendEntry.backendName) == -1) {
+          this.backendFilterNames.push(backendEntry.backendName);
+        }
       }
 
       this.rows = newRows;
     }, (error: any) => {
       console.log("error getting the message filter: " + error);
       this.loading = false;
-      this.alertService.error("Error occured: " + error);
+      this.alertService.error("Error occurred: " + error);
     });
   }
 
@@ -74,29 +79,74 @@ export class MessageFilterComponent {
     );
   }
 
-  updateValue(event, cell, cellValue, row) {
+  createValueProperty(cell, newProp, row) {
+    switch(cell) {
+      case 'from':
+        this.rows[row.$$index].from = newProp;
+        break;
+      case 'to':
+        this.rows[row.$$index].to = newProp;
+        break;
+      case 'action':
+        this.rows[row.$$index].action = newProp;
+        break;
+      case 'service':
+        this.rows[row.$$index].service = newProp;
+        break;
+    }
+  }
+
+  updateValueProperty(cell, cellValue, row) {
+    switch(cell) {
+      case 'from':
+        this.rows[row.$$index].from.expression = cellValue;
+        break;
+      case 'to':
+        this.rows[row.$$index].to.expression = cellValue;
+        break;
+      case 'action':
+        this.rows[row.$$index].action.expression = cellValue;
+        break;
+      case 'service':
+        this.rows[row.$$index].service.expression = cellValue;
+        break;
+    }
+  }
+
+  updateValue(event, cell, row) {
     this.editing[row.$$index + '-' + cell] = false;
 
     let edited = false;
 
-    let numRoutingCriterias = this.rows[row.$$index].routingCriterias.length;
-    for(let i = 0; i < numRoutingCriterias; i++) {
-      if(this.rows[row.$$index].routingCriterias[i].name == cell) {
-        this.rows[row.$$index].routingCriterias[i].expression = event.target.value;
-        edited = true;
-        break;
-      }
-    }
-
-    if(cell == 'plugin') {
+    if(cell == 'plugin' && event.target.value.trim() != '') {
       this.rows[row.$$index].backendName = event.target.value;
+      edited = true;
+    }
+    if(!edited && event.target.value.trim() != '') {
+      let newRC = new RoutingCriteriaEntry(null,cell,event.target.value);
+      if (this.rows[row.$$index].routingCriterias == null) {
+        this.rows[row.$$index].routingCriterias = [];
+      }
+      this.rows[row.$$index].routingCriterias.push(newRC);
+      this.createValueProperty(cell, newRC, row);
       edited = true;
     }
 
     if(!edited) {
-      let newRC = new RoutingCriteriaEntry(null,cell,event.target.value);
-      this.rows[row.$$index].routingCriterias.push(newRC);
-      edited = true;
+      let numRoutingCriterias = this.rows[row.$$index].routingCriterias.length;
+      for (let i = 0; i < numRoutingCriterias; i++) {
+        let routCriteria = this.rows[row.$$index].routingCriterias[i];
+        if (routCriteria.name == cell) {
+          if (event.target.value.trim() == '') {
+            this.rows[row.$$index].routingCriterias.splice(i, 1);
+          } else {
+            routCriteria.expression = event.target.value;
+          }
+          this.updateValueProperty(cell, event.target.value, row);
+          edited = true;
+          break;
+        }
+      }
     }
 
     if (edited) {
@@ -109,7 +159,7 @@ export class MessageFilterComponent {
     this.enableCancel = true;
     this.enableSave = true;
     this.enableDelete = false;
-    this.rows.push( {"backendName" : 'NEW'});
+    this.rows.push( {"backendName" : ''});
   }
 
   buttonCancel() {
@@ -120,7 +170,7 @@ export class MessageFilterComponent {
     this.enableMoveUp = this.rowNumber  > 0;
     this.enableMoveDown = this.rowNumber != this.rows.length - 1;
 
-    this.rows = this.rollback.slice();
+    this.ngOnInit();
   }
 
   saveDialog() {
@@ -133,10 +183,11 @@ export class MessageFilterComponent {
           this.enableSave = false;
           this.rollback = this.rows.slice();
           this.http.put('rest/messagefilters', JSON.stringify(this.rows), { headers: headers }).subscribe(res => {
-            this.alertService.success(res.json(), false);
+            this.alertService.success("The operation 'update message filters' completed successfully.", false);
           }, err => {
-            this.alertService.error(err.json(), false);
+            this.alertService.error("The operation 'update message filters' not completed successfully.", false);
           });
+
           break;
         case 'Cancel':
           // do nothing
@@ -144,7 +195,28 @@ export class MessageFilterComponent {
     });
   }
 
-  buttonDelete() {
+  deleteDialog() {
+    let dialogRef = this.dialog.open(DeleteMessagefilterDialogComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      switch(result) {
+        case 'Yes' :
+          this.enableCancel = true;
+          this.enableSave = true;
+          this.enableDelete = false;
+
+          this.enableMoveUp = false;
+          this.enableMoveDown = false;
+
+          this.rows.splice(this.rowNumber, 1);
+
+          break;
+        case 'No':
+        // do nothing
+      }
+    });
+  }
+
+  /*buttonDelete() {
     this.enableCancel = true;
     this.enableSave = true;
     this.enableDelete = false;
@@ -153,7 +225,7 @@ export class MessageFilterComponent {
     this.enableMoveDown = false;
 
     this.rows.splice(this.rowNumber, 1);
-  }
+  }*/
 
   buttonMoveUp() {
     if(this.rowNumber < 1) {

@@ -60,6 +60,15 @@ public class RoutingService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateBackendFilters(final List<BackendFilter> filters) {
         List<BackendFilterEntity> backendFilterEntities = coreConverter.convert(filters, BackendFilterEntity.class);
+        List<BackendFilterEntity> allBackendFilterEntities = backendFilterDao.findAll();
+        List<BackendFilterEntity> backendFilterEntityListToDelete = backendFiltersToDelete(allBackendFilterEntities, backendFilterEntities);
+        backendFilterDao.deleteAll(backendFilterEntityListToDelete);
         backendFilterDao.update(backendFilterEntities);
+    }
+
+    private List<BackendFilterEntity> backendFiltersToDelete(final List<BackendFilterEntity> masterData, final List<BackendFilterEntity> newData) {
+        List<BackendFilterEntity> result = new ArrayList<>(masterData);
+        result.removeAll(newData);
+        return result;
     }
 }

@@ -1,7 +1,7 @@
 <div>
   <div class="messageFilter" style="overflow-x:auto;">
     <md-card style="margin:0;padding:10px;">
-      <h2 style="margin:0;">Message Filter</h2>
+      <p class="domibusTextHeadingBold">Message Filter</p>
       <form name="messageFilterForm" #messageFilterForm="ngForm">
         <ngx-datatable
           #mydatatable
@@ -25,11 +25,12 @@
               </span>
               <input autofocus
                      list="backendFilters"
-                     (blur)="updateValue($event, 'plugin', value, row)" *ngIf="editing[row.$$index + '-plugin']">
+                     (blur)="updateValue($event, 'plugin', row)" *ngIf="editing[row.$$index + '-plugin']" [value]="value">
 
               <datalist id="backendFilters">
-                <option value="backendWebservice">
-                <option value="backendWebservice2">
+                <div *ngFor="let backendName of backendFilterNames">
+                  <option value={{backendName}}>
+                </div>
               </datalist>
               <!--<input
                 autofocus
@@ -57,7 +58,7 @@
               </span>
               <input
                 autofocus
-                (blur)="updateValue($event, 'from', value, row)"
+                (blur)="updateValue($event, 'from', row)"
                 *ngIf="editing[row.$$index + '-from']"
                 type="text"
                 [value]="value"
@@ -74,7 +75,7 @@
               </span>
               <input
                 autofocus
-                (blur)="updateValue($event, 'to', value, row)"
+                (blur)="updateValue($event, 'to', row)"
                 *ngIf="editing[row.$$index + '-to']"
                 type="text"
                 [value]="value"
@@ -91,7 +92,7 @@
               </span>
               <input
                 autofocus
-                (blur)="updateValue($event, 'action', value, row)"
+                (blur)="updateValue($event, 'action', row)"
                 *ngIf="editing[row.$$index + '-action']"
                 type="text"
                 [value]="value"
@@ -108,7 +109,7 @@
               </span>
               <input
                 autofocus
-                (blur)="updateValue($event, 'service', value, row)"
+                (blur)="updateValue($event, 'service', row)"
                 *ngIf="editing[row.$$index + '-service']"
                 type="text"
                 [value]="value"
@@ -156,7 +157,7 @@
                 <md-icon>add</md-icon>
                 <span>New</span>
               </button>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableDelete" (click)="buttonDelete()">
+              <button md-raised-button color="primary" type="button" [disabled]="!enableDelete" (click)="deleteDialog()">
                 <md-icon>delete</md-icon>
                 <span>Delete</span>
               </button>
