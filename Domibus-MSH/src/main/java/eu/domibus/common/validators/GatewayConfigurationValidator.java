@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -19,6 +20,7 @@ import java.util.Properties;
 /**
  * Created by idragusa on 4/14/16.
  */
+@Component
 public class GatewayConfigurationValidator {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(GatewayConfigurationValidator.class);

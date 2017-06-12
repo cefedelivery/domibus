@@ -7,10 +7,6 @@
     <import resource="jpa-config.xml"/>
     <context:annotation-config/>
     <context:component-scan base-package="eu.domibus"/>
-    <bean id="compressionMimeTypeBlacklist"
-          class="eu.domibus.ebms3.common.model.CompressionMimeTypeBlacklist">
-        <property name="entries" ref="compressionBlacklist"/>
-    </bean>
 
     <bean id="messageIdGenerator"
           class="eu.domibus.common.services.impl.MessageIdGenerator">
@@ -28,7 +24,7 @@
     <bean id="retentionWorkerTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="retentionWorkerJob"/>
-        <property name="cronExpression" value="0/60 * * * * ?"/>
+        <property name="cronExpression" value="${domibus.retentionWorker.cronExpression}"/>
         <property name="startDelay" value="20000"/>
     </bean>
 
