@@ -1,7 +1,14 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.common.ErrorCode;
+import eu.domibus.common.MSHRole;
+import eu.domibus.common.dao.PModeDao;
+import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.impl.PullContext;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PullRequest;
@@ -12,7 +19,9 @@ import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.pki.PolicyService;
 import eu.domibus.util.MessageUtil;
+import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
@@ -49,6 +58,10 @@ public class PullMessageSender {
     private UserMessageHandlerService userMessageHandlerService;
     @Autowired
     private BackendNotificationService backendNotificationService;
+    @Autowired
+    private PModeProvider pModeProvider;
+    @Autowired
+    private PolicyService policyService;
 
     @JmsListener(destination = "domibus.internal.pull.queue", containerFactory = "internalJmsListenerContainerFactory")
     public void processPullRequest(final MapMessage map) {
@@ -64,8 +77,19 @@ public class PullMessageSender {
             pullRequest.setMpc(mpc);
             signalMessage.setPullRequest(pullRequest);
             LOG.info("Sending message");
+            LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pMode);
+            Party receiverParty = pModeProvider.getReceiverParty(pMode);
+            Policy policy;
+            try {
+                policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+            } catch (final ConfigurationException e) {
+
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
+                ex.setMshRole(MSHRole.SENDING);
+                throw ex;
+            }
             SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(signalMessage, null);
-            final SOAPMessage response = mshDispatcher.dispatch(soapMessage, pMode);
+            final SOAPMessage response = mshDispatcher.dispatch(soapMessage,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
             messaging = MessageUtil.getMessage(response, jaxbContext);
             if(messaging.getUserMessage()==null && messaging.getSignalMessage()!=null){
                 Set<Error> error = signalMessage.getError();
@@ -80,7 +104,8 @@ public class PullMessageSender {
             UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
             SOAPMessage acknowlegement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
             //send receipt
-            mshDispatcher.dispatch(acknowlegement, pMode);
+
+            mshDispatcher.dispatch(acknowlegement,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
 
         } catch (TransformerException | SOAPException | JAXBException | IOException | JMSException e) {
             LOG.error(e.getMessage(), e);

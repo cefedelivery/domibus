@@ -13,6 +13,7 @@ import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.util.PojoInstaciatorUtil;
+import org.apache.neethi.Policy;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -117,8 +118,11 @@ public class MessageExchangeServiceImplTest {
         messageExchangeService.initiatePullRequest();
         ArgumentCaptor<SOAPMessage> soapMessageCaptor = ArgumentCaptor.forClass(SOAPMessage.class);
         ArgumentCaptor<String> pmodeCaptor= ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<LegConfiguration> legConfigurationArgumentCaptor= ArgumentCaptor.forClass(LegConfiguration.class);
+        ArgumentCaptor<String> endPointCaptor= ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Policy> polityCaptor= ArgumentCaptor.forClass(Policy.class);
         //when(messageBuilder.buildSOAPMessage())
-        verify(mshDispatcher,times(2)).dispatch(soapMessageCaptor.capture(), pmodeCaptor.capture());
+        verify(mshDispatcher,times(2)).dispatch(soapMessageCaptor.capture(),endPointCaptor.capture(),polityCaptor.capture(), legConfigurationArgumentCaptor.capture(),pmodeCaptor.capture());
         assertEquals("Mock:endPoint1:service:action:Mock:leg1",pmodeCaptor.getAllValues().get(0));
         assertEquals("Mock:endPoint2:service:action:Mock:leg1",pmodeCaptor.getAllValues().get(1));
     }
@@ -130,7 +134,7 @@ public class MessageExchangeServiceImplTest {
         Process process = PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1,action[name:action]]}", "responderParties{[name:endPoint1]}");
         when(processDao.findProcessByMessageContext(any(MessageExchangeContext.class))).thenReturn(Lists.newArrayList(process));
         messageExchangeService.initiatePullRequest();
-        verify(mshDispatcher,times(0)).dispatch(any(SOAPMessage.class), any(String.class));
+        verify(mshDispatcher,times(0)).dispatch(any(SOAPMessage.class),any(String.class),any(Policy.class),any(LegConfiguration.class), any(String.class));
     }
 
     @Test

@@ -936,6 +936,18 @@ public class UserMessageHandlerServiceTest {
         return result;
     }
 
+    public Messaging createValidSampleResponseMessaging() throws ParserConfigurationException, IOException, SAXException, JAXBException {
+        File validAS4ResponseFile = new File(TEST_RESOURCES_DIR + "/dataset/as4/validAS4Response.xml");
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setNamespaceAware(true);
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document responseFileDocument = documentBuilder.parse(validAS4ResponseFile);
+        Node messagingNode = responseFileDocument.getElementsByTagName("eb3:Messaging").item(0);
+
+        Messaging messaging = JAXBContext.newInstance(Messaging.class).createUnmarshaller().unmarshal(messagingNode, Messaging.class).getValue();
+        return messaging;
+    }
+
     protected Messaging createDummyRequestMessaging() {
         Messaging messaging = new ObjectFactory().createMessaging();
         messaging.setUserMessage(createSampleUserMessage());
@@ -1005,15 +1017,4 @@ public class UserMessageHandlerServiceTest {
         return result;
     }
 
-    public Messaging createValidSampleResponseMessaging() throws ParserConfigurationException, IOException, SAXException, JAXBException {
-        File validAS4ResponseFile = new File(TEST_RESOURCES_DIR + "/dataset/as4/validAS4Response.xml");
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document responseFileDocument = documentBuilder.parse(validAS4ResponseFile);
-        Node messagingNode = responseFileDocument.getElementsByTagName("eb3:Messaging").item(0);
-
-        Messaging messaging = JAXBContext.newInstance(Messaging.class).createUnmarshaller().unmarshal(messagingNode, Messaging.class).getValue();
-        return messaging;
-    }
 }

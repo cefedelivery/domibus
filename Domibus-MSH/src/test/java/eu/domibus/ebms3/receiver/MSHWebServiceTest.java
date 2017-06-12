@@ -369,12 +369,6 @@ public class MSHWebServiceTest {
     }
 
 
-    public Messaging createValidSampleResponseMessaging() throws ParserConfigurationException, IOException, SAXException, JAXBException {
-        InputStream validAS4ResponseFile = getClass().getClassLoader().getResourceAsStream("dataset/as4/validAS4Response.xml");
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document responseFileDocument = documentBuilder.parse(validAS4ResponseFile);
-        Node messagingNode = responseFileDocument.getElementsByTagName("eb3:Messaging").item(0);
+
 
 }
