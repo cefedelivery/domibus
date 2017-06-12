@@ -4,7 +4,9 @@ import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.configuration.Leg;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
@@ -18,13 +20,16 @@ import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.util.SoapUtil;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.*;
@@ -150,9 +155,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
-           // rawEnvelopeLogDao.findById()
-          //  SOAPMessage message = factory.createMessage(new MimeHeaders(), new ByteArrayInputStream(xml.getBytes(Charset.forName("UTF-8"))));
-            final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
+            SOAPMessage soapMessage = getSoapMessage(messageId, legConfiguration, userMessage);
             isOk = responseHandler.handle(request);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
                 EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occurred during marshalling", messageId, null);
@@ -172,7 +175,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (Throwable e) {
             throw e;
         } finally {
-            reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+           reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
             final SignalMessage signalMessage = new SignalMessage();
             signalMessage.setReceipt(new Receipt());
             MessageInfo messageInfo = new MessageInfo();
@@ -189,18 +192,38 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
     }
 
+    private SOAPMessage getSoapMessage(String messageId, LegConfiguration legConfiguration, UserMessage userMessage) throws SOAPException, IOException, ParserConfigurationException, SAXException, EbMS3Exception {
+        SOAPMessage soapMessage;
+        if(isNonRepudiation(legConfiguration)){
+            String rawXmlByMessageId = rawEnvelopeLogDao.findRawXmlByMessageId(messageId);
+            soapMessage= SoapUtil.createSOAPMessage(rawXmlByMessageId);
+        }
+        else{
+            soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
+        }
+        return soapMessage;
+    }
+
+    private boolean isNonRepudiation(LegConfiguration legConfiguration){
+        return legConfiguration.getReliability() != null &&
+                ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())&&
+                legConfiguration.getReliability().isNonRepudiation();
+    }
     private SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
-        pullContext.checkProcessValidity();
         if (!pullContext.isValid()) {
             throw new WebServiceException("Pmode configuration " + pullContext.createProcessWarningMessage());
         }
         UserMessage userMessage = messageExchangeService.retrieveReadyToPullUserMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
         try {
             if (userMessage != null) {
-                SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, pullContext.filterLegOnMpc(pullRequest.getMpc()));
+                LegConfiguration leg = pullContext.filterLegOnMpc();
+                SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
                 PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
+                if(isNonRepudiation(leg)) {
+                    PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_ID, userMessage.getMessageInfo().getMessageId());
+                }
                 return soapMessage;
             } else {
                 LOG.info("No message for incoming request for mpc " + pullContext.getMpcQualifiedName());

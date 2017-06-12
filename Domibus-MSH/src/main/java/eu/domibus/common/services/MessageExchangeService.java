@@ -33,4 +33,12 @@ public interface MessageExchangeService {
      * @return a pullcontext with all the information needed to continue with the pull process.
      */
     PullContext extractProcessOnMpc(String mpcQualifiedName);
+
+    /**
+     * In case of a pull message, the output soap envelope needs to be saved in order to be saved in order to check the
+     * non repudiation.
+     * @param rawXml the soap envelope
+     * @param messageId the user message
+     */
+    void savePulledMessageRawXml(String rawXml, String messageId);
 }

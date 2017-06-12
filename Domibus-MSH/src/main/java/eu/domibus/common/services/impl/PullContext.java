@@ -2,6 +2,7 @@ package eu.domibus.common.services.impl;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.*;
+import eu.domibus.common.model.configuration.Leg;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
@@ -138,7 +139,7 @@ public class PullContext {
         setMpcQualifiedName(currentLegConfiguration.getDefaultMpc().getQualifiedName());
     }
 
-    public LegConfiguration filterLegOnMpc(final String mpcQualifiedName) {
+    public LegConfiguration filterLegOnMpc() {
         checkProcessValidity();
         if (isValid() && mpcQualifiedName != null) {
             Collection<LegConfiguration> filter = Collections2.filter(process.getLegs(), new Predicate<LegConfiguration>() {
@@ -191,7 +192,7 @@ public class PullContext {
 
         for (String mpc : mpcs) {
             if (mpcs.count(mpc) > 1) {
-                LOG.error("Only one leg authorized in a oneway pull. PMode skipped!");
+                LOG.error("Only one leg authorized with the same mpc in a oneway pull. PMode skipped!");
                 addRequestStatus(MORE_THAN_ONE_LEG_FOR_THE_SAME_MPC);
                 break;
             }

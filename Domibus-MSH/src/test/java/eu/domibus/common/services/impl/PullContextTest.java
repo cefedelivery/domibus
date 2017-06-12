@@ -72,7 +72,8 @@ public class PullContextTest {
     public void filterLegOnMpc(){
         PullContext pullContext=new PullContext();
         pullContext.setProcess(PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}","responderParties{[name:resp1]}"));
-        LegConfiguration legConfiguration = pullContext.filterLegOnMpc("qn1");
+        pullContext.setMpcQualifiedName("qn1");
+        LegConfiguration legConfiguration = pullContext.filterLegOnMpc();
         assertEquals("qn1",legConfiguration.getDefaultMpc().getQualifiedName());
     }
 

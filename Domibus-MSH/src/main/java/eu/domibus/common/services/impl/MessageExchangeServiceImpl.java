@@ -6,6 +6,7 @@ import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.context.MessageExchangeContext;
 import eu.domibus.ebms3.common.model.MessagePullDto;
@@ -13,6 +14,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.BackendConnector;
+import eu.domibus.util.SoapUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
@@ -58,6 +60,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private JmsTemplate jmsPullTemplate;
     @Autowired
     private UserMessageLogDao messageLogDao;
+    @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
 
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageExchangeService.class);
@@ -161,8 +165,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         pullContext.setMpcQualifiedName(mpcQualifiedName);
         findCurrentAccesPoint(pullContext);
         finMpcProcess(pullContext);
-        pullContext.checkProcessValidity();
         pullContext.setResponder(pullContext.getProcess().getResponderParties().iterator().next());
+        pullContext.checkProcessValidity();
         return pullContext;
     }
 
@@ -192,6 +196,17 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private void findCurrentAccesPoint(PullContext pullContext) {
         Configuration configuration = configurationDAO.read();
         pullContext.setInitiator(configuration.getParty());
+    }
+
+    @Override
+    @Transactional
+    public void savePulledMessageRawXml(final String rawXml, final String messageId){
+        UserMessage userMessage=messagingDao.findUserMessageByMessageId(messageId.toString());
+        RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+        rawEnvelopeLog.setRawXML(rawXml);
+        rawEnvelopeLog.setUserMessage(userMessage);
+        rawEnvelopeLogDao.create(rawEnvelopeLog);
+        System.out.println("rawXMLMessage "+rawXml);
     }
 
 

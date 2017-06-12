@@ -5,6 +5,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.TypedQuery;
+
 import static org.springframework.util.StringUtils.hasLength;
 
 /**
@@ -18,6 +20,14 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
 
     public RawEnvelopeLogDao() {
         super(RawEnvelopeLog.class);
+    }
+
+    //@thom test this class
+    public String findRawXmlByMessageId(final String messageId){
+        TypedQuery<String> namedQuery = em.createNamedQuery("find.by.message.id", String.class);
+        namedQuery.setParameter("MESSAGE_ID",messageId);
+        return namedQuery.getSingleResult();
+
     }
 
 

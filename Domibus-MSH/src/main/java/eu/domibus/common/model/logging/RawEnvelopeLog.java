@@ -23,8 +23,8 @@ import static eu.domibus.common.model.configuration.Process.*;
  */
 @Entity
 @Table(name = "TB_RAWENVELOPE_LOG")
-/*@NamedQueries({
-        @NamedQuery(name = RETRIEVE_FROM_MESSAGE_CONTEXT, query = "SELECT p FROM Process as p left join p.agreement as a left join p.legs as l left join p.initiatorParties init left join p.responderParties resp  where l.action.name=:action and l.service.name=:service and (a is null  or a.name=:agreement) and l.name=:leg and init.name=:initiatorName and resp.name=:responderName")})*/
+@NamedQueries({
+        @NamedQuery(name = "find.by.message.id", query = "SELECT l.rawXML FROM RawEnvelopeLog l where l.userMessage.messageInfo.messageId=:MESSAGE_ID")})
 public class RawEnvelopeLog extends AbstractBaseEntity {
     @OneToOne
     @JoinColumn(name = "USERMESSAGE_ID_FK")

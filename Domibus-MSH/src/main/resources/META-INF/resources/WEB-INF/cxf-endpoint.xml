@@ -59,6 +59,7 @@
     <bean id="setPolicyOutInterceptor" class="eu.domibus.ebms3.sender.SetPolicyOutInterceptor"/>
 
     <bean id="setPolicyOutInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyOutInterceptorServer"/>
+    <bean id="saveRawPulledMessageInterceptor" class="eu.domibus.ebms3.sender.SaveRawPulledMessageInterceptor"/>
 
     <bean id="attachmentCleanupInterceptor" class="eu.domibus.ebms3.common.AttachmentCleanupInterceptor"/>
 
@@ -93,6 +94,7 @@
             <bean class="org.apache.cxf.jaxws.handler.SetCodeValueFaultOutInterceptor"/>
             <ref bean="clearMDCInterceptor"/>
            <ref bean="setPolicyOutInterceptorServer"/>
+           <ref bean="saveRawPulledMessageInterceptor"/>
         </jaxws:outInterceptors>
 
         <jaxws:outFaultInterceptors>
