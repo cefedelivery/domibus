@@ -41,7 +41,7 @@
              retrieve the private key password for a given alias -->
         <property name="passwordStore">
             <util:map>
-                <entry key="blue_gw" value="test123"/>
+                <entry key="${domibus.security.key.private.alias}" value="${domibus.security.key.private.password}"/>
             </util:map>
         </property>
     </bean>
@@ -53,19 +53,18 @@
             org.apache.wss4j.common.crypto.Merlin
         </prop>
         <!-- Type of the used keystore -->
-        <prop key="org.apache.ws.security.crypto.merlin.keystore.type">jks
-        </prop>
+        <prop key="org.apache.ws.security.crypto.merlin.keystore.type">${domibus.security.keystore.type}</prop>
         <!-- The password used to load the keystore -->
         <prop key="org.apache.ws.security.crypto.merlin.keystore.password">
-            test123
+            ${domibus.security.keystore.password}
         </prop>
         <!-- The keystore alias to use for decryption and signing. -->
         <prop key="org.apache.ws.security.crypto.merlin.keystore.alias">
-            blue_gw
+            ${domibus.security.key.private.alias}
         </prop>
         <!-- The location of the keystore -->
         <prop key="org.apache.ws.security.crypto.merlin.file">
-            ${domibus.config.location}/keystores/gateway_keystore.jks
+            ${domibus.security.keystore.location}
         </prop>
     </util:properties>
 
@@ -76,22 +75,21 @@
             eu.domibus.wss4j.common.crypto.Merlin
         </prop>
         <!-- Type of the used keystore -->
-        <prop key="org.apache.ws.security.crypto.merlin.trustStore.type">jks
-        </prop>
+        <prop key="org.apache.ws.security.crypto.merlin.trustStore.type">${domibus.security.truststore.type}</prop>
         <!-- The password used to load the keystore -->
-        <prop key="org.apache.ws.security.crypto.merlin.keystore.private.password">
+      <!--  <prop key="org.apache.ws.security.crypto.merlin.keystore.private.password">
             test123
-        </prop>
+        </prop>-->
         <!-- The password used to load the trustStore -->
         <prop key="org.apache.ws.security.crypto.merlin.trustStore.password">
-            test123
+            ${domibus.security.truststore.password}
         </prop>
         <prop key="org.apache.ws.security.crypto.merlin.load.cacerts">
             false
         </prop>
         <!-- The location and name of the trustStore -->
         <prop key="org.apache.ws.security.crypto.merlin.trustStore.file">
-            ${domibus.config.location}/keystores/gateway_truststore.jks
+            ${domibus.security.truststore.location}
         </prop>
     </util:properties>
 
@@ -106,12 +104,7 @@
     <sec:authentication-manager id="authenticationManagerForAdminConsole">
         <sec:authentication-provider>
             <sec:password-encoder ref="bcryptEncoder"/>
-            <sec:user-service>
-                <sec:user name="user" password="$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu"
-                          authorities="ROLE_USER"/>
-                <sec:user name="admin" password="$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36"
-                          authorities="ROLE_USER, ROLE_ADMIN"/>
-            </sec:user-service>
+            <sec:user-service properties="file:///${domibus.config.location}/users.properties"/>
         </sec:authentication-provider>
     </sec:authentication-manager>
 

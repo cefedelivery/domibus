@@ -45,7 +45,7 @@
     <import resource="classpath*:config/*-taskexecutor-context.xml"/>
 
     <import resource="file:///${domibus.config.location}/plugins/config/*-plugin.xml" />
-    <import resource="file:///${domibus.config.location}/domibus-security.xml"/>
+    <import resource="domibus-security.xml"/>
     <import resource="domibus-configuration.xml"/>
 
     <import resource="domibus-plugins.xml"/>
