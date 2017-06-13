@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.receiver;
 
+import com.sun.org.apache.xerces.internal.dom.TextImpl;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -29,12 +30,18 @@ import org.apache.wss4j.dom.str.EncryptedKeySTRParser;
 import org.apache.wss4j.dom.str.STRParserParameters;
 import org.apache.wss4j.dom.str.STRParserResult;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Properties;
@@ -48,11 +55,17 @@ import java.util.Properties;
  */
 public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
+    protected static final String DOMIBUS_SENDERPARTY_TRUST_VERIFICATION = "domibus.senderparty.trust.verification";
+
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TrustSenderInterceptor.class);
 
     public static final QName KEYINFO = new QName("http://www.w3.org/2000/09/xmldsig#", "KeyInfo");
 
     private Properties securityEncryptionProp;
+
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
 
     public TrustSenderInterceptor() {
         super(false);
@@ -70,6 +83,9 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
+        if(!isInterceptorEnabled())
+            return;
+
         String msgId = (String) message.getExchange().get(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY);
         if (!isMessageSecured(message)) {
             LOG.info("Message [" + msgId + "] does not contain security info ==> skipping sender trust verification.");
@@ -86,17 +102,28 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             }
             String senderPartyName = getSenderPartyName(message);
             if (org.apache.commons.lang.StringUtils.containsIgnoreCase(dnSubject, senderPartyName)) {
+            if(certificate != null && org.apache.commons.lang.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), senderPartyName) ) {
                 LOG.info("Sender [" + senderPartyName + "] is trusted for message [" + msgId + "]");
                 return;
             }
-            LOG.error("Sender [" + senderPartyName + "] is not trusted for message [" + msgId + "]");
-            EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, msgId, "Sender [" + senderPartyName + "] is not trusted", null);
+            LOG.error("Sender [" + senderPartyName + "] is not trusted for message [" + msgId + "]. To disable this check, set the property " + DOMIBUS_SENDERPARTY_TRUST_VERIFICATION + " to false.");
+            EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, "Sender [" + senderPartyName + "] is not trusted", msgId, null);
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
             throw ebMS3Ex;
         } catch (Exception ex) {
             LOG.error("Error while verifying parties trust", ex);
             throw new Fault(ex);
         }
+    }
+
+    protected Boolean isInterceptorEnabled() {
+        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDERPARTY_TRUST_VERIFICATION, "false"))) {
+            LOG.debug("Sender alias verification is enabled");
+            return true;
+        }
+
+        LOG.debug("Sender alias verification is disabled");
+        return false;
     }
 
     private boolean isMessageSecured(SoapMessage msg) {
@@ -149,13 +176,35 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             Crypto secCrypto = CryptoFactory.getInstance(securityEncryptionProp);
             requestData.setDecCrypto(secCrypto);
 
-            return getCertificateFromKeyInfo(requestData, getSecurityHeader(msg));
+            // extract certificate from KeyInfo
+            X509Certificate cert = getCertificateFromKeyInfo(requestData, getSecurityHeader(msg));
 
+            if (cert == null) { // check for certificate embedded in the message under BinarySecurityToken tag
+                LOG.info("Check for message embedded certificate in the BinarySecurityToken tag");
+                cert = getCertificateFromBinarySecurityToken(getSecurityHeader(msg));
+            }
+            return cert;
+        } catch (CertificateException certEx) {
+            throw new SoapFault("CertificateException", certEx, version.getSender());
         } catch (WSSecurityException wssEx) {
             throw new SoapFault("WSSecurityException", wssEx, version.getSender());
         } catch (SOAPException soapEx) {
             throw new SoapFault("SOAPException", soapEx, version.getSender());
         }
+    }
+
+    private X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader) throws WSSecurityException, CertificateException {
+        Node binarySecurityTokenTag = securityHeader.getElementsByTagName("wsse:BinarySecurityToken").item(0).getFirstChild();
+        if(binarySecurityTokenTag == null || !( binarySecurityTokenTag instanceof TextImpl) ) {
+            return null;
+        }
+
+        String certStr = ( "-----BEGIN CERTIFICATE-----\n" + ((TextImpl)binarySecurityTokenTag).getData() + "\n-----END CERTIFICATE-----\n" );
+        InputStream in = new ByteArrayInputStream(certStr.getBytes());
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        X509Certificate cert = (X509Certificate)certFactory.generateCertificate(in);
+
+        return cert;
     }
 
 
