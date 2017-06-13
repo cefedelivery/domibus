@@ -32,20 +32,6 @@
                   <option value={{backendName}}>
                 </div>
               </datalist>
-              <!--<input
-                autofocus
-                (blur)="updateValue($event, 'plugin', value, row)"
-                *ngIf="editing[row.$$index + '-plugin']"
-                type="text"
-                [value]="value"
-              />-->
-              <!--<select
-                *ngIf="!editing[row.$$index + '-plugin']"
-                (change)="updateValue($event, 'plugin', value, row)"
-                [value]="value">
-                <option value="backendWebservice">backendWebservice</option>
-                <option value="backendWebservice2">backendWebservice2</option>
-              </select>-->
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="From" prop="from.expression" [canAutoResize]="true" [sortable]="false">
@@ -99,18 +85,18 @@
               />
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="Service" prop="service.expression" [canAutoResize]="true" [sortable]="false">
+          <ngx-datatable-column name="Service" prop="sevice.expression" [canAutoResize]="true" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
-                (dblclick)="editing[row.$$index + '-service'] = true"
-                *ngIf="!editing[row.$$index + '-service']">
+                (dblclick)="editing[row.$$index + '-sevice'] = true"
+                *ngIf="!editing[row.$$index + '-sevice']">
                 {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
               <input
                 autofocus
-                (blur)="updateValue($event, 'service', row)"
-                *ngIf="editing[row.$$index + '-service']"
+                (blur)="updateValue($event, 'sevice', row)"
+                *ngIf="editing[row.$$index + '-sevice']"
                 type="text"
                 [value]="value"
               />

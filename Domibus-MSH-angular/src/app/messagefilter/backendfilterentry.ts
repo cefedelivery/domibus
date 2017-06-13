@@ -6,7 +6,7 @@ export class BackendFilterEntry {
   from: RoutingCriteriaEntry;
   to: RoutingCriteriaEntry;
   action: RoutingCriteriaEntry;
-  service: RoutingCriteriaEntry ;
+  sevice: RoutingCriteriaEntry ;
 
 
 
@@ -21,7 +21,7 @@ export class BackendFilterEntry {
     this.from = this.getRoutingCriteria("from");
     this.to = this.getRoutingCriteria("to");
     this.action = this.getRoutingCriteria("action");
-    this.service = this.getRoutingCriteria("service");
+    this.sevice = this.getRoutingCriteria("sevice");
   }
 
   public getRoutingCriteria(property: string): RoutingCriteriaEntry {

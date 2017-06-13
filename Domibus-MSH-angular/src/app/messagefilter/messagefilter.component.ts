@@ -90,8 +90,8 @@ export class MessageFilterComponent {
       case 'action':
         this.rows[row.$$index].action = newProp;
         break;
-      case 'service':
-        this.rows[row.$$index].service = newProp;
+      case 'sevice':
+        this.rows[row.$$index].sevice = newProp;
         break;
     }
   }
@@ -107,8 +107,8 @@ export class MessageFilterComponent {
       case 'action':
         this.rows[row.$$index].action.expression = cellValue;
         break;
-      case 'service':
-        this.rows[row.$$index].service.expression = cellValue;
+      case 'sevice':
+        this.rows[row.$$index].sevice.expression = cellValue;
         break;
     }
   }
@@ -122,17 +122,11 @@ export class MessageFilterComponent {
       this.rows[row.$$index].backendName = event.target.value;
       edited = true;
     }
-    if(!edited && event.target.value.trim() != '') {
-      let newRC = new RoutingCriteriaEntry(null,cell,event.target.value);
+
+    if(!edited) {
       if (this.rows[row.$$index].routingCriterias == null) {
         this.rows[row.$$index].routingCriterias = [];
       }
-      this.rows[row.$$index].routingCriterias.push(newRC);
-      this.createValueProperty(cell, newRC, row);
-      edited = true;
-    }
-
-    if(!edited) {
       let numRoutingCriterias = this.rows[row.$$index].routingCriterias.length;
       for (let i = 0; i < numRoutingCriterias; i++) {
         let routCriteria = this.rows[row.$$index].routingCriterias[i];
@@ -147,6 +141,13 @@ export class MessageFilterComponent {
           break;
         }
       }
+    }
+
+    if(!edited && event.target.value.trim() != '') {
+      let newRC = new RoutingCriteriaEntry(null,cell,event.target.value);
+      this.rows[row.$$index].routingCriterias.push(newRC);
+      this.createValueProperty(cell, newRC, row);
+      edited = true;
     }
 
     if (edited) {

@@ -1,4 +1,3 @@
-//import {MessageFilterEntry} from "./messagefilterentry";
 import {BackendFilterEntry} from "./backendfilterentry";
 export class MessageFilterResult {
   public length: number;

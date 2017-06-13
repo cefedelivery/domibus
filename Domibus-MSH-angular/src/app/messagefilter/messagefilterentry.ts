@@ -3,7 +3,7 @@ export class MessageFilterEntry {
   from: string,
   to: string,
   action: string,
-  service: string) {
+  sevice: string) {
 
   }
 }
