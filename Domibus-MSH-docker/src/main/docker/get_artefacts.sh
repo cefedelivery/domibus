@@ -16,7 +16,7 @@ ADMIN_PASSW="123456"
 cp $SOURCE_CODE/target/domibus-distribution-$DOMIBUS_VERSION-sql-scripts.zip ./mysql/
 cp $SOURCE_CODE/target/domibus-distribution-$DOMIBUS_VERSION-tomcat-full.zip ./tomcat/
 cp $SOURCE_CODE/target/domibus-distribution-$DOMIBUS_VERSION-sample-configuration-and-testing.zip ./tomcat/
-cp -R $SOURCE_CODE/../Domibus-MSH-tomcat/src/main/conf/domibus/policies/ ./tomcat/policies
+cp -R $SOURCE_CODE/../Domibus-MSH-tomcat/src/test/resources/policies/ ./tomcat/policies
 
 cd $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/mysql
 sudo docker build --build-arg DOMIBUS_VERSION=$DOMIBUS_VERSION --build-arg SQLSCRIPTS_VERSION=$SQLSCRIPTS_VERSION -t domibus/mysql:development .
