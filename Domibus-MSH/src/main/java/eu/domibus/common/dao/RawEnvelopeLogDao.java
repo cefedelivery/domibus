@@ -30,5 +30,9 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
 
     }
 
+    public void deleteRawMessage(final String messageId){
+
+    }
+
 
 }

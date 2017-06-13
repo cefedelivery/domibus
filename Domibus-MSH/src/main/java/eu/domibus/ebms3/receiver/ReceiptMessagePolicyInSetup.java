@@ -1,19 +1,12 @@
 package eu.domibus.ebms3.receiver;
 
-import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.ebms3.common.context.MessageExchangeContext;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.ebms3.sender.MSHDispatcher;
 import org.apache.cxf.binding.soap.SoapMessage;
 
 /**

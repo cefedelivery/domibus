@@ -5,7 +5,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.ebms3.common.context.MessageExchangeContext;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -20,8 +20,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import eu.domibus.common.services.DynamicDiscoveryService;
-import eu.domibus.common.services.impl.DynamicDiscoveryServiceOASIS;
-import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
 import eu.domibus.common.util.EndpointInfo;
 
 import javax.naming.InvalidNameException;
@@ -129,7 +127,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
      */
     @Override
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
-    public MessageExchangeContext findUserMessageExchangeContext(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
+    public MessageExchangeConfiguration findUserMessageExchangeContext(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
         try {
             return super.findUserMessageExchangeContext(userMessage, mshRole);
         } catch (final EbMS3Exception e) {

@@ -2,7 +2,7 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.ebms3.common.context.MessageExchangeContext;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.plugin.BackendConnector;
 import org.springframework.stereotype.Repository;
 
@@ -36,14 +36,14 @@ public class ProcessDaoImpl implements ProcessDao{
      *{@inheritDoc}
      */
     @Override
-    public List<Process> findProcessByMessageContext(final MessageExchangeContext messageExchangeContext){
+    public List<Process> findProcessByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration){
         TypedQuery<Process> processQuery= entityManager.createNamedQuery(RETRIEVE_FROM_MESSAGE_CONTEXT,Process.class);
-        processQuery.setParameter(ACTION,messageExchangeContext.getAction());
-        processQuery.setParameter(SERVICE,messageExchangeContext.getService());
-        processQuery.setParameter(AGREEMENT,messageExchangeContext.getAgreementName());
-        processQuery.setParameter(LEG,messageExchangeContext.getLeg());
-        processQuery.setParameter(INITIATOR_NAME,messageExchangeContext.getSenderParty());
-        processQuery.setParameter(RESPONDER_NAME,messageExchangeContext.getReceiverParty());
+        processQuery.setParameter(ACTION, messageExchangeConfiguration.getAction());
+        processQuery.setParameter(SERVICE, messageExchangeConfiguration.getService());
+        processQuery.setParameter(AGREEMENT, messageExchangeConfiguration.getAgreementName());
+        processQuery.setParameter(LEG, messageExchangeConfiguration.getLeg());
+        processQuery.setParameter(INITIATOR_NAME, messageExchangeConfiguration.getSenderParty());
+        processQuery.setParameter(RESPONDER_NAME, messageExchangeConfiguration.getReceiverParty());
         return processQuery.getResultList();
     }
 

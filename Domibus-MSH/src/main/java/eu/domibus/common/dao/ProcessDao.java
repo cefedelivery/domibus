@@ -2,7 +2,7 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.ebms3.common.context.MessageExchangeContext;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 
 import java.util.List;
 
@@ -13,10 +13,10 @@ import java.util.List;
 public interface ProcessDao {
     /**
      * Search for processes that correspond to the message exchange configuration.
-     * @param messageExchangeContext contains information about the exchange.
+     * @param messageExchangeConfiguration contains information about the exchange.
      * @return the corresponding processes.
      */
-    List<Process> findProcessByMessageContext(final MessageExchangeContext messageExchangeContext);
+    List<Process> findProcessByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration);
 
     /**
      * Retrieve Process with pull binding having party as an initiator.

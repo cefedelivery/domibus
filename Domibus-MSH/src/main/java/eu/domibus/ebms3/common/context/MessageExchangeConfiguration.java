@@ -6,7 +6,7 @@ import eu.domibus.common.MessageStatus;
  * Created by dussath on 5/18/17.
  * Class in charge of keeping track of the exchange information.
  */
-public class MessageExchangeContext {
+public class MessageExchangeConfiguration {
 
     private final String agreementName;
     private final String senderParty;
@@ -19,7 +19,7 @@ public class MessageExchangeContext {
     final static String SEPARATOR=":";
     private MessageStatus messageStatus;
 
-    public MessageExchangeContext(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action, final String leg) {
+    public MessageExchangeConfiguration(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action, final String leg) {
         this.agreementName = agreementName;
         this.senderParty = senderParty;
         this.receiverParty = receiverParty;
@@ -75,7 +75,7 @@ public class MessageExchangeContext {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        MessageExchangeContext that = (MessageExchangeContext) o;
+        MessageExchangeConfiguration that = (MessageExchangeConfiguration) o;
 
         if (agreementName != null ? !agreementName.equals(that.agreementName) : that.agreementName != null)
             return false;

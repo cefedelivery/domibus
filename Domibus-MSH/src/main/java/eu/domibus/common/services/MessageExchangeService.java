@@ -2,7 +2,7 @@ package eu.domibus.common.services;
 
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.ebms3.common.context.MessageExchangeContext;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.UserMessage;
 
 /**
@@ -15,9 +15,9 @@ public interface MessageExchangeService {
     /**
      * This method with analyse the messageExchange in order to find if the message should be pushed of pulled.
      * The status will be set in messsageExchangeContext.
-     * @param messageExchangeContext the context of the messae.
+     * @param messageExchangeConfiguration the context of the messae.
      */
-    void upgradeMessageExchangeStatus(final MessageExchangeContext messageExchangeContext);
+    void upgradeMessageExchangeStatus(final MessageExchangeConfiguration messageExchangeConfiguration);
 
     /**
      * Load pmode and find pull process in order to initialize pull request.

@@ -8,23 +8,19 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.ebms3.common.context.MessageExchangeContext;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.BackendConnector;
-import eu.domibus.util.SoapUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
-import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
-import org.springframework.jms.support.converter.MessageType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
@@ -45,7 +41,7 @@ import static eu.domibus.common.services.impl.PullRequestStatus.ONE_MATCHING_PRO
 @Service
 public class MessageExchangeServiceImpl implements MessageExchangeService {
 
-
+//@thom add more coverage here.
     @Autowired
     private ProcessDao processDao;
     @Autowired
@@ -71,9 +67,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
      */
     @Override
     @Transactional(readOnly = true)
-    public void upgradeMessageExchangeStatus(MessageExchangeContext messageExchangeContext) {
-        List<Process> processes = processDao.findProcessByMessageContext(messageExchangeContext);
-        messageExchangeContext.updateStatus(MessageStatus.SEND_ENQUEUED);
+    public void upgradeMessageExchangeStatus(MessageExchangeConfiguration messageExchangeConfiguration) {
+        List<Process> processes = processDao.findProcessByMessageContext(messageExchangeConfiguration);
+        messageExchangeConfiguration.updateStatus(MessageStatus.SEND_ENQUEUED);
         for (Process process : processes) {
             boolean pullProcess = BackendConnector.Mode.PULL.getFileMapping().equals(Process.getBindingValue(process));
             boolean oneWay = BackendConnector.Mep.ONE_WAY.getFileMapping().equals(Process.getMepValue(process));
@@ -91,7 +87,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                 if (!pullContext.isValid()) {
                     throw new RuntimeException(pullContext.createProcessWarningMessage());
                 }
-                messageExchangeContext.updateStatus(READY_TO_PULL);
+                messageExchangeConfiguration.updateStatus(READY_TO_PULL);
             }
         }
     }
@@ -118,13 +114,14 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             pullContext.send(new PullContextCommand() {
                 @Override
                 public void execute(final Map<String,String> messageMap) {
-                    jmsPullTemplate.convertAndSend(pullMessageQueue, messageMap, new MessagePostProcessor() {
+                    MessagePostProcessor postProcessor = new MessagePostProcessor() {
                         public Message postProcessMessage(Message message) throws JMSException {
                             message.setStringProperty(MPC, messageMap.get("mpc"));
                             message.setStringProperty(PMODE_KEY, messageMap.get("mpc"));
                             return message;
                         }
-                    });
+                    };
+                    jmsPullTemplate.convertAndSend(pullMessageQueue, messageMap, postProcessor);
                 }
             });
         }

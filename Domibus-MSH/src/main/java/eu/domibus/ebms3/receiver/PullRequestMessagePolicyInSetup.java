@@ -5,7 +5,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.ebms3.common.context.MessageExchangeContext;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PullRequest;
@@ -37,13 +37,13 @@ public class PullRequestMessagePolicyInSetup extends AbstractSignalMessagePolicy
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Incoming pull request :" + pullContext.createProcessWarningMessage(), messaging != null ? getMessageId() : "unknown", null);
         }
         LegConfiguration legConfiguration = pullContext.getProcess().getLegs().iterator().next();
-        MessageExchangeContext messageExchangeContext = new MessageExchangeContext(pullContext.getAgreement(),
+        MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(pullContext.getAgreement(),
                 pullContext.getInitiator().getName(),
                 pullContext.getResponder().getName(),
                 legConfiguration.getService().getName(),
                 legConfiguration.getAction().getName(),
                 legConfiguration.getName());
-        setUpMessage(messageExchangeContext.getPmodeKey());
+        setUpMessage(messageExchangeConfiguration.getPmodeKey());
         return legConfiguration;
     }
 

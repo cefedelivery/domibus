@@ -8,7 +8,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
-import eu.domibus.ebms3.common.context.MessageExchangeContext;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.ebms3.common.model.PartyId;
@@ -130,7 +130,7 @@ public abstract class PModeProvider {
     }
 
     @Transactional(propagation = Propagation.REQUIRED, noRollbackFor = IllegalStateException.class)
-    public MessageExchangeContext findUserMessageExchangeContext(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
+    public MessageExchangeConfiguration findUserMessageExchangeContext(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
 
         final String agreementName;
         final String senderParty;
@@ -157,9 +157,9 @@ public abstract class PModeProvider {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Ebms3Constants.TEST_SERVICE + " and ebMS3 Test Action: " + Ebms3Constants.TEST_ACTION + " can only be used together [CORE] 5.2.2.9", userMessage.getMessageInfo().getMessageId(), null);
             }
 
-            MessageExchangeContext messageExchangeContext = new MessageExchangeContext(agreementName, senderParty, receiverParty, service, action, leg);
-            LOG.debug("Found pmodeKey [{}] for message [{}]", messageExchangeContext .getPmodeKey(), userMessage);
-            return messageExchangeContext;
+            MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(agreementName, senderParty, receiverParty, service, action, leg);
+            LOG.debug("Found pmodeKey [{}] for message [{}]", messageExchangeConfiguration.getPmodeKey(), userMessage);
+            return messageExchangeConfiguration;
 
         } catch (IllegalStateException ise) {
             // It can happen if DB is clean and no pmodes are configured yet!

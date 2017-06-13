@@ -2,11 +2,10 @@ package eu.domibus.common.services.impl;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.*;
-import eu.domibus.common.model.configuration.Leg;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.ebms3.common.context.MessageExchangeContext;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 
@@ -209,13 +208,13 @@ public class PullContext {
             setCurrentLegConfiguration(legConfiguration);
             for (Party party : process.getInitiatorParties()) {
                 setInitiator(party);
-                MessageExchangeContext messageExchangeContext = new MessageExchangeContext(getAgreement(),
+                MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(getAgreement(),
                         initiator.getName(),
                         responder.getName(),
                         currentLegConfiguration.getService().getName(),
                         currentLegConfiguration.getAction().getName(),
                         currentLegConfiguration.getName());
-                setpModeKey(messageExchangeContext.getReversePmodeKey());
+                setpModeKey(messageExchangeConfiguration.getReversePmodeKey());
                 Map<String, String> map = Maps.newHashMap();
                 map.put(MPC,getMpcQualifiedName());
                 map.put(PMODE_KEY,getpModeKey());

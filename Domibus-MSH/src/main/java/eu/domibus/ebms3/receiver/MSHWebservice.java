@@ -176,15 +176,16 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             throw e;
         } finally {
            reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
-            final SignalMessage signalMessage = new SignalMessage();
-            signalMessage.setReceipt(new Receipt());
-            MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setRefToMessageId(messageId);
-            messageInfo.setTimestamp(new Date());
-            messageInfo.setMessageId(messageIdGenerator.generateMessageId());
-            signalMessage.setMessageInfo(messageInfo);
-
             try {
+                final SignalMessage signalMessage = new SignalMessage();
+     /*           Receipt value = new Receipt();
+                value.getAny().add("Notification received!");
+                signalMessage.setReceipt(value);
+                MessageInfo messageInfo = new MessageInfo();
+                messageInfo.setRefToMessageId(messageId);
+                messageInfo.setTimestamp(new Date());
+                messageInfo.setMessageId(messageIdGenerator.generateMessageId());
+                signalMessage.setMessageInfo(messageInfo);*/
                 return messageBuilder.buildSOAPMessage(signalMessage, null);
             } catch (EbMS3Exception e) {
                 throw new WebServiceException(e);

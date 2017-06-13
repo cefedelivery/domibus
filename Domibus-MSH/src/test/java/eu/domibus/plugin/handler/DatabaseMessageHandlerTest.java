@@ -20,7 +20,7 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
-import eu.domibus.ebms3.common.context.MessageExchangeContext;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Property;
@@ -207,7 +207,7 @@ public class DatabaseMessageHandlerTest {
             String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            result = new MessageExchangeContext("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");
+            result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");
 
             Party sender = new Party();
             sender.setName(GREEN);
@@ -277,7 +277,7 @@ public class DatabaseMessageHandlerTest {
             String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            result = new MessageExchangeContext("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
+            result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
 
             Party sender = new Party();
             sender.setName(GREEN);
@@ -416,7 +416,7 @@ public class DatabaseMessageHandlerTest {
 
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            result = new MessageExchangeContext("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
+            result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
 
             // Here the configuration of the access point is supposed to be BLUE!
             Configuration conf = new Configuration();
@@ -530,7 +530,7 @@ public class DatabaseMessageHandlerTest {
             String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            result = new MessageExchangeContext("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
+            result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
 
             Party sender = new Party();
             sender.setName(GREEN);
@@ -700,7 +700,7 @@ public class DatabaseMessageHandlerTest {
 
             String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            result = new MessageExchangeContext("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
+            result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
 
             Party sender = new Party();
             sender.setName(GREEN);
@@ -770,8 +770,8 @@ public class DatabaseMessageHandlerTest {
             String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            MessageExchangeContext messageExchangeContext = new MessageExchangeContext("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");
-            result = messageExchangeContext;
+            MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");
+            result = messageExchangeConfiguration;
 
             Party sender = new Party();
             sender.setName(GREEN);
@@ -806,9 +806,9 @@ public class DatabaseMessageHandlerTest {
             compressionService.handleCompression(userMessage, legConfiguration);
             result = true;
 
-            messageExchangeService.upgradeMessageExchangeStatus(messageExchangeContext);
-            messageExchangeContext.updateStatus(MessageStatus.READY_TO_PULL);
-            result=messageExchangeContext;
+            messageExchangeService.upgradeMessageExchangeStatus(messageExchangeConfiguration);
+            messageExchangeConfiguration.updateStatus(MessageStatus.READY_TO_PULL);
+            result= messageExchangeConfiguration;
 
         }};
 

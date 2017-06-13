@@ -18,7 +18,7 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
-import eu.domibus.ebms3.common.context.MessageExchangeContext;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.ObjectFactory;
@@ -43,8 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.stereotype.Service;
 
 /**
  * This class is responsible of handling the plugins requests for all the operations exposed.
@@ -244,8 +242,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             Messaging message = ebMS3Of.createMessaging();
             message.setUserMessage(userMessage);
 
-            MessageExchangeContext userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            String pModeKey = userMessageExchangeContext.getPmodeKey();
+            MessageExchangeConfiguration userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            String pModeKey = userMessageExchangeConfiguration.getPmodeKey();
             Party to = messageValidations(userMessage, pModeKey, backendName);
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
@@ -267,8 +265,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 throw ex;
             }
             //@question Should we allow the producer to specify the mps, if yes we could have multiple legs in the process.
-            messageExchangeService.upgradeMessageExchangeStatus(userMessageExchangeContext);
-            if(MessageStatus.READY_TO_PULL!=userMessageExchangeContext.getMessageStatus()) {
+            messageExchangeService.upgradeMessageExchangeStatus(userMessageExchangeConfiguration);
+            if(MessageStatus.READY_TO_PULL!= userMessageExchangeConfiguration.getMessageStatus()) {
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
             }
@@ -276,7 +274,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             // Builds the user message log
             UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
                     .setMessageId(userMessage.getMessageInfo().getMessageId())
-                    .setMessageStatus(userMessageExchangeContext.getMessageStatus())
+                    .setMessageStatus(userMessageExchangeConfiguration.getMessageStatus())
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(getNotificationStatus(legConfiguration))
                     .setMpc(message.getUserMessage().getMpc())

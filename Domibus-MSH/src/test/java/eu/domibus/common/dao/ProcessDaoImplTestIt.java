@@ -3,7 +3,7 @@ package eu.domibus.common.dao;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.ebms3.common.context.MessageExchangeContext;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.DefaultDaoTestConfiguration;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.xml.XMLUtilImpl;
@@ -40,7 +40,8 @@ import static org.junit.Assert.assertNull;
 public class ProcessDaoImplTestIt{
 
 
-    static class ContextConfiguration extends DefaultDaoTestConfiguration {
+    @org.springframework.context.annotation.Configuration
+    static class ContextConfiguration{
         @Bean
         public PModeDao pModeProvider(){return new PModeDao();}
         @Bean
@@ -78,14 +79,14 @@ public class ProcessDaoImplTestIt{
         FileInputStream fis = new FileInputStream(pModeFile);
         pModeProvider.updatePModes(IOUtils.toByteArray(fis));
 
-        List<Process> processesForMessageContext = processDao.findProcessByMessageContext(new MessageExchangeContext("agreement1110", "blue_gw", "red_gw", "noSecService", "noSecAction", "pushNoSecnoSecAction"));
+        List<Process> processesForMessageContext = processDao.findProcessByMessageContext(new MessageExchangeConfiguration("agreement1110", "blue_gw", "red_gw", "noSecService", "noSecAction", "pushNoSecnoSecAction"));
         assertEquals(1,processesForMessageContext.size());
         Process process = processesForMessageContext.get(0);
         assertEquals("agreement1110",process.getAgreement().getName());
         assertEquals("push",process.getMepBinding().getName());
         assertEquals("oneway",process.getMep().getName());
 
-        processesForMessageContext = processDao.findProcessByMessageContext(new MessageExchangeContext("agreement1110", "domibus_de", "ibmgw", "testService3", "tc3ActionLeg1", "pushTestcase3Leg1tc3ActionLeg1"));
+        processesForMessageContext = processDao.findProcessByMessageContext(new MessageExchangeConfiguration("agreement1110", "domibus_de", "ibmgw", "testService3", "tc3ActionLeg1", "pushTestcase3Leg1tc3ActionLeg1"));
         assertEquals(1,processesForMessageContext.size());
         process = processesForMessageContext.get(0);
         assertEquals("agreement1110",process.getAgreement().getName());

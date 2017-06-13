@@ -2,10 +2,12 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -78,7 +80,19 @@ public class RetryService {
                 userMessageService.scheduleSending(messageId);
             }
         }
+        resetUnAcknowledgedPullMessage();
     }
+
+    private void resetUnAcknowledgedPullMessage(){
+        List<String> timedoutPullMessages = userMessageLogDao.findTimedoutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
+        for (String timedOutPullMessage : timedoutPullMessages) {
+            UserMessageLog timedOutUserMessageLog = userMessageLogDao.findByMessageId(timedOutPullMessage);
+            timedOutUserMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
+            userMessageLogDao.update(timedOutUserMessageLog);
+        }
+    }
+
+
 
     /**
      * Notifies send failure, updates the message status and deletes the payload (if required) for messages that failed to be sent and expired
