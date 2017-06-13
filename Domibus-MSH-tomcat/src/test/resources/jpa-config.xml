@@ -65,6 +65,13 @@
           p:sessionTransacted="true"
           p:sessionAcknowledgeMode="0"/>
 
+    <bean id="jmsPullTemplate"
+          class="org.springframework.jms.core.JmsTemplate"
+          c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
+          p:defaultDestination-ref="pullMessageQueue"
+          p:sessionTransacted="true"
+          p:sessionAcknowledgeMode="0"/>
+
     <bean id="jmsTemplateCommand"
           class="org.springframework.jms.core.JmsTemplate"
           c:connectionFactory-ref="domibusJMS-XAConnectionFactory"

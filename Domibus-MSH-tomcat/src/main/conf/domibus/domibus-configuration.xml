@@ -45,6 +45,7 @@
         <prop key="domibus.msh.messageid.suffix">domibus.eu</prop>
         <!-- Retry Worker execution interval as a cron expression -->
         <prop key="domibus.msh.retry.cron">0/5 * * * * ?</prop>
+        <prop key="domibus.msh.pull.cron">0/20 * * * * ?</prop>
         <!-- Timeout tolerance for retry messages (in miliseconds). Scheduled retries that, due to any reason, were not performed within this period will be timeout -->
         <prop key="domibus.msh.retry.tolerance">10800000</prop>
         <!-- Should unrecoverable errors should be retried or not -->
@@ -116,12 +117,25 @@
         <property name="cronExpression" value="${domibus.msh.retry.cron}"/>
     </bean>
 
+    <bean id="pullRequestJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.ebms3.puller.MessagePullerJob"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="pullRequestTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="pullRequestJob"/>
+        <property name="cronExpression" value="${domibus.msh.pull.cron}"/>
+    </bean>
+
     <!-- customizable list of triggers to be executed by quartz -->
     <bean id="userdefinedTriggerList"
           class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list>
                 <ref bean="retryWorkerTrigger"/>
+                <ref bean="pullRequestTrigger"/>
             </list>
         </property>
     </bean>

@@ -34,6 +34,9 @@
     <bean id="sendMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.dispatch.queue"/>
     </bean>
+    <bean id="pullMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.internal.pull.queue"/>
+    </bean>
     <bean id="notifyBackendQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.notification.queue"/>
     </bean>
