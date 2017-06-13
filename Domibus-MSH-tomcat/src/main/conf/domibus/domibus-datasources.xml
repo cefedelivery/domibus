@@ -26,8 +26,6 @@
     http://activemq.apache.org/schema/core/activemq-core.xsd">
 
 
-    <import resource="file:///${domibus.config.location}/domibus-transactions.xml"/>
-
     <!-- JMS Configuration -->
     <!-- Connection Pool -->
     <bean id="domibusJMS-XAConnectionFactory"

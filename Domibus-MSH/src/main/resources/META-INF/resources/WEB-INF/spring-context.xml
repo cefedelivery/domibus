@@ -23,8 +23,8 @@
                      location="classpath:domibus.properties,file:///${domibus.config.location}/domibus.properties"/>
 
     <context:property-placeholder properties-ref="domibusProperties" ignore-resource-not-found="false" ignore-unresolvable="true"/>
-    <context:annotation-config/>
 
+    <context:annotation-config/>
     <jms:annotation-driven/>
 
     <tx:annotation-driven order="1" transaction-manager="transactionManager" proxy-target-class="true"/>
@@ -49,6 +49,8 @@
     <import resource="domibus-configuration.xml"/>
 
     <import resource="domibus-plugins.xml"/>
+    <import resource="classpath*:config/domibus-transactions.xml"/>
+    <import resource="jpa-config.xml"/>
     <import resource="msh-config.xml"/>
     <import resource="cxf-endpoint.xml"/>
     <import resource="spring-security.xml"/>
