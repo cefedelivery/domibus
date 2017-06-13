@@ -54,7 +54,7 @@ import java.util.Properties;
  */
 public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
-    private static final String DOMIBUS_SENDERPARTY_TRUST_VERIFICATION = "domibus.senderparty.trust.verification";
+    protected static final String DOMIBUS_SENDERPARTY_TRUST_VERIFICATION = "domibus.senderparty.trust.verification";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TrustSenderInterceptor.class);
 
@@ -82,16 +82,15 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
+        if(!isInterceptorEnabled())
+            return;
+
         String msgId = (String) message.getExchange().get(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY);
         if (!isMessageSecured(message)) {
             LOG.info("Message [" + msgId + "] does not contain security info ==> skipping sender trust verification.");
             return;
         }
 
-        if (!Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDERPARTY_TRUST_VERIFICATION, "false"))) {
-            LOG.debug("Sender alias verification is disabled");
-            return;
-        }
         try {
             LOG.debug("Verifying sender trust for message [" + msgId + "]");
             String senderPartyName = getSenderPartyName(message);
@@ -108,6 +107,16 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             LOG.error("Error while verifying parties trust", ex);
             throw new Fault(ex);
         }
+    }
+
+    protected Boolean isInterceptorEnabled() {
+        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDERPARTY_TRUST_VERIFICATION, "false"))) {
+            LOG.debug("Sender alias verification is enabled");
+            return true;
+        }
+
+        LOG.debug("Sender alias verification is disabled");
+        return false;
     }
 
     private boolean isMessageSecured(SoapMessage msg) {
