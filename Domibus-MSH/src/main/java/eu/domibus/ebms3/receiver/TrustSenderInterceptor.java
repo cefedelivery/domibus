@@ -5,7 +5,6 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.common.model.MessageInfo;
-import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -94,14 +93,8 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
         try {
             LOG.debug("Verifying sender trust for message [" + msgId + "]");
-            X509Certificate certificate = getSenderCertificate(message);
-            String dnSubject = certificate.getSubjectDN().getName();
-            Object o = message.get(MSHDispatcher.MESSAGE_TYPE_IN);
-            if(o!=null && MessageType.SIGNAL_MESSAGE.equals(o)){
-                return;
-            }
             String senderPartyName = getSenderPartyName(message);
-            if (org.apache.commons.lang.StringUtils.containsIgnoreCase(dnSubject, senderPartyName)) {
+            X509Certificate certificate = getSenderCertificate(message);
             if(certificate != null && org.apache.commons.lang.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), senderPartyName) ) {
                 LOG.info("Sender [" + senderPartyName + "] is trusted for message [" + msgId + "]");
                 return;
