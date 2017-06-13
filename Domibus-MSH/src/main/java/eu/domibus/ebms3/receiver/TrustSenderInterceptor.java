@@ -64,7 +64,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     @Autowired
     @Qualifier("domibusProperties")
-    private java.util.Properties domibusProperties;
+    private Properties domibusProperties;
 
     public TrustSenderInterceptor() {
         super(false);
