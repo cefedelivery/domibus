@@ -13,9 +13,9 @@ echo $SQLSCRIPTS_VERSION
 ADMIN_USER="admin"
 ADMIN_PASSW="123456"
 
-cp $SOURCE_CODE/target/domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip ./mysql/
-cp $SOURCE_CODE/target/domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip ./tomcat/
-cp $SOURCE_CODE/target/domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip ./tomcat/
+cp $SOURCE_CODE/target/domibus-distribution-$DOMIBUS_VERSION-sql-scripts.zip ./mysql/
+cp $SOURCE_CODE/target/domibus-distribution-$DOMIBUS_VERSION-tomcat-full.zip ./tomcat/
+cp $SOURCE_CODE/target/domibus-distribution-$DOMIBUS_VERSION-sample-configuration-and-testing.zip ./tomcat/
 cp -R $SOURCE_CODE/src/main/conf/domibus/policies/ ./tomcat/policies
 
 cd $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/mysql
@@ -28,7 +28,7 @@ sudo docker build --build-arg PARTY=red --build-arg DOMIBUS_VERSION=$DOMIBUS_VER
 cd $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/tomcat-mysql-c2-c3-compose
 sudo docker-compose up -d
 
-cd $SOURCE_CODE/
+cd $SOURCE_CODE/../Domibus-MSH-tomcat
 i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:8180/domibus/home; do sleep $((i++)) && echo -n . && if [ $i -eq 100 ]; then break; fi ;   done
 i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:9080/domibus/home; do sleep $((i++)) && echo -n . && if [ $i -eq 100 ]; then break; fi ;   done
 mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
