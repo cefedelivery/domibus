@@ -88,8 +88,8 @@ public class PullContextTest {
         }
         pullContext.setProcess(PojoInstaciatorUtil.instanciate(Process.class));
         pullContext.checkProcessValidity();
-        assertEquals("No leg configuration found\n" +
-                "No responder configured",pullContext.createProcessWarningMessage().trim());
+        assertTrue(pullContext.createProcessWarningMessage().contains("No leg configuration found"));
+        assertTrue(pullContext.createProcessWarningMessage().contains("No responder configured"));
     }
 
     @Test

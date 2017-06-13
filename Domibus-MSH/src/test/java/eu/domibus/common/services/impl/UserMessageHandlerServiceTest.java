@@ -123,14 +123,14 @@ public class UserMessageHandlerServiceTest {
     UserMessageHandlerService userMessageHandlerService;
 
     private static final String TEST_RESOURCES_DIR = "./src/test/resources";
-    private static final String VALID_PMODE_CONFIG_URI = "SamplePModes/domibus-configuration-valid.xml";
-    private static final String LEG_NO_SECNO_SEC_ACTION = "pushNoSecnoSecAction";
+    private static final String VALID_PMODE_CONFIG_URI = "samplePModes/domibus-configuration-valid.xml";
     private static final String PUSH_TESTCASE1_TC1ACTION = "pushTestcase1tc1Action";
     private static final String STRING_TYPE = "string";
     private static final String DEF_PARTY_TYPE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
     private static final String RED = "red_gw";
     private static final String BLUE = "blue_gw";
     private static final String FINAL_RECEIPIENT_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4";
+
     protected Property createProperty(String name, String value, String type) {
         Property aProperty = new Property();
         aProperty.setValue(value);
@@ -890,7 +890,7 @@ public class UserMessageHandlerServiceTest {
     @Test
     public void testGetMessaging(@Injectable final SOAPHeader soapHeader, @Injectable final Iterator soapChildElementsIterator, @Injectable final Node messagingXml) throws JAXBException, SOAPException, ParserConfigurationException, IOException, SAXException {
 
-        File validRequestFile = new File(TEST_RESOURCES_DIR + "/dataset/as4/blue2redGoodMessage.xml");
+        InputStream validRequestFile = getClass().getClassLoader().getResourceAsStream("dataset/as4/blue2redGoodMessage.xml");
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setNamespaceAware(true);
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -937,7 +937,7 @@ public class UserMessageHandlerServiceTest {
     }
 
     public Messaging createValidSampleResponseMessaging() throws ParserConfigurationException, IOException, SAXException, JAXBException {
-        File validAS4ResponseFile = new File(TEST_RESOURCES_DIR + "/dataset/as4/validAS4Response.xml");
+        InputStream validAS4ResponseFile = getClass().getClassLoader().getResourceAsStream("dataset/as4/validAS4Response.xml");
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setNamespaceAware(true);
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();

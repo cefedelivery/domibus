@@ -6,6 +6,7 @@ import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
@@ -41,7 +42,7 @@ import static eu.domibus.common.services.impl.PullRequestStatus.ONE_MATCHING_PRO
 @Service
 public class MessageExchangeServiceImpl implements MessageExchangeService {
 
-//@thom add more coverage here.
+    //@thom add more coverage here.
     @Autowired
     private ProcessDao processDao;
     @Autowired
@@ -104,7 +105,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         List<Process> pullProcesses = processDao.findPullProcessesByResponder(configuration.getParty());
         LOG.info(pullProcesses.size() + " pull PMODE found!");
         for (Process pullProcess : pullProcesses) {
-            PullContext pullContext=new PullContext();
+            PullContext pullContext = new PullContext();
             pullContext.setResponder(configuration.getParty());
             pullContext.setProcess(pullProcess);
             pullContext.checkProcessValidity();
@@ -113,7 +114,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             }
             pullContext.send(new PullContextCommand() {
                 @Override
-                public void execute(final Map<String,String> messageMap) {
+                public void execute(final Map<String, String> messageMap) {
                     MessagePostProcessor postProcessor = new MessagePostProcessor() {
                         public Message postProcessMessage(Message message) throws JMSException {
                             message.setStringProperty(MPC, messageMap.get("mpc"));
@@ -128,13 +129,10 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     }
 
 
-
-
-
     @Override
     public UserMessage retrieveReadyToPullUserMessages(final String mpc, final Party responder) {
         Set<Identifier> identifiers = responder.getIdentifiers();
-        List<MessagePullDto> messagingOnStatusReceiverAndMpc=new ArrayList<>();
+        List<MessagePullDto> messagingOnStatusReceiverAndMpc = new ArrayList<>();
         for (Identifier identifier : identifiers) {
             messagingOnStatusReceiverAndMpc.addAll(messagingDao.findMessagingOnStatusReceiverAndMpc(identifier.getPartyId(), MessageStatus.READY_TO_PULL, mpc));
         }
@@ -197,13 +195,32 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     @Override
     @Transactional
-    public void savePulledMessageRawXml(final String rawXml, final String messageId){
-        UserMessage userMessage=messagingDao.findUserMessageByMessageId(messageId.toString());
+    public void savePulledMessageRawXml(final String rawXml, final String messageId) {
+        UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId.toString());
         RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
         rawEnvelopeLog.setRawXML(rawXml);
         rawEnvelopeLog.setUserMessage(userMessage);
         rawEnvelopeLogDao.create(rawEnvelopeLog);
-        System.out.println("rawXMLMessage "+rawXml);
+    }
+
+    @Transactional
+    @Override
+    public void removeRawMessageIssuedByPullRequest(final String messageId) {
+        RawEnvelopeDto rawEnvelopeDto = findPulledMessageRawXmlByMessageId(messageId);
+        if (rawEnvelopeDto != null) {
+            rawEnvelopeLogDao.deleteRawMessage(rawEnvelopeDto.getId());
+        }
+    }
+
+    @Override
+    @Transactional
+    public RawEnvelopeDto findPulledMessageRawXmlByMessageId(final String messageId) {
+        List<RawEnvelopeDto> rawEnvelopeDto = rawEnvelopeLogDao.findRawXmlByMessageId(messageId);
+        if (rawEnvelopeDto.size() == 0 || rawEnvelopeDto.size() > 1) {
+            LOG.error("There should always have a raw message in the case of a pulledMessage");
+            return null;
+        }
+        return rawEnvelopeDto.get(0);
     }
 
 

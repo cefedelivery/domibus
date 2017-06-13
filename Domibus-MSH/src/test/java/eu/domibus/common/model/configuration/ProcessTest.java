@@ -19,7 +19,7 @@ public class ProcessTest {
 
     @Test
     public void testGetBindingValue() throws Exception {
-        assertNull("",Process.getBindingValue(new Process()));
+        assertEquals("",Process.getBindingValue(new Process()));
         assertEquals("Mock", Process.getBindingValue(PojoInstaciatorUtil.instanciate(Process.class)));
     }
 

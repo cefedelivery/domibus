@@ -7,6 +7,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Leg;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReplyPattern;
+import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
@@ -124,10 +125,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             } catch (final EbMS3Exception e) {
                 try {
                     System.out.println(e.getStackTrace());
-                    System.out.println("messaging "+messaging);
-                    System.out.println("userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer() "+userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer());
+                    System.out.println("messaging " + messaging);
+                    System.out.println("userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer() " + userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer());
                     if (!userMessageHandlerContext.isPingMessage() && userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
-                        System.out.println("error "+messaging);
+                        System.out.println("error " + messaging);
                         backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
                     }
                 } catch (Exception ex) {
@@ -175,17 +176,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (Throwable e) {
             throw e;
         } finally {
-           reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+            reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+            messageExchangeService.removeRawMessageIssuedByPullRequest(messageId);
             try {
                 final SignalMessage signalMessage = new SignalMessage();
-     /*           Receipt value = new Receipt();
-                value.getAny().add("Notification received!");
-                signalMessage.setReceipt(value);
-                MessageInfo messageInfo = new MessageInfo();
-                messageInfo.setRefToMessageId(messageId);
-                messageInfo.setTimestamp(new Date());
-                messageInfo.setMessageId(messageIdGenerator.generateMessageId());
-                signalMessage.setMessageInfo(messageInfo);*/
                 return messageBuilder.buildSOAPMessage(signalMessage, null);
             } catch (EbMS3Exception e) {
                 throw new WebServiceException(e);
@@ -195,21 +189,21 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     private SOAPMessage getSoapMessage(String messageId, LegConfiguration legConfiguration, UserMessage userMessage) throws SOAPException, IOException, ParserConfigurationException, SAXException, EbMS3Exception {
         SOAPMessage soapMessage;
-        if(isNonRepudiation(legConfiguration)){
-            String rawXmlByMessageId = rawEnvelopeLogDao.findRawXmlByMessageId(messageId);
-            soapMessage= SoapUtil.createSOAPMessage(rawXmlByMessageId);
-        }
-        else{
+        if (isNonRepudiation(legConfiguration)) {
+            RawEnvelopeDto rawEnvelopeDto = messageExchangeService.findPulledMessageRawXmlByMessageId(messageId);
+            soapMessage = SoapUtil.createSOAPMessage(rawEnvelopeDto.getRawMessage());
+        } else {
             soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
         }
         return soapMessage;
     }
 
-    private boolean isNonRepudiation(LegConfiguration legConfiguration){
+    private boolean isNonRepudiation(LegConfiguration legConfiguration) {
         return legConfiguration.getReliability() != null &&
-                ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())&&
+                ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern()) &&
                 legConfiguration.getReliability().isNonRepudiation();
     }
+
     private SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
@@ -222,7 +216,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 LegConfiguration leg = pullContext.filterLegOnMpc();
                 SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
                 PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
-                if(isNonRepudiation(leg)) {
+                if (isNonRepudiation(leg)) {
                     PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_ID, userMessage.getMessageInfo().getMessageId());
                 }
                 return soapMessage;
@@ -256,7 +250,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return userMessageHandlerService.getMessaging(request);
     }
 
+    public void deleteRawMessageIssuedByPullRequest() {
 
+    }
 
 
 }
