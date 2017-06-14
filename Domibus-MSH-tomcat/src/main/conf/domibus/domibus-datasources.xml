@@ -33,25 +33,19 @@
           init-method="init" destroy-method="close" depends-on="broker">
         <property name="uniqueResourceName" value="domibusJMS-XA"/>
         <property name="xaConnectionFactory" ref="xaJmsConnectionFactory"/>
-        <property name="maxPoolSize" value="20"/>
+        <property name="maxPoolSize" value="${com.atomikos.maxPoolSize}"/>
     </bean>
 
     <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
     <amq:xaConnectionFactory id="xaJmsConnectionFactory"
-                             brokerURL="tcp://localhost:61616"
-                             userName="domibus" password="changeit">
+                             brokerURL="${activeMQ.transportConnector.uri}"
+                             userName="${activeMQ.username}" password="${activeMQ.password}">
         <!-- do not remove this! otherwise the redeliveryPolicy configured in activemq.xml will be ignored -->
         <amq:redeliveryPolicy>
             <amq:redeliveryPolicy />
         </amq:redeliveryPolicy>
     </amq:xaConnectionFactory>
 
-    <!--  lets create an ActiveMQ Broker -->
-    <bean id="broker"
-          class="org.apache.activemq.xbean.BrokerFactoryBean">
-        <property name="config"
-                  value="file:///${domibus.config.location}/internal/activemq.xml"/>
-    </bean>
 
     <amq:queue id="sendMessageQueue"
                physicalName="domibus.internal.dispatch.queue"/>
