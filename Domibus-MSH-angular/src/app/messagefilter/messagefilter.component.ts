@@ -8,9 +8,7 @@ import {MessageFilterResult} from "./messagefilterresult";
 import {BackendFilterEntry} from "./backendfilterentry";
 import {RoutingCriteriaEntry} from "./routingcriteriaentry";
 import {DeleteMessagefilterDialogComponent} from "./deletemessagefilter-dialog/deletemessagefilter-dialog.component";
-/**
- * Created by tiago on 10/04/2017.
- */
+import {CancelMessagefilterDialogComponent} from "./cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
 
 @Component({
   moduleId: module.id,
@@ -131,14 +129,18 @@ export class MessageFilterComponent {
       for (let i = 0; i < numRoutingCriterias; i++) {
         let routCriteria = this.rows[row.$$index].routingCriterias[i];
         if (routCriteria.name == cell) {
-          if (event.target.value.trim() == '') {
-            this.rows[row.$$index].routingCriterias.splice(i, 1);
+          if (routCriteria.expression == event.target.value) {
+            return;
           } else {
-            routCriteria.expression = event.target.value;
+            if (event.target.value.trim() == '') {
+              this.rows[row.$$index].routingCriterias.splice(i, 1);
+            } else {
+              routCriteria.expression = event.target.value;
+            }
+            this.updateValueProperty(cell, event.target.value, row);
+            edited = true;
+            break;
           }
-          this.updateValueProperty(cell, event.target.value, row);
-          edited = true;
-          break;
         }
       }
     }
@@ -163,15 +165,25 @@ export class MessageFilterComponent {
     this.rows.push( {"backendName" : ''});
   }
 
-  buttonCancel() {
-    this.enableCancel = false;
-    this.enableSave = false;
-    this.enableDelete = false;
+  cancelDialog() {
+    let dialogRef = this.dialog.open(CancelMessagefilterDialogComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      switch(result) {
+        case 'Yes' :
+          this.enableCancel = false;
+          this.enableSave = false;
+          this.enableDelete = false;
 
-    this.enableMoveUp = this.rowNumber  > 0;
-    this.enableMoveDown = this.rowNumber != this.rows.length - 1;
+          this.enableMoveUp = this.rowNumber  > 0;
+          this.enableMoveDown = this.rowNumber != this.rows.length - 1;
 
-    this.ngOnInit();
+          this.ngOnInit();
+
+          break;
+        case 'No':
+        // do nothing
+      }
+    });
   }
 
   saveDialog() {
@@ -216,17 +228,6 @@ export class MessageFilterComponent {
       }
     });
   }
-
-  /*buttonDelete() {
-    this.enableCancel = true;
-    this.enableSave = true;
-    this.enableDelete = false;
-
-    this.enableMoveUp = false;
-    this.enableMoveDown = false;
-
-    this.rows.splice(this.rowNumber, 1);
-  }*/
 
   buttonMoveUp() {
     if(this.rowNumber < 1) {
