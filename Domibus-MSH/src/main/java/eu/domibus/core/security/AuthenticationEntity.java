@@ -7,10 +7,10 @@ import javax.persistence.*;
 @Entity
 @Table(name = "TB_AUTHENTICATION_ENTRY")
 @NamedQueries({
-        @NamedQuery(name = "AuthenticationEntry.findByUsername", query = "select bae from AuthenticationEntity bae where bae.username=:USERNAME"),
-        @NamedQuery(name = "AuthenticationEntry.findByCertificateId", query = "select bae from AuthenticationEntity bae where bae.certificateId=:CERTIFICATE_ID"),
-        @NamedQuery(name = "AuthenticationEntry.getRolesForUsername", query = "select bae.authRoles from AuthenticationEntity bae where bae.username=:USERNAME"),
-        @NamedQuery(name = "AuthenticationEntry.getRolesForCertificateId", query = "select bae.authRoles from AuthenticationEntity bae where bae.certificateId=:CERTIFICATE_ID")})
+        @NamedQuery(name = "AuthenticationEntity.findByUsername", query = "select bae from AuthenticationEntity bae where bae.username=:USERNAME"),
+        @NamedQuery(name = "AuthenticationEntity.findByCertificateId", query = "select bae from AuthenticationEntity bae where bae.certificateId=:CERTIFICATE_ID"),
+        @NamedQuery(name = "AuthenticationEntity.getRolesForUsername", query = "select bae.authRoles from AuthenticationEntity bae where bae.username=:USERNAME"),
+        @NamedQuery(name = "AuthenticationEntity.getRolesForCertificateId", query = "select bae.authRoles from AuthenticationEntity bae where bae.certificateId=:CERTIFICATE_ID")})
 
 public class AuthenticationEntity extends AbstractBaseEntity {
 
