@@ -23,7 +23,7 @@
     http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="userTransactionService" class="com.atomikos.icatch.config.UserTransactionServiceImp"
-          init-method="init" destroy-method="shutdownForce">
+          init-method="init" destroy-method="shutdownWait">
         <constructor-arg>
             <!-- IMPORTANT: specify all Atomikos properties here -->
             <props>
