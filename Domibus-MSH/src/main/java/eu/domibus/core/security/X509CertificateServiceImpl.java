@@ -7,6 +7,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.security.cert.CertificateExpiredException;
@@ -18,7 +19,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-@Service
+@Service("securityX509CertificateServiceImpl")
 public class X509CertificateServiceImpl implements X509CertificateService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(X509CertificateServiceImpl.class);
@@ -26,6 +27,7 @@ public class X509CertificateServiceImpl implements X509CertificateService {
     private static final Locale LOCALE = Locale.US;
 
     @Autowired
+    @Qualifier("securityCRLVerifierServiceImpl")
     ICRLVerifierService crlVerifierService;
 
     @Override

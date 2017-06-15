@@ -5,6 +5,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.api.util.HashUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Component(value="customAuthenticationProvider")
+@Component(value="securityCustomAuthenticationProvider")
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationProvider.class);
@@ -28,12 +29,15 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     private HashUtil hashUtil;
 
     @Autowired
-    private AuthenticationDAO authenticationDAO;
+    @Qualifier("securityAuthenticationDAO")
+    private AuthenticationDAO securityAuthenticationDAO;
 
     @Autowired
+    @Qualifier("securityBlueCoatCertificateServiceImpl")
     private BlueCoatCertificateService blueCoatCertificateService;
 
     @Autowired
+    @Qualifier("securityX509CertificateServiceImpl")
     private X509CertificateService x509CertificateService;
 
     @Override
@@ -43,22 +47,22 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 LOG.debug("Authenticating using the X509 certificate from the request");
                 authentication.setAuthenticated(x509CertificateService.isClientX509CertificateValid((X509Certificate[]) authentication.getCredentials()));
 
-                AuthenticationEntity authenticationEntity = authenticationDAO.findByCertificateId(authentication.getName());
+                AuthenticationEntity authenticationEntity = securityAuthenticationDAO.findByCertificateId(authentication.getName());
                 ((X509CertificateAuthentication) authentication).setOriginalUser(authenticationEntity.getOriginalUser());
-                List<AuthRole> authRoles = authenticationDAO.getRolesForCertificateId(authentication.getName());
+                List<AuthRole> authRoles = securityAuthenticationDAO.getRolesForCertificateId(authentication.getName());
                 setAuthority(authentication, authRoles);
             } else if (authentication instanceof BlueCoatClientCertificateAuthentication) {
                 LOG.debug("Authenticating using the decoded certificate in the http header");
                 authentication.setAuthenticated(blueCoatCertificateService.isBlueCoatClientCertificateValid((CertificateDetails) authentication.getCredentials()));
 
-                AuthenticationEntity authenticationEntity = authenticationDAO.findByCertificateId(authentication.getName());
+                AuthenticationEntity authenticationEntity = securityAuthenticationDAO.findByCertificateId(authentication.getName());
                 ((BlueCoatClientCertificateAuthentication) authentication).setOriginalUser(authenticationEntity.getOriginalUser());
-                List<AuthRole> authRoles = authenticationDAO.getRolesForCertificateId(authentication.getName());
+                List<AuthRole> authRoles = securityAuthenticationDAO.getRolesForCertificateId(authentication.getName());
                 setAuthority(authentication, authRoles);
             } else if (authentication instanceof BasicAuthentication) {
                 LOG.debug("Authenticating using the Basic authentication");
                 Boolean res = false;
-                AuthenticationEntity basicAuthenticationEntity = authenticationDAO.findByUser(authentication.getName());
+                AuthenticationEntity basicAuthenticationEntity = securityAuthenticationDAO.findByUser(authentication.getName());
                 try {
                     res = hashUtil.getSHA256Hash((String) authentication.getCredentials()).equals(basicAuthenticationEntity.getPasswd());
                 } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
@@ -67,7 +71,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 authentication.setAuthenticated(res);
 
                 ((BasicAuthentication) authentication).setOriginalUser(basicAuthenticationEntity.getOriginalUser());
-                List<AuthRole> authRoles = authenticationDAO.getRolesForUser(authentication.getName());
+                List<AuthRole> authRoles = securityAuthenticationDAO.getRolesForUser(authentication.getName());
                 setAuthority(authentication, authRoles);
             }
         } catch (final Exception exception)  {

@@ -20,7 +20,6 @@ public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Me
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationInterceptor.class);
 
-
     @Autowired
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
