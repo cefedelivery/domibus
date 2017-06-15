@@ -50,7 +50,7 @@
 
     <import resource="domibus-plugins.xml"/>
     <import resource="classpath*:config/domibus-transactions.xml"/>
-    <import resource="file:///${domibus.config.location}/domibus-datasources.xml"/>
+    <import resource="classpath*:config/domibus-datasources.xml"/>
     <import resource="jpa-config.xml"/>
     <import resource="msh-config.xml"/>
     <import resource="cxf-endpoint.xml"/>

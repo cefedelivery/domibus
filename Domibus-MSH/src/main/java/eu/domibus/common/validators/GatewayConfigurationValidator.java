@@ -39,11 +39,8 @@ public class GatewayConfigurationValidator {
         validateCerts();
 
         try {
-            try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus-datasources.xml.sha256"))));) {
-                validateFileHash("domibus-datasources.xml", br.readLine());
-            }
-            try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus-security.xml.sha256"))));) {
-                validateFileHash("domibus-security.xml", br.readLine());
+            try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus.properties.sha256"))));) {
+                validateFileHash("domibus.properties", br.readLine());
             }
         } catch (Exception e) {
             LOG.warn("Could not verify the configuration files hash", e);
