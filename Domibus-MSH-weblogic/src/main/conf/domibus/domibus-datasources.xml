@@ -44,7 +44,7 @@
     </bean>
 
     <bean id="entityManagerFactory" primary="true"
-          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="transactionManager">
         <property name="persistenceUnitName" value="domibusJTA"/>
         <property name="packagesToScan" value="eu.domibus"/>
         <property name="jtaDataSource" ref="domibusJDBC-XADataSource"/>
