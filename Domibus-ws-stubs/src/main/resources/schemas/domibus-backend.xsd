@@ -81,7 +81,6 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
-
     <xsd:element name="sendRequest">
         <xsd:complexType>
             <xsd:sequence>
@@ -175,7 +174,7 @@
             <xsd:enumeration value="RECEIVED"/>
             <xsd:enumeration value="RECEIVED_WITH_WARNINGS"/>
             <xsd:enumeration value="DELETED"/>
-            <!--<xsd:enumeration value="DOWNLOADED"/>-->
+            <xsd:enumeration value="DOWNLOADED"/>
         </xsd:restriction>
     </xsd:simpleType>
 
@@ -244,7 +243,15 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
+    <xsd:element name="statusRequest" nillable="true">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="messageID" type="tns:max255-non-empty-string"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
     <xsd:element name="getMessageStatusResponse" nillable="true" type="tns:messageStatus"/>
+    <xsd:element name="getStatusResponse" nillable="true" type="tns:messageStatus"/>
     <xsd:element name="getErrorsRequest" nillable="true">
         <xsd:complexType>
             <xsd:sequence>

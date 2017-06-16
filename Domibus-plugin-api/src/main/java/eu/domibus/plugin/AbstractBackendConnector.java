@@ -85,6 +85,11 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     }
 
     @Override
+    public MessageStatus getStatus(final String messageId) {
+        return this.messageRetriever.getStatus(messageId);
+    }
+
+    @Override
     public List<ErrorResult> getErrorsForMessage(final String messageId) {
         return new ArrayList<>(this.messageRetriever.getErrorsForMessage(messageId));
     }

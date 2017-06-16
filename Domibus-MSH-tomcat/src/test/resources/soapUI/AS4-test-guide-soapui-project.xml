@@ -1,520 +1,578 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <con:soapui-project id="1c29d1fb-f8ae-4ddb-ac43-1469a15001ec" activeEnvironment="Default" name="AS4_test_guide" resourceRoot="" soapui-version="5.2.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:WsdlInterface" id="9581111c-248c-4085-bf9f-dc452577042f" wsaVersion="NONE" name="BackendService_1_1SoapBinding" type="wsdl" bindingName="{http://org.ecodex.backend/1_1/}BackendService_1_1SoapBinding" soapVersion="1_2" anonymous="optional" definition="http://localhost:8080/domibus/services/backend?wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart="http://localhost:8080/domibus/services/backend?wsdl"><con:part><con:url>http://localhost:8080/domibus/services/backend?wsdl</con:url><con:content><![CDATA[<wsdl:definitions name="BackendService_1_1" targetNamespace="http://org.ecodex.backend/1_1/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://org.ecodex.backend/1_1/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns2="http://schemas.xmlsoap.org/soap/http" xmlns:ns1="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
   <wsdl:types>
-    <xs:schema targetNamespace="http://www.w3.org/XML/1998/namespace" version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-      <xs:attribute name="lang" type="xs:string"/>
+    <xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:tns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
+      <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+      <xsd:annotation>
+        <xsd:appinfo>Schema for Domibus messages' headers submission</xsd:appinfo>
+        <xsd:documentation xml:lang="en">This schema defines an XML subset of ebMS-3 headers which is used to validate messages submitted to Domibus
+            through WS plugin.</xsd:documentation>
+      </xsd:annotation>
+      <xsd:element name="Messaging" type="Messaging"/>
+      <xsd:complexType name="Messaging">
+        <xsd:sequence>
+          <xsd:element maxOccurs="1" minOccurs="0" name="UserMessage" type="UserMessage"/>
+        </xsd:sequence>
+        <xsd:attribute name="mustUnderstand" type="xsd:boolean" use="optional"/>
+      </xsd:complexType>
+      <xsd:complexType name="UserMessage">
+        <xsd:all>
+          <xsd:element maxOccurs="1" minOccurs="0" name="MessageInfo" type="MessageInfo"/>
+          <xsd:element maxOccurs="1" minOccurs="1" name="PartyInfo" type="PartyInfo"/>
+          <xsd:element maxOccurs="1" minOccurs="1" name="CollaborationInfo" type="CollaborationInfo"/>
+          <xsd:element maxOccurs="1" minOccurs="1" name="MessageProperties" type="tns:MessageProperties"/>
+          <xsd:element maxOccurs="1" minOccurs="1" name="PayloadInfo" type="tns:PayloadInfo"/>
+        </xsd:all>
+        <xsd:attribute name="mpc" type="xsd:anyURI" use="optional"/>
+      </xsd:complexType>
+      <xsd:complexType name="MessageInfo">
+        <xsd:all>
+          <xsd:element maxOccurs="1" minOccurs="0" name="Timestamp" type="xsd:dateTime"/>
+          <xsd:element maxOccurs="1" minOccurs="0" name="MessageId" type="tns:max255-non-empty-string"/>
+          <xsd:element maxOccurs="1" minOccurs="0" name="RefToMessageId" type="tns:max255-non-empty-string"/>
+        </xsd:all>
+      </xsd:complexType>
+      <xsd:complexType name="PartyInfo">
+        <xsd:all>
+          <xsd:element maxOccurs="1" minOccurs="1" name="From" type="tns:From"/>
+          <xsd:element maxOccurs="1" minOccurs="0" name="To" type="tns:To"/>
+        </xsd:all>
+      </xsd:complexType>
+      <xsd:complexType name="PartyId">
+        <xsd:simpleContent>
+          <xsd:extension base="tns:max255-non-empty-string">
+            <xsd:attribute name="type" type="tns:max255-non-empty-string" use="required"/>
+          </xsd:extension>
+        </xsd:simpleContent>
+      </xsd:complexType>
+      <xsd:complexType name="From">
+        <xsd:all>
+          <xsd:element maxOccurs="1" minOccurs="1" name="PartyId" type="tns:PartyId"/>
+          <xsd:element maxOccurs="1" minOccurs="1" name="Role" type="tns:max255-non-empty-string"/>
+        </xsd:all>
+      </xsd:complexType>
+      <xsd:complexType name="To">
+        <xsd:all>
+          <xsd:element maxOccurs="1" minOccurs="1" name="PartyId" type="tns:PartyId"/>
+          <xsd:element maxOccurs="1" minOccurs="1" name="Role" type="tns:max255-non-empty-string"/>
+        </xsd:all>
+      </xsd:complexType>
+      <xsd:complexType name="CollaborationInfo">
+        <xsd:all>
+          <xsd:element minOccurs="0" name="AgreementRef" type="tns:AgreementRef"/>
+          <xsd:element maxOccurs="1" minOccurs="1" name="Service" type="tns:Service"/>
+          <xsd:element maxOccurs="1" minOccurs="1" name="Action" type="xsd:token"/>
+          <xsd:element maxOccurs="1" minOccurs="0" name="ConversationId" type="xsd:token"/>
+        </xsd:all>
+      </xsd:complexType>
+      <xsd:complexType name="Service">
+        <xsd:simpleContent>
+          <xsd:extension base="tns:max255-non-empty-string">
+            <xsd:attribute name="type" type="tns:max255-non-empty-string" use="required"/>
+          </xsd:extension>
+        </xsd:simpleContent>
+      </xsd:complexType>
+      <xsd:complexType name="AgreementRef">
+        <xsd:simpleContent>
+          <xsd:extension base="tns:max255-non-empty-string">
+            <xsd:attribute name="type" type="tns:max255-non-empty-string" use="optional"/>
+            <xsd:attribute name="pmode" type="tns:max255-non-empty-string" use="optional"/>
+          </xsd:extension>
+        </xsd:simpleContent>
+      </xsd:complexType>
+      <xsd:complexType name="PayloadInfo">
+        <xsd:sequence>
+          <xsd:element maxOccurs="unbounded" minOccurs="1" name="PartInfo" type="tns:PartInfo"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="PartInfo">
+        <xsd:all>
+          <xsd:element minOccurs="0" name="Schema" type="Schema"/>
+          <xsd:element maxOccurs="1" minOccurs="0" name="Description" type="tns:Description"/>
+          <xsd:element minOccurs="0" name="PartProperties" type="tns:PartProperties"/>
+        </xsd:all>
+        <xsd:attribute name="href" type="xsd:token" use="required"/>
+      </xsd:complexType>
+      <xsd:complexType name="Property">
+        <xsd:simpleContent>
+          <xsd:extension base="tns:max255-non-empty-string">
+            <xsd:attribute name="name" type="tns:max255-non-empty-string" use="required"/>
+            <xsd:attribute name="type" type="tns:max255-non-empty-string" use="optional"/>
+          </xsd:extension>
+        </xsd:simpleContent>
+      </xsd:complexType>
+      <xsd:complexType name="PartProperties">
+        <xsd:sequence>
+          <xsd:element maxOccurs="unbounded" name="Property" type="tns:Property"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="MessageProperties">
+        <xsd:sequence>
+          <xsd:element maxOccurs="unbounded" name="Property" type="Property"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="Schema">
+        <xsd:attribute name="location" type="xsd:anyURI" use="optional"/>
+        <xsd:attribute name="version" type="tns:max255-non-empty-string" use="optional"/>
+        <xsd:attribute name="namespace" type="tns:max255-non-empty-string" use="optional"/>
+      </xsd:complexType>
+      <xsd:complexType name="Description">
+        <xsd:simpleContent>
+          <xsd:extension base="tns:max255-non-empty-string">
+            <xsd:attribute ref="xml:lang" use="required"/>
+          </xsd:extension>
+        </xsd:simpleContent>
+      </xsd:complexType>
+      <xsd:simpleType name="max255-non-empty-string">
+        <xsd:restriction base="xsd:string">
+          <xsd:minLength value="1"/>
+          <xsd:maxLength value="255"/>
+        </xsd:restriction>
+      </xsd:simpleType>
+    </xsd:schema>
+    <xsd:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://org.ecodex.backend/1_1/" xmlns:ns1="http://www.w3.org/2005/05/xmlmime">
+      <xsd:import namespace="http://www.w3.org/2005/05/xmlmime"/>
+      <xsd:simpleType name="max255-non-empty-string">
+        <xsd:restriction base="xsd:string">
+          <xsd:minLength value="1"/>
+          <xsd:maxLength value="255"/>
+        </xsd:restriction>
+      </xsd:simpleType>
+      <xsd:element name="FaultDetail">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="code" type="xsd:string"/>
+            <xsd:element name="message" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="downloadMessageRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="messageID" nillable="true" type="tns:max255-non-empty-string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="downloadMessageResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="bodyload" type="tns:PayloadType"/>
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" type="tns:PayloadType"/>
+            <xsd:any minOccurs="0"/>
+            <!--Introduced to support validation and MTOM/XOP-->
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="retrieveMessageRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="messageID" nillable="true" type="tns:max255-non-empty-string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="retrieveMessageResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="bodyload" type="tns:LargePayloadType"/>
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" type="tns:LargePayloadType"/>
+            <xsd:any minOccurs="0"/>
+            <!--Introduced to support validation and MTOM/XOP-->
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="listPendingMessagesRequest" nillable="false" type="xsd:anyType"/>
+      <xsd:element name="listPendingMessagesResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="messageID" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="messageErrorsRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="messageID" type="tns:max255-non-empty-string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="messageStatusRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="messageID" type="tns:max255-non-empty-string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="sendRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="bodyload" type="tns:PayloadType"/>
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:PayloadType"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="submitRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="bodyload" type="tns:LargePayloadType"/>
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:LargePayloadType"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="submitResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="messageID" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="sendRequestURL">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" name="bodyload" type="tns:PayloadURLType"/>
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:PayloadURLType"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="sendResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="messageID" nillable="true" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:complexType name="PayloadType">
+        <xsd:simpleContent>
+          <xsd:extension base="ns1:base64Binary">
+            <xsd:attribute name="payloadId" type="xsd:token" use="required"/>
+          </xsd:extension>
+        </xsd:simpleContent>
+      </xsd:complexType>
+      <xsd:complexType name="LargePayloadType">
+        <xsd:sequence>
+          <xsd:element name="value" ns1:expectedContentTypes="application/octet-stream" type="xsd:base64Binary"/>
+        </xsd:sequence>
+        <xsd:attribute name="payloadId" type="xsd:token" use="required"/>
+        <xsd:attribute name="contentType" type="xsd:string"/>
+      </xsd:complexType>
+      <xsd:complexType name="errorResultImpl">
+        <xsd:sequence>
+          <xsd:element minOccurs="0" name="errorCode" type="tns:errorCode"/>
+          <xsd:element minOccurs="0" name="errorDetail" type="xsd:string"/>
+          <xsd:element minOccurs="0" name="messageInErrorId" type="xsd:string"/>
+          <xsd:element minOccurs="0" name="mshRole" type="tns:mshRole"/>
+          <xsd:element minOccurs="0" name="notified" type="xsd:dateTime"/>
+          <xsd:element minOccurs="0" name="timestamp" type="xsd:dateTime"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="PayloadURLType">
+        <xsd:simpleContent>
+          <xsd:extension base="xsd:string">
+            <xsd:attribute name="payloadId" type="xsd:token" use="required"/>
+          </xsd:extension>
+        </xsd:simpleContent>
+      </xsd:complexType>
+      <xsd:simpleType name="messageStatus">
+        <xsd:restriction base="xsd:string">
+          <xsd:enumeration value="READY_TO_SEND"/>
+          <xsd:enumeration value="SEND_ENQUEUED"/>
+          <xsd:enumeration value="SEND_IN_PROGRESS"/>
+          <xsd:enumeration value="WAITING_FOR_RECEIPT"/>
+          <xsd:enumeration value="ACKNOWLEDGED"/>
+          <xsd:enumeration value="ACKNOWLEDGED_WITH_WARNING"/>
+          <xsd:enumeration value="SEND_ATTEMPT_FAILED"/>
+          <xsd:enumeration value="SEND_FAILURE"/>
+          <xsd:enumeration value="NOT_FOUND"/>
+          <xsd:enumeration value="WAITING_FOR_RETRY"/>
+          <xsd:enumeration value="RECEIVED"/>
+          <xsd:enumeration value="RECEIVED_WITH_WARNINGS"/>
+          <xsd:enumeration value="DELETED"/>
+          <xsd:enumeration value="DOWNLOADED"/>
+        </xsd:restriction>
+      </xsd:simpleType>
+      <xsd:simpleType name="errorCode">
+        <xsd:restriction base="xsd:string">
+          <xsd:enumeration value="EBMS_0001"/>
+          <xsd:enumeration value="EBMS_0002"/>
+          <xsd:enumeration value="EBMS_0003"/>
+          <xsd:enumeration value="EBMS_0004"/>
+          <xsd:enumeration value="EBMS_0005"/>
+          <xsd:enumeration value="EBMS_0006"/>
+          <xsd:enumeration value="EBMS_0007"/>
+          <xsd:enumeration value="EBMS_0008"/>
+          <xsd:enumeration value="EBMS_0009"/>
+          <xsd:enumeration value="EBMS_0010"/>
+          <xsd:enumeration value="EBMS_0011"/>
+          <xsd:enumeration value="EBMS_0101"/>
+          <xsd:enumeration value="EBMS_0102"/>
+          <xsd:enumeration value="EBMS_0103"/>
+          <xsd:enumeration value="EBMS_0201"/>
+          <xsd:enumeration value="EBMS_0202"/>
+          <xsd:enumeration value="EBMS_0301"/>
+          <xsd:enumeration value="EBMS_0302"/>
+          <xsd:enumeration value="EBMS_0303"/>
+          <xsd:enumeration value="EBMS_0020"/>
+          <xsd:enumeration value="EBMS_0021"/>
+          <xsd:enumeration value="EBMS_0022"/>
+          <xsd:enumeration value="EBMS_0023"/>
+          <xsd:enumeration value="EBMS_0030"/>
+          <xsd:enumeration value="EBMS_0031"/>
+          <xsd:enumeration value="EBMS_0040"/>
+          <xsd:enumeration value="EBMS_0041"/>
+          <xsd:enumeration value="EBMS_0042"/>
+          <xsd:enumeration value="EBMS_0043"/>
+          <xsd:enumeration value="EBMS_0044"/>
+          <xsd:enumeration value="EBMS_0045"/>
+          <xsd:enumeration value="EBMS_0046"/>
+          <xsd:enumeration value="EBMS_0047"/>
+          <xsd:enumeration value="EBMS_0048"/>
+          <xsd:enumeration value="EBMS_0049"/>
+          <xsd:enumeration value="EBMS_0050"/>
+          <xsd:enumeration value="EBMS_0051"/>
+          <xsd:enumeration value="EBMS_0052"/>
+          <xsd:enumeration value="EBMS_0053"/>
+          <xsd:enumeration value="EBMS_0054"/>
+          <xsd:enumeration value="EBMS_0055"/>
+          <xsd:enumeration value="EBMS_0060"/>
+          <xsd:enumeration value="EBMS_0065"/>
+        </xsd:restriction>
+      </xsd:simpleType>
+      <xsd:simpleType name="mshRole">
+        <xsd:restriction base="xsd:string">
+          <xsd:enumeration value="SENDING"/>
+          <xsd:enumeration value="RECEIVING"/>
+        </xsd:restriction>
+      </xsd:simpleType>
+      <xsd:complexType final="#all" name="errorResultImplArray">
+        <xsd:sequence>
+          <xsd:element maxOccurs="unbounded" minOccurs="0" name="item" nillable="true" type="tns:errorResultImpl"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="getStatusRequest" nillable="true">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="messageID" type="tns:max255-non-empty-string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="statusRequest" nillable="true">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="messageID" type="tns:max255-non-empty-string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="getMessageStatusResponse" nillable="true" type="tns:messageStatus"/>
+      <xsd:element name="getStatusResponse" nillable="true" type="tns:messageStatus"/>
+      <xsd:element name="getErrorsRequest" nillable="true">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="messageID" type="tns:max255-non-empty-string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="getMessageErrorsResponse" nillable="true" type="tns:errorResultImplArray"/>
+    </xsd:schema>
+    <xs:schema targetNamespace="http://www.w3.org/XML/1998/namespace" xml:lang="en" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:annotation>
+        <xs:documentation>See http://www.w3.org/XML/1998/namespace.html and
+   http://www.w3.org/TR/REC-xml for information about this namespace.
+
+    This schema document describes the XML namespace, in a form
+    suitable for import by other schema documents.  
+
+    Note that local names in this namespace are intended to be defined
+    only by the World Wide Web Consortium or its subgroups.  The
+    following names are currently defined in this namespace and should
+    not be used with conflicting semantics by any Working Group,
+    specification, or document instance:
+
+    base (as an attribute name): denotes an attribute whose value
+         provides a URI to be used as the base for interpreting any
+         relative URIs in the scope of the element on which it
+         appears; its value is inherited.  This name is reserved
+         by virtue of its definition in the XML Base specification.
+
+    id   (as an attribute name): denotes an attribute whose value
+         should be interpreted as if declared to be of type ID.
+         The xml:id specification is not yet a W3C Recommendation,
+         but this attribute is included here to facilitate experimentation
+         with the mechanisms it proposes.  Note that it is _not_ included
+         in the specialAttrs attribute group.
+
+    lang (as an attribute name): denotes an attribute whose value
+         is a language code for the natural language of the content of
+         any element; its value is inherited.  This name is reserved
+         by virtue of its definition in the XML specification.
+  
+    space (as an attribute name): denotes an attribute whose
+         value is a keyword indicating what whitespace processing
+         discipline is intended for the content of the element; its
+         value is inherited.  This name is reserved by virtue of its
+         definition in the XML specification.
+
+    Father (in any context at all): denotes Jon Bosak, the chair of 
+         the original XML Working Group.  This name is reserved by 
+         the following decision of the W3C XML Plenary and 
+         XML Coordination groups:
+
+             In appreciation for his vision, leadership and dedication
+             the W3C XML Plenary on this 10th day of February, 2000
+             reserves for Jon Bosak in perpetuity the XML name
+             xml:Father</xs:documentation>
+      </xs:annotation>
+      <xs:annotation>
+        <xs:documentation>This schema defines attributes and an attribute group
+        suitable for use by
+        schemas wishing to allow xml:base, xml:lang, xml:space or xml:id
+        attributes on elements they define.
+
+        To enable this, such a schema must import this schema
+        for the XML namespace, e.g. as follows:
+        &lt;schema . . .>
+         . . .
+         &lt;import namespace="http://www.w3.org/XML/1998/namespace"
+                    schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+
+        Subsequently, qualified reference to any of the attributes
+        or the group defined below will have the desired effect, e.g.
+
+        &lt;type . . .>
+         . . .
+         &lt;attributeGroup ref="xml:specialAttrs"/>
+ 
+         will define a type which will schema-validate an instance
+         element with any of those attributes</xs:documentation>
+      </xs:annotation>
+      <xs:annotation>
+        <xs:documentation>In keeping with the XML Schema WG's standard versioning
+   policy, this schema document will persist at
+   http://www.w3.org/2005/08/xml.xsd.
+   At the date of issue it can also be found at
+   http://www.w3.org/2001/xml.xsd.
+   The schema document at that URI may however change in the future,
+   in order to remain compatible with the latest version of XML Schema
+   itself, or with the XML namespace itself.  In other words, if the XML
+   Schema or XML namespaces change, the version of this document at
+   http://www.w3.org/2001/xml.xsd will change
+   accordingly; the version at
+   http://www.w3.org/2005/08/xml.xsd will not change.</xs:documentation>
+      </xs:annotation>
+      <xs:attribute name="lang">
+        <xs:annotation>
+          <xs:documentation>Attempting to install the relevant ISO 2- and 3-letter
+         codes as the enumerated possible values is probably never
+         going to be a realistic possibility.  See
+         RFC 3066 at http://www.ietf.org/rfc/rfc3066.txt and the IANA registry
+         at http://www.iana.org/assignments/lang-tag-apps.htm for
+         further information.
+
+         The union allows for the 'un-declaration' of xml:lang with
+         the empty string.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:union memberTypes="xs:language">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value=""/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:union>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="space">
+        <xs:simpleType>
+          <xs:restriction base="xs:NCName">
+            <xs:enumeration value="default"/>
+            <xs:enumeration value="preserve"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="base" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation>See http://www.w3.org/TR/xmlbase/ for
+                     information about this attribute.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="id" type="xs:ID">
+        <xs:annotation>
+          <xs:documentation>See http://www.w3.org/TR/xml-id/ for
+                     information about this attribute.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attributeGroup name="specialAttrs">
+        <xs:attribute ref="xml:base"/>
+        <xs:attribute ref="xml:lang"/>
+        <xs:attribute ref="xml:space"/>
+      </xs:attributeGroup>
     </xs:schema>
-    <xs:schema targetNamespace="http://www.w3.org/2005/05/xmlmime" version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.w3.org/2005/05/xmlmime">
+    <xs:schema targetNamespace="http://www.w3.org/2005/05/xmlmime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xmime="http://www.w3.org/2005/05/xmlmime">
+      <xs:attribute name="contentType">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="3"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="expectedContentTypes" type="xs:string"/>
       <xs:complexType name="base64Binary">
         <xs:simpleContent>
           <xs:extension base="xs:base64Binary">
-            <xs:attribute ref="tns:contentType"/>
+            <xs:attribute ref="xmime:contentType"/>
           </xs:extension>
         </xs:simpleContent>
       </xs:complexType>
       <xs:complexType name="hexBinary">
         <xs:simpleContent>
-          <xs:extension base="xs:string">
-            <xs:attribute ref="tns:contentType"/>
+          <xs:extension base="xs:hexBinary">
+            <xs:attribute ref="xmime:contentType"/>
           </xs:extension>
         </xs:simpleContent>
-      </xs:complexType>
-      <xs:attribute name="contentType" type="xs:string"/>
-    </xs:schema>
-    <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.w3.org/2003/05/soap-envelope" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.w3.org/2003/05/soap-envelope" xmlns:S12="http://www.w3.org/2003/05/soap-envelope">
-      <xs:import namespace="http://www.w3.org/XML/1998/namespace"/>
-      <xs:element name="Body" type="tns:Body"/>
-      <xs:element name="Envelope" type="tns:Envelope"/>
-      <xs:element name="Fault" type="tns:Fault"/>
-      <xs:element name="Header" type="tns:Header"/>
-      <xs:element name="NotUnderstood" type="tns:NotUnderstoodType"/>
-      <xs:element name="Upgrade" type="tns:UpgradeType"/>
-      <xs:complexType name="NotUnderstoodType">
-        <xs:sequence/>
-        <xs:attribute name="qname" type="xs:QName" use="required"/>
-      </xs:complexType>
-      <xs:complexType name="SupportedEnvType">
-        <xs:sequence/>
-        <xs:attribute name="qname" type="xs:QName" use="required"/>
-      </xs:complexType>
-      <xs:complexType name="Envelope">
-        <xs:sequence>
-          <xs:element minOccurs="0" name="Header" type="tns:Header"/>
-          <xs:element name="Body" type="tns:Body"/>
-        </xs:sequence>
-        <xs:anyAttribute namespace="##other" processContents="skip"/>
-      </xs:complexType>
-      <xs:complexType name="Header">
-        <xs:sequence>
-          <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
-        </xs:sequence>
-        <xs:anyAttribute namespace="##other" processContents="skip"/>
-      </xs:complexType>
-      <xs:complexType name="Body">
-        <xs:sequence>
-          <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
-        </xs:sequence>
-        <xs:anyAttribute namespace="##other" processContents="skip"/>
-      </xs:complexType>
-      <xs:complexType name="UpgradeType">
-        <xs:sequence>
-          <xs:element maxOccurs="unbounded" name="SupportedEnvelope" type="tns:SupportedEnvType"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="faultcode">
-        <xs:sequence>
-          <xs:element name="Value" type="xs:QName"/>
-          <xs:element minOccurs="0" name="Subcode" type="tns:subcode"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="subcode">
-        <xs:sequence>
-          <xs:element name="Value" type="xs:QName"/>
-          <xs:element minOccurs="0" name="Subcode" type="tns:subcode"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="reasontext">
-        <xs:simpleContent>
-          <xs:extension base="xs:string">
-            <xs:attribute ref="xml:lang" use="required"/>
-          </xs:extension>
-        </xs:simpleContent>
-      </xs:complexType>
-      <xs:complexType name="faultreason">
-        <xs:sequence>
-          <xs:element maxOccurs="unbounded" name="Text" type="tns:reasontext"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="detail">
-        <xs:sequence>
-          <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
-        </xs:sequence>
-        <xs:anyAttribute namespace="##other" processContents="skip"/>
-      </xs:complexType>
-      <xs:complexType name="Fault">
-        <xs:sequence>
-          <xs:element name="Code" type="tns:faultcode"/>
-          <xs:element name="Reason" type="tns:faultreason"/>
-          <xs:element minOccurs="0" name="Node" type="xs:anyURI"/>
-          <xs:element minOccurs="0" name="Role" type="xs:anyURI"/>
-          <xs:element minOccurs="0" name="Detail" type="tns:detail"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:attribute name="mustUnderstand" type="xs:boolean"/>
-    </xs:schema>
-    <xs:schema targetNamespace="http://schemas.xmlsoap.org/soap/envelope/" version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.xmlsoap.org/soap/envelope/" xmlns:S11="http://schemas.xmlsoap.org/soap/envelope/">
-      <xs:element name="Body" type="tns:Body"/>
-      <xs:element name="Envelope" type="tns:Envelope"/>
-      <xs:element name="Fault" type="tns:Fault"/>
-      <xs:element name="Header" type="tns:Header"/>
-      <xs:complexType name="Envelope">
-        <xs:sequence>
-          <xs:element form="qualified" minOccurs="0" name="Header" type="tns:Header"/>
-          <xs:element form="qualified" name="Body" type="tns:Body"/>
-          <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
-        </xs:sequence>
-        <xs:anyAttribute namespace="##other" processContents="skip"/>
-      </xs:complexType>
-      <xs:complexType name="Header">
-        <xs:sequence>
-          <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
-        </xs:sequence>
-        <xs:anyAttribute namespace="##other" processContents="skip"/>
-      </xs:complexType>
-      <xs:complexType name="Body">
-        <xs:sequence>
-          <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
-        </xs:sequence>
-        <xs:anyAttribute namespace="##other" processContents="skip"/>
-      </xs:complexType>
-      <xs:complexType name="detail">
-        <xs:sequence>
-          <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
-        </xs:sequence>
-        <xs:anyAttribute namespace="##other" processContents="skip"/>
-      </xs:complexType>
-      <xs:complexType name="Fault">
-        <xs:sequence>
-          <xs:element name="faultcode" type="xs:QName"/>
-          <xs:element name="faultstring" type="xs:string"/>
-          <xs:element minOccurs="0" name="faultactor" type="xs:anyURI"/>
-          <xs:element minOccurs="0" name="detail" type="tns:detail"/>
-        </xs:sequence>
-      </xs:complexType>
-    </xs:schema>
-    <xs:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://org.ecodex.backend/1_1/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://www.w3.org/2005/05/xmlmime">
-      <xs:import namespace="http://www.w3.org/2005/05/xmlmime"/>
-      <xs:element name="FaultDetail">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="code" type="xs:string"/>
-            <xs:element name="message" nillable="true" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="downloadMessageRequest">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="messageID" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="downloadMessageResponse">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element minOccurs="0" name="bodyload" type="tns:PayloadType"/>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:PayloadType"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="listPendingMessagesRequest" type="xs:anyType"/>
-      <xs:element name="listPendingMessagesResponse">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="messageID" nillable="true" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="messageErrorsRequest">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="messageID" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="messageStatusRequest">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="messageID" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="sendRequest">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element minOccurs="0" name="bodyload" type="tns:PayloadType"/>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:PayloadType"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="sendRequestURL">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element minOccurs="0" name="bodyload" type="tns:PayloadURLType"/>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:PayloadURLType"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="sendResponse">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="messageID" nillable="true" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:complexType name="PayloadType">
-        <xs:simpleContent>
-          <xs:extension base="ns1:base64Binary">
-            <xs:attribute name="payloadId" type="xs:token" use="required"/>
-          </xs:extension>
-        </xs:simpleContent>
-      </xs:complexType>
-      <xs:complexType name="errorResultImpl">
-        <xs:sequence>
-          <xs:element minOccurs="0" name="errorCode" type="tns:errorCode"/>
-          <xs:element minOccurs="0" name="errorDetail" type="xs:string"/>
-          <xs:element minOccurs="0" name="messageInErrorId" type="xs:string"/>
-          <xs:element minOccurs="0" name="mshRole" type="tns:mshRole"/>
-          <xs:element minOccurs="0" name="notified" type="xs:dateTime"/>
-          <xs:element minOccurs="0" name="timestamp" type="xs:dateTime"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="PayloadURLType">
-        <xs:simpleContent>
-          <xs:extension base="xs:string">
-            <xs:attribute name="payloadId" type="xs:token" use="required"/>
-          </xs:extension>
-        </xs:simpleContent>
-      </xs:complexType>
-      <xs:simpleType name="messageStatus">
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="READY_TO_SEND"/>
-          <xs:enumeration value="SEND_ENQUEUED"/>
-          <xs:enumeration value="SEND_IN_PROGRESS"/>
-          <xs:enumeration value="WAITING_FOR_RECEIPT"/>
-          <xs:enumeration value="ACKNOWLEDGED"/>
-          <xs:enumeration value="ACKNOWLEDGED_WITH_WARNING"/>
-          <xs:enumeration value="SEND_ATTEMPT_FAILED"/>
-          <xs:enumeration value="SEND_FAILURE"/>
-          <xs:enumeration value="NOT_FOUND"/>
-          <xs:enumeration value="WAITING_FOR_RETRY"/>
-          <xs:enumeration value="RECEIVED"/>
-          <xs:enumeration value="RECEIVED_WITH_WARNINGS"/>
-          <xs:enumeration value="DELETED"/>
-          <xs:enumeration value="DOWNLOADED"/>
-        </xs:restriction>
-      </xs:simpleType>
-      <xs:simpleType name="errorCode">
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="EBMS_0001"/>
-          <xs:enumeration value="EBMS_0002"/>
-          <xs:enumeration value="EBMS_0003"/>
-          <xs:enumeration value="EBMS_0004"/>
-          <xs:enumeration value="EBMS_0005"/>
-          <xs:enumeration value="EBMS_0006"/>
-          <xs:enumeration value="EBMS_0007"/>
-          <xs:enumeration value="EBMS_0008"/>
-          <xs:enumeration value="EBMS_0009"/>
-          <xs:enumeration value="EBMS_0010"/>
-          <xs:enumeration value="EBMS_0011"/>
-          <xs:enumeration value="EBMS_0101"/>
-          <xs:enumeration value="EBMS_0102"/>
-          <xs:enumeration value="EBMS_0103"/>
-          <xs:enumeration value="EBMS_0201"/>
-          <xs:enumeration value="EBMS_0202"/>
-          <xs:enumeration value="EBMS_0301"/>
-          <xs:enumeration value="EBMS_0302"/>
-          <xs:enumeration value="EBMS_0303"/>
-          <xs:enumeration value="EBMS_0020"/>
-          <xs:enumeration value="EBMS_0021"/>
-          <xs:enumeration value="EBMS_0022"/>
-          <xs:enumeration value="EBMS_0023"/>
-          <xs:enumeration value="EBMS_0030"/>
-          <xs:enumeration value="EBMS_0031"/>
-          <xs:enumeration value="EBMS_0040"/>
-          <xs:enumeration value="EBMS_0041"/>
-          <xs:enumeration value="EBMS_0042"/>
-          <xs:enumeration value="EBMS_0043"/>
-          <xs:enumeration value="EBMS_0044"/>
-          <xs:enumeration value="EBMS_0045"/>
-          <xs:enumeration value="EBMS_0046"/>
-          <xs:enumeration value="EBMS_0047"/>
-          <xs:enumeration value="EBMS_0048"/>
-          <xs:enumeration value="EBMS_0049"/>
-          <xs:enumeration value="EBMS_0050"/>
-          <xs:enumeration value="EBMS_0051"/>
-          <xs:enumeration value="EBMS_0052"/>
-          <xs:enumeration value="EBMS_0053"/>
-          <xs:enumeration value="EBMS_0054"/>
-          <xs:enumeration value="EBMS_0055"/>
-          <xs:enumeration value="EBMS_0060"/>
-          <xs:enumeration value="EBMS_0065"/>
-        </xs:restriction>
-      </xs:simpleType>
-      <xs:simpleType name="mshRole">
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="SENDING"/>
-          <xs:enumeration value="RECEIVING"/>
-        </xs:restriction>
-      </xs:simpleType>
-      <xs:complexType final="#all" name="errorResultImplArray">
-        <xs:sequence>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="item" nillable="true" type="tns:errorResultImpl"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:element name="getStatusRequest" nillable="true">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="messageID" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="getMessageStatusResponse" nillable="true" type="tns:messageStatus"/>
-      <xs:element name="getErrorsRequest" nillable="true">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="messageID" type="xs:string"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="getMessageErrorsResponse" nillable="true" type="tns:errorResultImplArray"/>
-    </xs:schema>
-    <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:ns1="http://www.w3.org/2003/05/soap-envelope" xmlns:eb="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
-      <xs:import namespace="http://www.w3.org/2003/05/soap-envelope"/>
-      <xs:import namespace="http://www.w3.org/XML/1998/namespace"/>
-      <xs:element name="Messaging" type="tns:Messaging"/>
-      <xs:element name="UserMessage" type="tns:UserMessage"/>
-      <xs:complexType name="Messaging">
-        <xs:sequence>
-          <xs:element minOccurs="0" name="SignalMessage" type="tns:SignalMessage"/>
-          <xs:element minOccurs="0" name="UserMessage" type="tns:UserMessage"/>
-          <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
-        </xs:sequence>
-        <xs:attribute name="id" type="xs:ID"/>
-        <xs:attribute ref="ns1:mustUnderstand"/>
-        <xs:anyAttribute namespace="##other" processContents="skip"/>
-      </xs:complexType>
-      <xs:complexType name="SignalMessage">
-        <xs:sequence>
-          <xs:element name="MessageInfo" type="tns:MessageInfo"/>
-          <xs:element minOccurs="0" name="PullRequest" type="tns:PullRequest"/>
-          <xs:element minOccurs="0" name="Receipt" type="tns:Receipt"/>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="Error" type="tns:Error"/>
-          <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="MessageInfo">
-        <xs:sequence>
-          <xs:element name="Timestamp" type="xs:dateTime"/>
-          <xs:element name="MessageId" type="xs:string"/>
-          <xs:element minOccurs="0" name="RefToMessageId" type="xs:string"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="PullRequest">
-        <xs:sequence>
-          <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
-        </xs:sequence>
-        <xs:attribute name="mpc" type="xs:anyURI"/>
-        <xs:anyAttribute namespace="##other" processContents="skip"/>
-      </xs:complexType>
-      <xs:complexType name="Service">
-        <xs:simpleContent>
-          <xs:extension base="xs:string">
-            <xs:attribute name="type" type="xs:string"/>
-          </xs:extension>
-        </xs:simpleContent>
-      </xs:complexType>
-      <xs:complexType name="PartyId">
-        <xs:simpleContent>
-          <xs:extension base="xs:string">
-            <xs:attribute name="type" type="xs:string"/>
-          </xs:extension>
-        </xs:simpleContent>
-      </xs:complexType>
-      <xs:complexType name="Schema">
-        <xs:sequence/>
-        <xs:attribute name="location" type="xs:anyURI" use="required"/>
-        <xs:attribute name="version" type="xs:string"/>
-        <xs:attribute name="namespace" type="xs:string"/>
-      </xs:complexType>
-      <xs:complexType name="To">
-        <xs:sequence>
-          <xs:element maxOccurs="unbounded" name="PartyId" type="tns:PartyId"/>
-          <xs:element default="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultRole" name="Role" type="xs:string"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="Error">
-        <xs:sequence>
-          <xs:element minOccurs="0" name="Description" type="tns:Description"/>
-          <xs:element minOccurs="0" name="ErrorDetail" type="xs:token"/>
-        </xs:sequence>
-        <xs:attribute name="category" type="xs:token"/>
-        <xs:attribute name="refToMessageInError" type="xs:token"/>
-        <xs:attribute name="errorCode" type="xs:token" use="required"/>
-        <xs:attribute name="origin" type="xs:token"/>
-        <xs:attribute name="severity" type="xs:token" use="required"/>
-        <xs:attribute name="shortDescription" type="xs:token"/>
-      </xs:complexType>
-      <xs:complexType name="Description">
-        <xs:simpleContent>
-          <xs:extension base="xs:string">
-            <xs:attribute ref="xml:lang" use="required"/>
-          </xs:extension>
-        </xs:simpleContent>
-      </xs:complexType>
-      <xs:complexType name="Receipt">
-        <xs:sequence>
-          <xs:any namespace="##other" processContents="skip"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="CollaborationInfo">
-        <xs:sequence>
-          <xs:element minOccurs="0" name="AgreementRef" type="tns:AgreementRef"/>
-          <xs:element name="Service" type="tns:Service"/>
-          <xs:element name="Action" type="xs:token"/>
-          <xs:element name="ConversationId" type="xs:token"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="AgreementRef">
-        <xs:simpleContent>
-          <xs:extension base="xs:string">
-            <xs:attribute name="type" type="xs:string"/>
-            <xs:attribute name="pmode" type="xs:string"/>
-          </xs:extension>
-        </xs:simpleContent>
-      </xs:complexType>
-      <xs:complexType name="MessageProperties">
-        <xs:sequence>
-          <xs:element maxOccurs="unbounded" name="Property" type="tns:Property"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="Property">
-        <xs:simpleContent>
-          <xs:extension base="xs:string">
-            <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="type" type="xs:string"/>
-          </xs:extension>
-        </xs:simpleContent>
-      </xs:complexType>
-      <xs:complexType name="From">
-        <xs:sequence>
-          <xs:element maxOccurs="unbounded" name="PartyId" type="tns:PartyId"/>
-          <xs:element default="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultRole" name="Role" type="xs:string"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="PartProperties">
-        <xs:sequence>
-          <xs:element maxOccurs="unbounded" name="Property" type="tns:Property"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="PartyInfo">
-        <xs:sequence>
-          <xs:element name="From" type="tns:From"/>
-          <xs:element name="To" type="tns:To"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="PayloadInfo">
-        <xs:sequence>
-          <xs:element maxOccurs="unbounded" name="PartInfo" type="tns:PartInfo"/>
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="PartInfo">
-        <xs:sequence>
-          <xs:element minOccurs="0" name="Schema" type="tns:Schema"/>
-          <xs:element minOccurs="0" name="Description" type="tns:Description"/>
-          <xs:element minOccurs="0" name="PartProperties" type="tns:PartProperties"/>
-        </xs:sequence>
-        <xs:attribute name="href" type="xs:token"/>
-      </xs:complexType>
-      <xs:complexType name="UserMessage">
-        <xs:sequence>
-          <xs:element name="MessageInfo" type="tns:MessageInfo"/>
-          <xs:element name="PartyInfo" type="tns:PartyInfo"/>
-          <xs:element name="CollaborationInfo" type="tns:CollaborationInfo"/>
-          <xs:element minOccurs="0" name="MessageProperties" type="tns:MessageProperties"/>
-          <xs:element minOccurs="0" name="PayloadInfo" type="tns:PayloadInfo"/>
-        </xs:sequence>
-        <xs:attribute name="mpc" type="xs:anyURI"/>
       </xs:complexType>
     </xs:schema>
   </wsdl:types>
-  <wsdl:message name="getMessageErrors">
-    <wsdl:part element="tns:getErrorsRequest" name="getErrorsRequest"></wsdl:part>
-  </wsdl:message>
   <wsdl:message name="downloadMessage">
     <wsdl:part element="tns:downloadMessageRequest" name="downloadMessageRequest"></wsdl:part>
   </wsdl:message>
   <wsdl:message name="DownloadMessageFault">
     <wsdl:part element="tns:FaultDetail" name="DownloadMessageFault"></wsdl:part>
   </wsdl:message>
-  <wsdl:message name="downloadMessageResponse">
-    <wsdl:part element="tns:downloadMessageResponse" name="downloadMessageResponse"></wsdl:part>
-    <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo"></wsdl:part>
-  </wsdl:message>
   <wsdl:message name="listPendingMessagesResponse">
     <wsdl:part element="tns:listPendingMessagesResponse" name="listPendingMessagesResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getStatusResponse">
+    <wsdl:part element="tns:getStatusResponse" name="getStatusResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getStatus">
+    <wsdl:part element="tns:statusRequest" name="statusRequest"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="submitMessageResponse">
+    <wsdl:part element="tns:submitResponse" name="submitResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getMessageErrors">
+    <wsdl:part element="tns:getErrorsRequest" name="getErrorsRequest"></wsdl:part>
   </wsdl:message>
   <wsdl:message name="getMessageStatusResponse">
     <wsdl:part element="tns:getMessageStatusResponse" name="getMessageStatusResponse"></wsdl:part>
   </wsdl:message>
+  <wsdl:message name="downloadMessageResponse">
+    <wsdl:part element="tns:downloadMessageResponse" name="downloadMessageResponse"></wsdl:part>
+    <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo"></wsdl:part>
+  </wsdl:message>
   <wsdl:message name="listPendingMessages">
     <wsdl:part element="tns:listPendingMessagesRequest" name="listPendingMessagesRequest"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="retrieveMessage">
+    <wsdl:part element="tns:retrieveMessageRequest" name="retrieveMessageRequest"></wsdl:part>
   </wsdl:message>
   <wsdl:message name="getMessageStatus">
     <wsdl:part element="tns:getStatusRequest" name="getStatusRequest"></wsdl:part>
   </wsdl:message>
   <wsdl:message name="sendMessageResponse">
     <wsdl:part element="tns:sendResponse" name="sendResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="retrieveMessageResponse">
+    <wsdl:part element="tns:retrieveMessageResponse" name="retrieveMessageResponse"></wsdl:part>
+    <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo"></wsdl:part>
   </wsdl:message>
   <wsdl:message name="sendMessage">
     <wsdl:part element="tns:sendRequest" name="sendRequest"></wsdl:part>
@@ -526,15 +584,38 @@
   <wsdl:message name="getMessageErrorsResponse">
     <wsdl:part element="tns:getMessageErrorsResponse" name="getMessageErrorsResponse"></wsdl:part>
   </wsdl:message>
+  <wsdl:message name="submitMessage">
+    <wsdl:part element="tns:submitRequest" name="submitRequest"></wsdl:part>
+    <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo"></wsdl:part>
+  </wsdl:message>
   <wsdl:portType name="BackendInterface">
     <wsdl:operation name="sendMessage">
       <wsdl:input message="tns:sendMessage" name="sendMessage"></wsdl:input>
       <wsdl:output message="tns:sendMessageResponse" name="sendMessageResponse"></wsdl:output>
       <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault"></wsdl:fault>
     </wsdl:operation>
+    <wsdl:operation name="retrieveMessage" parameterOrder="retrieveMessageRequest retrieveMessageResponse ebMSHeaderInfo">
+      <wsdl:input message="tns:retrieveMessage" name="retrieveMessage"></wsdl:input>
+      <wsdl:output message="tns:retrieveMessageResponse" name="retrieveMessageResponse"></wsdl:output>
+      <wsdl:fault message="tns:DownloadMessageFault" name="DownloadMessageFault"></wsdl:fault>
+    </wsdl:operation>
     <wsdl:operation name="getMessageStatus">
       <wsdl:input message="tns:getMessageStatus" name="getMessageStatus"></wsdl:input>
       <wsdl:output message="tns:getMessageStatusResponse" name="getMessageStatusResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="submitMessage">
+      <wsdl:input message="tns:submitMessage" name="submitMessage"></wsdl:input>
+      <wsdl:output message="tns:submitMessageResponse" name="submitMessageResponse"></wsdl:output>
+      <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault"></wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="downloadMessage" parameterOrder="downloadMessageRequest downloadMessageResponse ebMSHeaderInfo">
+      <wsdl:input message="tns:downloadMessage" name="downloadMessage"></wsdl:input>
+      <wsdl:output message="tns:downloadMessageResponse" name="downloadMessageResponse"></wsdl:output>
+      <wsdl:fault message="tns:DownloadMessageFault" name="DownloadMessageFault"></wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getStatus">
+      <wsdl:input message="tns:getStatus" name="getStatus"></wsdl:input>
+      <wsdl:output message="tns:getStatusResponse" name="getStatusResponse"></wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="listPendingMessages">
       <wsdl:input message="tns:listPendingMessages" name="listPendingMessages"></wsdl:input>
@@ -543,11 +624,6 @@
     <wsdl:operation name="getMessageErrors">
       <wsdl:input message="tns:getMessageErrors" name="getMessageErrors"></wsdl:input>
       <wsdl:output message="tns:getMessageErrorsResponse" name="getMessageErrorsResponse"></wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="downloadMessage" parameterOrder="downloadMessageRequest downloadMessageResponse ebMSHeaderInfo">
-      <wsdl:input message="tns:downloadMessage" name="downloadMessage"></wsdl:input>
-      <wsdl:output message="tns:downloadMessageResponse" name="downloadMessageResponse"></wsdl:output>
-      <wsdl:fault message="tns:DownloadMessageFault" name="DownloadMessageFault"></wsdl:fault>
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="BackendService_1_1SoapBinding" type="tns:BackendInterface">
@@ -565,12 +641,60 @@
         <soap12:fault name="SendMessageFault" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
+    <wsdl:operation name="retrieveMessage">
+      <soap12:operation soapAction="" style="document"/>
+      <wsdl:input name="retrieveMessage">
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="retrieveMessageResponse">
+        <soap12:header message="tns:retrieveMessageResponse" part="ebMSHeaderInfo" use="literal"></soap12:header>
+        <soap12:body parts="retrieveMessageResponse" use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="DownloadMessageFault">
+        <soap12:fault name="DownloadMessageFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
     <wsdl:operation name="getMessageStatus">
       <soap12:operation soapAction="" style="document"/>
       <wsdl:input name="getMessageStatus">
         <soap12:body use="literal"/>
       </wsdl:input>
       <wsdl:output name="getMessageStatusResponse">
+        <soap12:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="submitMessage">
+      <soap12:operation soapAction="" style="document"/>
+      <wsdl:input name="submitMessage">
+        <soap12:header message="tns:submitMessage" part="ebMSHeaderInfo" use="literal"></soap12:header>
+        <soap12:body parts="submitRequest" use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="submitMessageResponse">
+        <soap12:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="SendMessageFault">
+        <soap12:fault name="SendMessageFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="downloadMessage">
+      <soap12:operation soapAction="" style="document"/>
+      <wsdl:input name="downloadMessage">
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="downloadMessageResponse">
+        <soap12:header message="tns:downloadMessageResponse" part="ebMSHeaderInfo" use="literal"></soap12:header>
+        <soap12:body parts="downloadMessageResponse" use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="DownloadMessageFault">
+        <soap12:fault name="DownloadMessageFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getStatus">
+      <soap12:operation soapAction="" style="document"/>
+      <wsdl:input name="getStatus">
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getStatusResponse">
         <soap12:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
@@ -592,26 +716,195 @@
         <soap12:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="downloadMessage">
-      <soap12:operation soapAction="" style="document"/>
-      <wsdl:input name="downloadMessage">
-        <soap12:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="downloadMessageResponse">
-        <soap12:header message="tns:downloadMessageResponse" part="ebMSHeaderInfo" use="literal"></soap12:header>
-        <soap12:body parts="downloadMessageResponse" use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="DownloadMessageFault">
-        <soap12:fault name="DownloadMessageFault" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="BackendService_1_1">
     <wsdl:port binding="tns:BackendService_1_1SoapBinding" name="BACKEND_PORT">
       <soap12:address location="http://localhost:8080/domibus/services/backend"/>
     </wsdl:port>
   </wsdl:service>
-</wsdl:definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint></con:endpoints><con:operation id="dc567009-e72d-4167-9ec7-fe2ac1738684" isOneWay="false" action="" name="downloadMessage" bindingOperationName="downloadMessage" type="Request-Response" outputName="downloadMessageResponse" inputName="downloadMessage" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation><con:operation id="767cb481-8b7d-45ef-957f-e823696a27be" isOneWay="false" action="" name="getMessageErrors" bindingOperationName="getMessageErrors" type="Request-Response" outputName="getMessageErrorsResponse" inputName="getMessageErrors" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation><con:operation id="95ae55fb-b5a3-4575-94c9-44c3dedf1981" isOneWay="false" action="" name="getMessageStatus" bindingOperationName="getMessageStatus" type="Request-Response" outputName="getMessageStatusResponse" inputName="getMessageStatus" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation><con:operation id="f3563058-db2b-4135-a5e0-ddcfb8386683" isOneWay="false" action="" name="listPendingMessages" bindingOperationName="listPendingMessages" type="Request-Response" outputName="listPendingMessagesResponse" inputName="listPendingMessages" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation><con:operation id="3fe9115c-da9f-495b-90c5-4efabf0c9fa2" isOneWay="false" action="" name="sendMessage" bindingOperationName="sendMessage" type="Request-Response" outputName="sendMessageResponse" inputName="sendMessage" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation></con:interface><con:testSuite id="8345ac14-50f6-466e-8f9e-417c5c9280e5" name="Web Service Submission"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Business Scenario" searchProperties="true" id="86589e1f-bd28-4db0-b31c-ff7789eab78f">
+</wsdl:definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint></con:endpoints><con:operation id="dc567009-e72d-4167-9ec7-fe2ac1738684" isOneWay="false" action="" name="downloadMessage" bindingOperationName="downloadMessage" type="Request-Response" outputName="downloadMessageResponse" inputName="downloadMessage" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="f79dd490-a71e-4359-99f7-c6616b25435c" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+   <soap:Header/>
+   <soap:Body>
+      <_1:downloadMessageRequest>
+         <messageID>?</messageID>
+      </_1:downloadMessageRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/downloadMessage"/></con:call></con:operation><con:operation id="767cb481-8b7d-45ef-957f-e823696a27be" isOneWay="false" action="" name="getMessageErrors" bindingOperationName="getMessageErrors" type="Request-Response" outputName="getMessageErrorsResponse" inputName="getMessageErrors" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="65a67b0b-cbe6-414b-8fa0-f0c64c3dd412" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+   <soap:Header/>
+   <soap:Body>
+      <_1:getErrorsRequest>
+         <messageID>?</messageID>
+      </_1:getErrorsRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/getMessageErrors"/></con:call></con:operation><con:operation id="95ae55fb-b5a3-4575-94c9-44c3dedf1981" isOneWay="false" action="" name="getMessageStatus" bindingOperationName="getMessageStatus" type="Request-Response" outputName="getMessageStatusResponse" inputName="getMessageStatus" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="dd4d9cef-769e-424a-ba1b-22e2e982cb8b" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+   <soap:Header/>
+   <soap:Body>
+      <_1:getStatusRequest>
+         <messageID>?</messageID>
+      </_1:getStatusRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/getMessageStatus"/></con:call></con:operation><con:operation id="f3563058-db2b-4135-a5e0-ddcfb8386683" isOneWay="false" action="" name="listPendingMessages" bindingOperationName="listPendingMessages" type="Request-Response" outputName="listPendingMessagesResponse" inputName="listPendingMessages" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="dd300cdb-a4e4-45f0-826d-4423845d0442" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+   <soap:Header/>
+   <soap:Body>
+      <_1:listPendingMessagesRequest>?</_1:listPendingMessagesRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/listPendingMessages"/></con:call></con:operation><con:operation id="3fe9115c-da9f-495b-90c5-4efabf0c9fa2" isOneWay="false" action="" name="sendMessage" bindingOperationName="sendMessage" type="Request-Response" outputName="sendMessageResponse" inputName="sendMessage" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="33a213a1-8ed7-40b6-8e7b-55be4723092d" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+   <soap:Header>
+      <ns:Messaging mustUnderstand="?">
+         <!--Optional:-->
+         <ns:UserMessage mpc="?">
+            <!--You may enter the following 5 items in any order-->
+            <!--Optional:-->
+            <ns:MessageInfo>
+               <!--You may enter the following 3 items in any order-->
+               <!--Optional:-->
+               <ns:Timestamp>?</ns:Timestamp>
+               <!--Optional:-->
+               <ns:MessageId>?</ns:MessageId>
+               <!--Optional:-->
+               <ns:RefToMessageId>?</ns:RefToMessageId>
+            </ns:MessageInfo>
+            <ns:PartyInfo>
+               <!--You may enter the following 2 items in any order-->
+               <ns:From>
+                  <!--You may enter the following 2 items in any order-->
+                  <ns:PartyId type="?">?</ns:PartyId>
+                  <ns:Role>?</ns:Role>
+               </ns:From>
+               <!--Optional:-->
+               <ns:To>
+                  <!--You may enter the following 2 items in any order-->
+                  <ns:PartyId type="?">?</ns:PartyId>
+                  <ns:Role>?</ns:Role>
+               </ns:To>
+            </ns:PartyInfo>
+            <ns:CollaborationInfo>
+               <!--You may enter the following 4 items in any order-->
+               <!--Optional:-->
+               <ns:AgreementRef type="?" pmode="?">?</ns:AgreementRef>
+               <ns:Service type="?">?</ns:Service>
+               <ns:Action>?</ns:Action>
+               <!--Optional:-->
+               <ns:ConversationId>?</ns:ConversationId>
+            </ns:CollaborationInfo>
+            <ns:MessageProperties>
+               <!--1 or more repetitions:-->
+               <ns:Property name="?" type="?">?</ns:Property>
+            </ns:MessageProperties>
+            <ns:PayloadInfo>
+               <!--1 or more repetitions:-->
+               <ns:PartInfo href="?">
+                  <!--You may enter the following 3 items in any order-->
+                  <!--Optional:-->
+                  <ns:Schema location="?" version="?" namespace="?"/>
+                  <!--Optional:-->
+                  <ns:Description xml:lang="?">?</ns:Description>
+                  <!--Optional:-->
+                  <ns:PartProperties>
+                     <!--1 or more repetitions:-->
+                     <ns:Property name="?" type="?">?</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
+            </ns:PayloadInfo>
+         </ns:UserMessage>
+      </ns:Messaging>
+   </soap:Header>
+   <soap:Body>
+      <_1:sendRequest>
+         <!--Optional:-->
+         <bodyload xm:contentType="application/?" payloadId="?">cid:920080530403</bodyload>
+         <!--Zero or more repetitions:-->
+         <payload xm:contentType="application/?" payloadId="?">cid:382424662608</payload>
+      </_1:sendRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/sendMessage"/></con:call></con:operation><con:operation id="f9f04f32-d5af-4626-9463-548abb965805" isOneWay="false" action="" name="retrieveMessage" bindingOperationName="retrieveMessage" type="Request-Response" outputName="retrieveMessageResponse" inputName="retrieveMessage" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="16743867-c9ea-440b-871a-80219f76ccce" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+   <soap:Header/>
+   <soap:Body>
+      <_1:retrieveMessageRequest>
+         <messageID>?</messageID>
+      </_1:retrieveMessageRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/></con:call></con:operation><con:operation id="01b40577-1ff8-49bf-ac18-c6f8ba518d07" isOneWay="false" action="" name="submitMessage" bindingOperationName="submitMessage" type="Request-Response" outputName="submitMessageResponse" inputName="submitMessage" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="f629cf8e-798f-4483-bcaf-d5929a2f132e" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/">
+   <soap:Header>
+      <ns:Messaging mustUnderstand="?">
+         <!--Optional:-->
+         <ns:UserMessage mpc="?">
+            <!--You may enter the following 5 items in any order-->
+            <!--Optional:-->
+            <ns:MessageInfo>
+               <!--You may enter the following 3 items in any order-->
+               <!--Optional:-->
+               <ns:Timestamp>?</ns:Timestamp>
+               <!--Optional:-->
+               <ns:MessageId>?</ns:MessageId>
+               <!--Optional:-->
+               <ns:RefToMessageId>?</ns:RefToMessageId>
+            </ns:MessageInfo>
+            <ns:PartyInfo>
+               <!--You may enter the following 2 items in any order-->
+               <ns:From>
+                  <!--You may enter the following 2 items in any order-->
+                  <ns:PartyId type="?">?</ns:PartyId>
+                  <ns:Role>?</ns:Role>
+               </ns:From>
+               <!--Optional:-->
+               <ns:To>
+                  <!--You may enter the following 2 items in any order-->
+                  <ns:PartyId type="?">?</ns:PartyId>
+                  <ns:Role>?</ns:Role>
+               </ns:To>
+            </ns:PartyInfo>
+            <ns:CollaborationInfo>
+               <!--You may enter the following 4 items in any order-->
+               <!--Optional:-->
+               <ns:AgreementRef type="?" pmode="?">?</ns:AgreementRef>
+               <ns:Service type="?">?</ns:Service>
+               <ns:Action>?</ns:Action>
+               <!--Optional:-->
+               <ns:ConversationId>?</ns:ConversationId>
+            </ns:CollaborationInfo>
+            <ns:MessageProperties>
+               <!--1 or more repetitions:-->
+               <ns:Property name="?" type="?">?</ns:Property>
+            </ns:MessageProperties>
+            <ns:PayloadInfo>
+               <!--1 or more repetitions:-->
+               <ns:PartInfo href="?">
+                  <!--You may enter the following 3 items in any order-->
+                  <!--Optional:-->
+                  <ns:Schema location="?" version="?" namespace="?"/>
+                  <!--Optional:-->
+                  <ns:Description xml:lang="?">?</ns:Description>
+                  <!--Optional:-->
+                  <ns:PartProperties>
+                     <!--1 or more repetitions:-->
+                     <ns:Property name="?" type="?">?</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
+            </ns:PayloadInfo>
+         </ns:UserMessage>
+      </ns:Messaging>
+   </soap:Header>
+   <soap:Body>
+      <_1:submitRequest>
+         <!--Optional:-->
+         <bodyload payloadId="?" contentType="?">
+            <value>cid:854765388236</value>
+         </bodyload>
+         <!--Zero or more repetitions:-->
+         <payload payloadId="?" contentType="?">
+            <value>cid:740670959943</value>
+         </payload>
+      </_1:submitRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/></con:call></con:operation><con:operation id="c3d7b0df-7f58-4abd-838e-8cfc252be3c9" isOneWay="false" action="" name="getStatus" bindingOperationName="getStatus" type="Request-Response" outputName="getStatusResponse" inputName="getStatus" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="0696c7a9-027a-45e6-853b-f72e52f5ba23" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+   <soap:Header/>
+   <soap:Body>
+      <_1:statusRequest>
+         <messageID>?</messageID>
+      </_1:statusRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/getStatus"/></con:call></con:operation></con:interface><con:testSuite id="8345ac14-50f6-466e-8f9e-417c5c9280e5" name="Web Service Submission"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Business Scenario" searchProperties="true" id="86589e1f-bd28-4db0-b31c-ff7789eab78f">
    <con:settings/>
    <con:testStep type="request" name="sendMessage" id="e134bf83-9fde-4e3a-8391-d39e36559c4e">
       <con:settings/>
@@ -623,7 +916,7 @@
                <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
             </con:settings>
             <con:encoding>UTF-8</con:encoding>
-            <con:endpoint>${#Project#localUrl}/domibus/services/backend</con:endpoint>
+            <con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint>
             <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
    <soap:Header>
       <ns:Messaging>
@@ -805,13 +1098,13 @@
                <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
             </con:settings>
             <con:encoding>UTF-8</con:encoding>
-            <con:endpoint>${#Project#localUrl}/domibus/services/backend</con:endpoint>
+            <con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint>
             <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
    <soap:Header/>
    <soap:Body>
-      <_1:getStatusRequest>
-         <messageID>${ResponseParameters#messageID}</messageID>
-      </_1:getStatusRequest>
+      <_1:statusRequest>
+         <messageID>c219616a-130a-4b15-ada8-8608966d0c80</messageID>
+      </_1:statusRequest>
    </soap:Body>
 </soap:Envelope>]]></con:request>
             <con:assertion type="SOAP Response" id="7334ebf2-08cb-4d56-aba8-dbac684f309b"/>
@@ -1868,4 +2161,4 @@ iOQvLqT/2Q==
          <payload payloadId="cid:message">PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</payload>
       </_1:sendRequest>
    </soap:Body>
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" id="3a65a26d-664a-40b6-9237-8cfd66c7c2db"/><con:assertion type="SOAP Fault Assertion" id="de16367f-d571-432d-aba6-dd17028f80f0" name="Not SOAP Fault"/><con:assertion type="XPath Match" id="e2f8957d-2482-4c36-a6f1-3e05295a0fd6" name="XPath Match"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:loadTest id="2183a80e-b69e-47b4-8995-6547c1050154" name="Web Service LoadTest"><con:settings/><con:threadCount>3</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>100</con:testLimit><con:limitType>COUNT</con:limitType><con:loadStrategy><con:type>Simple</con:type></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:assertion type="Max Errors" name="Max Errors"><con:configuration><name>Max Errors</name><max-absolute-errors>0</max-absolute-errors><max-relative-errors>0.0</max-relative-errors><test-step>- Any -</test-step></con:configuration></con:assertion><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval><con:reportParameters/></con:loadTest><con:properties/><con:reportParameters/></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:requirements/><con:properties><con:property><con:name>localUrl</con:name><con:value>http://&lt;blue_hostname>:8080</con:value></con:property><con:property><con:name>remoteUrl</con:name><con:value>http://&lt;red_hostname>:8080</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting></con:soapui-project>
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" id="3a65a26d-664a-40b6-9237-8cfd66c7c2db"/><con:assertion type="SOAP Fault Assertion" id="de16367f-d571-432d-aba6-dd17028f80f0" name="Not SOAP Fault"/><con:assertion type="XPath Match" id="e2f8957d-2482-4c36-a6f1-3e05295a0fd6" name="XPath Match"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:loadTest id="2183a80e-b69e-47b4-8995-6547c1050154" name="Web Service LoadTest"><con:settings/><con:threadCount>3</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>100</con:testLimit><con:limitType>COUNT</con:limitType><con:loadStrategy><con:type>Simple</con:type></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:assertion type="Max Errors" name="Max Errors"><con:configuration><name>Max Errors</name><max-absolute-errors>0</max-absolute-errors><max-relative-errors>0.0</max-relative-errors><test-step>- Any -</test-step></con:configuration></con:assertion><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval><con:reportParameters/></con:loadTest><con:properties/><con:reportParameters/></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:requirements/><con:properties><con:property><con:name>localUrl</con:name><con:value>http://&lt;blue_hostname>:8080</con:value></con:property><con:property><con:name>remoteUrl</con:name><con:value>http://&lt;red_hostname>:8080</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
