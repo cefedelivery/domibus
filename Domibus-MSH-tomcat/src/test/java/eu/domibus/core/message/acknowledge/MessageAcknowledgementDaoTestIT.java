@@ -1,15 +1,25 @@
 package eu.domibus.core.message.acknowledge;
 
 import eu.domibus.AbstractIT;
+import eu.domibus.common.MSHRole;
+import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
+import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.SignalMessageDao;
+import eu.domibus.common.dao.SignalMessageLogDao;
+import eu.domibus.common.model.logging.MessageLogInfo;
+import eu.domibus.common.model.logging.SignalMessageLogBuilder;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import javax.transaction.Transactional;
 import javax.xml.bind.JAXBContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
