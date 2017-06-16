@@ -57,6 +57,7 @@ public interface MessageRetriever<T> {
      * @param messageId id of the message the status is requested for
      * @return the message status {@link eu.domibus.common.MessageStatus}
      */
+    //@todo
     MessageStatus getMessageStatus(String messageId);
 
     /**

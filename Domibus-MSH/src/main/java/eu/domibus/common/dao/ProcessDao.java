@@ -7,7 +7,8 @@ import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import java.util.List;
 
 /**
- * Created by dussath on 5/18/17.
+ * @author Thomas Dussart
+ * @since 3.3
  * Data acces for process entity.
  */
 public interface ProcessDao {
@@ -25,13 +26,6 @@ public interface ProcessDao {
      */
     List<Process> findPullProcessesByResponder(final Party party);
 
-    /**
-     * Returns a list of pullProcess based on requester name and mpc.
-     * @param initiator the requester name.
-     * @param mpc the message partition channeL
-     * @return the matching processes.
-     */
-    List<Process> findPullProcessByRequestPartyAndMpc(String initiator, String mpc);
 
     /**
      * Returns a list of pullProcess based on an mpc.

@@ -9,7 +9,8 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.binding.soap.SoapMessage;
 
 /**
- * Created by dussath on 5/31/17.
+ * @author Thomas Dussart
+ * @since 3.3
  */
 public abstract class AbstractMessagePolicyInSetup implements MessagePolicyInSetup{
     protected final SoapMessage message;

@@ -5,7 +5,8 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import javax.xml.soap.SOAPMessage;
 
 /**
- * Created by dussath on 6/7/17.
+ * @author Thomas Dussart
+ * @since 3.3
  *
  */
 public class UserMessageHandlerContext {

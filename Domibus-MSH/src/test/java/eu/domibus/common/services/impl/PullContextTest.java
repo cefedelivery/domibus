@@ -16,7 +16,8 @@ import static eu.domibus.common.services.impl.PullRequestStatus.*;
 import static org.junit.Assert.*;
 
 /**
- * Created by dussath on 6/1/17.
+ * @author Thomas Dussart
+ * @since 3.3
  *
  */
 public class PullContextTest {

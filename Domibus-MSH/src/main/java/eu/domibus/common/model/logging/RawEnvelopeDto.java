@@ -1,7 +1,8 @@
 package eu.domibus.common.model.logging;
 
 /**
- * Created by dussath on 6/13/17.
+ * @author Thomas Dussart
+ * @since 3.3
  */
 public class RawEnvelopeDto {
     final String rawMessage;

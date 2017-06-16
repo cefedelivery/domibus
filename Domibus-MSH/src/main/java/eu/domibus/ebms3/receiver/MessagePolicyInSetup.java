@@ -4,7 +4,8 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 
 /**
- * Created by dussath on 5/31/17.
+ * @author Thomas Dussart
+ * @since 3.3
  *
  */
 //@thom test this hierarchy of class

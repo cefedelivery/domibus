@@ -14,7 +14,8 @@ import java.util.*;
 import static eu.domibus.common.services.impl.PullRequestStatus.*;
 
 /**
- * Created by dussath on 5/24/17.
+ * @author Thomas Dussart
+ * @since 3.3
  * <p>
  * Contextual class for a pull.
  */

@@ -264,7 +264,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
             }
-            //@question Should we allow the producer to specify the mps, if yes we could have multiple legs in the process.
             messageExchangeService.upgradeMessageExchangeStatus(userMessageExchangeConfiguration);
             if(MessageStatus.READY_TO_PULL!= userMessageExchangeConfiguration.getMessageStatus()) {
                 // Sends message to the proper queue if not a message to be pulled.

@@ -7,7 +7,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 /**
- * Created by dussath on 5/19/17.
+ * @author Thomas Dussart
+ * @since 3.3
  *
  */
 public class ProcessTest {

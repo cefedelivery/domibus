@@ -7,7 +7,8 @@ import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.interceptor.Fault;
 
 /**
- * Created by dussath on 6/7/17.
+ * @author Thomas Dussart
+ * @since 3.3
  * In case of a pulled message, the outgoing is a user message with attachements which should
  * received the same processing as the outPut of a push message.
  */

@@ -56,7 +56,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by dussath on 6/7/17.
+ * @author Thomas Dussart
+ * @since 3.3
  *
  */
 @RunWith(JMockit.class)

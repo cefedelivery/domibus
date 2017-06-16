@@ -36,20 +36,22 @@ import static eu.domibus.common.services.impl.PullContext.PMODE_KEY;
 import static eu.domibus.common.services.impl.PullRequestStatus.ONE_MATCHING_PROCESS;
 
 /**
- * Created by dussath on 5/19/17.
+ * @author Thomas Dussart
+ * @since 3.3
  * {@inheritDoc}
  */
 @Service
 public class MessageExchangeServiceImpl implements MessageExchangeService {
 
+    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageExchangeService.class);
     //@thom add more coverage here.
     @Autowired
     private ProcessDao processDao;
     @Autowired
     private ConfigurationDAO configurationDAO;
+
     @Autowired
     private MessagingDao messagingDao;
-
     @Autowired
     @Qualifier("pullMessageQueue")
     private Queue pullMessageQueue;
@@ -57,11 +59,10 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private JmsTemplate jmsPullTemplate;
     @Autowired
     private UserMessageLogDao messageLogDao;
+
+
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
-
-
-    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageExchangeService.class);
 
     /**
      * {@inheritDoc}
@@ -74,7 +75,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         for (Process process : processes) {
             boolean pullProcess = BackendConnector.Mode.PULL.getFileMapping().equals(Process.getBindingValue(process));
             boolean oneWay = BackendConnector.Mep.ONE_WAY.getFileMapping().equals(Process.getMepValue(process));
-            //@question wich exception should be throwned here.
             if (pullProcess) {
                 if (!oneWay) {
                     throw new RuntimeException("We only support oneway/pull at the moment");
@@ -130,6 +130,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
 
     @Override
+    @Transactional
     public UserMessage retrieveReadyToPullUserMessages(final String mpc, final Party responder) {
         Set<Identifier> identifiers = responder.getIdentifiers();
         List<MessagePullDto> messagingOnStatusReceiverAndMpc = new ArrayList<>();

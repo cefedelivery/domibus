@@ -51,7 +51,8 @@ import java.io.StringWriter;
 import java.util.Iterator;
 
 /**
- * Created by dussath on 6/6/17.
+ * @author Thomas Dussart
+ * @since 3.3
  *
  */
 @org.springframework.stereotype.Service

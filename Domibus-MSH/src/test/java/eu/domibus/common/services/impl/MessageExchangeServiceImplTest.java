@@ -12,7 +12,6 @@ import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.util.PojoInstaciatorUtil;
-import org.apache.neethi.Policy;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +23,6 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
 
 import javax.jms.Destination;
-import javax.xml.soap.SOAPMessage;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +32,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * Created by dussath on 5/19/17.
+ * @author Thomas Dussart
+ * @since 3.3
  *
  */
 @RunWith(MockitoJUnitRunner.class)

@@ -1,47 +1,33 @@
 package eu.domibus.common.dao;
 
+import eu.domibus.AbstractIT;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.PartyIdType;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
-import eu.domibus.ebms3.common.dao.DefaultDaoTestConfiguration;
 import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.util.PojoInstaciatorUtil;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
- * Created by dussath on 6/1/17.
+ * @author Thomas Dussart
+ * @since 3.3
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class)
-public class MessagingDaoTestIt {
-
-    static class ContextConfiguration extends DefaultDaoTestConfiguration {
-        @Bean
-        public MessagingDao messagingDao(){return new MessagingDao();}
-        @Bean
-        public PartyDao partyDao(){return new PartyDao();}
-        @Bean
-        public UserMessageLogDao userMessageLogDao(){return new UserMessageLogDao();}
-    }
+public class MessagingDaoTestIT extends AbstractIT{
 
     @Autowired
     private MessagingDao messagingDao;

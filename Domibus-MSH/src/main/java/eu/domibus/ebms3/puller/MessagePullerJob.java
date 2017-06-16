@@ -8,7 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
- * Created by dussath on 5/29/17.
+ * @author Thomas Dussart
+ * @since 3.3
  */
 @DisallowConcurrentExecution //Only one SenderWorker runs at any time
 public class MessagePullerJob extends QuartzJobBean {

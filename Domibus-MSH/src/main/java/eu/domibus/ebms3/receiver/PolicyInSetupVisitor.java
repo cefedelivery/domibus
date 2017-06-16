@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Created by dussath on 5/31/17.
+ * @author Thomas Dussart
+ * @since 3.3
  */
 @Component
 public class PolicyInSetupVisitor {

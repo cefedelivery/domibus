@@ -14,7 +14,8 @@ import java.util.List;
 import static eu.domibus.common.model.configuration.Process.*;
 
 /**
- * Created by dussath on 5/18/17.
+ * @author Thomas Dussart
+ * @since 3.3
  * {@inheritDoc}
  */
 @Repository
@@ -58,17 +59,6 @@ public class ProcessDaoImpl implements ProcessDao{
         return processQuery.getResultList();
     }
 
-    /**
-     *{@inheritDoc}
-     */
-    @Override
-    public List<Process> findPullProcessByRequestPartyAndMpc(final String initiator, final String mpc){
-        TypedQuery<Process> processQuery= entityManager.createNamedQuery(FIND_PULL_PROCESS_FROM_INITIATOR_AND_MPC,Process.class);
-        processQuery.setParameter(MEP_BINDING,BackendConnector.Mode.PULL.getFileMapping());
-        processQuery.setParameter(RESPONDER, initiator);
-        processQuery.setParameter(MPC_NAME, mpc);
-        return processQuery.getResultList();
-    }
 
     /**
      *{@inheritDoc}

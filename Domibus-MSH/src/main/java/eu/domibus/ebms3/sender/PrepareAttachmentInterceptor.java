@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * Created by dussath on 6/8/17.
+ * @author Thomas Dussart
+ * @since 3.3
  */
 public class PrepareAttachmentInterceptor extends AbstractPhaseInterceptor<Message> {
     public PrepareAttachmentInterceptor() {

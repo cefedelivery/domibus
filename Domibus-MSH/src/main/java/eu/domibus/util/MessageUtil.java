@@ -12,7 +12,8 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
 /**
- * Created by dussath on 6/6/17.
+ * @author Thomas Dussart
+ * @since 3.3
  */
 public class MessageUtil {
 

@@ -49,14 +49,4 @@ public class PartyDao extends BasicDao<Party> {
         return query.getResultList();
     }
 
-    public Party findPartyByName(final String name){
-        final TypedQuery<Party> query = em.createNamedQuery("Party.findByName", Party.class);
-        query.setParameter("NAME", name);
-        try {
-            return query.getSingleResult();
-        } catch (NoResultException pEx) {
-            LOG.businessError(DomibusMessageCode.BUS_PARTY_NAME_NOT_FOUND, name);
-            return null;
-        }
-    }
 }

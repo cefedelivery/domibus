@@ -3,7 +3,8 @@ package eu.domibus.ebms3.common.model;
 import java.util.Date;
 
 /**
- * Created by dussath on 6/1/17.
+ * @author Thomas Dussart
+ * @since 3.3
  */
 public class MessagePullDto {
     private String messageId;

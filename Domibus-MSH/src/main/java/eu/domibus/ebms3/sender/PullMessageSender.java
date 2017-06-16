@@ -39,7 +39,8 @@ import java.io.IOException;
 import java.util.Set;
 
 /**
- * Created by dussath on 6/2/17.
+ * @author Thomas Dussart
+ * @since 3.3
  * <p>
  * Jms listener in charge of sending pullrequest.
  */

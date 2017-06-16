@@ -11,7 +11,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by dussath on 5/19/17.
+ * @author Thomas Dussart
+ * @since 3.3
  * <p>
  * Util class that allowing pojo instanciation with some values.
  */
@@ -88,24 +89,6 @@ public class PojoInstaciatorUtil {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void main(String[] args) {
-
-
-        //Pattern ententityPattehrn=Pattern.compile("\\[(,?(?<parameter>[a-zA-Z]*:[a-zA-Z]*),?)*\\]");
-        //Pattern ententityPattehrn=Pattern.compile("\\[([a-zA-Z]*:[a-zA-Z]*)?(,([a-zA-Z]*:[a-zA-Z]*),?)*\\]");
-
-        setUpParameters("mep[name:oneway,value:http]");
-        setUpParameters("responderParties{[name:oneway,value:http],[name:cool,userName:test]}");
-//        System.out.println("Parameter "+matcher.group("parameter"));
-        //   Assert.assertEquals("oneway",process.getMep());
-        // Assert.assertEquals("push",process.getMepBinding());
-
-        /*String test = "test1/test2[name:test,Class/name:name]";
-        HashMap valueMap = new HashMap();
-        setUpParameters(valueMap, test);
-        System.out.println("Done");*/
     }
 
 

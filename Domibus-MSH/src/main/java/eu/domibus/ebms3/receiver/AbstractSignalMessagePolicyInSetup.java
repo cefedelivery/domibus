@@ -8,7 +8,8 @@ import eu.domibus.ebms3.sender.MSHDispatcher;
 import org.apache.cxf.binding.soap.SoapMessage;
 
 /**
- * Created by dussath on 6/8/17.
+ * @author Thomas Dussart
+ * @since 3.3
  *
  */
 public abstract class AbstractSignalMessagePolicyInSetup extends AbstractMessagePolicyInSetup{

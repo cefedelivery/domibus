@@ -14,7 +14,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Created by dussath on 5/24/17.
+ * @author Thomas Dussart
+ * @since 3.3
  */
 public class PojoInstaciatorUtilTest {
     @Test
@@ -60,7 +61,7 @@ public class PojoInstaciatorUtilTest {
         Assert.assertEquals("test",process.getMep().getValue());
         Assert.assertEquals("push",process.getMepBinding().getName());
         Set<Party> responderParties = process.getResponderParties();
-        Assert.assertEquals(2, responderParties.size());
+        assertEquals(2, responderParties.size());
         boolean onePartyFound=false;
         boolean secondPartyFound=false;
         for (Party responderParty : responderParties) {

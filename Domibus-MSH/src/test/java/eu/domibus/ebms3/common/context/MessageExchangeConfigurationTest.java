@@ -5,7 +5,8 @@ import org.junit.Test;
 import static eu.domibus.ebms3.common.context.MessageExchangeConfiguration.SEPARATOR;
 import static org.junit.Assert.assertEquals;
 /**
- * Created by dussath on 5/18/17.
+ * @author Thomas Dussart
+ * @since 3.3
  *
  */
 public class MessageExchangeConfigurationTest {

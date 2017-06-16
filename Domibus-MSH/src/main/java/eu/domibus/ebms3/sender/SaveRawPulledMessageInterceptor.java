@@ -17,7 +17,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.ws.WebServiceException;
 
 /**
- * Created by dussath on 6/12/17.
+ * @author Thomas Dussart
+ * @since 3.3
  * Interceptor to save the raw xml in case of a pull message with non repudiation setup.
  */
 //@thom test this class

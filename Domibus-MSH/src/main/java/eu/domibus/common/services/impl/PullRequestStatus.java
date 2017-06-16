@@ -1,7 +1,8 @@
 package eu.domibus.common.services.impl;
 
 /**
- * Created by dussath on 5/30/17.
+ * @author Thomas Dussart
+ * @since 3.3
  */
 public enum PullRequestStatus {
     TOO_MANY_PROCESSES,

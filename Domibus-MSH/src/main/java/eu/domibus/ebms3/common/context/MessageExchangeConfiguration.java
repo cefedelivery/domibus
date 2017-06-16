@@ -3,7 +3,8 @@ package eu.domibus.ebms3.common.context;
 import eu.domibus.common.MessageStatus;
 
 /**
- * Created by dussath on 5/18/17.
+ * @author Thomas Dussart
+ * @since 3.3
  * Class in charge of keeping track of the exchange information.
  */
 public class MessageExchangeConfiguration {

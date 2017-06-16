@@ -3,7 +3,8 @@ package eu.domibus.common.services.impl;
 import java.util.Map;
 
 /**
- * Created by dussath on 6/6/17.
+ * @author Thomas Dussart
+ * @since 3.3
  *
  */
 public interface PullContextCommand {

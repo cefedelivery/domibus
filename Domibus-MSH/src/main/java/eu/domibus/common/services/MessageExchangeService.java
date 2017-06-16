@@ -8,7 +8,8 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Created by dussath on 5/19/17.
+ * @author Thomas Dussart
+ * @since 3.3
  * Service returning information about the message exchange.
  */
 
