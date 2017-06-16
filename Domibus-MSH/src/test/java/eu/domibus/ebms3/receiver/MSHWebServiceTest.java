@@ -3,10 +3,7 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
@@ -50,7 +47,6 @@ import javax.xml.soap.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.ws.WebServiceException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -69,7 +65,7 @@ public class MSHWebServiceTest {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHWebServiceTest.class);
     private static final String TEST_RESOURCES_DIR = "./src/test/resources";
-    private static final String VALID_PMODE_CONFIG_URI = "SamplePModes/domibus-configuration-valid.xml";
+    private static final String VALID_PMODE_CONFIG_URI = "samplePModes/domibus-configuration-valid.xml";
     private static final String LEG_NO_SECNO_SEC_ACTION = "pushNoSecnoSecAction";
     private static final String PUSH_TESTCASE1_TC1ACTION = "pushTestcase1tc1Action";
     private static final String STRING_TYPE = "string";
@@ -83,6 +79,9 @@ public class MSHWebServiceTest {
 
     @Injectable
     MessagingDao messagingDao;
+
+    @Injectable
+    RawEnvelopeLogDao rawEnvelopeLogDao;
 
     @Injectable
     MessagingService messagingService;
@@ -539,17 +538,9 @@ public class MSHWebServiceTest {
 
         final Messaging responseMessaging = createValidSampleResponseMessaging();
         final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
-        new Expectations() {{
-            soapResponseMessage.getSOAPHeader();
-            result = soapHeader;
+        new Expectations(mshWebservice) {{
 
-            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
-            result = messagingIterator;
-
-            messagingIterator.next();
-            result = node;
-
-            jaxbContext.createUnmarshaller().unmarshal(node, Messaging.class).getValue();
+            mshWebservice.getMessaging(withAny(soapRequestMessage));
             result = responseMessaging;
 
             messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId());
@@ -601,17 +592,9 @@ public class MSHWebServiceTest {
 
         final Messaging responseMessaging = createValidSampleResponseMessaging();
         final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
-        new Expectations() {{
-            soapResponseMessage.getSOAPHeader();
-            result = soapHeader;
+        new Expectations(mshWebservice) {{
 
-            soapHeader.getChildElements(ObjectFactory._Messaging_QNAME);
-            result = messagingIterator;
-
-            messagingIterator.next();
-            result = node;
-
-            jaxbContext.createUnmarshaller().unmarshal(node, Messaging.class).getValue();
+            mshWebservice.getMessaging(withAny(soapRequestMessage));
             result = responseMessaging;
 
             messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId());
@@ -940,7 +923,7 @@ public class MSHWebServiceTest {
     @Test
     public void testGetMessaging(@Injectable final SOAPHeader soapHeader, @Injectable final Iterator soapChildElementsIterator, @Injectable final Node messagingXml) throws JAXBException, SOAPException, ParserConfigurationException, IOException, SAXException {
 
-        File validRequestFile = new File(TEST_RESOURCES_DIR + "/dataset/as4/blue2redGoodMessage.xml");
+        InputStream validRequestFile = getClass().getClassLoader().getResourceAsStream("dataset/as4/blue2redGoodMessage.xml");
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setNamespaceAware(true);
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -1068,7 +1051,7 @@ public class MSHWebServiceTest {
 
 
     public Messaging createValidSampleResponseMessaging() throws ParserConfigurationException, IOException, SAXException, JAXBException {
-        File validAS4ResponseFile = new File(TEST_RESOURCES_DIR + "/dataset/as4/validAS4Response.xml");
+        InputStream validAS4ResponseFile = getClass().getClassLoader().getResourceAsStream("dataset/as4/validAS4Response.xml");
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setNamespaceAware(true);
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();

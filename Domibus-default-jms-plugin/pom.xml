@@ -14,7 +14,6 @@
     <artifactId>domibus-default-jms-plugin</artifactId>
     <packaging>jar</packaging>
 
-
     <dependencies>
         <dependency>
             <groupId>eu.domibus</groupId>
@@ -79,5 +78,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

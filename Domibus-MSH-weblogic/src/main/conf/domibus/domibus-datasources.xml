@@ -1,0 +1,87 @@
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="file:///${domibus.config.location}/domibus-transactions.xml"/>
+
+    <!-- JMS ConnectionFactory to be used in case of a clustered environment -->
+    <!-- <jee:jndi-lookup id="domibusJMS-XAConnectionFactory"
+                     jndi-name="jms/ConnectionFactory"
+                     cache="true"
+                     resource-ref="true"
+                     lookup-on-startup="false"
+                     expected-type="javax.jms.ConnectionFactory">
+        <jee:environment>
+            java.naming.provider.url=${domibus.deployment.cluster.url}
+        </jee:environment>
+    </jee:jndi-lookup>
+    -->
+
+    <!-- JMS ConnectionFactory to be used in case of single instance environment -->
+    <jee:jndi-lookup id="domibusJMS-XAConnectionFactory" jndi-name="jms/ConnectionFactory"/>
+
+    <bean id="sendMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.internal.dispatch.queue"/>
+    </bean>
+    <bean id="notifyBackendQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.internal.notification.queue"/>
+    </bean>
+    <bean id="unknownReceiverQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.internal.notification.unknown"/>
+    </bean>
+
+    <bean id="clusterCommandTopic" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.internal.command"/>
+    </bean>
+
+    <bean id="domibusJDBC-XADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jdbc/cipaeDeliveryDs"/>
+    </bean>
+    <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
+    </bean>
+
+    <bean id="entityManagerFactory" primary="true"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="transactionManager">
+        <property name="persistenceUnitName" value="domibusJTA"/>
+        <property name="packagesToScan" value="eu.domibus"/>
+        <property name="jtaDataSource" ref="domibusJDBC-XADataSource"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="showSql" value="false"/>
+                <property name="generateDdl" value="false"/>
+                <property name="databasePlatform" value="org.hibernate.dialect.Oracle10gDialect"/>
+            </bean>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.connection.driver_class">oracle.jdbc.xa.client.OracleXADataSource</prop>
+                <prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="transaction.factory_class">org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory</prop>
+                <prop key="hibernate.transaction.manager_lookup_class">org.hibernate.transaction.WeblogicTransactionManagerLookup</prop>
+                <prop key="hibernate.transaction.jta.platform">org.hibernate.service.jta.platform.internal.WeblogicJtaPlatform</prop>
+
+            </props>
+        </property>
+    </bean>
+
+    <bean id="internalDestinationResolver" class="org.springframework.jms.support.destination.JndiDestinationResolver">
+        <!--<property name="jndiTemplate" ref="jndiTemplate"/>-->
+        <property name="cache" value="true"/>
+        <!-- do not create a dynamic destination if the destination name is not found in JNDI -->
+        <property name="fallbackToDynamicDestination" value="false"/>
+    </bean>
+
+    <bean id="internalJmsListenerContainerFactory"
+          class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+        <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="concurrency" value="3-10"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="sessionAcknowledgeMode" value="0"/>
+        <property name="destinationResolver" ref="internalDestinationResolver"/>
+    </bean>
+</beans>

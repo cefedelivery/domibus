@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+
+        <!-- Domibus 3.2.4 - 3.2.5 -->
+    <changeSet author="Cosmin Baciu" id="EDELIVERY-2117">
+            <addColumn tableName="TB_BACKEND_FILTER">
+                <column name="CRITERIA_OPERATOR" type="VARCHAR(255)" defaultValue="AND">
+                    <constraints nullable="false"/>
+                </column>
+            </addColumn>
+        </changeSet>
+
+    <changeSet author="idragusa" id="changelog-nonrepudiation">
+        <createTable tableName="TB_RAWENVELOPE_LOG">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="USERMESSAGE_ID_FK" type="INT"/>
+            <column name="SIGNALMESSAGE_ID_FK" type="INT"/>
+            <column name="RAW_XML" type="CLOB"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="USERMESSAGE_ID_FK" baseTableName="TB_RAWENVELOPE_LOG"
+                                 constraintName="FK_usermsg_id_fk_rawenv_id" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_USER_MESSAGE"/>
+
+        <addForeignKeyConstraint baseColumnNames="SIGNALMESSAGE_ID_FK" baseTableName="TB_RAWENVELOPE_LOG"
+                                 constraintName="FK_signalmsg_id_fk_rawenv_id" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_SIGNAL_MESSAGE"/>
+
+
+    </changeSet>
+</databaseChangeLog>
+

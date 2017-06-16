@@ -36,26 +36,24 @@ public class PolicyServiceImplTest {
     }
 
     @Test
-    public void testIsNoSecurityPolicy_DoNothingPolicy() {
+    public void testIsNoSecurityPolicy_DoNothingPolicy(@Injectable final Policy doNothingPolicy) {
         //when doNothingPolicy.xml is specified
         new Expectations() {{
-            domibusConfigurationService.getConfigLocation();
-            result = TEST_RESOURCES_DIR;
+            doNothingPolicy.isEmpty();
+            result = true;
         }};
 
-        Policy doNothingPolicy = policyService.parsePolicy("policies/doNothingPolicy.xml");
         boolean result2 = policyService.isNoSecurityPolicy(doNothingPolicy);
         Assert.assertTrue(result2 == true);
     }
 
     @Test
-    public void testIsNoSecurityPolicy_SignOnPolicy() {
+    public void testIsNoSecurityPolicy_SignOnPolicy(@Injectable final Policy signOnlyPolicy) {
         new Expectations() {{
-            domibusConfigurationService.getConfigLocation();
-            result = TEST_RESOURCES_DIR;
+            signOnlyPolicy.isEmpty();
+            result = false;
         }};
 
-        Policy signOnlyPolicy = policyService.parsePolicy("policies/signOnly.xml");
         boolean result3 = policyService.isNoSecurityPolicy(signOnlyPolicy);
         Assert.assertTrue(result3 == false);
     }

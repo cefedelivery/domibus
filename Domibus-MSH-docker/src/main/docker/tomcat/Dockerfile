@@ -38,11 +38,11 @@ RUN apt-get install -y wget
 RUN apt-get install -y unzip
 RUN apt-get install -y curl
 
-COPY ./domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip .
-RUN unzip  -d $TOMCAT_FULL_DISTRIBUTION domibus-MSH-$DOMIBUS_VERSION-tomcat-full.zip
+COPY ./domibus-distribution-$DOMIBUS_VERSION-tomcat-full.zip .
+RUN unzip  -d $TOMCAT_FULL_DISTRIBUTION domibus-distribution-$DOMIBUS_VERSION-tomcat-full.zip
 
-COPY ./domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip .
-RUN unzip -d $DOMIBUS_DIST domibus-MSH-$DOMIBUS_VERSION-sample-configuration-and-testing.zip
+COPY ./domibus-distribution-$DOMIBUS_VERSION-sample-configuration-and-testing.zip .
+RUN unzip -d $DOMIBUS_DIST domibus-distribution-$DOMIBUS_VERSION-sample-configuration-and-testing.zip
 
 COPY ./policies .
 
