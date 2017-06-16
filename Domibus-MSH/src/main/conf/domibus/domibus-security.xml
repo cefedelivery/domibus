@@ -103,7 +103,7 @@
         <sec:authentication-provider ref="allowAllAuthenticationProvider"/>
     </sec:authentication-manager>
 
-    <sec:authentication-manager id="authenticationManagerForAdminConsole">
+    <sec:authentication-manager id="authenticationManagerFor    AdminConsole">
         <sec:authentication-provider>
             <sec:password-encoder ref="bcryptEncoder"/>
             <sec:user-service>

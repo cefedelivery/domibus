@@ -29,6 +29,7 @@ import {FooterComponent} from "./footer/footer.component";
 import {DomibusInfoService} from "./appinfo/domibusinfo.service";
 import {AuthorizedAdminGuard} from "./guards/authorized-admin.guard";
 import {MessageLogComponent} from "./messagelog/messagelog.component";
+import {UserComponent} from "./user/user.component"
 import {TruststoreComponent} from './truststore/truststore.component';
 import {PmodeUploadComponent} from './pmode-upload/pmode-upload.component';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
@@ -48,6 +49,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     LoginComponent,
     HomeComponent,
     MessageLogComponent,
+    UserComponent,
     ErrorLogComponent,
     AlertComponent,
     FooterComponent,

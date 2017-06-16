@@ -1,0 +1,92 @@
+<!--<app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event)" id="pagesize_id"></app-row-limiter>-->
+
+<ngx-datatable
+  id="userTable"
+  class="material striped"
+  [rows]="rows"
+  [columnMode]="'auto'"
+  [headerHeight]="50"
+  [footerHeight]="50"
+  [rowHeight]="'auto'"
+  [scrollbarH]="true"
+  [externalPaging]="true"
+  [externalSorting]="true"
+  [loadingIndicator]="loading"
+  [count]="count"
+  [offset]="offset"
+  [limit]="pageSize"
+  [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
+  (page)='onPage($event)'
+  (sort)="onSort($event)"
+  [selected]="selected"
+  [selectionType]="'single'"
+  (activate)="onActivate($event)"
+  (select)="onSelect($event)">
+  <!-- Message Id -->
+  <ngx-datatable-column name="Username" [canAutoResize]="true">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+  <!-- Conversation Id -->
+  <ngx-datatable-column name="Role" [canAutoResize]="true">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+  <!-- From Party Id -->
+  <ngx-datatable-column name="Email" [canAutoResize]="true">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+  <!-- To Party Id -->
+  <ngx-datatable-column name="Password" [canAutoResize]="true">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+  <!-- Status -->
+  <ngx-datatable-column name="Actif" [canAutoResize]="true">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+ </ngx-datatable>
+
+<div style="margin-top: 10px">
+  <button id="userCancelButton" md-raised-button color="primary"  [disabled]="true">
+    <md-icon>cancel</md-icon>
+    <span>Cancel</span>
+  </button>
+  <button id="userSaveButton" md-raised-button color="primary" [disabled]="false">
+    <md-icon>save</md-icon>
+    <span>Save</span>
+  </button>
+  <button id="userNewButton" md-raised-button color="primary" [disabled]="false">
+    <md-icon>move_to_inbox</md-icon>
+    <span>New</span>
+  </button>
+  <button id="userDeleteButton" md-raised-button color="primary" [disabled]="true">
+    <md-icon>delete</md-icon>
+    <span>Delete</span>
+  </button>
+</div>
+
+
+
