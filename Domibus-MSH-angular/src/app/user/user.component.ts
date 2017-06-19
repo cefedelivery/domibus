@@ -45,6 +45,12 @@ export class UserComponent implements OnInit {
 
   }
 
+  updateEmail(event, row){
+    console.log("Update email")
+    this.updateValue(event,"email",row);
+    this.emailFocusOut();
+
+  }
   updateValue(event, cell, row) {
     //this.clearEditing();
     //this.editing[row.$$index + '-' + cell] = false;
@@ -65,7 +71,9 @@ export class UserComponent implements OnInit {
     this.zone.run(() => {
       this.clearEditing();
       this.editedUser = new User("", "", "", true,UserState.NEW);
-      let userCount = this.userService.addUser(this.editedUser);
+      this.users.push(this.editedUser);
+      this.users=this.users.slice();
+      let userCount = this.users.length;
       console.log('usecount '+userCount);
       this.editing[userCount-1 + '-' + 'userName'] = true;
       this.editing[userCount-1 + '-' + 'email'] = true;
@@ -73,16 +81,24 @@ export class UserComponent implements OnInit {
       this.userNewButtonDisabled=true;
     });
 
-    this.getUsers();
+    //this.getUsers();
 
   }
-  focus(){
+  emailFocusOut(){
+    debugger;
+    console.log("Focus out ");
+    console.log("User is new "+this.editedUser.isNew());
     if(this.editedUser.isNew()){
       console.log("Setting new password");
       let dialogRef: MdDialogRef<PasswordComponent> = this.dialog.open(PasswordComponent);
       dialogRef.componentInstance.editedUser = this.editedUser;
     }
-
+  }
+  cancel(){
+    this.getUsers();
+    this.users=this.users.slice();
+    this.userCancelButtonDisabled=true;
+    this.userNewButtonDisabled=false;
   }
 
 

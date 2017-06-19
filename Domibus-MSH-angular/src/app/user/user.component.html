@@ -41,8 +41,7 @@
                 {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
       <input
-        (focusout)="focus()"
-        (blur)="updateValue($event, 'email', row)"
+        (blur)="updateEmail($event, row)"
         *ngIf="editing[row.$$index + '-email']"
         type="text"
         [value]="value"
@@ -71,7 +70,7 @@
 
 
 <div style="margin-top: 10px">
-  <button id="userCancelButton" md-raised-button color="primary" [disabled]="userCancelButtonDisabled">
+  <button id="userCancelButton" md-raised-button (click)="cancel()" color="primary" [disabled]="userCancelButtonDisabled">
     <md-icon>cancel</md-icon>
     <span>Cancel</span>
   </button>
