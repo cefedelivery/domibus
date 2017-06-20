@@ -32,6 +32,9 @@ public class TestResult {
                 pMode.equals(allValue.get(PullContext.PMODE_KEY)) &&
                 notifyBusiness.equals(allValue.get(NOTIFY_BUSINNES_ON_ERROR));
         if (!success) {
+            if(next==null){
+                return false;
+            }
             return next.testSucced(allValue);
         }
         return success;
