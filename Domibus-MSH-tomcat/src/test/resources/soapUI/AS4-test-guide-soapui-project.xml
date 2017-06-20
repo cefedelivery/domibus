@@ -736,14 +736,14 @@
          <messageID>?</messageID>
       </_1:getErrorsRequest>
    </soap:Body>
-</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/getMessageErrors"/></con:call></con:operation><con:operation id="95ae55fb-b5a3-4575-94c9-44c3dedf1981" isOneWay="false" action="" name="getMessageStatus" bindingOperationName="getMessageStatus" type="Request-Response" outputName="getMessageStatusResponse" inputName="getMessageStatus" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="dd4d9cef-769e-424a-ba1b-22e2e982cb8b" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/getMessageErrors"/></con:call></con:operation><con:operation id="95ae55fb-b5a3-4575-94c9-44c3dedf1981" isOneWay="false" action="" name="getStatus" bindingOperationName="getStatus" type="Request-Response" outputName="getStatusResponse" inputName="getStatus" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="dd4d9cef-769e-424a-ba1b-22e2e982cb8b" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
    <soap:Header/>
    <soap:Body>
       <_1:getStatusRequest>
          <messageID>?</messageID>
       </_1:getStatusRequest>
    </soap:Body>
-</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/getMessageStatus"/></con:call></con:operation><con:operation id="f3563058-db2b-4135-a5e0-ddcfb8386683" isOneWay="false" action="" name="listPendingMessages" bindingOperationName="listPendingMessages" type="Request-Response" outputName="listPendingMessagesResponse" inputName="listPendingMessages" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="dd300cdb-a4e4-45f0-826d-4423845d0442" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/getStatus"/></con:call></con:operation><con:operation id="f3563058-db2b-4135-a5e0-ddcfb8386683" isOneWay="false" action="" name="listPendingMessages" bindingOperationName="listPendingMessages" type="Request-Response" outputName="listPendingMessagesResponse" inputName="listPendingMessages" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="dd300cdb-a4e4-45f0-826d-4423845d0442" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
    <soap:Header/>
    <soap:Body>
       <_1:listPendingMessagesRequest>?</_1:listPendingMessagesRequest>
@@ -1123,7 +1123,7 @@
                   soap='http://www.w3.org/2003/05/soap-envelope';
                   /soap:Envelope/soap:Body[1]/*[namespace-uri()='http://org.ecodex.backend/1_1/'
                   and
-                  local-name()='getMessageStatusResponse'][1]</path><content>ACKNOWLEDGED</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration>
+                  local-name()='getStatusResponse'][1]</path><content>ACKNOWLEDGED</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration>
             </con:assertion>
             <con:credentials>
                <con:authType>No Authorization</con:authType>
