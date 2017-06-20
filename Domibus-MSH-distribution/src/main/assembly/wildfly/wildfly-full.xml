@@ -65,6 +65,12 @@
 
     <files>
         <file>
+            <source>${project.basedir}/../Domibus-MSH/src/main/conf/domibus/users.properties</source>
+            <outputDirectory>domibus/conf/domibus</outputDirectory>
+            <destName>users.properties</destName>
+            <filtered>false</filtered>
+        </file>
+        <file>
             <source>${project.basedir}/../Domibus-MSH/src/main/conf/domibus/internal/ehcache.xml</source>
             <outputDirectory>domibus/conf/domibus/internal</outputDirectory>
             <filtered>false</filtered>
