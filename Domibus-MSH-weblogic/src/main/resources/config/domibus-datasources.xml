@@ -1,26 +1,21 @@
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:jee="http://www.springframework.org/schema/jee"
        xmlns="http://www.springframework.org/schema/beans"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd">
 
-    <import resource="file:///${domibus.config.location}/domibus-transactions.xml"/>
 
-    <!-- JMS ConnectionFactory to be used in case of a clustered environment -->
-    <!-- <jee:jndi-lookup id="domibusJMS-XAConnectionFactory"
+    <bean id="contextEnvironment" class="eu.domibus.spring.PrefixedProperties">
+        <constructor-arg name="props" ref="domibusProperties"/>
+        <constructor-arg name="prefix" value="domibus.environment.context."/>
+    </bean>
+
+    <jee:jndi-lookup id="domibusJMS-XAConnectionFactory"
                      jndi-name="jms/ConnectionFactory"
                      cache="true"
                      resource-ref="true"
                      lookup-on-startup="false"
-                     expected-type="javax.jms.ConnectionFactory">
-        <jee:environment>
-            java.naming.provider.url=${domibus.deployment.cluster.url}
-        </jee:environment>
-    </jee:jndi-lookup>
-    -->
-
-    <!-- JMS ConnectionFactory to be used in case of single instance environment -->
-    <jee:jndi-lookup id="domibusJMS-XAConnectionFactory" jndi-name="jms/ConnectionFactory"/>
+                     expected-type="javax.jms.ConnectionFactory" environment-ref="contextEnvironment"/>
 
     <bean id="sendMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.dispatch.queue"/>
@@ -43,29 +38,22 @@
         <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
     </bean>
 
+    <bean id="jpaProperties" class="eu.domibus.spring.PrefixedProperties">
+        <constructor-arg name="props" ref="domibusProperties"/>
+        <constructor-arg name="prefix" value="domibus.entityManagerFactory.jpaProperty."/>
+    </bean>
     <bean id="entityManagerFactory" primary="true"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="persistenceUnitName" value="domibusJTA"/>
-        <property name="packagesToScan" value="eu.domibus"/>
+        <property name="packagesToScan" value="#{'${domibus.entityManagerFactory.packagesToScan}'.split(',')}"/>
         <property name="jtaDataSource" ref="domibusJDBC-XADataSource"/>
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
                 <property name="showSql" value="false"/>
                 <property name="generateDdl" value="false"/>
-                <property name="databasePlatform" value="org.hibernate.dialect.Oracle10gDialect"/>
             </bean>
         </property>
-        <property name="jpaProperties">
-            <props>
-                <prop key="hibernate.connection.driver_class">oracle.jdbc.xa.client.OracleXADataSource</prop>
-                <prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</prop>
-                <prop key="hibernate.format_sql">true</prop>
-                <prop key="transaction.factory_class">org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory</prop>
-                <prop key="hibernate.transaction.manager_lookup_class">org.hibernate.transaction.WeblogicTransactionManagerLookup</prop>
-                <prop key="hibernate.transaction.jta.platform">org.hibernate.service.jta.platform.internal.WeblogicJtaPlatform</prop>
-
-            </props>
-        </property>
+        <property name="jpaProperties" ref="jpaProperties"/>
     </bean>
 
     <bean id="internalDestinationResolver" class="org.springframework.jms.support.destination.JndiDestinationResolver">
