@@ -44,7 +44,7 @@
                              userName="domibus" password="changeit">
         <!-- do not remove this! otherwise the redeliveryPolicy configured in activemq.xml will be ignored -->
         <amq:redeliveryPolicy>
-            <amq:redeliveryPolicy />
+            <amq:redeliveryPolicy/>
         </amq:redeliveryPolicy>
     </amq:xaConnectionFactory>
 
@@ -105,7 +105,7 @@
     </bean>
 
     <bean id="entityManagerFactory" primary="true"
-          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="transactionManager">
         <property name="persistenceUnitName" value="domibusJTA"/>
         <property name="packagesToScan" value="eu.domibus"/>
         <property name="jtaDataSource" ref="domibusJDBC-XADataSource"/>
@@ -121,8 +121,12 @@
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
                 <prop key="hibernate.format_sql">true</prop>
-                <prop key="transaction.factory_class">org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory</prop>
-                <prop key="hibernate.transaction.manager_lookup_class">com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup</prop>
+                <prop key="transaction.factory_class">
+                    org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory
+                </prop>
+                <prop key="hibernate.transaction.manager_lookup_class">
+                    com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup
+                </prop>
             </props>
         </property>
     </bean>

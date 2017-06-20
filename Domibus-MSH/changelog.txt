@@ -1,4 +1,6 @@
 Domibus 3.3-RC1
+- Expose the DOWNLOADED message status in the plugin API and the default ws plugin
+- Deprecated the method getMessageStatus(String messageId) which converts new DOWNLOADED status to RECEIVED. Use the new getStatus(String messageId) method instead.
 - Migrated the logging framework to SLF4J and Logback
 - Domibus uses 3 logs files: domibus.log, domibus-business.log and domibus-security.log
 - JMS monitoring: fixed the computation of the total number of messages in the queue for WebLogic

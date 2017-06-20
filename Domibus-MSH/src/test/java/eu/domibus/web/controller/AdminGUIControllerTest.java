@@ -58,8 +58,7 @@ public class AdminGUIControllerTest {
 
     @Test
     public void testGetMessageStatuses() throws Exception {
-        //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
         final List<MessageStatus> messageStatuses = adminGUIController.getMessageStatuses();
-        Assert.assertFalse(messageStatuses.contains(MessageStatus.DOWNLOADED));
+        Assert.assertTrue(messageStatuses.contains(MessageStatus.DOWNLOADED));
     }
 }
