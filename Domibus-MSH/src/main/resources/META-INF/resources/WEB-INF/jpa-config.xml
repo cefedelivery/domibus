@@ -12,7 +12,7 @@
         <property name="destination" ref="sendMessageQueue"/>
         <property name="messageListener" ref="messageSenderService" />
         <property name="transactionManager" ref="transactionManager"/>
-        <property name="concurrency" value="3-3"/>
+        <property name="concurrency" value="${domibus.dispatcher.concurency}"/>
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
     </bean>
