@@ -113,7 +113,7 @@
     </wsdl:message>
     <wsdl:portType name="BackendInterface">
         <wsdl:operation name="sendMessage">
-            <!-- deprecated in 3.3 -->
+            <!-- deprecated in 3.3; this method does not handle large payloads, use submitMessage instead -->
             <wsdl:input message="tns:sendMessage" name="sendMessage">
             </wsdl:input>
             <wsdl:output message="tns:sendMessageResponse" name="sendMessageResponse">
@@ -130,7 +130,8 @@
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getMessageStatus">
-            <!-- deprecated in 3.3 -->
+            <!-- deprecated in 3.3; this method converts status DOWNLOADED to RECEIVED for
+            backwards compatibility, use getStatus instead -->
             <wsdl:input message="tns:getMessageStatus" name="getMessageStatus">
             </wsdl:input>
             <wsdl:output message="tns:getMessageStatusResponse" name="getMessageStatusResponse">
@@ -155,7 +156,7 @@
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="downloadMessage">
-            <!-- deprecated in 3.3 -->
+            <!-- deprecated in 3.3; this method does not handle large payloads, use retrieveMessage instead -->
             <wsdl:input message="tns:downloadMessage" name="downloadMessage">
             </wsdl:input>
             <wsdl:output message="tns:downloadMessageResponse" name="downloadMessageResponse">
