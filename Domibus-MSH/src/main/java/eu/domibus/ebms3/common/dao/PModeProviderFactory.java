@@ -17,7 +17,6 @@ public class PModeProviderFactory  {
 
     private String implementation;
 
-//    @Override
     public PModeProvider getObject() throws Exception {
         if(StringUtils.equals(CACHING_IMPLEMENATION, implementation)) {
             return new CachingPModeProvider();
@@ -27,16 +26,6 @@ public class PModeProviderFactory  {
         //default implementation
         return new PModeDao();
     }
-
-//    @Override
-//    public Class<?> getObjectType() {
-//        return CachingPModeProvider.class;
-//    }
-//
-//    @Override
-//    public boolean isSingleton() {
-//        return true;
-//    }
 
     public String getImplementation() {
         return implementation;
