@@ -182,7 +182,7 @@
             tb_backend_filter.CRITERIA_OPERATOR='AND'
             order by
             PRIORITY asc, OLD_PRIO asc
-            ) p inner join (SELECT @rownum := 0, @old_prio := 0) r
+            ) p inner join (SELECT @rownum := 0) r
             );
 
             create temporary table tb_backend_filter_migr2 like tb_backend_filter_migr;
