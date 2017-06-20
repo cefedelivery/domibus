@@ -39,37 +39,7 @@ public class PrepareAttachmentInterceptor extends AbstractPhaseInterceptor<Messa
      */
     @Override
     public void handleMessage(final Message message) throws Fault {
-            /*InterceptorChain interceptorChain = message.getInterceptorChain();
-            Interceptor wss4jInternal = null;
-            PolicyBasedWSS4JOutInterceptor wss4JOutInterceptor = null;
-
-            for(Interceptor interceptor : interceptorChain){
-                LOG.info(interceptor.getClass().getName());
-            }
-
-            for(Interceptor interceptor : interceptorChain){
-                if(interceptor.getClass().getName().contains("WSS4JOutInterceptorInternal")){
-                    wss4jInternal = interceptor;
-                }
-                if (interceptor instanceof PolicyBasedWSS4JOutInterceptor){
-                    wss4JOutInterceptor = (PolicyBasedWSS4JOutInterceptor)interceptor;
-                }
-
-            }
-            interceptorChain.remove(wss4jInternal);
-            interceptorChain.add(wss4JOutInterceptor.createEndingInterceptor());
-
-           for(Interceptor interceptor : interceptorChain){
-                LOG.info(interceptor.getClass().getName());
-            }*/
-
         final SOAPMessage soapMessage = message.getContent(SOAPMessage.class);
-        try {
-            String rawXMLMessage = SoapUtil.getRawXMLMessage(soapMessage);
-            System.out.println("rawXMLMessage "+rawXMLMessage);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
         if (soapMessage.countAttachments() > 0) {
             if (message.getAttachments() == null) {
                 message.setAttachments(new ArrayList<Attachment>(soapMessage
@@ -94,8 +64,6 @@ public class PrepareAttachmentInterceptor extends AbstractPhaseInterceptor<Messa
             }
         }
         message.getInterceptorChain().add(new SetPolicyOutInterceptor.LogAfterPolicyCheckInterceptor());
-
-
     }
 
 }
