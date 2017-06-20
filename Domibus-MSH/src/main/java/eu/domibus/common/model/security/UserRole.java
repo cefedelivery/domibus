@@ -13,6 +13,10 @@ import java.util.Set;
  * Created by dussath on 6/14/17.
  */
 @Entity
+@NamedQueries({
+        @NamedQuery(name = "UserRole.findAll",
+                query = "FROM UserRole")
+})
 @Table(name = "TB_USER_ROLE",
         uniqueConstraints = {
                 @UniqueConstraint(

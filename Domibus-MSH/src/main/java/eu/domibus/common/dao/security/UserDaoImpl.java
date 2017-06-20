@@ -4,12 +4,14 @@ package eu.domibus.common.dao.security;
 
 import eu.domibus.common.dao.BasicDao;
 import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserRole;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Thomas Dussart
@@ -33,6 +35,7 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao{
         TypedQuery<User> namedQuery = entityManager.createNamedQuery("User.findAll", User.class);
         return namedQuery.getResultList();
     }
+
 
 
 

@@ -1,8 +1,8 @@
 import {Component, NgZone, OnInit} from "@angular/core";
-import {User, UserState} from "./user";
+import {UserResponseRO, UserState} from "./user";
 import {UserService} from "./user.service";
 import {MdDialog, MdDialogRef} from "@angular/material";
-import {PasswordComponent} from "./password/password.component";
+import {PasswordComponent} from "./password/password-dialog.component";
 
 
 @Component({
@@ -14,15 +14,16 @@ import {PasswordComponent} from "./password/password.component";
 
 
 export class UserComponent implements OnInit {
-  users: Array<User>;
+  users: Array<UserResponseRO>=[];
   pageSize: number = 10;
   editing = {};
   zone: NgZone;
   userSaveButtonDisabled=true;
   userNewButtonDisabled=false;
   userCancelButtonDisabled=true;
-  editedUser:User ;
-
+  editedUser:UserResponseRO ;
+  selected = [];
+  test:boolean=false;
 
   constructor(private userService: UserService,public dialog: MdDialog) {
     this.zone = new NgZone({enableLongStackTrace: false});
@@ -33,10 +34,17 @@ export class UserComponent implements OnInit {
   }
 
   getUsers(): void {
-    this.userService.getUsers().then(users => this.users = users);
+    this.userService.getUsers().subscribe(users => {
+      for(let u in users){
+        this.users.push(new UserResponseRO(users[u]["userName"],users[u]["email"],"",users[u]["active"],UserState.PERSISTED,users[u]["authorities"]));
+      }
+    });
+    this.users=this.users.slice();
+
   }
 
-  onSelect({selected}) {
+  onSelect(selected) {
+  console.log("Selected "+selected);
     //this.clearEditing();
 
   }
@@ -52,14 +60,16 @@ export class UserComponent implements OnInit {
 
   }
   updateValue(event, cell, row) {
-    //this.clearEditing();
-    //this.editing[row.$$index + '-' + cell] = false;
-    this.users[row.$$index][cell] = event.target.value;
+    this.zone.run(() => {
+      this.clearEditing();
+      //this.editing[row.$$index + '-' + cell] = false;
+      this.users[row.$$index][cell] = event.target.value;
+    });
+
   }
 
     clearEditing():void{
       for (let edit in this.editing) {
-        debugger;
         console.log(edit);
         console.log(this.editing[edit]);
         this.editing[edit]=false;
@@ -70,13 +80,13 @@ export class UserComponent implements OnInit {
   newUser(): void {
     this.zone.run(() => {
       this.clearEditing();
-      this.editedUser = new User("", "", "", true,UserState.NEW);
+      this.editedUser = new UserResponseRO("", "", "", true,UserState.NEW,[""]);
       this.users.push(this.editedUser);
       this.users=this.users.slice();
       let userCount = this.users.length;
       console.log('usecount '+userCount);
       this.editing[userCount-1 + '-' + 'userName'] = true;
-      this.editing[userCount-1 + '-' + 'email'] = true;
+  //    this.editing[userCount-1 + '-' + 'email'] = true;
       this.userCancelButtonDisabled=false;
       this.userNewButtonDisabled=true;
     });
@@ -84,21 +94,59 @@ export class UserComponent implements OnInit {
     //this.getUsers();
 
   }
+  openPasswordDialog(rowIndex){
+    let dialogRef: MdDialogRef<PasswordComponent> = this.dialog.open(PasswordComponent,{data:this.users[rowIndex]});
+    dialogRef.afterClosed().subscribe(result => {
+      console.log("Dialog result "+result)
+
+      if(result==true){
+        this.zone.run(() => {
+          this.clearEditing();
+          this.userCancelButtonDisabled = false;
+          this.userNewButtonDisabled = false;
+          this.userSaveButtonDisabled = false;
+          this.users = this.users.slice();
+        });
+      }else{
+
+      }
+    });
+  }
   emailFocusOut(){
-    debugger;
-    console.log("Focus out ");
+    console.log("Focus out");
     console.log("User is new "+this.editedUser.isNew());
-    if(this.editedUser.isNew()){
+    if(this.editedUser.isNew() && this.editedUser.password===""){
       console.log("Setting new password");
-      let dialogRef: MdDialogRef<PasswordComponent> = this.dialog.open(PasswordComponent);
-      dialogRef.componentInstance.editedUser = this.editedUser;
+      let dialogRef: MdDialogRef<PasswordComponent> = this.dialog.open(PasswordComponent,{data:this.editedUser});
+      dialogRef.afterClosed().subscribe(result => {
+        console.log("Dialog result "+result)
+
+        if(result==true){
+          this.zone.run(() => {
+            this.clearEditing();
+            this.userCancelButtonDisabled = false;
+            this.userNewButtonDisabled = false;
+            this.userSaveButtonDisabled = false;
+            this.users = this.users.slice();
+          });
+        }else{
+
+        }
+      });
+
     }
   }
   cancel(){
+    this.users=[];
     this.getUsers();
-    this.users=this.users.slice();
+    //this.users=this.users.slice();
     this.userCancelButtonDisabled=true;
     this.userNewButtonDisabled=false;
+  }
+
+  shouldEditUserName(row):boolean{
+    return this.users[row].isNew();
+
   }
 
 

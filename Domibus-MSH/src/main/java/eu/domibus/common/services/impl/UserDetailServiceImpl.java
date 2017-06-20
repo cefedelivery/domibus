@@ -3,6 +3,7 @@ package eu.domibus.common.services.impl;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserDetail;
+import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserDetailService;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +49,10 @@ public class UserDetailServiceImpl implements UserDetailService {
     @Transactional(readOnly = true)
     public  List<User> findUsers() {
         return userDao.listUsers();
+    }
+
+    @Override
+    public List<UserRole> findRoles() {
+        return null;
     }
 }

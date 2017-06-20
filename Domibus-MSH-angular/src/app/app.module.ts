@@ -38,7 +38,7 @@ import {JmsComponent} from './jms/jms.component';
 import {RowLimiterComponent} from './common/row-limiter/row-limiter.component';
 import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
 import {MessageDialogComponent} from './jms/message-dialog/message-dialog.component';
-import { PasswordComponent } from './user/password/password.component';
+import { PasswordComponent } from './user/password/password-dialog.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);

@@ -44,7 +44,7 @@ public class User extends AbstractBaseEntity{
     @Column(name="OPTLOCK")
     public Integer version;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "TB_USER_ROLES",
             joinColumns = @JoinColumn(
