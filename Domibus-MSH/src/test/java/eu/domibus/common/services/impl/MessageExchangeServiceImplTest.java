@@ -125,13 +125,14 @@ public class MessageExchangeServiceImplTest {
         ArgumentCaptor<Map> mapArgumentCaptor= ArgumentCaptor.forClass(Map.class);
         messageExchangeService.initiatePullRequest();
         verify(jmsPullTemplate,times(2)).convertAndSend(any(Destination.class),mapArgumentCaptor.capture(), any(MessagePostProcessor.class));
-        assertEquals("qn1",mapArgumentCaptor.getAllValues().get(0).get(PullContext.MPC));
-        assertEquals("party1:initiator:service1:Mock:Mock:leg1",mapArgumentCaptor.getAllValues().get(0).get(PullContext.PMODE_KEY));
-        assertEquals("false",mapArgumentCaptor.getAllValues().get(0).get(PullContext.NOTIFY_BUSINNES_ON_ERROR));
+        //needed because the set does not return the values always in the same order.
+        TestResult testResult = new TestResult("qn1", "party1:initiator:service1:Mock:Mock:leg1", "false");
+        testResult.chain(new TestResult("qn2","party1:initiator:service2:Mock:Mock:leg2","false"));
+        List<Map> allValues = mapArgumentCaptor.getAllValues();
+        for (Map allValue : allValues) {
+            assertTrue(testResult.testSucced(allValue));
+        }
 
-        assertEquals("qn2",mapArgumentCaptor.getAllValues().get(1).get(PullContext.MPC));
-        assertEquals("party1:initiator:service2:Mock:Mock:leg2",mapArgumentCaptor.getAllValues().get(1).get(PullContext.PMODE_KEY));
-        assertEquals("false",mapArgumentCaptor.getAllValues().get(1).get(PullContext.NOTIFY_BUSINNES_ON_ERROR));
     }
 
     @Test
