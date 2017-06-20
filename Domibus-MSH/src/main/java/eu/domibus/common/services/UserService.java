@@ -12,9 +12,15 @@ import java.util.List;
  * @author Thomas Dussart
  * @since 3.3
  */
-public interface UserDetailService {
+public interface UserService {
 
     List<User> findUsers();
 
     List<UserRole> findRoles();
+
+    @Transactional
+    void createUser(User user);
+
+    @Transactional
+    void updateUser(User user);
 }

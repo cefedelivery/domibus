@@ -24,8 +24,8 @@ import java.util.Set;
 }
 )
 @NamedQueries({
-        @NamedQuery(name = "User.findAll",
-                query = "FROM User")
+        @NamedQuery(name = "User.findAll", query = "FROM User"),
+        @NamedQuery(name = "User.findByUserName", query = "FROM User u where u.userName=:USER_NAME")
 })
 public class User extends AbstractBaseEntity{
     @NotNull
@@ -39,7 +39,7 @@ public class User extends AbstractBaseEntity{
     private String password;
     @NotNull
     @Column(name = "USER_ENABLED")
-    private boolean enabled;
+    private Boolean enabled;
     @Version
     @Column(name="OPTLOCK")
     public Integer version;
@@ -55,6 +55,7 @@ public class User extends AbstractBaseEntity{
 
     public User(final String userName) {
         this.userName = userName;
+        this.enabled=Boolean.TRUE;
     }
 
     public User() {
@@ -68,7 +69,7 @@ public class User extends AbstractBaseEntity{
         return password;
     }
 
-    public boolean isEnabled() {
+    public Boolean isEnabled() {
         return enabled;
     }
 
@@ -93,7 +94,7 @@ public class User extends AbstractBaseEntity{
         this.password = password;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
 

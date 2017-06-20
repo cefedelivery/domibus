@@ -2,11 +2,12 @@ package eu.domibus.web.rest;
 
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserRole;
-import eu.domibus.common.services.UserDetailService;
+import eu.domibus.common.services.UserService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * @author Thomas Dussart
@@ -26,24 +28,32 @@ public class UserResource {
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserResource.class);
 
-    private final UserDetailService userDetailService;
+    private final UserService userService;
 
     @Autowired
-    public UserResource(UserDetailService userDetailService) {
-        this.userDetailService=userDetailService;
+    public UserResource(UserService userService) {
+        this.userService = userService;
     }
 
     @RequestMapping(value = {"/users"}, method = GET)
     public List<UserResponseRO> users() {
         LOG.info("Retrieving users !");
-        List<User> users = userDetailService.findUsers();
+        List<User> users = userService.findUsers();
         return prepareResponse(users);
+    }
+
+    @RequestMapping(value = {"/save"}, method = POST)
+    public void save(@RequestBody List<UserResponseRO> users) {
+        LOG.info("Saving users !");
+        for (UserResponseRO user : users) {
+            LOG.info(user.toString());
+        }
     }
 
     @RequestMapping(value = {"/roles"}, method = GET)
     public List<String> roles() {
         LOG.info("Retrieving users !");
-        List<UserRole> userRoles = userDetailService.findRoles();
+        List<UserRole> userRoles = userService.findRoles();
         List<String> authorities=new ArrayList<>();
         for (UserRole userRole : userRoles) {
             authorities.add(userRole.getName());
@@ -59,6 +69,8 @@ public class UserResource {
             for (UserRole userRole : roles) {
                 userResponseRO.addAuthority(userRole.getName());
             }
+            //@thom use an enum.
+            userResponseRO.setStatus("PERSISTED");
             responses.add(userResponseRO);
         }
         return responses;

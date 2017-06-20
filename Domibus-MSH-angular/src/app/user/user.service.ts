@@ -6,7 +6,7 @@ import {Observable} from "rxjs/Observable";
 @Injectable()
 export class UserService {
   users:Array<UserResponseRO>;
-  initialUsers:Array<UserResponseRO>;
+
 
 
   constructor(private http: Http,private alertService: AlertService) {
@@ -29,6 +29,14 @@ export class UserService {
       .map(this.extractData)
       .catch(this.handleError);
   }
+
+  saveUsers(users:Array<UserResponseRO>):void{
+    this.http.post("rest/user/save", users).subscribe(res => {
+      this.alertService.success(res.text(), false);
+    }, err => {
+      this.alertService.error(err, false);
+    });
+  }
     //return this.http.get("rest/user/users").toPromise().then(response=>response.json()._embedded.userResponseROs as  Array<UserResponseRO>).catch(); /*{
    /* this.http.get("rest/user/users").subscribe(
       (response: Response) => {
@@ -45,9 +53,7 @@ export class UserService {
     return Promise.resolve( this.users);*/
   //}
 
-  saveUsers(users:Array<UserResponseRO>):void{
 
-  }
 
 
 

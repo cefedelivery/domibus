@@ -3,29 +3,30 @@ import {UserResponseRO, UserState} from "./user";
 import {UserService} from "./user.service";
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {PasswordComponent} from "./password/password-dialog.component";
+import {UserValidatorService} from "app/user/uservalidator.service";
 
 
 @Component({
   moduleId: module.id,
   templateUrl: 'user.component.html',
-  providers: [UserService],
+  providers: [UserService,UserValidatorService],
   styleUrls: ['./user.component.css']
 })
 
 
 export class UserComponent implements OnInit {
-  users: Array<UserResponseRO>=[];
+  users: Array<UserResponseRO> = [];
   pageSize: number = 10;
   editing = {};
   zone: NgZone;
-  userSaveButtonDisabled=true;
-  userNewButtonDisabled=false;
-  userCancelButtonDisabled=true;
-  editedUser:UserResponseRO ;
+  userSaveButtonDisabled = true;
+  userNewButtonDisabled = false;
+  userCancelButtonDisabled = true;
+  editedUser: UserResponseRO;
   selected = [];
-  test:boolean=false;
+  test: boolean = false;
 
-  constructor(private userService: UserService,public dialog: MdDialog) {
+  constructor(private userService: UserService, public dialog: MdDialog,private userValidatorService:UserValidatorService) {
     this.zone = new NgZone({enableLongStackTrace: false});
   }
 
@@ -34,17 +35,17 @@ export class UserComponent implements OnInit {
   }
 
   getUsers(): void {
-    this.userService.getUsers().subscribe(users => {
-      for(let u in users){
-        this.users.push(new UserResponseRO(users[u]["userName"],users[u]["email"],"",users[u]["active"],UserState.PERSISTED,users[u]["authorities"]));
-      }
-    });
-    this.users=this.users.slice();
+    this.userService.getUsers().subscribe(users => this.users = users);
+    /*for(let u in users){
+     this.users.push(new UserResponseRO(users[u]["userName"],users[u]["email"],"",users[u]["active"],UserState.PERSISTED,users[u]["authorities"]));
+     }
+     });*/
+    this.users = this.users.slice();
 
   }
 
   onSelect(selected) {
-  console.log("Selected "+selected);
+    console.log("Selected " + selected);
     //this.clearEditing();
 
   }
@@ -53,12 +54,13 @@ export class UserComponent implements OnInit {
 
   }
 
-  updateEmail(event, row){
+  /*updateEmail(event, row) {
     console.log("Update email")
-    this.updateValue(event,"email",row);
+    this.updateValue(event, "email", row);
     this.emailFocusOut();
 
-  }
+  }*/
+
   updateValue(event, cell, row) {
     this.zone.run(() => {
       this.clearEditing();
@@ -68,38 +70,39 @@ export class UserComponent implements OnInit {
 
   }
 
-    clearEditing():void{
-      for (let edit in this.editing) {
-        console.log(edit);
-        console.log(this.editing[edit]);
-        this.editing[edit]=false;
-      }
-      this.users=this.users.slice();
+  clearEditing(): void {
+    for (let edit in this.editing) {
+      console.log(edit);
+      console.log(this.editing[edit]);
+      this.editing[edit] = false;
+    }
+    this.users = this.users.slice();
   }
 
   newUser(): void {
     this.zone.run(() => {
       this.clearEditing();
-      this.editedUser = new UserResponseRO("", "", "", true,UserState.NEW,[""]);
+      this.editedUser = new UserResponseRO("", "", "", true, UserState[UserState.NEW], [""]);
       this.users.push(this.editedUser);
-      this.users=this.users.slice();
+      this.users = this.users.slice();
       let userCount = this.users.length;
-      console.log('usecount '+userCount);
-      this.editing[userCount-1 + '-' + 'userName'] = true;
-  //    this.editing[userCount-1 + '-' + 'email'] = true;
-      this.userCancelButtonDisabled=false;
-      this.userNewButtonDisabled=true;
+      console.log('usecount ' + userCount);
+      this.editing[userCount - 1 + '-' + 'userName'] = true;
+      //    this.editing[userCount-1 + '-' + 'email'] = true;
+      this.userCancelButtonDisabled = false;
+      this.userNewButtonDisabled = true;
     });
 
     //this.getUsers();
 
   }
-  openPasswordDialog(rowIndex){
-    let dialogRef: MdDialogRef<PasswordComponent> = this.dialog.open(PasswordComponent,{data:this.users[rowIndex]});
-    dialogRef.afterClosed().subscribe(result => {
-      console.log("Dialog result "+result)
 
-      if(result==true){
+  openPasswordDialog(rowIndex) {
+    let dialogRef: MdDialogRef<PasswordComponent> = this.dialog.open(PasswordComponent, {data: this.users[rowIndex]});
+    dialogRef.afterClosed().subscribe(result => {
+      console.log("Dialog result " + result)
+
+      if (result == true) {
         this.zone.run(() => {
           this.clearEditing();
           this.userCancelButtonDisabled = false;
@@ -107,21 +110,22 @@ export class UserComponent implements OnInit {
           this.userSaveButtonDisabled = false;
           this.users = this.users.slice();
         });
-      }else{
+      } else {
 
       }
     });
   }
-  emailFocusOut(){
-    console.log("Focus out");
-    console.log("User is new "+this.editedUser.isNew());
-    if(this.editedUser.isNew() && this.editedUser.password===""){
-      console.log("Setting new password");
-      let dialogRef: MdDialogRef<PasswordComponent> = this.dialog.open(PasswordComponent,{data:this.editedUser});
-      dialogRef.afterClosed().subscribe(result => {
-        console.log("Dialog result "+result)
 
-        if(result==true){
+  /*emailFocusOut() {
+    console.log("Focus out");
+    console.log("User is new " + this.editedUser.isNew());
+    if (this.editedUser.isNew() && this.editedUser.password === "") {
+      console.log("Setting new password");
+      let dialogRef: MdDialogRef<PasswordComponent> = this.dialog.open(PasswordComponent, {data: this.editedUser});
+      dialogRef.afterClosed().subscribe(result => {
+        console.log("Dialog result " + result)
+
+        if (result == true) {
           this.zone.run(() => {
             this.clearEditing();
             this.userCancelButtonDisabled = false;
@@ -129,25 +133,37 @@ export class UserComponent implements OnInit {
             this.userSaveButtonDisabled = false;
             this.users = this.users.slice();
           });
-        }else{
+        } else {
 
         }
       });
 
     }
-  }
-  cancel(){
-    this.users=[];
+  }*/
+
+  cancel() {
+    this.users = [];
     this.getUsers();
     //this.users=this.users.slice();
-    this.userCancelButtonDisabled=true;
-    this.userNewButtonDisabled=false;
+    this.userCancelButtonDisabled = true;
+    this.userNewButtonDisabled = false;
   }
 
-  shouldEditUserName(row):boolean{
+
+  filterModifiedUser():UserResponseRO[]{
+    return this.users.filter(user=>user.status!==UserState[UserState.PERSISTED]);
+  }
+
+  save(){
+    if(this.userValidatorService.validateUsers(this.filterModifiedUser(),this.users)) {
+      this.userService.saveUsers(this.filterModifiedUser());
+    }
+  }
+
+  /*shouldEditUserName(row): boolean {
     return this.users[row].isNew();
 
-  }
+  }*/
 
 
 }

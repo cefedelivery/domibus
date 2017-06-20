@@ -104,6 +104,13 @@
     </sec:authentication-manager>
 
     <sec:authentication-manager id="authenticationManagerFor    AdminConsole">
+        <sec:authentication-provider
+                user-service-ref="userDetailService" >
+            <sec:password-encoder ref="bcryptEncoder">
+            </sec:password-encoder>
+        </sec:authentication-provider>
+    </sec:authentication-manager>
+    <!--<sec:authentication-manager id="authenticationManagerFor    AdminConsole">
         <sec:authentication-provider>
             <sec:password-encoder ref="bcryptEncoder"/>
             <sec:user-service>
@@ -113,7 +120,7 @@
                           authorities="ROLE_USER, ROLE_ADMIN"/>
             </sec:user-service>
         </sec:authentication-provider>
-    </sec:authentication-manager>
+    </sec:authentication-manager>-->
 
     <sec:global-method-security pre-post-annotations="enabled"/>
 

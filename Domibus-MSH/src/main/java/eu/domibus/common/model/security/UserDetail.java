@@ -1,5 +1,6 @@
 package eu.domibus.common.model.security;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,19 +14,23 @@ import java.util.*;
  */
 public class UserDetail implements UserDetails{
     private final User domibusUser;
-    private final org.springframework.security.core.userdetails.User springUser;
+    private final UserDetails springUser;
 
     public UserDetail(final User user) {
         this.domibusUser=user;
-        springUser=new org.springframework.security.core.userdetails.User(user.getUserName(),user.getPassword(),getGrantedAuthorities(Sets.newHashSet(user.getRoles())));
+        springUser=org.springframework.security.core.userdetails.User
+                .withUsername(user.getUserName())
+                .password(user.getPassword())
+                .authorities(getGrantedAuthorities(user.getRoles()))
+                .build();
     }
 
-    private Set<GrantedAuthority> getGrantedAuthorities(Set<UserRole> roles) {
+    private List<GrantedAuthority> getGrantedAuthorities(Collection<UserRole> roles) {
         Set<GrantedAuthority> authorities = new HashSet<>();
         for (UserRole role : roles) {
             authorities.add(new SimpleGrantedAuthority(role.getName()));
         }
-        return authorities;
+        return Lists.newArrayList(authorities);
     }
 
     @Override

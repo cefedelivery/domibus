@@ -8,16 +8,21 @@ import java.util.List;
  * @since 3.3
  */
 public class UserResponseRO {
-    final private String userName;
-    final private String email;
-    final private boolean active;
-    final private List<String> authorities;
+    private String userName;
+    private String email;
+    private boolean active;
+    private List<String> authorities;
+    private String status;
+    private String password;
 
     public UserResponseRO(String userName, String email, boolean actif) {
         this.userName = userName;
         this.email = email;
         this.active = actif;
         this.authorities=new ArrayList<>();
+    }
+
+    public UserResponseRO() {
     }
 
     public String getUserName() {
@@ -38,5 +43,32 @@ public class UserResponseRO {
 
     public List<String> getAuthorities() {
         return authorities;
+    }
+
+    @Override
+    public String toString() {
+        return "UserResponseRO{" +
+                "userName='" + userName + '\'' +
+                ", email='" + email + '\'' +
+                ", active=" + active +
+                ", authorities=" + authorities +
+                ", status='" + status + '\'' +
+                '}';
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

@@ -15,4 +15,5 @@ public interface UserDao {
     List<User> listUsers();
     void create(final User user);
 
+    User loadUserByUsername(String userName);
 }

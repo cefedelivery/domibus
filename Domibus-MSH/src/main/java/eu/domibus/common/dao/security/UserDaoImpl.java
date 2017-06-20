@@ -35,6 +35,12 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao{
         TypedQuery<User> namedQuery = entityManager.createNamedQuery("User.findAll", User.class);
         return namedQuery.getResultList();
     }
+    @Override
+    public User loadUserByUsername(String userName){
+        TypedQuery<User> namedQuery = entityManager.createNamedQuery("User.findByUserName", User.class);
+        namedQuery.setParameter("USER_NAME",userName);
+        return namedQuery.getSingleResult();
+    }
 
 
 
