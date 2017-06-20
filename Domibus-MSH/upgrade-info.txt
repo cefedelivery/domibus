@@ -116,7 +116,7 @@ Domibus 3.3-RC1 (from 3.2.1):
                         <amq:queue id="pullMessageQueue" physicalName="domibus.internal.pull.queue"/>
                     - remove file "conf\domibus\persistence.xml"
                 - [WebLogic only]
-                   o execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.2.1-to-3.3-RC1-WeblogicSingleServer.properties for single server deployment or 3.2.1-to-3.3-RC1-WeblogicCluster.properties for cluster deployment
+                   o execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.2.5-to-3.3-RC1-WeblogicSingleServer.properties for single server deployment or 3.2.5-to-3.3-RC1-WeblogicCluster.properties for cluster deployment
                    o in file "\conf\domibus\domibus-datasources.xml" add the following bean:
                          <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
                             <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
@@ -126,7 +126,7 @@ Domibus 3.3-RC1 (from 3.2.1):
                                  <property name="jndiName" value="jms/domibus.internal.pull.queue"/>
                           </bean>
                 - [WildFly only]
-                    o in file "cef_edelivery_path\domibus\standalone\configuration\standalone-full.xml":
+                    o in file "cef_edel ivery_path\domibus\standalone\configuration\standalone-full.xml":
                      - add the following datasource(MySQL or Oracle) in the datasources section
                         (please adapt the values for host, port, username and password properties according to your database schema):
 
@@ -183,6 +183,31 @@ Domibus 3.3-RC1 (from 3.2.1):
                                  </concurrent>
                                  ........................
                             <subsystem xmlns="urn:jboss:domain:ee:3.0">
+                     - add the following queue in the destination section
+                                .............................
+                                <jms-destinations>
+                                    .............................
+                                    <jms-queue name="DomibusPullMessageQueue">
+                                                            <entry name="java:/jms/domibus.internal.pull.queue"/>
+                                                            <entry name="java:/jms/queue/DomibusPullMessageQueue"/>
+                                                            <durable>true</durable>
+                                                        </jms-queue>
+                                    .............................
+                                </jms-destinations>
+                                .............................
+                     - add the following address-setting in the address-settings section
+                                .............................
+                                <address-settings>
+                                    .............................
+                                    <address-setting match="jms.queue.DomibusPullMessageQueue">
+                                                        <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
+                                                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                                                        <redelivery-delay>5000</redelivery-delay>
+                                                        <max-delivery-attempts>1</max-delivery-attempts>
+                                                    </address-setting>
+                                    .............................
+                                </address-settings>
+                                .............................
                     o in file "\conf\domibus\domibus-datasources.xml" add the following bean:
                          <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
                             <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
