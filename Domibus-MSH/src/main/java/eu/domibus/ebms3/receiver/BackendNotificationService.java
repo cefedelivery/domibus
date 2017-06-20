@@ -144,12 +144,14 @@ public class BackendNotificationService {
     }
 
     protected boolean isBackendFilterMatching(BackendFilter filter, Map<String, IRoutingCriteria> criteriaMap, final UserMessage userMessage) {
-        for (final RoutingCriteria routingCriteriaEntity : filter.getRoutingCriterias()) {
-            final IRoutingCriteria criteria = criteriaMap.get(StringUtils.upperCase(routingCriteriaEntity.getName()));
-            boolean matches = criteria.matches(userMessage, routingCriteriaEntity.getExpression());
-            //if at least one criteria does not match it means the filter is not matching
-            if (!matches) {
-                return false;
+        if(filter.getRoutingCriterias() != null) {
+            for (final RoutingCriteria routingCriteriaEntity : filter.getRoutingCriterias()) {
+                final IRoutingCriteria criteria = criteriaMap.get(StringUtils.upperCase(routingCriteriaEntity.getName()));
+                boolean matches = criteria.matches(userMessage, routingCriteriaEntity.getExpression());
+                //if at least one criteria does not match it means the filter is not matching
+                if (!matches) {
+                    return false;
+                }
             }
         }
         return true;

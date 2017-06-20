@@ -29,7 +29,9 @@ import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.services.MessagesLogService;
 import eu.domibus.common.util.DomibusPropertiesService;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.*;
 import eu.domibus.wss4j.common.crypto.CryptoService;
@@ -46,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
@@ -298,9 +301,10 @@ public class AdminGUIController {
                     List<String> mappedExpression = map.get(backendName.replaceAll(" ", "") + "selection");
                     List<String> operator = map.get(backendName.replaceAll(" ", "") + "operator");
 
-                    if (operator != null && !operator.isEmpty()) {
+                    // TODO: Criteria operator is not used anymore. Clean this.
+                    /*if (operator != null && !operator.isEmpty()) {
                         backendFilter.setCriteriaOperator(LogicalOperator.valueOf(operator.get(0)));
-                    }
+                    }*/
 
                     backendFilter.getRoutingCriterias().clear();
                     if (mappedRoutingCrierias != null) {
