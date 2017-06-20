@@ -36,6 +36,43 @@ Domibus 3.3-RC1 (from 3.2.1):
                     o   add   <prop key="domibus.dispatcher.connectionTimeout">240000</prop>
                     o   add   <prop key="domibus.dispatcher.receiveTimeout">240000</prop>
                     o   increase the value of the domibus.msh.retry.tolerance to 10800000 miliseconds: <prop key="domibus.msh.retry.tolerance">10800000</prop>
+                    o   add   <prop key="domibus.msh.pull.cron">0/20 * * * * ?</prop>
+                    o   add the following beans:
+                        <bean id="pullRequestJob"
+                                  class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+                                <property name="jobClass" value="eu.domibus.ebms3.puller.MessagePullerJob"/>
+                                <property name="durability" value="true"/>
+                            </bean>
+
+                            <bean id="pullRequestTrigger"
+                                  class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+                                <property name="jobDetail" ref="pullRequestJob"/>
+                                <property name="cronExpression" value="${domibus.msh.pull.cron}"/>
+                            </bean>
+                    o   replace userdefinedTriggerList bean:
+
+                              <bean id="userdefinedTriggerList"
+                                      class="org.springframework.beans.factory.config.ListFactoryBean">
+                                    <property name="sourceList">
+                                        <list>
+                                            <ref bean="retryWorkerTrigger"/>
+                                        </list>
+                                    </property>
+                                </bean>
+                        by new definition:
+
+                                <bean id="userdefinedTriggerList"
+                                          class="org.springframework.beans.factory.config.ListFactoryBean">
+                                        <property name="sourceList">
+                                            <list>
+                                                <ref bean="retryWorkerTrigger"/>
+                                                <ref bean="pullRequestTrigger"/>
+                                            </list>
+                                        </property>
+                                    </bean>
+
+
+
                - [Tomcat only] in file "\conf\domibus\domibus-datasources.xml"
                     - add the following bean(please adapt the values for for host, port, username and password properties according to your database schema):
                        o for MySQL:
@@ -75,6 +112,8 @@ Domibus 3.3-RC1 (from 3.2.1):
                                     </props>
                                 </property>
                             </bean>
+                    - add queue configuration :
+                        <amq:queue id="pullMessageQueue" physicalName="domibus.internal.pull.queue"/>
                     - remove file "conf\domibus\persistence.xml"
                 - [WebLogic only]
                    o execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.2.1-to-3.3-RC1-WeblogicSingleServer.properties for single server deployment or 3.2.1-to-3.3-RC1-WeblogicCluster.properties for cluster deployment
@@ -82,6 +121,10 @@ Domibus 3.3-RC1 (from 3.2.1):
                          <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
                             <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
                         </bean>
+
+                         <bean id="pullMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+                                 <property name="jndiName" value="jms/domibus.internal.pull.queue"/>
+                          </bean>
                 - [WildFly only]
                     o in file "cef_edelivery_path\domibus\standalone\configuration\standalone-full.xml":
                      - add the following datasource(MySQL or Oracle) in the datasources section
@@ -144,10 +187,17 @@ Domibus 3.3-RC1 (from 3.2.1):
                          <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
                             <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
                          </bean>
+
+                         <bean id="pullMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+                              <property name="jndiName" value="jms/domibus.internal.pull.queue"/>
+                         </bean>
                - [MySQL only] For all installations of MySQL execute the SQL commands in the file mysql5innoDb-3.2-to-3.3-migration.ddl
                               For each Domibus MySQL schema present execute the command: alter schema `your_domibus_schema_name` default charset=utf8 collate=utf8_bin;
 
                 Please consider the replacement of deprecated operation getMessageStatus() with the newer getStatus() that also returns the newly introduced DOWNLOADED status.
+                o in file \conf\domibus\internal\activemq.xml add:
+                 <queue id="pullMessageQueue"
+                                   physicalName="domibus.internal.pull.queue"/>
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2.5:
                - Run the appropriate DB migration script.

@@ -1,4 +1,5 @@
 Domibus 3.3-RC1
+- Add the posibility to pull messages
 - Expose the DOWNLOADED message status in the plugin API and the default ws plugin
 - Deprecated the method getMessageStatus(String messageId) which converts new DOWNLOADED status to RECEIVED. Use the new getStatus(String messageId) method instead.
 - Migrated the logging framework to SLF4J and Logback
