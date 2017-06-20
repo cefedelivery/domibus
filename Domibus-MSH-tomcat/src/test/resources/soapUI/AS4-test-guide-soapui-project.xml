@@ -916,7 +916,7 @@
                <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
             </con:settings>
             <con:encoding>UTF-8</con:encoding>
-            <con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint>
+            <con:endpoint>${#Project#localUrl}/domibus/services/backend</con:endpoint>
             <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
    <soap:Header>
       <ns:Messaging>
@@ -1092,18 +1092,18 @@
       <con:settings/>
       <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
          <con:interface>BackendService_1_1SoapBinding</con:interface>
-         <con:operation>getMessageStatus</con:operation>
+         <con:operation>getStatus</con:operation>
          <con:request name="getStatus" id="d3d7682b-4998-44b9-a5b3-61469ce82d67">
             <con:settings>
                <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
             </con:settings>
             <con:encoding>UTF-8</con:encoding>
-            <con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint>
+            <con:endpoint>${#Project#localUrl}/domibus/services/backend</con:endpoint>
             <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
    <soap:Header/>
    <soap:Body>
       <_1:statusRequest>
-         <messageID>c219616a-130a-4b15-ada8-8608966d0c80</messageID>
+         <messageID>${ResponseParameters#messageID}</messageID>
       </_1:statusRequest>
    </soap:Body>
 </soap:Envelope>]]></con:request>
