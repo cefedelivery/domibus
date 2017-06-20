@@ -57,6 +57,9 @@ public class MSHDispatcher {
 
     public static final String PMODE_KEY_CONTEXT_PROPERTY = "PMODE_KEY_CONTEXT_PROPERTY";
     public static final String ASYMMETRIC_SIG_ALGO_PROPERTY = "ASYMMETRIC_SIG_ALGO_PROPERTY";
+    public static final String MESSAGE_TYPE_IN = "MESSAGE_TYPE";
+    public static final String MESSAGE_TYPE_OUT = "MESSAGE_TYPE_OUT";
+    public static final String MESSAGE_ID = "MESSAGE_ID";
     public static final QName SERVICE_NAME = new QName("http://domibus.eu", "msh-dispatch-service");
     public static final QName PORT_NAME = new QName("http://domibus.eu", "msh-dispatch");
 

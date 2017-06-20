@@ -162,6 +162,8 @@
     <xsd:simpleType name="messageStatus">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="READY_TO_SEND"/>
+            <xsd:enumeration value="READY_TO_PULL"/>
+            <xsd:enumeration value="BEING_PULLED"/>
             <xsd:enumeration value="SEND_ENQUEUED"/>
             <xsd:enumeration value="SEND_IN_PROGRESS"/>
             <xsd:enumeration value="WAITING_FOR_RECEIPT"/>

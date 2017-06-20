@@ -6,6 +6,8 @@ import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -73,6 +75,11 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         }
         super.update(messageLog);
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_STATUS_UPDATE, messageStatus);
+    }
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void setIntermediaryPullStatus(String messageId){
+        MessageStatus beingPulled = MessageStatus.BEING_PULLED;
+        setMessageStatus(messageId, beingPulled);
     }
 
     public MessageStatus getMessageStatus(String messageId) {

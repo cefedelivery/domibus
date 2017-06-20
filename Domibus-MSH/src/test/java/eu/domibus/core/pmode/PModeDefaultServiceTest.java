@@ -2,6 +2,7 @@ package eu.domibus.core.pmode;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import mockit.Expectations;
@@ -34,15 +35,15 @@ public class PModeDefaultServiceTest {
                                         @Injectable final eu.domibus.common.model.configuration.LegConfiguration legConfigurationEntity) throws Exception {
         final String messageId = "1";
         final String pmodeKey = "1";
-
+        final MessageExchangeConfiguration messageExchangeConfiguration=new MessageExchangeConfiguration("1",",","","","","");
         new Expectations() {{
             messagingDao.findUserMessageByMessageId(messageId);
             result = userMessage;
 
-            pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
-            result = pmodeKey;
+            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            result = messageExchangeConfiguration;
 
-            pModeProvider.getLegConfiguration(pmodeKey);
+            pModeProvider.getLegConfiguration(messageExchangeConfiguration.getPmodeKey());
             result = legConfigurationEntity;
 
         }};

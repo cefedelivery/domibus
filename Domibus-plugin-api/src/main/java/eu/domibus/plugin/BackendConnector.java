@@ -164,10 +164,42 @@ public interface BackendConnector<U, T> {
         /**
          * Messages and notifications are actively pushed to the backend application (i.e. via a JMS queue)
          */
-        PUSH,
+        PUSH("push"),
         /**
          * Messages and notifications are actively pulled by the backend application (i.e. via a webservice)
          */
-        PULL;
+        PULL("pull");
+
+        private final String fileMapping;
+        Mode(String fileMapping) {
+            this.fileMapping=fileMapping;
+        }
+        public String getFileMapping() {
+            return fileMapping;
+        }
+    }
+
+    /**
+     * Describes the message exchange protocol
+     */
+    enum Mep {
+        /**
+         * Exchange is ONE WAY. Only one message user exchanged.
+         */
+        ONE_WAY("oneway"),
+        /**
+         * Exchange of multiple UserMessage.
+         */
+        TWO_WAY("twoway");
+
+
+        private final String fileMapping;
+        Mep(String fileMapping) {
+           this.fileMapping = fileMapping;
+        }
+
+        public String getFileMapping() {
+            return fileMapping;
+        }
     }
 }
