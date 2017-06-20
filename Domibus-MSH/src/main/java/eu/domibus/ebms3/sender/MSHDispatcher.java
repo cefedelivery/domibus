@@ -20,6 +20,7 @@
 package eu.domibus.ebms3.sender;
 
 import com.google.common.base.Strings;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -85,6 +86,8 @@ public class MSHDispatcher {
         //ReceiveTimeOut - Specifies the amount of time, in milliseconds, that the consumer will wait for a response before it times out. 0 is infinite.
         int receiveTimeout = Integer.parseInt(domibusProperties.getProperty("domibus.dispatcher.receiveTimeout", "120000"));
         httpClientPolicy.setReceiveTimeout(receiveTimeout);
+        httpClientPolicy.setAllowChunking(Boolean.valueOf(domibusProperties.getProperty("domibus.dispatcher.allowChunking", "false")));
+
         final TLSClientParameters params = tlsReader.getTlsClientParameters();
         if (params != null && endpoint.startsWith("https://")) {
             httpConduit.setTlsClientParameters(params);
