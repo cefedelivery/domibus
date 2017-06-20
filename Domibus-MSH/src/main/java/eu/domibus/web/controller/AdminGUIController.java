@@ -155,8 +155,6 @@ public class AdminGUIController {
         model.addObject("beginIndex", begin);
         model.addObject("endIndex", end);
         if (page <= pages) {
-            //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
-            convertDownloadedStatusToReceived(messageLogEntries);
             model.addObject("table", messageLogEntries);
         }
         model.addObject("title", "Domibus - Messages Log: ");
@@ -172,24 +170,9 @@ public class AdminGUIController {
 
     }
 
-    //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
-    protected void convertDownloadedStatusToReceived(List<? extends MessageLog> messageLogEntries) {
-        if (messageLogEntries == null) {
-            return;
-        }
-        for (MessageLog messageLogEntry : messageLogEntries) {
-            if (MessageStatus.DOWNLOADED == messageLogEntry.getMessageStatus()) {
-                messageLogEntry.setMessageStatus(MessageStatus.RECEIVED);
-            }
-        }
-    }
-
-
     protected List<MessageStatus> getMessageStatuses() {
         List<MessageStatus> messageStatuses = new ArrayList<>();
         messageStatuses.addAll(Arrays.asList(MessageStatus.values()));
-        //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
-        messageStatuses.remove(MessageStatus.DOWNLOADED);
         return messageStatuses;
     }
 

@@ -27,7 +27,14 @@
          * The message is ready to be put in the send queue .
          */
         READY_TO_SEND,
-
+        /**
+         * The message is ready to get pulled.
+         */
+        READY_TO_PULL,
+        /**
+         * The message is being pulled.
+         */
+        BEING_PULLED,
         /**
          * The message is in the send queue.
          */

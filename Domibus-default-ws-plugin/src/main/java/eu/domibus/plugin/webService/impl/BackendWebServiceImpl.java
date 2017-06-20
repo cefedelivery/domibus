@@ -477,6 +477,11 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     }
 
     @Override
+    public MessageStatus getStatus(final StatusRequest statusRequest) {
+        return defaultTransformer.transformFromMessageStatus(messageRetriever.getStatus(statusRequest.getMessageID()));
+    }
+
+    @Override
     public ErrorResultImplArray getMessageErrors(final GetErrorsRequest messageErrorsRequest) {
         return defaultTransformer.transformFromErrorResults(messageRetriever.getErrorsForMessage(messageErrorsRequest.getMessageID()));
     }

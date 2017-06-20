@@ -45,10 +45,25 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         return query.getResultList();
     }
 
+
+    //@thom add test and doc
+    public List<String> findReadyToPullMessages() {
+        TypedQuery<String> query = this.em.createNamedQuery("UserMessageLog.findReadyToPullMessages", String.class);
+
+        return query.getResultList();
+    }
+
+
     public List<String> findTimedoutMessages(int timeoutTolerance) {
         TypedQuery<String> query = this.em.createNamedQuery("UserMessageLog.findTimedoutMessages", String.class);
         query.setParameter("TIMESTAMP_WITH_TOLERANCE", new Date(System.currentTimeMillis() - timeoutTolerance));
 
+        return query.getResultList();
+    }
+
+    public List<String> findTimedoutPullMessages(int timeoutTolerance) {
+        TypedQuery<String> query = this.em.createNamedQuery("UserMessageLog.findPullTimedoutMessages", String.class);
+        query.setParameter("TIMESTAMP_WITH_TOLERANCE", new Date(System.currentTimeMillis() - timeoutTolerance));
         return query.getResultList();
     }
 

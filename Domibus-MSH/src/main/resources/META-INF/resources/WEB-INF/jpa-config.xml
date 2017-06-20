@@ -21,6 +21,7 @@
         <property name="sessionAcknowledgeMode" value="0"/>
     </bean>
 
+
     <bean id="controllerListener" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
         <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
         <property name="destination" ref="clusterCommandTopic"/>
@@ -37,6 +38,13 @@
           class="org.springframework.jms.core.JmsTemplate"
           c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
           p:defaultDestination-ref="sendMessageQueue"
+          p:sessionTransacted="true"
+          p:sessionAcknowledgeMode="0"/>
+
+    <bean id="jmsPullTemplate"
+          class="org.springframework.jms.core.JmsTemplate"
+          c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
+          p:defaultDestination-ref="pullMessageQueue"
           p:sessionTransacted="true"
           p:sessionAcknowledgeMode="0"/>
 

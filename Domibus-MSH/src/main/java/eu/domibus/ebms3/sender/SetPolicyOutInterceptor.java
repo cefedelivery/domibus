@@ -72,9 +72,8 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
         LOG.debug("SetPolicyOutInterceptor");
-
         final String pModeKey = (String) message.getContextualProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
-        message.getInterceptorChain().add(new SetPolicyOutInterceptor.PrepareAttachmentInterceptor());
+        message.getInterceptorChain().add(new PrepareAttachmentInterceptor());
 
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pModeKey);
 
@@ -101,76 +100,6 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
 
     }
 
-    static class PrepareAttachmentInterceptor extends AbstractPhaseInterceptor<Message> {
-        public PrepareAttachmentInterceptor() {
-            super(Phase.MARSHAL);
-            super.addBefore(BareOutInterceptor.class.getName());
-        }
-
-        /**
-         * Intercepts a message.
-         * Interceptors should NOT invoke handleMessage or handleFault
-         * on the next interceptor - the interceptor chain will
-         * take care of this.
-         *
-         * @param message message to handle
-         */
-        @Override
-        public void handleMessage(final Message message) throws Fault {
-            /*InterceptorChain interceptorChain = message.getInterceptorChain();
-            Interceptor wss4jInternal = null;
-            PolicyBasedWSS4JOutInterceptor wss4JOutInterceptor = null;
-
-            for(Interceptor interceptor : interceptorChain){
-                LOG.info(interceptor.getClass().getName());
-            }
-
-            for(Interceptor interceptor : interceptorChain){
-                if(interceptor.getClass().getName().contains("WSS4JOutInterceptorInternal")){
-                    wss4jInternal = interceptor;
-                }
-                if (interceptor instanceof PolicyBasedWSS4JOutInterceptor){
-                    wss4JOutInterceptor = (PolicyBasedWSS4JOutInterceptor)interceptor;
-                }
-
-            }
-            interceptorChain.remove(wss4jInternal);
-            interceptorChain.add(wss4JOutInterceptor.createEndingInterceptor());
-
-           for(Interceptor interceptor : interceptorChain){
-                LOG.info(interceptor.getClass().getName());
-            }*/
-
-            final SOAPMessage soapMessage = message.getContent(SOAPMessage.class);
-            if (soapMessage.countAttachments() > 0) {
-                if (message.getAttachments() == null) {
-                    message.setAttachments(new ArrayList<Attachment>(soapMessage
-                            .countAttachments()));
-                }
-                final Iterator<AttachmentPart> it = CastUtils.cast(soapMessage.getAttachments());
-                while (it.hasNext()) {
-                    final AttachmentPart part = it.next();
-                    final String id = AttachmentUtil.cleanContentId(part.getContentId());
-                    final AttachmentImpl att = new AttachmentImpl(id);
-                    try {
-                        att.setDataHandler(part.getDataHandler());
-                    } catch (final SOAPException e) {
-                        throw new Fault(e);
-                    }
-                    final Iterator<MimeHeader> it2 = CastUtils.cast(part.getAllMimeHeaders());
-                    while (it2.hasNext()) {
-                        final MimeHeader header = it2.next();
-                        att.setHeader(header.getName(), header.getValue());
-                    }
-                    message.getAttachments().add(att);
-                }
-            }
-            message.getInterceptorChain().add(new SetPolicyOutInterceptor.LogAfterPolicyCheckInterceptor());
-
-
-        }
-
-    }
 
     public static class LogAfterPolicyCheckInterceptor extends AbstractSoapInterceptor {
 

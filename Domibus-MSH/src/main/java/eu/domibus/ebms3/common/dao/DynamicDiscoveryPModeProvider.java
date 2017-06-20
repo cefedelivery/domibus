@@ -5,21 +5,21 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
+import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.Property;
+import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.lang.StringUtils;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import eu.domibus.common.services.DynamicDiscoveryService;
-import eu.domibus.common.services.impl.DynamicDiscoveryServiceOASIS;
-import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
 import eu.domibus.common.util.EndpointInfo;
 
 import javax.naming.InvalidNameException;
@@ -127,16 +127,16 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
      */
     @Override
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
-    public String findPModeKeyForUserMessage(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
+    public MessageExchangeConfiguration findUserMessageExchangeContext(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
         try {
-            return super.findPModeKeyForUserMessage(userMessage, mshRole);
+            return super.findUserMessageExchangeContext(userMessage, mshRole);
         } catch (final EbMS3Exception e) {
             LOG.info("PmodeKey not found, starting the dynamic discovery process");
             doDynamicDiscovery(userMessage, mshRole);
 
         }
-        LOG.debug("Recalling findPModeKeyForUserMessage after the dynamic discovery");
-        return super.findPModeKeyForUserMessage(userMessage, mshRole);
+        LOG.debug("Recalling findUserMessageExchangeContext after the dynamic discovery");
+        return super.findUserMessageExchangeContext(userMessage, mshRole);
     }
 
     void doDynamicDiscovery(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {

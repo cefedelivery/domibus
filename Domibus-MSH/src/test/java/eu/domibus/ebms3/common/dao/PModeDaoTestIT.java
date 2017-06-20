@@ -142,6 +142,8 @@ public class PModeDaoTestIT {
 
     }
 
+
+
     @Test
     public void testUpdatePModeWithValidPmode() throws Exception {
         InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-valid.xml");

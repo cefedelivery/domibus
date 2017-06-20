@@ -7,6 +7,7 @@ import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.NotificationListener;
@@ -75,6 +76,9 @@ public class BackendNotificationServiceTest {
 
     @Injectable
     DomainCoreConverter coreConverter;
+
+    @Injectable
+    MessageExchangeService messageExchangeService;
 
     @Tested
     BackendNotificationService backendNotificationService = new BackendNotificationService();
