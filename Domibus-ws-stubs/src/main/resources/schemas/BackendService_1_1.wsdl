@@ -67,12 +67,20 @@
         <wsdl:part element="tns:getMessageStatusResponse" name="getMessageStatusResponse">
         </wsdl:part>
     </wsdl:message>
+    <wsdl:message name="getStatusResponse">
+        <wsdl:part element="tns:getStatusResponse" name="getStatusResponse">
+        </wsdl:part>
+    </wsdl:message>
     <wsdl:message name="listPendingMessages">
         <wsdl:part element="tns:listPendingMessagesRequest" name="listPendingMessagesRequest">
         </wsdl:part>
     </wsdl:message>
     <wsdl:message name="getMessageStatus">
         <wsdl:part element="tns:getStatusRequest" name="getStatusRequest">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getStatus">
+        <wsdl:part element="tns:statusRequest" name="statusRequest">
         </wsdl:part>
     </wsdl:message>
     <wsdl:message name="sendMessageResponse">
@@ -105,6 +113,7 @@
     </wsdl:message>
     <wsdl:portType name="BackendInterface">
         <wsdl:operation name="sendMessage">
+            <!-- deprecated in 3.3; this method does not handle large payloads, use submitMessage instead -->
             <wsdl:input message="tns:sendMessage" name="sendMessage">
             </wsdl:input>
             <wsdl:output message="tns:sendMessageResponse" name="sendMessageResponse">
@@ -121,9 +130,17 @@
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getMessageStatus">
+            <!-- deprecated in 3.3; this method converts status DOWNLOADED to RECEIVED for
+            backwards compatibility, use getStatus instead -->
             <wsdl:input message="tns:getMessageStatus" name="getMessageStatus">
             </wsdl:input>
             <wsdl:output message="tns:getMessageStatusResponse" name="getMessageStatusResponse">
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getStatus">
+            <wsdl:input message="tns:getStatus" name="getStatus">
+            </wsdl:input>
+            <wsdl:output message="tns:getStatusResponse" name="getStatusResponse">
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="listPendingMessages">
@@ -139,6 +156,7 @@
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="downloadMessage">
+            <!-- deprecated in 3.3; this method does not handle large payloads, use retrieveMessage instead -->
             <wsdl:input message="tns:downloadMessage" name="downloadMessage">
             </wsdl:input>
             <wsdl:output message="tns:downloadMessageResponse" name="downloadMessageResponse">
@@ -190,6 +208,15 @@
                 <soap12:body use="literal"/>
             </wsdl:input>
             <wsdl:output name="getMessageStatusResponse">
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getStatus">
+            <soap12:operation soapAction="" style="document"/>
+            <wsdl:input name="getStatus">
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="getStatusResponse">
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
