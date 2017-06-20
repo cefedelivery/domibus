@@ -1,8 +1,10 @@
 package eu.domibus.plugin.routing;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import eu.domibus.plugin.routing.operation.LogicalOperator;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -133,4 +135,12 @@ public class BackendFilterEntity extends AbstractBaseEntity implements Comparabl
                 .toHashCode();
     }
 
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("index", index)
+                .append("routingCriterias", routingCriterias)
+                .append("backendName", backendName)
+                .toString();
+    }
 }

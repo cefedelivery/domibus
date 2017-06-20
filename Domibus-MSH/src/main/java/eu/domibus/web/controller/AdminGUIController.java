@@ -32,9 +32,14 @@ import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.*;
+import eu.domibus.wss4j.common.crypto.CryptoService;
+import eu.domibus.plugin.routing.operation.LogicalOperator;
+import org.apache.commons.lang.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,17 +56,23 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 /**
  * @author Christian Walczac
  */
-//TODO to remove
+
 @Controller
 public class AdminGUIController {
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(AdminGUIController.class);
 
     @Autowired
+    private CacheManager cacheManager;
+
+    @Autowired
     private MessagesLogService messagesLogService;
 
     @Autowired
     private ErrorLogDao eld; //TODO refactor, eliminate this.
+
+    @Autowired
+    private PModeProvider pModeProvider;
 
     @Autowired
     private DomibusPropertiesService domibusPropertiesService;
@@ -71,6 +82,9 @@ public class AdminGUIController {
 
     @Autowired
     private List<NotificationListener> notificationListenerServices;
+
+    @Autowired
+    private CryptoService cryptoService;
 
     @Resource(name = "routingCriteriaFactories")
     private List<CriteriaFactory> routingCriteriaFactories;
@@ -157,11 +171,11 @@ public class AdminGUIController {
 
     //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
     protected void convertDownloadedStatusToReceived(List<? extends MessageLog> messageLogEntries) {
-        if(messageLogEntries == null) {
+        if (messageLogEntries == null) {
             return;
         }
         for (MessageLog messageLogEntry : messageLogEntries) {
-            if(MessageStatus.DOWNLOADED == messageLogEntry.getMessageStatus()) {
+            if (MessageStatus.DOWNLOADED == messageLogEntry.getMessageStatus()) {
                 messageLogEntry.setMessageStatus(MessageStatus.RECEIVED);
             }
         }
@@ -256,6 +270,7 @@ public class AdminGUIController {
         model.addObject("title", "Domibus - Message Filter: Routing Criteria");
         List<String> routingCriteriaNames = new ArrayList<>();
         model.addObject("routingcriterias", routingCriteriaFactories);
+        model.addObject("routingOperators", LogicalOperator.values());
         model.addObject("backendConnectors", routingService.getBackendFilters());
         model.setViewName("messagefilter");
         return model;
@@ -281,6 +296,11 @@ public class AdminGUIController {
 
                     List<String> mappedRoutingCrierias = map.get(backendName.replaceAll(" ", "") + "filter");
                     List<String> mappedExpression = map.get(backendName.replaceAll(" ", "") + "selection");
+                    List<String> operator = map.get(backendName.replaceAll(" ", "") + "operator");
+
+                    if (operator != null && !operator.isEmpty()) {
+                        backendFilter.setCriteriaOperator(LogicalOperator.valueOf(operator.get(0)));
+                    }
 
                     backendFilter.getRoutingCriterias().clear();
                     if (mappedRoutingCrierias != null) {
@@ -300,5 +320,68 @@ public class AdminGUIController {
         Collections.sort(backendFilters);
         routingService.updateBackendFilters(backendFilters);
         return "Filters updated.";
+    }
+
+    /**
+     * Upload single file using Spring Controller
+     */
+    @RequestMapping(value = "/home/uploadPmodeFile", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    String uploadPmodeFile(@RequestParam("pmode") MultipartFile pmode) {
+        if (pmode.isEmpty()) {
+            return "Failed to upload the PMode file since it was empty.";
+        }
+
+        try {
+            byte[] bytes = pmode.getBytes();
+            List<String> pmodeUpdateMessage = pModeProvider.updatePModes(bytes);
+            String message = "PMode file has been successfully uploaded";
+            if (pmodeUpdateMessage != null && pmodeUpdateMessage.size() > 0) {
+                message += " but some issues were detected: <br>" + StringUtils.join(pmodeUpdateMessage, "<br>");
+            }
+            return message;
+        } catch (XmlProcessingException e) {
+            LOG.error("Error uploading the PMode", e);
+            return "Failed to upload the PMode file due to: <br><br> " + StringUtils.join(e.getErrors(), "<br>");
+        } catch (Exception e) {
+            LOG.error("Error uploading the PMode", e);
+            return "Failed to upload the PMode file due to: <br><br> " + e.getMessage();
+        }
+    }
+
+    @RequestMapping(value = "/home/uploadTruststoreFile", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    String uploadTruststoreFile(@RequestParam("truststore") MultipartFile truststore, @RequestParam("password") String password) {
+
+        if (!truststore.isEmpty()) {
+            try {
+                byte[] bytes = truststore.getBytes();
+                cryptoService.replaceTruststore(bytes, password);
+                //clear the cache used for certificate validation as it uses the truststore to get the certificate details
+                clearCache("certValidationByAlias");
+                return "Truststore file has been successfully replaced.";
+            } catch (Exception e) {
+                LOG.error("Failed to upload the truststore file", e);
+                return "Failed to upload the truststore file due to => " + e.getMessage();
+            }
+        } else {
+            return "Failed to upload the truststore file since it was empty.";
+        }
+    }
+
+    //TODO move it to a newly created class DomibusCacheService
+    protected void clearCache(String refreshCacheName) {
+        Collection<String> cacheNames = cacheManager.getCacheNames();
+        for (String cacheName : cacheNames) {
+            if (StringUtils.equals(cacheName, refreshCacheName)) {
+                final Cache cache = cacheManager.getCache(cacheName);
+                if (cache != null) {
+                    LOG.debug("Clearing cache [" + refreshCacheName + "]");
+                    cache.clear();
+                }
+            }
+        }
     }
 }

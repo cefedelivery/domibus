@@ -18,6 +18,8 @@ import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.routing.*;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
+import eu.domibus.plugin.routing.operation.LogicalOperation;
+import eu.domibus.plugin.routing.operation.LogicalOperationFactory;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
@@ -130,9 +132,11 @@ public class BackendNotificationService {
     }
 
     protected BackendFilter getMatchingBackendFilter(final List<BackendFilter> backendFilters, final Map<String, IRoutingCriteria> criteriaMap, final UserMessage userMessage) {
+        LOG.debug("Getting the backend filter for message [" + userMessage.getMessageInfo().getMessageId() + "]");
         for (final BackendFilter filter : backendFilters) {
             final boolean backendFilterMatching = isBackendFilterMatching(filter, criteriaMap, userMessage);
             if (backendFilterMatching) {
+                LOG.debug("Filter [" + filter + "] matched for message [" + userMessage.getMessageInfo().getMessageId() + "]");
                 return filter;
             }
         }

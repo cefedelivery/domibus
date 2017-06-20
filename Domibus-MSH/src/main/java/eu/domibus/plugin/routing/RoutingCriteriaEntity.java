@@ -90,7 +90,6 @@ public class RoutingCriteriaEntity extends AbstractBaseEntity implements IRoutin
     public boolean matches(final String candidate) {
 
         final Matcher m = getPattern(expression).matcher(candidate);
-
         return m.matches();
     }
 
