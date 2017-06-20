@@ -3,15 +3,35 @@
 }
 
 .inputField {
-  width:350px;
+  width:33%;
+}
+
+.inputFieldParties {
+  width:15%;
+}
+
+.optionField {
+  width:15%;
+}
+
+.dateField {
+  width:15%;
 }
 
 .filterTable {
   width:100%;
 }
 
+.filterTable td {
+  width :33%
+}
+
 .dateTableField {
   width:30%;
+}
+
+.filterTable td {
+  width :33%
 }
 
 .dateTimeTitle {

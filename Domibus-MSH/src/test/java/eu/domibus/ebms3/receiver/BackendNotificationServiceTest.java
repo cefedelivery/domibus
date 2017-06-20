@@ -4,6 +4,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.NotificationListener;
@@ -68,6 +69,9 @@ public class BackendNotificationServiceTest {
 
     @Injectable
     Map<String, IRoutingCriteria> criteriaMap;
+
+    @Injectable
+    DomainCoreConverter coreConverter;
 
     @Tested
     BackendNotificationService backendNotificationService = new BackendNotificationService();

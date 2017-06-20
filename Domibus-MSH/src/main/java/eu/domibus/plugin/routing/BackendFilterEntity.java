@@ -16,9 +16,9 @@ import java.util.List;
 @Entity
 @Table(name = "TB_BACKEND_FILTER")
 @NamedQueries({
-        @NamedQuery(name = "BackendFilter.findEntries", query = "select bf from BackendFilter bf order by bf.index")
+        @NamedQuery(name = "BackendFilter.findEntries", query = "select bf from BackendFilterEntity bf order by bf.index")
 })
-public class BackendFilter extends AbstractBaseEntity implements Comparable<BackendFilter> {
+public class BackendFilterEntity extends AbstractBaseEntity implements Comparable<BackendFilterEntity> {
 
     @Column(name = "PRIORITY")
     private int index;
@@ -26,15 +26,10 @@ public class BackendFilter extends AbstractBaseEntity implements Comparable<Back
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "FK_BACKEND_FILTER")
     @OrderColumn(name = "PRIORITY")
-    private List<RoutingCriteria> routingCriterias = new ArrayList<>();
+    private List<RoutingCriteriaEntity> routingCriterias = new ArrayList<>();
 
     @Column(name = "BACKEND_NAME")
     private String backendName;
-
-    @Column(name = "CRITERIA_OPERATOR")
-    @Enumerated(EnumType.STRING)
-    private LogicalOperator criteriaOperator;
-
     public void setIndex(final int index) {
         this.index = index;
     }
@@ -45,22 +40,26 @@ public class BackendFilter extends AbstractBaseEntity implements Comparable<Back
      * <p/>
      * This accessor method returns a reference to the live list, not a
      * snapshot. Therefore any modification you make to the returned list will
-     * be present inside the BackendFilter object. This is why there is not a
+     * be present inside the BackendFilterEntity object. This is why there is not a
      * <CODE>set</CODE> method for the property.
      * <p/>
      * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getRoutingCriterias().add(newItem);
+     *    getRoutingCriteriaEntities().add(newItem);
      * </pre>
      * <p/>
      * <p/>
      * <p/>
      * Objects of the following type(s) are allowed in the list
-     * {@link RoutingCriteria }
+     * {@link RoutingCriteriaEntity }
      */
-    public List<RoutingCriteria> getRoutingCriterias() {
+    public List<RoutingCriteriaEntity> getRoutingCriterias() {
         return routingCriterias;
+    }
+
+    public void setRoutingCriterias(List<RoutingCriteriaEntity> routingCriterias) {
+        this.routingCriterias = routingCriterias;
     }
 
     public String getBackendName() {
@@ -69,14 +68,6 @@ public class BackendFilter extends AbstractBaseEntity implements Comparable<Back
 
     public void setBackendName(final String backendName) {
         this.backendName = backendName;
-    }
-
-    public LogicalOperator getCriteriaOperator() {
-        return criteriaOperator;
-    }
-
-    public void setCriteriaOperator(LogicalOperator criteriaOperation) {
-        this.criteriaOperator = criteriaOperation;
     }
 
     /**
@@ -118,7 +109,7 @@ public class BackendFilter extends AbstractBaseEntity implements Comparable<Back
      *                              from being compared to this object.
      */
     @Override
-    public int compareTo(final BackendFilter o) {
+    public int compareTo(final BackendFilterEntity o) {
         return index - o.index;
     }
 
@@ -128,7 +119,7 @@ public class BackendFilter extends AbstractBaseEntity implements Comparable<Back
 
         if (o == null || getClass() != o.getClass()) return false;
 
-        BackendFilter that = (BackendFilter) o;
+        BackendFilterEntity that = (BackendFilterEntity) o;
 
         return new EqualsBuilder()
                 .appendSuper(super.equals(o))
@@ -150,7 +141,6 @@ public class BackendFilter extends AbstractBaseEntity implements Comparable<Back
                 .append("index", index)
                 .append("routingCriterias", routingCriterias)
                 .append("backendName", backendName)
-                .append("criteriaOperator", criteriaOperator)
                 .toString();
     }
 }

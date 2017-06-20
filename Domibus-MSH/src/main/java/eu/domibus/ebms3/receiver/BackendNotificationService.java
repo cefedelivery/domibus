@@ -1,10 +1,13 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.routing.BackendFilter;
+import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -21,6 +24,7 @@ import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
 import eu.domibus.submission.SubmissionValidatorListProvider;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -74,6 +78,9 @@ public class BackendNotificationService {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private DomainCoreConverter coreConverter;
 
     //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
@@ -137,41 +144,33 @@ public class BackendNotificationService {
     }
 
     protected boolean isBackendFilterMatching(BackendFilter filter, Map<String, IRoutingCriteria> criteriaMap, final UserMessage userMessage) {
-        LOG.debug("Verifying if filter [" + filter.getBackendName() + "] is matching for message [" + userMessage.getMessageInfo().getMessageId() + "]");
-
-        if (filter.getRoutingCriterias() == null || filter.getRoutingCriterias().isEmpty()) {
-            LOG.debug("Filter [" + filter.getBackendName() + "] is matching for message [" + userMessage.getMessageInfo().getMessageId() + "]: matched filter as no routing criteria are defined");
-            return true;
-        }
-
-        final LogicalOperation logicalOperation = new LogicalOperationFactory().create(filter.getCriteriaOperator());
-
-        for (final RoutingCriteria routingCriteria : filter.getRoutingCriterias()) {
-            final IRoutingCriteria criteria = criteriaMap.get(routingCriteria.getName());
-            boolean matches = criteria.matches(userMessage, routingCriteria.getExpression());
-
-            logicalOperation.addIntermediateResult(matches);
-            if (logicalOperation.canShortCircuitOperation()) {
-                LOG.debug("Short-circuiting for operator [" + filter.getCriteriaOperator() + "]: criteria [" + criteria.getName() + "] matched for backend criteria [" + routingCriteria.getExpression() + "] and message [" + userMessage.getMessageInfo().getMessageId() + "]");
-                return logicalOperation.getResult();
+        for (final RoutingCriteria routingCriteriaEntity : filter.getRoutingCriterias()) {
+            final IRoutingCriteria criteria = criteriaMap.get(StringUtils.upperCase(routingCriteriaEntity.getName()));
+            boolean matches = criteria.matches(userMessage, routingCriteriaEntity.getExpression());
+            //if at least one criteria does not match it means the filter is not matching
+            if (!matches) {
+                return false;
             }
         }
-        return logicalOperation.getResult();
+        return true;
     }
 
     protected List<BackendFilter> getBackendFilters() {
-        List<BackendFilter> backendFilters = backendFilterDao.findAll();
-        if (backendFilters.isEmpty()) { // There is no saved backendfilter configuration. Most likely the backends have not been configured yet
-            backendFilters = routingService.getBackendFilters();
-            if (backendFilters.isEmpty()) {
-                LOG.error("There are no backend plugins deployed on this server");
-            }
-            if (backendFilters.size() > 1) { //There is more than one unconfigured backend available. For security reasons we cannot send the message just to the first one
-                LOG.error("There are multiple unconfigured backend plugins available. Please set up the configuration using the \"Message filter\" pannel of the administrative GUI.");
-                backendFilters.clear(); // empty the list so its handled in the desired way.
-            }
-            //If there is only one backend deployed we send it to that as this is most likely the intent
+        List<BackendFilterEntity> backendFilterEntities = backendFilterDao.findAll();
+
+        if(!backendFilterEntities.isEmpty()) {
+            return coreConverter.convert(backendFilterEntities,BackendFilter.class);
         }
+
+        List<BackendFilter> backendFilters = routingService.getBackendFilters();
+        if (backendFilters.isEmpty()) {
+            LOG.error("There are no backend plugins deployed on this server");
+        }
+        if (backendFilters.size() > 1) { //There is more than one unconfigured backend available. For security reasons we cannot send the message just to the first one
+            LOG.error("There are multiple unconfigured backend plugins available. Please set up the configuration using the \"Message filter\" pannel of the administrative GUI.");
+            backendFilters.clear(); // empty the list so its handled in the desired way.
+        }
+        //If there is only one backend deployed we send it to that as this is most likely the intent
         return backendFilters;
     }
 
