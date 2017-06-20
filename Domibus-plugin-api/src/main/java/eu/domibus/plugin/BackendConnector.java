@@ -84,7 +84,7 @@ public interface BackendConnector<U, T> {
      * @param messageId id of the message the status is requested for
      * @return the message status {@link eu.domibus.common.MessageStatus}
      * @deprecated since 3.3-rc1; this method converts DOWNLOADED status to RECEIVED to maintain
-     * the backwards compatibility. Use getStatus(String messageId) instead
+     * the backwards compatibility. Use {@link eu.domibus.plugin.BackendConnector#getStatus(String)} instead
      */
     @Deprecated
     MessageStatus getMessageStatus(final String messageId);
