@@ -28,7 +28,7 @@ export class PmodeUploadComponent implements OnInit {
     this.http.post(this.url, input).subscribe(res => {
         this.alertService.success(res.text(), false);
       }, err => {
-        this.alertService.error(err, false);
+        this.alertService.error(err._body, false);
       }
     );
     this.dialogRef.close();

@@ -7,8 +7,8 @@ import {Observable} from "rxjs/Observable";
 import {MessageFilterResult} from "./messagefilterresult";
 import {BackendFilterEntry} from "./backendfilterentry";
 import {RoutingCriteriaEntry} from "./routingcriteriaentry";
-import {DeleteMessagefilterDialogComponent} from "./deletemessagefilter-dialog/deletemessagefilter-dialog.component";
 import {CancelMessagefilterDialogComponent} from "./cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
+import {isUndefined} from "util";
 
 @Component({
   moduleId: module.id,
@@ -208,25 +208,15 @@ export class MessageFilterComponent {
     });
   }
 
-  deleteDialog() {
-    let dialogRef = this.dialog.open(DeleteMessagefilterDialogComponent);
-    dialogRef.afterClosed().subscribe(result => {
-      switch(result) {
-        case 'Yes' :
-          this.enableCancel = true;
-          this.enableSave = true;
-          this.enableDelete = false;
+  buttonDelete() {
+    this.enableCancel = true;
+    this.enableSave = true;
+    this.enableDelete = false;
 
-          this.enableMoveUp = false;
-          this.enableMoveDown = false;
+    this.enableMoveUp = false;
+    this.enableMoveDown = false;
 
-          this.rows.splice(this.rowNumber, 1);
-
-          break;
-        case 'No':
-        // do nothing
-      }
-    });
+    this.rows.splice(this.rowNumber, 1);
   }
 
   buttonMoveUp() {
@@ -272,6 +262,10 @@ export class MessageFilterComponent {
 
   onSelect({ selected }) {
     console.log('Select Event', selected, this.selected);
+
+    if(isUndefined(selected)) {
+      return;
+    }
 
     this.rowNumber = this.selected[0].$$index;
 

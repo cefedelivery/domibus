@@ -36,10 +36,10 @@ export class TruststoreComponent implements OnInit {
     input.append('truststore', fi.files[0]);
     input.append('password', this.password.nativeElement.value);
     this.http.post(this.url, input).subscribe(res => {
-        this.alertService.success(res.json(), false);
+        this.alertService.success(res.text(), false);
       },
       err => {
-        this.alertService.error(err.json(), false);
+        this.alertService.error("Error updating truststore file", false);
       }
     );
 

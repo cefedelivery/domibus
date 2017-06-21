@@ -38,7 +38,6 @@ import {JmsComponent} from './jms/jms.component';
 import {RowLimiterComponent} from './common/row-limiter/row-limiter.component';
 import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
 import {MessagefilterDialogComponent} from "./messagefilter/messagefilter-dialog/messagefilter-dialog.component";
-import {DeleteMessagefilterDialogComponent} from "./messagefilter/deletemessagefilter-dialog/deletemessagefilter-dialog.component";
 import {CancelMessagefilterDialogComponent} from "./messagefilter/cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
 import {MessageDialogComponent} from './jms/message-dialog/message-dialog.component';
 
@@ -64,7 +63,6 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessagefilterDialogComponent,
     PmodeUploadComponent,
     MessagelogDialogComponent,
-    DeleteMessagefilterDialogComponent,
     CancelMessagefilterDialogComponent,
     JmsComponent,
     RowLimiterComponent,
@@ -80,7 +78,6 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessagelogDialogComponent,
     MoveDialogComponent,
     MessageDialogComponent,
-    DeleteMessagefilterDialogComponent,
     CancelMessagefilterDialogComponent,
     MoveDialogComponent
   ],

@@ -90,7 +90,7 @@
   </md-card>
 </div>
 
-<app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event)" id="pagesize_id"></app-row-limiter>
+<app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event.value)" id="pagesize_id"></app-row-limiter>
 
 <ngx-datatable
   id="messageLogTable"
