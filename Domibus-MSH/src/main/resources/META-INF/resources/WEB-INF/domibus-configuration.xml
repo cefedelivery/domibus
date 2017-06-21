@@ -41,11 +41,21 @@
         <property name="jobClass" value="eu.domibus.ebms3.sender.SendRetryWorker"/>
         <property name="durability" value="true"/>
     </bean>
+    <bean id="pullRequestJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.ebms3.puller.MessagePullerJob"/>
+        <property name="durability" value="true"/>
+    </bean>
 
     <bean id="retryWorkerTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="retryWorkerJob"/>
         <property name="cronExpression" value="${domibus.msh.retry.cron}"/>
+    </bean>
+    <bean id="pullRequestTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="pullRequestJob"/>
+        <property name="cronExpression" value="${domibus.msh.pull.cron}"/>
     </bean>
 
     <!-- customizable list of triggers to be executed by quartz -->
@@ -54,6 +64,7 @@
         <property name="sourceList">
             <list>
                 <ref bean="retryWorkerTrigger"/>
+                <ref bean="pullRequestTrigger"/>
             </list>
         </property>
     </bean>
