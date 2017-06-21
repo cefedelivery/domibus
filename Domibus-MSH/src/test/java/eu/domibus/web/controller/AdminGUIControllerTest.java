@@ -15,6 +15,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.cache.CacheManager;
 
 import java.util.List;
 
@@ -30,6 +31,9 @@ public class AdminGUIControllerTest {
 
     @Injectable
     private MessagesLogService messagesLogService;
+
+    @Injectable
+    private CacheManager cacheManager;
 
     @Injectable
     private ErrorLogDao eld; //TODO refactor, eliminate this.
@@ -54,8 +58,7 @@ public class AdminGUIControllerTest {
 
     @Test
     public void testGetMessageStatuses() throws Exception {
-        //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
         final List<MessageStatus> messageStatuses = adminGUIController.getMessageStatuses();
-        Assert.assertFalse(messageStatuses.contains(MessageStatus.DOWNLOADED));
+        Assert.assertTrue(messageStatuses.contains(MessageStatus.DOWNLOADED));
     }
 }

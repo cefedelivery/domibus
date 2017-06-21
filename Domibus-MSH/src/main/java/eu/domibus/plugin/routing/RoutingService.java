@@ -1,5 +1,7 @@
 package eu.domibus.plugin.routing;
 
+import eu.domibus.api.routing.BackendFilter;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ public class RoutingService {
     @Autowired
     private List<NotificationListener> notificationListeners;
 
+    @Autowired
+    private DomainCoreConverter coreConverter;
+
     /**
      * Returns the configured backend filters present in the classpath
      *
@@ -31,53 +36,39 @@ public class RoutingService {
      */
     @Cacheable(value = "backendFilterCache")
     public List<BackendFilter> getBackendFilters() {
-        final List<BackendFilter> filters = new ArrayList<>(backendFilterDao.findAll());
+        final List<BackendFilterEntity> filters = new ArrayList<>(backendFilterDao.findAll());
         final List<NotificationListener> backendsTemp = new ArrayList<>(notificationListeners);
 
-        final Iterator<BackendFilter> backendFilterIterator = filters.iterator();
-        while (backendFilterIterator.hasNext()) {
-            BackendFilter filter = backendFilterIterator.next();
-
-            boolean filterExists = false;
+        for (BackendFilterEntity filter : filters) {
             for (final NotificationListener backend : backendsTemp) {
                 if (filter.getBackendName().equals(backend.getBackendName())) {
-                    filterExists = true;
                     backendsTemp.remove(backend);
                     break;
                 }
             }
-            if (!filterExists) {
-                backendFilterIterator.remove();
-            }
         }
 
         for (final NotificationListener backend : backendsTemp) {
-            final BackendFilter filter = new BackendFilter();
+            final BackendFilterEntity filter = new BackendFilterEntity();
             filter.setBackendName(backend.getBackendName());
             filters.add(filter);
         }
-        return filters;
+        return coreConverter.convert(filters, BackendFilter.class);
     }
 
     @CacheEvict(value = "backendFilterCache", allEntries = true)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateBackendFilters(final List<BackendFilter> filters) {
-        backendFilterDao.update(filters);
+        List<BackendFilterEntity> backendFilterEntities = coreConverter.convert(filters, BackendFilterEntity.class);
+        List<BackendFilterEntity> allBackendFilterEntities = backendFilterDao.findAll();
+        List<BackendFilterEntity> backendFilterEntityListToDelete = backendFiltersToDelete(allBackendFilterEntities, backendFilterEntities);
+        backendFilterDao.deleteAll(backendFilterEntityListToDelete);
+        backendFilterDao.update(backendFilterEntities);
     }
 
-/*    public BackendConnector findResponsibleBackend(UserMessage message){
-        for(BackendFilter filter:getBackendFilters()){
-            for (RoutingCriteria routingCriteria: filter.getRoutingCriterias()) {
-                if (routingCriteria.matches(message, )){
-                    for (BackendConnector backend:backends){
-                        if (backend.getName().equals(filter.getBackendName())){
-                            return backend;
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }*/
-
+    private List<BackendFilterEntity> backendFiltersToDelete(final List<BackendFilterEntity> masterData, final List<BackendFilterEntity> newData) {
+        List<BackendFilterEntity> result = new ArrayList<>(masterData);
+        result.removeAll(newData);
+        return result;
+    }
 }

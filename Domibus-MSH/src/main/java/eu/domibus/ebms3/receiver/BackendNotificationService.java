@@ -1,11 +1,17 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.routing.BackendFilter;
+import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.common.services.impl.PullContext;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.model.Property;
+import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -15,10 +21,13 @@ import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.routing.*;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
+import eu.domibus.plugin.routing.operation.LogicalOperation;
+import eu.domibus.plugin.routing.operation.LogicalOperationFactory;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
 import eu.domibus.submission.SubmissionValidatorListProvider;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -73,6 +82,12 @@ public class BackendNotificationService {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private MessageExchangeService messageExchangeService;
+
+    @Autowired
+    private DomainCoreConverter coreConverter;
+
     //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
 
@@ -123,9 +138,11 @@ public class BackendNotificationService {
     }
 
     protected BackendFilter getMatchingBackendFilter(final List<BackendFilter> backendFilters, final Map<String, IRoutingCriteria> criteriaMap, final UserMessage userMessage) {
+        LOG.debug("Getting the backend filter for message [" + userMessage.getMessageInfo().getMessageId() + "]");
         for (final BackendFilter filter : backendFilters) {
             final boolean backendFilterMatching = isBackendFilterMatching(filter, criteriaMap, userMessage);
             if (backendFilterMatching) {
+                LOG.debug("Filter [" + filter + "] matched for message [" + userMessage.getMessageInfo().getMessageId() + "]");
                 return filter;
             }
         }
@@ -133,30 +150,35 @@ public class BackendNotificationService {
     }
 
     protected boolean isBackendFilterMatching(BackendFilter filter, Map<String, IRoutingCriteria> criteriaMap, final UserMessage userMessage) {
-        for (final RoutingCriteria routingCriteria : filter.getRoutingCriterias()) {
-            final IRoutingCriteria criteria = criteriaMap.get(routingCriteria.getName());
-            boolean matches = criteria.matches(userMessage, routingCriteria.getExpression());
-            //if at least one criteria does not match it means the filter is not matching
-            if (!matches) {
-                return false;
+        if(filter.getRoutingCriterias() != null) {
+            for (final RoutingCriteria routingCriteriaEntity : filter.getRoutingCriterias()) {
+                final IRoutingCriteria criteria = criteriaMap.get(StringUtils.upperCase(routingCriteriaEntity.getName()));
+                boolean matches = criteria.matches(userMessage, routingCriteriaEntity.getExpression());
+                //if at least one criteria does not match it means the filter is not matching
+                if (!matches) {
+                    return false;
+                }
             }
         }
         return true;
     }
 
     protected List<BackendFilter> getBackendFilters() {
-        List<BackendFilter> backendFilters = backendFilterDao.findAll();
-        if (backendFilters.isEmpty()) { // There is no saved backendfilter configuration. Most likely the backends have not been configured yet
-            backendFilters = routingService.getBackendFilters();
-            if (backendFilters.isEmpty()) {
-                LOG.error("There are no backend plugins deployed on this server");
-            }
-            if (backendFilters.size() > 1) { //There is more than one unconfigured backend available. For security reasons we cannot send the message just to the first one
-                LOG.error("There are multiple unconfigured backend plugins available. Please set up the configuration using the \"Message filter\" pannel of the administrative GUI.");
-                backendFilters.clear(); // empty the list so its handled in the desired way.
-            }
-            //If there is only one backend deployed we send it to that as this is most likely the intent
+        List<BackendFilterEntity> backendFilterEntities = backendFilterDao.findAll();
+
+        if(!backendFilterEntities.isEmpty()) {
+            return coreConverter.convert(backendFilterEntities,BackendFilter.class);
         }
+
+        List<BackendFilter> backendFilters = routingService.getBackendFilters();
+        if (backendFilters.isEmpty()) {
+            LOG.error("There are no backend plugins deployed on this server");
+        }
+        if (backendFilters.size() > 1) { //There is more than one unconfigured backend available. For security reasons we cannot send the message just to the first one
+            LOG.error("There are multiple unconfigured backend plugins available. Please set up the configuration using the \"Message filter\" pannel of the administrative GUI.");
+            backendFilters.clear(); // empty the list so its handled in the desired way.
+        }
+        //If there is only one backend deployed we send it to that as this is most likely the intent
         return backendFilters;
     }
 

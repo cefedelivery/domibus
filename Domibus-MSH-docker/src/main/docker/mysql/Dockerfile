@@ -10,15 +10,15 @@ ENV SQLSCRIPTS_VERSION ${SQLSCRIPTS_VERSION}
 ARG DOMIBUS_VERSION
 ENV DOMIBUS_VERSION ${DOMIBUS_VERSION}
 
-ENV SQL_SCRIPTS_URL ./domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip
+ENV SQL_SCRIPTS_URL ./domibus-distribution-$DOMIBUS_VERSION-sql-scripts.zip
 ENV SQL_SCRIPTS_HOME /usr/local/domibusSql
 
 RUN apt-get update
 RUN apt-get install -y wget
 RUN apt-get install -y unzip
 
-COPY ./domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip .
-RUN unzip  -d $SQL_SCRIPTS_HOME domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip
+COPY ./domibus-distribution-$DOMIBUS_VERSION-sql-scripts.zip .
+RUN unzip  -d $SQL_SCRIPTS_HOME domibus-distribution-$DOMIBUS_VERSION-sql-scripts.zip
 RUN cp $SQL_SCRIPTS_HOME/sql-scripts/mysql5innoDb-$SQLSCRIPTS_VERSION.ddl /docker-entrypoint-initdb.d/mysql5innoDb-$SQLSCRIPTS_VERSION.sql
 
 EXPOSE 3306

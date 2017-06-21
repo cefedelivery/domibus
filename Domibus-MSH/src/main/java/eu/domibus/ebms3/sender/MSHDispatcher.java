@@ -22,17 +22,10 @@ package eu.domibus.ebms3.sender;
 import com.google.common.base.Strings;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.Party;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.pki.CertificateService;
-import eu.domibus.pki.DomibusCertificateException;
-import eu.domibus.pki.PolicyService;
-import org.apache.commons.lang.Validate;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
@@ -64,72 +57,23 @@ public class MSHDispatcher {
 
     public static final String PMODE_KEY_CONTEXT_PROPERTY = "PMODE_KEY_CONTEXT_PROPERTY";
     public static final String ASYMMETRIC_SIG_ALGO_PROPERTY = "ASYMMETRIC_SIG_ALGO_PROPERTY";
+    public static final String MESSAGE_TYPE_IN = "MESSAGE_TYPE";
+    public static final String MESSAGE_TYPE_OUT = "MESSAGE_TYPE_OUT";
+    public static final String MESSAGE_ID = "MESSAGE_ID";
     public static final QName SERVICE_NAME = new QName("http://domibus.eu", "msh-dispatch-service");
     public static final QName PORT_NAME = new QName("http://domibus.eu", "msh-dispatch");
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHDispatcher.class);
 
     @Autowired
-    PolicyService policyService;
-
-    @Autowired
     private TLSReader tlsReader;
-
-    @Autowired
-    private PModeProvider pModeProvider;
-
-    @Autowired
-    CertificateService certificateService;
 
     @Autowired
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
 
     @Transactional(propagation = Propagation.MANDATORY)
-    public SOAPMessage dispatch(final SOAPMessage soapMessage, final String pModeKey) throws EbMS3Exception {
-
-        final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
-        Party sendingParty = pModeProvider.getSenderParty(pModeKey);
-        Validate.notNull(sendingParty, "Initiator party was not found");
-        Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
-        Validate.notNull(receiverParty, "Responder party was not found");
-        Policy policy;
-        try {
-            policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
-        } catch (final ConfigurationException e) {
-
-            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
-            ex.setMshRole(MSHRole.SENDING);
-            throw ex;
-        }
-
-        if (!policyService.isNoSecurityPolicy(policy)) {
-            // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
-            try {
-                certificateService.isCertificateValid(sendingParty.getName());
-                LOG.info("Sender certificate exists and is valid [" + sendingParty.getName() + "]");
-            } catch (DomibusCertificateException dcEx) {
-                String msg = "Could not find and verify sender's certificate [" + sendingParty.getName() + "]";
-                LOG.error(msg, dcEx);
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, msg, null, dcEx);
-                ex.setMshRole(MSHRole.SENDING);
-                throw ex;
-            }
-
-            // Verifies the validity of receiver's certificate.
-            if (certificateService.isCertificateValidationEnabled()) {
-                try {
-                    boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
-                    if (!certificateChainValid) {
-                        warnOutput("Certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
-                    }
-                } catch (Exception e) {
-                    LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
-                }
-            }
-        }
-
-        final String endpoint = receiverParty.getEndpoint();
+    public SOAPMessage dispatch(final SOAPMessage soapMessage, String endpoint, final Policy policy, final LegConfiguration legConfiguration, final String pModeKey) throws EbMS3Exception {
         final Dispatch<SOAPMessage> dispatch = createWSServiceDispatcher(endpoint);//service.createDispatch(PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
         dispatch.getRequestContext().put(PolicyConstants.POLICY_OVERRIDE, policy);
         dispatch.getRequestContext().put(ASYMMETRIC_SIG_ALGO_PROPERTY, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm());

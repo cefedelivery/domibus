@@ -220,13 +220,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
     }
 
     public MessageStatus transformFromMessageStatus(eu.domibus.common.MessageStatus messageStatus) {
-        if(eu.domibus.common.MessageStatus.DOWNLOADED == messageStatus) {
-            //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
-            LOG.debug("Changing DOWNLOADED status to RECEIVED");
-            messageStatus = eu.domibus.common.MessageStatus.RECEIVED;
-        }
         return MessageStatus.fromValue(messageStatus.name());
-
     }
 
     public ErrorResultImplArray transformFromErrorResults(List<? extends ErrorResult> errors) {

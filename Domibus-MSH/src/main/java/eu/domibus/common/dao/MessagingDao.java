@@ -1,5 +1,7 @@
 package eu.domibus.common.dao;
 
+import eu.domibus.common.MessageStatus;
+import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -11,9 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +24,15 @@ import static org.springframework.util.StringUtils.hasLength;
  * @author Christian Koch, Stefan Mueller, Federico Martini
  * @since 3.0
  */
+
 @Repository
 public class MessagingDao extends BasicDao<Messaging> {
 
+    final static String FIND_MESSAGING_ON_STATUS_AND_RECEIVER="select new eu.domibus.ebms3.common.model.MessagePullDto(ul.messageId,ul.received) from UserMessageLog ul where ul.messageId in (SELECT m.userMessage.messageInfo.messageId as id FROM  Messaging m left join m.userMessage.partyInfo.to.partyId as pids where pids.value=:PARTY_ID and m.userMessage.mpc=:MPC) and ul.messageStatus=:MESSAGE_STATUS ORDER BY ul.received";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingDao.class);
+    private static final String PARTY_ID = "PARTY_ID";
+    private static final String MESSAGE_STATUS = "MESSAGE_STATUS";
+    private static final String MPC = "MPC";
 
     public MessagingDao() {
         super(Messaging.class);
@@ -81,4 +86,20 @@ public class MessagingDao extends BasicDao<Messaging> {
         }
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DATA_CLEARED, messageId);
     }
+
+    /**
+     * Retrieves messages based STATUS and TO fields. The return is ordered by received date.
+     * @param partyId the party to which this message should be delivered.
+     * @param messageStatus the status of the message.
+     * @param mpc
+     * @return a list of class containing the date and the messageId.
+     */
+    public List<MessagePullDto> findMessagingOnStatusReceiverAndMpc(final String partyIdentifier, final MessageStatus messageStatus, final String mpc){
+        TypedQuery<MessagePullDto> processQuery= em.createQuery(FIND_MESSAGING_ON_STATUS_AND_RECEIVER,MessagePullDto.class);
+        processQuery.setParameter(PARTY_ID, partyIdentifier);
+        processQuery.setParameter(MESSAGE_STATUS, messageStatus);
+        processQuery.setParameter(MPC, mpc);
+        return processQuery.getResultList();
+    }
 }
+

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * The eb:Messaging element is the top element of ebMS-3 headers, and it is
  * placed within the SOAP Header element (either SOAP 1.1 or SOAP 1.2). The
@@ -41,6 +42,7 @@ import java.util.Map;
         @NamedQuery(name = "Messaging.emptyPayloads", query = "update PartInfo p set p.binaryData = null where p in :PARTINFOS"),
 })
 public class Messaging extends AbstractBaseEntity {
+
 
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)

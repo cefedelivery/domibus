@@ -28,6 +28,7 @@ import {ErrorLogComponent} from "./errorlog/errorlog.component";
 import {FooterComponent} from "./footer/footer.component";
 import {DomibusInfoService} from "./appinfo/domibusinfo.service";
 import {AuthorizedAdminGuard} from "./guards/authorized-admin.guard";
+import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
 import {MessageLogComponent} from "./messagelog/messagelog.component";
 import {UserComponent} from "./user/user.component"
 import {TruststoreComponent} from './truststore/truststore.component';
@@ -37,6 +38,9 @@ import {MessagelogDialogComponent} from './messagelog/messagelog-dialog/messagel
 import {JmsComponent} from './jms/jms.component';
 import {RowLimiterComponent} from './common/row-limiter/row-limiter.component';
 import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
+import {MessagefilterDialogComponent} from "./messagefilter/messagefilter-dialog/messagefilter-dialog.component";
+import {DeleteMessagefilterDialogComponent} from "./messagefilter/deletemessagefilter-dialog/deletemessagefilter-dialog.component";
+import {CancelMessagefilterDialogComponent} from "./messagefilter/cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
 import {MessageDialogComponent} from './jms/message-dialog/message-dialog.component';
 import { PasswordComponent } from './user/password/password-dialog.component';
 
@@ -49,6 +53,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     AppComponent,
     LoginComponent,
     HomeComponent,
+    MessageFilterComponent,
     MessageLogComponent,
     UserComponent,
     ErrorLogComponent,
@@ -59,19 +64,29 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TruststoreComponent,
     PModeComponent,
     PmodeUploadComponent,
+    MessagefilterDialogComponent,
+    PmodeUploadComponent,
     MessagelogDialogComponent,
+    DeleteMessagefilterDialogComponent,
+    CancelMessagefilterDialogComponent,
     JmsComponent,
     RowLimiterComponent,
     MoveDialogComponent,
     MessageDialogComponent,
+    MessagefilterDialogComponent,
     PasswordComponent
   ],
   entryComponents: [
     AppComponent,
     PmodeUploadComponent,
+    MessagefilterDialogComponent,
+    PmodeUploadComponent,
     MessagelogDialogComponent,
     MoveDialogComponent,
     MessageDialogComponent,
+    DeleteMessagefilterDialogComponent,
+    CancelMessagefilterDialogComponent,
+    MoveDialogComponent,
     PasswordComponent
   ],
   imports: [

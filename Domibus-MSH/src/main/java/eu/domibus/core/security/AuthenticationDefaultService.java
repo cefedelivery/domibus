@@ -32,7 +32,7 @@ public class AuthenticationDefaultService implements AuthenticationService {
     private Properties domibusProperties;
 
     @Autowired
-    @Qualifier("customAuthenticationProvider")
+    @Qualifier("securityCustomAuthenticationProvider")
     private AuthenticationProvider authenticationProvider;
 
     @Override

@@ -19,4 +19,6 @@ public interface CertificateService {
     boolean isCertificateValid(String alias) throws DomibusCertificateException;
 
     String extractCommonName(final X509Certificate certificate) throws InvalidNameException;
+
+    X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password);
 }

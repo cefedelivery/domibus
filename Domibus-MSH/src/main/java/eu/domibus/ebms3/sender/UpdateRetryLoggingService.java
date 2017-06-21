@@ -52,7 +52,11 @@ public class UpdateRetryLoggingService {
             LOG.debug("Updating send attempts to [{}]", userMessageLog.getSendAttempts());
             if (legConfiguration.getReceptionAwareness() != null) {
                 userMessageLog.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(userMessageLog.getNextAttempt(), userMessageLog.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
-                userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RETRY);
+                if (MessageStatus.BEING_PULLED.equals(userMessageLog.getMessageStatus())) {
+                    userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
+                } else {
+                    userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RETRY);
+                }
                 LOG.debug("Updating status to [{}]", userMessageLog.getMessageStatus());
                 userMessageLogDao.update(userMessageLog);
             }
@@ -90,8 +94,8 @@ public class UpdateRetryLoggingService {
      * @return
      */
     protected Long getScheduledStartTime(final MessageLog userMessageLog) {
-        Date result =  userMessageLog.getRestored();
-        if(result == null) {
+        Date result = userMessageLog.getRestored();
+        if (result == null) {
             LOG.debug("Using the received date for scheduled start time [{}]", userMessageLog.getReceived());
             return userMessageLog.getReceived().getTime();
         }

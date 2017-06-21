@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+
+    <resource-ref id="DomibusWorkManager">
+        <res-ref-name>DomibusWorkManager</res-ref-name>
+        <res-type>commonj.work.WorkManager</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Unshareable</res-sharing-scope>
+    </resource-ref>
+    <resource-ref id="QuartzWorkManager">
+        <res-ref-name>QuartzWorkManager</res-ref-name>
+        <res-type>commonj.work.WorkManager</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Unshareable</res-sharing-scope>
+    </resource-ref>
+</web-app>

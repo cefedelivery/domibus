@@ -10,7 +10,7 @@ import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+@Repository("securityAuthenticationDAO")
 @Transactional
 public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
 
@@ -20,14 +20,14 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
 
 
     public AuthenticationEntity findByUser(final String username) {
-        final TypedQuery<AuthenticationEntity> query = this.em.createNamedQuery("AuthenticationEntry.findByUsername", AuthenticationEntity.class);
+        final TypedQuery<AuthenticationEntity> query = this.em.createNamedQuery("AuthenticationEntity.findByUsername", AuthenticationEntity.class);
         query.setParameter("USERNAME", username);
 
         return query.getSingleResult();
     }
 
     public List<AuthRole> getRolesForUser(final String username) {
-        final TypedQuery<String> query = this.em.createNamedQuery("AuthenticationEntry.getRolesForUsername", String.class);
+        final TypedQuery<String> query = this.em.createNamedQuery("AuthenticationEntity.getRolesForUsername", String.class);
         query.setParameter("USERNAME", username);
 
         List<AuthRole> authRoles = new ArrayList<>();
@@ -40,14 +40,14 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
     }
 
     public AuthenticationEntity findByCertificateId(final String certificateId) {
-        final TypedQuery<AuthenticationEntity> query = this.em.createNamedQuery("AuthenticationEntry.findByCertificateId", AuthenticationEntity.class);
+        final TypedQuery<AuthenticationEntity> query = this.em.createNamedQuery("AuthenticationEntity.findByCertificateId", AuthenticationEntity.class);
         query.setParameter("CERTIFICATE_ID", certificateId);
 
         return query.getSingleResult();
     }
 
     public List<AuthRole> getRolesForCertificateId(final String certificateId) {
-        final TypedQuery<String> query = this.em.createNamedQuery("AuthenticationEntry.getRolesForCertificateId", String.class);
+        final TypedQuery<String> query = this.em.createNamedQuery("AuthenticationEntity.getRolesForCertificateId", String.class);
         query.setParameter("CERTIFICATE_ID", certificateId);
 
         List<AuthRole> authRoles = new ArrayList<>();

@@ -115,7 +115,7 @@ public class PModeDaoTestIT {
 
     @Test
     public void testUpdatePModeWithPmodeContainingWhiteSpace() throws Exception {
-        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("SamplePModes/domibus-configuration-with-whitespaces.xml");
+        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-with-whitespaces.xml");
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
         UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, new ByteArrayInputStream(pModeBytes), null);
 
@@ -142,9 +142,11 @@ public class PModeDaoTestIT {
 
     }
 
+
+
     @Test
     public void testUpdatePModeWithValidPmode() throws Exception {
-        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("SamplePModes/domibus-configuration-valid.xml");
+        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-valid.xml");
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
         UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, new ByteArrayInputStream(pModeBytes), null);
 
@@ -165,7 +167,7 @@ public class PModeDaoTestIT {
 
     @Test
     public void testUpdatePModeWithXsdNotCompliantPmode() throws Exception {
-        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("SamplePModes/domibus-configuration-xsd-not-compliant.xml");
+        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-xsd-not-compliant.xml");
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
 
         try {
