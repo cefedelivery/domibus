@@ -38,6 +38,7 @@
                 {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
       <input
+        autofocus
         (blur)="updateValue($event,'email',row)"
         *ngIf="editing[row.$$index + '-email']"
         type="text"
@@ -50,14 +51,17 @@
     <span
       title="Double click to edit"
       (dblclick)="editing[row.$$index + '-roles'] = true"
-      *ngIf="!editing[row.$$index + '-roles']">
+      *ngIf="!editing[row.$$index + '-roles']"
+      style="text-transform:uppercase">
                 {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
       <input
+        autofocus
         (blur)="updateValue($event,'roles',row)"
         *ngIf="editing[row.$$index + '-roles']"
         type="text"
         [value]="value"
+        style="text-transform:uppercase"
       />
     </ng-template>
   </ngx-datatable-column>

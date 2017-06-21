@@ -12,7 +12,7 @@ public class UserResponseRO {
     private String email;
     private boolean active;
     private List<String> authorities;
-    private String roles;
+    private String roles="";
     private String status;
     private String password;
 
@@ -40,6 +40,11 @@ public class UserResponseRO {
 
     public void addAuthority(String authority){
         authorities.add(authority);
+        String separator="";
+        if(authorities.size()>1){
+            separator=",";
+        }
+        roles+=separator+authority;
     }
 
     public List<String> getAuthorities() {
@@ -72,5 +77,9 @@ public class UserResponseRO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getRoles() {
+        return roles;
     }
 }

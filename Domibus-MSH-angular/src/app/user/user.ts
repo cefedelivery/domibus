@@ -1,6 +1,7 @@
 export enum UserState{
   PERSISTED,
-  NEW
+  NEW,
+  UPDATED
 }
 export class UserResponseRO {
   userName: string;

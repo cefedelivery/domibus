@@ -24,6 +24,9 @@ public class User {
         this.password = password;
     }
 
+    public User() {
+    }
+
     public String getUserName() {
         return userName;
     }
@@ -46,5 +49,29 @@ public class User {
 
     public String getPassword() {
         return password;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public void setAuthorities(List<String> authorities) {
+        this.authorities = authorities;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

@@ -5,25 +5,12 @@ import {AlertService} from "../alert/alert.service";
 import {Observable} from "rxjs/Observable";
 @Injectable()
 export class UserService {
-  users:Array<UserResponseRO>;
-
-
 
   constructor(private http: Http,private alertService: AlertService) {
 
-    /*this.initialUsers= [new User('thom', 'dussartt@gmail.com', '', true,UserState.PERSISTED),
-      new User('thom 2', 'dussartt@gmail.com', '' ,true,UserState.PERSISTED),
-      new User('thom 3', 'dussartt@gmail.com', '',true,UserState.PERSISTED)]
-    this.users=[new User('thom', 'dussartt@gmail.com', '', true,UserState.PERSISTED),
-      new User('thom 2', 'dussartt@gmail.com', '' ,true,UserState.PERSISTED),
-      new User('thom 3', 'dussartt@gmail.com', '',true,UserState.PERSISTED)]*/
+
   }
 
-  /*var USERS: Array<User> = [
-  new User('thom', 'dussartt@gmail.com', '*****', 'OK'),
-  new User('thom 2', 'dussartt@gmail.com', '*****', 'OK'),
-  new User('thom 3', 'dussartt@gmail.com', '*****', 'OK')
-]*/
   getUsers():Observable<UserResponseRO[]>{
     return this.http.get("rest/user/users")
       .map(this.extractData)
@@ -32,29 +19,20 @@ export class UserService {
 
   saveUsers(users:Array<UserResponseRO>):void{
     this.http.post("rest/user/save", users).subscribe(res => {
-      this.alertService.success(res.text(), false);
+      this.changeUserStatus(users);
+      this.alertService.success("User saved", false);
     }, err => {
       this.alertService.error(err, false);
     });
   }
-    //return this.http.get("rest/user/users").toPromise().then(response=>response.json()._embedded.userResponseROs as  Array<UserResponseRO>).catch(); /*{
-   /* this.http.get("rest/user/users").subscribe(
-      (response: Response) => {
-        debugger;
-        let users = response.json().users;
-        for (let key in users) {
-          this.users.push(users[key])
-        }
-      },
-      (error: Response) => {
-        this.alertService.error('Could not load queues: ' + error);
-      }
-    )
-    return Promise.resolve( this.users);*/
-  //}
 
-
-
+  changeUserStatus(users:Array<UserResponseRO>){
+    debugger;
+    for(let u in users){
+      users[u].status="PERSISTED";
+      users[u].password="";
+    }
+  }
 
 
 private extractData(res: Response) {
@@ -64,6 +42,7 @@ private extractData(res: Response) {
 
 private handleError (error: Response | any) {
   // In a real world app, we might use a remote logging infrastructure
+  this.alertService.error(error, false);
   let errMsg: string;
   if (error instanceof Response) {
     const body = error.json() || '';

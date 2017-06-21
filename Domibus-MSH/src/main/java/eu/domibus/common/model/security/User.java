@@ -111,5 +111,11 @@ public class User extends AbstractBaseEntity{
         return userName.hashCode();
     }
 
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
+    public Boolean getActive() {
+        return active;
+    }
 }

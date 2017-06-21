@@ -4,6 +4,7 @@ import {UserService} from "./user.service";
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {PasswordComponent} from "./password/password-dialog.component";
 import {UserValidatorService} from "app/user/uservalidator.service";
+import {AlertService} from "../alert/alert.service";
 
 
 @Component({
@@ -19,14 +20,14 @@ export class UserComponent implements OnInit {
   pageSize: number = 10;
   editing = {};
   zone: NgZone;
-  userSaveButtonDisabled = true;
+  userSaveButtonDisabled = false;
   userNewButtonDisabled = false;
-  userCancelButtonDisabled = true;
+  userCancelButtonDisabled = false;
   editedUser: UserResponseRO;
   selected = [];
   test: boolean = false;
 
-  constructor(private userService: UserService, public dialog: MdDialog,private userValidatorService:UserValidatorService) {
+  constructor(private userService: UserService, public dialog: MdDialog,private userValidatorService:UserValidatorService,private alertService:AlertService) {
     this.zone = new NgZone({enableLongStackTrace: false});
   }
 
@@ -36,10 +37,6 @@ export class UserComponent implements OnInit {
 
   getUsers(): void {
     this.userService.getUsers().subscribe(users => this.users = users);
-    /*for(let u in users){
-     this.users.push(new UserResponseRO(users[u]["userName"],users[u]["email"],"",users[u]["active"],UserState.PERSISTED,users[u]["authorities"]));
-     }
-     });*/
     this.users = this.users.slice();
 
   }
@@ -65,7 +62,10 @@ export class UserComponent implements OnInit {
     this.zone.run(() => {
       this.clearEditing();
       //this.editing[row.$$index + '-' + cell] = false;
-      this.users[row.$$index][cell] = event.target.value;
+      if(this.users[row.$$index][cell] !== event.target.value){
+        this.users[row.$$index][cell] = event.target.value
+        this.users[row.$$index].status=UserState[UserState.UPDATED]
+      }
     });
 
   }
@@ -88,12 +88,8 @@ export class UserComponent implements OnInit {
       let userCount = this.users.length;
       console.log('usecount ' + userCount);
       this.editing[userCount - 1 + '-' + 'userName'] = true;
-      //    this.editing[userCount-1 + '-' + 'email'] = true;
-      this.userCancelButtonDisabled = false;
-      this.userNewButtonDisabled = true;
     });
 
-    //this.getUsers();
 
   }
 
@@ -105,10 +101,8 @@ export class UserComponent implements OnInit {
       if (result == true) {
         this.zone.run(() => {
           this.clearEditing();
-          this.userCancelButtonDisabled = false;
-          this.userNewButtonDisabled = false;
-          this.userSaveButtonDisabled = false;
           this.users = this.users.slice();
+          this.alertService.clearAlert();
         });
       } else {
 
@@ -155,7 +149,7 @@ export class UserComponent implements OnInit {
   }
 
   save(){
-    if(this.userValidatorService.validateNewUsers(this.filterModifiedUser(),this.users)) {
+    if(this.userValidatorService.validateUsers(this.filterModifiedUser(),this.users)) {
       let filteredUsers = this.filterModifiedUser();
       for(let u in filteredUsers){
         let user:UserResponseRO=filteredUsers[u];

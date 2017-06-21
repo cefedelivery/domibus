@@ -27,7 +27,7 @@ public class UserRoleDaoImpl extends BasicDao<UserRole> implements UserRoleDao {
     @Override
     public UserRole findByName(final String roleName) {
         TypedQuery<UserRole> namedQuery = em.createNamedQuery("UserRole.findByName", UserRole.class);
-        namedQuery.setParameter("ROLE_NAME", roleName);
+        namedQuery.setParameter("ROLE_NAME", roleName.trim().toUpperCase());
         return namedQuery.getSingleResult();
     }
 }

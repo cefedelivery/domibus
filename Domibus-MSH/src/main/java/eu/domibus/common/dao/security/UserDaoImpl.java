@@ -33,6 +33,7 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao{
         TypedQuery<User> namedQuery = em.createNamedQuery("User.findAll", User.class);
         return namedQuery.getResultList();
     }
+    //@thom load only active users.
     @Override
     public User loadUserByUsername(String userName){
         TypedQuery<User> namedQuery = em.createNamedQuery("User.findByUserName", User.class);
