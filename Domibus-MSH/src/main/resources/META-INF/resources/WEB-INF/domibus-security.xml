@@ -76,10 +76,7 @@
         </prop>
         <!-- Type of the used keystore -->
         <prop key="org.apache.ws.security.crypto.merlin.trustStore.type">${domibus.security.truststore.type}</prop>
-        <!-- The password used to load the keystore -->
-      <!--  <prop key="org.apache.ws.security.crypto.merlin.keystore.private.password">
-            test123
-        </prop>-->
+
         <!-- The password used to load the trustStore -->
         <prop key="org.apache.ws.security.crypto.merlin.trustStore.password">
             ${domibus.security.truststore.password}

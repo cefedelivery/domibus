@@ -31,7 +31,7 @@ public class PModeDefaultService implements PModeService {
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         String pModeKey = null;
         try {
-            pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
+            pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
         } catch (EbMS3Exception e) {
             throw new PModeException(DomibusCoreErrorCode.DOM_001, "Could not get the PMode key for message [" + messageId + "]", e);
         }

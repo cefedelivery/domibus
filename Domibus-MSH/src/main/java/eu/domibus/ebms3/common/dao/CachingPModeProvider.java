@@ -34,6 +34,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -337,7 +338,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<String> updatePModes(final byte[] bytes) throws XmlProcessingException {
+    public List<String> updatePModes(final byte[] bytes) throws XmlProcessingException, IOException {
         List<String> messages = super.updatePModes(bytes);
         this.configuration = null;
         return messages;

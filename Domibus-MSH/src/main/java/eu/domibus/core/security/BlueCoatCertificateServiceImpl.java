@@ -5,7 +5,7 @@ import eu.domibus.api.security.CertificateDetails;
 import eu.domibus.api.security.BlueCoatCertificateService;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("securityBlueCoatCertificateServiceImpl")
 public class BlueCoatCertificateServiceImpl implements BlueCoatCertificateService {
 
     /**

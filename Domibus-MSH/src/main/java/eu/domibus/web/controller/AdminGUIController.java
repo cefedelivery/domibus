@@ -19,6 +19,8 @@
 
 package eu.domibus.web.controller;
 
+import eu.domibus.api.routing.BackendFilter;
+import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -153,8 +155,6 @@ public class AdminGUIController {
         model.addObject("beginIndex", begin);
         model.addObject("endIndex", end);
         if (page <= pages) {
-            //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
-            convertDownloadedStatusToReceived(messageLogEntries);
             model.addObject("table", messageLogEntries);
         }
         model.addObject("title", "Domibus - Messages Log: ");
@@ -170,24 +170,9 @@ public class AdminGUIController {
 
     }
 
-    //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
-    protected void convertDownloadedStatusToReceived(List<? extends MessageLog> messageLogEntries) {
-        if (messageLogEntries == null) {
-            return;
-        }
-        for (MessageLog messageLogEntry : messageLogEntries) {
-            if (MessageStatus.DOWNLOADED == messageLogEntry.getMessageStatus()) {
-                messageLogEntry.setMessageStatus(MessageStatus.RECEIVED);
-            }
-        }
-    }
-
-
     protected List<MessageStatus> getMessageStatuses() {
         List<MessageStatus> messageStatuses = new ArrayList<>();
         messageStatuses.addAll(Arrays.asList(MessageStatus.values()));
-        //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
-        messageStatuses.remove(MessageStatus.DOWNLOADED);
         return messageStatuses;
     }
 
@@ -299,9 +284,10 @@ public class AdminGUIController {
                     List<String> mappedExpression = map.get(backendName.replaceAll(" ", "") + "selection");
                     List<String> operator = map.get(backendName.replaceAll(" ", "") + "operator");
 
-                    if (operator != null && !operator.isEmpty()) {
+                    // TODO: Criteria operator is not used anymore. Clean this.
+                    /*if (operator != null && !operator.isEmpty()) {
                         backendFilter.setCriteriaOperator(LogicalOperator.valueOf(operator.get(0)));
-                    }
+                    }*/
 
                     backendFilter.getRoutingCriterias().clear();
                     if (mappedRoutingCrierias != null) {

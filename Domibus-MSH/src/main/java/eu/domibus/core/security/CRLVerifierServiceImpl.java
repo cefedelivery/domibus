@@ -47,7 +47,7 @@ import java.util.List;
  * under the License.
  */
 
-@Service
+@Service("securityCRLVerifierServiceImpl")
 public class CRLVerifierServiceImpl implements ICRLVerifierService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CRLVerifierServiceImpl.class);

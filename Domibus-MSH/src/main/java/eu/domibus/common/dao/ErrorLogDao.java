@@ -98,17 +98,27 @@ public class ErrorLogDao extends BasicDao<ErrorLogEntry> {
                         switch (filter.getKey().toString()) {
                             case "":
                                 break;
+                            default:
+                                predicates.add(cb.like(ele.<String>get(filter.getKey()), (String) filter.getValue()));
+                                break;
+                        }
+                    }
+                } else if (filter.getValue() instanceof Date) {
+                    if (!filter.getValue().toString().isEmpty()) {
+                        switch (filter.getKey().toString()) {
+                            case "":
+                                break;
                             case "timestampFrom":
-                                predicates.add(cb.greaterThanOrEqualTo(ele.<Date>get("timestamp"), Timestamp.valueOf(filter.getValue().toString())));
+                                predicates.add(cb.greaterThanOrEqualTo(ele.<Date>get("timestamp"), (Timestamp) filter.getValue()));
                                 break;
                             case "timestampTo":
-                                predicates.add(cb.lessThanOrEqualTo(ele.<Date>get("timestamp"), Timestamp.valueOf(filter.getValue().toString())));
+                                predicates.add(cb.lessThanOrEqualTo(ele.<Date>get("timestamp"), (Timestamp) filter.getValue()));
                                 break;
                             case "notifiedFrom":
-                                predicates.add(cb.greaterThanOrEqualTo(ele.<Date>get("notified"), Timestamp.valueOf(filter.getValue().toString())));
+                                predicates.add(cb.greaterThanOrEqualTo(ele.<Date>get("notified"), (Timestamp) filter.getValue()));
                                 break;
                             case "notifiedTo":
-                                predicates.add(cb.lessThanOrEqualTo(ele.<Date>get("notified"), Timestamp.valueOf(filter.getValue().toString())));
+                                predicates.add(cb.lessThanOrEqualTo(ele.<Date>get("notified"), (Timestamp) filter.getValue()));
                                 break;
                             default:
                                 predicates.add(cb.like(ele.<String>get(filter.getKey()), (String) filter.getValue()));

@@ -2,6 +2,7 @@ package eu.domibus.ebms3.common.model;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
+import java.io.Serializable;
 
 /**
  * Base type for entity
@@ -10,7 +11,7 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @XmlTransient
 @MappedSuperclass
-public abstract class AbstractBaseEntity {
+public abstract class AbstractBaseEntity implements Serializable {
 
     @Id
     @XmlTransient
@@ -18,12 +19,16 @@ public abstract class AbstractBaseEntity {
     @Column(name = "ID_PK")
     private int entityId;
 
-
     /**
      * @return the primary key of the entity
      */
     public int getEntityId() {
         return this.entityId;
+    }
+
+
+    public void setEntityId(int entityId) {
+        this.entityId = entityId;
     }
 
     @Override

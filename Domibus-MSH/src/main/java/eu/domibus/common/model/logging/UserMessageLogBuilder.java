@@ -44,16 +44,6 @@ public class UserMessageLogBuilder {
         return this;
     }
 
-/*    public UserMessageLogBuilder setNextAttempt(Date date) {
-        userMessageLog.setNextAttempt(date);
-        return this;
-    }
-
-    public UserMessageLogBuilder setSendAttempts(int attempts) {
-        userMessageLog.setSendAttempts(attempts);
-        return this;
-    }*/
-
     public UserMessageLogBuilder setSendAttemptsMax(int maxAttempts) {
         userMessageLog.setSendAttemptsMax(maxAttempts);
         return this;

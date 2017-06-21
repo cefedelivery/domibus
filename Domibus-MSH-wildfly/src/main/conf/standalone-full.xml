@@ -392,6 +392,12 @@
                         <redelivery-delay>1000</redelivery-delay>
                         <max-delivery-attempts>1</max-delivery-attempts>
                     </address-setting>
+                    <address-setting match="jms.queue.DomibusPullMessageQueue">
+                        <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
+                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                        <redelivery-delay>5000</redelivery-delay>
+                        <max-delivery-attempts>1</max-delivery-attempts>
+                    </address-setting>
                     <address-setting match="jms.queue.DomibusBusinessMessageOutQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
@@ -527,6 +533,11 @@
                     <jms-queue name="DomibusSendMessageQueue">
                         <entry name="java:/jms/domibus.internal.dispatch.queue"/>
                         <entry name="java:/jms/queue/DomibusSendMessageQueue"/>
+                        <durable>true</durable>
+                    </jms-queue>
+                    <jms-queue name="DomibusPullMessageQueue">
+                        <entry name="java:/jms/domibus.internal.pull.queue"/>
+                        <entry name="java:/jms/queue/DomibusPullMessageQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusNotifyBackendWebServiceQueue">

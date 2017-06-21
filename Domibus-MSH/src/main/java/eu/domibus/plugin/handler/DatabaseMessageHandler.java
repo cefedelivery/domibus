@@ -11,12 +11,14 @@ import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
+import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.ObjectFactory;
@@ -95,6 +97,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     private BackendMessageValidator backendMessageValidator;
+
+    @Autowired
+    private MessageExchangeService messageExchangeService;
 
     @Autowired
     AuthUtils authUtils;
@@ -181,8 +186,26 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         if (!authUtils.isUnsecureLoginAllowed())
             authUtils.hasAdminRole();
 
+        return convertMessageStatus(userMessageLogDao.getMessageStatus(messageId));
+    }
+
+    protected MessageStatus convertMessageStatus(MessageStatus messageStatus) {
+        if(MessageStatus.DOWNLOADED == messageStatus) {
+            LOG.warn("Using deprecated method that converts DOWNLOADED status to RECEIVED");
+            //convert the DOWNLOADED status to RECEIVED to assure backwards compatibility
+            messageStatus = eu.domibus.common.MessageStatus.RECEIVED;
+        }
+        return messageStatus;
+    }
+
+    @Override
+    public MessageStatus getStatus(final String messageId) {
+        if (!authUtils.isUnsecureLoginAllowed())
+            authUtils.hasAdminRole();
+
         return userMessageLogDao.getMessageStatus(messageId);
     }
+
 
     @Override
     public List<? extends ErrorResult> getErrorsForMessage(final String messageId) {
@@ -237,7 +260,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             Messaging message = ebMS3Of.createMessaging();
             message.setUserMessage(userMessage);
 
-            String pModeKey = pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
+            MessageExchangeConfiguration userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            String pModeKey = userMessageExchangeConfiguration.getPmodeKey();
             Party to = messageValidations(userMessage, pModeKey, backendName);
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
@@ -258,14 +282,16 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
             }
-
-            // Sends message to the proper queue
-            userMessageService.scheduleSending(messageId);
+            messageExchangeService.upgradeMessageExchangeStatus(userMessageExchangeConfiguration);
+            if(MessageStatus.READY_TO_PULL!= userMessageExchangeConfiguration.getMessageStatus()) {
+                // Sends message to the proper queue if not a message to be pulled.
+                userMessageService.scheduleSending(messageId);
+            }
 
             // Builds the user message log
             UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
                     .setMessageId(userMessage.getMessageInfo().getMessageId())
-                    .setMessageStatus(MessageStatus.SEND_ENQUEUED)
+                    .setMessageStatus(userMessageExchangeConfiguration.getMessageStatus())
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(getNotificationStatus(legConfiguration))
                     .setMpc(message.getUserMessage().getMpc())
