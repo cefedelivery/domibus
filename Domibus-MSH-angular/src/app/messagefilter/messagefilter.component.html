@@ -1,0 +1,156 @@
+<div>
+  <div class="messageFilter" style="overflow-x:auto;">
+    <md-card style="margin:0;padding:10px;">
+      <p class="domibusTextHeadingBold">Message Filter</p>
+      <form name="messageFilterForm" #messageFilterForm="ngForm">
+        <ngx-datatable
+          #mydatatable
+          class="material"
+          [headerHeight]="50"
+          [columnMode]="'force'"
+          [footerHeight]="50"
+          [rowHeight]="'auto'"
+          [rows]="rows"
+          [selected]="selected"
+          [selectionType]="'single'"
+          (activate)="onActivate($event)"
+          (select)='onSelect($event)'>
+          <ngx-datatable-column name="Plugin" prop="backendName" [canAutoResize]="true" [sortable]="false">
+            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              <span
+                title="Double click to edit"
+                (dblclick)="editing[row.$$index + '-plugin'] = true"
+                *ngIf="!editing[row.$$index + '-plugin']">
+                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              </span>
+              <input autofocus
+                     list="backendFilters"
+                     (blur)="updateValue($event, 'plugin', row)" *ngIf="editing[row.$$index + '-plugin']" [value]="value">
+
+              <datalist id="backendFilters">
+                <div *ngFor="let backendName of backendFilterNames">
+                  <option value={{backendName}}>
+                </div>
+              </datalist>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="From" prop="from.expression" [canAutoResize]="true" [sortable]="false">
+            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              <span
+                title="Double click to edit"
+                (dblclick)="editing[row.$$index + '-from'] = true"
+                *ngIf="!editing[row.$$index + '-from']">
+                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              </span>
+              <input
+                autofocus
+                (blur)="updateValue($event, 'from', row)"
+                *ngIf="editing[row.$$index + '-from']"
+                type="text"
+                [value]="value"
+              />
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="To" prop="to.expression" [canAutoResize]="true" [sortable]="false">
+            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              <span
+                title="Double click to edit"
+                (dblclick)="editing[row.$$index + '-to'] = true"
+                *ngIf="!editing[row.$$index + '-to']">
+                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              </span>
+              <input
+                autofocus
+                (blur)="updateValue($event, 'to', row)"
+                *ngIf="editing[row.$$index + '-to']"
+                type="text"
+                [value]="value"
+              />
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Action" prop="action.expression" [canAutoResize]="true" [sortable]="false">
+            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              <span
+                title="Double click to edit"
+                (dblclick)="editing[row.$$index + '-action'] = true"
+                *ngIf="!editing[row.$$index + '-action']">
+                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              </span>
+              <input
+                autofocus
+                (blur)="updateValue($event, 'action', row)"
+                *ngIf="editing[row.$$index + '-action']"
+                type="text"
+                [value]="value"
+              />
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Service" prop="sevice.expression" [canAutoResize]="true" [sortable]="false">
+            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              <span
+                title="Double click to edit"
+                (dblclick)="editing[row.$$index + '-sevice'] = true"
+                *ngIf="!editing[row.$$index + '-sevice']">
+                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              </span>
+              <input
+                autofocus
+                (blur)="updateValue($event, 'sevice', row)"
+                *ngIf="editing[row.$$index + '-sevice']"
+                type="text"
+                [value]="value"
+              />
+            </ng-template>
+          </ngx-datatable-column>
+        </ngx-datatable>
+
+        <table class="buttonsMoveRow">
+          <tr>
+            <td>
+              <button md-raised-button color="primary" type="button" [disabled]="!enableMoveUp" (click)="buttonMoveUp()">
+                <md-icon>arrow_upwards</md-icon>
+                <span>Move Up</span>
+              </button>
+            </td>
+            <td>
+              <button md-raised-button color="primary" type="button" [disabled]="!enableMoveDown" (click)="buttonMoveDown()">
+                <md-icon>arrow_downwards</md-icon>
+                <span>Move Down</span>
+              </button>
+            </td>
+          </tr>
+        </table>
+        <!--<div class="rowsDiv">
+          <md-select placeholder="Rows" [(ngModel)]="pageSize" name="pageSize" (change)="changeRowLimits($event)">
+            <md-option *ngFor="let rowLimit of rowLimits" [value]="rowLimit.value">
+              {{rowLimit.key}}
+            </md-option>
+          </md-select>
+        </div>
+        <div> </div>-->
+        <table class="buttonsRow">
+          <tr>
+            <td>
+              <button md-raised-button color="primary" type="button" [disabled]="!enableCancel" (click)="cancelDialog()">
+                <md-icon>cancel</md-icon>
+                <span>Cancel</span>
+              </button>
+              <button md-raised-button color="primary" type="button" [disabled]="!enableSave" (click)="saveDialog()">
+                <md-icon>save</md-icon>
+                <span>Save</span>
+              </button>
+              <button md-raised-button color="primary" type="button" (click)="buttonNew()">
+                <md-icon>add</md-icon>
+                <span>New</span>
+              </button>
+              <button md-raised-button color="primary" type="button" [disabled]="!enableDelete" (click)="deleteDialog()">
+                <md-icon>delete</md-icon>
+                <span>Delete</span>
+              </button>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </md-card>
+  </div>
+</div>

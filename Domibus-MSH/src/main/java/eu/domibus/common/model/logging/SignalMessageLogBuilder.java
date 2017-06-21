@@ -44,19 +44,4 @@ public class SignalMessageLogBuilder {
         return this;
     }
 
-/*    public SignalMessageLogBuilder setNextAttempt(Date date) {
-        signalMessageLog.setNextAttempt(date);
-        return this;
-    }
-
-    public SignalMessageLogBuilder setSendAttempts(int attempts) {
-        signalMessageLog.setSendAttempts(attempts);
-        return this;
-    }
-
-    public SignalMessageLogBuilder setSendAttemptsMax(int maxAttempts) {
-        signalMessageLog.setSendAttemptsMax(maxAttempts);
-        return this;
-    }*/
-
 }

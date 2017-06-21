@@ -1,3 +1,22 @@
+/*
+ * Copyright 2015 e-CODEX Project
+ *
+ * Licensed under the EUPL, Version 1.1 or – as soon they
+ * will be approved by the European Commission - subsequent
+ * versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the
+ * Licence.
+ * You may obtain a copy of the Licence at:
+ * http://ec.europa.eu/idabc/eupl5
+ * Unless required by applicable law or agreed to in
+ * writing, software distributed under the Licence is
+ * distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
 package eu.domibus.ebms3.common.dao;
 
 import eu.domibus.api.util.xml.UnmarshallerResult;
@@ -6,6 +25,7 @@ import eu.domibus.clustering.Command;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.dao.ConfigurationRawDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
@@ -37,8 +57,10 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
@@ -56,6 +78,9 @@ public abstract class PModeProvider {
 
     @Autowired
     protected ConfigurationDAO configurationDAO;
+
+    @Autowired
+    protected ConfigurationRawDAO configurationRawDAO;
 
     @PersistenceContext(unitName = "domibusJTA")
     protected EntityManager entityManager;
@@ -75,9 +100,14 @@ public abstract class PModeProvider {
 
     public abstract void refresh();
 
+    public byte[] getRawConfiguration() {
+        final ConfigurationRaw latest = this.configurationRawDAO.getLatest();
+        return (latest != null) ? latest.getXml() : new byte[0];
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<String> updatePModes(byte[] bytes) throws XmlProcessingException {
+    public List<String> updatePModes(byte[] bytes) throws XmlProcessingException, IOException {
         LOG.debug("Updating the PMode");
 
         //unmarshall the PMode with whitespaces ignored
@@ -102,6 +132,13 @@ public abstract class PModeProvider {
 
         Configuration configuration = unmarshalledConfiguration.getResult();
         configurationDAO.updateConfiguration(configuration);
+
+        //save the raw configuration
+        final ConfigurationRaw configurationRaw = new ConfigurationRaw();
+        configurationRaw.setConfigurationDate(Calendar.getInstance().getTime());
+        configurationRaw.setXml(bytes);
+        configurationRawDAO.create(configurationRaw);
+
         LOG.info("Configuration successfully updated");
         // Sends a message into the topic queue in order to refresh all the singleton instances of the PModeProvider.
         jmsOperations.send(new ReloadPmodeMessageCreator());

@@ -1,0 +1,23 @@
+#jmsQueueSelector {
+  width: 40%;
+}
+
+#jmsFromDatePicker {
+  width: 25%
+}
+
+#jmsToDatePicker {
+  width: 25%;
+}
+
+#jmsSelector {
+  width: 35%;
+}
+
+#jmsType {
+  width: 35%
+}
+
+.selectionCriteria {
+  margin-top:5px;
+}

@@ -1,0 +1,32 @@
+.selectionCriteria {
+  margin-top:5px;
+}
+
+.inputField {
+  width:33%;
+}
+
+.optionField {
+  width:15%;
+}
+
+.dateField {
+  width:15%;
+}
+
+.dateTableField {
+  width:30%;
+}
+
+.filterTable {
+  width:100%;
+
+}
+.filterTable td {
+  width :33%
+}
+
+.dateTimeTitle {
+  width:100px;
+  text-align:right;
+}

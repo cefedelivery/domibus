@@ -19,6 +19,8 @@
 
 package eu.domibus.web.controller;
 
+import eu.domibus.api.routing.BackendFilter;
+import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -282,9 +284,10 @@ public class AdminGUIController {
                     List<String> mappedExpression = map.get(backendName.replaceAll(" ", "") + "selection");
                     List<String> operator = map.get(backendName.replaceAll(" ", "") + "operator");
 
-                    if (operator != null && !operator.isEmpty()) {
+                    // TODO: Criteria operator is not used anymore. Clean this.
+                    /*if (operator != null && !operator.isEmpty()) {
                         backendFilter.setCriteriaOperator(LogicalOperator.valueOf(operator.get(0)));
-                    }
+                    }*/
 
                     backendFilter.getRoutingCriterias().clear();
                     if (mappedRoutingCrierias != null) {

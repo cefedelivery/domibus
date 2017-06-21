@@ -121,4 +121,228 @@
         </createTable>
     </changeSet>
 
+    <changeSet author="Mircea" id="Add raw configuration table">
+        <createTable tableName="TB_CONFIGURATION_RAW">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="CONFIGURATION_DATE" type="DATETIME"/>
+            <column name="XML" type="BLOB"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="Message Filter changes" author="Tiago Miguel">
+        <sql dbms="mysql">
+            DROP TABLE IF EXISTS tb_backend_filter_backup;
+            DROP TABLE IF EXISTS tb_routing_criteria_backup;
+            DROP TABLE IF EXISTS tb_backend_filter_migr2;
+            DROP TABLE IF EXISTS tb_routing_criteria_migr;
+            DROP TABLE IF EXISTS tb_backend_filter_migr;
+
+            CREATE TEMPORARY TABLE IF NOT EXISTS tb_backend_filter_backup as (
+            select
+            *
+            from
+            tb_backend_filter
+            );
+
+            CREATE TEMPORARY TABLE IF NOT EXISTS tb_routing_criteria_backup as (
+            select
+            *
+            from
+            tb_routing_criteria
+            );
+
+            CREATE TEMPORARY TABLE IF NOT EXISTS tb_backend_filter_migr AS (
+            select
+            @rownum:=@rownum + 1 as ID_PK,
+            BACKEND_NAME,
+            @rownum-1 as PRIORITY,
+            OLD_ID,
+            OLD_PRIO,
+            CRITERIA_OPERATOR
+            from
+            (
+            select
+            tb_backend_filter.ID_PK as OLD_ID, BACKEND_NAME, tb_backend_filter.CRITERIA_OPERATOR,tb_backend_filter.PRIORITY, tb_routing_criteria.PRIORITY as OLD_PRIO
+            from
+            tb_backend_filter
+            left outer join tb_routing_criteria on tb_backend_filter.id_pk = tb_routing_criteria.FK_BACKEND_FILTER
+            where
+            tb_backend_filter.CRITERIA_OPERATOR='OR'
+
+            union all
+
+            select
+            distinct tb_backend_filter.ID_PK as OLD_ID, BACKEND_NAME,tb_backend_filter.CRITERIA_OPERATOR,tb_backend_filter.PRIORITY, 0 as OLD_PRIO
+            from
+            tb_backend_filter
+            left outer join tb_routing_criteria on tb_backend_filter.id_pk = tb_routing_criteria.FK_BACKEND_FILTER
+            where
+            tb_backend_filter.CRITERIA_OPERATOR='AND'
+            order by
+            PRIORITY asc, OLD_PRIO asc
+            ) p inner join (SELECT @rownum := 0) r
+            );
+
+            create temporary table tb_backend_filter_migr2 like tb_backend_filter_migr;
+            insert into tb_backend_filter_migr2 select * from tb_backend_filter_migr;
+
+            CREATE TEMPORARY TABLE IF NOT EXISTS tb_routing_criteria_migr AS (
+            select
+            ID_PK,
+            EXPRESSION,
+            NAME,
+            FK_BACKEND_FILTER,
+            PRIORITY
+            from
+            (
+            select
+            rc.ID_PK as ID_PK,
+            rc.EXPRESSION as EXPRESSION,
+            rc.NAME as NAME,
+            migr.ID_PK as FK_BACKEND_FILTER,
+            0 as PRIORITY
+            from tb_routing_criteria rc, tb_backend_filter_migr migr
+            where rc.PRIORITY = migr.old_prio and rc.FK_BACKEND_FILTER = migr.old_id and migr.criteria_operator = 'OR'
+            union all
+            select
+            rc.ID_PK as ID_PK,
+            rc.EXPRESSION as EXPRESSION,
+            rc.NAME as NAME,
+            migr2.ID_PK as FK_BACKEND_FILTER,
+            rc.PRIORITY as PRIORITY
+            from tb_routing_criteria rc, tb_backend_filter_migr2 migr2
+            where rc.FK_BACKEND_FILTER = migr2.old_id and migr2.criteria_operator = 'AND'
+            order by id_pk) p);
+
+            SET FOREIGN_KEY_CHECKS = 0;
+
+            truncate table tb_routing_criteria;
+            truncate table tb_backend_filter;
+
+            alter table tb_backend_filter drop column CRITERIA_OPERATOR;
+
+            insert into tb_backend_filter
+            select ID_PK, BACKEND_NAME, PRIORITY from tb_backend_filter_migr;
+
+            insert into tb_routing_criteria
+            select * from tb_routing_criteria_migr;
+
+            SET FOREIGN_KEY_CHECKS = 1;
+        </sql>
+        <sql dbms="oracle">
+            CREATE GLOBAL TEMPORARY TABLE tb_backend_filter_backup on commit preserve rows as (
+            select
+            *
+            from
+            tb_backend_filter
+            );
+
+            CREATE GLOBAL TEMPORARY TABLE tb_routing_criteria_backup on commit preserve rows as (
+            select
+            *
+            from
+            tb_routing_criteria
+            );
+
+            CREATE GLOBAL TEMPORARY TABLE tb_backend_filter_migr
+            ON COMMIT PRESERVE ROWS
+            AS (
+            select
+            rownum as ID_PK,
+            BACKEND_NAME,
+            rownum-1 as PRIORITY,
+            OLD_ID,
+            OLD_PRIO,
+            CRITERIA_OPERATOR
+            from
+            (
+            select
+            tb_backend_filter.ID_PK as OLD_ID, BACKEND_NAME, tb_backend_filter.CRITERIA_OPERATOR,tb_backend_filter.PRIORITY, tb_routing_criteria.PRIORITY as OLD_PRIO
+            from
+            tb_backend_filter
+            left outer join tb_routing_criteria on tb_backend_filter.id_pk = tb_routing_criteria.FK_BACKEND_FILTER
+            where
+            tb_backend_filter.CRITERIA_OPERATOR='OR'
+
+            union all
+
+            select
+            distinct tb_backend_filter.ID_PK as OLD_ID, BACKEND_NAME,tb_backend_filter.CRITERIA_OPERATOR,tb_backend_filter.PRIORITY, 0 as OLD_PRIO
+            from
+            tb_backend_filter
+            left outer join tb_routing_criteria on tb_backend_filter.id_pk = tb_routing_criteria.FK_BACKEND_FILTER
+            where
+            tb_backend_filter.CRITERIA_OPERATOR='AND'
+            order by
+            PRIORITY asc, OLD_PRIO asc
+            )
+            );
+
+            CREATE GLOBAL TEMPORARY TABLE tb_backend_filter_migr2 ON COMMIT PRESERVE ROWS AS select * from tb_backend_filter_migr;
+
+            CREATE GLOBAL TEMPORARY TABLE tb_routing_criteria_migr ON COMMIT PRESERVE ROWS AS (
+            select
+            ID_PK,
+            EXPRESSION,
+            NAME,
+            FK_BACKEND_FILTER,
+            PRIORITY
+            from
+            (
+            select
+            rc.ID_PK as ID_PK,
+            rc.EXPRESSION as EXPRESSION,
+            rc.NAME as NAME,
+            migr.ID_PK as FK_BACKEND_FILTER,
+            0 as PRIORITY
+            from tb_routing_criteria rc, tb_backend_filter_migr migr
+            where rc.PRIORITY = migr.old_prio and rc.FK_BACKEND_FILTER = migr.old_id and migr.criteria_operator = 'OR'
+            union all
+            select
+            rc.ID_PK as ID_PK,
+            rc.EXPRESSION as EXPRESSION,
+            rc.NAME as NAME,
+            migr2.ID_PK as FK_BACKEND_FILTER,
+            rc.PRIORITY as PRIORITY
+            from tb_routing_criteria rc, tb_backend_filter_migr2 migr2
+            where rc.FK_BACKEND_FILTER = migr2.old_id and migr2.criteria_operator = 'AND'
+            order by id_pk) p);
+
+            select
+            rc.ID_PK as ID_PK,
+            rc.EXPRESSION as EXPRESSION,
+            rc.NAME as NAME,
+            migr.ID_PK as FK_BACKEND_FILTER,
+            0 as PRIORITY
+            from tb_routing_criteria rc, tb_backend_filter_migr migr
+            where rc.PRIORITY = migr.old_prio and rc.FK_BACKEND_FILTER = migr.old_id and migr.criteria_operator = 'OR'
+            union all
+            select
+            rc.ID_PK as ID_PK,
+            rc.EXPRESSION as EXPRESSION,
+            rc.NAME as NAME,
+            migr2.ID_PK as FK_BACKEND_FILTER,
+            rc.PRIORITY as PRIORITY
+            from tb_routing_criteria rc, tb_backend_filter_migr2 migr2
+            where rc.FK_BACKEND_FILTER = migr2.old_id and migr2.criteria_operator = 'AND'
+            order by id_pk;
+
+            alter table tb_routing_criteria disable constraint FK_I7GEI6BDR2CDN61HDOPLXBU7P;
+            truncate table tb_routing_criteria;
+            truncate table tb_backend_filter;
+            alter table tb_routing_criteria enable constraint FK_I7GEI6BDR2CDN61HDOPLXBU7P;
+
+            alter table tb_backend_filter drop column CRITERIA_OPERATOR;
+
+            insert into tb_backend_filter
+            select ID_PK, BACKEND_NAME, PRIORITY from tb_backend_filter_migr;
+
+            insert into tb_routing_criteria
+            select * from tb_routing_criteria_migr;
+        </sql>
+    </changeSet>
+
+
 </databaseChangeLog>

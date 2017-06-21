@@ -1,0 +1,16 @@
+﻿<div>
+    <table class="userInfo">
+      <tr>
+        <td>Username:</td>
+        <td>{{currentUser.username}}</td>
+      </tr>
+      <tr>
+        <td>Role(s):</td>
+        <td>
+          <table *ngFor="let role of currentUser.authorities">
+            <tr><td>{{role}}</td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+</div>

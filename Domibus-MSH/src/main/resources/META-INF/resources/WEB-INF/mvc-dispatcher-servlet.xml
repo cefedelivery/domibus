@@ -6,7 +6,7 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans     
-        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc.xsd
         http://www.springframework.org/schema/context 
@@ -17,25 +17,25 @@
 
     <import resource="classpath*:config/*-domibusServlet.xml"/>
 
-    <bean id="multipartResolver"
-          class="org.springframework.web.multipart.commons.CommonsMultipartResolver"><property
-            name="maxUploadSize" value="10000000" /></bean>
+    <!-- Configuring interceptors based on URI -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/ext/**" />
+            <bean class="eu.domibus.ext.web.interceptor.AuthenticationInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
 
-    <bean id="messageSource"
-          class="org.springframework.context.support.ResourceBundleMessageSource">
-        <property name="basename" value="validation"/>
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="10000000" />
     </bean>
 
-    <bean
-            class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix">
-            <value>/WEB-INF/views/</value>
-        </property>
-        <property name="suffix">
-            <value>.jsp</value>
-        </property>
-    </bean>
+    <mvc:annotation-driven >
+        <mvc:message-converters register-defaults="true">
+            <bean id="customMappingJackson2HttpMessageConverter" class="eu.domibus.web.converter.CustomMappingJackson2HttpMessageConverter">
+                <property name="jsonPrefix" value=")]}',\n"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
 
-
-
+    <mvc:resources mapping="/**" location="/"/>
 </beans>
