@@ -1,24 +1,24 @@
 package eu.domibus.common.model.security;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Thomas Dussart
  * @since 3.3
  */
-public class UserDetail implements UserDetails{
-    private final User domibusUser;
+public class UserDetail implements UserDetails {
     private final UserDetails springUser;
 
     public UserDetail(final User user) {
-        this.domibusUser=user;
-        springUser=org.springframework.security.core.userdetails.User
+        springUser = org.springframework.security.core.userdetails.User
                 .withUsername(user.getUserName())
                 .password(user.getPassword())
                 .authorities(getGrantedAuthorities(user.getRoles()))
@@ -67,13 +67,6 @@ public class UserDetail implements UserDetails{
     public boolean isEnabled() {
         return springUser.isEnabled();
     }
-
-    public String getMail(){
-        return domibusUser.getEmail();
-    }
-
-
-
 
 
 }

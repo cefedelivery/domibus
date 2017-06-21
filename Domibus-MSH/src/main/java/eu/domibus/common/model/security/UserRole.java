@@ -14,8 +14,8 @@ import java.util.Set;
  */
 @Entity
 @NamedQueries({
-        @NamedQuery(name = "UserRole.findAll",
-                query = "FROM UserRole")
+        @NamedQuery(name = "UserRole.findAll", query = "FROM UserRole"),
+        @NamedQuery(name = "UserRole.findByName", query = "FROM UserRole where upper(name)=:ROLE_NAME")
 })
 @Table(name = "TB_USER_ROLE",
         uniqueConstraints = {

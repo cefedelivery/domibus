@@ -155,8 +155,13 @@ export class UserComponent implements OnInit {
   }
 
   save(){
-    if(this.userValidatorService.validateUsers(this.filterModifiedUser(),this.users)) {
-      this.userService.saveUsers(this.filterModifiedUser());
+    if(this.userValidatorService.validateNewUsers(this.filterModifiedUser(),this.users)) {
+      let filteredUsers = this.filterModifiedUser();
+      for(let u in filteredUsers){
+        let user:UserResponseRO=filteredUsers[u];
+        user.authorities=user.roles.split(",");
+      }
+      this.userService.saveUsers(filteredUsers);
     }
   }
 

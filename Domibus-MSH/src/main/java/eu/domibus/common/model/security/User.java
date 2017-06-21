@@ -39,7 +39,7 @@ public class User extends AbstractBaseEntity{
     private String password;
     @NotNull
     @Column(name = "USER_ENABLED")
-    private Boolean enabled;
+    private Boolean active;
     @Version
     @Column(name="OPTLOCK")
     public Integer version;
@@ -55,7 +55,7 @@ public class User extends AbstractBaseEntity{
 
     public User(final String userName) {
         this.userName = userName;
-        this.enabled=Boolean.TRUE;
+        this.active =Boolean.TRUE;
     }
 
     public User() {
@@ -70,7 +70,7 @@ public class User extends AbstractBaseEntity{
     }
 
     public Boolean isEnabled() {
-        return enabled;
+        return active;
     }
 
 
@@ -94,8 +94,8 @@ public class User extends AbstractBaseEntity{
         this.password = password;
     }
 
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
+    public void setActive(Boolean enabled) {
+        this.active = enabled;
     }
 
     @Override

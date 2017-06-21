@@ -3,6 +3,7 @@ package eu.domibus.web.rest;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserService;
+import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.UserResponseRO;
@@ -35,31 +36,33 @@ public class UserResource {
         this.userService = userService;
     }
 
+    @Autowired
+    private DomainExtConverter domainConverter;
+
     @RequestMapping(value = {"/users"}, method = GET)
     public List<UserResponseRO> users() {
-        LOG.info("Retrieving users !");
+        LOG.info("Retrieving usersRo !");
         List<User> users = userService.findUsers();
         return prepareResponse(users);
     }
 
     @RequestMapping(value = {"/save"}, method = POST)
-    public void save(@RequestBody List<UserResponseRO> users) {
-        LOG.info("Saving users !");
-        for (UserResponseRO user : users) {
-            LOG.info(user.toString());
-        }
+    public void save(@RequestBody List<UserResponseRO> usersRo) {
+        LOG.info("Saving "+ usersRo.size()+"");
+        List<eu.domibus.api.user.User> users = domainConverter.convert(usersRo, eu.domibus.api.user.User.class);
+        userService.saveUsers(users);
     }
 
-    @RequestMapping(value = {"/roles"}, method = GET)
+    /*@RequestMapping(value = {"/roles"}, method = GET)
     public List<String> roles() {
-        LOG.info("Retrieving users !");
+        LOG.info("Retrieving usersRo !");
         List<UserRole> userRoles = userService.findRoles();
         List<String> authorities=new ArrayList<>();
         for (UserRole userRole : userRoles) {
             authorities.add(userRole.getName());
         }
         return authorities;
-    }
+    }*/
 
     private List<UserResponseRO> prepareResponse(List<User> users) {
         List<UserResponseRO>responses=new ArrayList<>();

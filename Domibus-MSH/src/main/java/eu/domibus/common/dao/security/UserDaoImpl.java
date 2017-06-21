@@ -22,8 +22,6 @@ import java.util.Set;
  */
 @Repository
 public class UserDaoImpl extends BasicDao<User> implements UserDao{
-    @PersistenceContext(unitName = "domibusJTA")
-    protected EntityManager entityManager;
 
 
     public UserDaoImpl() {
@@ -32,12 +30,12 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao{
 
     @Override
     public List<User> listUsers() {
-        TypedQuery<User> namedQuery = entityManager.createNamedQuery("User.findAll", User.class);
+        TypedQuery<User> namedQuery = em.createNamedQuery("User.findAll", User.class);
         return namedQuery.getResultList();
     }
     @Override
     public User loadUserByUsername(String userName){
-        TypedQuery<User> namedQuery = entityManager.createNamedQuery("User.findByUserName", User.class);
+        TypedQuery<User> namedQuery = em.createNamedQuery("User.findByUserName", User.class);
         namedQuery.setParameter("USER_NAME",userName);
         return namedQuery.getSingleResult();
     }

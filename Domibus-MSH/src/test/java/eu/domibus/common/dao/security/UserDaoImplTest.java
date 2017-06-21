@@ -29,7 +29,7 @@ public class UserDaoImplTest extends AbstractIT{
         user.addRole(userRole);
         user.setEmail("test@gmail.com");
         user.setPassword("test");
-        user.setEnabled(true);
+        user.setActive(true);
         userDao.create(user);
         List<User> users = userDao.listUsers();
         assertEquals(1,users.size());

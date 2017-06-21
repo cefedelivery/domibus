@@ -12,4 +12,6 @@ import java.util.List;
 public interface UserRoleDao {
 
     List<UserRole> listRoles();
+
+    UserRole findByName(final String roleName);
 }

@@ -12,6 +12,7 @@ public class UserResponseRO {
     private String email;
     private boolean active;
     private List<String> authorities;
+    private String roles;
     private String status;
     private String password;
 
@@ -53,6 +54,7 @@ public class UserResponseRO {
                 ", active=" + active +
                 ", authorities=" + authorities +
                 ", status='" + status + '\'' +
+                ", password='" + password+ '\'' +
                 '}';
     }
 

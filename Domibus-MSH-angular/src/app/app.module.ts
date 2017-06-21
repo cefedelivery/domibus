@@ -1,6 +1,6 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {FormsModule} from '@angular/forms';
+import {FormsModule,ReactiveFormsModule} from '@angular/forms';
 import {HttpModule, Http, XHRBackend, RequestOptions} from '@angular/http';
 import {MaterialModule, MdNativeDateModule, MdSelectModule} from '@angular/material';
 import {MdButtonModule} from '@angular/material';
@@ -84,7 +84,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MdButtonModule,
     MdSelectModule,
     Md2Module.forRoot(),
-    routing
+    routing,
+    ReactiveFormsModule
   ],
   providers: [
     AuthenticatedGuard,
