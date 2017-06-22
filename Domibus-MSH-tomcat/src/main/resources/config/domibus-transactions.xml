@@ -30,13 +30,13 @@
                 <prop key="com.atomikos.icatch.service">com.atomikos.icatch.standalone.UserTransactionServiceFactory</prop>
 
                 <!-- properties for single server deployment -->
-                <prop key="com.atomikos.icatch.output_dir">${domibus.work.location:${domibus.config.location}}/work/transactions</prop>
-                <prop key="com.atomikos.icatch.log_base_dir">${domibus.work.location:${domibus.config.location}}/work/transactions/log</prop>
+                <prop key="com.atomikos.icatch.output_dir">${com.atomikos.icatch.output_dir}</prop>
+                <prop key="com.atomikos.icatch.log_base_dir">${com.atomikos.icatch.log_base_dir}</prop>
                 <!-- properties for clustered server deployment -->
                 <!--prop key="com.atomikos.icatch.output_dir">${domibus.work.location:${domibus.config.location}}/work/transactions/${domibus.node.id}</prop>
                 <prop key="com.atomikos.icatch.log_base_dir">${domibus.work.location:${domibus.config.location}}/work/transactions/${domibus.node.id}/log</prop-->
                 <prop key="com.atomikos.icatch.force_shutdown_on_vm_exit">true</prop>
-                <prop key="com.atomikos.icatch.default_jta_timeout">60000</prop>
+                <prop key="com.atomikos.icatch.default_jta_timeout">${com.atomikos.icatch.default_jta_timeout}</prop>
             </props>
         </constructor-arg>
     </bean>

@@ -7,16 +7,12 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd ">
 
-
-
-    <import resource="file:///${domibus.config.location}/domibus-datasources.xml"/>
-
     <bean id="dispatchContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
         <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
         <property name="destination" ref="sendMessageQueue"/>
         <property name="messageListener" ref="messageSenderService" />
         <property name="transactionManager" ref="transactionManager"/>
-        <property name="concurrency" value="3-3"/>
+        <property name="concurrency" value="${domibus.dispatcher.concurency}"/>
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
     </bean>

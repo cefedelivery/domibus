@@ -26,8 +26,6 @@
     http://activemq.apache.org/schema/core/activemq-core.xsd">
 
 
-    <import resource="file:///${domibus.config.location}/domibus-transactions.xml"/>
-
     <!-- JMS Configuration -->
     <!-- Connection Pool -->
     <bean id="domibusJMS-XAConnectionFactory"
@@ -35,25 +33,19 @@
           init-method="init" destroy-method="close" depends-on="broker">
         <property name="uniqueResourceName" value="domibusJMS-XA"/>
         <property name="xaConnectionFactory" ref="xaJmsConnectionFactory"/>
-        <property name="maxPoolSize" value="20"/>
+        <property name="maxPoolSize" value="${com.atomikos.maxPoolSize}"/>
     </bean>
 
     <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
     <amq:xaConnectionFactory id="xaJmsConnectionFactory"
-                             brokerURL="tcp://localhost:61616"
-                             userName="domibus" password="changeit">
+                             brokerURL="${activeMQ.transportConnector.uri}"
+                             userName="${activeMQ.username}" password="${activeMQ.password}">
         <!-- do not remove this! otherwise the redeliveryPolicy configured in activemq.xml will be ignored -->
         <amq:redeliveryPolicy>
-            <amq:redeliveryPolicy/>
+            <amq:redeliveryPolicy />
         </amq:redeliveryPolicy>
     </amq:xaConnectionFactory>
 
-    <!--  lets create an ActiveMQ Broker -->
-    <bean id="broker"
-          class="org.apache.activemq.xbean.BrokerFactoryBean">
-        <property name="config"
-                  value="file:///${domibus.config.location}/internal/activemq.xml"/>
-    </bean>
 
     <amq:queue id="sendMessageQueue"
                physicalName="domibus.internal.dispatch.queue"/>
@@ -67,6 +59,11 @@
     <amq:topic id="clusterCommandTopic"
                physicalName="domibus.internal.command"/>
 
+    <bean id="xaProperties" class="eu.domibus.spring.PrefixedProperties">
+        <constructor-arg name="props" ref="domibusProperties"/>
+        <constructor-arg name="prefix" value="domibus.datasource.xa.property."/>
+    </bean>
+
     <bean id="domibusJDBC-XADataSource"
           class="com.atomikos.jdbc.AtomikosDataSourceBean"
           init-method="init" destroy-method="close">
@@ -74,61 +71,42 @@
             <value>domibusJDBC-XA</value>
         </property>
         <property name="xaDataSourceClassName">
-            <value>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</value>
+            <value>${domibus.datasource.xa.xaDataSourceClassName}</value>
         </property>
-        <property name="xaProperties">
-            <props>
-                <prop key="serverName">localhost</prop>
-                <prop key="port">3306</prop>
-                <prop key="user">edelivery</prop>
-                <prop key="password">edelivery</prop>
-                <prop key="url">
-                    jdbc:mysql://localhost:3306/domibus?pinGlobalTxToPhysicalConnection=true
-                </prop>
-            </props>
-        </property>
+        <property name="xaProperties" ref="xaProperties"/>
         <property name="minPoolSize">
-            <value>1</value>
+            <value>${domibus.datasource.xa.minPoolSize}</value>
         </property>
         <property name="maxPoolSize">
-            <value>100</value>
+            <value>${domibus.datasource.xa.maxPoolSize}</value>
         </property>
         <property name="testQuery">
-            <value>select 1</value>
+            <value>${domibus.datasource.xa.testQuery}</value>
         </property>
     </bean>
     <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-        <property name="url" value="jdbc:mysql://localhost:3306/domibus?useSSL=false"/>
-        <property name="username" value="edelivery"/>
-        <property name="password" value="edelivery"/>
+	   <property name="driverClassName" value="${domibus.datasource.driverClassName}"/>
+	   <property name="url" value="${domibus.datasource.url}"/>
+	   <property name="username" value="${domibus.datasource.user}"/>
+	   <property name="password" value="${domibus.datasource.password}"/>
     </bean>
 
+     <bean id="jpaProperties" class="eu.domibus.spring.PrefixedProperties">
+        <constructor-arg name="props" ref="domibusProperties"/>
+        <constructor-arg name="prefix" value="domibus.entityManagerFactory.jpaProperty."/>
+    </bean>
     <bean id="entityManagerFactory" primary="true"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="transactionManager">
         <property name="persistenceUnitName" value="domibusJTA"/>
-        <property name="packagesToScan" value="eu.domibus"/>
+        <property name="packagesToScan" value="#{'${domibus.entityManagerFactory.packagesToScan}'.split(',')}"/>
         <property name="jtaDataSource" ref="domibusJDBC-XADataSource"/>
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
                 <property name="showSql" value="false"/>
                 <property name="generateDdl" value="false"/>
-                <property name="databasePlatform"
-                          value="org.hibernate.dialect.MySQL5InnoDBDialect"/>
             </bean>
         </property>
-        <property name="jpaProperties">
-            <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
-                <prop key="hibernate.format_sql">true</prop>
-                <prop key="transaction.factory_class">
-                    org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory
-                </prop>
-                <prop key="hibernate.transaction.manager_lookup_class">
-                    com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup
-                </prop>
-            </props>
-        </property>
+        <property name="jpaProperties" ref="jpaProperties"/>
     </bean>
 
 

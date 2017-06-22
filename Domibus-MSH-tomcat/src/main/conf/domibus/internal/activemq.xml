@@ -29,14 +29,14 @@
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <context:property-placeholder system-properties-mode="ENVIRONMENT" />
+    <context:property-placeholder properties-ref="domibusProperties" ignore-resource-not-found="true" ignore-unresolvable="true"/>
 
-    <broker useJmx="true" brokerName="localhost"  persistent="true" schedulerSupport="true" dataDirectory="${domibus.work.location:${domibus.config.location}}/work/activemq_data" tmpDataDirectory="${domibus.work.location:${domibus.config.location}}/temp">
+    <broker useJmx="true" brokerName="${activeMQ.brokerName}"  persistent="true" schedulerSupport="true" dataDirectory="${domibus.work.location:${domibus.config.location}}/work/activemq_data" tmpDataDirectory="${domibus.work.location:${domibus.config.location}}/temp">
         <managementContext>
-            <managementContext createConnector="true" connectorPort="1199" rmiServerPort="1200"/>
+            <managementContext createConnector="true" connectorPort="${activeMQ.connectorPort}" rmiServerPort="${activeMQ.rmiServerPort}"/>
         </managementContext>
         <transportConnectors>
-            <transportConnector uri="tcp://localhost:61616" disableAsyncDispatch="true"/>
+            <transportConnector uri="${activeMQ.transportConnector.uri}" disableAsyncDispatch="true"/>
         </transportConnectors>
         <persistenceAdapter>
             <kahaDB directory="${domibus.work.location:${domibus.config.location}}/work/kahadb" />
@@ -110,7 +110,7 @@
         <plugins>
             <simpleAuthenticationPlugin anonymousAccessAllowed="false">
                 <users>
-                    <authenticationUser username="domibus" password="changeit"
+                    <authenticationUser username="${activeMQ.username}" password="${activeMQ.password}"
                                         groups="users"/>
                     <authenticationUser username="admin" password="123456" groups="admins,users" />
                 </users>

@@ -48,6 +48,9 @@
             .*domibus\.(internal|DLQ|backend\.jms|notification\.jms|notification\.webservice|notification\.kerkovi).*
         </prop>
         <prop key="activeMQ.JMXURL">service:jmx:rmi:///jndi/rmi://localhost:2000/jmxrmi</prop>
+        <prop key="activeMQ.brokerName">localhost</prop>
+        <prop key="compressionBlacklist">application/vnd.etsi.asic-s+zip,image/jpeg</prop>
+
 
         <!--Accepted Format for MessageId-->
         <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
