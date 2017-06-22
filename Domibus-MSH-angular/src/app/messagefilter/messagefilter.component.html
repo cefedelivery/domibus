@@ -15,12 +15,12 @@
           [selectionType]="'single'"
           (activate)="onActivate($event)"
           (select)='onSelect($event)'>
-          <ngx-datatable-column name="Plugin" prop="backendName" [canAutoResize]="true" [sortable]="false">
+          <ngx-datatable-column name="Plugin" prop="backendName" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-plugin'] = true"
-                *ngIf="!editing[row.$$index + '-plugin']">
+                *ngIf="!editing[row.$$index + '-plugin']" class="justified">
                 {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
               <input autofocus
@@ -34,12 +34,12 @@
               </datalist>
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="From" prop="from.expression" [canAutoResize]="true" [sortable]="false">
+          <ngx-datatable-column name="From" prop="from.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-from'] = true"
-                *ngIf="!editing[row.$$index + '-from']">
+                *ngIf="!editing[row.$$index + '-from']" class="justified">
                 {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
               <input
@@ -51,12 +51,12 @@
               />
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="To" prop="to.expression" [canAutoResize]="true" [sortable]="false">
+          <ngx-datatable-column name="To" prop="to.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-to'] = true"
-                *ngIf="!editing[row.$$index + '-to']">
+                *ngIf="!editing[row.$$index + '-to']" class="justified">
                 {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
               <input
@@ -68,12 +68,12 @@
               />
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="Action" prop="action.expression" [canAutoResize]="true" [sortable]="false">
+          <ngx-datatable-column name="Action" prop="action.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-action'] = true"
-                *ngIf="!editing[row.$$index + '-action']">
+                *ngIf="!editing[row.$$index + '-action']" class="justified">
                 {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
               <input
@@ -85,12 +85,12 @@
               />
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="Service" prop="sevice.expression" [canAutoResize]="true" [sortable]="false">
+          <ngx-datatable-column name="Service" prop="sevice.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-sevice'] = true"
-                *ngIf="!editing[row.$$index + '-sevice']">
+                *ngIf="!editing[row.$$index + '-sevice']" class="justified">
                 {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
               <input
@@ -143,7 +143,7 @@
                 <md-icon>add</md-icon>
                 <span>New</span>
               </button>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableDelete" (click)="deleteDialog()">
+              <button md-raised-button color="primary" type="button" [disabled]="!enableDelete" (click)="buttonDelete()">
                 <md-icon>delete</md-icon>
                 <span>Delete</span>
               </button>
