@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 public class UserResourceTest {
     @InjectMocks
     private UserResource userResource;
-    @Test
+    //@Test@thom implement those tests
     public void users() throws Exception {
         assertTrue(false);
     }

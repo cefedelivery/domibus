@@ -94,13 +94,16 @@ export class UserComponent implements OnInit {
   }
 
   cancel() {
-    let dialogRef: MdDialogRef<MessagefilterDialogComponent> = this.dialog.open(MessagefilterDialogComponent);
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === "Save") {
-        this.users = [];
-        this.getUsers();
-      }
-    });
+    let filteredUsers = this.filterModifiedUser();
+    if (filteredUsers.length > 0) {
+      let dialogRef: MdDialogRef<MessagefilterDialogComponent> = this.dialog.open(MessagefilterDialogComponent);
+      dialogRef.afterClosed().subscribe(result => {
+        if (result === "Save") {
+          this.users = [];
+          this.getUsers();
+        }
+      });
+    }
   }
 
   filterModifiedUser(): UserResponseRO[] {
