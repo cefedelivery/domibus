@@ -2,7 +2,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {FormsModule,ReactiveFormsModule} from '@angular/forms';
 import {HttpModule, Http, XHRBackend, RequestOptions} from '@angular/http';
-import {MaterialModule, MdNativeDateModule, MdSelectModule} from '@angular/material';
+import {MaterialModule, MdSelectModule} from '@angular/material';
 import {MdButtonModule} from '@angular/material';
 import 'hammerjs';
 
@@ -74,7 +74,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MoveDialogComponent,
     MessageDialogComponent,
     MessagefilterDialogComponent,
-    PasswordComponent
+    PasswordComponent,
   ],
   entryComponents: [
     AppComponent,

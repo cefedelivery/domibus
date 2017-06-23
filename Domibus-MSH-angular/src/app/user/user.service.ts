@@ -27,7 +27,6 @@ export class UserService {
   }
 
   changeUserStatus(users:Array<UserResponseRO>){
-    debugger;
     for(let u in users){
       users[u].status="PERSISTED";
       users[u].password="";

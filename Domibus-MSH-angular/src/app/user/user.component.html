@@ -10,15 +10,17 @@
   [rowHeight]="'auto'"
   [scrollbarH]="true"
   [loadingIndicator]="false"
-  [selected]="selected">
+  [selected]="selected"
+  [selectionType]="'single'">
   <ngx-datatable-column name="Username" prop="userName" [canAutoResize]="true">
     <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
     <span
       title="Double click to edit"
-      (dblclick)="editing[row.$$index + '-userName'] = true"
-      *ngIf="!editing[row.$$index + '-userName']">
-      {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              </span>
+      (dblclick)="userNameDblClick(row.$$index)"
+      *ngIf="!editing[row.$$index + '-userName']"
+      class="clickAble">
+      {{value}}
+    </span>
       <input
         autofocus
         (blur)="updateValue($event, 'userName', row)"
@@ -34,15 +36,18 @@
     <span
       title="Double click to edit"
       (dblclick)="editing[row.$$index + '-email'] = true"
-      *ngIf="!editing[row.$$index + '-email']">
-                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              </span>
+      *ngIf="!editing[row.$$index + '-email']"
+      class="clickAble">
+      {{value}}
+
+    </span>
       <input
-        autofocus
         (blur)="updateValue($event,'email',row)"
         *ngIf="editing[row.$$index + '-email']"
         type="text"
         [value]="value"
+        autofocus
+        onshow="focus()"
       />
     </ng-template>
   </ngx-datatable-column>
@@ -52,8 +57,8 @@
       title="Double click to edit"
       (dblclick)="editing[row.$$index + '-roles'] = true"
       *ngIf="!editing[row.$$index + '-roles']"
-      style="text-transform:uppercase">
-                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      class="clickAble">
+                {{value}}
               </span>
       <input
         autofocus
@@ -68,20 +73,18 @@
   <ngx-datatable-column name="Password" prop="password" [canAutoResize]="true">
     <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
       <span title="Double click to edit" (dblclick)="openPasswordDialog(row.$$index)"
-            class="password-field">******</span>
+            class="password-field" class="clickAble">******</span>
     </ng-template>
   </ngx-datatable-column>
 
-  <ngx-datatable-column name="Active"  [canAutoResize]="true">
+  <ngx-datatable-column name="Active" [canAutoResize]="true">
     <ng-template ngx-datatable-cell-template let-row="row">
-      <input type="checkbox" [checked]="row['active']" (change)="row['active']">
+      <input type="checkbox" [checked]="row['active']" (change)="updateCheckBox($event,'active',row)">
     </ng-template>
-   </ngx-datatable-column>
+  </ngx-datatable-column>
 
 
 </ngx-datatable>
-
-
 
 <div style="position: fixed;bottom:10px">
   <button id="userCancelButton" md-raised-button (click)="cancel()" color="primary"

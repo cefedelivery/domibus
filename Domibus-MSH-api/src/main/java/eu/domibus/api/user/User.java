@@ -15,13 +15,13 @@ public class User {
     private String status;
     private String password;
 
-    public User(String userName, String email, boolean active, List<String> authorities, String status, String password) {
+    public User(String userName, String email, boolean active, List<String> authorities, UserState userState) {
         this.userName = userName;
         this.email = email;
         this.active = active;
         this.authorities = authorities;
-        this.status = status;
-        this.password = password;
+        this.status = userState.name();
+        this.password = null;
     }
 
     public User() {

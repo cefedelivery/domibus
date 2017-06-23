@@ -13,7 +13,12 @@ import java.util.Set;
  */
 public interface UserDao {
     List<User> listUsers();
+
     void create(final User user);
 
     User loadUserByUsername(String userName);
+
+    User loadActiveUserByUsername(String userName);
+
+    void update(final User entity);
 }

@@ -1,5 +1,10 @@
-import {Component, Inject, OnInit} from '@angular/core';
-import {UserResponseRO} from "../user";
+/**
+ * @author Thomas Dussart
+ * @since 3.3
+ */
+
+import {Component, Inject} from '@angular/core';
+import {UserResponseRO, UserState} from "../user";
 import {MdDialogRef} from "@angular/material";
 import {MD_DIALOG_DATA} from '@angular/material';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
@@ -11,6 +16,7 @@ import {UserValidatorService} from "../uservalidator.service";
   styleUrls: ['./password-dialog.component.css'],
   providers:[UserValidatorService]
 })
+
 export class PasswordComponent {
 
   password:any;
@@ -30,25 +36,11 @@ export class PasswordComponent {
     );
   }
 
-
-
-  save():void{
-    console.log("Edited "+this.data.password+" "+this.passwordVerification)
-    if(this.data.password===this.passwordVerification){
-
-    }else{
-      this.passwordError=true;
-      this.passwordVerification="";
-    }
-  }
-  cancel():void{
-    this.dialogRef.close(false);
-  }
-
   submitForm(form: any): void{
-    console.log('Form Data: ');
-    console.log(form);
     this.data.password=form['password'];
+    if(UserState[UserState.PERSISTED]===this.data.status) {
+      this.data.status = UserState[UserState.UPDATED]
+    }
     this.dialogRef.close(true);
   }
 

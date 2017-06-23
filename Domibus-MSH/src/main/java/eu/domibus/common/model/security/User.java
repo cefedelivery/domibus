@@ -25,7 +25,8 @@ import java.util.Set;
 )
 @NamedQueries({
         @NamedQuery(name = "User.findAll", query = "FROM User"),
-        @NamedQuery(name = "User.findByUserName", query = "FROM User u where u.userName=:USER_NAME")
+        @NamedQuery(name = "User.findByUserName", query = "FROM User u where u.userName=:USER_NAME"),
+        @NamedQuery(name = "User.findActiveByUserName", query = "FROM User u where u.userName=:USER_NAME and u.active=true")
 })
 public class User extends AbstractBaseEntity{
     @NotNull
@@ -81,6 +82,10 @@ public class User extends AbstractBaseEntity{
     public void addRole(UserRole userRole){
         roles.add(userRole);
         userRole.addUser(this);
+    }
+
+    public void clearRoles(){
+        roles.clear();
     }
     public String getUserName() {
         return userName;

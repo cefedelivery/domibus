@@ -10,9 +10,9 @@ import java.util.List;
  * @author Thomas Dussart
  * @since 3.3
  */
-public interface UserService extends UserDetailsService {
+public interface UserService{
 
-    List<User> findUsers();
+    List<eu.domibus.api.user.User> findUsers();
 
     void saveUsers(List<eu.domibus.api.user.User> users);
 }

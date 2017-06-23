@@ -11,16 +11,21 @@ export class UserValidatorService{
   constructor(private alertService: AlertService) {
   }
 
-  validateUsers(modifyUsers:UserResponseRO[], users:UserResponseRO[]):boolean{
+  validateUsers(modifiedUsers:UserResponseRO[], users:UserResponseRO[]):boolean{
     let errorMessage: string = "";
-    for (let u in modifyUsers) {
-      let user: UserResponseRO = modifyUsers[u];
+    if(modifiedUsers.length==0){
+      return false;
+    }
+    errorMessage = errorMessage.concat(this.checkUserNameDuplication(users));
+    for (let u in modifiedUsers) {
+      let user: UserResponseRO = modifiedUsers[u];
       let number = users.indexOf(user) + 1;
       if(user.status===UserState[UserState.NEW]){
         errorMessage = errorMessage.concat(this.validateNewUsers(user,number));
       }
       else if(user.status===UserState[UserState.UPDATED]){
         errorMessage =errorMessage.concat(this.validateRoles(user,number));
+        errorMessage =errorMessage.concat(this.validateEmail(user,number));
       }
     }
     return this.triggerValidation(errorMessage);
@@ -33,12 +38,25 @@ export class UserValidatorService{
         errorMessage = errorMessage.concat("User " + number + " has no username defined\n");
       }
       errorMessage =errorMessage.concat(this.validateRoles(user,number));
-
+      errorMessage =errorMessage.concat(this.validateEmail(user,number));
       if (user.password == null || user.password.trim() === "") {
         errorMessage = errorMessage.concat("User " + number + " has no password defined\n");
       }
 
       return errorMessage;
+  }
+
+  checkUserNameDuplication(allUsers:UserResponseRO[]){
+    let errorMessage:string="";
+    let seen = new Set();
+    var hasDuplicates=allUsers.every(function(user) {
+      if(seen.size === seen.add(user.userName).size){
+        errorMessage=errorMessage.concat("Duplicate user name with user "+allUsers.indexOf(user)+" ");
+        return false;
+      };
+      return true;
+    });
+    return errorMessage;
   }
 
    triggerValidation(errorMessage:string):boolean{
@@ -65,6 +83,16 @@ export class UserValidatorService{
       }
       return errorMessage;
     }
+
+   validateEmail(user:UserResponseRO,number): string{
+    let email:string=user.email;
+    var EMAIL_REGEXP = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i;
+
+    if (email!= "" && (email.length <= 5 || !EMAIL_REGEXP.test(email))) {
+      return "incorrectMailFormat for user "+number;
+    }
+    return "";
+  }
 
 
 

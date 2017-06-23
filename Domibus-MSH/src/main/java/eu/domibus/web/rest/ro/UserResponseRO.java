@@ -38,13 +38,16 @@ public class UserResponseRO {
         return active;
     }
 
-    public void addAuthority(String authority){
-        authorities.add(authority);
+    public void updateRolesField(){
+        int count=0;
         String separator="";
-        if(authorities.size()>1){
-            separator=",";
+        for (String authority : authorities) {
+            if(count>0){
+               separator=",";
+            }
+            count++;
+            roles+=separator+authority;
         }
-        roles+=separator+authority;
     }
 
     public List<String> getAuthorities() {
@@ -77,6 +80,23 @@ public class UserResponseRO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public void setAuthorities(List<String> authorities) {
+        this.authorities = authorities;
     }
 
     public String getRoles() {
