@@ -10,7 +10,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by dussath on 6/14/17.
+ * @author Thomas Dussart
+ * @since 3.3
  */
 @Entity
 @NamedQueries({

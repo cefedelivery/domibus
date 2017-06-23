@@ -38,7 +38,6 @@ export class UserComponent implements OnInit {
 
   getUsers(): void {
     this.userService.getUsers().subscribe(users => this.users = users);
-    //this.users = this.users.slice();
   }
 
   updateValue(event, cell, row) {
@@ -54,8 +53,8 @@ export class UserComponent implements OnInit {
     });
   }
 
-  updateCheckBox(event, cell, row){
-    let checked:boolean=event.srcElement.checked;
+  updateCheckBox(event, cell, row) {
+    let checked: boolean = event.srcElement.checked;
     this.users[row.$$index][cell] = checked;
     if (UserState[UserState.NEW] != this.users[row.$$index].status) {
       this.users[row.$$index].status = UserState[UserState.UPDATED]
@@ -117,8 +116,8 @@ export class UserComponent implements OnInit {
 
   save() {
     let filteredUsers = this.filterModifiedUser();
-    if (this.userValidatorService.validateUsers(filteredUsers, this.users)) {
-      if (filteredUsers.length > 0) {
+    if (filteredUsers.length > 0) {
+      if (this.userValidatorService.validateUsers(filteredUsers, this.users)) {
         let dialogRef: MdDialogRef<MessagefilterDialogComponent> = this.dialog.open(MessagefilterDialogComponent);
         dialogRef.afterClosed().subscribe(result => {
           if (result === "Save") {
@@ -131,7 +130,7 @@ export class UserComponent implements OnInit {
         });
       }
     }
-}
+  }
 
 
 }

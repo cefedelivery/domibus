@@ -18,10 +18,6 @@
   width:100px;
   text-align:right;
 }
-:before {
-  content: "\200D";
-  display:inline;
-}
 .clickAble {
   display:inline-block;
   width: 100%;

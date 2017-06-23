@@ -20,8 +20,6 @@ import {UserValidatorService} from "../uservalidator.service";
 export class PasswordComponent {
 
   password:any;
-  passwordVerification:any;
-  passwordError:boolean;
   passwordForm:FormGroup;
   constructor(public dialogRef: MdDialogRef<PasswordComponent>,
               @Inject(MD_DIALOG_DATA) public data: UserResponseRO,

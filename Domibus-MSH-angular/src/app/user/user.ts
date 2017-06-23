@@ -24,14 +24,5 @@ export class UserResponseRO {
     for(let authority in authorities){
       this.roles=this.roles.concat(authorities[authority]).concat(" ");
     }
-    //debugger;
-  }
-
-  isNew():boolean{
-    return this.status===UserState.NEW.toString();
-  }
-  getFirstAuthority():any{
-    debugger;
-    return this.authorities[0];
   }
 }

@@ -42,7 +42,6 @@ export class UserValidatorService{
       if (user.password == null || user.password.trim() === "") {
         errorMessage = errorMessage.concat("User " + number + " has no password defined\n");
       }
-
       return errorMessage;
   }
 
@@ -52,9 +51,9 @@ export class UserValidatorService{
     var hasDuplicates=allUsers.every(function(user) {
       if(seen.size === seen.add(user.userName).size){
         errorMessage=errorMessage.concat("Duplicate user name with user "+allUsers.indexOf(user)+" ");
-        return false;
-      };
-      return true;
+        return hasDuplicates;
+      }
+      return hasDuplicates;
     });
     return errorMessage;
   }
@@ -94,19 +93,11 @@ export class UserValidatorService{
     return "";
   }
 
-
-
   matchPassword(form: AbstractControl) {
       let password = form.get('password').value; // to get value in input tag
       let confirmPassword = form.get('passwordConfirmation').value; // to get value in input tag
       if(password != confirmPassword) {
-        console.log('false');
         form.get('passwordConfirmation').setErrors( {confirmation: true} )
-      } else {
-        console.log('true');
-        return null
       }
     }
-
-
 }

@@ -8,7 +8,6 @@ export class UserService {
 
   constructor(private http: Http,private alertService: AlertService) {
 
-
   }
 
   getUsers():Observable<UserResponseRO[]>{
@@ -40,7 +39,6 @@ private extractData(res: Response) {
 }
 
 private handleError (error: Response | any) {
-  // In a real world app, we might use a remote logging infrastructure
   this.alertService.error(error, false);
   let errMsg: string;
   if (error instanceof Response) {

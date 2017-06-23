@@ -12,7 +12,14 @@ import java.util.List;
  */
 public interface UserService{
 
+    /**
+     * @return the list of system users.
+     */
     List<eu.domibus.api.user.User> findUsers();
 
+    /**
+     * create or update users of the system (edited in the user management gui console).
+     * @param users to create of update.
+     */
     void saveUsers(List<eu.domibus.api.user.User> users);
 }

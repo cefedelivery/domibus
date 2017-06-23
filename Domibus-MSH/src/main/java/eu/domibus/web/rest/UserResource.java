@@ -37,21 +37,30 @@ public class UserResource {
     @Autowired
     private DomainCoreConverter domainConverter;
 
+    /**
+     * {@inheritDoc}
+     */
     @RequestMapping(value = {"/users"}, method = GET)
     public List<UserResponseRO> users() {
-        LOG.info("Retrieving usersRo !");
+        LOG.debug("Retrieving usersRo !");
         List<User> users = userService.findUsers();
         return prepareResponse(users);
     }
 
+
     @RequestMapping(value = {"/save"}, method = POST)
     public void save(@RequestBody List<UserResponseRO> usersRo) {
-        LOG.info("Saving "+ usersRo.size()+"");
+        LOG.debug("Saving "+ usersRo.size()+"");
         List<eu.domibus.api.user.User> users = domainConverter.convert(usersRo, eu.domibus.api.user.User.class);
         userService.saveUsers(users);
     }
 
 
+    /**
+     * convert user to userresponsero.
+     * @param users
+     * @return a list of
+     */
     private List<UserResponseRO> prepareResponse(List<User> users) {
         List<UserResponseRO> userResponseROS = domainConverter.convert(users, UserResponseRO.class);
         for (UserResponseRO userResponseRO : userResponseROS) {
