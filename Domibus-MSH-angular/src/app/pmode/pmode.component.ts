@@ -34,9 +34,9 @@ export class PModeComponent {
 
   download() {
     this.http.get(this.url).subscribe(res => {
-      this.downloadFile(res);
+      this.downloadFile(res.text());
     }, err => {
-      this.alertService.error(err.json());
+      this.alertService.error(err._body);
     });
 
   }

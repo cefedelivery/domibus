@@ -30,42 +30,18 @@
     <files>
         <file>
             <source>
-                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-configuration.xml
+                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/domibus.properties
             </source>
             <outputDirectory>/</outputDirectory>
-            <destName>domibus-configuration.xml</destName>
+            <destName>domibus.properties</destName>
             <filtered>false</filtered>
         </file>
         <file>
             <source>
-                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-plugins.xml
+                ${project.basedir}/../Domibus-MSH/src/main/conf/domibus/users.properties
             </source>
             <outputDirectory>/</outputDirectory>
-            <destName>domibus-plugins.xml</destName>
-            <filtered>false</filtered>
-        </file>
-        <file>
-            <source>
-                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-datasources.xml
-            </source>
-            <outputDirectory>/</outputDirectory>
-            <destName>domibus-datasources.xml</destName>
-            <filtered>false</filtered>
-        </file>
-        <file>
-            <source>
-                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-security.xml
-            </source>
-            <outputDirectory>/</outputDirectory>
-            <destName>domibus-security.xml</destName>
-            <filtered>false</filtered>
-        </file>
-        <file>
-            <source>
-                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/domibus-transactions.xml
-            </source>
-            <outputDirectory>/</outputDirectory>
-            <destName>domibus-transactions.xml</destName>
+            <destName>users.properties</destName>
             <filtered>false</filtered>
         </file>
         <file>
