@@ -20,16 +20,17 @@
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-plugin'] = true"
-                *ngIf="!editing[row.$$index + '-plugin']" class="justified">
-                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                *ngIf="!editing[row.$$index + '-plugin']" class="justified, clickable">
+                {{value}}
               </span>
               <input autofocus
                      list="backendFilters"
-                     (blur)="updateValue($event, 'plugin', row)" *ngIf="editing[row.$$index + '-plugin']" [value]="value">
+                     (blur)="updateValue($event, 'plugin', row)" *ngIf="editing[row.$$index + '-plugin']"
+                     [value]="value" class="justified, clickable">
 
               <datalist id="backendFilters">
                 <div *ngFor="let backendName of backendFilterNames">
-                  <option value={{backendName}}>
+                  <option value={{backendName}}>{{backendName}}</option>
                 </div>
               </datalist>
             </ng-template>
@@ -39,15 +40,15 @@
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-from'] = true"
-                *ngIf="!editing[row.$$index + '-from']" class="justified">
-                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                *ngIf="!editing[row.$$index + '-from']" class="justified, clickable">
+                {{value}}
               </span>
               <input
                 autofocus
                 (blur)="updateValue($event, 'from', row)"
                 *ngIf="editing[row.$$index + '-from']"
                 type="text"
-                [value]="value"
+                [value]="value" class="justified, clickable"
               />
             </ng-template>
           </ngx-datatable-column>
@@ -56,15 +57,15 @@
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-to'] = true"
-                *ngIf="!editing[row.$$index + '-to']" class="justified">
-                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                *ngIf="!editing[row.$$index + '-to']" class="justified, clickable">
+                {{value}}
               </span>
               <input
                 autofocus
                 (blur)="updateValue($event, 'to', row)"
                 *ngIf="editing[row.$$index + '-to']"
                 type="text"
-                [value]="value"
+                [value]="value" class="justified, clickable"
               />
             </ng-template>
           </ngx-datatable-column>
@@ -73,15 +74,15 @@
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-action'] = true"
-                *ngIf="!editing[row.$$index + '-action']" class="justified">
-                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                *ngIf="!editing[row.$$index + '-action']" class="justified, clickable">
+                {{value}}
               </span>
               <input
                 autofocus
                 (blur)="updateValue($event, 'action', row)"
                 *ngIf="editing[row.$$index + '-action']"
                 type="text"
-                [value]="value"
+                [value]="value" class="justified, clickable"
               />
             </ng-template>
           </ngx-datatable-column>
@@ -90,15 +91,15 @@
               <span
                 title="Double click to edit"
                 (dblclick)="editing[row.$$index + '-sevice'] = true"
-                *ngIf="!editing[row.$$index + '-sevice']" class="justified">
-                {{value}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                *ngIf="!editing[row.$$index + '-sevice']" class="justified, clickable">
+                {{value}}
               </span>
               <input
                 autofocus
                 (blur)="updateValue($event, 'sevice', row)"
                 *ngIf="editing[row.$$index + '-sevice']"
                 type="text"
-                [value]="value"
+                [value]="value" class="justified, clickable"
               />
             </ng-template>
           </ngx-datatable-column>

@@ -6,6 +6,17 @@
   max-width: 100%;
 }
 
+:before {
+  content: "\200D";
+  display:inline;
+}
+
+.clickable {
+  display:inline-block;
+  width: 100%;
+  height: 100%;
+}
+
 .rowsDiv {
   margin-top:30px;
 }
