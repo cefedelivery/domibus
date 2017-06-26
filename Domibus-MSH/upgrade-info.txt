@@ -2,13 +2,13 @@ Domibus 3.3-RC1 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-rc1-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-rc1-migration.ddl for Oracle)
                - [ALL Databases]:execute the following SQL snippet after replacing the values for the USER_PASSWORD with the configured passwords in domibus-security.xml(in the "authenticationManagerForAdminConsole" authentication manager)
-                               INSERT INTO TB_USER_ROLE (ROLE_NAME) VALUES ('ROLE_ADMIN');
-                               INSERT INTO TB_USER_ROLE (ROLE_NAME) VALUES ('ROLE_USER');
-                               INSERT INTO TB_USER (USER_NAME, USER_PASSWORD) VALUES ('admin', '$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36');
-                               INSERT INTO TB_USER (USER_NAME, USER_PASSWORD) VALUES ('user', '$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu');
-                               INSERT INTO TB_USER (USER_ID, ROLE_ID) VALUES ('1', '1');
-                               INSERT INTO TB_USER (USER_ID, ROLE_ID) VALUES ('1', '2');
-                               INSERT INTO TB_USER (USER_ID, ROLE_ID) VALUES ('2', '1');
+                               INSERT INTO TB_USER_ROLE (ID_PK, ROLE_NAME) VALUES ('1', 'ROLE_ADMIN');
+                               INSERT INTO TB_USER_ROLE (ID_PK, ROLE_NAME) VALUES ('2', 'ROLE_USER');
+                               INSERT INTO TB_USER (ID_PK, USER_NAME, USER_PASSWORD, USER_ENABLED) VALUES ('1', 'admin', '$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36', 1);
+                               INSERT INTO TB_USER (ID_PK, USER_NAME, USER_PASSWORD, USER_ENABLED) VALUES ('2', 'user', '$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu', 1);
+                               INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ('1', '1');
+                               INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ('1', '2');
+                               INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ('2', '2');
                 - [MySQL only] Execute the command: alter schema `your_domibus_schema_name` default charset=utf8 collate=utf8_bin;
 
                - in the location "\conf\domibus" delete the log4j.properties file and copy the logback.xml distributed in the domibus configuration specific to each server
