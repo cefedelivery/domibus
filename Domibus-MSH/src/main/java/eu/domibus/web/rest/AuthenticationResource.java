@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,7 +38,7 @@ public class AuthenticationResource {
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
     public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) throws Exception {
         LOG.debug("Authenticating user [{}]", loginRO.getUsername());
-        final User principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword());
+        final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword());
         //Parse Granted authorities to a list of string authorities
         List<String> authorities = new ArrayList<>();
         for (GrantedAuthority grantedAuthority : principal.getAuthorities()) {
@@ -68,7 +68,7 @@ public class AuthenticationResource {
 
     @RequestMapping(value = "user", method = RequestMethod.GET)
     public String getUser() {
-        User securityUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetail securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return securityUser.getUsername();
     }
 }

@@ -6,6 +6,7 @@ import {PModeComponent} from "./pmode/pmode.component";
 import {AuthorizedAdminGuard} from "./guards/authorized-admin.guard";
 import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
 import {MessageLogComponent} from "./messagelog/messagelog.component";
+import {UserComponent} from "./user/user.component"
 import {TruststoreComponent} from "app/truststore/truststore.component";
 import {JmsComponent} from "./jms/jms.component";
 
@@ -16,6 +17,7 @@ const appRoutes: Routes = [
   {path: 'messagefilter', component: MessageFilterComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: 'truststore', component: TruststoreComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: 'messagelog', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
+  {path: 'user', component: UserComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard]},
   {path: 'login', component: LoginComponent},
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},

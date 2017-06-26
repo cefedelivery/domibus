@@ -98,10 +98,17 @@
         <sec:authentication-provider ref="allowAllAuthenticationProvider"/>
     </sec:authentication-manager>
 
+    <bean name="userDetailService"  
+          class="eu.domibus.common.services.impl.UserDetailServiceImpl"/>
+    <sec:authentication-manager>
+        <sec:authentication-provider ref="allowAllAuthenticationProvider"/>
+    </sec:authentication-manager>
+
     <sec:authentication-manager id="authenticationManagerForAdminConsole">
-        <sec:authentication-provider>
+        <sec:authentication-provider
+                user-service-ref="userDetailService" >
             <sec:password-encoder ref="bcryptEncoder"/>
-            <sec:user-service properties="file:///${domibus.config.location}/users.properties"/>
+
         </sec:authentication-provider>
     </sec:authentication-manager>
 

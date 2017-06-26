@@ -223,6 +223,17 @@ Domibus 3.3-RC1 (from 3.2.1):
                 o in file \conf\domibus\internal\activemq.xml add:
                  <queue id="pullMessageQueue"
                                    physicalName="domibus.internal.pull.queue"/>
+
+                [ALL Datbases]:execute the followinh sql after replacing USER_PASSWORD by the hash of your own passwords
+                INSERT INTO TB_USER_ROLE (ROLE_NAME) VALUES ('ROLE_ADMIN');
+                INSERT INTO TB_USER_ROLE (ROLE_NAME) VALUES ('ROLE_USER');
+                INSERT INTO TB_USER (USER_NAME, USER_PASSWORD) VALUES ('admin', '$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36');
+                INSERT INTO TB_USER (USER_NAME, USER_PASSWORD) VALUES ('user', '$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu');
+                INSERT INTO TB_USER (USER_ID, ROLE_ID) VALUES ('1', '1');
+                INSERT INTO TB_USER (USER_ID, ROLE_ID) VALUES ('1', '2');
+                INSERT INTO TB_USER (USER_ID, ROLE_ID) VALUES ('2', '1');
+
+
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2.5:
                - Run the appropriate DB migration script.

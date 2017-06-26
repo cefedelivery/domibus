@@ -1,8 +1,8 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {FormsModule} from '@angular/forms';
+import {FormsModule,ReactiveFormsModule} from '@angular/forms';
 import {HttpModule, Http, XHRBackend, RequestOptions} from '@angular/http';
-import {MaterialModule, MdNativeDateModule, MdSelectModule} from '@angular/material';
+import {MaterialModule, MdSelectModule} from '@angular/material';
 import {MdButtonModule} from '@angular/material';
 import 'hammerjs';
 
@@ -30,6 +30,7 @@ import {DomibusInfoService} from "./appinfo/domibusinfo.service";
 import {AuthorizedAdminGuard} from "./guards/authorized-admin.guard";
 import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
 import {MessageLogComponent} from "./messagelog/messagelog.component";
+import {UserComponent} from "./user/user.component"
 import {TruststoreComponent} from './truststore/truststore.component';
 import {PmodeUploadComponent} from './pmode-upload/pmode-upload.component';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
@@ -40,6 +41,7 @@ import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
 import {MessagefilterDialogComponent} from "./messagefilter/messagefilter-dialog/messagefilter-dialog.component";
 import {CancelMessagefilterDialogComponent} from "./messagefilter/cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
 import {MessageDialogComponent} from './jms/message-dialog/message-dialog.component';
+import { PasswordComponent } from './user/password/password-dialog.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -52,6 +54,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     HomeComponent,
     MessageFilterComponent,
     MessageLogComponent,
+    UserComponent,
     ErrorLogComponent,
     AlertComponent,
     FooterComponent,
@@ -68,7 +71,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     RowLimiterComponent,
     MoveDialogComponent,
     MessageDialogComponent,
-    MessagefilterDialogComponent
+    MessagefilterDialogComponent,
+    PasswordComponent,
   ],
   entryComponents: [
     AppComponent,
@@ -79,7 +83,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MoveDialogComponent,
     MessageDialogComponent,
     CancelMessagefilterDialogComponent,
-    MoveDialogComponent
+    MoveDialogComponent,
+    PasswordComponent
   ],
   imports: [
     BrowserModule,
@@ -91,7 +96,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MdButtonModule,
     MdSelectModule,
     Md2Module.forRoot(),
-    routing
+    routing,
+    ReactiveFormsModule
   ],
   providers: [
     AuthenticatedGuard,

@@ -343,6 +343,72 @@
             select * from tb_routing_criteria_migr;
         </sql>
     </changeSet>
+    <changeSet author="dussath" id="1497515734454-58">
+        <comment>new user table to handle spring security in database</comment>
+        <createTable tableName="TB_USER">
+            <column autoIncrement="true" name="ID_PK" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="USER_EMAIL" type="VARCHAR(255)"/>
+            <column name="USER_ENABLED" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OPTLOCK" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="dussath" id="1497515734454-60">
+        <comment>new role table to handle spring security in database</comment>
+        <createTable tableName="TB_USER_ROLE">
+            <column autoIncrement="true" name="ID_PK" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ROLE_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="dussath" id="1497515734454-61">
+        <comment>Intermediary table between user an role</comment>
+        <createTable tableName="TB_USER_ROLES">
+            <column name="USER_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROLE_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="dussath" id="1497515734454-74">
+        <addPrimaryKey columnNames="USER_ID, ROLE_ID" constraintName="PK_PRIMARY" tableName="TB_USER_ROLES"/>
+    </changeSet>
+    <changeSet author="dussath" id="1497515734454-75">
+        <addUniqueConstraint columnNames="ROLE_NAME" constraintName="UQ_ROLE_NAME" tableName="TB_USER_ROLE"/>
+    </changeSet>
+    <changeSet author="dussath" id="1497515734454-78">
+        <addUniqueConstraint columnNames="USER_NAME" constraintName="USER_NAME" tableName="TB_USER"/>
+    </changeSet>
+    <changeSet author="dussath" id="1497515734454-79">
+        <createIndex indexName="IDX_ROLE_ID" tableName="TB_USER_ROLES">
+            <column name="ROLE_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="dussath" id="1497515734454-80">
+        <createIndex indexName="IDX_USER_ID" tableName="TB_USER_ROLES">
+            <column name="USER_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="dussath" id="1497515734454-165">
+        <addForeignKeyConstraint baseColumnNames="ROLE_ID" baseTableName="TB_USER_ROLES" constraintName="FK_USER_ROLES_USER" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_ROLE"/>
+    </changeSet>
+    <changeSet author="dussath" id="1497515734454-166">
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_USER_ROLES" constraintName="FK_USER_ROLES_ROLE" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER"/>
+    </changeSet>
 
 
 </databaseChangeLog>
