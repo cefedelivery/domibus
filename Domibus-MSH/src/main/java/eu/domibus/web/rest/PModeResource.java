@@ -47,6 +47,12 @@ public class PModeResource {
             resource = new ByteArrayResource(rawConfiguration);
         }
 
+        if(resource.getByteArray().length == 0) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .contentType(MediaType.parseMediaType("application/octet-stream"))
+                    .header("content-disposition", "attachment; filename=Pmodes.xml")
+                    .body(resource);
+        }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
