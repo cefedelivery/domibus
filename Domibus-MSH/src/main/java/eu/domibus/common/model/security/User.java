@@ -41,7 +41,6 @@ public class User extends AbstractBaseEntity{
     @NotNull
     @Column(name = "USER_ENABLED")
     private Boolean active;
-    @Version
     @Column(name="OPTLOCK")
     public Integer version;
 
