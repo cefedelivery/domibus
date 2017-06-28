@@ -42,7 +42,23 @@ export class LoginComponent implements OnInit {
     this.securityEventService.onLoginErrorEvent().subscribe(
       error => {
         console.error("Error authenticating:" + error);
-        this.alertService.error("Invalid username or password");
+        let message;
+        const HTTP_UNAUTHORIZED = 401;
+        const HTTP_FORBIDDEN = 403;
+        const HTTP_GATEWAY_TIMEOUT = 504;
+        switch (error.status) {
+          case HTTP_UNAUTHORIZED:
+          case HTTP_FORBIDDEN:
+            message = "The username/password combination you provided are not valid. Please try again or contact your administrator.";
+            break;
+          case HTTP_GATEWAY_TIMEOUT:
+            message = "Unable to login. Domibus is not running.";
+            break;
+          default:
+            message = "Default error (" + error.status + ") occurred during login.";
+            break;
+        }
+        this.alertService.error(message);
       });
   }
 
