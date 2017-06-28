@@ -64,7 +64,7 @@ public class PullMessageSender {
     @Autowired
     private PolicyService policyService;
 
-    @JmsListener(destination = "domibus.internal.pull.queue", containerFactory = "internalJmsListenerContainerFactory")
+    @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "internalJmsListenerContainerFactory")
     public void processPullRequest(final MapMessage map) {
         boolean notifiyBusinessOnError = false;
         Messaging messaging = null;
