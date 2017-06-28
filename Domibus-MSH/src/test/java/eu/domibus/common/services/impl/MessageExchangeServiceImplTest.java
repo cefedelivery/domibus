@@ -71,6 +71,7 @@ public class MessageExchangeServiceImplTest {
 
         configuration = new Configuration();
         configuration.setParty(correctParty);
+        when(configurationDao.configurationExists()).thenReturn(true);
         when(configurationDao.read()).thenReturn(configuration);
         List<Process> processes = Lists.newArrayList(process);
         when(processDao.findPullProcessesByResponder(correctParty)).thenReturn(processes);
@@ -124,6 +125,8 @@ public class MessageExchangeServiceImplTest {
     public void testInitiatePullRequest() throws Exception {
         ArgumentCaptor<Map> mapArgumentCaptor= ArgumentCaptor.forClass(Map.class);
         messageExchangeService.initiatePullRequest();
+        verify(configurationDao,times(1)).configurationExists();
+        verify(configurationDao,times(1)).read();
         verify(jmsPullTemplate,times(2)).convertAndSend(any(Destination.class),mapArgumentCaptor.capture(), any(MessagePostProcessor.class));
         //needed because the set does not return the values always in the same order.
         //@thom this does work on my machine but not on bamboo. Fix this.
@@ -133,8 +136,16 @@ public class MessageExchangeServiceImplTest {
         for (Map allValue : allValues) {
             assertTrue(testResult.testSucced(allValue));
         }*/
-
     }
+
+    @Test
+    public void testInitiatePullRequestWithoutConfiguration() throws Exception {
+        when(configurationDao.configurationExists()).thenReturn(false);
+        messageExchangeService.initiatePullRequest();
+        verify(configurationDao,times(1)).configurationExists();
+        verify(configurationDao,times(0)).read();
+    }
+
 
     @Test
     public void testInvalidRequest() throws Exception {

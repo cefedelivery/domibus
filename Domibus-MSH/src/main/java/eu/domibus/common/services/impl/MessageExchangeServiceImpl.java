@@ -100,7 +100,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional
     public void initiatePullRequest() {
-        LOG.info("Check for pull PMODE");
+        if(!configurationDAO.configurationExists()){
+            return;
+        }
         Configuration configuration = configurationDAO.read();
         List<Process> pullProcesses = processDao.findPullProcessesByResponder(configuration.getParty());
         LOG.info(pullProcesses.size() + " pull PMODE found!");
@@ -197,7 +199,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional
     public void savePulledMessageRawXml(final String rawXml, final String messageId) {
-        UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId.toString());
+        UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
         rawEnvelopeLog.setRawXML(rawXml);
         rawEnvelopeLog.setUserMessage(userMessage);
