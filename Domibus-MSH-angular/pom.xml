@@ -77,7 +77,7 @@
 
   <profiles>
     <profile>
-      <id>tomcat-mysql</id>
+      <id>tomcat</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
@@ -105,7 +105,7 @@
     </profile>
 
     <profile>
-      <id>weblogic-oracle</id>
+      <id>weblogic</id>
 
       <build>
         <plugins>
@@ -130,7 +130,7 @@
     </profile>
 
     <profile>
-      <id>wildfly-mysql</id>
+      <id>wildfly</id>
 
       <build>
         <plugins>

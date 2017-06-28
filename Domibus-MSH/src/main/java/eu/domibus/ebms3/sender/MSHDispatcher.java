@@ -45,6 +45,7 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPBinding;
+import java.net.ConnectException;
 import java.util.Properties;
 
 /**
@@ -107,7 +108,11 @@ public class MSHDispatcher {
         try {
             result = dispatch.invoke(soapMessage);
         } catch (final WebServiceException e) {
-            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0005, "error dispatching message to " + endpoint, null, e);
+            Exception exception = e;
+            if(e.getCause() instanceof ConnectException) {
+                exception = new WebServiceException("Error dispatching message to [" + endpoint + "]: possible reason is that the receiver is not available", e);
+            }
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0005, "Error dispatching message to " + endpoint, null, exception);
             ex.setMshRole(MSHRole.SENDING);
             throw ex;
         }
