@@ -6,6 +6,7 @@ import {PasswordComponent} from "./password/password-dialog.component";
 import {UserValidatorService} from "app/user/uservalidator.service";
 import {AlertService} from "../alert/alert.service";
 import {MessagefilterDialogComponent} from "app/messagefilter/messagefilter-dialog/messagefilter-dialog.component";
+import {CancelMessagefilterDialogComponent} from "../messagefilter/cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
 
 
 @Component({
@@ -96,9 +97,9 @@ export class UserComponent implements OnInit {
   cancel() {
     let filteredUsers = this.filterModifiedUser();
     if (filteredUsers.length > 0) {
-      let dialogRef: MdDialogRef<MessagefilterDialogComponent> = this.dialog.open(MessagefilterDialogComponent);
+      let dialogRef: MdDialogRef<CancelMessagefilterDialogComponent> = this.dialog.open(CancelMessagefilterDialogComponent);
       dialogRef.afterClosed().subscribe(result => {
-        if (result === "Save") {
+        if (result === "Yes") {
           this.users = [];
           this.getUsers();
         }
