@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.wss4j.common.crypto.CryptoService;
@@ -22,6 +23,9 @@ public class TruststoreResource {
     @Autowired
     private CryptoService cryptoService;
 
+    @Autowired
+    private DomibusCacheService domibusCacheService;
+
     @RequestMapping(value = "/rest/truststore", method = RequestMethod.POST)
     public ResponseEntity<String> uploadTruststoreFile(@RequestPart("truststore") MultipartFile truststore, @RequestParam("password") String password) {
 
@@ -29,6 +33,7 @@ public class TruststoreResource {
             try {
                 byte[] bytes = truststore.getBytes();
                 cryptoService.replaceTruststore(bytes, password);
+                domibusCacheService.clearCache("certValidationByAlias");
                 return ResponseEntity.ok("Truststore file has been successfully replaced.");
             } catch (Exception e) {
                 LOG.error("Failed to upload the truststore file", e);
