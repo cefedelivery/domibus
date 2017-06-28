@@ -17,19 +17,9 @@
         <module>Domibus-MSH-logging</module>
         <module>Domibus-MSH-jms-spi</module>
         <module>Domibus-MSH-jms-spi-helper</module>
-        <module>Domibus-MSH-jms-weblogic</module>
-        <module>Domibus-MSH-jms-activemq</module>
-        <module>Domibus-MSH-jms-wildfly</module>
-		<module>Domibus-MSH-taskexecutor-weblogic</module>
-		<module>Domibus-MSH-taskexecutor-wildfly</module>
-        <module>Domibus-MSH-taskexecutor-tomcat</module>
-
         <module>Domibus-MSH-soapui-tests</module>
         <module>Domibus-MSH-docker</module>
         <module>Domibus-plugin-api</module>
-        <module>Domibus-ws-stubs</module>
-        <module>Domibus-default-ws-plugin</module>
-        <module>Domibus-default-jms-plugin</module>
         <module>Domibus-MSH-fiware</module>
         <module>Domibus-MSH-test</module>
     </modules>
