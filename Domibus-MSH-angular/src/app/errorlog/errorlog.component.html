@@ -137,7 +137,7 @@
       {{column.name}}
     </ng-template>
     <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | date: dateFormat}}</span>
+      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
     </ng-template>
   </ngx-datatable-column>
   <ngx-datatable-column name="Notified" [width]="180">
@@ -145,7 +145,7 @@
       {{column.name}}
     </ng-template>
     <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | date: dateFormat}}</span>
+      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
     </ng-template>
   </ngx-datatable-column>
 </ngx-datatable>

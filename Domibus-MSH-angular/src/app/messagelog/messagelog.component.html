@@ -192,7 +192,7 @@
       {{column.name}}
     </ng-template>
     <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | date: dateFormat}}</span>
+      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
     </ng-template>
   </ngx-datatable-column>
   <!-- Received -->
@@ -201,7 +201,7 @@
       {{column.name}}
     </ng-template>
     <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | date: dateFormat}}</span>
+      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
     </ng-template>
   </ngx-datatable-column>
   <!-- Failed -->
@@ -210,7 +210,7 @@
       {{column.name}}
     </ng-template>
     <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | date: dateFormat}}</span>
+      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
     </ng-template>
   </ngx-datatable-column>
   <!-- Restored -->
@@ -219,7 +219,7 @@
       {{column.name}}
     </ng-template>
     <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | date: dateFormat}}</span>
+      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
     </ng-template>
   </ngx-datatable-column>
   <!-- Failed Send Attempts -->
@@ -246,7 +246,7 @@
       {{column.name}}
     </ng-template>
     <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | date: dateFormat}}</span>
+      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
     </ng-template>
   </ngx-datatable-column>
   <!-- Original Sender -->
