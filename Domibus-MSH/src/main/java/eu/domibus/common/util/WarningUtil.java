@@ -9,8 +9,8 @@ public class WarningUtil {
 
     public static String warnOutput(String message) {
         return "\n\n\n"+
-        "**************** WARNING **************** WARNING **************** WARNING **************** "+
-        message+
+        "**************** WARNING **************** WARNING **************** WARNING **************** \n"+
+        message+"\n"+
         "*******************************************************************************************\n\n\n";
     }
 
