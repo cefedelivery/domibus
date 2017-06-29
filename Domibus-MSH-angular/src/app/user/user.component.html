@@ -55,7 +55,8 @@
       title="Double click to edit"
       (dblclick)="editing[row.$$index + '-roles'] = true"
       *ngIf="!editing[row.$$index + '-roles']"
-      class="clickAble">
+      class="clickAble"
+      style="text-transform:uppercase">
                 {{value}}
               </span>
       <input
