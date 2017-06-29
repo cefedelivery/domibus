@@ -48,6 +48,7 @@ public class AuthenticationResource {
         UserRO userRO = new UserRO();
         userRO.setUsername(loginRO.getUsername());
         userRO.setAuthorities(authorities);
+        userRO.setDefaultPasswordUsed(principal.isDefaultPasswordUsed());
         return userRO;
     }
 

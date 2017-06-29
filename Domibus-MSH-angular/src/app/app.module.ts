@@ -42,6 +42,7 @@ import {MessagefilterDialogComponent} from "./messagefilter/messagefilter-dialog
 import {CancelMessagefilterDialogComponent} from "./messagefilter/cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
 import {MessageDialogComponent} from './jms/message-dialog/message-dialog.component';
 import { PasswordComponent } from './user/password/password-dialog.component';
+import { DefaultPasswordDialogComponent } from './security/default-password-dialog/default-password-dialog.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -73,6 +74,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessageDialogComponent,
     MessagefilterDialogComponent,
     PasswordComponent,
+    DefaultPasswordDialogComponent,
   ],
   entryComponents: [
     AppComponent,
@@ -84,7 +86,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessageDialogComponent,
     CancelMessagefilterDialogComponent,
     MoveDialogComponent,
-    PasswordComponent
+    PasswordComponent,
+    DefaultPasswordDialogComponent
   ],
   imports: [
     BrowserModule,

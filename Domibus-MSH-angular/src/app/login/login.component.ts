@@ -1,9 +1,12 @@
-﻿import {Component, OnInit} from "@angular/core";
+﻿import {Component, OnDestroy, OnInit} from "@angular/core";
 import {Router, ActivatedRoute} from "@angular/router";
 import {SecurityService} from "../security/security.service";
 import {HttpEventService} from "../http/http.event.service";
 import {AlertService} from "../alert/alert.service";
 import {SecurityEventService} from "../security/security.event.service";
+import {User} from "../security/user";
+import {MdDialogRef, MdDialog} from "@angular/material";
+import {DefaultPasswordDialogComponent} from "app/security/default-password-dialog/default-password-dialog.component";
 
 @Component({
   moduleId: module.id,
@@ -11,17 +14,21 @@ import {SecurityEventService} from "../security/security.event.service";
   styleUrls: ['./login.component.css']
 })
 
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit,OnDestroy {
+
+
   model: any = {};
   loading = false;
   returnUrl: string;
+  sub:any;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
               private securityService: SecurityService,
               private httpEventService: HttpEventService,
               private alertService: AlertService,
-              private securityEventService: SecurityEventService) {
+              private securityEventService: SecurityEventService,
+              private dialog: MdDialog) {
   }
 
   ngOnInit() {
@@ -33,9 +40,10 @@ export class LoginComponent implements OnInit {
       this.securityService.logout();
     });
 
-    this.securityEventService.onLoginSuccessEvent().subscribe(
+    this.sub=this.securityEventService.onLoginSuccessEvent().subscribe(
       data => {
         console.log("Authentication successfull");
+        this.verifyDefaultLoginUsed();
         this.router.navigate([this.returnUrl]);
       });
 
@@ -64,5 +72,15 @@ export class LoginComponent implements OnInit {
 
   login() {
     this.securityService.login(this.model.username, this.model.password);
+  }
+  verifyDefaultLoginUsed(){
+    let currentUser:User = this.securityService.getCurrentUser();
+    if(currentUser.defaultPasswordUsed){
+      this.dialog.open(DefaultPasswordDialogComponent);
+    }
+  }
+  ngOnDestroy(): void {
+    console.log("Destroying login component");
+    this.sub.unsubscribe();
   }
 }
