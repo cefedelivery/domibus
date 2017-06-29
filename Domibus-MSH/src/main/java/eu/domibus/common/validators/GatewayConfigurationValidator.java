@@ -1,6 +1,7 @@
 package eu.domibus.common.validators;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.common.util.WarningUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import eu.domibus.logging.DomibusLogger;
@@ -90,10 +91,7 @@ public class GatewayConfigurationValidator {
     }
 
     private void warnOutput(String message) {
-        LOG.warn("\n\n\n");
-        LOG.warn("**************** WARNING **************** WARNING **************** WARNING **************** ");
-        LOG.warn(message);
-        LOG.warn("*******************************************************************************************\n\n\n");
+        LOG.warn(WarningUtil.warnOutput(message));
     }
 
 }

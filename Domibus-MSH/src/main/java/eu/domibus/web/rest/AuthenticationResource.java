@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.common.model.security.UserDetail;
+import eu.domibus.common.util.WarningUtil;
 import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
@@ -39,6 +40,9 @@ public class AuthenticationResource {
     public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) throws Exception {
         LOG.debug("Authenticating user [{}]", loginRO.getUsername());
         final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword());
+        if(principal.isDefaultPasswordUsed()){
+            LOG.warn(WarningUtil.warnOutput(principal.getUsername()+" is using default password."));
+        }
         //Parse Granted authorities to a list of string authorities
         List<String> authorities = new ArrayList<>();
         for (GrantedAuthority grantedAuthority : principal.getAuthorities()) {
@@ -72,4 +76,6 @@ public class AuthenticationResource {
         UserDetail securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return securityUser.getUsername();
     }
+
+
 }
