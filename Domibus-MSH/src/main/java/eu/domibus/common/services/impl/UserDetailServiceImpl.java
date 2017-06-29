@@ -5,10 +5,12 @@ import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.security.DefaultCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -22,6 +24,10 @@ public class UserDetailServiceImpl implements UserDetailsService {
     @Autowired
     private UserDao userDao;
 
+    @Autowired
+    private BCryptPasswordEncoder bcryptEncoder;
+
+
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
@@ -31,6 +37,16 @@ public class UserDetailServiceImpl implements UserDetailsService {
             LOG.warn(msg);
             throw new UsernameNotFoundException(msg);
         }
-        return new UserDetail(user);
+        boolean defaultPasswordUsed = isDefaultPasswordUsed(userName, user.getPassword());
+        return new UserDetail(user,defaultPasswordUsed);
+    }
+
+    private boolean isDefaultPasswordUsed(final String user, final String password){
+        boolean defaultPassword=false;
+        String defaultPasswordForUser = DefaultCredentials.getDefaultPasswordForUser(user);
+        if(defaultPasswordForUser!=null) {
+            defaultPassword = bcryptEncoder.matches(defaultPasswordForUser, password);
+        }
+        return defaultPassword;
     }
 }
