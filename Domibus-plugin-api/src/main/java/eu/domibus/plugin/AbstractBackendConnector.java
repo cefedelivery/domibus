@@ -79,7 +79,14 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     }
 
 
+    /**
+     * @deprecated since 3.3-rc1; this method converts DOWNLOADED status to RECEIVED to maintain
+     * the backwards compatibility. Use {@link AbstractBackendConnector#getStatus(String)} instead
+     * @param messageId id of the message the status is requested for
+     * @return the message status
+     */
     @Override
+    @Deprecated
     public MessageStatus getMessageStatus(final String messageId) {
         return this.messageRetriever.getMessageStatus(messageId);
     }
