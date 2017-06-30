@@ -157,7 +157,6 @@ public class PullContext {
             throw new IllegalArgumentException("Process should be set before calling checkProcessValidity.");
         }
         pullRequestStatuses.clear();
-        LOG.info("Checking process configuration for pullrequest with mpc " + getMpcQualifiedName());
         checkMpcConfiguration();
         checkLegConfiguration();
         checkResponderConfiguration();

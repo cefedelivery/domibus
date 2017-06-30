@@ -109,19 +109,18 @@ public class PullMessageSender {
             mshDispatcher.dispatch(acknowlegement,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
 
         } catch (TransformerException | SOAPException | JAXBException | IOException | JMSException e) {
+            //@thom change this exception handling.
             LOG.error(e.getMessage(), e);
             throw new RuntimeException(e);
         } catch (final EbMS3Exception e) {
             try {
-
+                LOG.warn(e.getMessage());
                 if (notifiyBusinessOnError && messaging != null) {
                     backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
                 }
             } catch (Exception ex) {
                 LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, messageId);
             }
-            throw new WebServiceException(e);
-
         }
     }
 }
