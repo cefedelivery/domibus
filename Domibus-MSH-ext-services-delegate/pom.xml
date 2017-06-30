@@ -13,7 +13,7 @@
     <name>Domibus EXT Services Delegate</name>
 
     <properties>
-        <domibus-ext-services-api.version>1.0-SNAPSHOT</domibus-ext-services-api.version>
+        <domibus-ext-services-api.version>1.0-RC1</domibus-ext-services-api.version>
     </properties>
 
     <build>
