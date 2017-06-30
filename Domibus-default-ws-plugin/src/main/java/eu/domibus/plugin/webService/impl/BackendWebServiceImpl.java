@@ -91,7 +91,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
      * @param ebMSHeaderInfo
      * @return
      * @throws SendMessageFault
-     * @deprecated Use sendMessageWithLargeFilesSupport
+     * @deprecated since 3.3-rc1. Use {@link BackendWebServiceImpl#submitMessage(SubmitRequest, Messaging)}
      */
     @Deprecated
     @SuppressWarnings("ValidExternallyBoundObject")
@@ -301,7 +301,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
      * @param downloadMessageResponse
      * @param ebMSHeaderInfo
      * @throws DownloadMessageFault
-     * @deprecated Use downloadMessageWithLargeFilesSupport
+     * @deprecated since 3.3-rc1. Use {@link BackendWebServiceImpl#retrieveMessage(RetrieveMessageRequest, Holder, Holder)}
      */
     @Deprecated
     @Override
@@ -470,7 +470,14 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         return detail;
     }
 
-
+    /**
+     * @deprecated since 3.3-rc1. Use {@link BackendWebServiceImpl#getStatus(StatusRequest)}.
+     * Converts DOWNLOADED status to RECEIVED to maintain the backwards compatibility
+     *
+     * @param messageStatusRequest
+     * @return
+     */
+    @Deprecated
     @Override
     public MessageStatus getMessageStatus(final GetStatusRequest messageStatusRequest) {
         return defaultTransformer.transformFromMessageStatus(messageRetriever.getMessageStatus(messageStatusRequest.getMessageID()));
