@@ -50,6 +50,8 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
 
+import static org.apache.commons.lang.StringUtils.trim;
+
 
 @SuppressWarnings("ValidExternallyBoundObject")
 @javax.jws.WebService(
@@ -313,7 +315,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
         try {
             if (isMessageIdNotEmpty) {
-                userMessage = downloadMessage(downloadMessageRequest.getMessageID(), null);
+                userMessage = downloadMessage(trim(downloadMessageRequest.getMessageID()), null);
             }
         } catch (final MessageNotFoundException mnfEx) {
             if (LOG.isDebugEnabled()) {
@@ -367,7 +369,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
 
         UserMessage userMessage = null;
-        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(retrieveMessageRequest.getMessageID());
+        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(trim(retrieveMessageRequest.getMessageID()));
 
         try {
             if (isMessageIdNotEmpty) {
