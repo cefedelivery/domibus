@@ -77,7 +77,7 @@ public class PullMessageSender {
             PullRequest pullRequest = new PullRequest();
             pullRequest.setMpc(mpc);
             signalMessage.setPullRequest(pullRequest);
-            LOG.info("Sending message");
+            LOG.debug("Sending pull request with mpc "+mpc);
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pMode);
             Party receiverParty = pModeProvider.getReceiverParty(pMode);
             Policy policy;
@@ -95,7 +95,7 @@ public class PullMessageSender {
             if(messaging.getUserMessage()==null && messaging.getSignalMessage()!=null){
                 Set<Error> error = signalMessage.getError();
                 //@thom why do not I have the error inside the message??
-                LOG.info("No message for mpc "+mpc+" for the moment");
+                LOG.debug("No message for sent pull request with mpc "+mpc);
                 for (Error error1 : error) {
                     LOG.info(error1.getErrorCode()+" "+error1.getShortDescription());
                 }
@@ -109,19 +109,28 @@ public class PullMessageSender {
             mshDispatcher.dispatch(acknowlegement,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
 
         } catch (TransformerException | SOAPException | JAXBException | IOException | JMSException e) {
+            //@thom change this exception handling.
             LOG.error(e.getMessage(), e);
             throw new RuntimeException(e);
         } catch (final EbMS3Exception e) {
             try {
-
                 if (notifiyBusinessOnError && messaging != null) {
                     backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
                 }
             } catch (Exception ex) {
                 LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, messageId);
             }
-            throw new WebServiceException(e);
+            checkConnectionProblem(e);
+        }
+    }
 
+    private void checkConnectionProblem(EbMS3Exception e) {
+        if(e.getErrorCode()== ErrorCode.EbMS3ErrorCode.EBMS_0005) {
+            LOG.warn(e.getErrorDetail());
+            LOG.warn(e.getMessage());
+        }
+        else{
+            throw new WebServiceException(e);
         }
     }
 }
