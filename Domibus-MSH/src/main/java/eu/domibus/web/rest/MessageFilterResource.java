@@ -4,6 +4,7 @@ import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.web.rest.ro.MessageFilterRO;
+import eu.domibus.web.rest.ro.MessageFilterResultRO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,9 +28,23 @@ public class MessageFilterResource {
     DomainCoreConverter coreConverter;
 
     @RequestMapping(method = RequestMethod.GET)
-    public List<MessageFilterRO> getMessageFilter() {
-        List<BackendFilter> backendFilters = routingService.getBackendFilters();
-        return coreConverter.convert(backendFilters, MessageFilterRO.class);
+    public MessageFilterResultRO getMessageFilter() {
+        List<BackendFilter> backendFilters = routingService.getBackendFiltersUncached();
+        List<MessageFilterRO> messageFilterResultROS = coreConverter.convert(backendFilters, MessageFilterRO.class);
+        boolean areFiltersPersisted = true;
+        for (MessageFilterRO messageFilter : messageFilterResultROS) {
+            if(messageFilter.getEntityId() == 0) {
+                messageFilter.setPersisted(false);
+                areFiltersPersisted = false;
+            } else {
+                messageFilter.setPersisted(true);
+            }
+        }
+
+        MessageFilterResultRO resultRO = new MessageFilterResultRO();
+        resultRO.setMessageFilterEntries(messageFilterResultROS);
+        resultRO.setAreFiltersPersisted(areFiltersPersisted);
+        return resultRO;
     }
 
     @RequestMapping(method = RequestMethod.PUT)

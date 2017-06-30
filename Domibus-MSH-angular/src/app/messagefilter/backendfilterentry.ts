@@ -8,12 +8,11 @@ export class BackendFilterEntry {
   action: RoutingCriteriaEntry;
   sevice: RoutingCriteriaEntry ;
 
-
-
   public constructor(public entityId: number,
                      public index: number,
                      public backendName: string,
-                     public routingCriterias: Array<RoutingCriteriaEntry>) {
+                     public routingCriterias: Array<RoutingCriteriaEntry>,
+                     public persisted: boolean) {
     this.initRoutingCriteria();
   }
 

@@ -103,6 +103,11 @@
               />
             </ng-template>
           </ngx-datatable-column>
+          <ngx-datatable-column name="Persisted" prop="persisted" [sortable]="false">
+            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              <input autofocus type="checkbox" [checked]="value" disabled />
+            </ng-template>
+          </ngx-datatable-column>
         </ngx-datatable>
 
         <table class="buttonsMoveRow">
@@ -121,14 +126,6 @@
             </td>
           </tr>
         </table>
-        <!--<div class="rowsDiv">
-          <md-select placeholder="Rows" [(ngModel)]="pageSize" name="pageSize" (change)="changeRowLimits($event)">
-            <md-option *ngFor="let rowLimit of rowLimits" [value]="rowLimit.value">
-              {{rowLimit.key}}
-            </md-option>
-          </md-select>
-        </div>
-        <div> </div>-->
         <table class="buttonsRow">
           <tr>
             <td>

@@ -11,7 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -36,6 +35,10 @@ public class RoutingService {
      */
     @Cacheable(value = "backendFilterCache")
     public List<BackendFilter> getBackendFilters() {
+        return getBackendFiltersUncached();
+    }
+
+    public List<BackendFilter> getBackendFiltersUncached() {
         final List<BackendFilterEntity> filters = new ArrayList<>(backendFilterDao.findAll());
         final List<NotificationListener> backendsTemp = new ArrayList<>(notificationListeners);
 

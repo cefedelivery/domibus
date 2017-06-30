@@ -18,6 +18,8 @@ public class MessageFilterRO {
 
     private String backendName;
 
+    private boolean isPersisted;
+
     public int getEntityId() {
         return entityId;
     }
@@ -48,5 +50,13 @@ public class MessageFilterRO {
 
     public void setBackendName(String backendName) {
         this.backendName = backendName;
+    }
+
+    public boolean isPersisted() {
+        return isPersisted;
+    }
+
+    public void setPersisted(boolean isPersisted) {
+        this.isPersisted = isPersisted;
     }
 }
