@@ -19,7 +19,7 @@ import {isNullOrUndefined} from "util";
 export class PModeComponent {
   private ERROR_PMODE_EMPTY = "As PMode is empty, no file was downloaded.";
   private selectedOption: string;
-  private url = "/rest/pmode";
+  private url = "rest/pmode";
 
   private pModeExists = false;
 
