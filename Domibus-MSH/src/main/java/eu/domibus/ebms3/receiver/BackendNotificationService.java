@@ -175,7 +175,7 @@ public class BackendNotificationService {
             LOG.error("There are no backend plugins deployed on this server");
         }
         if (backendFilters.size() > 1) { //There is more than one unconfigured backend available. For security reasons we cannot send the message just to the first one
-            LOG.error("There are multiple unconfigured backend plugins available. Please set up the configuration using the \"Message filter\" pannel of the administrative GUI.");
+            LOG.warn("There are multiple unconfigured backend plugins available. Please set up the configuration using the \"Message filter\" pannel of the administrative GUI.");
             backendFilters.clear(); // empty the list so its handled in the desired way.
         }
         //If there is only one backend deployed we send it to that as this is most likely the intent

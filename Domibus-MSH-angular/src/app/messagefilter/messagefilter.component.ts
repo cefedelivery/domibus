@@ -8,7 +8,7 @@ import {MessageFilterResult} from "./messagefilterresult";
 import {BackendFilterEntry} from "./backendfilterentry";
 import {RoutingCriteriaEntry} from "./routingcriteriaentry";
 import {CancelMessagefilterDialogComponent} from "./cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
-import {isUndefined} from "util";
+import {isNullOrUndefined, isUndefined} from "util";
 
 @Component({
   moduleId: module.id,
@@ -37,33 +37,41 @@ export class MessageFilterComponent {
 
   loading: boolean = false;
 
+  areFiltersPersisted: boolean;
+
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
     this.rollback = this.rows.slice();
   }
 
 
-
-  ngOnInit() {
-    this.loading = true;
-
+  getBackendFiltersInfo() {
     this.getMessageFilterEntries().subscribe((result: MessageFilterResult) => {
       console.log("messagefilter response: " + result);
 
       let newRows = [];
       this.backendFilterNames = [];
-      for(let i = 0 ; i < result.length; i++) {
-        if(result[i] == null) {
-          continue;
+      if(!isNullOrUndefined(result.messageFilterEntries)) {
+        for (let i = 0; i < result.messageFilterEntries.length; i++) {
+          let currentFilter : BackendFilterEntry = result.messageFilterEntries[i];
+          if (isNullOrUndefined(currentFilter)) {
+            continue;
+          }
+          let backendEntry = new BackendFilterEntry(currentFilter.entityId, i, currentFilter.backendName, currentFilter.routingCriterias, currentFilter.persisted);
+          newRows.push(backendEntry);
+          if (this.backendFilterNames.indexOf(backendEntry.backendName) == -1) {
+            this.backendFilterNames.push(backendEntry.backendName);
+          }
         }
-        let currentFilter = result[i];
-        let backendEntry = new BackendFilterEntry(currentFilter.entityId, i, currentFilter.backendName, currentFilter.routingCriterias);
-        newRows.push(backendEntry);
-        if(this.backendFilterNames.indexOf(backendEntry.backendName) == -1) {
-          this.backendFilterNames.push(backendEntry.backendName);
+        this.areFiltersPersisted = result.areFiltersPersisted;
+
+        this.rows = newRows;
+
+        if(!this.areFiltersPersisted) {
+          this.alertService.error("Several filters in the table were not configured yet (Persisted flag is not checked). " +
+            "It is strongly recommended to double check the filters configuration and afterwards save it.");
+          this.enableSave = true;
         }
       }
-
-      this.rows = newRows;
     }, (error: any) => {
       console.log("error getting the message filter: " + error);
       this.loading = false;
@@ -75,6 +83,12 @@ export class MessageFilterComponent {
     return this.http.get('rest/messagefilters').map((response: Response) =>
       response.json()
     );
+  }
+
+  ngOnInit() {
+    this.loading = true;
+
+    this.getBackendFiltersInfo();
   }
 
   createValueProperty(cell, newProp, row) {
@@ -177,7 +191,7 @@ export class MessageFilterComponent {
           this.enableMoveUp = this.rowNumber  > 0;
           this.enableMoveDown = this.rowNumber != this.rows.length - 1;
 
-          this.ngOnInit();
+          this.getBackendFiltersInfo();
 
           break;
         case 'No':
@@ -197,6 +211,7 @@ export class MessageFilterComponent {
           this.rollback = this.rows.slice();
           this.http.put('rest/messagefilters', JSON.stringify(this.rows), { headers: headers }).subscribe(res => {
             this.alertService.success("The operation 'update message filters' completed successfully.", false);
+            this.getBackendFiltersInfo();
           }, err => {
             this.alertService.error("The operation 'update message filters' not completed successfully.", false);
           });
@@ -223,8 +238,8 @@ export class MessageFilterComponent {
     if(this.rowNumber < 1) {
       return;
     }
-    var array = this.rows.slice();
-    var move = array[this.rowNumber];
+    let array = this.rows.slice();
+    let move = array[this.rowNumber];
     array[this.rowNumber] = array[this.rowNumber-1];
     array[this.rowNumber-1] = move;
 
@@ -244,8 +259,8 @@ export class MessageFilterComponent {
       return;
     }
 
-    var array = this.rows.slice();
-    var move = array[this.rowNumber];
+    let array = this.rows.slice();
+    let move = array[this.rowNumber];
     array[this.rowNumber] = array[this.rowNumber+1];
     array[this.rowNumber+1] = move;
 

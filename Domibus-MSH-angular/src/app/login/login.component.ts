@@ -45,6 +45,7 @@ export class LoginComponent implements OnInit {
         let message;
         const HTTP_UNAUTHORIZED = 401;
         const HTTP_FORBIDDEN = 403;
+        const HTTP_NOTFOUND = 404;
         const HTTP_GATEWAY_TIMEOUT = 504;
         switch (error.status) {
           case HTTP_UNAUTHORIZED:
@@ -52,6 +53,7 @@ export class LoginComponent implements OnInit {
             message = "The username/password combination you provided are not valid. Please try again or contact your administrator.";
             break;
           case HTTP_GATEWAY_TIMEOUT:
+          case HTTP_NOTFOUND:
             message = "Unable to login. Domibus is not running.";
             break;
           default:
