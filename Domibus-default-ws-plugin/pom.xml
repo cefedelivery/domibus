@@ -8,7 +8,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3-SNAPSHOT</version>
+        <version>3.3-RC1</version>
     </parent>
     <artifactId>domibus-default-ws-plugin</artifactId>
     <packaging>jar</packaging>
