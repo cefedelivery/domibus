@@ -216,7 +216,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 }
                 return soapMessage;
             } else {
-                LOG.info("No message for received pull request with mpc " + pullContext.getMpcQualifiedName());
+                LOG.debug("No message for received pull request with mpc " + pullContext.getMpcQualifiedName());
                 EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0006, "There is no message available for\n" +
                         "pulling from this MPC at this moment.", null, null);
                 final SignalMessage signalMessage = new SignalMessage();

@@ -77,7 +77,7 @@ public class PullMessageSender {
             PullRequest pullRequest = new PullRequest();
             pullRequest.setMpc(mpc);
             signalMessage.setPullRequest(pullRequest);
-            LOG.info("Sending pull request with mpc "+mpc);
+            LOG.debug("Sending pull request with mpc "+mpc);
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pMode);
             Party receiverParty = pModeProvider.getReceiverParty(pMode);
             Policy policy;
@@ -95,7 +95,7 @@ public class PullMessageSender {
             if(messaging.getUserMessage()==null && messaging.getSignalMessage()!=null){
                 Set<Error> error = signalMessage.getError();
                 //@thom why do not I have the error inside the message??
-                LOG.info("No message for sent pull request with mpc "+mpc);
+                LOG.debug("No message for sent pull request with mpc "+mpc);
                 for (Error error1 : error) {
                     LOG.info(error1.getErrorCode()+" "+error1.getShortDescription());
                 }
