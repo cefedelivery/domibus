@@ -12,6 +12,7 @@ public class UserRO implements Serializable {
     private Integer id;
     private String username;
     private List<String> authorities;
+    private boolean defaultPasswordUsed;
 
     public Integer getId() {
         return id;
@@ -35,5 +36,13 @@ public class UserRO implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public boolean isDefaultPasswordUsed() {
+        return defaultPasswordUsed;
+    }
+
+    public void setDefaultPasswordUsed(boolean defaultPasswordUsed) {
+        this.defaultPasswordUsed = defaultPasswordUsed;
     }
 }

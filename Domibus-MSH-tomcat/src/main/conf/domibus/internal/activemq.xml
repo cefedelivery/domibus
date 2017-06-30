@@ -133,6 +133,8 @@
                         <redeliveryPolicyEntries>
                             <redeliveryPolicy queue="sendMessageQueue"
                                               maximumRedeliveries="0"/>
+                            <redeliveryPolicy queue="pullMessageQueue"
+                                              maximumRedeliveries="0"/>
                             <redeliveryPolicy queue="*"
                                               maximumRedeliveries="10" redeliveryDelay="300000"/>
                         </redeliveryPolicyEntries>

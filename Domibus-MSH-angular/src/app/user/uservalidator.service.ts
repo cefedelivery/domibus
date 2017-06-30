@@ -48,12 +48,12 @@ export class UserValidatorService{
   checkUserNameDuplication(allUsers:UserResponseRO[]){
     let errorMessage:string="";
     let seen = new Set();
-    var hasDuplicates=allUsers.every(function(user) {
+    allUsers.every(function(user) {
       if(seen.size === seen.add(user.userName).size){
         errorMessage=errorMessage.concat("Duplicate user name with user "+allUsers.indexOf(user)+" ");
-        return hasDuplicates;
+        return false;
       }
-      return hasDuplicates;
+      return true;
     });
     return errorMessage;
   }

@@ -16,8 +16,10 @@ import java.util.Set;
  */
 public class UserDetail implements UserDetails {
     private final UserDetails springUser;
+    private boolean defaultPasswordUsed;
 
-    public UserDetail(final User user) {
+    public UserDetail(final User user,boolean defaultPasswordUsed) {
+        this.defaultPasswordUsed=defaultPasswordUsed;
         springUser = org.springframework.security.core.userdetails.User
                 .withUsername(user.getUserName())
                 .password(user.getPassword())
@@ -68,5 +70,7 @@ public class UserDetail implements UserDetails {
         return springUser.isEnabled();
     }
 
-
+    public boolean isDefaultPasswordUsed() {
+        return defaultPasswordUsed;
+    }
 }
