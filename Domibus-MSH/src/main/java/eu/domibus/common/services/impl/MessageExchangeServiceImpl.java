@@ -105,7 +105,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         }
         Configuration configuration = configurationDAO.read();
         List<Process> pullProcesses = processDao.findPullProcessesByResponder(configuration.getParty());
-        LOG.info(pullProcesses.size() + " pull PMODE found!");
         for (Process pullProcess : pullProcesses) {
             PullContext pullContext = new PullContext();
             pullContext.setResponder(configuration.getParty());

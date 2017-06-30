@@ -77,7 +77,7 @@ public class PullMessageSender {
             PullRequest pullRequest = new PullRequest();
             pullRequest.setMpc(mpc);
             signalMessage.setPullRequest(pullRequest);
-            LOG.info("Sending message");
+            LOG.info("Sending pull request with mpc "+mpc);
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pMode);
             Party receiverParty = pModeProvider.getReceiverParty(pMode);
             Policy policy;
