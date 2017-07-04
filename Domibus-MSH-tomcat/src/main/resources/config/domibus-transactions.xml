@@ -37,6 +37,7 @@
                 <prop key="com.atomikos.icatch.log_base_dir">${domibus.work.location:${domibus.config.location}}/work/transactions/${domibus.node.id}/log</prop-->
                 <prop key="com.atomikos.icatch.force_shutdown_on_vm_exit">true</prop>
                 <prop key="com.atomikos.icatch.default_jta_timeout">${com.atomikos.icatch.default_jta_timeout}</prop>
+                <prop key="com.atomikos.icatch.max_timeout">${com.atomikos.icatch.max_timeout}</prop>
             </props>
         </constructor-arg>
     </bean>
