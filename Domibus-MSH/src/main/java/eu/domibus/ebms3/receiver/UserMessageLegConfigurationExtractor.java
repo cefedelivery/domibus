@@ -16,12 +16,11 @@ import org.apache.cxf.binding.soap.SoapMessage;
  * Loading legconfiguration for an incoming usermessage.
  */
 
-public class UserMessagePolicyInSetup extends AbstractMessagePolicyInSetup {
-
+public class UserMessageLegConfigurationExtractor extends AbstractLegConfigurationExtractor {
 
     private PModeProvider pModeProvider;
 
-    UserMessagePolicyInSetup(SoapMessage message, Messaging messaging) {
+    UserMessageLegConfigurationExtractor(SoapMessage message, Messaging messaging) {
         super(message, messaging);
     }
 
@@ -39,7 +38,7 @@ public class UserMessagePolicyInSetup extends AbstractMessagePolicyInSetup {
     }
 
     @Override
-    public void accept(PolicyInSetupVisitor visitor) {
+    public void accept(MessageLegConfigurationVisitor visitor) {
         visitor.visit(this);
     }
 

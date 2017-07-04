@@ -18,10 +18,8 @@ import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.binding.soap.interceptor.MustUnderstandInterceptor;
 import org.apache.cxf.binding.soap.saaj.SAAJInInterceptor;
 import org.apache.cxf.common.util.StringUtils;
-import org.apache.cxf.helpers.IOUtils;
 import org.apache.cxf.interceptor.AttachmentInInterceptor;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.interceptor.StaxInInterceptor;
 import org.apache.cxf.message.Attachment;
 import org.apache.cxf.phase.Phase;
 import org.apache.cxf.ws.policy.PolicyBuilder;
@@ -29,21 +27,16 @@ import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.policy.PolicyInInterceptor;
 import org.apache.cxf.ws.security.SecurityConstants;
 import org.apache.neethi.Policy;
-import org.apache.neethi.builders.converters.StaxToDOMConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.stream.XMLStreamReader;
 import java.io.*;
 import java.util.Collection;
 import java.util.HashSet;
@@ -67,7 +60,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     @Autowired
     private SoapService soapService;
 
-    private MessagePolicyFactory messagePolicyFactory;
+    private MessageLegConfigurationFactory messageLegConfigurationFactory;
 
     public SetPolicyInInterceptor() {
         this(Phase.RECEIVE);
@@ -83,8 +76,8 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         this.jaxbContext = jaxbContext;
     }
 
-    public void setMessagePolicyFactory(MessagePolicyFactory messagePolicyFactory) {
-        this.messagePolicyFactory = messagePolicyFactory;
+    public void setMessageLegConfigurationFactory(MessageLegConfigurationFactory messageLegConfigurationFactory) {
+        this.messageLegConfigurationFactory = messageLegConfigurationFactory;
     }
 
     /**
@@ -112,10 +105,10 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
         try {
             messaging=soapService.getMessage(message);
-            MessagePolicyInSetup messagePolicyInSetup = messagePolicyFactory.getMessagePolicyInSetup(message, messaging);
-            if(messagePolicyInSetup==null)return;
+            LegConfigurationExtractor legConfigurationExtractor = messageLegConfigurationFactory.extractMessageConfiguration(message, messaging);
+            if(legConfigurationExtractor ==null)return;
 
-            final LegConfiguration legConfiguration=messagePolicyInSetup.extractMessageConfiguration();
+            final LegConfiguration legConfiguration= legConfigurationExtractor.extractMessageConfiguration();
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();
             final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));

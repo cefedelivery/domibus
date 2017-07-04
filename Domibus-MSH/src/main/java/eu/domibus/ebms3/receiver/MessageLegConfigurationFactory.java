@@ -8,8 +8,9 @@ import org.apache.cxf.binding.soap.SoapMessage;
  * @since 3.3
  */
 
-public interface MessagePolicyFactory {
+public interface MessageLegConfigurationFactory {
 
-    MessagePolicyInSetup getMessagePolicyInSetup(final SoapMessage soapMessage, final Messaging messaging);
+    LegConfigurationExtractor extractMessageConfiguration(final SoapMessage soapMessage, final Messaging messaging);
+
 
 }

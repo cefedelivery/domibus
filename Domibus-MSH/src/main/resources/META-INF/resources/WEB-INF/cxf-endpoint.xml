@@ -50,11 +50,11 @@
     <!--Interceptors to enable SwA encryption for Dispatch/WebServiceProvider implementations-->
     <bean id="setPolicyInInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor">
         <property name="jaxbContext" ref="jaxbContextEBMS"/>
-        <property name="messagePolicyFactory" ref="serverInMessagePolicyFactory"/>
+        <property name="messageLegConfigurationFactory" ref="serverInMessageLegConfigurationFactory"/>
     </bean>
     <bean id="setPolicyInInterceptorClient" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor">
         <property name="jaxbContext" ref="jaxbContextEBMS"/>
-        <property name="messagePolicyFactory" ref="clientInMessagePolicyFactory"/>
+        <property name="messageLegConfigurationFactory" ref="userMessageLegConfigurationFactory"/>
     </bean>
 
     <bean id="setSignatureAlgorithmInInterceptor"
@@ -121,7 +121,6 @@
         <jaxws:inInterceptors>
             <ref bean="setSignatureAlgorithmInInterceptor"/>
             <ref bean="setPolicyInInterceptorClient"/>
-            <!--<ref bean="setClientPolicyInInterceptor"/>-->
         </jaxws:inInterceptors>
         <jaxws:handlers>
             <bean class="eu.domibus.ebms3.sender.FaultOutHandler"/>

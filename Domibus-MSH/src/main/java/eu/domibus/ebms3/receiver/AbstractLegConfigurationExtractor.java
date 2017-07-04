@@ -11,20 +11,19 @@ import org.apache.cxf.binding.soap.SoapMessage;
  * @author Thomas Dussart
  * @since 3.3
  */
-public abstract class AbstractMessagePolicyInSetup implements MessagePolicyInSetup{
+public abstract class AbstractLegConfigurationExtractor implements LegConfigurationExtractor {
 
     protected final SoapMessage message;
 
     protected final Messaging messaging;
 
-    protected static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractMessagePolicyInSetup.class);
+    protected static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractLegConfigurationExtractor.class);
 
 
-    AbstractMessagePolicyInSetup(final SoapMessage message, final Messaging messaging) {
+    AbstractLegConfigurationExtractor(final SoapMessage message, final Messaging messaging) {
         this.message = message;
-        this.messaging=messaging;
+        this.messaging = messaging;
     }
-
 
 
     protected abstract String getMessageId();
