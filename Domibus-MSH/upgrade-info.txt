@@ -1,3 +1,9 @@
+Domibus 3.3 (from 3.3-RC1):
+               - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
+               - In the file "\conf\domibus\domibus.properties":
+                    o rename the property "com.atomikos.maxPoolSize" to "domibus.jms.XAConnectionFactory.maxPoolSize":
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.3-RC1 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-rc1-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-rc1-migration.ddl for Oracle)

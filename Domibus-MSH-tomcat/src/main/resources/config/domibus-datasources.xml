@@ -33,7 +33,7 @@
           init-method="init" destroy-method="close" depends-on="broker">
         <property name="uniqueResourceName" value="domibusJMS-XA"/>
         <property name="xaConnectionFactory" ref="xaJmsConnectionFactory"/>
-        <property name="maxPoolSize" value="${com.atomikos.maxPoolSize}"/>
+        <property name="maxPoolSize" value="${domibus.jms.XAConnectionFactory.maxPoolSize}"/>
     </bean>
 
     <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
