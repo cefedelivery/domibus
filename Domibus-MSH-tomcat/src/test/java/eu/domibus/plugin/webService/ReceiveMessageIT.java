@@ -2,6 +2,7 @@ package eu.domibus.plugin.webService;
 
 import eu.domibus.AbstractIT;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.ebms3.receiver.MessageLegConfigurationFactory;
 import eu.domibus.ebms3.receiver.SetPolicyInInterceptor;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import org.apache.commons.codec.binary.Base64;
@@ -52,6 +53,8 @@ public class ReceiveMessageIT extends AbstractIT {
     @Autowired
     SetPolicyInInterceptor setPolicyInInterceptor;
 
+    @Autowired
+    MessageLegConfigurationFactory serverInMessageLegConfigurationFactory;
     @Before
     public void before() throws IOException {
 
@@ -60,6 +63,7 @@ public class ReceiveMessageIT extends AbstractIT {
             insertDataset("sendMessageDataset.sql");
             initialized = true;
         }
+        setPolicyInInterceptor.setMessageLegConfigurationFactory(serverInMessageLegConfigurationFactory);
     }
 
     private void verifyMessageStatus(String messageId) throws SQLException {
