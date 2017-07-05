@@ -17,10 +17,10 @@ import org.apache.cxf.binding.soap.SoapMessage;
  * @since 3.3
  */
 
-public class PullRequestMessagePolicyInSetup extends AbstractSignalMessagePolicyInSetup{
+public class PullRequestLegConfigurationExtractor extends AbstractSignalLegConfigurationExtractor {
     private MessageExchangeService messageExchangeService;
 
-    public PullRequestMessagePolicyInSetup(SoapMessage message, Messaging messaging) {
+    PullRequestLegConfigurationExtractor(SoapMessage message, Messaging messaging) {
         super(message, messaging);
     }
 
@@ -49,7 +49,7 @@ public class PullRequestMessagePolicyInSetup extends AbstractSignalMessagePolicy
     }
 
     @Override
-    public void accept(PolicyInSetupVisitor visitor) {
+    public void accept(MessageLegConfigurationVisitor visitor) {
         visitor.visit(this);
     }
 

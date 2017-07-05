@@ -5,7 +5,6 @@ import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.UserMessage;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Thomas Dussart
@@ -45,7 +44,7 @@ public interface MessageExchangeService {
      */
     void savePulledMessageRawXml(String rawXml, String messageId);
 
-    @Transactional
+
     RawEnvelopeDto findPulledMessageRawXmlByMessageId(String messageId);
 
     //@thom test this method.
