@@ -25,6 +25,7 @@ public abstract class AbstractMessageLegConfigurationFactory implements MessageL
         if (configuration == null) {
             configuration = executeNextFactory(soapMessage, messaging);
         } else {
+            //@thom remove the visitor, do the injection directly in the factory.
             configuration.accept(messageLegConfigurationVisitor);
         }
         return configuration;

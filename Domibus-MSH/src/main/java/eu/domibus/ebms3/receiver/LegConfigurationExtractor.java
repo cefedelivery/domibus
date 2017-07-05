@@ -11,5 +11,6 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 //@thom test this hierarchy of class
 public interface LegConfigurationExtractor {
     LegConfiguration extractMessageConfiguration() throws EbMS3Exception;
+
     void accept(MessageLegConfigurationVisitor visitor);
 }
