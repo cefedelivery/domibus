@@ -11,10 +11,9 @@ import org.mockito.Mockito;
 import java.util.List;
 import java.util.Map;
 
-import static eu.domibus.common.services.impl.PullContext.MPC;
-import static eu.domibus.common.services.impl.PullContext.NOTIFY_BUSINNES_ON_ERROR;
 import static eu.domibus.common.services.impl.PullRequestStatus.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Thomas Dussart
@@ -26,18 +25,17 @@ public class PullContextTest {
     public void checkProcessValidityWithMoreThanOneLegAndDifferentReponder() throws Exception {
         PullContext pullContext = new PullContext();
         pullContext.setProcess(PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1];[name:leg2]}"));
-        pullContext.checkProcessValidity();
         assertEquals(false, pullContext.isValid());
         assertEquals(2, pullContext.getPullRequestStatuses().size());
         assertTrue(pullContext.getPullRequestStatuses().contains(MORE_THAN_ONE_LEG_FOR_THE_SAME_MPC));
         assertTrue(pullContext.getPullRequestStatuses().contains(NO_RESPONDER));
         pullContext.setProcess(PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1];[name:leg2]}", "responderParties{[name:resp1];[name:resp2]}"));
-        pullContext.checkProcessValidity();
+        assertEquals(false, pullContext.isValid());
         assertEquals(2, pullContext.getPullRequestStatuses().size());
         assertTrue(pullContext.getPullRequestStatuses().contains(MORE_THAN_ONE_LEG_FOR_THE_SAME_MPC));
         assertTrue(pullContext.getPullRequestStatuses().contains(TOO_MANY_RESPONDER));
         pullContext.setProcess(PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1];[name:leg2]}", "responderParties{[name:resp1]}"));
-        pullContext.checkProcessValidity();
+        assertEquals(false, pullContext.isValid());
         assertEquals(1, pullContext.getPullRequestStatuses().size());
         assertTrue(pullContext.getPullRequestStatuses().contains(MORE_THAN_ONE_LEG_FOR_THE_SAME_MPC));
     }
@@ -46,7 +44,6 @@ public class PullContextTest {
     public void checkProcessValidityWithZeroLeg() throws Exception {
         PullContext pullContext = new PullContext();
         pullContext.setProcess(PojoInstaciatorUtil.instanciate(Process.class));
-        pullContext.checkProcessValidity();
         assertEquals(false, pullContext.isValid());
     }
 
@@ -54,7 +51,6 @@ public class PullContextTest {
     public void checkProcessWithNoLegs() throws Exception {
         PullContext pullContext = new PullContext();
         pullContext.setProcess(PojoInstaciatorUtil.instanciate(Process.class, "responderParties{[name:resp1]}"));
-        pullContext.checkProcessValidity();
         assertEquals(false, pullContext.isValid());
         assertEquals(1, pullContext.getPullRequestStatuses().size());
         assertTrue(pullContext.getPullRequestStatuses().contains(NO_PROCESS_LEG));
@@ -64,7 +60,6 @@ public class PullContextTest {
     public void checkProcessValidityWithOneLeg() throws Exception {
         PullContext pullContext = new PullContext();
         pullContext.setProcess(PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1]}", "responderParties{[name:resp1]}"));
-        pullContext.checkProcessValidity();
         assertEquals(true, pullContext.isValid());
         assertTrue(pullContext.getPullRequestStatuses().contains(ONE_MATCHING_PROCESS));
     }
@@ -81,14 +76,10 @@ public class PullContextTest {
     @Test
     public void createProcessWarningMessage() {
         PullContext pullContext = new PullContext();
-        try {
-            pullContext.checkProcessValidity();
-            assertTrue(false);
-        } catch (IllegalArgumentException i) {
-
-        }
+        assertEquals(false, pullContext.isValid());
+        assertTrue(pullContext.getPullRequestStatuses().contains(NO_PROCESSES));
         pullContext.setProcess(PojoInstaciatorUtil.instanciate(Process.class));
-        pullContext.checkProcessValidity();
+        assertEquals(false, pullContext.isValid());
         assertTrue(pullContext.createProcessWarningMessage().contains("No leg configuration found"));
         assertTrue(pullContext.createProcessWarningMessage().contains("No responder configured"));
     }
@@ -113,7 +104,6 @@ public class PullContextTest {
             assertTrue(testResult.testSucced(allValue));
         }
     }
-
 
 
 }

@@ -58,7 +58,7 @@ public class PullContext {
 
     void addRequestStatus(final PullRequestStatus pullRequestStatus) {
         if (!ONE_MATCHING_PROCESS.equals(pullRequestStatus)) {
-            pullRequestStatuses.remove(pullRequestStatus);
+            pullRequestStatuses.remove(ONE_MATCHING_PROCESS);
         }
         pullRequestStatuses.add(pullRequestStatus);
     }
@@ -73,7 +73,20 @@ public class PullContext {
     }
 
     public boolean isValid() {
-        return pullRequestStatuses.size() == 1 && ONE_MATCHING_PROCESS.equals(pullRequestStatuses.iterator().next());
+        boolean valid = false;
+        if (process == null) {
+            addRequestStatus(NO_PROCESSES);
+        } else {
+            pullRequestStatuses.clear();
+            checkMpcConfiguration();
+            checkLegConfiguration();
+            checkResponderConfiguration();
+            if (pullRequestStatuses.isEmpty()) {
+                addRequestStatus(ONE_MATCHING_PROCESS);
+                valid = true;
+            }
+        }
+        return valid;
     }
 
 
@@ -140,7 +153,6 @@ public class PullContext {
     }
 
     public LegConfiguration filterLegOnMpc() {
-        checkProcessValidity();
         if (isValid() && mpcQualifiedName != null) {
             Collection<LegConfiguration> filter = Collections2.filter(process.getLegs(), new Predicate<LegConfiguration>() {
                 @Override
@@ -150,19 +162,6 @@ public class PullContext {
             });
             return filter.iterator().next();
         } else throw new IllegalArgumentException("Method should be called after correct context setup.");
-    }
-
-    public void checkProcessValidity() {
-        if (process == null) {
-            throw new IllegalArgumentException("Process should be set before calling checkProcessValidity.");
-        }
-        pullRequestStatuses.clear();
-        checkMpcConfiguration();
-        checkLegConfiguration();
-        checkResponderConfiguration();
-        if (pullRequestStatuses.isEmpty()) {
-            addRequestStatus(ONE_MATCHING_PROCESS);
-        }
     }
 
     private void checkResponderConfiguration() {

@@ -33,7 +33,6 @@ import java.util.Set;
 import static eu.domibus.common.MessageStatus.READY_TO_PULL;
 import static eu.domibus.common.services.impl.PullContext.MPC;
 import static eu.domibus.common.services.impl.PullContext.PMODE_KEY;
-import static eu.domibus.common.services.impl.PullRequestStatus.ONE_MATCHING_PROCESS;
 
 /**
  * @author Thomas Dussart
@@ -84,7 +83,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                 }
                 PullContext pullContext = new PullContext();
                 pullContext.setProcess(process);
-                pullContext.checkProcessValidity();
                 if (!pullContext.isValid()) {
                     throw new RuntimeException(pullContext.createProcessWarningMessage());
                 }
@@ -109,7 +107,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             PullContext pullContext = new PullContext();
             pullContext.setResponder(configuration.getParty());
             pullContext.setProcess(pullProcess);
-            pullContext.checkProcessValidity();
             if (!pullContext.isValid()) {
                 continue;
             }
@@ -158,12 +155,13 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
         PullContext pullContext = new PullContext();
-        pullContext.addRequestStatus(ONE_MATCHING_PROCESS);
         pullContext.setMpcQualifiedName(mpcQualifiedName);
         findCurrentAccesPoint(pullContext);
         finMpcProcess(pullContext);
-        pullContext.setResponder(pullContext.getProcess().getResponderParties().iterator().next());
-        pullContext.checkProcessValidity();
+        //@thom come on you can do better.....change that asap.
+        if (pullContext.isValid()) {
+            pullContext.setResponder(pullContext.getProcess().getResponderParties().iterator().next());
+        }
         return pullContext;
     }
 

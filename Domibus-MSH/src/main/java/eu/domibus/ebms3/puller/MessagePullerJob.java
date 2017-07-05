@@ -18,6 +18,6 @@ public class MessagePullerJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        messageExchangeService.initiatePullRequest();
+        //messageExchangeService.initiatePullRequest();
     }
 }
