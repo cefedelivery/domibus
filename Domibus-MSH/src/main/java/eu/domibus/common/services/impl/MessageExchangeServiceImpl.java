@@ -1,14 +1,16 @@
 package eu.domibus.common.services.impl;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.*;
-import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.common.model.configuration.Identifier;
-import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -49,6 +51,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Autowired
     private ConfigurationDAO configurationDAO;
 
+
     @Autowired
     private MessagingDao messagingDao;
     @Autowired
@@ -63,28 +66,29 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
 
+    @Autowired
+    private ProcessValidator processValidator;
+
     /**
      * {@inheritDoc}
      */
     @Override
     @Transactional(readOnly = true)
-    public void upgradeMessageExchangeStatus(MessageExchangeConfiguration messageExchangeConfiguration) {
+    public void upgradeMessageExchangeStatus(MessageExchangeConfiguration messageExchangeConfiguration) throws EbMS3Exception {
         List<Process> processes = processDao.findProcessByMessageContext(messageExchangeConfiguration);
         messageExchangeConfiguration.updateStatus(MessageStatus.SEND_ENQUEUED);
         for (Process process : processes) {
+
             boolean pullProcess = BackendConnector.Mode.PULL.getFileMapping().equals(Process.getBindingValue(process));
             boolean oneWay = BackendConnector.Mep.ONE_WAY.getFileMapping().equals(Process.getMepValue(process));
             if (pullProcess) {
+                processValidator.validatePullProcess(Lists.newArrayList(process));
+                //@thom add those checks in the validator.
                 if (!oneWay) {
                     throw new RuntimeException("We only support oneway/pull at the moment");
                 }
                 if (processes.size() > 1) {
                     throw new RuntimeException("This configuration is also mapping another process!");
-                }
-                PullContext pullContext = new PullContext();
-                pullContext.setProcess(process);
-                if (!pullContext.isValid()) {
-                    throw new RuntimeException(pullContext.createProcessWarningMessage());
                 }
                 messageExchangeConfiguration.updateStatus(READY_TO_PULL);
             }
@@ -98,32 +102,49 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional
     public void initiatePullRequest() {
-        if(!configurationDAO.configurationExists()){
+        if (!configurationDAO.configurationExists()) {
             return;
         }
         Configuration configuration = configurationDAO.read();
-        List<Process> pullProcesses = processDao.findPullProcessesByResponder(configuration.getParty());
+        Party responderParty = configuration.getParty();
+        List<Process> pullProcesses = processDao.findPullProcessesByResponder(responderParty);
         for (Process pullProcess : pullProcesses) {
-            PullContext pullContext = new PullContext();
-            pullContext.setResponder(configuration.getParty());
-            pullContext.setProcess(pullProcess);
-            if (!pullContext.isValid()) {
-                continue;
-            }
-            pullContext.send(new PullContextCommand() {
-                @Override
-                public void execute(final Map<String, String> messageMap) {
-                    MessagePostProcessor postProcessor = new MessagePostProcessor() {
-                        public Message postProcessMessage(Message message) throws JMSException {
-                            message.setStringProperty(MPC, messageMap.get("mpc"));
-                            message.setStringProperty(PMODE_KEY, messageMap.get("mpc"));
-                            return message;
-                        }
-                    };
-                    jmsPullTemplate.convertAndSend(pullMessageQueue, messageMap, postProcessor);
+            try {
+                processValidator.validatePullProcess(Lists.newArrayList(pullProcess));
+                for (LegConfiguration legConfiguration : pullProcess.getLegs()) {
+                    for (Party initiatorParty : pullProcess.getInitiatorParties()) {
+                        String mpcQualifiedName = legConfiguration.getDefaultMpc().getQualifiedName();
+                        //@thom remove the pullcontext from here.
+                        PullContext pullContext = new PullContext(pullProcess,
+                                initiatorParty,
+                                mpcQualifiedName);
+                        MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(pullContext.getAgreement(),
+                                initiatorParty.getName(),
+                                responderParty.getName(),
+                                legConfiguration.getService().getName(),
+                                legConfiguration.getAction().getName(),
+                                legConfiguration.getName());
+
+                        final Map<String, String> map = Maps.newHashMap();
+                        map.put(MPC, mpcQualifiedName);
+                        map.put(PMODE_KEY, messageExchangeConfiguration.getReversePmodeKey());
+                        map.put(PullContext.NOTIFY_BUSINNES_ON_ERROR, String.valueOf(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()));
+                        MessagePostProcessor postProcessor = new MessagePostProcessor() {
+                            public Message postProcessMessage(Message message) throws JMSException {
+                                message.setStringProperty(MPC, map.get("mpc"));
+                                message.setStringProperty(PMODE_KEY, map.get("mpc"));
+                                return message;
+                            }
+                        };
+                        jmsPullTemplate.convertAndSend(pullMessageQueue, map, postProcessor);
+
+                    }
                 }
-            });
+            } catch (EbMS3Exception e) {
+                LOG.warn("Invalid pull process configuration found during pull try " + e.getMessage());
+            }
         }
+
     }
 
 
@@ -154,44 +175,16 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
      */
     @Override
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
-        PullContext pullContext = new PullContext();
-        pullContext.setMpcQualifiedName(mpcQualifiedName);
-        findCurrentAccesPoint(pullContext);
-        finMpcProcess(pullContext);
-        //@thom come on you can do better.....change that asap.
-        if (pullContext.isValid()) {
-            pullContext.setResponder(pullContext.getProcess().getResponderParties().iterator().next());
-        }
-        return pullContext;
-    }
-
-    /**
-     * Retrieve process information based on the information contained in the pullRequest.
-     *
-     * @param pullContext the context of the request.
-     */
-    //@thom test this method
-    private void finMpcProcess(PullContext pullContext) {
-        List<Process> processes = processDao.findPullProcessBytMpc(pullContext.getMpcQualifiedName());
-        if (processes.size() > 1) {
-            pullContext.addRequestStatus(PullRequestStatus.TOO_MANY_PROCESSES);
-        } else if (processes.size() == 0) {
-            pullContext.addRequestStatus(PullRequestStatus.NO_PROCESSES);
-        } else {
-            pullContext.setProcess(processes.get(0));
-        }
-    }
-
-    /**
-     * Extract initiator and responder information based on the pullrequest.
-     *
-     * @param pullContext the context of the pull request.
-     */
-    //@thom test this method
-    private void findCurrentAccesPoint(PullContext pullContext) {
+        List<Process> processes = processDao.findPullProcessBytMpc(mpcQualifiedName);
         Configuration configuration = configurationDAO.read();
-        pullContext.setInitiator(configuration.getParty());
+        try {
+            processValidator.validatePullProcess(processes);
+            return new PullContext(processes.get(0), configuration.getParty(), mpcQualifiedName);
+        } catch (EbMS3Exception e) {
+            return new PullContext(e.getMessage());
+        }
     }
+
 
     @Override
     @Transactional

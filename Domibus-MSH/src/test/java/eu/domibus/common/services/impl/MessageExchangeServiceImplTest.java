@@ -8,6 +8,7 @@ import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
@@ -18,16 +19,19 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
 
 import javax.jms.Destination;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -47,9 +51,13 @@ public class MessageExchangeServiceImplTest {
     private JmsTemplate jmsPullTemplate;
     @Mock
     private EbMS3MessageBuilder messageBuilder;
+    @Spy
+    private ProcessValidator processValidator;
+
     @InjectMocks
     private MessageExchangeServiceImpl messageExchangeService;
     private Process process;
+
 
     private Configuration configuration;
     private Party correctParty;
@@ -85,8 +93,8 @@ public class MessageExchangeServiceImplTest {
     }
 
     @Test
-    public void testOneWayPullOnlySupported(){
-        Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:twoway]", "mepBinding[name:pull]");
+    public void testOneWayPullOnlySupported() throws EbMS3Exception {
+        Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:twoway]", "mepBinding[name:pull]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "responderParties{[name:resp1]}");
         try {
             getMessageExchangeContext(process);
             assertTrue(false);
@@ -95,7 +103,7 @@ public class MessageExchangeServiceImplTest {
         }
     }
 
-    private MessageExchangeConfiguration getMessageExchangeContext(Process process) {
+    private MessageExchangeConfiguration getMessageExchangeContext(Process process) throws EbMS3Exception {
         List<Process> processes= Lists.newArrayList();
         processes.add(process);
         MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("agreementName", "senderParty", "receiverParty", "service", "action", "leg");
@@ -104,8 +112,8 @@ public class MessageExchangeServiceImplTest {
         return messageExchangeConfiguration;
     }
 
-    @Test
-    public void testIncorrectMultipleProcessFoundForConfiguration(){
+    @Test(expected = EbMS3Exception.class)
+    public void testIncorrectMultipleProcessFoundForConfiguration() throws EbMS3Exception {
         MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("agreementName", "senderParty", "receiverParty", "service", "action", "leg");
         List<Process> processes= Lists.newArrayList();
         Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]");
@@ -113,12 +121,7 @@ public class MessageExchangeServiceImplTest {
         process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:push]");
         processes.add(process);
         when(processDao.findProcessByMessageContext(messageExchangeConfiguration)).thenReturn(processes);
-        try {
             messageExchangeService.upgradeMessageExchangeStatus(messageExchangeConfiguration);
-            assertTrue(false);
-        }catch (RuntimeException e){
-
-        }
     }
 
     @Test
@@ -166,9 +169,24 @@ public class MessageExchangeServiceImplTest {
         List<Process> processes = Lists.newArrayList(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "responderParties{[name:resp1]}"));
         when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(processes);
         PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
+        assertEquals(true, pullContext.isValid());
         assertEquals("resp1",pullContext.getResponder().getName());
         assertEquals("party1",pullContext.getInitiator().getName());
         assertEquals("oneway",pullContext.getProcess().getMep().getName());
+    }
+
+    @Test
+    public void extractProcessMpcWithNoProcess() throws Exception {
+        when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(new ArrayList<Process>());
+        PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
+        assertEquals(false, pullContext.isValid());
+    }
+
+    @Test
+    public void extractProcessMpcWithNoToManyProcess() throws Exception {
+        when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(Lists.newArrayList(new Process(), new Process()));
+        PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
+        assertEquals(false, pullContext.isValid());
     }
 
 

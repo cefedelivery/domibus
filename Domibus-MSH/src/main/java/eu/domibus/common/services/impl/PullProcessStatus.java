@@ -4,7 +4,7 @@ package eu.domibus.common.services.impl;
  * @author Thomas Dussart
  * @since 3.3
  */
-public enum PullRequestStatus {
+public enum PullProcessStatus {
     TOO_MANY_PROCESSES,
     TOO_MANY_RESPONDER,
     NO_RESPONDER,
