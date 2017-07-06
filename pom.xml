@@ -1,23 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright 2015 e-CODEX Project
-  ~
-  ~ Licensed under the EUPL, Version 1.1 or – as soon they
-  ~ will be approved by the European Commission - subsequent
-  ~ versions of the EUPL (the "Licence");
-  ~ You may not use this work except in compliance with the
-  ~ Licence.
-  ~ You may obtain a copy of the Licence at:
-  ~ http://ec.europa.eu/idabc/eupl5
-  ~ Unless required by applicable law or agreed to in
-  ~ writing, software distributed under the Licence is
-  ~ distributed on an "AS IS" basis,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  ~ express or implied.
-  ~ See the Licence for the specific language governing
-  ~ permissions and limitations under the Licence.
-  -->
-
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -30,21 +11,22 @@
     <name>Domibus MSH</name>
     <modules>
         <module>Domibus-MSH</module>
+        <module>Domibus-MSH-angular</module>
         <module>Domibus-MSH-api</module>
         <module>Domibus-MSH-ext-services-delegate</module>
         <module>Domibus-MSH-logging</module>
         <module>Domibus-MSH-jms-spi</module>
         <module>Domibus-MSH-jms-spi-helper</module>
-        <module>Domibus-plugin-api</module>
         <module>Domibus-MSH-soapui-tests</module>
         <module>Domibus-MSH-docker</module>
+        <module>Domibus-plugin-api</module>
         <module>Domibus-MSH-fiware</module>
         <module>Domibus-MSH-test</module>
     </modules>
     <properties>
         <cxf.version>3.1.7</cxf.version>
         <spring.version>4.2.2.RELEASE</spring.version>
-        <spring.security.version>3.2.0.RELEASE</spring.security.version>
+        <spring.security.version>4.2.2.RELEASE</spring.security.version>
         <activemq.version>5.12.1</activemq.version>
         <aspectj.version>1.8.9</aspectj.version>
         <slf4j.version>1.7.21</slf4j.version>
@@ -69,7 +51,8 @@
         <sonar.exclusions>
             **/validators/EbMS3MessageValidator.java, **/controller/AdminGUIController.java,
             **/discovery/PartyIndentifierResolverService.java,
-            **/quartz/**, **/target/**, **/eu/domibus/spring/SpringContextProvider.java, **/eu/domibus/taskexecutor/weblogic/DomibusDelegatingWork.java
+            **/quartz/**, **/target/**, **/eu/domibus/spring/SpringContextProvider.java,
+            **/eu/domibus/taskexecutor/weblogic/DomibusDelegatingWork.java
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
         <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar/</sonar.host.url>
@@ -307,17 +290,6 @@
                 <artifactId>spring-security-config</artifactId>
                 <version>${spring.security.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-taglibs</artifactId>
-                <version>${spring.security.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>spring-aop</artifactId>
-                        <groupId>org.springframework</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
             <!-- End Spring Security -->
 
             <dependency>
@@ -475,6 +447,11 @@
                         <target>1.7</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.0.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

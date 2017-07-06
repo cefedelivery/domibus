@@ -50,6 +50,8 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
 
+import static org.apache.commons.lang.StringUtils.trim;
+
 
 @SuppressWarnings("ValidExternallyBoundObject")
 @javax.jws.WebService(
@@ -91,7 +93,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
      * @param ebMSHeaderInfo
      * @return
      * @throws SendMessageFault
-     * @deprecated Use sendMessageWithLargeFilesSupport
+     * @deprecated since 3.3-rc1. Use {@link BackendWebServiceImpl#submitMessage(SubmitRequest, Messaging)}
      */
     @Deprecated
     @SuppressWarnings("ValidExternallyBoundObject")
@@ -301,7 +303,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
      * @param downloadMessageResponse
      * @param ebMSHeaderInfo
      * @throws DownloadMessageFault
-     * @deprecated Use downloadMessageWithLargeFilesSupport
+     * @deprecated since 3.3-rc1. Use {@link BackendWebServiceImpl#retrieveMessage(RetrieveMessageRequest, Holder, Holder)}
      */
     @Deprecated
     @Override
@@ -313,7 +315,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
         try {
             if (isMessageIdNotEmpty) {
-                userMessage = downloadMessage(downloadMessageRequest.getMessageID(), null);
+                userMessage = downloadMessage(trim(downloadMessageRequest.getMessageID()), null);
             }
         } catch (final MessageNotFoundException mnfEx) {
             if (LOG.isDebugEnabled()) {
@@ -367,7 +369,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
 
         UserMessage userMessage = null;
-        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(retrieveMessageRequest.getMessageID());
+        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(trim(retrieveMessageRequest.getMessageID()));
 
         try {
             if (isMessageIdNotEmpty) {
@@ -470,10 +472,22 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         return detail;
     }
 
-
+    /**
+     * @deprecated since 3.3-rc1. Use {@link BackendWebServiceImpl#getStatus(StatusRequest)}.
+     * Converts DOWNLOADED status to RECEIVED to maintain the backwards compatibility
+     *
+     * @param messageStatusRequest
+     * @return
+     */
+    @Deprecated
     @Override
     public MessageStatus getMessageStatus(final GetStatusRequest messageStatusRequest) {
         return defaultTransformer.transformFromMessageStatus(messageRetriever.getMessageStatus(messageStatusRequest.getMessageID()));
+    }
+
+    @Override
+    public MessageStatus getStatus(final StatusRequest statusRequest) {
+        return defaultTransformer.transformFromMessageStatus(messageRetriever.getStatus(statusRequest.getMessageID()));
     }
 
     @Override

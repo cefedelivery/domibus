@@ -15,7 +15,7 @@
     </bean>
 
     <bean id="brokerViewMBean" class="org.springframework.jmx.access.MBeanProxyFactoryBean"
-          p:objectName="org.apache.activemq:type=Broker,brokerName=localhost"
+          p:objectName="org.apache.activemq:type=Broker,brokerName=${activeMQ.brokerName}"
           p:proxyInterface="org.apache.activemq.broker.jmx.BrokerViewMBean"
           p:server-ref="mbeanServerConnection" />
 

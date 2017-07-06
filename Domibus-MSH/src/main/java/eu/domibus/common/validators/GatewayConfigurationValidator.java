@@ -1,11 +1,13 @@
 package eu.domibus.common.validators;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.common.util.WarningUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -19,6 +21,7 @@ import java.util.Properties;
 /**
  * Created by idragusa on 4/14/16.
  */
+@Component
 public class GatewayConfigurationValidator {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(GatewayConfigurationValidator.class);
@@ -37,11 +40,8 @@ public class GatewayConfigurationValidator {
         validateCerts();
 
         try {
-            try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus-datasources.xml.sha256"))));) {
-                validateFileHash("domibus-datasources.xml", br.readLine());
-            }
-            try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus-security.xml.sha256"))));) {
-                validateFileHash("domibus-security.xml", br.readLine());
+            try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus.properties.sha256"))));) {
+                validateFileHash("domibus.properties", br.readLine());
             }
         } catch (Exception e) {
             LOG.warn("Could not verify the configuration files hash", e);
@@ -91,10 +91,7 @@ public class GatewayConfigurationValidator {
     }
 
     private void warnOutput(String message) {
-        LOG.warn("\n\n\n");
-        LOG.warn("**************** WARNING **************** WARNING **************** WARNING **************** ");
-        LOG.warn(message);
-        LOG.warn("*******************************************************************************************\n\n\n");
+        LOG.warn(WarningUtil.warnOutput(message));
     }
 
 }

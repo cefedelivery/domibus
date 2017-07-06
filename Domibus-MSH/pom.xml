@@ -17,8 +17,6 @@
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hibernate.version>4.1.9.Final</hibernate.version>
-        <jstl.version>1.2</jstl.version>
-
         <dom4j.version>1.6.1</dom4j.version>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
@@ -32,6 +30,11 @@
 
     <dependencies>
         <!-- Domibus modules -->
+        <dependency>
+            <groupId>eu.domibus.fsplugin</groupId>
+            <artifactId>domibus-angular</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>eu.domibus.fsplugin</groupId>
             <artifactId>domibus-plugin-api</artifactId>
@@ -69,6 +72,13 @@
             <artifactId>aspectjweaver</artifactId>
         </dependency>
         <!-- End AspectJ -->
+
+        <!-- Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <!-- End Jackson -->
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -135,10 +145,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-taglibs</artifactId>
         </dependency>
         <!-- End Spring Security -->
 
@@ -243,17 +249,6 @@
         <!-- End Apache commons -->
 
         <dependency>
-            <groupId>com.sun.faces</groupId>
-            <artifactId>jsf-api</artifactId>
-            <version>2.1.20</version>
-        </dependency>
-
-        <dependency>
-            <groupId>jstl</groupId>
-            <artifactId>jstl</artifactId>
-            <version>${jstl.version}</version>
-        </dependency>
-        <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
             <version>1.1.0.Final</version>
@@ -307,25 +302,25 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-default-ws-plugin</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-default-jms-plugin</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-db</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

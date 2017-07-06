@@ -2,15 +2,20 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.routing.BackendFilter;
+import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
-import eu.domibus.plugin.routing.*;
+import eu.domibus.plugin.routing.CriteriaFactory;
+import eu.domibus.plugin.routing.IRoutingCriteria;
+import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
-import eu.domibus.plugin.routing.operation.LogicalOperator;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import eu.domibus.plugin.validation.SubmissionValidator;
@@ -68,6 +73,12 @@ public class BackendNotificationServiceTest {
 
     @Injectable
     Map<String, IRoutingCriteria> criteriaMap;
+
+    @Injectable
+    DomainCoreConverter coreConverter;
+
+    @Injectable
+    MessageExchangeService messageExchangeService;
 
     @Tested
     BackendNotificationService backendNotificationService = new BackendNotificationService();
@@ -250,8 +261,9 @@ public class BackendNotificationServiceTest {
             filter.getRoutingCriterias();
             result = criteriaList;
 
-            filter.getCriteriaOperator();
-            result = LogicalOperator.AND;
+            // TODO: Criteria Operator is not used.
+            /*filter.getCriteriaOperator();
+            result = LogicalOperator.AND;*/
 
             fromRoutingCriteria.getName();
             result = fromCriteriaName;
@@ -304,8 +316,8 @@ public class BackendNotificationServiceTest {
             filter.getRoutingCriterias();
             result = criteriaList;
 
-            filter.getCriteriaOperator();
-            result = LogicalOperator.AND;
+            //filter.getCriteriaOperator();
+            //result = LogicalOperator.AND;
 
             fromRoutingCriteria.getName();
             result = fromCriteriaName;
@@ -359,8 +371,8 @@ public class BackendNotificationServiceTest {
             filter.getRoutingCriterias();
             result = criteriaList;
 
-            filter.getCriteriaOperator();
-            result = LogicalOperator.AND;
+            //filter.getCriteriaOperator();
+            //result = LogicalOperator.AND;
 
             fromRoutingCriteria.getName();
             result = fromCriteriaName;
@@ -388,7 +400,7 @@ public class BackendNotificationServiceTest {
     }
 
     @Test
-    public void testIsBackendFilterMatchingOROperationWithFromMatchingAndActionNotMatching(@Injectable final BackendFilter filter,
+    public void testIsBackendFilterMatchingWithFromMatchingAndActionNotMatching(@Injectable final BackendFilter filter,
                                                                                            @Injectable final Map<String, IRoutingCriteria> criteriaMap,
                                                                                            @Injectable final UserMessage userMessage,
                                                                                            @Injectable final IRoutingCriteria fromRoutingCriteriaConfiguration, //configured in the domibus-plugins.xml
@@ -408,8 +420,8 @@ public class BackendNotificationServiceTest {
             filter.getRoutingCriterias();
             result = criteriaList;
 
-            filter.getCriteriaOperator();
-            result = LogicalOperator.OR;
+            //filter.getCriteriaOperator();
+            //result = LogicalOperator.OR;
 
             fromRoutingCriteria.getName();
             result = fromCriteriaName;
@@ -425,14 +437,14 @@ public class BackendNotificationServiceTest {
         }};
 
         final boolean backendFilterMatching = backendNotificationService.isBackendFilterMatching(filter, criteriaMap, userMessage);
-        Assert.assertTrue(backendFilterMatching);
+        Assert.assertFalse(backendFilterMatching);
 
         new Verifications() {{
             criteriaMap.get(actionCriteriaName);
             times = 0;
 
             actionRoutingCriteriaConfiguration.matches(userMessage, anyString);
-            times = 0;
+            times = 1;
         }};
     }
 
@@ -460,7 +472,7 @@ public class BackendNotificationServiceTest {
     }
 
     @Test
-    public void testIsBackendFilterMatchingOROperationWithFromNotMatchingAndActionMatching(@Injectable final BackendFilter filter,
+    public void testIsBackendFilterMatchingANDOperationWithFromNotMatchingAndActionMatching(@Injectable final BackendFilter filter,
                                                                                            @Injectable final Map<String, IRoutingCriteria> criteriaMap,
                                                                                            @Injectable final UserMessage userMessage,
                                                                                            @Injectable final IRoutingCriteria fromRoutingCriteriaConfiguration, //configured in the domibus-plugins.xml
@@ -480,8 +492,8 @@ public class BackendNotificationServiceTest {
             filter.getRoutingCriterias();
             result = criteriaList;
 
-            filter.getCriteriaOperator();
-            result = LogicalOperator.OR;
+            //filter.getCriteriaOperator();
+            //result = LogicalOperator.OR;
 
             fromRoutingCriteria.getName();
             result = fromCriteriaName;
@@ -492,23 +504,11 @@ public class BackendNotificationServiceTest {
             criteriaMap.get(fromCriteriaName);
             result = fromRoutingCriteriaConfiguration;
 
-            actionRoutingCriteria.getName();
-            result = actionCriteriaName;
-
-            actionRoutingCriteria.getExpression();
-            result = "myAction";
-
-            criteriaMap.get(actionCriteriaName);
-            result = actionRoutingCriteriaConfiguration;
-
             fromRoutingCriteriaConfiguration.matches(userMessage, fromRoutingCriteria.getExpression());
             result = false;
-
-            actionRoutingCriteriaConfiguration.matches(userMessage, actionRoutingCriteria.getExpression());
-            result = true;
         }};
 
         final boolean backendFilterMatching = backendNotificationService.isBackendFilterMatching(filter, criteriaMap, userMessage);
-        Assert.assertTrue(backendFilterMatching);
+        Assert.assertFalse(backendFilterMatching);
     }
 }

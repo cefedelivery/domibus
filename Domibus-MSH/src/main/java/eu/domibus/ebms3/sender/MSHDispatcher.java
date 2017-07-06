@@ -45,6 +45,7 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPBinding;
+import java.net.ConnectException;
 import java.util.Properties;
 
 /**
@@ -57,6 +58,9 @@ public class MSHDispatcher {
 
     public static final String PMODE_KEY_CONTEXT_PROPERTY = "PMODE_KEY_CONTEXT_PROPERTY";
     public static final String ASYMMETRIC_SIG_ALGO_PROPERTY = "ASYMMETRIC_SIG_ALGO_PROPERTY";
+    public static final String MESSAGE_TYPE_IN = "MESSAGE_TYPE";
+    public static final String MESSAGE_TYPE_OUT = "MESSAGE_TYPE_OUT";
+    public static final String MESSAGE_ID = "MESSAGE_ID";
     public static final QName SERVICE_NAME = new QName("http://domibus.eu", "msh-dispatch-service");
     public static final QName PORT_NAME = new QName("http://domibus.eu", "msh-dispatch");
 
@@ -85,6 +89,8 @@ public class MSHDispatcher {
         //ReceiveTimeOut - Specifies the amount of time, in milliseconds, that the consumer will wait for a response before it times out. 0 is infinite.
         int receiveTimeout = Integer.parseInt(domibusProperties.getProperty("domibus.dispatcher.receiveTimeout", "120000"));
         httpClientPolicy.setReceiveTimeout(receiveTimeout);
+        httpClientPolicy.setAllowChunking(Boolean.valueOf(domibusProperties.getProperty("domibus.dispatcher.allowChunking", "false")));
+
         final TLSClientParameters params = tlsReader.getTlsClientParameters();
         if (params != null && endpoint.startsWith("https://")) {
             httpConduit.setTlsClientParameters(params);
@@ -102,7 +108,11 @@ public class MSHDispatcher {
         try {
             result = dispatch.invoke(soapMessage);
         } catch (final WebServiceException e) {
-            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0005, "error dispatching message to " + endpoint, null, e);
+            Exception exception = e;
+            if(e.getCause() instanceof ConnectException) {
+                exception = new WebServiceException("Error dispatching message to [" + endpoint + "]: possible reason is that the receiver is not available", e);
+            }
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0005, "Error dispatching message to " + endpoint, null, exception);
             ex.setMshRole(MSHRole.SENDING);
             throw ex;
         }

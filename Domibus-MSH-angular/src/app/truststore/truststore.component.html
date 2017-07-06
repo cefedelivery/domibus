@@ -1,0 +1,24 @@
+<div class="divTable">
+  <div class="divTableBody">
+
+    <div class="divTableRow">
+      <div class="divTableCell firstColumn"><label for="password">Truststore password</label></div>
+      <div class="divTableCell">
+        <md-input-container>
+          <input mdInput #password type="password" id="password">
+        </md-input-container>
+      </div>
+    </div>
+
+    <div class="divTableRow">
+      <div class="divTableCell firstColumn"><label for="truststore">Truststore file</label></div>
+      <div class="divTableCell"><input #fileInput type="file" id="truststore" accept=".jks"></div>
+    </div>
+
+    <div class="divTableRow">
+      <div class="divTableCell firstColumn">
+        <button md-raised-button color="primary" (click)="submit()">Upload</button>
+      </div>
+    </div>
+  </div>
+</div>

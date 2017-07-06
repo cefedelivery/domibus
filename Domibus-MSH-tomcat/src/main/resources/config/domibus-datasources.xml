@@ -1,0 +1,124 @@
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://activemq.apache.org/schema/core
+    http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+
+    <!-- JMS Configuration -->
+    <!-- Connection Pool -->
+    <bean id="domibusJMS-XAConnectionFactory"
+          class="com.atomikos.jms.AtomikosConnectionFactoryBean"
+          init-method="init" destroy-method="close" depends-on="broker">
+        <property name="uniqueResourceName" value="domibusJMS-XA"/>
+        <property name="xaConnectionFactory" ref="xaJmsConnectionFactory"/>
+        <property name="maxPoolSize" value="${com.atomikos.maxPoolSize}"/>
+    </bean>
+
+    <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
+    <amq:xaConnectionFactory id="xaJmsConnectionFactory"
+                             brokerURL="${activeMQ.transportConnector.uri}"
+                             userName="${activeMQ.username}" password="${activeMQ.password}">
+        <!-- do not remove this! otherwise the redeliveryPolicy configured in activemq.xml will be ignored -->
+        <amq:redeliveryPolicy>
+            <amq:redeliveryPolicy />
+        </amq:redeliveryPolicy>
+    </amq:xaConnectionFactory>
+
+
+    <amq:queue id="sendMessageQueue"
+               physicalName="domibus.internal.dispatch.queue"/>
+    <amq:queue id="pullMessageQueue"
+               physicalName="domibus.internal.pull.queue"/>
+    <amq:queue id="notifyBackendQueue"
+               physicalName="domibus.internal.notification.queue"/>
+    <!-- I no backend with matching policy found notifcations are sent to this queue -->
+    <amq:queue id="unknownReceiverQueue"
+               physicalName="domibus.internal.notification.unknown"/>
+    <amq:topic id="clusterCommandTopic"
+               physicalName="domibus.internal.command"/>
+
+    <bean id="xaProperties" class="eu.domibus.spring.PrefixedProperties">
+        <constructor-arg name="props" ref="domibusProperties"/>
+        <constructor-arg name="prefix" value="domibus.datasource.xa.property."/>
+    </bean>
+
+    <bean id="domibusJDBC-XADataSource"
+          class="com.atomikos.jdbc.AtomikosDataSourceBean"
+          init-method="init" destroy-method="close">
+        <property name="uniqueResourceName">
+            <value>domibusJDBC-XA</value>
+        </property>
+        <property name="xaDataSourceClassName">
+            <value>${domibus.datasource.xa.xaDataSourceClassName}</value>
+        </property>
+        <property name="xaProperties" ref="xaProperties"/>
+        <property name="minPoolSize">
+            <value>${domibus.datasource.xa.minPoolSize}</value>
+        </property>
+        <property name="maxPoolSize">
+            <value>${domibus.datasource.xa.maxPoolSize}</value>
+        </property>
+        <property name="testQuery">
+            <value>${domibus.datasource.xa.testQuery}</value>
+        </property>
+    </bean>
+    <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+	   <property name="driverClassName" value="${domibus.datasource.driverClassName}"/>
+	   <property name="url" value="${domibus.datasource.url}"/>
+	   <property name="username" value="${domibus.datasource.user}"/>
+	   <property name="password" value="${domibus.datasource.password}"/>
+    </bean>
+
+     <bean id="jpaProperties" class="eu.domibus.spring.PrefixedProperties">
+        <constructor-arg name="props" ref="domibusProperties"/>
+        <constructor-arg name="prefix" value="domibus.entityManagerFactory.jpaProperty."/>
+    </bean>
+    <bean id="entityManagerFactory" primary="true"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="transactionManager">
+        <property name="persistenceUnitName" value="domibusJTA"/>
+        <property name="packagesToScan" value="#{'${domibus.entityManagerFactory.packagesToScan}'.split(',')}"/>
+        <property name="jtaDataSource" ref="domibusJDBC-XADataSource"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="showSql" value="false"/>
+                <property name="generateDdl" value="false"/>
+            </bean>
+        </property>
+        <property name="jpaProperties" ref="jpaProperties"/>
+    </bean>
+
+
+    <bean id="internalJmsListenerContainerFactory"
+          class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+        <property name="connectionFactory"
+                  ref="domibusJMS-XAConnectionFactory"/>
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="concurrency" value="3-10"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="sessionAcknowledgeMode" value="0"/>
+    </bean>
+
+</beans>
+

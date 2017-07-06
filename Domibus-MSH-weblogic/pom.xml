@@ -105,13 +105,7 @@
                         <fileSet>
                             <directory>${project.basedir}/src/main/conf/domibus</directory>
                             <includes>
-                                <include>domibus-datasources.xml</include>
-                            </includes>
-                        </fileSet>
-                        <fileSet>
-                            <directory>${project.basedir}/src/main/conf/domibus</directory>
-                            <includes>
-                                <include>domibus-security.xml</include>
+                                <include>domibus.properties</include>
                             </includes>
                         </fileSet>
                     </fileSets>

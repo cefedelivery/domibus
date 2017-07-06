@@ -15,12 +15,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static eu.domibus.common.model.configuration.Process.*;
+
 /**
  * @author idragusa
  * @since 3.2.5
  */
 @Entity
 @Table(name = "TB_RAWENVELOPE_LOG")
+@NamedQueries({
+        @NamedQuery(name = "find.by.message.id", query = "SELECT new eu.domibus.common.model.logging.RawEnvelopeDto(l.entityId,l.rawXML) FROM RawEnvelopeLog l where l.userMessage.messageInfo.messageId=:MESSAGE_ID")
+})
 public class RawEnvelopeLog extends AbstractBaseEntity {
     @OneToOne
     @JoinColumn(name = "USERMESSAGE_ID_FK")

@@ -10,6 +10,8 @@ import eu.domibus.plugin.webService.generated.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -148,7 +150,9 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
     }
 
 
+
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS,noRollbackFor = {IllegalArgumentException.class,IllegalStateException.class})
     public Submission transformToSubmission(final Messaging messageData) {
         return transformFromMessaging(messageData.getUserMessage());
     }
@@ -220,13 +224,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
     }
 
     public MessageStatus transformFromMessageStatus(eu.domibus.common.MessageStatus messageStatus) {
-        if(eu.domibus.common.MessageStatus.DOWNLOADED == messageStatus) {
-            //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
-            LOG.debug("Changing DOWNLOADED status to RECEIVED");
-            messageStatus = eu.domibus.common.MessageStatus.RECEIVED;
-        }
         return MessageStatus.fromValue(messageStatus.name());
-
     }
 
     public ErrorResultImplArray transformFromErrorResults(List<? extends ErrorResult> errors) {

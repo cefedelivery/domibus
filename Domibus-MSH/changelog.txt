@@ -1,4 +1,12 @@
 Domibus 3.3-RC1
+- Configuration of Domibus is done with domibus.properties instead of externalized spring xml files
+- Add the possibility to pull messages
+- Expose the DOWNLOADED message status in the plugin API and the default ws plugin
+- Deprecated the methods eu.domibus.plugin.AbstractBackendConnector.getMessageStatus(String messageId) and eu.domibus.plugin.handler.MessageRetriever.getMessageStatus(String messageId) which converts the DOWNLOADED status to RECEIVED. Use the new getStatus(String messageId) method instead.
+- Deprecated the following methods from eu.domibus.plugin.webService.impl.BackendWebServiceImpl in the Default WS Plugin:
+    o sendMessage(SubmitRequest, Messaging). Use submitMessage(SubmitRequest, Messaging) which add support for large files.
+    o downloadMessage(RetrieveMessageRequest, Holder, Holder). Use retrieveMessage(RetrieveMessageRequest, Holder, Holder) which add support for large files.
+    o getMessageStatus(StatusRequest). Use getStatus(StatusRequest) which converts the DOWNLOADED status to RECEIVED.
 - Migrated the logging framework to SLF4J and Logback
 - Domibus uses 3 logs files: domibus.log, domibus-business.log and domibus-security.log
 - JMS monitoring: fixed the computation of the total number of messages in the queue for WebLogic
@@ -13,7 +21,7 @@ Domibus 3.3-RC1
 - Core: during sendMessage operation, Domibus verifies that, if MessageId and RefToMessageId is specified by backend client, then it should contain only printable ASCII characters.
 - Core: during sendMessage operation, all validations comparisons with the PMode data are case insensitive.
 - Core: during MSH dispatch operation, Domibus verifies the validity of sender's certificate.
-- Core: during MSH receive operation, Domibus verifies the trust of the sender.
+- Core: during MSH receive operation, Domibus can verify the trust of the sender if activated.
 - Core: validation on MessageId and RefToMessageId can be by-passed by removing the key "domibus.sendMessage.messageIdPattern" from configuration file.
 - Core: new configuration properties added for ConnectionTimeout and ReceiveTimeout to allow fine tuning of the access points' conduit.
 - Core: provision added to support the "DoNothing security" policy (no security, no encryption).

@@ -1,22 +1,16 @@
-Domibus 3.3-RC1 (from 3.2.1):
-               Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
-               - in the file pom.xml of the custom plugin maven module:
-                   o remove the following dependency:
-                         <dependency>
-                            <groupId>commons-logging</groupId>
-                            <artifactId>commons-logging</artifactId>
-                            <scope>provided</scope>
-                        </dependency>
-                   o add the following dependency:
-                         <dependency>
-                            <groupId>eu.domibus</groupId>
-                            <artifactId>domibus-logging</artifactId>
-                        </dependency>
-               - in the custom plugin module source code replace all declarations of the logger:
-                   o Before
-                      eg: private static final Log LOG = LogFactory.getLog(BackendWebServiceImpl.class);
-                   o Before
-                      eg: private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendWebServiceImpl.class);
+Domibus 3.3-RC1 (from 3.2.5):
+               - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
+               - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-rc1-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-rc1-migration.ddl for Oracle)
+               - [ALL Databases]:execute the following SQL snippet after replacing the values for the USER_PASSWORD with the configured passwords in domibus-security.xml(in the "authenticationManagerForAdminConsole" authentication manager)
+                               INSERT INTO TB_USER_ROLE (ID_PK, ROLE_NAME) VALUES ('1', 'ROLE_ADMIN');
+                               INSERT INTO TB_USER_ROLE (ID_PK, ROLE_NAME) VALUES ('2', 'ROLE_USER');
+                               INSERT INTO TB_USER (ID_PK, USER_NAME, USER_PASSWORD, USER_ENABLED) VALUES ('1', 'admin', '$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36', 1);
+                               INSERT INTO TB_USER (ID_PK, USER_NAME, USER_PASSWORD, USER_ENABLED) VALUES ('2', 'user', '$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu', 1);
+                               INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ('1', '1');
+                               INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ('1', '2');
+                               INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ('2', '2');
+                - [MySQL only] Execute the command: alter schema `your_domibus_schema_name` default charset=utf8 collate=utf8_bin;
+
                - in the location "\conf\domibus" delete the log4j.properties file and copy the logback.xml distributed in the domibus configuration specific to each server
                - in file "\conf\domibus\plugins\config\ws-plugin.xml" locate the following section and add the interceptors:
                     <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
@@ -30,58 +24,51 @@ Domibus 3.3-RC1 (from 3.2.1):
 
                     </jaxws:endpoint>
 
-               - in file "\conf\domibus\domibus-configuration.xml"
-                    o   add   <prop key="domibus.listPendingMessages.maxCount">500</prop>
-                    o   add   <prop key="domibus.sendMessage.messageIdPattern">^[\x20-\x7E]*$</prop>
-                    o   add   <prop key="domibus.dispatcher.connectionTimeout">240000</prop>
-                    o   add   <prop key="domibus.dispatcher.receiveTimeout">240000</prop>
-                    o   increase the value of the domibus.msh.retry.tolerance to 10800000 miliseconds: <prop key="domibus.msh.retry.tolerance">10800000</prop>
-               - [Tomcat only] in file "\conf\domibus\domibus-datasources.xml"
-                    - add the following bean(please adapt the values for for host, port, username and password properties according to your database schema):
-                       o for MySQL:
-                           <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-                               <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-                               <property name="url" value="jdbc:mysql://localhost:3306/domibus_schema?useSSL=false"/>
-                               <property name="username" value="edelivery_username"/>
-                               <property name="password" value="edelivery_password"/>
-                           </bean>
-                       o for Oracle:
-                           <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-                              <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
-                              <property name="URL" value="jdbc:oracle:thin:@127.0.0.1:1521:xe"/>
-                              <property name="username" value="edelivery_username"/>
-                              <property name="password" value="edelivery_password"/>
-                           </bean>
-                    - replace the entityManagerFactory with the following(please take into account the type of the database used):
-                            <bean id="entityManagerFactory" primary="true"
-                                  class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-                                <property name="persistenceUnitName" value="domibusJTA"/>
-                                <property name="packagesToScan" value="eu.domibus"/>
-                                <property name="jtaDataSource" ref="domibusJDBC-XADataSource"/>
-                                <property name="jpaVendorAdapter">
-                                    <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-                                        <property name="showSql" value="false"/>
-                                        <property name="generateDdl" value="false"/>
-                                        <property name="databasePlatform"
-                                                  value="org.hibernate.dialect.MySQL5InnoDBDialect"/>
-                                    </bean>
-                                </property>
-                                <property name="jpaProperties">
-                                    <props>
-                                        <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
-                                        <prop key="hibernate.format_sql">true</prop>
-                                        <prop key="transaction.factory_class">org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory</prop>
-                                        <prop key="hibernate.transaction.manager_lookup_class">com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup</prop>
-                                    </props>
-                                </property>
-                            </bean>
-                    - remove file "conf\domibus\persistence.xml"
+               - The external Spring configuration files(domibus-configuration.xml, domibus-datasources.xml, domibus-plugins.xml, domibus-security.xml, domibus-transactions.xml, persistence.xml) are not used anymore.
+                All the properties defined in those files have been externalized in a new property file named "domibus.properties" which is specific to each supported server(Tomcat/WebLogic/WildFly).
+
+                In order to perform the upgrade please copy the file "domibus.properties" distributed in the domibus configuration specific to each server to "\conf\domibus" and adapt the properties values
+                based on the configured properties defined in the old Spring configuration files. After this action is completed the old Spring configuration files
+                (domibus-configuration.xml, domibus-datasources.xml, domibus-plugins.xml, domibus-security.xml, domibus-transactions.xml, persistence.xml) can be deleted.
+
+                Please find below the mapping between the old Spring configuration files and the new "domibus.properties" file:
+                     - in the file "\conf\domibus\domibus-configuration.xml" all the properties defined in "<util:properties id="domibusProperties">" have been copied such as
+                     - in the file "\conf\domibus\domibus-security.xml"
+                         o in the "keystorePasswordCallback" section:
+                                - "key" mapped to "domibus.security.key.private.alias"
+                                - "value" mapped to "domibus.security.key.private.password"
+                                <util:properties id="keystoreProperties">
+                         o in the "<util:properties id="keystoreProperties">" section:
+                                - "org.apache.ws.security.crypto.merlin.keystore.type" mapped to "domibus.security.keystore.type"
+                                - "org.apache.ws.security.crypto.merlin.keystore.password" mapped to "domibus.security.keystore.password"
+                                - "org.apache.ws.security.crypto.merlin.keystore.alias" mapped to "domibus.security.key.private.alias"
+                                - "org.apache.ws.security.crypto.merlin.file" mapped to "domibus.security.keystore.location"
+                        o in the "<util:properties id="trustStoreProperties">" section:
+                                - "org.apache.ws.security.crypto.merlin.trustStore.type" mapped to "domibus.security.truststore.type"
+                                - "org.apache.ws.security.crypto.merlin.trustStore.password" mapped to "domibus.security.truststore.password"
+                                - "org.apache.ws.security.crypto.merlin.trustStore.file" mapped to "domibus.security.truststore.location"
+                     - in file "\conf\domibus\domibus-datasources.xml"
+                        o in the "entityManagerFactory" section:
+                                - "packagesToScan" mapped to "domibus.entityManagerFactory.packagesToScan"
+                                - "jpaProperties" properties are mapped with the following convention: prefix "domibus.entityManagerFactory.jpaProperty." + property name; Eg: "hibernate.dialect" mapped to "domibus.entityManagerFactory.jpaProperty.hibernate.dialect"
+
+                        [Tomcat only]
+                        o in the "domibusJMS-XAConnectionFactory" section:
+                                - "maxPoolSize" mapped to "com.atomikos.maxPoolSize"
+                        o in the "amq:xaConnectionFactory" section:
+                                - "brokerURL" mapped to "activeMQ.transportConnector.uri"
+                                - "userName" mapped to "activeMQ.username"
+                                - "password" mapped to "activeMQ.password"
+                        o in the "domibusJDBC-XADataSource" section:
+                                - "xaDataSourceClassName" mapped to "domibus.datasource.xa.xaDataSourceClassName"
+                                - "minPoolSize" mapped to "domibus.datasource.xa.minPoolSize"
+                                - "maxPoolSize" mapped to "domibus.datasource.xa.maxPoolSize"
+                                - "testQuery" mapped to "domibus.datasource.xa.testQuery"
+                                - "xaProperties" properties are mapped with the following convention: prefix "domibus.datasource.xa.property." + property name; Eg: "serverName" mapped to "domibus.datasource.xa.property.serverName"
+                        o new properties added:
+                                - check the section "#Non-XA Datasource" and adapt the properties based on the used database(MySQL or Oracle)
                 - [WebLogic only]
-                   o execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.2.1-to-3.3-RC1-WeblogicSingleServer.properties for single server deployment or 3.2.1-to-3.3-RC1-WeblogicCluster.properties for cluster deployment
-                   o in file "\conf\domibus\domibus-datasources.xml" add the following bean:
-                         <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-                            <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
-                        </bean>
+                   o execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.2.5-to-3.3-RC1-WeblogicSingleServer.properties for single server deployment or 3.2.5-to-3.3-RC1-WeblogicCluster.properties for cluster deployment
                 - [WildFly only]
                     o in file "cef_edelivery_path\domibus\standalone\configuration\standalone-full.xml":
                      - add the following datasource(MySQL or Oracle) in the datasources section
@@ -140,12 +127,74 @@ Domibus 3.3-RC1 (from 3.2.1):
                                  </concurrent>
                                  ........................
                             <subsystem xmlns="urn:jboss:domain:ee:3.0">
-                    o in file "\conf\domibus\domibus-datasources.xml" add the following bean:
-                         <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-                            <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
-                         </bean>
-               - [MySQL only] For all installations of MySQL execute the SQL commands in the file mysql5innoDb-3.2-to-3.3-migration.ddl
-                              For each Domibus MySQL schema present execute the command: alter schema `your_domibus_schema_name` default charset=utf8 collate=utf8_bin;
+                     - add the following queue in the destination section
+                                .............................
+                                <jms-destinations>
+                                    .............................
+                                    <jms-queue name="DomibusPullMessageQueue">
+                                                            <entry name="java:/jms/domibus.internal.pull.queue"/>
+                                                            <entry name="java:/jms/queue/DomibusPullMessageQueue"/>
+                                                            <durable>true</durable>
+                                                        </jms-queue>
+                                    .............................
+                                </jms-destinations>
+                                .............................
+                     - add the following address-setting in the address-settings section
+                                .............................
+                                <address-settings>
+                                    .............................
+                                    <address-setting match="jms.queue.DomibusPullMessageQueue">
+                                                        <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
+                                                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                                                        <redelivery-delay>5000</redelivery-delay>
+                                                        <max-delivery-attempts>1</max-delivery-attempts>
+                                                    </address-setting>
+                                    .............................
+                                </address-settings>
+                                .............................
+
+
+
+                - [Tomcat only]
+                     o in file \conf\domibus\internal\activemq.xml add the following queue in the destinations section:
+                        <broker .....>
+                          .............................
+                          <destinations>
+                          .............................
+                            <queue id="pullMessageQueue" physicalName="domibus.internal.pull.queue"/>
+                          .............................
+                          </<destinations>>
+                          .............................
+                        </broker>
+
+                Optional changes
+
+                Please consider the replacement of deprecated operation getMessageStatus() with the newer getStatus() that also returns the newly introduced DOWNLOADED status.
+
+                In Domibus 3.3 the logging framework changed from Commons Logging to SLF4J with Logback. Nevertheless the support in the custom plugins for Commons Logging is still
+                supported in order to maintain backward compatibility. Still we strongly recommend to perform the following modification in order to perform the switch from Commons Logging
+                to the Domibus custom logger which is based on SLFJ:
+                   - in the file pom.xml of the custom plugin maven module:
+                       o remove the following dependency:
+                             <dependency>
+                                <groupId>commons-logging</groupId>
+                                <artifactId>commons-logging</artifactId>
+                                <scope>provided</scope>
+                            </dependency>
+                       o add the following dependency:
+                             <dependency>
+                                <groupId>eu.domibus</groupId>
+                                <artifactId>domibus-logging</artifactId>
+                            </dependency>
+                   - in the custom plugin module source code replace all declarations of the logger:
+                       o Before
+                          eg: private static final Log LOG = LogFactory.getLog(BackendWebServiceImpl.class);
+                       o Before
+                          eg: private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendWebServiceImpl.class);
+
+
+
+
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.2.5:
                - Run the appropriate DB migration script.
@@ -366,7 +415,6 @@ Domibus 3.2 RC1:   Run the appropriate DB migration script.
                                     </amq:xaConnectionFactory>
 
                     If you are using samples keystores, please update them since they are expiring on the 26th of October 2016.
-
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.1.1:      Replace the war. This release updated the type of one column for the MySQL db. Please run the migration script.
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
