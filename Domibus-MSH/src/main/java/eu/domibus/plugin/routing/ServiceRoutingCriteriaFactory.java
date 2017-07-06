@@ -12,7 +12,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
 
 public class ServiceRoutingCriteriaFactory implements CriteriaFactory {
 
-    private static final String NAME = "SEVICE";
+    private static final String NAME = "SERVICE";
     private static final String TOOLTIP = "Type in the filtering rule: [SERVICE]:[TYPE]. Combine with regular expression.";
     private static final String INPUTPATTERN = "\\\\w+[:]\\\\w+";
 

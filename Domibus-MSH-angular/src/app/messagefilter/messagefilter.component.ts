@@ -102,8 +102,8 @@ export class MessageFilterComponent {
       case 'action':
         this.rows[row.$$index].action = newProp;
         break;
-      case 'sevice':
-        this.rows[row.$$index].sevice = newProp;
+      case 'service':
+        this.rows[row.$$index].service = newProp;
         break;
     }
   }
@@ -122,9 +122,9 @@ export class MessageFilterComponent {
         this.rows[row.$$index].action.expression = cellValue;
         this.hasError('action', cellValue);
         break;
-      case 'sevice':
-        this.rows[row.$$index].sevice.expression = cellValue;
-        this.hasError('sevice', cellValue);
+      case 'service':
+        this.rows[row.$$index].service.expression = cellValue;
+        this.hasError('service', cellValue);
         break;
     }
   }
@@ -329,9 +329,9 @@ export class MessageFilterComponent {
           return true;
         }
         return false;
-      case 'sevice':
+      case 'service':
         if(!this.isValidFromToService(str)) {
-          this.alertService.error("SERVICE rule is [SERVICE]:[TYPE] and '" + str + "' is not according to that.");
+          this.alertService.error(type.toUpperCase() + " rule is [SERVICE]:[TYPE] and '" + str + "' is not according to that.");
           return true;
         }
         return false;

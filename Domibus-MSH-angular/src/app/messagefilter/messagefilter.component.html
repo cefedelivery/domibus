@@ -99,12 +99,12 @@
                 class="justified, clickable"/>
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="Service" prop="sevice.expression" [sortable]="false">
+          <ngx-datatable-column name="Service" prop="service.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
                 title="Double click to edit. Rule: [SERVICE]:[TYPE]"
-                (dblclick)="editing[row.$$index + '-sevice'] = true"
-                *ngIf="!editing[row.$$index + '-sevice']"
+                (dblclick)="editing[row.$$index + '-service'] = true"
+                *ngIf="!editing[row.$$index + '-service']"
                 class="justified, clickable">
                 {{value}}
               </span>
@@ -112,8 +112,8 @@
                 mdInput
                 autofocus
                 placeholder="Service"
-                (blur)="updateValue($event, 'sevice', row)"
-                *ngIf="editing[row.$$index + '-sevice']"
+                (blur)="updateValue($event, 'service', row)"
+                *ngIf="editing[row.$$index + '-service']"
                 type="text"
                 title="[SERVICE]:[TYPE]"
                 [value]="value"
