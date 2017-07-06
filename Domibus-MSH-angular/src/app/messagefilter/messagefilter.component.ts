@@ -66,7 +66,7 @@ export class MessageFilterComponent {
 
         this.rows = newRows;
 
-        if(!this.areFiltersPersisted) {
+        if(!this.areFiltersPersisted && this.backendFilterNames.length > 1) {
           this.alertService.error("Several filters in the table were not configured yet (Persisted flag is not checked). " +
             "It is strongly recommended to double check the filters configuration and afterwards save it.");
           this.enableSave = true;
@@ -112,15 +112,19 @@ export class MessageFilterComponent {
     switch(cell) {
       case 'from':
         this.rows[row.$$index].from.expression = cellValue;
+        this.hasError('from', cellValue);
         break;
       case 'to':
         this.rows[row.$$index].to.expression = cellValue;
+        this.hasError('to', cellValue);
         break;
       case 'action':
         this.rows[row.$$index].action.expression = cellValue;
+        this.hasError('action', cellValue);
         break;
       case 'sevice':
         this.rows[row.$$index].sevice.expression = cellValue;
+        this.hasError('sevice', cellValue);
         break;
     }
   }
@@ -149,7 +153,11 @@ export class MessageFilterComponent {
             if (event.target.value.trim() == '') {
               this.rows[row.$$index].routingCriterias.splice(i, 1);
             } else {
-              routCriteria.expression = event.target.value;
+              if (!this.hasError(cell, event.target.value)) {
+                routCriteria.expression = event.target.value;
+              } else {
+                break;
+              }
             }
             this.updateValueProperty(cell, event.target.value, row);
             edited = true;
@@ -160,15 +168,18 @@ export class MessageFilterComponent {
     }
 
     if(!edited && event.target.value.trim() != '') {
-      let newRC = new RoutingCriteriaEntry(null,cell,event.target.value);
-      this.rows[row.$$index].routingCriterias.push(newRC);
-      this.createValueProperty(cell, newRC, row);
-      edited = true;
+      if(!this.hasError(cell,event.target.value)) {
+        let newRC = new RoutingCriteriaEntry(null, cell, event.target.value);
+        this.rows[row.$$index].routingCriterias.push(newRC);
+        this.createValueProperty(cell, newRC, row);
+        edited = true;
+      }
     }
 
     if (edited) {
       this.enableSave = true;
       this.enableCancel = true;
+      this.alertService.clearAlert();
     }
   }
 
@@ -293,5 +304,39 @@ export class MessageFilterComponent {
 
   onActivate(event) {
     console.log('Activate Event', event);
+  }
+
+  isValidFromToService(str: string) {
+    return str=='' || (/^[a-zA-Z0-9_:-]+:[a-zA-Z0-9_:-]+$/.test(str));
+  }
+
+  isValidAction(str: string) {
+    return str=='' || (/^[a-zA-Z0-9_:-]+$/.test(str));
+  }
+
+  hasError(type: string, str: string) {
+    switch(type) {
+      case 'from':
+      case 'to':
+        if(!this.isValidFromToService(str)) {
+          this.alertService.error(type.toUpperCase() + " rule is [PARTYID]:[TYPE] and '" + str + "' is not according to that.");
+          return true;
+        }
+        return false;
+      case 'action':
+        if(!this.isValidAction(str)) {
+          this.alertService.error(type.toUpperCase() + " rule is [ACTION] and '" + str + "' is not according to that.");
+          return true;
+        }
+        return false;
+      case 'sevice':
+        if(!this.isValidFromToService(str)) {
+          this.alertService.error("SERVICE rule is [SERVICE]:[TYPE] and '" + str + "' is not according to that.");
+          return true;
+        }
+        return false;
+      default:
+        return false;
+    }
   }
 }
