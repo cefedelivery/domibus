@@ -6,7 +6,7 @@ export class BackendFilterEntry {
   from: RoutingCriteriaEntry;
   to: RoutingCriteriaEntry;
   action: RoutingCriteriaEntry;
-  sevice: RoutingCriteriaEntry ;
+  service: RoutingCriteriaEntry ;
 
   public constructor(public entityId: number,
                      public index: number,
@@ -20,7 +20,7 @@ export class BackendFilterEntry {
     this.from = this.getRoutingCriteria("from");
     this.to = this.getRoutingCriteria("to");
     this.action = this.getRoutingCriteria("action");
-    this.sevice = this.getRoutingCriteria("sevice");
+    this.service = this.getRoutingCriteria("service");
   }
 
   public getRoutingCriteria(property: string): RoutingCriteriaEntry {
