@@ -9,7 +9,8 @@ import eu.domibus.common.model.configuration.LegConfiguration;
  *
  */
 //@thom test this hierarchy of class
-public interface MessagePolicyInSetup {
+public interface LegConfigurationExtractor {
     LegConfiguration extractMessageConfiguration() throws EbMS3Exception;
-    void accept(PolicyInSetupVisitor visitor);
+
+    void accept(MessageLegConfigurationVisitor visitor);
 }

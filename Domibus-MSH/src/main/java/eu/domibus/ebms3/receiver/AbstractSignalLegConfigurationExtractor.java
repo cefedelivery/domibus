@@ -10,10 +10,9 @@ import org.apache.cxf.binding.soap.SoapMessage;
 /**
  * @author Thomas Dussart
  * @since 3.3
- *
  */
-public abstract class AbstractSignalMessagePolicyInSetup extends AbstractMessagePolicyInSetup{
-    public AbstractSignalMessagePolicyInSetup(SoapMessage message, Messaging messaging) {
+public abstract class AbstractSignalLegConfigurationExtractor extends AbstractLegConfigurationExtractor {
+    AbstractSignalLegConfigurationExtractor(SoapMessage message, Messaging messaging) {
         super(message, messaging);
     }
 
@@ -23,5 +22,5 @@ public abstract class AbstractSignalMessagePolicyInSetup extends AbstractMessage
         return process();
     }
 
-    abstract LegConfiguration process() throws EbMS3Exception ;
+    abstract LegConfiguration process() throws EbMS3Exception;
 }

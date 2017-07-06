@@ -5,11 +5,9 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.common.services.SoapService;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -20,10 +18,8 @@ import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.binding.soap.interceptor.MustUnderstandInterceptor;
 import org.apache.cxf.binding.soap.saaj.SAAJInInterceptor;
 import org.apache.cxf.common.util.StringUtils;
-import org.apache.cxf.helpers.IOUtils;
 import org.apache.cxf.interceptor.AttachmentInInterceptor;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.interceptor.StaxInInterceptor;
 import org.apache.cxf.message.Attachment;
 import org.apache.cxf.phase.Phase;
 import org.apache.cxf.ws.policy.PolicyBuilder;
@@ -31,21 +27,16 @@ import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.policy.PolicyInInterceptor;
 import org.apache.cxf.ws.security.SecurityConstants;
 import org.apache.neethi.Policy;
-import org.apache.neethi.builders.converters.StaxToDOMConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.stream.XMLStreamReader;
 import java.io.*;
 import java.util.Collection;
 import java.util.HashSet;
@@ -67,7 +58,9 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     private DomibusConfigurationService domibusConfigurationService;
 
     @Autowired
-    private PolicyInSetupVisitor policyInSetupVisitor;
+    private SoapService soapService;
+
+    private MessageLegConfigurationFactory messageLegConfigurationFactory;
 
     public SetPolicyInInterceptor() {
         this(Phase.RECEIVE);
@@ -81,6 +74,10 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
+    }
+
+    public void setMessageLegConfigurationFactory(MessageLegConfigurationFactory messageLegConfigurationFactory) {
+        this.messageLegConfigurationFactory = messageLegConfigurationFactory;
     }
 
     /**
@@ -102,27 +99,16 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             return;
         }
 
-        final InputStream inputStream = message.getContent(InputStream.class);
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Messaging messaging = null;
         String policyName = null;
         String messageId = null;
 
         try {
-            IOUtils.copy(inputStream, byteArrayOutputStream); //FIXME: do not copy the whole byte[], use SequenceInputstream instead
-            final byte[] data = byteArrayOutputStream.toByteArray();
-            message.setContent(InputStream.class, new ByteArrayInputStream(data));
-            new StaxInInterceptor().handleMessage(message);
-            final XMLStreamReader xmlStreamReader = message.getContent(XMLStreamReader.class);
-            final Element soapEnvelope = new StaxToDOMConverter().convert(xmlStreamReader);
-            message.removeContent(XMLStreamReader.class);
-            message.setContent(InputStream.class, new ByteArrayInputStream(data));
-            //message.setContent(XMLStreamReader.class, XMLInputFactory.newInstance().createXMLStreamReader(message.getContent(InputStream.class)));
-            final Node messagingNode = soapEnvelope.getElementsByTagNameNS(ObjectFactory._Messaging_QNAME.getNamespaceURI(), ObjectFactory._Messaging_QNAME.getLocalPart()).item(0);
-            messaging = ((JAXBElement<Messaging>) this.jaxbContext.createUnmarshaller().unmarshal(messagingNode)).getValue();
-            MessagePolicyInSetup messagePolicyInSetup = getMessagePolicyInSetup(message, messaging);
+            messaging=soapService.getMessage(message);
+            LegConfigurationExtractor legConfigurationExtractor = messageLegConfigurationFactory.extractMessageConfiguration(message, messaging);
+            if(legConfigurationExtractor ==null)return;
 
-            final LegConfiguration legConfiguration=messagePolicyInSetup.extractMessageConfiguration();
+            final LegConfiguration legConfiguration= legConfigurationExtractor.extractMessageConfiguration();
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();
             final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));
@@ -220,29 +206,6 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         }
     }
 
-    public MessagePolicyInSetup getMessagePolicyInSetup(final SoapMessage soapMessage,final Messaging messaging){
-        MessagePolicyInSetup messagePolicyInSetup=null;
-        if(messaging.getUserMessage()!=null){
-            UserMessagePolicyInSetup userMessagePolicyInSetup = new UserMessagePolicyInSetup(soapMessage, messaging);
-            userMessagePolicyInSetup.accept(policyInSetupVisitor);
-            messagePolicyInSetup=userMessagePolicyInSetup;
-        }
-        else if(messaging.getSignalMessage()!=null){
-            PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
-            if(pullRequest !=null){
-                PullRequestMessagePolicyInSetup policyInSetup=new PullRequestMessagePolicyInSetup(soapMessage,messaging);
-                policyInSetup.accept(policyInSetupVisitor);
-                messagePolicyInSetup=policyInSetup;
-            }
-            else if(messaging.getSignalMessage().getReceipt()!=null){
-                ReceiptMessagePolicyInSetup receiptMessagePolicyInSetup = new ReceiptMessagePolicyInSetup(soapMessage, messaging);
-                receiptMessagePolicyInSetup.accept(policyInSetupVisitor);
-                messagePolicyInSetup=receiptMessagePolicyInSetup;
-            }
-        }
-
-        return messagePolicyInSetup;
-    }
 }
 
 
