@@ -66,7 +66,7 @@ export class JmsComponent implements OnInit {
     this.getDestinations(true);
   }
 
-  private getDestinations(initial: boolean) {
+  private getDestinations(searchSelectedDestination: boolean) {
     this.http.get("rest/jms/destinations").subscribe(
       (response: Response) => {
         this.queues = [];
@@ -77,7 +77,7 @@ export class JmsComponent implements OnInit {
             this.selectedSource = destinations[key];
           }
         }
-        if(initial) {
+        if(searchSelectedDestination) {
           this.search();
         }
         // console.log(this.queues);
