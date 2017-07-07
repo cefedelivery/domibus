@@ -42,7 +42,6 @@ export class JmsComponent implements OnInit {
 
   rows: Array<any> = [];
   pageSizes: Array<any> = [
-    {key: '5', value: 5},
     {key: '10', value: 10},
     {key: '25', value: 25},
     {key: '50', value: 50},
@@ -50,28 +49,37 @@ export class JmsComponent implements OnInit {
   ];
   pageSize: number = this.pageSizes[0].value;
 
-  request = new MessagesRequestRO()
+  request = new MessagesRequestRO();
   private headers = new Headers({'Content-Type': 'application/json'});
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   ngOnInit() {
-    this.getDestinations();
+    // set fromDate equals to now - 3 days
+    this.request.fromDate = new Date(Date.now());
+    this.request.fromDate.setDate(this.request.fromDate.getDate()-3);
+
+    // set toDate equals to now
+    this.request.toDate = new Date(Date.now());
+
+    this.getDestinations(true);
   }
 
-  private getDestinations() {
+  private getDestinations(initial: boolean) {
     this.http.get("rest/jms/destinations").subscribe(
       (response: Response) => {
         this.queues = [];
         let destinations = response.json().jmsDestinations;
         for (let key in destinations) {
-          this.queues.push(destinations[key])
+          this.queues.push(destinations[key]);
           if (key.match('domibus\.DLQ')) {
             this.selectedSource = destinations[key];
           }
         }
-
+        if(initial) {
+          this.search();
+        }
         // console.log(this.queues);
       },
       (error: Response) => {
@@ -120,8 +128,7 @@ export class JmsComponent implements OnInit {
       selector: this.request.selector,
     }, {headers: this.headers}).subscribe(
       (response: Response) => {
-        let messages = response.json().messages;
-        this.rows = messages;
+        this.rows = response.json().messages;
         this.loading = false;
         //console.log(messages);
       },
@@ -168,7 +175,7 @@ export class JmsComponent implements OnInit {
     this.markedForDeletionMessages.push(...this.selectedMessages);
     let newRows = this.rows.filter((element) => {
       return !this.selectedMessages.includes(element);
-    })
+    });
     this.selectedMessages = [];
     this.rows = newRows;
   }
@@ -180,16 +187,16 @@ export class JmsComponent implements OnInit {
       selectedMessages: messageIds,
       action: "MOVE"
     }, {headers: this.headers}).subscribe(
-      (response: Response) => {
+      () => {
         this.alertService.success("The operation 'move messages' completed successfully.");
 
         //refresh destinations
-        this.getDestinations();
+        this.getDestinations(false);
 
         //remove the selected rows
         let newRows = this.rows.filter((element) => {
           return !this.selectedMessages.includes(element);
-        })
+        });
         this.selectedMessages = [];
         this.rows = newRows;
       },
@@ -205,9 +212,9 @@ export class JmsComponent implements OnInit {
       selectedMessages: messageIds,
       action: "REMOVE"
     }, {headers: this.headers}).subscribe(
-      (response: Response) => {
+      () => {
         this.alertService.success("The operation 'updates on message(s)' completed successfully.");
-        this.getDestinations();
+        this.getDestinations(false);
         this.markedForDeletionMessages = [];
       },
       error => {
