@@ -1,5 +1,8 @@
 package eu.domibus.ebms3.common.model;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -60,19 +63,22 @@ public class PayloadInfo {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PayloadInfo)) return false;
 
-        final PayloadInfo that = (PayloadInfo) o;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        PayloadInfo that = (PayloadInfo) o;
 
-        return !(this.partInfo != null ? !this.partInfo.equals(that.partInfo) : that.partInfo != null);
-
+        return new EqualsBuilder()
+                .append(partInfo, that.partInfo)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return this.partInfo.hashCode();
+        return new HashCodeBuilder(17, 37)
+                .append(partInfo)
+                .toHashCode();
     }
 }

@@ -176,6 +176,7 @@ public class MessageSender implements MessageListener {
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
         } catch (Throwable e) {
+            LOG.error("Error sending message [{}]", messageId, e);
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;

@@ -281,7 +281,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
                 .appendSuper(super.equals(o))
                 .append(schema, partInfo.schema)
                 .append(description, partInfo.description)
-                .append(partProperties, partInfo.partProperties)
+//                .append(partProperties, partInfo.partProperties)
                 .append(href, partInfo.href)
                 .isEquals();
     }
@@ -292,7 +292,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
                 .appendSuper(super.hashCode())
                 .append(schema)
                 .append(description)
-                .append(partProperties)
+//                .append(partProperties)
                 .append(href)
                 .toHashCode();
     }

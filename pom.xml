@@ -11,7 +11,6 @@
     <name>Domibus MSH</name>
     <modules>
         <module>Domibus-MSH</module>
-        <module>Domibus-MSH-angular</module>
         <module>Domibus-MSH-api</module>
         <module>Domibus-MSH-ext-services-delegate</module>
         <module>Domibus-MSH-logging</module>
@@ -677,6 +676,15 @@
             </activation>
             <modules>
                 <module>Domibus-MSH-db</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>UI</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>Domibus-MSH-angular</module>
             </modules>
         </profile>
         <profile>
