@@ -175,6 +175,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
      */
     @Override
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
+        if (!configurationDAO.configurationExists()) {
+            return new PullContext("Pmode not configured");
+        }
         List<Process> processes = processDao.findPullProcessBytMpc(mpcQualifiedName);
         Configuration configuration = configurationDAO.read();
         try {
@@ -183,6 +186,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         } catch (EbMS3Exception e) {
             return new PullContext(e.getMessage());
         }
+
+
     }
 
 
