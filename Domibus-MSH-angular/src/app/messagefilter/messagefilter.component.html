@@ -23,11 +23,13 @@
                 *ngIf="!editing[row.$$index + '-plugin']" class="justified, clickable">
                 {{value}}
               </span>
-              <input autofocus
-                     list="backendFilters"
-                     (blur)="updateValue($event, 'plugin', row)" *ngIf="editing[row.$$index + '-plugin']"
-                     [value]="value" class="justified, clickable">
-
+              <input
+                autofocus
+                mdInput
+                list="backendFilters"
+                (blur)="updateValue($event, 'plugin', row)"
+                *ngIf="editing[row.$$index + '-plugin']"
+                [value]="value" class="justified, clickable">
               <datalist id="backendFilters">
                 <div *ngFor="let backendName of backendFilterNames">
                   <option value={{backendName}}>{{backendName}}</option>
@@ -38,69 +40,84 @@
           <ngx-datatable-column name="From" prop="from.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
-                title="Double click to edit"
+                title="Double click to edit. Rule: [PARTYID]:[TYPE]"
                 (dblclick)="editing[row.$$index + '-from'] = true"
-                *ngIf="!editing[row.$$index + '-from']" class="justified, clickable">
+                *ngIf="!editing[row.$$index + '-from']"
+                class="justified, clickable">
                 {{value}}
               </span>
               <input
+                mdInput
                 autofocus
+                placeholder="From"
                 (blur)="updateValue($event, 'from', row)"
                 *ngIf="editing[row.$$index + '-from']"
                 type="text"
-                [value]="value" class="justified, clickable"
-              />
+                title="[PARTYID]:[TYPE]"
+                [value]="value"
+                class="justified, clickable"/>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="To" prop="to.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
-                title="Double click to edit"
+                title="Double click to edit. Rule: [PARTYID]:[TYPE]"
                 (dblclick)="editing[row.$$index + '-to'] = true"
                 *ngIf="!editing[row.$$index + '-to']" class="justified, clickable">
                 {{value}}
               </span>
               <input
+                mdInput
                 autofocus
+                placeholder="To"
                 (blur)="updateValue($event, 'to', row)"
                 *ngIf="editing[row.$$index + '-to']"
                 type="text"
-                [value]="value" class="justified, clickable"
-              />
+                title="[PARTYID]:[TYPE]"
+                [value]="value"
+                class="justified, clickable"/>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="Action" prop="action.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
-                title="Double click to edit"
+                title="Double click to edit. Rule: [ACTION]"
                 (dblclick)="editing[row.$$index + '-action'] = true"
-                *ngIf="!editing[row.$$index + '-action']" class="justified, clickable">
+                *ngIf="!editing[row.$$index + '-action']"
+                class="justified, clickable">
                 {{value}}
               </span>
               <input
+                mdInput
                 autofocus
+                placeholder="Action"
                 (blur)="updateValue($event, 'action', row)"
                 *ngIf="editing[row.$$index + '-action']"
                 type="text"
-                [value]="value" class="justified, clickable"
-              />
+                title="[ACTION]"
+                [value]="value"
+                class="justified, clickable"/>
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="Service" prop="sevice.expression" [sortable]="false">
+          <ngx-datatable-column name="Service" prop="service.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span
-                title="Double click to edit"
-                (dblclick)="editing[row.$$index + '-sevice'] = true"
-                *ngIf="!editing[row.$$index + '-sevice']" class="justified, clickable">
+                title="Double click to edit. Rule: [SERVICE]:[TYPE]"
+                (dblclick)="editing[row.$$index + '-service'] = true"
+                *ngIf="!editing[row.$$index + '-service']"
+                class="justified, clickable">
                 {{value}}
               </span>
               <input
+                mdInput
                 autofocus
-                (blur)="updateValue($event, 'sevice', row)"
-                *ngIf="editing[row.$$index + '-sevice']"
+                placeholder="Service"
+                (blur)="updateValue($event, 'service', row)"
+                *ngIf="editing[row.$$index + '-service']"
                 type="text"
-                [value]="value" class="justified, clickable"
-              />
+                title="[SERVICE]:[TYPE]"
+                [value]="value"
+                class="justified, clickable"/>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="Persisted" prop="persisted" [sortable]="false">
