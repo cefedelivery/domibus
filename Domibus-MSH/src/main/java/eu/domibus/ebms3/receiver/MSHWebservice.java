@@ -14,10 +14,7 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
-import eu.domibus.ebms3.sender.MSHDispatcher;
-import eu.domibus.ebms3.sender.ReliabilityChecker;
-import eu.domibus.ebms3.sender.ResponseHandler;
+import eu.domibus.ebms3.sender.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -84,6 +81,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     @Autowired
     private ReliabilityChecker reliabilityChecker;
+
+    @Autowired
+    private UpdateRetryLoggingService updateRetryLoggingService;
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
@@ -204,15 +204,20 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         if (!pullContext.isValid()) {
             throw new WebServiceException("Pmode configuration " + pullContext.getErrorMessage());
         }
+        LegConfiguration leg = null;
+        String messageId = null;
         UserMessage userMessage = messageExchangeService.retrieveReadyToPullUserMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
+        ReliabilityChecker.CheckResult pullStatus = ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
         try {
             if (userMessage != null) {
-                LegConfiguration leg = pullContext.filterLegOnMpc();
+                messageId = userMessage.getMessageInfo().getMessageId();
+                leg = pullContext.filterLegOnMpc();
                 SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
                 PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
                 if (isNonRepudiation(leg)) {
-                    PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_ID, userMessage.getMessageInfo().getMessageId());
+                    PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_ID, messageId);
                 }
+                reliabilityChecker.handleReliability(messageId, pullStatus, null, leg);
                 return soapMessage;
             } else {
                 LOG.debug("No message for received pull request with mpc " + pullContext.getMpcQualifiedName());
@@ -224,7 +229,14 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 return soapMessage;
             }
         } catch (EbMS3Exception e) {
-            throw new WebServiceException(e);
+            pullStatus = ReliabilityChecker.CheckResult.FAIL;
+            try {
+                return messageBuilder.buildSOAPFaultMessage(e.getFaultInfo());
+            } catch (EbMS3Exception e1) {
+                throw new WebServiceException(e1);
+            }
+        } finally {
+            reliabilityChecker.handleReliability(messageId, pullStatus, null, leg);
         }
     }
 
