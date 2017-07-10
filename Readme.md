@@ -28,12 +28,12 @@ Any feedback on this documentation is highly welcome, including bugs, typos
 or things you think should be included but aren't. You can use [JIRA](https://ec.europa.eu/cefdigital/tracker/projects/EDELIVERY/issues) to provide feedback.
 
 Following documents are available on the [Domibus release page](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus):
-    * Quick Start Guide
-    * Administration Guide 
-    * Testing guide
-    * Interface Control Documents of the default plugins
-    * Plugin cookbook 
-    * Software Architecture Document
+*   Quick Start Guide
+*   Administration Guide 
+*   Testing guide
+*   Interface Control Documents of the default plugins
+*   Plugin cookbook 
+*   Software Architecture Document
 
 
 [Top](#top)
@@ -66,8 +66,8 @@ How to install and run Domibus can be read in the Quick Start Guide and more adv
 
 The purpose of Domibus is to facilitate B2B communication. To achieve this goal it provides a very flexible plugin model which allows the integration with nearly all back office applications. 
 Domibus offers two default plugins, available with the Domibus distribution:
-    * Web Service plugin
-    * JMS plugin 
+*   Web Service plugin
+*   JMS plugin 
 The Interface Control Document of the default JMS plugin outlines the JMS Data Format Exchange to be used as part of the default JMS backend plugin.
 The Interface Control Document of the default WS plugin describes the WSDL and the observable behaviour of the interface provided in the default WS plugin
 Both documents are available on the [Domibus Release Page](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus)
