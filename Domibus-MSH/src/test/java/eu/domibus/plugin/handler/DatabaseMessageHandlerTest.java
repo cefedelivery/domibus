@@ -449,8 +449,6 @@ public class DatabaseMessageHandlerTest {
             backendMessageValidator.validateInitiatorParty(withAny(new Party()), withAny(new Party()));
             backendMessageValidator.validateResponderParty(withAny(new Party()), withAny(new Party()));
             times = 0;
-            backendMessageValidator.validatePartiesRoles(withAny(new Role()), withAny(new Role()));
-            times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
             messagingService.storeMessage(withAny(new Messaging()));
@@ -500,8 +498,6 @@ public class DatabaseMessageHandlerTest {
             backendMessageValidator.validateInitiatorParty(withAny(new Party()), withAny(new Party()));
             times = 0;
             backendMessageValidator.validateResponderParty(withAny(new Party()), withAny(new Party()));
-            times = 0;
-            backendMessageValidator.validatePartiesRoles(withAny(new Role()), withAny(new Role()));
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;

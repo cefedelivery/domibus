@@ -33,6 +33,7 @@ import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.common.validators.ConfigurationValidator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -96,6 +97,9 @@ public abstract class PModeProvider {
     @Autowired
     XMLUtil xmlUtil;
 
+    @Autowired
+    List<ConfigurationValidator> configurationValidators;
+
     public abstract void init();
 
     public abstract void refresh();
@@ -133,6 +137,10 @@ public abstract class PModeProvider {
         Configuration configuration = unmarshalledConfiguration.getResult();
         configurationDAO.updateConfiguration(configuration);
 
+        for (ConfigurationValidator validator : configurationValidators) {
+            resultMessage.addAll(validator.validate(configuration));
+        }
+
         //save the raw configuration
         final ConfigurationRaw configurationRaw = new ConfigurationRaw();
         configurationRaw.setConfigurationDate(Calendar.getInstance().getTime());
@@ -145,6 +153,7 @@ public abstract class PModeProvider {
 
         return resultMessage;
     }
+
 
     protected UnmarshallerResult unmarshall(byte[] bytes, boolean ignoreWhitespaces) throws XmlProcessingException {
         Configuration configuration = null;
