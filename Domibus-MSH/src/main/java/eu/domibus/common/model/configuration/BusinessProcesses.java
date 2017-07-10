@@ -32,45 +32,45 @@ public class BusinessProcesses extends AbstractBaseEntity {
 
     @XmlElement(required = true, name = "roles")
     @Transient
-    protected Roles rolesXml;
+    private Roles rolesXml; //NOSONAR
     @XmlElement(required = true, name = "parties")
     @Transient
-    protected Parties partiesXml;
+    private Parties partiesXml; //NOSONAR
     @XmlElement(required = true, name = "meps")
     @Transient
-    protected Meps mepsXml;
+    private Meps mepsXml; //NOSONAR
     @XmlElement(name = "properties")
     @Transient
-    protected Properties propertiesXml;
+    private Properties propertiesXml; //NOSONAR
     @XmlElement(required = true, name = "payloadProfiles")
     @Transient
-    protected PayloadProfiles payloadProfilesXml;
+    private PayloadProfiles payloadProfilesXml; //NOSONAR
     @XmlElement(required = true, name = "errorHandlings")
     @Transient
-    protected ErrorHandlings errorHandlingsXml;
+    private ErrorHandlings errorHandlingsXml; //NOSONAR
     @XmlElement(required = true, name = "agreements")
     @Transient
-    protected Agreements agreementsXml;
+    private Agreements agreementsXml; //NOSONAR
     @XmlElement(required = true, name = "services")
     @Transient
-    protected Services servicesXml;
+    private Services servicesXml; //NOSONAR
     @XmlElement(required = true, name = "actions")
     @Transient
-    protected Actions actionsXml;
+    private Actions actionsXml; //NOSONAR
     @XmlElement(required = true, name = "as4")
     @Transient
-    protected As4 as4Xml;
+    private As4 as4Xml; //NOSONAR
     @XmlElement(required = true, name = "securities")
     @Transient
-    protected Securities securitiesXml;
+    private Securities securitiesXml; //NOSONAR
     @XmlElement(required = true, name = "legConfigurations")
     @Transient
-    protected LegConfigurations legConfigurationsXml;
+    private LegConfigurations legConfigurationsXml; //NOSONAR
 
     @XmlElement(required = true, name = "process")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_BUSINESSPROCESS")
-    protected Set<Process> processes;
+    private Set<Process> processes;
 
 
     @XmlTransient

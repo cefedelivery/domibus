@@ -87,7 +87,7 @@ public class PojoInstaciatorUtil {
                 }
             return instance;
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new PojoInstantiatorException(e);
         }
     }
 

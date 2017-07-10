@@ -410,8 +410,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     private void fillInfoParts(Holder<DownloadMessageResponse> downloadMessageResponse, Messaging messaging) throws DownloadMessageFault {
 
-        String msgId = messaging.getUserMessage().getMessageInfo().getMessageId();
-
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
             PayloadType payloadType = WEBSERVICE_OF.createPayloadType();

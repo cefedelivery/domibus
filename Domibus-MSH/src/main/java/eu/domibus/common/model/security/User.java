@@ -37,7 +37,7 @@ public class User extends AbstractBaseEntity{
     private String email;
     @NotNull
     @Column(name = "USER_PASSWORD")
-    private String password;
+    private String password; //NOSONAR
     @NotNull
     @Column(name = "USER_ENABLED")
     private Boolean active;

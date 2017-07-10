@@ -20,7 +20,7 @@ public class PayloadProfile extends AbstractBaseEntity {
 
     @XmlElement(required = true, name = "attachment")
     @Transient
-    protected List<Attachment> attachment;
+    protected List<Attachment> attachment; //NOSONAR
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME")
     protected String name;

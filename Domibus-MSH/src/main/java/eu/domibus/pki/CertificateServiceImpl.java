@@ -164,8 +164,9 @@ public class CertificateServiceImpl implements CertificateService {
      */
     @Override
     public X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password) {
+        FileInputStream fileInputStream = null;
         try {
-            FileInputStream fileInputStream = new FileInputStream(filePath);
+            fileInputStream = new FileInputStream(filePath);
 
             KeyStore keyStore = KeyStore.getInstance("JKS");
             keyStore.load(fileInputStream, password.toCharArray());
@@ -176,6 +177,14 @@ public class CertificateServiceImpl implements CertificateService {
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
             LOG.error("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password);
             throw new DomibusCertificateException("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password, e);
+        } finally {
+            try {
+                if(fileInputStream != null) {
+                    fileInputStream.close();
+                }
+            } catch (IOException e) {
+                LOG.warn("Problems closing FileInputStream", e);
+            }
         }
     }
 }

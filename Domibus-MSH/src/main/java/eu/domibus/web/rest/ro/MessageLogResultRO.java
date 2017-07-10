@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class MessageLogResultRO implements Serializable {
 
-    private Map<String, Object> filter;
+    private Map<String, Object> filter; //NOSONAR
     private List<MessageLogRO> messageLogEntries;
 
     private MSHRole[] mshRoles;

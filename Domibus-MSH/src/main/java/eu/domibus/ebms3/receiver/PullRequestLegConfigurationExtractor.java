@@ -35,7 +35,7 @@ public class PullRequestLegConfigurationExtractor extends AbstractSignalLegConfi
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
         if (!pullContext.isValid()) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Incoming pull request :" + pullContext.createProcessWarningMessage(), messaging != null ? getMessageId() : "unknown", null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Incoming pull request :" + pullContext.createProcessWarningMessage(), getMessageId(), null);
         }
         LegConfiguration legConfiguration = pullContext.getProcess().getLegs().iterator().next();
         MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(pullContext.getAgreement(),

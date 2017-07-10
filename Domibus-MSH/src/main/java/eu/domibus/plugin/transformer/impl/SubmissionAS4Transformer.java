@@ -16,8 +16,6 @@ import java.util.Locale;
 @org.springframework.stereotype.Service
 public class SubmissionAS4Transformer {
 
-    public static final String DESCRIPTION_PROPERTY_NAME = "description";
-
     @Autowired
     private MessageIdGenerator messageIdGenerator;
 
@@ -155,14 +153,10 @@ public class SubmissionAS4Transformer {
 
         if (messaging.getPayloadInfo() != null) {
             for (final PartInfo partInfo : messaging.getPayloadInfo().getPartInfo()) {
-                String mime = "";
                 final Collection<Submission.TypedProperty> properties = new ArrayList<>();
                 if (partInfo.getPartProperties() != null) {
                     for (final Property property : partInfo.getPartProperties().getProperties()) {
                         properties.add(new Submission.TypedProperty(property.getName(), property.getValue(), property.getType()));
-                        if (property.getName().equals(Property.MIME_TYPE)) {
-                            mime = property.getValue();
-                        }
                     }
                 }
                 Submission.Description description = null;

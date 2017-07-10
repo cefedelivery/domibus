@@ -33,7 +33,7 @@ public class Receipt extends AbstractBaseEntity {
     @Lob
     @CollectionTable(name = "TB_RECEIPT_DATA", joinColumns = @JoinColumn(name = "RECEIPT_ID"))
     @Column(name = "RAW_XML")
-    protected List<String> any;
+    protected List<String> any; //NOSONAR
 
     /**
      * Gets the value of the any property.
