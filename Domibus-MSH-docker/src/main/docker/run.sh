@@ -37,6 +37,8 @@ sed -i -e "s/<blue_hostname>:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-
 sed -i -e "s/<red_hostname>:8080/domibusred:8080/g" ./domibus-gw-sample-pmode-blue.xml
 sed -i -e "s/<blue_hostname>:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-red.xml
 sed -i -e "s/<red_hostname>:8080/domibusred:8080/g" ./domibus-gw-sample-pmode-red.xml
+$SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:8180 $SOURCE_CODE/../Domibus-MSH-tomcat/domibus-gw-sample-pmode-blue.xml
+$SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:9080 $SOURCE_CODE/../Domibus-MSH-tomcat/domibus-gw-sample-pmode-red.xml
 mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
 
 cd $SOURCE_CODE/../Domibus-MSH-soapui-tests
@@ -47,20 +49,17 @@ sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-blue.xm
 sed -i -e "s/localhost:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-red.xml
 sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-red.xml
 
-./uploadPmode.sh localhost:8180 ./domibus-gw-sample-pmode-blue.xml
-./uploadPmode.sh localhost:9080 ./domibus-gw-sample-pmode-red.xml
-#curl --user $ADMIN_USER:$ADMIN_PASSW -X POST -F pmode=@./domibus-gw-sample-pmode-blue.xml http://localhost:8180/domibus/home/uploadPmodeFile
-#curl --user $ADMIN_USER:$ADMIN_PASSW -X POST -F pmode=@./domibus-gw-sample-pmode-red.xml http://localhost:9080/domibus/home/uploadPmodeFile
+$SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:8180 $SOURCE_CODE/../Domibus-MSH-soapui-tests/domibus-gw-sample-pmode-blue.xml
+$SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:9080 $SOURCE_CODE/../Domibus-MSH-soapui-tests/domibus-gw-sample-pmode-red.xml
 
 MYSQL_CONNECTOR="mysql-connector-java-5.1.40"
 
 echo $MYSQL_CONNECTOR
 
-#sudo apt-get install -y wget
-#sudo apt-get install -y unzip
-#sudo wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
-#    && sudo unzip -o $MYSQL_CONNECTOR.zip
-#
-#sudo cp $MYSQL_CONNECTOR/$MYSQL_CONNECTOR-bin.jar ./src/main/soapui/lib
+sudo apt-get install -y wget
+sudo apt-get install -y unzip
+sudo wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
+    && sudo unzip -o $MYSQL_CONNECTOR.zip
 
+sudo cp $MYSQL_CONNECTOR/$MYSQL_CONNECTOR-bin.jar ./src/main/soapui/lib
 mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
