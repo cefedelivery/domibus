@@ -39,7 +39,7 @@ public class SignalMessage extends AbstractBaseEntity {
     protected MessageInfo messageInfo;
     @XmlElement(name = "PullRequest")
     @Embedded
-    private PullRequest pullRequest; //NOSONAR
+    protected PullRequest pullRequest; //NOSONAR
     @XmlElement(name = "Receipt")
     @OneToOne(cascade = CascadeType.ALL)
     protected Receipt receipt;

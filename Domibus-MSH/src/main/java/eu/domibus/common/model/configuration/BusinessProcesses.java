@@ -32,40 +32,40 @@ public class BusinessProcesses extends AbstractBaseEntity {
 
     @XmlElement(required = true, name = "roles")
     @Transient
-    private Roles rolesXml; //NOSONAR
+    protected Roles rolesXml; //NOSONAR
     @XmlElement(required = true, name = "parties")
     @Transient
-    private Parties partiesXml; //NOSONAR
+    protected Parties partiesXml; //NOSONAR
     @XmlElement(required = true, name = "meps")
     @Transient
-    private Meps mepsXml; //NOSONAR
+    protected Meps mepsXml; //NOSONAR
     @XmlElement(name = "properties")
     @Transient
-    private Properties propertiesXml; //NOSONAR
+    protected Properties propertiesXml; //NOSONAR
     @XmlElement(required = true, name = "payloadProfiles")
     @Transient
-    private PayloadProfiles payloadProfilesXml; //NOSONAR
+    protected PayloadProfiles payloadProfilesXml; //NOSONAR
     @XmlElement(required = true, name = "errorHandlings")
     @Transient
-    private ErrorHandlings errorHandlingsXml; //NOSONAR
+    protected ErrorHandlings errorHandlingsXml; //NOSONAR
     @XmlElement(required = true, name = "agreements")
     @Transient
-    private Agreements agreementsXml; //NOSONAR
+    protected Agreements agreementsXml; //NOSONAR
     @XmlElement(required = true, name = "services")
     @Transient
-    private Services servicesXml; //NOSONAR
+    protected Services servicesXml; //NOSONAR
     @XmlElement(required = true, name = "actions")
     @Transient
-    private Actions actionsXml; //NOSONAR
+    protected Actions actionsXml; //NOSONAR
     @XmlElement(required = true, name = "as4")
     @Transient
-    private As4 as4Xml; //NOSONAR
+    protected As4 as4Xml; //NOSONAR
     @XmlElement(required = true, name = "securities")
     @Transient
-    private Securities securitiesXml; //NOSONAR
+    protected Securities securitiesXml; //NOSONAR
     @XmlElement(required = true, name = "legConfigurations")
     @Transient
-    private LegConfigurations legConfigurationsXml; //NOSONAR
+    protected LegConfigurations legConfigurationsXml; //NOSONAR
 
     @XmlElement(required = true, name = "process")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

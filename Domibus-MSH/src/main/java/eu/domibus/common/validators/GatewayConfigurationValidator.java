@@ -58,22 +58,13 @@ public class GatewayConfigurationValidator {
             return;
         }
 
-        FileInputStream fileInputStream = null;
-        try {
-            fileInputStream = new FileInputStream(trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file"));
+        try (FileInputStream fileInputStream = new FileInputStream(trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file"))) {
             ks.load(fileInputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
         } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
             LOG.warn("Failed to load certificates! " + e.getMessage());
             warnOutput("CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
-        } finally {
-            if(fileInputStream != null) {
-                try {
-                    fileInputStream.close();
-                } catch (IOException e) {
-                    LOG.warn("Problems closing FileInputStream", e);
-                }
-            }
         }
+
         try {
             if (ks.containsAlias(BLUE_GW_ALIAS)) {
                 warnOutput("SAMPLE CERTIFICATES ARE BEING USED - NOT FOR PRODUCTION USAGE");

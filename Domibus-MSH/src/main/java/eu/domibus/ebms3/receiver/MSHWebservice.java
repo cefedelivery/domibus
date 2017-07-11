@@ -100,11 +100,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             if (messaging.getSignalMessage().getPullRequest() != null) {
                 return handlePullRequest(messaging);
             } else if (messaging.getSignalMessage().getReceipt() != null) {
-                try {
-                    handlePullRequestReceipt(request, messaging);
-                } catch (EbMS3Exception e) {
-                    reliabilityChecker.handleEbms3Exception(e, messaging.getId());
-                }
+                handlePullRequestReceipt(request, messaging);
             }
         } else {
             String pmodeKey = null;
@@ -142,7 +138,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return new UserMessageHandlerContext();
     }
 
-    private void handlePullRequestReceipt(SOAPMessage request, Messaging messaging) throws EbMS3Exception {
+    private SOAPMessage handlePullRequestReceipt(SOAPMessage request, Messaging messaging) {
         String messageId = messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = null;
         ResponseHandler.CheckResult isOk = null;
@@ -170,13 +166,17 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             }
         } catch (final EbMS3Exception e) {
             reliabilityChecker.handleEbms3Exception(e, messageId);
-        } catch (ParserConfigurationException | SOAPException | SAXException | IOException e) {
-            LOG.error("Problems getting SOAP message");
+        } catch (Throwable e) {
+            throw e;
         } finally {
             reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
             messageExchangeService.removeRawMessageIssuedByPullRequest(messageId);
-            final SignalMessage signalMessage = new SignalMessage();
-            messageBuilder.buildSOAPMessage(signalMessage, null);
+            try {
+                final SignalMessage signalMessage = new SignalMessage();
+                return messageBuilder.buildSOAPMessage(signalMessage, null);
+            } catch (EbMS3Exception e) {
+                throw new WebServiceException(e);
+            }
         }
     }
 

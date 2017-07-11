@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class MessageFilterResultRO implements Serializable {
 
-    private List<MessageFilterRO> messageFilterEntries; //NOSONAR
+    private List<MessageFilterRO> messageFilterEntries;
 
     private boolean areFiltersPersisted;
 
