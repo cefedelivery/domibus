@@ -28,7 +28,6 @@ public class AuthenticationResourceTest {
     @Test
     public void testWarningWhenDefaultPasswordUsed(@Mocked WarningUtil warningUtil, @Mocked final LoggerFactory loggerFactory) throws Exception {
         User user = new User("user", "user");
-        user.setPassword("user");
         LoginRO loginRO = new LoginRO();
         loginRO.setUsername("user");
         loginRO.setPassword("user");
