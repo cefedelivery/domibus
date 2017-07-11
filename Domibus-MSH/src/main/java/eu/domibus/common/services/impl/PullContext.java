@@ -22,7 +22,7 @@ public class PullContext {
     private String mpcQualifiedName;
     public static final String MPC = "mpc";
     public static final String PMODE_KEY = "pmodKey";
-    public static final String NOTIFY_BUSINNES_ON_ERROR = "not";
+    public static final String NOTIFY_BUSINNES_ON_ERROR = "NOTIFY_BUSINNES_ON_ERROR";
     private boolean valid = false;
     private String errorMessage;
 

@@ -2,9 +2,9 @@ package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.*;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
@@ -16,7 +16,6 @@ import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.plugin.BackendConnector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
@@ -33,8 +32,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static eu.domibus.common.MessageStatus.READY_TO_PULL;
-import static eu.domibus.common.services.impl.PullContext.MPC;
-import static eu.domibus.common.services.impl.PullContext.PMODE_KEY;
+import static eu.domibus.common.MessageStatus.SEND_ENQUEUED;
+import static eu.domibus.common.services.impl.PullContext.*;
 
 /**
  * @author Thomas Dussart
@@ -74,25 +73,16 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
      */
     @Override
     @Transactional(readOnly = true)
-    public void upgradeMessageExchangeStatus(MessageExchangeConfiguration messageExchangeConfiguration) throws EbMS3Exception {
-        List<Process> processes = processDao.findProcessByMessageContext(messageExchangeConfiguration);
-        messageExchangeConfiguration.updateStatus(MessageStatus.SEND_ENQUEUED);
-        for (Process process : processes) {
-
-            boolean pullProcess = BackendConnector.Mode.PULL.getFileMapping().equals(Process.getBindingValue(process));
-            boolean oneWay = BackendConnector.Mep.ONE_WAY.getFileMapping().equals(Process.getMepValue(process));
-            if (pullProcess) {
-                processValidator.validatePullProcess(Lists.newArrayList(process));
-                //@thom add those checks in the validator.
-                if (!oneWay) {
-                    throw new RuntimeException("We only support oneway/pull at the moment");
-                }
-                if (processes.size() > 1) {
-                    throw new RuntimeException("This configuration is also mapping another process!");
-                }
-                messageExchangeConfiguration.updateStatus(READY_TO_PULL);
-            }
+    public MessageStatus getMessageStatus(final MessageExchangeConfiguration messageExchangeConfiguration) {
+        MessageStatus messageStatus = SEND_ENQUEUED;
+        List<Process> processes = processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
+        if (!processes.isEmpty()) {
+            processValidator.validatePullProcess(Lists.newArrayList(processes));
+            messageStatus = READY_TO_PULL;
+        } else {
+            LOG.debug("No pull process found for message configuration");
         }
+        return messageStatus;
     }
 
 
@@ -131,8 +121,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                         map.put(PullContext.NOTIFY_BUSINNES_ON_ERROR, String.valueOf(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()));
                         MessagePostProcessor postProcessor = new MessagePostProcessor() {
                             public Message postProcessMessage(Message message) throws JMSException {
-                                message.setStringProperty(MPC, map.get("mpc"));
-                                message.setStringProperty(PMODE_KEY, map.get("mpc"));
+                                message.setStringProperty(MPC, map.get(MPC));
+                                message.setStringProperty(PMODE_KEY, map.get(PMODE_KEY));
+                                message.setStringProperty(NOTIFY_BUSINNES_ON_ERROR, map.get(NOTIFY_BUSINNES_ON_ERROR));
                                 return message;
                             }
                         };
@@ -140,7 +131,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
                     }
                 }
-            } catch (EbMS3Exception e) {
+            } catch (PModeException e) {
                 LOG.warn("Invalid pull process configuration found during pull try " + e.getMessage());
             }
         }
@@ -183,11 +174,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         try {
             processValidator.validatePullProcess(processes);
             return new PullContext(processes.get(0), configuration.getParty(), mpcQualifiedName);
-        } catch (EbMS3Exception e) {
-            return new PullContext(e.getMessage());
+        } catch (PModeException p) {
+            return new PullContext(p.getMessage());
         }
-
-
     }
 
 
