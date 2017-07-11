@@ -52,7 +52,8 @@
             **/quartz/**,
             **/target/**,
             **/web/controller/AdminGUIController.java,
-            **/Domibus-MSH-angular/node_modules/**
+            **/Domibus-MSH-angular/node_modules/**,
+            **/web.xml
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
         <sonar.host.url>http://localhost:9000/</sonar.host.url>

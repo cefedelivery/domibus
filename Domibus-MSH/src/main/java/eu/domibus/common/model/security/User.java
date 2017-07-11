@@ -37,7 +37,7 @@ public class User extends AbstractBaseEntity{
     private String email;
     @NotNull
     @Column(name = "USER_PASSWORD")
-    private String password; //NOSONAR
+    private String password;
     @NotNull
     @Column(name = "USER_ENABLED")
     private Boolean active;
@@ -53,9 +53,10 @@ public class User extends AbstractBaseEntity{
                     name = "ROLE_ID", referencedColumnName = "ID_PK"))
     private Set<UserRole> roles=new HashSet<>();
 
-    public User(final String userName) {
+    public User(final String userName, final String password) {
         this.userName = userName;
         this.active =Boolean.TRUE;
+        this.password = password;
     }
 
     public User() {

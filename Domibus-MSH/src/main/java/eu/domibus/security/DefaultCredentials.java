@@ -1,7 +1,5 @@
 package eu.domibus.security;
 
-import com.google.common.collect.Maps;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,8 +11,8 @@ import java.util.Map;
 public class DefaultCredentials {
     private final static String USER="user";
     private final static String ADMIN="admin";
-    private final static String USER_PWD="123456";
-    private final static String ADMIN_PWD="123456";
+    private final static String USER_PWD="123456"; //NOSONAR
+    private final static String ADMIN_PWD="123456"; //NOSONAR
     private final static Map<String,String> DEFAULT_CREDENTIALS;
 
     static {

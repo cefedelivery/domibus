@@ -138,6 +138,10 @@ public class SubmissionAS4Transformer {
     public Submission transformFromMessaging(final UserMessage messaging) {
         final Submission result = new Submission();
 
+        if(messaging == null) {
+            return result;
+        }
+
         final CollaborationInfo collaborationInfo = messaging.getCollaborationInfo();
         result.setAction(collaborationInfo.getAction());
         result.setService(messaging.getCollaborationInfo().getService().getValue());

@@ -134,7 +134,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
         userMessageLogDao.setMessageAsDownloaded(messageId);
         // Deleting the message and signal message if the retention download is zero and the payload is not stored on the file system.
-        if (0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc()) && !userMessage.isPayloadOnFileSystem()) {
+        if (userMessage != null && 0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc()) && !userMessage.isPayloadOnFileSystem()) {
             messagingDao.clearPayloadData(messageId);
             List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
             if (!signalMessages.isEmpty()) {
@@ -232,6 +232,11 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
         UserMessage userMessage = transformer.transformFromSubmission(messageData);
+
+        if(userMessage == null) {
+            LOG.warn("UserMessage is null");
+            throw new MessageNotFoundException("UserMessage is null");
+        }
 
         validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
 
