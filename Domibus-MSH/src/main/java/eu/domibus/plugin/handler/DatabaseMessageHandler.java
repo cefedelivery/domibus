@@ -283,8 +283,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 throw ex;
             }
             MessageStatus messageStatus = messageExchangeService.getMessageStatus(userMessageExchangeConfiguration);
-            userMessageExchangeConfiguration.updateStatus(messageStatus);
-            if (MessageStatus.READY_TO_PULL != userMessageExchangeConfiguration.getMessageStatus()) {
+            if (MessageStatus.READY_TO_PULL != messageStatus) {
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
             }
@@ -292,7 +291,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             // Builds the user message log
             UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
                     .setMessageId(userMessage.getMessageInfo().getMessageId())
-                    .setMessageStatus(userMessageExchangeConfiguration.getMessageStatus())
+                    .setMessageStatus(messageStatus)
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(getNotificationStatus(legConfiguration))
                     .setMpc(message.getUserMessage().getMpc())

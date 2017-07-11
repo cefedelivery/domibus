@@ -89,18 +89,17 @@ public class MessageExchangeServiceImplTest {
     @Test
     public void testSuccessFullOneWayPullConfiguration() throws Exception {
         Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]","legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}","responderParties{[name:resp1]}");
-        MessageExchangeConfiguration messageExchangeConfiguration = getMessageExchangeContext(process);
-        assertEquals(MessageStatus.READY_TO_PULL, messageExchangeConfiguration.getMessageStatus());
+        MessageStatus messageStatus = getMessageStatus(process);
+        assertEquals(MessageStatus.READY_TO_PULL, messageStatus);
     }
 
 
-    private MessageExchangeConfiguration getMessageExchangeContext(Process process) throws EbMS3Exception {
+    private MessageStatus getMessageStatus(Process process) throws EbMS3Exception {
         List<Process> processes= Lists.newArrayList();
         processes.add(process);
         MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("agreementName", "senderParty", "receiverParty", "service", "action", "leg");
         when(processDao.findPullProcessesByMessageContext(messageExchangeConfiguration)).thenReturn(processes);
-        messageExchangeService.getMessageStatus(messageExchangeConfiguration);
-        return messageExchangeConfiguration;
+        return messageExchangeService.getMessageStatus(messageExchangeConfiguration);
     }
 
     @Test(expected = PModeException.class)

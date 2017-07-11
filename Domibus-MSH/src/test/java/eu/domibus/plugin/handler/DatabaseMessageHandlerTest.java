@@ -945,8 +945,7 @@ public class DatabaseMessageHandlerTest {
             result = true;
 
             messageExchangeService.getMessageStatus(messageExchangeConfiguration);
-            messageExchangeConfiguration.updateStatus(MessageStatus.READY_TO_PULL);
-            result= messageExchangeConfiguration;
+            result = MessageStatus.READY_TO_PULL;
 
         }};
 
