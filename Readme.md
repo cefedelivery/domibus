@@ -62,18 +62,6 @@ How to install and run Domibus can be read in the Quick Start Guide and more adv
 
 [Top](#top)
 
-## Default plugins
-
-The purpose of Domibus is to facilitate B2B communication. To achieve this goal it provides a very flexible plugin model which allows the integration with nearly all back office applications. 
-Domibus offers two default plugins, available with the Domibus distribution:
-*   Web Service plugin
-*   JMS plugin 
-The Interface Control Document of the default JMS plugin outlines the JMS Data Format Exchange to be used as part of the default JMS backend plugin.
-The Interface Control Document of the default WS plugin describes the WSDL and the observable behaviour of the interface provided in the default WS plugin
-Both documents are available on the [Domibus Release Page](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus)
-
-[Top](#top)
-
 ## Testing
 
 ### Ent-to-end tests
@@ -85,7 +73,7 @@ A restricted set of tests that do not require any interactivity may run with the
 
     mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
 
-# Unit Tests
+### Unit Tests
 
 To run unit test via Maven, issue this command : 
 
@@ -96,6 +84,19 @@ To skip the unit tests from the build process:
 
     mvn clean install -DskipTests=true -DskipITs=true
 
+[Top](#top)
+
+## Default plugins
+
+The purpose of Domibus is to facilitate B2B communication. To achieve this goal it provides a very flexible plugin model which allows the integration with nearly all back office applications. 
+Domibus offers two default plugins, available with the Domibus distribution:
+
+*   Web Service plugin
+*   JMS plugin
+
+The Interface Control Document (ICD) of the default JMS plugin outlines the JMS Data Format Exchange to be used as part of the default JMS backend plugin.
+The Interface Control Document (ICD) of the default WS plugin describes the WSDL and the observable behaviour of the interface provided in the default WS plugin
+Both documents are available on the [Domibus Release Page](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus)
 
 [Top](#top)
 
@@ -108,7 +109,10 @@ Domibus is licensed under European Union Public Licence (EUPL) version 1.1.
 ## Support
 
 Have questions? Consult our [Q&A section](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus+FAQs). 
-Still have questions? Contact [eDelivery support](https://ec.europa.eu/cefdigital/tracker/servicedesk/customer/portal/2/create/4) 
+Ask your thorough programming questions using [stackoverflow](http://stackoverflow.com/questions/ask)
+and your general questions on [FIWARE Q&A](https://ask.fiware.org). In both cases please use the tag `context.domibus`.
+
+Still have questions? Contact [eDelivery support](https://ec.europa.eu/cefdigital/tracker/servicedesk/customer/portal/2/create/4).
 
 
 [Top](#top)
