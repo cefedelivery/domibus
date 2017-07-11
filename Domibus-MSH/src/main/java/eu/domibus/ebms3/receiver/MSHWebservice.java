@@ -201,9 +201,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
-        if (!pullContext.isValid()) {
-            throw new WebServiceException("Pmode configuration " + pullContext.getErrorMessage());
-        }
         UserMessage userMessage = messageExchangeService.retrieveReadyToPullUserMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
         try {
             if (userMessage != null) {

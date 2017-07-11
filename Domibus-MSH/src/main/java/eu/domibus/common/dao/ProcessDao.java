@@ -17,7 +17,7 @@ public interface ProcessDao {
      * @param messageExchangeConfiguration contains information about the exchange.
      * @return the corresponding processes.
      */
-    List<Process> findProcessByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration);
+    List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration);
 
     /**
      * Retrieve Process with pull binding having party as an initiator.
@@ -29,7 +29,7 @@ public interface ProcessDao {
 
     /**
      * Returns a list of pullProcess based on an mpc.
-     * @param mpc the message partition channeL
+     * @param mpc the message partition channel
      * @return the matching processes.
      */
     List<Process> findPullProcessBytMpc(String mpc);

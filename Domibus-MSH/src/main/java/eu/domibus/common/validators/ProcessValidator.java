@@ -2,13 +2,15 @@ package eu.domibus.common.validators;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import eu.domibus.common.ErrorCode;
-import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Mep;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.impl.PullProcessStatus;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.plugin.BackendConnector;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -31,15 +33,14 @@ public class ProcessValidator {
      * This method validate that the configuration is in synch with the restrictions.
      *
      * @param pullProcesses the list of potential pull processes.
-     * @throws EbMS3Exception in case of process missconfiguration
+     * @throws PModeException in case of process missconfiguration
      */
 
-    public void validatePullProcess(List<Process> pullProcesses) throws EbMS3Exception {
+    public void validatePullProcess(List<Process> pullProcesses) {
         Set<PullProcessStatus> pullProcessStatuses = verifyPullProcessStatus(pullProcesses);
         if (!uniqueCorrectlyConfiguredPullProcess(pullProcessStatuses)) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, createWarningMessage(pullProcessStatuses), null, null);
+            throw new PModeException(DomibusCoreErrorCode.DOM_003, createWarningMessage(pullProcessStatuses));
         }
-
     }
 
     Set<PullProcessStatus> verifyPullProcessStatus(List<Process> pullProcesses) {
@@ -50,11 +51,26 @@ public class ProcessValidator {
             pullProcessStatuses.add(checkMpcConfiguration(process));
             pullProcessStatuses.add(checkLegConfiguration(process));
             pullProcessStatuses.add(checkResponderConfiguration(process));
+            pullProcessStatuses.add(checkMepConfiguration(process));
             if (pullProcessStatuses.size() > 1) {
                 pullProcessStatuses.remove(ONE_MATCHING_PROCESS);
             }
         }
         return pullProcessStatuses;
+    }
+
+    private PullProcessStatus checkMepConfiguration(Process process) {
+        PullProcessStatus status = INVALID_MEP;
+        Mep binding = process.getMep();
+        if (binding != null) {
+            String name = binding.getName();
+            if (name != null) {
+                if (BackendConnector.Mep.ONE_WAY.getFileMapping().equals(name)) {
+                    status = ONE_MATCHING_PROCESS;
+                }
+            }
+        }
+        return status;
     }
 
     private boolean uniqueCorrectlyConfiguredPullProcess(Set<PullProcessStatus> pullProcessStatuses) {
@@ -136,6 +152,8 @@ public class ProcessValidator {
                 return "Pull process should only have one responder configured for mpc";
             case NO_RESPONDER:
                 return "No responder configured";
+            case INVALID_MEP:
+                return "Invalid mep. Only one way supported";
         }
         return "";
     }

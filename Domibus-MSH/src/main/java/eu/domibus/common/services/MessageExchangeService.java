@@ -1,6 +1,6 @@
 package eu.domibus.common.services;
 
-import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.services.impl.PullContext;
@@ -18,9 +18,10 @@ public interface MessageExchangeService {
     /**
      * This method with analyse the messageExchange in order to find if the message should be pushed of pulled.
      * The status will be set in messageExchangeContext.
-     * @param messageExchangeConfiguration the context of the messae.
+     * @param messageExchangeConfiguration the message configuration used to retrieve the associated process.
+     * @return the status of the message.
      */
-    void upgradeMessageExchangeStatus(final MessageExchangeConfiguration messageExchangeConfiguration) throws EbMS3Exception;
+    MessageStatus getMessageStatus(final MessageExchangeConfiguration messageExchangeConfiguration);
 
     /**
      * Load pmode and find pull process in order to initialize pull request.

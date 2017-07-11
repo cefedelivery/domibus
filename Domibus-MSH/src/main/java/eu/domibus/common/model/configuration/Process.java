@@ -21,7 +21,7 @@ import static eu.domibus.common.model.configuration.Process.*;
 @Entity
 @Table(name = "TB_PROCESS")
 @NamedQueries({
-        @NamedQuery(name = RETRIEVE_FROM_MESSAGE_CONTEXT, query = "SELECT p FROM Process as p left join p.agreement as a left join p.legs as l left join p.initiatorParties init left join p.responderParties resp  where l.action.name=:action and l.service.name=:service and (a is null  or a.name=:agreement) and l.name=:leg and init.name=:initiatorName and resp.name=:responderName"),
+        @NamedQuery(name = RETRIEVE_PULL_PROCESS_FROM_MESSAGE_CONTEXT, query = "SELECT p FROM Process as p left join p.agreement as a left join p.legs as l left join p.initiatorParties init left join p.responderParties resp  where p.mepBinding.name=:mepBinding and l.action.name=:action and l.service.name=:service and (a is null  or a.name=:agreement) and l.name=:leg and init.name=:initiatorName and resp.name=:responderName"),
         //@thom this is the place to swith initiator and responder.
         //@question please clarify where the MHS initiator and responder are set in the pmode file in case of a pull.
         @NamedQuery(name = FIND_PULL_PROCESS_TO_INITIATE, query = "SELECT p FROM Process as p join p.responderParties as resp WHERE p.mepBinding.name=:mepBinding and resp in(:responder)"),
@@ -30,7 +30,7 @@ import static eu.domibus.common.model.configuration.Process.*;
 public class Process extends AbstractBaseEntity {
     @Transient
     @XmlTransient
-    public final static String RETRIEVE_FROM_MESSAGE_CONTEXT = "Process.retrieveFromMessageContext";
+    public final static String RETRIEVE_PULL_PROCESS_FROM_MESSAGE_CONTEXT = "Process.retrievePullProcessFromMessageContext";
     public final static String FIND_PULL_PROCESS_TO_INITIATE = "Process.findPullProcessToInitiate";
     public final static String FIND_PULL_PROCESS_FROM_INITIATOR_AND_MPC = "Process.findPullProcessFromInitiatorAndMpc";
     public final static String FIND_PULL_PROCESS_FROM_MPC = "Process.findPullProcessFromMpc";
@@ -236,27 +236,4 @@ public class Process extends AbstractBaseEntity {
         return dynamicInitiator;
     }
 
-    public static String getMepValue(Process process) {
-        String mepVal = "";
-        Mep mep = process.getMep();
-        if (mep != null) {
-            String name = mep.getName();
-            if (name != null) {
-                mepVal = name;
-            }
-        }
-        return mepVal;
-    }
-
-    public static String getBindingValue(Process process) {
-        String bindingVal = "";
-        Binding binding = process.getMepBinding();
-        if (binding != null) {
-            String name = binding.getName();
-            if (name != null) {
-                bindingVal = name;
-            }
-        }
-        return bindingVal;
-    }
 }

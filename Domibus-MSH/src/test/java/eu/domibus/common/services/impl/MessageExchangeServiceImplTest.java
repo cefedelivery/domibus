@@ -1,6 +1,7 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.ConfigurationDAO;
@@ -65,7 +66,7 @@ public class MessageExchangeServiceImplTest {
     @Before
     public void init() {
         correctParty = PojoInstaciatorUtil.instanciate(Party.class, " [name:party1]");
-        process = PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}","responderParties{[name:responder]}","initiatorParties{[name:initiator]}");
+        process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "responderParties{[name:responder]}", "initiatorParties{[name:initiator]}");
         Iterator<LegConfiguration> iterator = process.getLegs().iterator();
         LegConfiguration firstLeg = iterator.next();
         Service service = new Service();
@@ -92,27 +93,17 @@ public class MessageExchangeServiceImplTest {
         assertEquals(MessageStatus.READY_TO_PULL, messageExchangeConfiguration.getMessageStatus());
     }
 
-    @Test
-    public void testOneWayPullOnlySupported() throws EbMS3Exception {
-        Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:twoway]", "mepBinding[name:pull]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "responderParties{[name:resp1]}");
-        try {
-            getMessageExchangeContext(process);
-            assertTrue(false);
-        }catch (RuntimeException e){
-
-        }
-    }
 
     private MessageExchangeConfiguration getMessageExchangeContext(Process process) throws EbMS3Exception {
         List<Process> processes= Lists.newArrayList();
         processes.add(process);
         MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("agreementName", "senderParty", "receiverParty", "service", "action", "leg");
-        when(processDao.findProcessByMessageContext(messageExchangeConfiguration)).thenReturn(processes);
-        messageExchangeService.upgradeMessageExchangeStatus(messageExchangeConfiguration);
+        when(processDao.findPullProcessesByMessageContext(messageExchangeConfiguration)).thenReturn(processes);
+        messageExchangeService.getMessageStatus(messageExchangeConfiguration);
         return messageExchangeConfiguration;
     }
 
-    @Test(expected = EbMS3Exception.class)
+    @Test(expected = PModeException.class)
     public void testIncorrectMultipleProcessFoundForConfiguration() throws EbMS3Exception {
         MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("agreementName", "senderParty", "receiverParty", "service", "action", "leg");
         List<Process> processes= Lists.newArrayList();
@@ -120,8 +111,8 @@ public class MessageExchangeServiceImplTest {
         processes.add(process);
         process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:push]");
         processes.add(process);
-        when(processDao.findProcessByMessageContext(messageExchangeConfiguration)).thenReturn(processes);
-            messageExchangeService.upgradeMessageExchangeStatus(messageExchangeConfiguration);
+        when(processDao.findPullProcessesByMessageContext(messageExchangeConfiguration)).thenReturn(processes);
+        messageExchangeService.getMessageStatus(messageExchangeConfiguration);
     }
 
     @Test
@@ -133,12 +124,12 @@ public class MessageExchangeServiceImplTest {
         verify(jmsPullTemplate,times(2)).convertAndSend(any(Destination.class),mapArgumentCaptor.capture(), any(MessagePostProcessor.class));
         //needed because the set does not return the values always in the same order.
         //@thom this does work on my machine but not on bamboo. Fix this.
-        /*TestResult testResult = new TestResult("qn1", "party1:initiator:service1:Mock:Mock:leg1", "false");
+        TestResult testResult = new TestResult("qn1", "party1:initiator:service1:Mock:Mock:leg1", "false");
         testResult.chain(new TestResult("qn2","party1:initiator:service2:Mock:Mock:leg2","false"));
         List<Map> allValues = mapArgumentCaptor.getAllValues();
         for (Map allValue : allValues) {
             assertTrue(testResult.testSucced(allValue));
-        }*/
+        }
     }
 
     @Test
@@ -159,7 +150,7 @@ public class MessageExchangeServiceImplTest {
         when(configurationDao.read()).thenReturn(configuration);
         List<Process> processes = Lists.newArrayList(process);
         when(processDao.findPullProcessesByResponder(correctParty)).thenReturn(processes);
-        when(processDao.findProcessByMessageContext(any(MessageExchangeConfiguration.class))).thenReturn(Lists.newArrayList(process));
+        when(processDao.findPullProcessesByMessageContext(any(MessageExchangeConfiguration.class))).thenReturn(Lists.newArrayList(process));
         messageExchangeService.initiatePullRequest();
         verify(jmsPullTemplate,times(0)).convertAndSend(any(Destination.class),any(Map.class), any(MessagePostProcessor.class));
     }
