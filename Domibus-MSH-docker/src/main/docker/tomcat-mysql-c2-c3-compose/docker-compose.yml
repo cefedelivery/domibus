@@ -25,7 +25,7 @@ services:
     expose:
       - "3306"
     ports:
-      - "3305:3306"
+      - "3302:3306"
   domibusblue:
     container_name: domibusblue
     image: domibus/tomcat/blue:development
