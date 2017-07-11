@@ -109,7 +109,7 @@ public class X509CertificateAuthentication implements Authentication {
 
     private String calculateCertificateId(final X509Certificate cert) {
         if(cert == null) {
-            return null;
+            throw new IllegalArgumentException("Certificate is null");
         }
         // subject principal name must be in the order CN=XX,O=YY,C=ZZ
         // In some JDK versions it is O=YY,CN=XX,C=ZZ instead (e.g. 1.6.0_45)
