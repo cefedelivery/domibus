@@ -40,13 +40,13 @@ public class Process extends AbstractBaseEntity {
 
     @XmlElement(required = true, name = "initiatorParties")
     @Transient
-    protected InitiatorParties initiatorPartiesXml;
+    protected InitiatorParties initiatorPartiesXml; //NOSONAR
     @XmlElement(required = true, name = "responderParties")
     @Transient
-    protected ResponderParties responderPartiesXml;
+    protected ResponderParties responderPartiesXml; //NOSONAR
     @XmlElement(required = true, name = "legs")
     @Transient
-    protected Legs legsXml;
+    protected Legs legsXml; //NOSONAR
     @XmlAttribute(name = "initiatorRole", required = true)
     @Transient
     protected String initiatorRoleXml;

@@ -63,7 +63,7 @@ public class PropertyProfileValidator {
                     break;
                 case "int":
                     try {
-                        Integer.parseInt(property.getValue());
+                        Integer.parseInt(property.getValue()); //NOSONAR: Validation is done via exception
                         break;
                     } catch (final NumberFormatException e) {
                         throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Property profiling for this exchange requires a INTEGER datatype for property named: " + property.getName() + ", but got " + property.getValue(), messaging.getUserMessage().getMessageInfo().getMessageId(), null);

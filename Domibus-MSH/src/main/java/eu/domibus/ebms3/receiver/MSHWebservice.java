@@ -4,7 +4,6 @@ import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.Leg;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
@@ -39,7 +38,6 @@ import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.io.IOException;
-import java.util.Date;
 
 /**
  * This method is responsible for the receiving of ebMS3 messages and the sending of signal messages like receipts or ebMS3 errors in return
@@ -102,7 +100,11 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             if (messaging.getSignalMessage().getPullRequest() != null) {
                 return handlePullRequest(messaging);
             } else if (messaging.getSignalMessage().getReceipt() != null) {
-                handlePullRequestReceipt(request, messaging);
+                try {
+                    handlePullRequestReceipt(request, messaging);
+                } catch (EbMS3Exception e) {
+                    reliabilityChecker.handleEbms3Exception(e, messaging.getId());
+                }
             }
         } else {
             String pmodeKey = null;
@@ -140,7 +142,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return new UserMessageHandlerContext();
     }
 
-    private SOAPMessage handlePullRequestReceipt(SOAPMessage request, Messaging messaging) {
+    private void handlePullRequestReceipt(SOAPMessage request, Messaging messaging) throws EbMS3Exception {
         String messageId = messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = null;
         ResponseHandler.CheckResult isOk = null;
@@ -168,17 +170,13 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             }
         } catch (final EbMS3Exception e) {
             reliabilityChecker.handleEbms3Exception(e, messageId);
-        } catch (Throwable e) {
-            throw e;
+        } catch (ParserConfigurationException | SOAPException | SAXException | IOException e) {
+            LOG.error("Problems getting SOAP message");
         } finally {
             reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
             messageExchangeService.removeRawMessageIssuedByPullRequest(messageId);
-            try {
-                final SignalMessage signalMessage = new SignalMessage();
-                return messageBuilder.buildSOAPMessage(signalMessage, null);
-            } catch (EbMS3Exception e) {
-                throw new WebServiceException(e);
-            }
+            final SignalMessage signalMessage = new SignalMessage();
+            messageBuilder.buildSOAPMessage(signalMessage, null);
         }
     }
 
