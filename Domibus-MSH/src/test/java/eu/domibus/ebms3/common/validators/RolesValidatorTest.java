@@ -1,18 +1,24 @@
 package eu.domibus.ebms3.common.validators;
 
-import eu.domibus.common.model.configuration.BusinessProcesses;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.common.model.configuration.Process;
-import eu.domibus.common.model.configuration.Role;
+import eu.domibus.common.model.configuration.Party;
+import org.apache.commons.io.IOUtils;
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ReflectionUtils;
 
-import java.util.HashSet;
+import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by musatmi on 10/07/2017.
@@ -20,41 +26,39 @@ import static org.junit.Assert.*;
 public class RolesValidatorTest {
 
     private RolesValidator validator = new RolesValidator();
+    private ObjectMapper mapper = new ObjectMapper();
+
+    static class YourClassKeyDeserializer extends KeyDeserializer {
+        @Override
+        public Party deserializeKey(final String key, final DeserializationContext ctxt) throws IOException, JsonProcessingException {
+            final Party party = new Party();
+            party.setName(key);
+            return party; // replace null with your logic
+        }
+    }
+
+    @Before
+    public void init() {
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addKeyDeserializer(Party.class, new YourClassKeyDeserializer());
+        mapper.registerModule(simpleModule);
+    }
 
     @Test
     public void validate() throws Exception {
         Configuration configuration = newConfiguration();
         final List<String> results = validator.validate(configuration);
         assertTrue(results.size() == 1);
-        assertEquals(results.get(0),"For business process TestProcess the initiator role and the responder role are identical (eCODEXRole)");
+        assertEquals(results.get(0), "For business process TestProcess the initiator role and the responder role are identical (eCODEXRole)");
     }
 
-    private Configuration newConfiguration(){
-        Configuration configuration = new Configuration();
+    private Configuration newConfiguration() throws IOException {
+        return mapper.readValue(getResourceAsString("Configuration.json"), Configuration.class);
+    }
 
-        Role initiatorRole = new Role();
-        initiatorRole.setName("eCODEXRole");
-        initiatorRole.setValue("GW");
-
-        Role responderRole = new Role();
-        responderRole.setName("eCODEXRole");
-        responderRole.setValue("GW");
-
-        Process process = new Process();
-        ReflectionTestUtils.setField(process,"name", "TestProcess");
-        ReflectionTestUtils.setField(process,"initiatorRole", initiatorRole);
-        ReflectionTestUtils.setField(process,"responderRole", responderRole);
-
-        Set<Process> processesSet = new HashSet<>();
-        processesSet.add(process);
-
-
-        BusinessProcesses processes = new BusinessProcesses();
-
-        ReflectionTestUtils.setField(processes,"processes", processesSet);
-        configuration.setBusinessProcesses(processes);
-
-        return configuration;
+    private String getResourceAsString(String resourceName) throws IOException {
+        ClassPathResource json = new ClassPathResource(this.getClass().getPackage().getName().replaceAll("\\.","\\/") + "/" + resourceName);
+        return IOUtils.toString(json.getInputStream());
     }
 
 }
