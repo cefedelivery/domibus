@@ -32,7 +32,7 @@ public class LegConfiguration extends AbstractBaseEntity {
 
 
     @Transient
-    protected final List<PartyMpc> partyMpc = new ArrayList<>();
+    protected final List<PartyMpc> partyMpc = new ArrayList<>(); //NOSONAR
     @XmlTransient
     @ElementCollection(fetch = FetchType.EAGER, targetClass = Mpc.class)
     @MapKeyClass(Party.class)

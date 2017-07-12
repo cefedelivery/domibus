@@ -140,7 +140,7 @@ public class CachingPModeProvider extends PModeProvider {
                             URI.create(partyIdType);
                         } catch (final IllegalArgumentException e) {
                             final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "no matching party found", null, e);
-                            ex.setErrorDetail("PartyId " + id.getValue() + " is not a valid URI [CORE] 5.2.2.3");
+                            ex.setErrorDetail("PartyId " + id.getValue() + " is not a valid URI [CORE]");
                             throw ex;
                         }
                     }

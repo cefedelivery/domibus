@@ -24,11 +24,10 @@ public class UserDaoImplTest extends AbstractIT{
     @Transactional
     @Rollback
     public void listUsers() throws Exception {
-        User user=new User("userOne");
+        User user=new User("userOne", "test");
         UserRole userRole=new UserRole("ROLE_USER");
         user.addRole(userRole);
         user.setEmail("test@gmail.com");
-        user.setPassword("test");
         user.setActive(true);
         userDao.create(user);
         List<User> users = userDao.listUsers();

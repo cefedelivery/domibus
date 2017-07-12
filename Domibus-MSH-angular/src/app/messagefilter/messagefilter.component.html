@@ -130,13 +130,13 @@
         <table class="buttonsMoveRow">
           <tr>
             <td>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableMoveUp" (click)="buttonMoveUp()">
+              <button md-raised-button color="primary" type="button" [disabled]="!enableMoveUp" (click)="buttonMoveUp()" id="moveupbutton_id">
                 <md-icon>arrow_upwards</md-icon>
                 <span>Move Up</span>
               </button>
             </td>
             <td>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableMoveDown" (click)="buttonMoveDown()">
+              <button md-raised-button color="primary" type="button" [disabled]="!enableMoveDown" (click)="buttonMoveDown()" id="movedownbutton_id">
                 <md-icon>arrow_downwards</md-icon>
                 <span>Move Down</span>
               </button>
@@ -146,19 +146,19 @@
         <table class="buttonsRow">
           <tr>
             <td>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableCancel" (click)="cancelDialog()">
+              <button md-raised-button color="primary" type="button" [disabled]="!enableCancel" (click)="cancelDialog()" id="cancelbutton_id">
                 <md-icon>cancel</md-icon>
                 <span>Cancel</span>
               </button>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableSave" (click)="saveDialog()">
+              <button md-raised-button color="primary" type="button" [disabled]="!enableSave" (click)="saveDialog()" id="savebutton_id">
                 <md-icon>save</md-icon>
                 <span>Save</span>
               </button>
-              <button md-raised-button color="primary" type="button" (click)="buttonNew()">
+              <button md-raised-button color="primary" type="button" (click)="buttonNew()" id="newbutton_id">
                 <md-icon>add</md-icon>
                 <span>New</span>
               </button>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableDelete" (click)="buttonDelete()">
+              <button md-raised-button color="primary" type="button" [disabled]="!enableDelete" (click)="buttonDelete()" id="deletebutton_id">
                 <md-icon>delete</md-icon>
                 <span>Delete</span>
               </button>
