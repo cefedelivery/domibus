@@ -1,6 +1,8 @@
 package eu.domibus.common.services.impl;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MessageStatus;
@@ -14,6 +16,7 @@ import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.util.PojoInstaciatorUtil;
+import org.apache.commons.lang3.Validate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,9 +30,9 @@ import org.springframework.jms.core.MessagePostProcessor;
 
 import javax.jms.Destination;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -68,16 +71,14 @@ public class MessageExchangeServiceImplTest {
     public void init() {
         correctParty = PojoInstaciatorUtil.instanciate(Party.class, " [name:party1]");
         process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "responderParties{[name:responder]}", "initiatorParties{[name:initiator]}");
-        Iterator<LegConfiguration> iterator = process.getLegs().iterator();
-        LegConfiguration firstLeg = iterator.next();
+
         Service service = new Service();
         service.setName("service1");
-        firstLeg.setService(service);
+        findLegByName("leg1").setService(service);
 
-        LegConfiguration secondLeg = iterator.next();
         service = new Service();
         service.setName("service2");
-        secondLeg.setService(service);
+        findLegByName("leg2").setService(service);
 
         configuration = new Configuration();
         configuration.setParty(correctParty);
@@ -86,7 +87,17 @@ public class MessageExchangeServiceImplTest {
         List<Process> processes = Lists.newArrayList(process);
         when(processDao.findPullProcessesByResponder(correctParty)).thenReturn(processes);
     }
-    
+
+    private LegConfiguration findLegByName(final String name) {
+        final Set<LegConfiguration> filter = Sets.filter(process.getLegs(), new Predicate<LegConfiguration>() {
+            @Override
+            public boolean apply(LegConfiguration legConfiguration) {
+                return name.equals(legConfiguration.getName());
+            }
+        });
+        Validate.isTrue(filter.size() == 1);
+        return filter.iterator().next();
+    }
     @Test
     public void testSuccessFullOneWayPullConfiguration() throws Exception {
         Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]","legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}","responderParties{[name:resp1]}");

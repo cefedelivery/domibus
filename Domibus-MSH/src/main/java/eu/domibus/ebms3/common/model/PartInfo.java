@@ -39,15 +39,15 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
 
     @XmlElement(name = "Schema")
     @Embedded
-    protected Schema schema;
+    protected Schema schema; //NOSONAR
 
     @XmlElement(name = "Description")
     @Embedded
-    protected Description description;
+    protected Description description; //NOSONAR
 
     @XmlElement(name = "PartProperties")
     @Embedded
-    protected PartProperties partProperties;
+    protected PartProperties partProperties; //NOSONAR
 
     @XmlAttribute(name = "href")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -70,7 +70,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
     protected boolean inBody;
     @Transient
     @XmlTransient
-    protected DataHandler payloadDatahandler;
+    protected DataHandler payloadDatahandler; //NOSONAR
     @Column(name = "MIME")
     @XmlTransient
     private String mime;

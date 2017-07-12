@@ -61,8 +61,9 @@ public class UserResponseRO {
                 ", email='" + email + '\'' +
                 ", active=" + active +
                 ", authorities=" + authorities +
+                ", roles='" + roles + '\'' +
                 ", status='" + status + '\'' +
-                ", password='" + password+ '\'' +
+                ", password='" + password + '\'' + //NOSONAR
                 '}';
     }
 

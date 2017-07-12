@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class ErrorLogResultRO implements Serializable {
 
-    private Map<String, Object> filter;
+    private Map<String, Object> filter; //NOSONAR
     private List<ErrorLogRO> errorLogEntries;
 
     private MSHRole[] mshRoles;

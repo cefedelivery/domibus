@@ -18,7 +18,7 @@ public class BasicAuthentication implements Authentication {
 	private String user = null;
 	private String password = null;
     private String originalUser = null;
-    private Collection<GrantedAuthority> authorityList = null;
+    private Collection<GrantedAuthority> authorityList = null; //NOSONAR
 
 
 	public BasicAuthentication(String user, String password){
@@ -45,7 +45,7 @@ public class BasicAuthentication implements Authentication {
 
     @Override
     public Object getDetails() {
-        return user != null ? user : "" + ":" + password != null ? password : "";
+        return user != null ? user + ":" + password : "";
     }
 
     @Override

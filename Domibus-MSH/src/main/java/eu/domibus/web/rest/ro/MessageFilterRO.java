@@ -2,13 +2,14 @@ package eu.domibus.web.rest.ro;
 
 import eu.domibus.api.routing.RoutingCriteria;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author Tiago Miguel
  * @since 3.3
  */
-public class MessageFilterRO {
+public class MessageFilterRO implements Serializable {
 
     private int entityId;
 
