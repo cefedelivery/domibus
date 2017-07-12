@@ -51,7 +51,6 @@
         <sonar.exclusions>
             **/quartz/**,
             **/target/**,
-            **/web/controller/AdminGUIController.java,
             **/Domibus-MSH-angular/node_modules/**,
             **/web.xml
         </sonar.exclusions>

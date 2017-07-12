@@ -254,7 +254,6 @@ public class MSHWebServiceTest {
         }};
     }
 
-
     public Configuration loadSamplePModeConfiguration(String samplePModeFileRelativeURI) throws JAXBException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         LOG.debug("Inside sample PMode configuration");
         InputStream xmlStream = getClass().getClassLoader().getResourceAsStream(samplePModeFileRelativeURI);
@@ -306,7 +305,6 @@ public class MSHWebServiceTest {
         messaging.setSignalMessage(signalMessage);
         return messaging;
     }
-
 
     protected UserMessage createSampleUserMessage() {
         UserMessage userMessage = new UserMessage();
