@@ -74,7 +74,9 @@ public class MessagingDao extends BasicDao<Messaging> {
 
         for (PartInfo result : results) {
             if (hasLength(result.getFileName())) {
-                new File(result.getFileName()).delete();
+                if (!new File(result.getFileName()).delete()) {
+                    LOG.warn("Problem deleting paylod data files");
+                }
             } else {
                 databasePayloads.add(result);
             }

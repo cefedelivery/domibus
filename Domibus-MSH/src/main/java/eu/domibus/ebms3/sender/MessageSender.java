@@ -180,18 +180,21 @@ public class MessageSender implements MessageListener {
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
         } finally {
+            boolean skipHandling = false;
             if (abortSending) {
                 LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
-                return;
+                skipHandling = true;
             }
-            reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
-            try {
-                attempt.setError(attemptError);
-                attempt.setStatus(attemptStatus);
-                attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
-                messageAttemptService.create(attempt);
-            } catch (Exception e) {
-                LOG.error("Could not create the message attempt", e);
+            if(!skipHandling) {
+                reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+                try {
+                    attempt.setError(attemptError);
+                    attempt.setStatus(attemptStatus);
+                    attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
+                    messageAttemptService.create(attempt);
+                } catch (Exception e) {
+                    LOG.error("Could not create the message attempt", e);
+                }
             }
 
         }
