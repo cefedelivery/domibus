@@ -1,8 +1,9 @@
 package eu.domibus.ebms3.receiver;
 
-import eu.domibus.common.*;
-import eu.domibus.common.dao.*;
+import eu.domibus.common.ErrorCode;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReplyPattern;
@@ -32,7 +33,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.*;
+import javax.xml.transform.TransformerException;
 import javax.xml.ws.*;
 import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
@@ -200,9 +201,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
-        if (!pullContext.isValid()) {
-            throw new WebServiceException("Pmode configuration " + pullContext.createProcessWarningMessage());
-        }
         UserMessage userMessage = messageExchangeService.retrieveReadyToPullUserMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
         try {
             if (userMessage != null) {
@@ -241,10 +239,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     protected Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
         LOG.debug("Unmarshalling the Messaging instance from the request");
         return userMessageHandlerService.getMessaging(request);
-    }
-
-    public void deleteRawMessageIssuedByPullRequest() {
-
     }
 
 

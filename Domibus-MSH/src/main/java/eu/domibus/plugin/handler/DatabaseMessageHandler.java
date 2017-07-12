@@ -1,6 +1,7 @@
 package eu.domibus.plugin.handler;
 
 import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
@@ -27,10 +28,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
-import eu.domibus.messaging.DuplicateMessageException;
-import eu.domibus.messaging.MessageConstants;
-import eu.domibus.messaging.MessageNotFoundException;
-import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.messaging.*;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import org.apache.commons.lang.StringUtils;
@@ -43,6 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.stereotype.Service;
 
 /**
  * This class is responsible of handling the plugins requests for all the operations exposed.
@@ -190,7 +190,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     }
 
     protected MessageStatus convertMessageStatus(MessageStatus messageStatus) {
-        if(MessageStatus.DOWNLOADED == messageStatus) {
+        if (MessageStatus.DOWNLOADED == messageStatus) {
             LOG.warn("Using deprecated method that converts DOWNLOADED status to RECEIVED");
             //convert the DOWNLOADED status to RECEIVED to assure backwards compatibility
             messageStatus = eu.domibus.common.MessageStatus.RECEIVED;
@@ -287,8 +287,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
             }
-            messageExchangeService.upgradeMessageExchangeStatus(userMessageExchangeConfiguration);
-            if(MessageStatus.READY_TO_PULL!= userMessageExchangeConfiguration.getMessageStatus()) {
+            MessageStatus messageStatus = messageExchangeService.getMessageStatus(userMessageExchangeConfiguration);
+            if (MessageStatus.READY_TO_PULL != messageStatus) {
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
             }
@@ -296,7 +296,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             // Builds the user message log
             UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
                     .setMessageId(userMessage.getMessageInfo().getMessageId())
-                    .setMessageStatus(userMessageExchangeConfiguration.getMessageStatus())
+                    .setMessageStatus(messageStatus)
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(getNotificationStatus(legConfiguration))
                     .setMpc(message.getUserMessage().getMpc())
@@ -312,7 +312,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", ebms3Ex);
             errorLogDao.create(new ErrorLogEntry(ebms3Ex));
             throw MessagingExceptionFactory.transform(ebms3Ex);
+        } catch (PModeException p) {
+            LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]" + p.getMessage());
+            errorLogDao.create(new ErrorLogEntry(MSHRole.SENDING, userMessage.getMessageInfo().getMessageId(), ErrorCode.EBMS_0010, p.getMessage()));
+            throw new PModeMismatchException(p.getMessage(), p);
         }
+
     }
 
     private Party messageValidations(UserMessage userMessage, String pModeKey, String backendName) throws EbMS3Exception, MessagingProcessingException {

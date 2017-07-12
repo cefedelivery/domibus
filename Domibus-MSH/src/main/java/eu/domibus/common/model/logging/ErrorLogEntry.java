@@ -60,6 +60,13 @@ public class ErrorLogEntry extends AbstractBaseEntity implements ErrorResult {
         this.timestamp = new Date();
     }
 
+    public ErrorLogEntry(MSHRole mshRole, String messageInErrorId, ErrorCode errorCode, String errorDetail) {
+        this.mshRole = mshRole;
+        this.messageInErrorId = messageInErrorId;
+        this.errorCode = errorCode;
+        this.errorDetail = errorDetail;
+    }
+
     /**
      * Creates an ErrorLogEntry from an ebMS3 signal message
      *
