@@ -11,8 +11,6 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.ReflectionUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,7 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Created by musatmi on 10/07/2017.
+ * @author musatmi
+ * @since 3.3
  */
 public class RolesValidatorTest {
 
