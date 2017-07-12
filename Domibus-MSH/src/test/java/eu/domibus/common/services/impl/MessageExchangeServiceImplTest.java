@@ -52,6 +52,7 @@ public class MessageExchangeServiceImplTest {
     private JmsTemplate jmsPullTemplate;
     @Mock
     private EbMS3MessageBuilder messageBuilder;
+
     @Spy
     private ProcessValidator processValidator;
 
@@ -159,24 +160,21 @@ public class MessageExchangeServiceImplTest {
         List<Process> processes = Lists.newArrayList(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "responderParties{[name:resp1]}"));
         when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(processes);
         PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
-        assertEquals(true, pullContext.isValid());
         assertEquals("resp1",pullContext.getResponder().getName());
         assertEquals("party1",pullContext.getInitiator().getName());
         assertEquals("oneway",pullContext.getProcess().getMep().getName());
     }
 
-    @Test
+    @Test(expected = PModeException.class)
     public void extractProcessMpcWithNoProcess() throws Exception {
         when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(new ArrayList<Process>());
         PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
-        assertEquals(false, pullContext.isValid());
     }
 
-    @Test
+    @Test(expected = PModeException.class)
     public void extractProcessMpcWithNoToManyProcess() throws Exception {
         when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(Lists.newArrayList(new Process(), new Process()));
         PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
-        assertEquals(false, pullContext.isValid());
     }
 
 

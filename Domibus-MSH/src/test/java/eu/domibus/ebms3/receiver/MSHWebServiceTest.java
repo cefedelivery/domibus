@@ -1,20 +1,25 @@
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
+import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
@@ -22,12 +27,10 @@ import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.lang.StringUtils;
+import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,10 +60,7 @@ import java.lang.reflect.Method;
 public class MSHWebServiceTest {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHWebServiceTest.class);
-    private static final String TEST_RESOURCES_DIR = "./src/test/resources";
     private static final String VALID_PMODE_CONFIG_URI = "samplePModes/domibus-configuration-valid.xml";
-    private static final String LEG_NO_SECNO_SEC_ACTION = "pushNoSecnoSecAction";
-    private static final String PUSH_TESTCASE1_TC1ACTION = "pushTestcase1tc1Action";
     private static final String STRING_TYPE = "string";
     private static final String DEF_PARTY_TYPE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
     private static final String RED = "red_gw";
@@ -142,6 +142,13 @@ public class MSHWebServiceTest {
     @Tested
     MSHWebservice mshWebservice;
 
+    @Injectable
+    ReliabilityMatcher pullReceiptMatcher;
+
+    @Injectable
+    ReliabilityMatcher pullRequestMatcher;
+
+
     /**
      * Happy flow unit testing with actual data
      *
@@ -168,9 +175,9 @@ public class MSHWebServiceTest {
             result = messaging;
 
             messaging.getSignalMessage();
-            result=null;
+            result = null;
 
-            userMessageHandlerService.handleNewUserMessage(withEqual(pmodeKey),withEqual(soapRequestMessage), withEqual(messaging),withAny(new UserMessageHandlerContext()));
+            userMessageHandlerService.handleNewUserMessage(withEqual(pmodeKey), withEqual(soapRequestMessage), withEqual(messaging), withAny(new UserMessageHandlerContext()));
             result = soapResponseMessage;
         }};
 
@@ -183,32 +190,9 @@ public class MSHWebServiceTest {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * Unit testing with actual data.
      *
-     * @param soapHeader
-     * @param soapChildElementsIterator
-     * @param messagingXml
      * @throws JAXBException
      * @throws SOAPException
      * @throws ParserConfigurationException
@@ -224,22 +208,22 @@ public class MSHWebServiceTest {
         new Expectations(mshWebservice) {{
 
             userMessageHandlerService.getMessaging(withAny(soapRequestMessage));
-            result=messaging;
+            result = messaging;
 
             messaging.getSignalMessage();
-            result=null;
+            result = null;
 
             UserMessageHandlerContext arg = new UserMessageHandlerContext();
             arg.setLegConfiguration(legConfiguration);
             mshWebservice.getMessageHandler();
-            result=arg;
+            result = arg;
 
             legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer();
             result = true;
 
 
-            userMessageHandlerService.handleNewUserMessage(withAny(pmodeKey),withAny(soapRequestMessage), withAny(messaging),withAny(arg));
-            result=new EbMS3Exception(null,null,null,null);
+            userMessageHandlerService.handleNewUserMessage(withAny(pmodeKey), withAny(soapRequestMessage), withAny(messaging), withAny(arg));
+            result = new EbMS3Exception(null, null, null, null);
 
         }};
 
@@ -251,6 +235,144 @@ public class MSHWebServiceTest {
 
         new Verifications() {{
             backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), (ErrorResult) any);
+        }};
+    }
+
+    @Test
+    public void testHandlePullRequestMessageFound(
+            @Mocked final PhaseInterceptorChain pi,
+            @Mocked final Process process,
+            @Mocked final LegConfiguration legConfiguration,
+            @Mocked final PullContext pullContext) throws EbMS3Exception {
+        final String mpcQualifiedName = "defaultMPC";
+
+        Messaging messaging = new Messaging();
+        SignalMessage signalMessage = new SignalMessage();
+        final PullRequest pullRequest = new PullRequest();
+        pullRequest.setMpc(mpcQualifiedName);
+        signalMessage.setPullRequest(pullRequest);
+        messaging.setSignalMessage(signalMessage);
+
+        final UserMessage userMessage = createSampleUserMessage();
+        final String messageId = userMessage.getMessageInfo().getMessageId();
+
+
+        new Expectations() {{
+            legConfiguration.getReliability().isNonRepudiation();
+            result = true;
+
+            pullRequestMatcher.matchReliableCallBack(withAny(legConfiguration));
+            result = true;
+
+            messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
+            result = pullContext;
+
+            pullContext.filterLegOnMpc();
+            result = legConfiguration;
+
+            messageExchangeService.retrieveReadyToPullUserMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
+            result = userMessage;
+        }};
+        SOAPMessage soapMessage = mshWebservice.handlePullRequest(messaging);
+        new Verifications() {{
+            messageExchangeService.extractProcessOnMpc(mpcQualifiedName);
+
+            PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
+            times = 1;
+
+            PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_ID, messageId);
+            times = 1;
+
+            messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
+            times = 1;
+
+            reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK, null, legConfiguration);
+            times = 1;
+
+        }};
+    }
+
+    @Test
+    public void testHandlePullRequestNoMessageFound(@Injectable ReliabilityMatcher pullReceiptMatcher,
+                                                    @Injectable ReliabilityMatcher pullRequestMatcher,
+                                                    @Mocked final PhaseInterceptorChain pi,
+                                                    @Mocked final Process process,
+                                                    @Mocked final LegConfiguration legConfiguration,
+                                                    @Mocked final PullContext pullContext) throws EbMS3Exception {
+        final String mpcQualifiedName = "defaultMPC";
+
+        Messaging messaging = new Messaging();
+        SignalMessage signalMessage = new SignalMessage();
+        final PullRequest pullRequest = new PullRequest();
+        pullRequest.setMpc(mpcQualifiedName);
+        signalMessage.setPullRequest(pullRequest);
+        messaging.setSignalMessage(signalMessage);
+
+        new Expectations() {{
+
+            messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
+            result = pullContext;
+
+            messageExchangeService.retrieveReadyToPullUserMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
+            result = null;
+        }};
+        mshWebservice.handlePullRequest(messaging);
+        new Verifications() {{
+            messageExchangeService.extractProcessOnMpc(mpcQualifiedName);
+
+            SignalMessage signal;
+            messageBuilder.buildSOAPMessage(signal = withCapture(), withAny(legConfiguration));
+            Assert.assertEquals(1, signal.getError().size());
+        }};
+    }
+
+
+    @Test
+    public void testHandlePullRequestMessageFoundWithErro(@Injectable ReliabilityMatcher pullReceiptMatcher,
+                                                          @Injectable ReliabilityMatcher pullRequestMatcher,
+                                                          @Mocked final PhaseInterceptorChain pi,
+                                                          @Mocked final Process process,
+                                                          @Mocked final LegConfiguration legConfiguration,
+                                                          @Mocked final PullContext pullContext) throws EbMS3Exception {
+        final String mpcQualifiedName = "defaultMPC";
+
+        Messaging messaging = new Messaging();
+        SignalMessage signalMessage = new SignalMessage();
+        final PullRequest pullRequest = new PullRequest();
+        pullRequest.setMpc(mpcQualifiedName);
+        signalMessage.setPullRequest(pullRequest);
+        messaging.setSignalMessage(signalMessage);
+
+        final UserMessage userMessage = createSampleUserMessage();
+        final String messageId = userMessage.getMessageInfo().getMessageId();
+        final EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Payload in body must be valid XML", messageId, null);
+
+
+        new Expectations() {{
+            messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
+            result = pullContext;
+
+            pullContext.filterLegOnMpc();
+            result = legConfiguration;
+
+            messageExchangeService.retrieveReadyToPullUserMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
+            result = userMessage;
+
+            messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
+            result = ebMS3Exception;
+        }};
+        SOAPMessage soapMessage = mshWebservice.handlePullRequest(messaging);
+        new Verifications() {{
+            messageExchangeService.extractProcessOnMpc(mpcQualifiedName);
+
+            Error error;
+            messageBuilder.buildSOAPFaultMessage(error = withCapture());
+            error.equals(ebMS3Exception.getFaultInfo());
+            times = 1;
+
+            reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            times = 1;
+
         }};
     }
 
@@ -310,6 +432,9 @@ public class MSHWebServiceTest {
 
     protected UserMessage createSampleUserMessage() {
         UserMessage userMessage = new UserMessage();
+        final MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setMessageId("id123456");
+        userMessage.setMessageInfo(messageInfo);
         CollaborationInfo collaborationInfo = new CollaborationInfo();
         collaborationInfo.setAction("TC1Leg1");
         AgreementRef agreementRef = new AgreementRef();
@@ -367,8 +492,6 @@ public class MSHWebServiceTest {
         aProperty.setType(type);
         return aProperty;
     }
-
-
 
 
 }

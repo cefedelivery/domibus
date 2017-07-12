@@ -7,9 +7,9 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
@@ -58,18 +58,24 @@ public class ReliabilityChecker {
     private UpdateRetryLoggingService updateRetryLoggingService;
     @Autowired
     private ErrorLogDao errorLogDao;
+    @Autowired
+    private ReliabilityMatcher pushMatcher;
 
     public CheckResult check(final SOAPMessage request, final SOAPMessage response, final String pmodeKey) throws EbMS3Exception {
+        return check(request, response, pmodeKey, pushMatcher);
+    }
+
+    public CheckResult check(final SOAPMessage request, final SOAPMessage response, final String pmodeKey, final ReliabilityMatcher matcher) throws EbMS3Exception {
 
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
         String messageId = null;
 
-        if (legConfiguration.getReliability() != null && ReplyPattern.CALLBACK.equals(legConfiguration.getReliability().getReplyPattern())) {
+        if (matcher.matchReliableCallBack(legConfiguration)) {
             LOG.debug("Reply pattern is waiting for callback, setting message status to WAITING_FOR_CALLBACK.");
             return CheckResult.WAITING_FOR_CALLBACK;
         }
 
-        if (legConfiguration.getReliability() != null && ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())) {
+        if (matcher.matchReliableReceipt(legConfiguration)) {
             LOG.debug("Checking reliability for outgoing message");
             final Messaging messaging;
 

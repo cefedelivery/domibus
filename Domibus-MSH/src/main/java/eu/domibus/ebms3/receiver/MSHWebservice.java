@@ -6,15 +6,18 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.sender.*;
+import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
+import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.ebms3.sender.ReliabilityChecker;
+import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -83,7 +86,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private ReliabilityChecker reliabilityChecker;
 
     @Autowired
-    private UpdateRetryLoggingService updateRetryLoggingService;
+    private ReliabilityMatcher pullReceiptMatcher;
+
+    @Autowired
+    private ReliabilityMatcher pullRequestMatcher;
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
@@ -92,7 +98,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Override
     @Transactional
     public SOAPMessage invoke(final SOAPMessage request) {
-
         SOAPMessage responseMessage = null;
         Messaging messaging;
         messaging = getMessage(request);
@@ -157,7 +162,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 e.setMshRole(MSHRole.SENDING);
                 throw e;
             }
-            reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, request, pModeKey);
+            reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, request, pModeKey, pullReceiptMatcher);
 
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
@@ -183,7 +188,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     private SOAPMessage getSoapMessage(String messageId, LegConfiguration legConfiguration, UserMessage userMessage) throws SOAPException, IOException, ParserConfigurationException, SAXException, EbMS3Exception {
         SOAPMessage soapMessage;
-        if (isNonRepudiation(legConfiguration)) {
+        if (pullReceiptMatcher.matchReliableReceipt(legConfiguration) && legConfiguration.getReliability().isNonRepudiation()) {
             RawEnvelopeDto rawEnvelopeDto = messageExchangeService.findPulledMessageRawXmlByMessageId(messageId);
             soapMessage = SoapUtil.createSOAPMessage(rawEnvelopeDto.getRawMessage());
         } else {
@@ -192,32 +197,25 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return soapMessage;
     }
 
-    private boolean isNonRepudiation(LegConfiguration legConfiguration) {
-        return legConfiguration.getReliability() != null &&
-                ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern()) &&
-                legConfiguration.getReliability().isNonRepudiation();
-    }
-
-    private SOAPMessage handlePullRequest(Messaging messaging) {
+    SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
-        if (!pullContext.isValid()) {
-            throw new WebServiceException("Pmode configuration " + pullContext.getErrorMessage());
-        }
         LegConfiguration leg = null;
         String messageId = null;
         UserMessage userMessage = messageExchangeService.retrieveReadyToPullUserMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
-        ReliabilityChecker.CheckResult pullStatus = ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
         try {
             if (userMessage != null) {
                 messageId = userMessage.getMessageInfo().getMessageId();
                 leg = pullContext.filterLegOnMpc();
                 SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
                 PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
-                if (isNonRepudiation(leg)) {
+                System.out.println(pullRequestMatcher.matchReliableCallBack(leg));
+                System.out.println(leg.getReliability().isNonRepudiation());
+                if (pullRequestMatcher.matchReliableCallBack(leg) &&
+                        leg.getReliability().isNonRepudiation()) {
                     PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_ID, messageId);
                 }
-                reliabilityChecker.handleReliability(messageId, pullStatus, null, leg);
+                reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK, null, leg);
                 return soapMessage;
             } else {
                 LOG.debug("No message for received pull request with mpc " + pullContext.getMpcQualifiedName());
@@ -229,14 +227,12 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 return soapMessage;
             }
         } catch (EbMS3Exception e) {
-            pullStatus = ReliabilityChecker.CheckResult.FAIL;
+            reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, leg);
             try {
                 return messageBuilder.buildSOAPFaultMessage(e.getFaultInfo());
             } catch (EbMS3Exception e1) {
                 throw new WebServiceException(e1);
             }
-        } finally {
-            reliabilityChecker.handleReliability(messageId, pullStatus, null, leg);
         }
     }
 

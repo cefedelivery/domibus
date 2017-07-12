@@ -2,6 +2,7 @@ package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.*;
@@ -167,16 +168,12 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
         if (!configurationDAO.configurationExists()) {
-            return new PullContext("Pmode not configured");
+            throw new PModeException(DomibusCoreErrorCode.DOM_003, "No pmode configuration found");
         }
         List<Process> processes = processDao.findPullProcessBytMpc(mpcQualifiedName);
         Configuration configuration = configurationDAO.read();
-        try {
-            processValidator.validatePullProcess(processes);
-            return new PullContext(processes.get(0), configuration.getParty(), mpcQualifiedName);
-        } catch (PModeException p) {
-            return new PullContext(p.getMessage());
-        }
+        processValidator.validatePullProcess(processes);
+        return new PullContext(processes.get(0), configuration.getParty(), mpcQualifiedName);
     }
 
 

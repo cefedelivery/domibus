@@ -28,6 +28,13 @@ public interface MessageExchangeService {
      */
     void initiatePullRequest();
 
+    /**
+     * Check if a message exist for the association mpc/responder. If it does it returns the first one that arrived.
+     *
+     * @param mpc       the mpc contained in the pull request.
+     * @param responder the party for who this message is related.
+     * @return a UserMessage if found.
+     */
     UserMessage retrieveReadyToPullUserMessages(String mpc, Party responder);
 
     /**
