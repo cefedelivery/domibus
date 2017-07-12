@@ -1,5 +1,7 @@
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
@@ -144,9 +146,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return new UserMessageHandlerContext();
     }
 
-    private SOAPMessage handlePullRequestReceipt(SOAPMessage request, Messaging messaging) {
+    SOAPMessage handlePullRequestReceipt(SOAPMessage request, Messaging messaging) {
         String messageId = messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
-        ReliabilityChecker.CheckResult reliabilityCheckSuccessful = null;
+        ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
         ResponseHandler.CheckResult isOk = null;
         LegConfiguration legConfiguration = null;
         try {
@@ -172,25 +174,24 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             }
         } catch (final EbMS3Exception e) {
             reliabilityChecker.handleEbms3Exception(e, messageId);
-        } catch (Throwable e) {
-            throw e;
+        } catch (ReliabilityException r) {
+            LOG.warn(r.getMessage());
         } finally {
             reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
             messageExchangeService.removeRawMessageIssuedByPullRequest(messageId);
-            try {
-                final SignalMessage signalMessage = new SignalMessage();
-                return messageBuilder.buildSOAPMessage(signalMessage, null);
-            } catch (EbMS3Exception e) {
-                throw new WebServiceException(e);
-            }
         }
+        return null;
     }
 
-    private SOAPMessage getSoapMessage(String messageId, LegConfiguration legConfiguration, UserMessage userMessage) throws SOAPException, IOException, ParserConfigurationException, SAXException, EbMS3Exception {
+    SOAPMessage getSoapMessage(String messageId, LegConfiguration legConfiguration, UserMessage userMessage) throws EbMS3Exception {
         SOAPMessage soapMessage;
         if (pullReceiptMatcher.matchReliableReceipt(legConfiguration) && legConfiguration.getReliability().isNonRepudiation()) {
             RawEnvelopeDto rawEnvelopeDto = messageExchangeService.findPulledMessageRawXmlByMessageId(messageId);
-            soapMessage = SoapUtil.createSOAPMessage(rawEnvelopeDto.getRawMessage());
+            try {
+                soapMessage = SoapUtil.createSOAPMessage(rawEnvelopeDto.getRawMessage());
+            } catch (ParserConfigurationException | SOAPException | SAXException | IOException e) {
+                throw new ReliabilityException(DomibusCoreErrorCode.DOM_004, "Raw message found in db but impossible to restore it");
+            }
         } else {
             soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
         }

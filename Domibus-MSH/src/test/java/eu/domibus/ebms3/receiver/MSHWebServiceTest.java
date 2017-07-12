@@ -1,7 +1,10 @@
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
@@ -16,6 +19,7 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.*;
@@ -374,6 +378,111 @@ public class MSHWebServiceTest {
             times = 1;
 
         }};
+    }
+
+    @Test
+    public void testHandlePullRequestReceiptHappyFlow(@Mocked final SOAPMessage request,
+                                                      @Mocked final Messaging messaging,
+                                                      @Mocked final UserMessage userMessage,
+                                                      @Mocked final MessageExchangeConfiguration messageConfiguration,
+                                                      @Injectable final SOAPMessage soapMessage,
+                                                      @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
+        final String messageId = "12345";
+        final String pModeKey = "pmodeKey";
+        new Expectations() {{
+            messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
+            result = messageId;
+
+            messagingDao.findUserMessageByMessageId(messageId);
+            result = userMessage;
+
+            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            result = messageConfiguration;
+
+            messageConfiguration.getPmodeKey();
+            result = pModeKey;
+
+            responseHandler.handle(request);
+            result = ResponseHandler.CheckResult.WARNING;
+
+            reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
+            result = ReliabilityChecker.CheckResult.OK;
+        }};
+
+        mshWebservice.handlePullRequestReceipt(request, messaging);
+
+        new Verifications() {{
+            messagingDao.findUserMessageByMessageId(messageId);
+            times = 1;
+            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            times = 1;
+            pModeProvider.getLegConfiguration(pModeKey);
+            times = 1;
+            responseHandler.handle(request);
+            times = 1;
+            reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
+            reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, withAny(legConfiguration));
+            messageExchangeService.removeRawMessageIssuedByPullRequest(messageId);
+        }};
+
+    }
+
+    @Test
+    public void testHandlePullRequestWithEbmsException(@Mocked final SOAPMessage request,
+                                                       @Mocked final Messaging messaging,
+                                                       @Mocked final UserMessage userMessage,
+                                                       @Mocked final MessageExchangeConfiguration me,
+                                                       @Injectable final SOAPMessage soapMessage,
+                                                       @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
+        final String messageId = "12345";
+        final String pModeKey = "pmodeKey";
+        new Expectations(mshWebservice) {{
+            messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
+            result = messageId;
+            mshWebservice.getSoapMessage(messageId, withAny(legConfiguration), withAny(userMessage));
+            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Payload in body must be valid XML", messageId, null);
+        }};
+
+        mshWebservice.handlePullRequestReceipt(request, messaging);
+
+        new Verifications() {{
+
+            reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
+            times = 0;
+            reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, withAny(legConfiguration));
+            times = 1;
+
+        }};
+
+    }
+
+    @Test
+    public void testHandlePullRequestWithReliabilityException(@Mocked final SOAPMessage request,
+                                                              @Mocked final Messaging messaging,
+                                                              @Mocked final UserMessage userMessage,
+                                                              @Mocked final MessageExchangeConfiguration me,
+                                                              @Injectable final SOAPMessage soapMessage,
+                                                              @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
+        final String messageId = "12345";
+        final String pModeKey = "pmodeKey";
+        new Expectations(mshWebservice) {{
+            messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
+            result = messageId;
+            mshWebservice.getSoapMessage(messageId, withAny(legConfiguration), withAny(userMessage));
+            result = new ReliabilityException(DomibusCoreErrorCode.DOM_004, "test");
+        }};
+
+        mshWebservice.handlePullRequestReceipt(request, messaging);
+
+        new Verifications() {{
+
+            reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
+            times = 0;
+            reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, withAny(legConfiguration));
+            times = 1;
+
+        }};
+
     }
 
 

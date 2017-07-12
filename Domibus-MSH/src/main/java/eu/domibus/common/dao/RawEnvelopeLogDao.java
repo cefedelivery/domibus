@@ -6,11 +6,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
-
-import java.util.List;
-
-import static org.springframework.util.StringUtils.hasLength;
 
 /**
  * @author idragusa
@@ -26,10 +23,14 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
     }
 
     //@thom test this class
-    public List<RawEnvelopeDto> findRawXmlByMessageId(final String messageId){
+    public RawEnvelopeDto findRawXmlByMessageId(final String messageId) {
         TypedQuery<RawEnvelopeDto> namedQuery = em.createNamedQuery("find.by.message.id", RawEnvelopeDto.class);
         namedQuery.setParameter("MESSAGE_ID",messageId);
-        return namedQuery.getResultList();
+        try {
+            return namedQuery.getSingleResult();
+        } catch (NoResultException nr) {
+            return null;
+        }
     }
 
     public void deleteRawMessage(final int id){

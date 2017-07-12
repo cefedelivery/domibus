@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.pmode.PModeException;
+import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.model.configuration.*;
@@ -178,17 +179,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
 
     @Override
-    @Transactional
-    public void savePulledMessageRawXml(final String rawXml, final String messageId) {
-        UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
-        RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
-        rawEnvelopeLog.setRawXML(rawXml);
-        rawEnvelopeLog.setUserMessage(userMessage);
-        rawEnvelopeLogDao.create(rawEnvelopeLog);
-    }
-
-    @Transactional
-    @Override
+    @Transactional(noRollbackFor = ReliabilityException.class)
     public void removeRawMessageIssuedByPullRequest(final String messageId) {
         RawEnvelopeDto rawEnvelopeDto = findPulledMessageRawXmlByMessageId(messageId);
         if (rawEnvelopeDto != null) {
@@ -198,15 +189,22 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     @Override
     @Transactional
-    public RawEnvelopeDto findPulledMessageRawXmlByMessageId(final String messageId) {
-        List<RawEnvelopeDto> rawEnvelopeDto = rawEnvelopeLogDao.findRawXmlByMessageId(messageId);
-        if (rawEnvelopeDto.size() == 0 || rawEnvelopeDto.size() > 1) {
-            LOG.error("There should always have a raw message in the case of a pulledMessage");
-            return null;
-        }
-        return rawEnvelopeDto.get(0);
+    public void savePulledMessageRawXml(final String rawXml, final String messageId) {
+        UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+        rawEnvelopeLog.setRawXML(rawXml);
+        rawEnvelopeLog.setUserMessage(userMessage);
+        rawEnvelopeLogDao.create(rawEnvelopeLog);
     }
 
-
+    @Override
+    @Transactional(noRollbackFor = ReliabilityException.class)
+    public RawEnvelopeDto findPulledMessageRawXmlByMessageId(final String messageId) {
+        final RawEnvelopeDto rawXmlByMessageId = rawEnvelopeLogDao.findRawXmlByMessageId(messageId);
+        if (rawXmlByMessageId == null) {
+            throw new ReliabilityException(DomibusCoreErrorCode.DOM_004, "There should always have a raw message for message " + messageId);
+        }
+        return rawXmlByMessageId;
+    }
 }
 
