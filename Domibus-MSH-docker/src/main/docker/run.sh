@@ -29,8 +29,16 @@ cd $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/tomcat-mysql-c2-c3-compose
 sudo docker-compose up -d
 
 cd $SOURCE_CODE/../Domibus-MSH-tomcat
-i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:8180/domibus/home; do sleep $((i++)) && echo -n . && if [ $i -eq 100 ]; then break; fi ;   done
-i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:9080/domibus/home; do sleep $((i++)) && echo -n . && if [ $i -eq 100 ]; then break; fi ;   done
+i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:8180/domibus/; do sleep $((i++)) && echo -n . && if [ $i -eq 100 ]; then break; fi ;   done
+i=0; while ! curl --output /dev/null --silent --head --fail http://localhost:9080/domibus/; do sleep $((i++)) && echo -n . && if [ $i -eq 100 ]; then break; fi ;   done
+cp ../Domibus-MSH/src/main/conf/pmodes/domibus-gw-sample-pmode-blue.xml .
+cp ../Domibus-MSH/src/main/conf/pmodes/domibus-gw-sample-pmode-red.xml .
+sed -i -e "s/<blue_hostname>:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-blue.xml
+sed -i -e "s/<red_hostname>:8080/domibusred:8080/g" ./domibus-gw-sample-pmode-blue.xml
+sed -i -e "s/<blue_hostname>:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-red.xml
+sed -i -e "s/<red_hostname>:8080/domibusred:8080/g" ./domibus-gw-sample-pmode-red.xml
+$SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:8180 $SOURCE_CODE/../Domibus-MSH-tomcat/domibus-gw-sample-pmode-blue.xml
+$SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:9080 $SOURCE_CODE/../Domibus-MSH-tomcat/domibus-gw-sample-pmode-red.xml
 mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
 
 cd $SOURCE_CODE/../Domibus-MSH-soapui-tests
@@ -41,8 +49,8 @@ sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-blue.xm
 sed -i -e "s/localhost:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-red.xml
 sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-red.xml
 
-curl --user $ADMIN_USER:$ADMIN_PASSW -X POST -F pmode=@./domibus-gw-sample-pmode-blue.xml http://localhost:8180/domibus/home/uploadPmodeFile
-curl --user $ADMIN_USER:$ADMIN_PASSW -X POST -F pmode=@./domibus-gw-sample-pmode-red.xml http://localhost:9080/domibus/home/uploadPmodeFile
+$SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:8180 $SOURCE_CODE/../Domibus-MSH-soapui-tests/domibus-gw-sample-pmode-blue.xml
+$SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:9080 $SOURCE_CODE/../Domibus-MSH-soapui-tests/domibus-gw-sample-pmode-red.xml
 
 MYSQL_CONNECTOR="mysql-connector-java-5.1.40"
 
@@ -54,5 +62,5 @@ sudo wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
     && sudo unzip -o $MYSQL_CONNECTOR.zip
 
 sudo cp $MYSQL_CONNECTOR/$MYSQL_CONNECTOR-bin.jar ./src/main/soapui/lib
-
-mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
+### Temporary ignore until tests are updated to 3.3-rc1 ###
+#mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
