@@ -124,11 +124,10 @@ public abstract class PModeProvider {
             throw xmlProcessingException;
         }
 
-        List<String> resultMessage = null;
+        List<String> resultMessage = new ArrayList<>();
         //unmarshall the PMode taking into account the whitespaces
         UnmarshallerResult unmarshalledConfiguration = unmarshall(bytes, false);
         if (!unmarshalledConfiguration.isValid()) {
-            resultMessage = new ArrayList<>();
             resultMessage.add("The PMode file is not XSD compliant. It is recommended to correct the issues:");
             resultMessage.addAll(unmarshalledConfiguration.getErrors());
             LOG.warn(StringUtils.join(resultMessage, " "));
