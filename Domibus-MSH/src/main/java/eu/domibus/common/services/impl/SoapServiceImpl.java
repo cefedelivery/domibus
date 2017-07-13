@@ -1,5 +1,7 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.common.ErrorCode;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.SoapService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
@@ -36,7 +38,7 @@ public class SoapServiceImpl implements SoapService {
     private JAXBContext jaxbContext;
 
 
-    public Messaging getMessage(final SoapMessage message) throws IOException, JAXBException {
+    public Messaging getMessage(final SoapMessage message) throws IOException, JAXBException, EbMS3Exception {
         final InputStream inputStream = message.getContent(InputStream.class);
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         IOUtils.copy(inputStream, byteArrayOutputStream); //FIXME: do not copy the whole byte[], use SequenceInputstream instead
@@ -49,6 +51,10 @@ public class SoapServiceImpl implements SoapService {
         message.setContent(InputStream.class, new ByteArrayInputStream(data));
         //message.setContent(XMLStreamReader.class, XMLInputFactory.newInstance().createXMLStreamReader(message.getContent(InputStream.class)));
         final Node messagingNode = soapEnvelope.getElementsByTagNameNS(ObjectFactory._Messaging_QNAME.getNamespaceURI(), ObjectFactory._Messaging_QNAME.getLocalPart()).item(0);
+        if(messagingNode == null) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, "Messaging header is empty!", null, null);
+        }
+
         return ((JAXBElement<Messaging>) this.jaxbContext.createUnmarshaller().unmarshal(messagingNode)).getValue();
     }
 }
