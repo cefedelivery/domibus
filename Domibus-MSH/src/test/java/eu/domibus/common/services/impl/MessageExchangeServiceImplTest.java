@@ -188,6 +188,10 @@ public class MessageExchangeServiceImplTest {
         PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
     }
 
+    public void testRetrieveReadyToPullUserMessageId() {
+        when(messagingDao.findMessagingOnStatusReceiverAndMpc)
+    }
+
 
 
 

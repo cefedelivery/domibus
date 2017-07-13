@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
@@ -142,8 +143,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
 
     @Override
-    @Transactional
-    public UserMessage retrieveReadyToPullUserMessages(final String mpc, final Party responder) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public String retrieveReadyToPullUserMessageId(final String mpc, final Party responder) {
         Set<Identifier> identifiers = responder.getIdentifiers();
         List<MessagePullDto> messagingOnStatusReceiverAndMpc = new ArrayList<>();
         for (Identifier identifier : identifiers) {
@@ -152,9 +153,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
         if (!messagingOnStatusReceiverAndMpc.isEmpty()) {
             MessagePullDto messagePullDto = messagingOnStatusReceiverAndMpc.get(0);
-            UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(messagePullDto.getMessageId());
             messageLogDao.setIntermediaryPullStatus(messagePullDto.getMessageId());
-            return userMessageByMessageId;
+            return messagePullDto.getMessageId();
         }
         return null;
 

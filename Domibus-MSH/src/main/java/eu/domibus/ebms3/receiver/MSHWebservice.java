@@ -15,7 +15,10 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
-import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.PullRequest;
+import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.receiver.handler.PullRequestHandler;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
@@ -25,7 +28,6 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.util.SoapUtil;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
@@ -37,7 +39,6 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
 import javax.xml.ws.*;
-import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.io.IOException;
@@ -76,8 +77,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     @Autowired
     private EbMS3MessageBuilder messageBuilder;
+
     @Autowired
     private UserMessageHandlerService userMessageHandlerService;
+
     @Autowired
     private ResponseHandler responseHandler;
 
@@ -91,7 +94,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private ReliabilityMatcher pullReceiptMatcher;
 
     @Autowired
-    private ReliabilityMatcher pullRequestMatcher;
+    private PullRequestHandler pullRequestHandler;
+
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
@@ -201,40 +205,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
-        LegConfiguration leg = null;
-        String messageId = null;
-        UserMessage userMessage = messageExchangeService.retrieveReadyToPullUserMessages(pullContext.getMpcQualifiedName(), pullContext.getResponder());
-        try {
-            if (userMessage != null) {
-                messageId = userMessage.getMessageInfo().getMessageId();
-                leg = pullContext.filterLegOnMpc();
-                SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
-                PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
-                System.out.println(pullRequestMatcher.matchReliableCallBack(leg));
-                System.out.println(leg.getReliability().isNonRepudiation());
-                if (pullRequestMatcher.matchReliableCallBack(leg) &&
-                        leg.getReliability().isNonRepudiation()) {
-                    PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_ID, messageId);
-                }
-                reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK, null, leg);
-                return soapMessage;
-            } else {
-                LOG.debug("No message for received pull request with mpc " + pullContext.getMpcQualifiedName());
-                EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0006, "There is no message available for\n" +
-                        "pulling from this MPC at this moment.", null, null);
-                final SignalMessage signalMessage = new SignalMessage();
-                signalMessage.getError().add(ebMS3Exception.getFaultInfo());
-                SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(signalMessage, null);
-                return soapMessage;
-            }
-        } catch (EbMS3Exception e) {
-            reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, leg);
-            try {
-                return messageBuilder.buildSOAPFaultMessage(e.getFaultInfo());
-            } catch (EbMS3Exception e1) {
-                throw new WebServiceException(e1);
-            }
-        }
+        String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getResponder());
+        return pullRequestHandler.handlePullRequestInNewTransaction(messageId, pullContext);
     }
 
     private Messaging getMessage(SOAPMessage request) {

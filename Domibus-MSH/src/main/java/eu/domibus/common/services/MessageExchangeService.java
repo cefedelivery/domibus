@@ -5,7 +5,6 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import eu.domibus.ebms3.common.model.UserMessage;
 
 /**
  * @author Thomas Dussart
@@ -35,7 +34,7 @@ public interface MessageExchangeService {
      * @param responder the party for who this message is related.
      * @return a UserMessage if found.
      */
-    UserMessage retrieveReadyToPullUserMessages(String mpc, Party responder);
+    String retrieveReadyToPullUserMessageId(String mpc, Party responder);
 
     /**
      * When a pull request comes in, there is very litle information.  From this information we retrieve
