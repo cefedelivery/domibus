@@ -330,9 +330,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             backendMessageValidator.validateInitiatorParty(config.getParty(), from);
             backendMessageValidator.validateResponderParty(config.getParty(), to);
 
-            Role fromRole = pModeProvider.getBusinessProcessRole(userMessage.getPartyInfo().getFrom().getRole());
-            Role toRole = pModeProvider.getBusinessProcessRole(userMessage.getPartyInfo().getTo().getRole());
-            backendMessageValidator.validatePartiesRoles(fromRole, toRole);
             return to;
         } catch (IllegalArgumentException runTimEx) {
             LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", runTimEx);
