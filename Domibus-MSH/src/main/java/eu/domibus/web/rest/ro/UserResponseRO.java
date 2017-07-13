@@ -1,5 +1,9 @@
 package eu.domibus.web.rest.ro;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,19 +58,6 @@ public class UserResponseRO {
         return authorities;
     }
 
-    @Override
-    public String toString() {
-        return "UserResponseRO{" +
-                "userName='" + userName + '\'' +
-                ", email='" + email + '\'' +
-                ", active=" + active +
-                ", authorities=" + authorities +
-                ", roles='" + roles + '\'' +
-                ", status='" + status + '\'' +
-                ", password='" + password + '\'' + //NOSONAR
-                '}';
-    }
-
     public String getStatus() {
         return status;
     }
@@ -83,10 +74,10 @@ public class UserResponseRO {
         this.password = password;
     }
 
-
     public void setUserName(String userName) {
         this.userName = userName;
     }
+
 
     public void setEmail(String email) {
         this.email = email;
@@ -102,5 +93,50 @@ public class UserResponseRO {
 
     public String getRoles() {
         return roles;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("userName", userName)
+                .append("email", email)
+                .append("active", active)
+                .append("authorities", authorities)
+                .append("roles", roles)
+                .append("status", status)
+                .append("password", password)
+                .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserResponseRO that = (UserResponseRO) o;
+
+        return new EqualsBuilder()
+                .append(active, that.active)
+                .append(userName, that.userName)
+                .append(email, that.email)
+                .append(authorities, that.authorities)
+                .append(roles, that.roles)
+                .append(status, that.status)
+                .append(password, that.password)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(userName)
+                .append(email)
+                .append(active)
+                .append(authorities)
+                .append(roles)
+                .append(status)
+                .append(password)
+                .toHashCode();
     }
 }

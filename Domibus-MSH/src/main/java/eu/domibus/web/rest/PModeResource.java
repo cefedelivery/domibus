@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.bind.JAXBException;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -39,7 +37,7 @@ public class PModeResource {
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = "application/xml")
-    public ResponseEntity<? extends Resource> downloadPmodes() throws IOException, JAXBException {
+    public ResponseEntity<? extends Resource> downloadPmodes() {
 
         final byte[] rawConfiguration = pModeProvider.getRawConfiguration();
         ByteArrayResource resource = new ByteArrayResource(new byte[0]);
@@ -68,7 +66,7 @@ public class PModeResource {
 
             List<String> pmodeUpdateMessage = pModeProvider.updatePModes(bytes);
             String message = "PMode file has been successfully uploaded";
-            if (pmodeUpdateMessage != null && pmodeUpdateMessage.size() > 0) {
+            if (pmodeUpdateMessage != null && !pmodeUpdateMessage.isEmpty()) {
                 message += " but some issues were detected: \n" + StringUtils.join(pmodeUpdateMessage, "\n");
             }
             return ResponseEntity.ok(message);

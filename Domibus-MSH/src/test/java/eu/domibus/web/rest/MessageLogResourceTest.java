@@ -23,9 +23,11 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 /**
- * Created by migueti on 12/07/2017.
+ * @author Tiago Miguel
+ * @since 3.3
  */
 @RunWith(JMockit.class)
 public class MessageLogResourceTest {
@@ -47,7 +49,7 @@ public class MessageLogResourceTest {
      * @param user true if UserMessageLog, false if SignalMessageLog
      * @return
      */
-    private MessageLog createMessageLog(boolean user) {
+    public static MessageLog createMessageLog(boolean user) {
         MessageLog messageLog = user ? new UserMessageLog() : new SignalMessageLog();
         messageLog.setEntityId(1);
         messageLog.setBackend("backend");
@@ -68,23 +70,24 @@ public class MessageLogResourceTest {
 
     @Test
     public void testUserMessageLog() {
+        // Given
         UserMessageLog userMessageLog = (UserMessageLog) createMessageLog(true);
         final MessageLogInfo messageLogInfo = new MessageLogInfo(userMessageLog , "conversationId", "fromPartyId", "toPartyId", "originalSender", "finalRecipient", "refToMessageId");
-        final ArrayList<MessageLogInfo> resultList = new ArrayList<>();
+        final List<MessageLogInfo> resultList = new ArrayList<>();
         resultList.add(messageLogInfo);
         new Expectations() {{
             userMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
             result = resultList;
         }};
-        final MessageLogResultRO messageLogResultRO = messageLogResource.getMessageLog(1, 10, 10, "description", true,
-                "", "", null, MessageType.USER_MESSAGE, null,
-                null, "", "", "", "", "",
-                "", "");
 
+        // When
+        final MessageLogResultRO messageLogResultRO = getMessageLog(MessageType.USER_MESSAGE);
+
+        // Then
         Assert.assertNotNull(messageLogResultRO);
         Assert.assertEquals(1, messageLogResultRO.getMessageLogEntries().size());
-        MessageLogRO messageLogRO = messageLogResultRO.getMessageLogEntries().get(0);
 
+        MessageLogRO messageLogRO = messageLogResultRO.getMessageLogEntries().get(0);
         Assert.assertEquals(userMessageLog.getMessageId(), messageLogRO.getMessageId());
         Assert.assertEquals(userMessageLog.getMessageStatus(), messageLogRO.getMessageStatus());
         Assert.assertEquals(userMessageLog.getMessageType(), messageLogRO.getMessageType());
@@ -98,6 +101,7 @@ public class MessageLogResourceTest {
 
     @Test
     public void testSignalMessageLog() {
+        // Given
         SignalMessageLog signalMessageLog = (SignalMessageLog) createMessageLog(false);
         final MessageLogInfo messageLogInfo = new MessageLogInfo(signalMessageLog, "fromPartyId", "toPartyId", "originalSender", "finalRecipient", "refToMessageId");
         final ArrayList<MessageLogInfo> resultList = new ArrayList<>();
@@ -106,11 +110,11 @@ public class MessageLogResourceTest {
            signalMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
            result = resultList;
         }};
-        final MessageLogResultRO messageLogResultRO = messageLogResource.getMessageLog(1, 10, 10, "description", true,
-                "", "", null, MessageType.SIGNAL_MESSAGE, null,
-                null, "", "", "", "", "",
-                "", "");
 
+        // When
+        final MessageLogResultRO messageLogResultRO = getMessageLog(MessageType.SIGNAL_MESSAGE);
+
+        // Then
         Assert.assertNotNull(messageLogResultRO);
         Assert.assertEquals(1, messageLogResultRO.getMessageLogEntries().size());
         MessageLogRO messageLogRO = messageLogResultRO.getMessageLogEntries().get(0);
@@ -124,5 +128,12 @@ public class MessageLogResourceTest {
         Assert.assertEquals(signalMessageLog.getNotificationStatus(), messageLogRO.getNotificationStatus());
         Assert.assertEquals(signalMessageLog.getReceived(), messageLogRO.getReceived());
         Assert.assertEquals(signalMessageLog.getSendAttempts(), messageLogRO.getSendAttempts());
+    }
+
+    private MessageLogResultRO getMessageLog(MessageType messageType) {
+        return messageLogResource.getMessageLog(1, 10, 10, "MessageId", true,
+                null, null, null, messageType, null,
+                null, null, null, null, null, null,
+                null, null);
     }
 }
