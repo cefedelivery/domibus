@@ -41,9 +41,18 @@
                              brokerURL="${activeMQ.transportConnector.uri}"
                              userName="${activeMQ.username}" password="${activeMQ.password}">
         <!-- do not remove this! otherwise the redeliveryPolicy configured in activemq.xml will be ignored -->
-        <amq:redeliveryPolicy>
-            <amq:redeliveryPolicy />
-        </amq:redeliveryPolicy>
+        <amq:redeliveryPolicyMap>
+            <amq:redeliveryPolicyMap><!-- Don't know why a double nesting -->
+                <amq:defaultEntry>
+                    <!-- default policy-->
+                    <amq:redeliveryPolicy maximumRedeliveries="10" initialRedeliveryDelay="300000" />
+                </amq:defaultEntry>
+                <amq:redeliveryPolicyEntries>
+                    <amq:redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0" />
+                    <amq:redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0" />
+                </amq:redeliveryPolicyEntries>
+            </amq:redeliveryPolicyMap>
+        </amq:redeliveryPolicyMap>
     </amq:xaConnectionFactory>
 
 
