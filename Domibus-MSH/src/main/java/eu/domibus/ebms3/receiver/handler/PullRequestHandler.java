@@ -17,6 +17,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ import javax.xml.ws.WebServiceException;
  */
 
 
+@Component
 public class PullRequestHandler {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHWebservice.class);
@@ -50,7 +52,7 @@ public class PullRequestHandler {
         return handlePullRequest(messageId, pullContext);
     }
 
-    public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
+    SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         LegConfiguration leg = null;
         try {
             if (messageId != null) {
@@ -70,8 +72,7 @@ public class PullRequestHandler {
                         "pulling from this MPC at this moment.", null, null);
                 final SignalMessage signalMessage = new SignalMessage();
                 signalMessage.getError().add(ebMS3Exception.getFaultInfo());
-                SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(signalMessage, null);
-                return soapMessage;
+                return messageBuilder.buildSOAPMessage(signalMessage, null);
             }
         } catch (EbMS3Exception e) {
             reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, leg);

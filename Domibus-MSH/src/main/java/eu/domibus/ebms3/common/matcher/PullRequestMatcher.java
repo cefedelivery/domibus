@@ -21,7 +21,6 @@ public class PullRequestMatcher implements ReliabilityMatcher {
 
     @Override
     public boolean matchReliableReceipt(LegConfiguration legConfiguration) {
-        return legConfiguration.getReliability() != null && (ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())
-                || ReplyPattern.CALLBACK.equals(legConfiguration.getReliability().getReplyPattern()));
+        return false;
     }
 }

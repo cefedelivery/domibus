@@ -2,8 +2,6 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
@@ -16,7 +14,6 @@ import javax.persistence.TypedQuery;
 @Repository
 public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
 
-    private static final Log LOG = LogFactory.getLog(RawEnvelopeLogDao.class);
 
     public RawEnvelopeLogDao() {
         super(RawEnvelopeLog.class);

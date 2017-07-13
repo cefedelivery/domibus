@@ -32,7 +32,7 @@ public interface MessageExchangeService {
      *
      * @param mpc       the mpc contained in the pull request.
      * @param responder the party for who this message is related.
-     * @return a UserMessage if found.
+     * @return a UserMessage id  if found.
      */
     String retrieveReadyToPullUserMessageId(String mpc, Party responder);
 
