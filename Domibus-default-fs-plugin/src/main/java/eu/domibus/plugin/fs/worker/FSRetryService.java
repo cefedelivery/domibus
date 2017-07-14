@@ -30,9 +30,9 @@ import java.util.Properties;
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
 @Service
-public class RetryService {
+public class FSRetryService {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RetryService.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSRetryService.class);
 
     @Autowired
     @Qualifier("fsPluginProperties")
@@ -43,7 +43,7 @@ public class RetryService {
      * corresponding OUT directory and eventually it will be treated like a normal file.
      */
     public void resendFailedFSMessages() {
-        LOG.debug("Resending failed file system messages...");
+        LOG.info("Resending failed file system messages...");
     }
 
 }

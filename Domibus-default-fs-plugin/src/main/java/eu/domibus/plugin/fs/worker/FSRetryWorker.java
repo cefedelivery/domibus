@@ -25,15 +25,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
- * Quartz based worker responsible for the periodical execution of the RetryService.
+ * Quartz based worker responsible for the periodical execution of the FSRetryService.
  *
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
-@DisallowConcurrentExecution // Only one SendRetryWorker runs at any time on the same node
-public class SendRetryWorker extends QuartzJobBean {
+@DisallowConcurrentExecution // Only one FSRetryWorker runs at any time on the same node
+public class FSRetryWorker extends QuartzJobBean {
 
     @Autowired
-    private RetryService retryService;
+    private FSRetryService retryService;
 
     @Override
     protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {

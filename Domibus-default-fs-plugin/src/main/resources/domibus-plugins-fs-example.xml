@@ -26,9 +26,10 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd
        http://activemq.apache.org/schema/core
        http://activemq.apache.org/schema/core/activemq-core.xsd">
-
 
     <!-- General File System Plugin properties -->
     <util:properties id="fsPluginProperties">
@@ -54,7 +55,7 @@
     <!-- quartz job for the retry  -->
     <bean id="retryWorkerJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="eu.domibus.plugin.fs.worker.SendRetryWorker"/>
+        <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSRetryWorker"/>
         <property name="durability" value="true"/>
     </bean>
 
