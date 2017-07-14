@@ -68,6 +68,9 @@ public class PullRequestHandler {
     @Autowired
     private RetryService retryService;
 
+    @Autowired
+    private ReliabilityChecker reliabilityChecker;
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public SOAPMessage handlePullRequestInNewTransaction(String messageId, PullContext pullContext) {
         if (messageId != null) {
@@ -135,6 +138,7 @@ public class PullRequestHandler {
         } catch (EbMS3Exception e) {
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
+            reliabilityChecker.handleEbms3Exception(e, messageId);
             try {
                 soapMessage = messageBuilder.buildSOAPFaultMessage(e.getFaultInfo());
             } catch (EbMS3Exception e1) {
