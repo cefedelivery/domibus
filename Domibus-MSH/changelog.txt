@@ -20,7 +20,7 @@ Domibus 3.3-RC1
 - Core: during sendMessage operation, Domibus trims the leading and trailing whitespaces in all the request fields.
 - Core: during sendMessage operation, Domibus verifies that, if MessageId and RefToMessageId is specified by backend client, then it should contain only printable ASCII characters.
 - Core: during sendMessage operation, all validations comparisons with the PMode data are case insensitive.
-- Core: during MSH dispatch operation, Domibus verifies the validity of sender's certificate.
+- Core: during MSH dispatch operation, Domibus verifies the validity of sender's certificate. The sender party name needs to be the same as the certificate alias from the keystore.
 - Core: during MSH receive operation, Domibus can verify the trust of the sender if activated.
 - Core: validation on MessageId and RefToMessageId can be by-passed by removing the key "domibus.sendMessage.messageIdPattern" from configuration file.
 - Core: new configuration properties added for ConnectionTimeout and ReceiveTimeout to allow fine tuning of the access points' conduit.

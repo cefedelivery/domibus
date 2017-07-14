@@ -88,19 +88,17 @@ public class MessageLogResource {
         LOGGER.debug("using filters [{}]", filters);
 
         List<MessageLogInfo> resultList = new ArrayList<>();
-        switch(messageType) {
-            case SIGNAL_MESSAGE:
-                int numberOfSignalMessageLogs = signalMessageLogDao.countAllInfo(column, asc, filters);
-                LOGGER.debug("count Signal Messages Logs [{}]", numberOfSignalMessageLogs);
-                result.setCount(numberOfSignalMessageLogs);
-                resultList = signalMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
-                break;
-            case USER_MESSAGE:
-                int numberOfUserMessageLogs = userMessageLogDao.countAllInfo(column, asc, filters);
-                LOGGER.debug("count User Messages Logs [{}]", numberOfUserMessageLogs);
-                result.setCount(numberOfUserMessageLogs);
-                resultList = userMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
-                break;
+        if (messageType == MessageType.SIGNAL_MESSAGE) {
+            int numberOfSignalMessageLogs = signalMessageLogDao.countAllInfo(column, asc, filters);
+            LOGGER.debug("count Signal Messages Logs [{}]", numberOfSignalMessageLogs);
+            result.setCount(numberOfSignalMessageLogs);
+            resultList = signalMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
+
+        } else if (messageType == MessageType.USER_MESSAGE) {
+            int numberOfUserMessageLogs = userMessageLogDao.countAllInfo(column, asc, filters);
+            LOGGER.debug("count User Messages Logs [{}]", numberOfUserMessageLogs);
+            result.setCount(numberOfUserMessageLogs);
+            resultList = userMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
         }
         result.setMessageLogEntries(convertMessageLogInfoList(resultList));
         result.setMshRoles(MSHRole.values());
@@ -156,6 +154,7 @@ public class MessageLogResource {
         } else if(signalMessageLog != null) {
             setSpecificMessageLogInfo(result, signalMessageLog);
         } else {
+            // it shouldn't enter here because MessageType is USER or SIGNAL
             LOGGER.error("Message Log Info doesn't contain neither User nor Signal message.");
         }
         return result;
