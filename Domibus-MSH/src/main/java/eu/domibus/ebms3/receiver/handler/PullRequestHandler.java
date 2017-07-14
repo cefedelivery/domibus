@@ -3,6 +3,7 @@ package eu.domibus.ebms3.receiver.handler;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
 import eu.domibus.api.message.attempt.MessageAttemptStatus;
+import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
@@ -20,6 +21,7 @@ import eu.domibus.ebms3.receiver.MSHWebservice;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
+import eu.domibus.ebms3.sender.RetryService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.DomibusCertificateException;
@@ -63,6 +65,9 @@ public class PullRequestHandler {
     @Autowired
     private MessageExchangeService messageExchangeService;
 
+    @Autowired
+    private RetryService retryService;
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public SOAPMessage handlePullRequestInNewTransaction(String messageId, PullContext pullContext) {
         if (messageId != null) {
@@ -72,7 +77,7 @@ public class PullRequestHandler {
         }
     }
 
-    private SOAPMessage notifyNoMessage(PullContext pullContext) {
+    SOAPMessage notifyNoMessage(PullContext pullContext) {
         LOG.debug("No message for received pull request with mpc " + pullContext.getMpcQualifiedName());
         EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0006, "There is no message available for\n" +
                 "pulling from this MPC at this moment.", null, null);
@@ -97,10 +102,23 @@ public class PullRequestHandler {
         String attemptError = null;
         final Timestamp startDate = new Timestamp(System.currentTimeMillis());
         boolean abortSending = false;
+        SOAPMessage soapMessage = null;
         try {
+
             UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+            leg = pullContext.filterLegOnMpc();
             try {
-                abortSending = !messageExchangeService.areMessagePartiesCertificatesValid(userMessage);
+                messageExchangeService.verifyReceiverCerficate(leg, pullContext.getInitiator().getName());
+                messageExchangeService.verifySenderCertificate(leg, pullContext.getResponder().getName());
+                leg = pullContext.filterLegOnMpc();
+                soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
+                PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
+                if (pullRequestMatcher.matchReliableCallBack(leg) &&
+                        leg.getReliability().isNonRepudiation()) {
+                    PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_ID, messageId);
+                }
+                checkResult = ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
+                return soapMessage;
             } catch (DomibusCertificateException dcEx) {
                 LOG.error(dcEx.getMessage(), dcEx);
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, dcEx.getMessage(), null, dcEx);
@@ -112,21 +130,13 @@ public class PullRequestHandler {
                 throw ex;
             }
 
-            leg = pullContext.filterLegOnMpc();
-            SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
-            PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
-            if (pullRequestMatcher.matchReliableCallBack(leg) &&
-                    leg.getReliability().isNonRepudiation()) {
-                PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_ID, messageId);
-            }
-            checkResult = ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
-            return soapMessage;
-
+        } catch (ChainCertificateInvalidException e) {
+            abortSending = true;
         } catch (EbMS3Exception e) {
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
             try {
-                return messageBuilder.buildSOAPFaultMessage(e.getFaultInfo());
+                soapMessage = messageBuilder.buildSOAPFaultMessage(e.getFaultInfo());
             } catch (EbMS3Exception e1) {
                 throw new WebServiceException(e1);
             }
@@ -137,6 +147,8 @@ public class PullRequestHandler {
         } finally {
             if (abortSending) {
                 LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
+                LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
+                retryService.purgeTimedoutMessage(messageId);
             } else {
                 messageExchangeService.handleReliability(messageId, checkResult, null, leg);
                 try {
@@ -146,6 +158,8 @@ public class PullRequestHandler {
                     LOG.error("Could not create the message attempt", e);
                 }
             }
+
         }
+        return soapMessage;
     }
 }
