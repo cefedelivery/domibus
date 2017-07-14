@@ -86,7 +86,7 @@
         </createTable>
     </changeSet>
     <changeSet dbms="oracle" id="insert_trigger" author="idragusa">
-        <sql endDelimiter="\n/">CREATE OR REPLACE TRIGGER trigger_auth BEFORE INSERT ON TB_AUTHENTICATION_ENTRY FOR EACH ROW BEGIN :new.ID_PK := HIBERNATE_SEQUENCE.nextval; END trigger_auth;</sql>
+        <sql endDelimiter="\n/">CREATE OR REPLACE TRIGGER trigger_auth BEFORE INSERT ON TB_AUTHENTICATION_ENTRY FOR EACH ROW BEGIN select HIBERNATE_SEQUENCE.nextval into :new.ID_PK from dual; END trigger_auth;</sql>
     </changeSet>
     <changeSet id="insert_ws_default_auth" author="idragusa">
         <insert tableName="TB_AUTHENTICATION_ENTRY">
