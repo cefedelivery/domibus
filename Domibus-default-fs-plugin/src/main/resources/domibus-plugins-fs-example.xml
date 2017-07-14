@@ -19,17 +19,22 @@
 -->
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:jaxws="http://cxf.apache.org/jaxws"
        xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:util="http://www.springframework.org/schema/util"
        xmlns:c="http://www.springframework.org/schema/c"
        xmlns:p="http://www.springframework.org/schema/p"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
        http://activemq.apache.org/schema/core
        http://activemq.apache.org/schema/core/activemq-core.xsd">
 
+
+    <!-- General File System Plugin properties -->
+    <util:properties id="fsPluginProperties">
+        <!-- Retry Worker execution interval as a cron expression -->
+        <prop key="fsPlugin.messages.retry.worker.cronExpression">0/5 * * * * ?</prop>
+    </util:properties>
 
     <amq:queue id="notifyBackendFSQueue"
                physicalName="domibus.notification.filesystem"/>
@@ -45,5 +50,28 @@
           class="eu.domibus.plugin.NotificationListenerService"
           c:queue-ref="notifyBackendFSQueue" c:mode="PUSH"
           p:backendConnector-ref="backendFSPlugin"/>
+
+    <!-- quartz job for the retry  -->
+    <bean id="retryWorkerJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.plugin.fs.worker.SendRetryWorker"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="retryWorkerTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="retryWorkerJob"/>
+        <property name="cronExpression" value="${fsPlugin.messages.retry.worker.cronExpression}"/>
+    </bean>
+
+    <!-- customizable list of triggers to be executed by quartz -->
+    <bean id="userdefinedTriggerList"
+          class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list>
+                <ref bean="retryWorkerTrigger"/>
+            </list>
+        </property>
+    </bean>
 
 </beans>
