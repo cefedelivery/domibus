@@ -1,0 +1,17 @@
+{
+  "businessProcesses": {
+    "processes": [
+      {
+        "name": "TestProcess",
+        "initiatorRole": {
+          "name": "eCODEXRole",
+          "value": "GW"
+        },
+        "responderRole": {
+          "name": "eCODEXRole",
+          "value": "GW"
+        }
+      }
+    ]
+  }
+}

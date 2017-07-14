@@ -6,16 +6,6 @@ import eu.domibus.ebms3.receiver.MessageLegConfigurationFactory;
 import eu.domibus.ebms3.receiver.SetPolicyInInterceptor;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.cxf.Bus;
-import org.apache.cxf.binding.soap.SoapMessage;
-import org.apache.cxf.bus.extension.ExtensionManagerBus;
-import org.apache.cxf.bus.managers.PhaseManagerImpl;
-import org.apache.cxf.interceptor.InterceptorChain;
-import org.apache.cxf.message.ExchangeImpl;
-import org.apache.cxf.message.MessageImpl;
-import org.apache.cxf.phase.PhaseInterceptorChain;
-import org.apache.cxf.ws.policy.PolicyBuilder;
-import org.apache.cxf.ws.policy.PolicyBuilderImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +21,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Provider;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -158,22 +147,6 @@ public class ReceiveMessageIT extends AbstractIT {
     }
 
     private SOAPMessage createSOAPMessagePolicyInterceptor(String dataset) throws SOAPException, IOException, ParserConfigurationException, SAXException {
-        InputStream is = getClass().getClassLoader().getResourceAsStream("dataset/as4/" + dataset);
-
-        SoapMessage sm = new SoapMessage(new MessageImpl());
-        sm.setContent(InputStream.class, is);
-        InterceptorChain ic = new PhaseInterceptorChain((new PhaseManagerImpl()).getOutPhases());
-        sm.setInterceptorChain(ic);
-        ExchangeImpl exchange = new ExchangeImpl();
-        Bus bus = new ExtensionManagerBus();
-        bus.setExtension(new PolicyBuilderImpl(bus), PolicyBuilder.class);
-        exchange.put(Bus.class, bus);
-        sm.setExchange(exchange);
-
-        setPolicyInInterceptor.handleMessage(sm);
-
-        //return sm.getContent(SOAPMessage.class); // TODO is returns null
-
         SOAPMessage message = createSOAPMessage("SOAPMessage.xml");
         return message;
     }

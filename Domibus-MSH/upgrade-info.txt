@@ -24,6 +24,8 @@ Domibus 3.3-RC1 (from 3.2.5):
 
                     </jaxws:endpoint>
 
+               - If not already the case modify the certificate alias from the keystore in order to match the party name of the sender AP
+
                - The external Spring configuration files(domibus-configuration.xml, domibus-datasources.xml, domibus-plugins.xml, domibus-security.xml, domibus-transactions.xml, persistence.xml) are not used anymore.
                 All the properties defined in those files have been externalized in a new property file named "domibus.properties" which is specific to each supported server(Tomcat/WebLogic/WildFly).
 

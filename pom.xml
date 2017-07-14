@@ -49,11 +49,10 @@
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
         <sonar.scm.disabled>true</sonar.scm.disabled>
         <sonar.exclusions>
-            **/quartz/**,
             **/target/**,
-            **/web/controller/AdminGUIController.java,
             **/Domibus-MSH-angular/node_modules/**,
-            **/web.xml
+            **/web.xml,
+            **/common/model/configuration/**
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
         <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar/</sonar.host.url>

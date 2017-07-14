@@ -25,7 +25,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping(value = "/rest/user")
 public class UserResource {
 
-    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserResource.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserResource.class);
 
     private final UserService userService;
 
