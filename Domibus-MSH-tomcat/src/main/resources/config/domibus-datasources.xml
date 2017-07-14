@@ -45,12 +45,8 @@
             <amq:redeliveryPolicyMap><!-- Don't know why a double nesting -->
                 <amq:defaultEntry>
                     <!-- default policy-->
-                    <amq:redeliveryPolicy maximumRedeliveries="10" initialRedeliveryDelay="300000" />
+                    <amq:redeliveryPolicy maximumRedeliveries="0"/>
                 </amq:defaultEntry>
-                <amq:redeliveryPolicyEntries>
-                    <amq:redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0" />
-                    <amq:redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0" />
-                </amq:redeliveryPolicyEntries>
             </amq:redeliveryPolicyMap>
         </amq:redeliveryPolicyMap>
     </amq:xaConnectionFactory>

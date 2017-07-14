@@ -130,13 +130,13 @@
                               sendToDlqIfMaxRetriesExceeded="true">
                 <redeliveryPolicyMap>
                     <redeliveryPolicyMap>
+                        <defaultEntry>
+                            <!-- default policy-->
+                            <redeliveryPolicy maximumRedeliveries="10" redeliveryDelay="300000"/>
+                        </defaultEntry>
                         <redeliveryPolicyEntries>
-                            <redeliveryPolicy queue="sendMessageQueue"
-                                              maximumRedeliveries="0"/>
-                            <redeliveryPolicy queue="pullMessageQueue"
-                                              maximumRedeliveries="0"/>
-                            <redeliveryPolicy queue="*"
-                                              maximumRedeliveries="10" redeliveryDelay="300000"/>
+                            <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="2"/>
+                            <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="2"/>
                         </redeliveryPolicyEntries>
                     </redeliveryPolicyMap>
                 </redeliveryPolicyMap>
