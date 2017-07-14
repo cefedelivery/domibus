@@ -99,13 +99,13 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return;
         }
         Configuration configuration = configurationDAO.read();
-        Party responderParty = configuration.getParty();
-        List<Process> pullProcesses = processDao.findPullProcessesByResponder(responderParty);
+        Party initiator = configuration.getParty();
+        List<Process> pullProcesses = processDao.findPullProcessesInitiator(initiator);
         for (Process pullProcess : pullProcesses) {
             try {
                 processValidator.validatePullProcess(Lists.newArrayList(pullProcess));
                 for (LegConfiguration legConfiguration : pullProcess.getLegs()) {
-                    for (Party initiatorParty : pullProcess.getInitiatorParties()) {
+                    for (Party initiatorParty : pullProcess.getResponderParties()) {
                         String mpcQualifiedName = legConfiguration.getDefaultMpc().getQualifiedName();
                         //@thom remove the pullcontext from here.
                         PullContext pullContext = new PullContext(pullProcess,
@@ -113,7 +113,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                                 mpcQualifiedName);
                         MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(pullContext.getAgreement(),
                                 initiatorParty.getName(),
-                                responderParty.getName(),
+                                initiator.getName(),
                                 legConfiguration.getService().getName(),
                                 legConfiguration.getAction().getName(),
                                 legConfiguration.getName());
@@ -144,8 +144,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String retrieveReadyToPullUserMessageId(final String mpc, final Party responder) {
-        Set<Identifier> identifiers = responder.getIdentifiers();
+    public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
+        Set<Identifier> identifiers = initiator.getIdentifiers();
         List<MessagePullDto> messagingOnStatusReceiverAndMpc = new ArrayList<>();
         for (Identifier identifier : identifiers) {
             messagingOnStatusReceiverAndMpc.addAll(messagingDao.findMessagingOnStatusReceiverAndMpc(identifier.getPartyId(), MessageStatus.READY_TO_PULL, mpc));
@@ -157,8 +157,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return messagePullDto.getMessageId();
         }
         return null;
-
-
     }
 
     /**

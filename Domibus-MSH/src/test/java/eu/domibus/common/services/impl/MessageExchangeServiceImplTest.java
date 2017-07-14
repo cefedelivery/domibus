@@ -71,7 +71,8 @@ public class MessageExchangeServiceImplTest {
 
     @Before
     public void init() {
-        correctParty = PojoInstaciatorUtil.instanciate(Party.class, " [name:party1]");
+        correctParty = new Party();
+        correctParty.setName("party1");
         process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "responderParties{[name:responder]}", "initiatorParties{[name:initiator]}");
 
         Service service = new Service();
@@ -87,7 +88,7 @@ public class MessageExchangeServiceImplTest {
         when(configurationDao.configurationExists()).thenReturn(true);
         when(configurationDao.read()).thenReturn(configuration);
         List<Process> processes = Lists.newArrayList(process);
-        when(processDao.findPullProcessesByResponder(correctParty)).thenReturn(processes);
+        when(processDao.findPullProcessesInitiator(correctParty)).thenReturn(processes);
     }
 
     private LegConfiguration findLegByName(final String name) {
@@ -102,7 +103,7 @@ public class MessageExchangeServiceImplTest {
     }
     @Test
     public void testSuccessFullOneWayPullConfiguration() throws Exception {
-        Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]","legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}","responderParties{[name:resp1]}");
+        Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "initiatorParties{[name:resp1]}");
         MessageStatus messageStatus = getMessageStatus(process);
         assertEquals(MessageStatus.READY_TO_PULL, messageStatus);
     }
@@ -137,8 +138,8 @@ public class MessageExchangeServiceImplTest {
         verify(jmsPullTemplate,times(2)).convertAndSend(any(Destination.class),mapArgumentCaptor.capture(), any(MessagePostProcessor.class));
         //needed because the set does not return the values always in the same order.
         //@thom this does work on my machine but not on bamboo. Fix this.
-        TestResult testResult = new TestResult("qn1", "party1:initiator:service1:Mock:Mock:leg1", "false");
-        testResult.chain(new TestResult("qn2","party1:initiator:service2:Mock:Mock:leg2","false"));
+        TestResult testResult = new TestResult("qn1", "party1:responder:service1:Mock:Mock:leg1", "false");
+        testResult.chain(new TestResult("qn2", "party1:responder:service2:Mock:Mock:leg2", "false"));
         List<Map> allValues = mapArgumentCaptor.getAllValues();
         for (Map allValue : allValues) {
             assertTrue(testResult.testSucced(allValue));
@@ -162,7 +163,7 @@ public class MessageExchangeServiceImplTest {
 
         when(configurationDao.read()).thenReturn(configuration);
         List<Process> processes = Lists.newArrayList(process);
-        when(processDao.findPullProcessesByResponder(correctParty)).thenReturn(processes);
+        when(processDao.findPullProcessesInitiator(correctParty)).thenReturn(processes);
         when(processDao.findPullProcessesByMessageContext(any(MessageExchangeConfiguration.class))).thenReturn(Lists.newArrayList(process));
         messageExchangeService.initiatePullRequest();
         verify(jmsPullTemplate,times(0)).convertAndSend(any(Destination.class),any(Map.class), any(MessagePostProcessor.class));
@@ -170,11 +171,11 @@ public class MessageExchangeServiceImplTest {
 
     @Test
     public void extractProcessOnMpc() throws Exception {
-        List<Process> processes = Lists.newArrayList(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "responderParties{[name:resp1]}"));
+        List<Process> processes = Lists.newArrayList(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "initiatorParties{[name:resp1]}"));
         when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(processes);
         PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
-        assertEquals("resp1",pullContext.getResponder().getName());
-        assertEquals("party1",pullContext.getInitiator().getName());
+        assertEquals("resp1", pullContext.getInitiator().getName());
+        assertEquals("party1", pullContext.getResponder().getName());
         assertEquals("oneway",pullContext.getProcess().getMep().getName());
     }
 

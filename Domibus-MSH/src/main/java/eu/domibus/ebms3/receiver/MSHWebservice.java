@@ -205,7 +205,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
-        String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getResponder());
+        String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
         return pullRequestHandler.handlePullRequestInNewTransaction(messageId, pullContext);
     }
 

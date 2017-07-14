@@ -31,10 +31,10 @@ public interface MessageExchangeService {
      * Check if a message exist for the association mpc/responder. If it does it returns the first one that arrived.
      *
      * @param mpc       the mpc contained in the pull request.
-     * @param responder the party for who this message is related.
+     * @param initiator the party for who this message is related.
      * @return a UserMessage id  if found.
      */
-    String retrieveReadyToPullUserMessageId(String mpc, Party responder);
+    String retrieveReadyToPullUserMessageId(String mpc, Party initiator);
 
     /**
      * When a pull request comes in, there is very litle information.  From this information we retrieve
