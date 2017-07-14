@@ -13,4 +13,8 @@ public class ReliabilityException extends DomibusCoreException {
     public ReliabilityException(DomibusCoreErrorCode dce, String message) {
         super(dce, message);
     }
+    public ReliabilityException(DomibusCoreErrorCode dce, String message, Throwable cause) {
+        super(dce, message, cause);
+    }
+
 }

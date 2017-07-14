@@ -1,7 +1,7 @@
 package eu.domibus.core.message;
 
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.message.MessageGenericException;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -34,8 +34,9 @@ public class MessageConverterDefaultService implements MessageConverterService {
             marshaller = jaxbContext.createMarshaller();
             marshaller.marshal(message, baos);
         } catch (JAXBException e) {
-            LOG.error("Error marshalling the message with id {}", message.getId());
-            throw new RuntimeException(e);
+            String error = "Error marshalling the message with id " + message.getId();
+            LOG.error(error);
+            throw new MessageGenericException(DomibusCoreErrorCode.DOM_001, error, e);
         }
 
         return baos.toByteArray();
