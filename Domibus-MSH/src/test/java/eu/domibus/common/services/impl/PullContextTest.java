@@ -22,6 +22,13 @@ public class PullContextTest {
         LegConfiguration legConfiguration = pullContext.filterLegOnMpc();
         assertEquals("qn1", legConfiguration.getDefaultMpc().getQualifiedName());
     }
+
+    @Test(expected = NullPointerException.class)
+    public void testInstanciationWithIllegalMpc() {
+        Process process = PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "responderParties{[name:resp1]}");
+        PullContext pullContext = new PullContext(process, new Party(), null);
+    }
+
 }
 
 

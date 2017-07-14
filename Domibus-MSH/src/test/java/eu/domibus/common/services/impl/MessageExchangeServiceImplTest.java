@@ -7,35 +7,32 @@ import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.ProcessDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
+import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.util.PojoInstaciatorUtil;
 import org.apache.commons.lang3.Validate;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
 
 import javax.jms.Destination;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -55,6 +52,12 @@ public class MessageExchangeServiceImplTest {
     private JmsTemplate jmsPullTemplate;
     @Mock
     private EbMS3MessageBuilder messageBuilder;
+    @Mock
+    private MessagingDao messagingDao;
+
+    @Mock
+    private UserMessageLogDao messageLogDao;
+
     @Spy
     private ProcessValidator processValidator;
 
@@ -170,24 +173,62 @@ public class MessageExchangeServiceImplTest {
         List<Process> processes = Lists.newArrayList(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "responderParties{[name:resp1]}"));
         when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(processes);
         PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
-        assertEquals(true, pullContext.isValid());
         assertEquals("resp1",pullContext.getResponder().getName());
         assertEquals("party1",pullContext.getInitiator().getName());
         assertEquals("oneway",pullContext.getProcess().getMep().getName());
     }
 
-    @Test
+    @Test(expected = PModeException.class)
     public void extractProcessMpcWithNoProcess() throws Exception {
         when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(new ArrayList<Process>());
         PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
-        assertEquals(false, pullContext.isValid());
     }
 
-    @Test
+    @Test(expected = PModeException.class)
     public void extractProcessMpcWithNoToManyProcess() throws Exception {
         when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(Lists.newArrayList(new Process(), new Process()));
         PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
-        assertEquals(false, pullContext.isValid());
+    }
+
+    @Test
+    public void testRetrieveReadyToPullUserMessageIdWithNoMessage() {
+        String mpc = "mpc";
+        Party party = Mockito.mock(Party.class);
+
+        Set<Identifier> identifiers = new HashSet<>();
+        Identifier identifier = new Identifier();
+        identifier.setPartyId("party1");
+        identifiers.add(identifier);
+
+        when(party.getIdentifiers()).thenReturn(identifiers);
+
+        when(messagingDao.findMessagingOnStatusReceiverAndMpc(eq("party1"), eq(MessageStatus.READY_TO_PULL), eq(mpc))).thenReturn(Lists.<MessagePullDto>newArrayList());
+
+        final String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party);
+        assertNull(messageId);
+
+    }
+
+    @Test
+    public void testRetrieveReadyToPullUserMessageIdWithMessage() {
+        String mpc = "mpc";
+        Party party = Mockito.mock(Party.class);
+
+        Set<Identifier> identifiers = new HashSet<>();
+        Identifier identifier = new Identifier();
+        identifier.setPartyId("party1");
+        identifiers.add(identifier);
+
+        when(party.getIdentifiers()).thenReturn(identifiers);
+
+        final String testMessageId = "testMessageId";
+        final List<MessagePullDto> messagePullDtos = Lists.newArrayList(new MessagePullDto(testMessageId, DateTime.now().toDate()), new MessagePullDto("messageID2", DateTime.now().toDate()));
+        when(messagingDao.findMessagingOnStatusReceiverAndMpc(eq("party1"), eq(MessageStatus.READY_TO_PULL), eq(mpc))).thenReturn(messagePullDtos);
+
+        final String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party);
+        verify(messageLogDao, times(1)).setIntermediaryPullStatus(eq(testMessageId));
+        assertEquals(testMessageId, messageId);
+
     }
 
 

@@ -2,7 +2,9 @@ package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.pmode.PModeException;
+import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.model.configuration.*;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
@@ -140,8 +143,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
 
     @Override
-    @Transactional
-    public UserMessage retrieveReadyToPullUserMessages(final String mpc, final Party responder) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public String retrieveReadyToPullUserMessageId(final String mpc, final Party responder) {
         Set<Identifier> identifiers = responder.getIdentifiers();
         List<MessagePullDto> messagingOnStatusReceiverAndMpc = new ArrayList<>();
         for (Identifier identifier : identifiers) {
@@ -150,9 +153,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
         if (!messagingOnStatusReceiverAndMpc.isEmpty()) {
             MessagePullDto messagePullDto = messagingOnStatusReceiverAndMpc.get(0);
-            UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(messagePullDto.getMessageId());
             messageLogDao.setIntermediaryPullStatus(messagePullDto.getMessageId());
-            return userMessageByMessageId;
+            return messagePullDto.getMessageId();
         }
         return null;
 
@@ -167,18 +169,23 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
         if (!configurationDAO.configurationExists()) {
-            return new PullContext("Pmode not configured");
+            throw new PModeException(DomibusCoreErrorCode.DOM_003, "No pmode configuration found");
         }
         List<Process> processes = processDao.findPullProcessBytMpc(mpcQualifiedName);
         Configuration configuration = configurationDAO.read();
-        try {
-            processValidator.validatePullProcess(processes);
-            return new PullContext(processes.get(0), configuration.getParty(), mpcQualifiedName);
-        } catch (PModeException p) {
-            return new PullContext(p.getMessage());
-        }
+        processValidator.validatePullProcess(processes);
+        return new PullContext(processes.get(0), configuration.getParty(), mpcQualifiedName);
     }
 
+
+    @Override
+    @Transactional(noRollbackFor = ReliabilityException.class)
+    public void removeRawMessageIssuedByPullRequest(final String messageId) {
+        RawEnvelopeDto rawEnvelopeDto = findPulledMessageRawXmlByMessageId(messageId);
+        if (rawEnvelopeDto != null) {
+            rawEnvelopeLogDao.deleteRawMessage(rawEnvelopeDto.getId());
+        }
+    }
 
     @Override
     @Transactional
@@ -190,26 +197,14 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         rawEnvelopeLogDao.create(rawEnvelopeLog);
     }
 
-    @Transactional
     @Override
-    public void removeRawMessageIssuedByPullRequest(final String messageId) {
-        RawEnvelopeDto rawEnvelopeDto = findPulledMessageRawXmlByMessageId(messageId);
-        if (rawEnvelopeDto != null) {
-            rawEnvelopeLogDao.deleteRawMessage(rawEnvelopeDto.getId());
-        }
-    }
-
-    @Override
-    @Transactional
+    @Transactional(noRollbackFor = ReliabilityException.class)
     public RawEnvelopeDto findPulledMessageRawXmlByMessageId(final String messageId) {
-        List<RawEnvelopeDto> rawEnvelopeDto = rawEnvelopeLogDao.findRawXmlByMessageId(messageId);
-        if (rawEnvelopeDto.size() == 0 || rawEnvelopeDto.size() > 1) {
-            LOG.error("There should always have a raw message in the case of a pulledMessage");
-            return null;
+        final RawEnvelopeDto rawXmlByMessageId = rawEnvelopeLogDao.findRawXmlByMessageId(messageId);
+        if (rawXmlByMessageId == null) {
+            throw new ReliabilityException(DomibusCoreErrorCode.DOM_004, "There should always have a raw message for message " + messageId);
         }
-        return rawEnvelopeDto.get(0);
+        return rawXmlByMessageId;
     }
-
-
 }
 
