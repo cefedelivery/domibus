@@ -42,7 +42,7 @@
     <bean id="backendFSPlugin"
           class="eu.domibus.plugin.fs.BackendFSImpl">
         <constructor-arg value="backendFSPlugin"/>
-        <property name="lister" ref="webserviceNotificationListenerService"/>
+        <property name="lister" ref="fsNotificationListenerService"/>
     </bean>
     
     <!-- TODO Confirm the plugin backend connector mode PUSH -->
@@ -58,10 +58,11 @@
         <property name="durability" value="true"/>
     </bean>
 
-    <bean id="retryWorkerTrigger"
+    <bean id="fsPluginRetryWorkerTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="retryWorkerJob"/>
-        <property name="cronExpression" value="${fsPlugin.messages.retry.worker.cronExpression}"/>
+        <!--property name="cronExpression" value="${fsPlugin.messages.retry.worker.cronExpression}"/-->
+        <property name="cronExpression" value="0/5 * * * * ?"/>
     </bean>
 
     <!-- customizable list of triggers to be executed by quartz -->
@@ -69,7 +70,7 @@
           class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list>
-                <ref bean="retryWorkerTrigger"/>
+                <ref bean="fsPluginRetryWorkerTrigger"/>
             </list>
         </property>
     </bean>
