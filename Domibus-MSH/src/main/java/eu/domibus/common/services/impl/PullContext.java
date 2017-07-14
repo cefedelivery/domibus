@@ -23,8 +23,6 @@ public class PullContext {
     public static final String MPC = "mpc";
     public static final String PMODE_KEY = "pmodKey";
     public static final String NOTIFY_BUSINNES_ON_ERROR = "NOTIFY_BUSINNES_ON_ERROR";
-    private boolean valid = false;
-    private String errorMessage;
 
     public PullContext(final Process process, final Party initiator, final String mpcQualifiedName) {
         Validate.notNull(process);
@@ -33,13 +31,7 @@ public class PullContext {
         Validate.isTrue(process.getResponderParties().size() == 1);
         this.process = process;
         this.mpcQualifiedName = mpcQualifiedName;
-        this.valid = true;
         this.initiator = initiator;
-    }
-
-
-    public PullContext(final String errorMessage) {
-        this.errorMessage = errorMessage;
     }
 
     public String getAgreement() {
@@ -66,7 +58,7 @@ public class PullContext {
     }
 
     public LegConfiguration filterLegOnMpc() {
-        if (isValid() && mpcQualifiedName != null) {
+        if (mpcQualifiedName != null) {
             Collection<LegConfiguration> filter = Collections2.filter(process.getLegs(), new Predicate<LegConfiguration>() {
                 @Override
                 public boolean apply(LegConfiguration legConfiguration) {
@@ -77,12 +69,6 @@ public class PullContext {
         } else throw new IllegalArgumentException("Method should be called after correct context setup.");
     }
 
-    public boolean isValid() {
-        return valid;
-    }
 
-    public String getErrorMessage() {
-        return errorMessage;
-    }
 
 }

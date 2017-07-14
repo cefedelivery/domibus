@@ -45,7 +45,7 @@ public class UpdateRetryLoggingService {
      */
     public void updateRetryLogging(final String messageId, final LegConfiguration legConfiguration) {
         LOG.debug("Updating retry for message");
-        final MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
+        MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
         //userMessageLog.setMessageStatus(MessageStatus.SEND_ATTEMPT_FAILED); //This is not stored in the database
         if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
             userMessageLog.setSendAttempts(userMessageLog.getSendAttempts() + 1);

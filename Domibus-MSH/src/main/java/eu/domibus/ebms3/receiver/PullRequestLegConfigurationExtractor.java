@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -33,21 +34,22 @@ public class PullRequestLegConfigurationExtractor extends AbstractSignalLegConfi
     public LegConfiguration process() throws EbMS3Exception {
         message.put(MSHDispatcher.MESSAGE_TYPE_IN, MessageType.SIGNAL_MESSAGE);
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
-        PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
-        if (!pullContext.isValid()) {
-            EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Error for pullrequest with mpc:" + pullRequest.getMpc() + " " + pullContext.getErrorMessage(), null, null);
+        try {
+            PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
+            LegConfiguration legConfiguration = pullContext.getProcess().getLegs().iterator().next();
+            MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(pullContext.getAgreement(),
+                    pullContext.getInitiator().getName(),
+                    pullContext.getResponder().getName(),
+                    legConfiguration.getService().getName(),
+                    legConfiguration.getAction().getName(),
+                    legConfiguration.getName());
+            setUpMessage(messageExchangeConfiguration.getPmodeKey());
+            return legConfiguration;
+        } catch (PModeException p) {
+            EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Error for pullrequest with mpc:" + pullRequest.getMpc() + " " + p.getMessage(), null, null);
             LOG.warn(ebMS3Exception.getErrorDetail());
             throw ebMS3Exception;
         }
-        LegConfiguration legConfiguration = pullContext.getProcess().getLegs().iterator().next();
-        MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(pullContext.getAgreement(),
-                pullContext.getInitiator().getName(),
-                pullContext.getResponder().getName(),
-                legConfiguration.getService().getName(),
-                legConfiguration.getAction().getName(),
-                legConfiguration.getName());
-        setUpMessage(messageExchangeConfiguration.getPmodeKey());
-        return legConfiguration;
     }
 
     @Override

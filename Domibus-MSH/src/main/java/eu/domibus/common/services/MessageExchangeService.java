@@ -5,7 +5,6 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import eu.domibus.ebms3.common.model.UserMessage;
 
 /**
  * @author Thomas Dussart
@@ -28,7 +27,14 @@ public interface MessageExchangeService {
      */
     void initiatePullRequest();
 
-    UserMessage retrieveReadyToPullUserMessages(String mpc, Party responder);
+    /**
+     * Check if a message exist for the association mpc/responder. If it does it returns the first one that arrived.
+     *
+     * @param mpc       the mpc contained in the pull request.
+     * @param responder the party for who this message is related.
+     * @return a UserMessage id  if found.
+     */
+    String retrieveReadyToPullUserMessageId(String mpc, Party responder);
 
     /**
      * When a pull request comes in, there is very litle information.  From this information we retrieve
@@ -46,7 +52,12 @@ public interface MessageExchangeService {
      */
     void savePulledMessageRawXml(String rawXml, String messageId);
 
-
+    /**
+     * Retrieve the unique raw message of UserMessage. Enforce that it is unique.
+     *
+     * @param messageId the id of the message.
+     * @return the raw soap envelop.
+     */
     RawEnvelopeDto findPulledMessageRawXmlByMessageId(String messageId);
 
     //@thom test this method.
