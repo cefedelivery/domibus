@@ -2,6 +2,8 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
@@ -14,6 +16,7 @@ import javax.persistence.TypedQuery;
 @Repository
 public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
 
+    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(RawEnvelopeLogDao.class);
 
     public RawEnvelopeLogDao() {
         super(RawEnvelopeLog.class);
@@ -26,6 +29,7 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
         try {
             return namedQuery.getSingleResult();
         } catch (NoResultException nr) {
+            LOG.warn("The message should have an associate raw xml saved in the database.");
             return null;
         }
     }
