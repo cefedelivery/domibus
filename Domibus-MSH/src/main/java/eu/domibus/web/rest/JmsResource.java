@@ -1,8 +1,6 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.jms.JMSManager;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -19,8 +17,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RestController
 @RequestMapping(value = "/rest/jms")
 public class JmsResource {
-
-    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(JmsResource.class);
 
     @Autowired
     JMSManager jmsManager;
@@ -50,13 +46,10 @@ public class JmsResource {
         try {
             String[] ids = messageIds.toArray(new String[0]);
 
-            switch (request.getAction()) {
-                case MOVE:
-                    jmsManager.moveMessages(request.getSource(), request.getDestination(),ids);
-                    break;
-                case REMOVE:
-                    jmsManager.deleteMessages(request.getSource(), ids);
-                    break;
+            if (request.getAction() == MessagesActionRequestRO.Action.MOVE) {
+                jmsManager.moveMessages(request.getSource(), request.getDestination(), ids);
+            } else if (request.getAction() == MessagesActionRequestRO.Action.REMOVE) {
+                jmsManager.deleteMessages(request.getSource(), ids);
             }
         } catch (RuntimeException e) {
             response.setOutcome(e.getMessage());

@@ -37,7 +37,7 @@ public class AuthenticationResource {
     private AuthenticationService authenticationService;
 
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
-    public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) throws Exception {
+    public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) {
         LOG.debug("Authenticating user [{}]", loginRO.getUsername());
         final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword());
         if(principal.isDefaultPasswordUsed()){
