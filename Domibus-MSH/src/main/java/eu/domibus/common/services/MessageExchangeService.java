@@ -1,10 +1,14 @@
 package eu.domibus.common.services;
 
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
+import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.sender.ReliabilityChecker;
+import eu.domibus.ebms3.sender.ResponseHandler;
 
 /**
  * @author Thomas Dussart
@@ -62,4 +66,9 @@ public interface MessageExchangeService {
 
     //@thom test this method.
     void removeRawMessageIssuedByPullRequest(String messageId);
+
+    boolean areMessagePartiesCertificatesValid(UserMessage userMessage);
+
+
+    void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
 }

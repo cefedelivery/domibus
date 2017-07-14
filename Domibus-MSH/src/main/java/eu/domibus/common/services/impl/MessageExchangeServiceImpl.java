@@ -5,8 +5,10 @@ import com.google.common.collect.Maps;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.reliability.ReliabilityException;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.*;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
@@ -14,10 +16,17 @@ import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.sender.ReliabilityChecker;
+import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.pki.CertificateService;
+import eu.domibus.pki.PolicyService;
+import org.apache.commons.lang.Validate;
+import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
@@ -64,12 +73,25 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Autowired
     private UserMessageLogDao messageLogDao;
 
-
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
 
     @Autowired
     private ProcessValidator processValidator;
+
+    @Autowired
+    private PModeProvider pModeProvider;
+
+    @Autowired
+    private PolicyService policyService;
+
+    @Autowired
+    private CertificateService certificateService;
+
+    @Autowired
+    private ReliabilityChecker reliabilityChecker;
+
+
 
     /**
      * {@inheritDoc}
@@ -204,5 +226,53 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         }
         return rawXmlByMessageId;
     }
+
+    @Override
+    public boolean areMessagePartiesCertificatesValid(final UserMessage userMessage) {
+        String pModeKey = null;
+        boolean certificateChainValid = true;
+        try {
+            pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
+        } catch (EbMS3Exception e) {
+            throw new PModeException(DomibusCoreErrorCode.DOM_003, e.getMessage());
+        }
+        LOG.debug("PMode key found : " + pModeKey);
+        LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+        LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
+
+        Policy policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+        Party sendingParty = pModeProvider.getSenderParty(pModeKey);
+        Validate.notNull(sendingParty, "Initiator party was not found");
+        Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+        Validate.notNull(receiverParty, "Responder party was not found");
+
+        if (!policyService.isNoSecurityPolicy(policy)) {
+            // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
+            certificateService.isCertificateValid(sendingParty.getName());
+            LOG.info("Sender certificate exists and is valid [" + sendingParty.getName() + "]");
+        }
+
+        if (certificateService.isCertificateValidationEnabled()) {
+            try {
+                certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
+            } catch (Exception e) {
+                LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
+            }
+        }
+        return certificateChainValid;
+    }
+
+
+    //temporary solution to create new transaction on handlereliability.
+    //It should be change in the reliability checker but we need to test the impact first.
+    //New transaction is needed because every bean can potentialy invalidate the transaction, but
+    //the state of the message must be saved.
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+        reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+    }
+
+
 }
 

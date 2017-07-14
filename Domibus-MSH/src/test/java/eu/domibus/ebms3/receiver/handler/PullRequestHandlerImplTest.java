@@ -75,7 +75,7 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             result = ebMS3Exception;
         }};
-        pullRequestHandler.handlePullRequest(messageId, pullContext);
+        pullRequestHandler.handleRequest(messageId, pullContext);
         new Verifications() {{
             eu.domibus.ebms3.common.model.Error error;
             messageBuilder.buildSOAPFaultMessage(error = withCapture());
@@ -120,7 +120,7 @@ public class PullRequestHandlerImplTest {
             messagingDao.findUserMessageByMessageId(messageId);
             result = userMessage;
         }};
-        pullRequestHandler.handlePullRequest(messageId, pullContext);
+        pullRequestHandler.handleRequest(messageId, pullContext);
         new Verifications() {{
 
             PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
@@ -146,7 +146,7 @@ public class PullRequestHandlerImplTest {
                                                     @Mocked final LegConfiguration legConfiguration,
                                                     @Mocked final PullContext pullContext) throws EbMS3Exception {
 
-        pullRequestHandler.handlePullRequest(null, pullContext);
+        pullRequestHandler.handleRequest(null, pullContext);
         new Verifications() {{
 
             SignalMessage signal;
