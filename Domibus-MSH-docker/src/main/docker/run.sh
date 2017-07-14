@@ -63,4 +63,4 @@ sudo wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
 
 sudo cp $MYSQL_CONNECTOR/$MYSQL_CONNECTOR-bin.jar ./src/main/soapui/lib
 ### Comment the line below to disable the soapUI tests for 3.3-rc1 ###
-mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
+#mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
