@@ -56,12 +56,17 @@
                     <projectProperties>
                         <value>localUrl=http://localhost:8180</value>
                         <value>remoteUrl=http://localhost:9080</value>
-                        <value>driver=com.mysql.jdbc.Driver</value>
-                        <value>jdbcUrl1=jdbc:mysql://127.0.0.1:3304/domibus</value>
-                        <value>jdbcUrl2=jdbc:mysql://127.0.0.1:3305/domibus</value>
-                        <value>database=mysql</value>
-                        <value>user=root</value>
-                        <value>password=123456</value>
+                        <value>driverBlue=com.mysql.jdbc.Driver</value>
+                        <value>driverRed=com.mysql.jdbc.Driver</value>
+                        <value>jdbcUrlBlue=jdbc:mysql://127.0.0.1:3304/domibus</value>
+                        <value>jdbcUrlRed=jdbc:mysql://127.0.0.1:3305/domibus</value>
+                        <value>databaseBlue=mysql</value>
+                        <value>databaseRed=mysql</value>
+                        <value>blueDbUser=root</value>
+                        <value>blueDbPassword=123456</value>
+                        <value>redDbUser=root</value>
+                        <value>redDbPassword=123456</value>
+                        <value>updateReport=false</value>
                     </projectProperties>
                     <soapuiProperties>
                         <property>
