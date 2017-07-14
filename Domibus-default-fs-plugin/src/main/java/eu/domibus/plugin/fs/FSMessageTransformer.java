@@ -1,13 +1,12 @@
 /*
- * Copyright 2017 Domibus FS Plugin Project
- *
+ * Copyright 2015 e-CODEX Project
  * Licensed under the EUPL, Version 1.1 or – as soon they
  * will be approved by the European Commission - subsequent
  * versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the
  * Licence.
  * You may obtain a copy of the Licence at:
- *https://joinup.ec.europa.eu/sites/default/files/eupl1.1.-licence-en_0.pdf
+ * http://ec.europa.eu/idabc/eupl.html
  * Unless required by applicable law or agreed to in
  * writing, software distributed under the Licence is
  * distributed on an "AS IS" basis,
@@ -16,17 +15,18 @@
  * See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+
 package eu.domibus.plugin.fs;
 
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.Properties;
 
 /**
  * This class is responsible for transformations from {@link FSMessage} to
