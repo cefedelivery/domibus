@@ -7,6 +7,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Role;
 import eu.domibus.ebms3.common.model.PartyId;
+import eu.domibus.ebms3.common.validators.ConfigurationValidator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import mockit.Expectations;
@@ -62,6 +63,9 @@ public class CachingPModeProviderTest {
 
     @Injectable
     XMLUtil xmlUtil;
+
+    @Injectable
+    List<ConfigurationValidator> validators;
 
     @Injectable
     Configuration configuration;
