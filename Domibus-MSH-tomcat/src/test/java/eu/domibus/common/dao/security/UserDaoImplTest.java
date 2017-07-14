@@ -43,13 +43,13 @@ public class UserDaoImplTest extends AbstractIT{
     @Transactional
     @Rollback
     public void loadActiveUserByUsername() {
-        User user = new User("userOne", "test");
+        User user = new User("userTwo", "test");
         UserRole userRole = new UserRole("ROLE_USER");
         user.addRole(userRole);
         user.setEmail("test@gmail.com");
         user.setActive(true);
         userDao.create(user);
-        final User userOne = userDao.loadActiveUserByUsername("userOne");
+        final User userOne = userDao.loadActiveUserByUsername("userTwo");
         assertNotNull(userOne);
     }
 
