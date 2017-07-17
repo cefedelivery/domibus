@@ -135,8 +135,8 @@
                             <redeliveryPolicy maximumRedeliveries="10" redeliveryDelay="300000"/>
                         </defaultEntry>
                         <redeliveryPolicyEntries>
-                            <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="2"/>
-                            <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="2"/>
+                            <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0"/>
+                            <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0"/>
                         </redeliveryPolicyEntries>
                     </redeliveryPolicyMap>
                 </redeliveryPolicyMap>
