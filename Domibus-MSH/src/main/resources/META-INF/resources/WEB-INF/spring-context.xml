@@ -44,9 +44,11 @@
     <import resource="classpath*:config/*-jms-context.xml"/>
     <import resource="classpath*:config/*-taskexecutor-context.xml"/>
 
-    <import resource="file:///${domibus.config.location}/plugins/config/*-plugin.xml" />
     <import resource="domibus-security.xml"/>
     <import resource="domibus-configuration.xml"/>
+    <!-- This order matters to allow the plugin usage of "userdefinedTriggerList" in the plugin configuration xml -->
+    <!-- TODO: Confirm that the spring configuration order can be changed -->
+    <import resource="file:///${domibus.config.location}/plugins/config/*-plugin.xml" />
 
     <import resource="domibus-plugins.xml"/>
     <import resource="classpath*:config/domibus-transactions.xml"/>

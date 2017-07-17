@@ -42,7 +42,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     public BackendFSImpl(String name) {
         super(name);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("The plugin {} is created with the given name {}.", this.getClass().getSimpleName(), name);
+            LOG.debug("The plugin {} is created with the given name {} and classloader {}", this.getClass().getSimpleName(), name, this.getClass().getClassLoader());
         }
     }
 

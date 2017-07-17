@@ -18,6 +18,8 @@
 
 package eu.domibus.plugin.fs.worker;
 
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -31,6 +33,8 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
  */
 @DisallowConcurrentExecution // Only one FSRetryWorker runs at any time on the same node
 public class FSRetryWorker extends QuartzJobBean {
+
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSRetryWorker.class);
 
     @Autowired
     private FSRetryService retryService;

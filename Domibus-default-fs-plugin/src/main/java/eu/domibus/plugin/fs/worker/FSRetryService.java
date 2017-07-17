@@ -22,8 +22,10 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.Properties;
 
 /**
@@ -38,12 +40,21 @@ public class FSRetryService {
     @Qualifier("fsPluginProperties")
     private Properties fsPluginProperties;
 
+    @Autowired
+    private ApplicationContext appContext;
+
+    @PostConstruct
+    private void init() {
+        LOG.debug("Understanding plugin application context ({}) and classloader.", appContext);
+        LOG.debug("FS Plugin Properties: {}", fsPluginProperties);
+    }
+
     /**
      * Triggering the re-send means that the message file from the FAILED directory will be copied directly under the
      * corresponding OUT directory and eventually it will be treated like a normal file.
      */
     public void resendFailedFSMessages() {
-        LOG.info("Resending failed file system messages...");
+        LOG.debug("Resending failed file system messages...");
     }
 
 }
