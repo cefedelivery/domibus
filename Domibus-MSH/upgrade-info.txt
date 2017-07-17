@@ -158,16 +158,33 @@ Domibus 3.3-RC1 (from 3.2.5):
 
 
                 - [Tomcat only]
-                     o in file \conf\domibus\internal\activemq.xml add the following queue in the destinations section:
-                        <broker .....>
-                          .............................
-                          <destinations>
-                          .............................
-                            <queue id="pullMessageQueue" physicalName="domibus.internal.pull.queue"/>
-                          .............................
-                          </<destinations>>
-                          .............................
-                        </broker>
+                     o in file \conf\domibus\internal\activemq.xml
+                        - add the following queue in the destinations section:
+                                <broker .....>
+                                  .............................
+                                  <destinations>
+                                  .............................
+                                    <queue id="pullMessageQueue" physicalName="domibus.internal.pull.queue"/>
+                                  .............................
+                                  </<destinations>>
+                                  .............................
+                                </broker>
+
+                        - the configuration for the redelivery plugin should now look like the one below:
+                                <redeliveryPlugin fallbackToDeadLetter="true" sendToDlqIfMaxRetriesExceeded="true">
+                                    <redeliveryPolicyMap>
+                                        <redeliveryPolicyMap>
+                                            <defaultEntry>
+                                                <!-- default policy-->
+                                                <redeliveryPolicy maximumRedeliveries="10" redeliveryDelay="300000"/>
+                                            </defaultEntry>
+                                            <redeliveryPolicyEntries>
+                                                <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0"/>
+                                                <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0"/>
+                                            </redeliveryPolicyEntries>
+                                        </redeliveryPolicyMap>
+                                    </redeliveryPolicyMap>
+                                </redeliveryPlugin>
 
                 Optional changes
 
