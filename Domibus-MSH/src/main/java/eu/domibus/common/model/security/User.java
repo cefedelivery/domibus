@@ -53,14 +53,16 @@ public class User extends AbstractBaseEntity{
                     name = "ROLE_ID", referencedColumnName = "ID_PK"))
     private Set<UserRole> roles=new HashSet<>();
 
+    @SuppressWarnings("squid:S2637")
     public User(@NotNull final String userName, @NotNull final String password) {
         this.userName = userName;
         this.active = Boolean.TRUE;
         this.password = password;
     }
 
-//    public User() {
-//    }
+    @SuppressWarnings("squid:S2637")
+    public User() {
+    }
 
     public String getEmail() {
         return email;
