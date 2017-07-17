@@ -2,7 +2,6 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
-import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -32,7 +31,7 @@ public class NonRepudiationChecker {
         } catch (final XPathExpressionException e) {
             assert false;
             // due to the fact that we use a static expression this can never occur.
-            throw new ReliabilityException(DomibusCoreErrorCode.DOM_001, "Due to the fact that we use a static expression this can never occur.", e);
+            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "XPath problem occurred", e);
         }
 
         if (nodes == null) {

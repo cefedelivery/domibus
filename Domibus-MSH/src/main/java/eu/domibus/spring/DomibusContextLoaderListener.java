@@ -1,7 +1,7 @@
 package eu.domibus.spring;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.plugins.PluginException;
+import eu.domibus.api.plugin.PluginException;
 import eu.domibus.plugin.classloader.PluginClassLoader;
 import eu.domibus.property.PropertyResolverBuilder;
 import org.apache.commons.lang.StringUtils;

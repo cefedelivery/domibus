@@ -1,7 +1,7 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.message.MessageGenericException;
+import eu.domibus.api.message.UserMessageException;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
@@ -344,7 +344,7 @@ public class UserMessageHandlerService {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
                 // this cannot happen
                 assert false;
-                throw new MessageGenericException(DomibusCoreErrorCode.DOM_001, "This cannot happen on this stage", e);
+                throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Error generating receipt", e);
             } catch (final TransformerException e) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0201, "Could not generate Receipt. Check security header and non-repudiation settings", null, e);
