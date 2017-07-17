@@ -156,20 +156,20 @@ Domibus 3.3-RC1 (from 3.2.5):
 
 
                 - [Tomcat only]
-                     o in file \conf\domibus\internal\activemq.xml add the following queue in the destinations section:
-                        <broker .....>
-                          .............................
-                          <destinations>
-                          .............................
-                            <queue id="pullMessageQueue" physicalName="domibus.internal.pull.queue"/>
-                          .............................
-                          </<destinations>>
-                          .............................
-                        </broker>
+                     o in file \conf\domibus\internal\activemq.xml
+                        - add the following queue in the destinations section:
+                                <broker .....>
+                                  .............................
+                                  <destinations>
+                                  .............................
+                                    <queue id="pullMessageQueue" physicalName="domibus.internal.pull.queue"/>
+                                  .............................
+                                  </<destinations>>
+                                  .............................
+                                </broker>
 
-                    o in file \conf\domibus\internal\activemq.xml the configuration for the redelivery plugin should now look like the one below:
-                    <redeliveryPlugin fallbackToDeadLetter="true"
-                                                  sendToDlqIfMaxRetriesExceeded="true">
+                        - the configuration for the redelivery plugin should now look like the one below:
+                                <redeliveryPlugin fallbackToDeadLetter="true" sendToDlqIfMaxRetriesExceeded="true">
                                     <redeliveryPolicyMap>
                                         <redeliveryPolicyMap>
                                             <defaultEntry>
