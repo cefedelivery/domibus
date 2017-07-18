@@ -44,7 +44,7 @@ public class FSRetryService {
     private ApplicationContext appContext;
 
     @PostConstruct
-    private void init() {
+    public void init() {
         LOG.debug("Understanding plugin application context ({}) and classloader.", appContext);
         LOG.debug("FS Plugin Properties: {}", fsPluginProperties);
     }

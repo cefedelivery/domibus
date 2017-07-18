@@ -46,7 +46,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     }
 
     @PostConstruct
-    private void init() {
+    public void init() {
         LOG.info("The File System Plugin is initialized.");
     }
 
