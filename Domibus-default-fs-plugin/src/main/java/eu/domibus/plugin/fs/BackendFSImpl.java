@@ -25,6 +25,8 @@ import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 
+import javax.annotation.PostConstruct;
+
 /**
  * File system backend integration plugin.
  *
@@ -41,9 +43,11 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
      */
     public BackendFSImpl(String name) {
         super(name);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("The plugin {} is created with the given name {} and classloader {}", this.getClass().getSimpleName(), name, this.getClass().getClassLoader());
-        }
+    }
+
+    @PostConstruct
+    private void init() {
+        LOG.info("The File System Plugin is initialized.");
     }
 
     /**
