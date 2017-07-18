@@ -17,6 +17,7 @@ public class SpringContextProvider implements ApplicationContextAware {
         return applicationContext;
     }
 
+    @SuppressWarnings("squid:S2696") //TODO: SONAR version updated!
     public void setApplicationContext(ApplicationContext context) throws BeansException {
         applicationContext = context;
     }
