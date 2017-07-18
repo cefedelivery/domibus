@@ -11,6 +11,7 @@ import {SecurityEventService} from "./security/security.event.service";
 export class AppComponent implements OnInit {
 
   isAdmin: boolean;
+  _currentUser: string;
 
   constructor(private securityService: SecurityService,
               private router: Router,
@@ -37,6 +38,15 @@ export class AppComponent implements OnInit {
 
   hasAdmin(): boolean {
     return this.securityService.isCurrentUserAdmin();
+  }
+
+  get currentUser(): string {
+    let user = this.securityService.getCurrentUser();
+    if (user != null) {
+      return user.username;
+    }
+    return "";
+
   }
 
   logout(event: Event): void {
