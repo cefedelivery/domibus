@@ -18,6 +18,7 @@
   -->
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:amq="http://activemq.apache.org/schema/core"
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:c="http://www.springframework.org/schema/c"
@@ -25,16 +26,17 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://www.springframework.org/schema/util
        http://www.springframework.org/schema/util/spring-util.xsd
        http://activemq.apache.org/schema/core
        http://activemq.apache.org/schema/core/activemq-core.xsd">
 
     <!-- General File System Plugin properties -->
-    <util:properties id="fsPluginProperties">
-        <!-- Retry Worker execution interval as a cron expression -->
-        <prop key="fsPlugin.messages.retry.worker.cronExpression">0/5 * * * * ?</prop>
-    </util:properties>
+    <util:properties id="fsPluginProperties" ignore-resource-not-found="true"
+                     location="classpath:fsPlugin.properties,file:///${domibus.config.location}/fsPlugin.properties"/>
+    <context:property-placeholder properties-ref="fsPluginProperties" ignore-resource-not-found="true"
+                                  ignore-unresolvable="true" />
 
     <amq:queue id="notifyBackendFSQueue"
                physicalName="domibus.notification.filesystem"/>
@@ -44,14 +46,14 @@
         <constructor-arg value="backendFSPlugin"/>
         <property name="lister" ref="fsNotificationListenerService"/>
     </bean>
-    
+
     <bean id="fsNotificationListenerService"
           class="eu.domibus.plugin.NotificationListenerService"
           c:queue-ref="notifyBackendFSQueue" c:mode="PUSH"
           p:backendConnector-ref="backendFSPlugin"/>
 
     <!-- quartz job for the retry  -->
-    <bean id="retryWorkerJob"
+    <bean id="fsRetryWorkerJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSRetryWorker"/>
         <property name="durability" value="true"/>
@@ -59,16 +61,15 @@
 
     <bean id="fsPluginRetryWorkerTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="retryWorkerJob"/>
+        <property name="jobDetail" ref="fsRetryWorkerJob"/>
         <property name="cronExpression" value="${fsPlugin.messages.retry.worker.cronExpression}"/>
-        <!--property name="cronExpression" value="0/5 * * * * ?"/-->
     </bean>
 
     <!-- customizable list of triggers to be executed by quartz -->
-    <bean id="fsPluginTriggerList" parent="userdefinedTriggerList"
+    <bean id="fsPluginTriggerList" parent="domibusStandardTriggerList"
           class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
-            <list>
+            <list merge="true">
                 <ref bean="fsPluginRetryWorkerTrigger"/>
             </list>
         </property>
