@@ -41,6 +41,9 @@ public class FSPluginProperties extends Properties {
 
     private static final String SENT_PURGE_EXPIRED = "sent.purge.expired";
 
+    // TODO Add all the plugin properties
+    // https://ec.europa.eu/cefdigital/tracker/browse/EDELIVERY-2361
+
     /**
      * @return The location of the directory that the plugin will use to manage the messages to be sent and received
      * in case no domain expression matches
