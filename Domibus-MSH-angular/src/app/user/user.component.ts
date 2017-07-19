@@ -136,5 +136,9 @@ export class UserComponent implements OnInit {
     }
   }
 
+  singleSelectCheck(row: any) {
+    return this.selected.indexOf(row) === -1;
+  }
+
 
 }

@@ -13,6 +13,7 @@
           [rows]="rows"
           [selected]="selected"
           [selectionType]="'single'"
+          [selectCheck]="singleSelectCheck"
           (activate)="onActivate($event)"
           (select)='onSelect($event)'>
           <ngx-datatable-column name="Plugin" prop="backendName" [sortable]="false">

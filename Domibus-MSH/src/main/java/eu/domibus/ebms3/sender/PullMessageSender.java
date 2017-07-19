@@ -1,20 +1,21 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.message.UserMessageException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.dao.PModeDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.impl.PullContext;
+import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -30,7 +31,6 @@ import org.springframework.stereotype.Component;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
@@ -64,6 +64,7 @@ public class PullMessageSender {
     @Autowired
     private PolicyService policyService;
 
+    @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
     @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "internalJmsListenerContainerFactory")
     public void processPullRequest(final MapMessage map) {
         boolean notifiyBusinessOnError = false;
@@ -108,10 +109,10 @@ public class PullMessageSender {
 
             mshDispatcher.dispatch(acknowlegement,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
 
-        } catch (TransformerException | SOAPException | JAXBException | IOException | JMSException e) {
+        } catch (TransformerException | SOAPException | IOException | JMSException e) {
             //@thom change this exception handling.
             LOG.error(e.getMessage(), e);
-            throw new RuntimeException(e);
+            throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Error handling new UserMessage", e);
         } catch (final EbMS3Exception e) {
             try {
                 if (notifiyBusinessOnError && messaging != null) {

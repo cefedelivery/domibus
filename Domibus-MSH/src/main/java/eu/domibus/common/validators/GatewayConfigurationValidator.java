@@ -35,7 +35,7 @@ public class GatewayConfigurationValidator {
     private DomibusConfigurationService domibusConfigurationService;
 
     @PostConstruct
-    public void validateConfiguration() throws Exception {
+    public void validateConfiguration() {
         LOG.info("Checking gateway configuration ...");
         validateCerts();
 
@@ -77,7 +77,7 @@ public class GatewayConfigurationValidator {
     }
 
     private void validateFileHash(String filename, String expectedHash) throws IOException {
-        File file = new File(domibusConfigurationService.getConfigLocation() + "/" + filename);
+        File file = new File(domibusConfigurationService.getConfigLocation(), filename);
         try {
             String hash = DigestUtils.sha256Hex(FileUtils.readFileToByteArray(file));
             LOG.debug("Hash for " + filename + ": " + hash);
