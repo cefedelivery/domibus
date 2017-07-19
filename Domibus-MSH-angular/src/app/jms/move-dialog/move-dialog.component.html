@@ -6,7 +6,7 @@
 
 <div style="width:100%;margin-bottom: 15px;">
   <md-select placeholder="Destination" [(ngModel)]="selectedSource" name="jmsQueueSelector" id="jmsQueueSelector"
-             style="width:100%">
+             style="width:100%" disabled={{destinationsChoiceDisabled}}>
     <md-option *ngFor="let queue of queues" [value]="queue" style="width:100%">
       {{queue.internal ? "[internal]" :""}} {{queue.name}} ({{queue.numberOfMessages}})
     </md-option>
@@ -17,7 +17,8 @@
   <div class="divTableBody">
     <div class="divTableRow">
       <div class="divTableCell" style="width:50%">
-        <button id="messageDialogResendButton" md-raised-button color="primary" (click)="dialogRef.close({destination:selectedSource.name})" [disabled]="!canOk()">
+        <button id="messageDialogResendButton" md-raised-button color="primary"
+                (click)="dialogRef.close({destination:selectedSource.name})" [disabled]="!canOk()">
           <md-icon>check circle</md-icon>
           <span>Ok</span>
         </button>

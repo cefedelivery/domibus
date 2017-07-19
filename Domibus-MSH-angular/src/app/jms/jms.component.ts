@@ -154,26 +154,33 @@ export class JmsComponent implements OnInit {
   move() {
     let dialogRef: MdDialogRef<MoveDialogComponent> = this.dialog.open(MoveDialogComponent);
 
-    dialogRef.componentInstance.queues = [];
+    if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
 
-    for (let message of this.selectedMessages) {
-      let originalQueue;
-      try {
-        originalQueue = message.customProperties.originalQueue;
-      }
-      catch (e) {
-        console.error(e);
-      }
-      if (!isNullOrUndefined(originalQueue)) {
-        dialogRef.componentInstance.queues.push(...this.queues.filter((queue) => queue.name === originalQueue));
-        break;
-      }
-    }
+      for (let message of this.selectedMessages) {
 
-    if (dialogRef.componentInstance.queues.length == 0) {
-      console.warn("Unable to determine the original queue for the selected messages");
+        try {
+          let originalQueue = message.customProperties.originalQueue;
+          if (!isNullOrUndefined(originalQueue)) {
+            let queue = this.queues.filter((queue) => queue.name === originalQueue).pop();
+            dialogRef.componentInstance.queues.push(queue);
+            dialogRef.componentInstance.destinationsChoiceDisabled = true;
+            dialogRef.componentInstance.selectedSource = queue;
+            break;
+          }
+        }
+        catch (e) {
+          console.error(e);
+        }
+      }
+
+      if (dialogRef.componentInstance.queues.length == 0) {
+        console.warn("Unable to determine the original queue for the selected messages");
+        dialogRef.componentInstance.queues.push(...this.queues);
+      }
+    } else {
       dialogRef.componentInstance.queues.push(...this.queues);
     }
+
 
     dialogRef.afterClosed().subscribe(result => {
       if (!isNullOrUndefined(result) && !isNullOrUndefined(result.destination)) {
