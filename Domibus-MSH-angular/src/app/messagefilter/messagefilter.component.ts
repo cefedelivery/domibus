@@ -1,6 +1,6 @@
 import {Component} from "@angular/core";
 import {MessagefilterDialogComponent} from "./messagefilter-dialog/messagefilter-dialog.component";
-import {MdDialog} from "@angular/material";
+import {MdDialog, MdDialogRef} from "@angular/material";
 import {AlertService} from "../alert/alert.service";
 import {Http, Headers, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
@@ -9,6 +9,7 @@ import {BackendFilterEntry} from "./backendfilterentry";
 import {RoutingCriteriaEntry} from "./routingcriteriaentry";
 import {CancelMessagefilterDialogComponent} from "./cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
 import {isNullOrUndefined, isUndefined} from "util";
+import {EditMessageFilterComponent} from "./editmessagefilter-form/editmessagefilter-form.component";
 
 @Component({
   moduleId: module.id,
@@ -31,6 +32,7 @@ export class MessageFilterComponent {
   enableCancel = false;
   enableSave = false;
   enableDelete = false;
+  enableEdit = false;
 
   enableMoveUp = false;
   enableMoveDown = false;
@@ -94,16 +96,16 @@ export class MessageFilterComponent {
   createValueProperty(cell, newProp, row) {
     switch(cell) {
       case 'from':
-        this.rows[row.$$index].from = newProp;
+        this.rows[row].from = newProp;
         break;
       case 'to':
-        this.rows[row.$$index].to = newProp;
+        this.rows[row].to = newProp;
         break;
       case 'action':
-        this.rows[row.$$index].action = newProp;
+        this.rows[row].action = newProp;
         break;
       case 'service':
-        this.rows[row.$$index].service = newProp;
+        this.rows[row].service = newProp;
         break;
     }
   }
@@ -184,10 +186,129 @@ export class MessageFilterComponent {
   }
 
   buttonNew() {
-    this.enableCancel = true;
-    this.enableSave = true;
-    this.enableDelete = false;
-    this.rows.push( {"backendName" : ''});
+    let formRef: MdDialogRef<EditMessageFilterComponent> = this.dialog.open(EditMessageFilterComponent, {data: {backendFilterNames: this.backendFilterNames}});
+    formRef.afterClosed().subscribe(result => {
+      if(result == true) {
+        let routingCriterias : Array<RoutingCriteriaEntry> = [];
+        if(!isNullOrUndefined(formRef.componentInstance.from)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0,'from',formRef.componentInstance.from));
+        }
+        if(!isNullOrUndefined(formRef.componentInstance.to)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0,'to',formRef.componentInstance.to));
+        }
+        if(!isNullOrUndefined(formRef.componentInstance.action)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0,'action',formRef.componentInstance.action));
+        }
+        if(!isNullOrUndefined(formRef.componentInstance.service)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0,'service',formRef.componentInstance.service));
+        }
+        let backendEntry = new BackendFilterEntry(0, this.rowNumber + 1, formRef.componentInstance.plugin, routingCriterias, false);
+        this.rows.push(backendEntry);
+
+        this.enableSave = true;
+        this.enableCancel = true;
+      }
+    });
+
+  }
+
+  buttonEdit() {
+    let formRef: MdDialogRef<EditMessageFilterComponent> = this.dialog.open(EditMessageFilterComponent, {data: {backendFilterNames: this.backendFilterNames, edit: this.selected[0]}});
+    formRef.afterClosed().subscribe(result => {
+      if(result == true) {
+        this.updateSelectedFrom(formRef.componentInstance.from);
+        this.updateSelectedTo(formRef.componentInstance.to);
+        this.updateSelectedAction(formRef.componentInstance.action);
+        this.updateSelectedService(formRef.componentInstance.service);
+
+        this.enableSave = true;
+        this.enableCancel = true;
+      }
+    });
+  }
+
+  private deleteRoutingCriteria(rc: string) {
+    let numRoutingCriterias = this.rows[this.rowNumber].routingCriterias.length;
+    for (let i = 0; i < numRoutingCriterias; i++) {
+      let routCriteria = this.rows[this.rowNumber].routingCriterias[i];
+      if (routCriteria.name == rc) {
+        this.rows[this.rowNumber].routingCriterias.splice(i, 1);
+        return;
+      }
+    }
+  }
+
+  private createRoutingCriteria(rc: string, value: string) {
+    if(value.length == 0) {
+      return;
+    }
+    let newRC = new RoutingCriteriaEntry(null, rc, value);
+    this.rows[this.rowNumber].routingCriterias.push(newRC);
+    this.createValueProperty(rc, newRC, this.rowNumber);
+  }
+
+  private updateSelectedTo(value: string) {
+    if(!isNullOrUndefined(this.rows[this.rowNumber].to)) {
+      if(value.length == 0) {
+        // delete
+        this.deleteRoutingCriteria('to');
+        this.rows[this.rowNumber].to.expression = '';
+      } else {
+        // update
+        this.rows[this.rowNumber].to.expression = value;
+      }
+    } else {
+      // create
+      this.createRoutingCriteria('to', value);
+    }
+  }
+
+  private updateSelectedFrom(value: string) {
+    if(!isNullOrUndefined(this.rows[this.rowNumber].from)) {
+      if(value.length == 0) {
+        // delete
+        this.deleteRoutingCriteria('from');
+        this.rows[this.rowNumber].from.expression = '';
+      } else {
+        // update
+        this.rows[this.rowNumber].from.expression = value;
+      }
+    } else {
+      // create
+      this.createRoutingCriteria('from', value);
+    }
+  }
+
+  private updateSelectedAction(value: string) {
+    if(!isNullOrUndefined(this.rows[this.rowNumber].action)) {
+      if(value.length == 0) {
+        // delete
+        this.deleteRoutingCriteria('action');
+        this.rows[this.rowNumber].action.expression = '';
+      } else {
+        // update
+        this.rows[this.rowNumber].action.expression = value;
+      }
+    } else {
+      // create
+      this.createRoutingCriteria('action', value);
+    }
+  }
+
+  private updateSelectedService(value: string) {
+    if(!isNullOrUndefined(this.rows[this.rowNumber].service)) {
+      if(value.length == 0) {
+        // delete
+        this.deleteRoutingCriteria('service');
+        this.rows[this.rowNumber].service.expression = '';
+      } else {
+        // update
+        this.rows[this.rowNumber].service.expression = value;
+      }
+    } else {
+      // create
+      this.createRoutingCriteria('service', value);
+    }
   }
 
   cancelDialog() {
@@ -300,6 +421,7 @@ export class MessageFilterComponent {
     this.enableMoveDown = selected.length > 0 && this.rowNumber < this.rows.length - 1;
     this.enableMoveUp = selected.length > 0 && this.rowNumber > 0;
     this.enableDelete = selected.length == 1;
+    this.enableEdit = selected.length == 1;
   }
 
   onActivate(event) {

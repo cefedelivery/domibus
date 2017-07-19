@@ -1,0 +1,55 @@
+<div style="width: 500px">
+  <p class="domibusTextSmall" style="margin:0;font-weight: bold">Message Filter Edit</p>
+  <form>
+    <md-card style="margin:0;padding:10px;">
+      <div>
+        <md2-select mdInput placeholder="Plugin" floatPlaceholder="always">
+          <md2-option *ngFor="let bName of backendFilterNames" [value]="bName.toString()">
+            {{bName.toString()}}
+          </md2-option>
+        </md2-select>
+      </div>
+
+      <div>
+        <md-input-container class="inputField">
+          <input mdInput placeholder="From" name="from" id="from" [value]="from" (blur)="updateFrom($event)"> <!--[formControl]="messageFilterForm.controls['from_to']">-->
+        </md-input-container>
+      </div>
+
+      <div>
+        <md-input-container class="inputField">
+          <input mdInput placeholder="To" name="to" id="to" [value]="to" (blur)="updateTo($event)"> <!-- [formControl]="messageFilterForm.controls['from_to']">-->
+        </md-input-container>
+      </div>
+
+      <div>
+        <md-input-container class="inputField">
+          <input mdInput placeholder="Action" name="action" id="action" [value]="action" (blur)="updateAction($event)">
+                 <!--[formControl]="messageFilterForm.controls['action']">-->
+        </md-input-container>
+      </div>
+
+      <div>
+        <md-input-container class="inputField">
+          <input mdInput placeholder="Service" name="service" id="service" [value]="service" (blur)="updateService($event)">
+                 <!--[formControl]="messageFilterForm.controls['service']">-->
+        </md-input-container>
+      </div>
+
+      <div>
+      <md-dialog-actions>
+        <button md-raised-button color="primary" md-dialog-close>
+          <md-icon>cancel</md-icon>
+          <span>Cancel</span>
+        </button>
+        <!-- Can optionally provide a result for the closing dialog. -->
+        <button md-raised-button color="primary" [md-dialog-close]="true" (click)="submitForm()" type="submit">
+          <md-icon>check circle</md-icon>
+          <span>OK</span>
+        </button>
+      </md-dialog-actions>
+      </div>
+
+    </md-card>
+  </form>
+</div>

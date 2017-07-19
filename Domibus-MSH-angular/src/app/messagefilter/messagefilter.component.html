@@ -1,7 +1,7 @@
-<div>
-  <div class="messageFilter" style="overflow-x:auto;">
-    <md-card style="margin:0;padding:10px;">
-      <p class="domibusTextHeadingBold">Message Filter</p>
+<div class="messageFilter" style="overflow-x:auto;">
+  <md-card style="margin:0;padding:10px;">
+    <md-card-content>
+      <p class="domibusTextHeading" style="margin:0;font-weight: bold">Message Filter</p>
       <form name="messageFilterForm" #messageFilterForm="ngForm">
         <ngx-datatable
           #mydatatable
@@ -17,107 +17,37 @@
           (select)='onSelect($event)'>
           <ngx-datatable-column name="Plugin" prop="backendName" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span
-                title="Double click to edit"
-                (dblclick)="editing[row.$$index + '-plugin'] = true"
-                *ngIf="!editing[row.$$index + '-plugin']" class="justified, clickable">
+              <span class="justified, clickable">
                 {{value}}
               </span>
-              <input
-                autofocus
-                mdInput
-                list="backendFilters"
-                (blur)="updateValue($event, 'plugin', row)"
-                *ngIf="editing[row.$$index + '-plugin']"
-                [value]="value" class="justified, clickable">
-              <datalist id="backendFilters">
-                <div *ngFor="let backendName of backendFilterNames">
-                  <option value={{backendName}}>{{backendName}}</option>
-                </div>
-              </datalist>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="From" prop="from.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span
-                title="Double click to edit. Rule: [PARTYID]:[TYPE]"
-                (dblclick)="editing[row.$$index + '-from'] = true"
-                *ngIf="!editing[row.$$index + '-from']"
-                class="justified, clickable">
+              <span class="justified, clickable">
                 {{value}}
               </span>
-              <input
-                mdInput
-                autofocus
-                placeholder="From"
-                (blur)="updateValue($event, 'from', row)"
-                *ngIf="editing[row.$$index + '-from']"
-                type="text"
-                title="[PARTYID]:[TYPE]"
-                [value]="value"
-                class="justified, clickable"/>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="To" prop="to.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span
-                title="Double click to edit. Rule: [PARTYID]:[TYPE]"
-                (dblclick)="editing[row.$$index + '-to'] = true"
-                *ngIf="!editing[row.$$index + '-to']" class="justified, clickable">
+              <span class="justified, clickable">
                 {{value}}
               </span>
-              <input
-                mdInput
-                autofocus
-                placeholder="To"
-                (blur)="updateValue($event, 'to', row)"
-                *ngIf="editing[row.$$index + '-to']"
-                type="text"
-                title="[PARTYID]:[TYPE]"
-                [value]="value"
-                class="justified, clickable"/>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="Action" prop="action.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span
-                title="Double click to edit. Rule: [ACTION]"
-                (dblclick)="editing[row.$$index + '-action'] = true"
-                *ngIf="!editing[row.$$index + '-action']"
-                class="justified, clickable">
+              <span class="justified, clickable">
                 {{value}}
               </span>
-              <input
-                mdInput
-                autofocus
-                placeholder="Action"
-                (blur)="updateValue($event, 'action', row)"
-                *ngIf="editing[row.$$index + '-action']"
-                type="text"
-                title="[ACTION]"
-                [value]="value"
-                class="justified, clickable"/>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="Service" prop="service.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span
-                title="Double click to edit. Rule: [SERVICE]:[TYPE]"
-                (dblclick)="editing[row.$$index + '-service'] = true"
-                *ngIf="!editing[row.$$index + '-service']"
-                class="justified, clickable">
+              <span class="justified, clickable">
                 {{value}}
               </span>
-              <input
-                mdInput
-                autofocus
-                placeholder="Service"
-                (blur)="updateValue($event, 'service', row)"
-                *ngIf="editing[row.$$index + '-service']"
-                type="text"
-                title="[SERVICE]:[TYPE]"
-                [value]="value"
-                class="justified, clickable"/>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="Persisted" prop="persisted" [sortable]="false">
@@ -158,6 +88,10 @@
                 <md-icon>add</md-icon>
                 <span>New</span>
               </button>
+              <button md-raised-button color="primary" type="button" [disabled]="!enableEdit" (click)="buttonEdit()" id="editbutton_id">
+                <md-icon>edit</md-icon>
+                <span>Edit</span>
+              </button>
               <button md-raised-button color="primary" type="button" [disabled]="!enableDelete" (click)="buttonDelete()" id="deletebutton_id">
                 <md-icon>delete</md-icon>
                 <span>Delete</span>
@@ -166,6 +100,6 @@
           </tr>
         </table>
       </form>
-    </md-card>
-  </div>
+    </md-card-content>
+  </md-card>
 </div>
