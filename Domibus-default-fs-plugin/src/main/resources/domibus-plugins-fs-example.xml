@@ -44,16 +44,16 @@
     <bean id="backendFSPlugin"
           class="eu.domibus.plugin.fs.BackendFSImpl">
         <constructor-arg value="backendFSPlugin"/>
-        <property name="lister" ref="fsNotificationListenerService"/>
+        <property name="lister" ref="fsPluginNotificationListenerService"/>
     </bean>
 
-    <bean id="fsNotificationListenerService"
+    <bean id="fsPluginNotificationListenerService"
           class="eu.domibus.plugin.NotificationListenerService"
           c:queue-ref="notifyBackendFSQueue" c:mode="PUSH"
           p:backendConnector-ref="backendFSPlugin"/>
 
     <!-- quartz job for the retry  -->
-    <bean id="fsRetryWorkerJob"
+    <bean id="fsPluginRetryWorkerJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSRetryWorker"/>
         <property name="durability" value="true"/>
@@ -61,7 +61,7 @@
 
     <bean id="fsPluginRetryWorkerTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="fsRetryWorkerJob"/>
+        <property name="jobDetail" ref="fsPluginRetryWorkerJob"/>
         <property name="cronExpression" value="${fsPlugin.messages.retry.worker.cronExpression}"/>
     </bean>
 
