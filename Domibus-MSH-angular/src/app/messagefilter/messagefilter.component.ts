@@ -314,8 +314,11 @@ export class MessageFilterComponent {
     return str == '' || (/^[a-zA-Z0-9_:-]+$/.test(str));
   }
 
-  singleSelectCheck(row: any) {
-    return this.selected.indexOf(row) === -1;
+  onTableContextMenu(contextMenuEvent) {
+    // console.log('onTableContextMenu' + contextMenuEvent);
+    this.selected = [];
+    contextMenuEvent.event.preventDefault();
+    contextMenuEvent.event.stopPropagation();
   }
 
   hasError(type: string, str: string) {

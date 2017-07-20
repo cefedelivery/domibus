@@ -136,9 +136,11 @@ export class UserComponent implements OnInit {
     }
   }
 
-  singleSelectCheck(row: any) {
-    return this.selected.indexOf(row) === -1;
+  onTableContextMenu(contextMenuEvent) {
+    // console.log('onTableContextMenu' + contextMenuEvent);
+    this.selected = [];
+    contextMenuEvent.event.preventDefault();
+    contextMenuEvent.event.stopPropagation();
   }
-
 
 }

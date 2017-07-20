@@ -112,7 +112,7 @@
   (sort)="onSort($event)"
   [selected]="selected"
   [selectionType]="'single'"
-  [selectCheck]="singleSelectCheck"
+  (tableContextmenu)="onTableContextMenu($event)"
   (activate)="onActivate($event)"
   (select)="onSelect($event)">
   <!-- Message Id -->

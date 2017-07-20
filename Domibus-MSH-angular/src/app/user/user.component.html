@@ -10,7 +10,7 @@
   [loadingIndicator]="false"
   [selected]="selected"
   [selectionType]="'single'"
-  [selectCheck]="singleSelectCheck">
+  (tableContextmenu)="onTableContextMenu($event)">
   <ngx-datatable-column name="Username" prop="userName" [canAutoResize]="true">
     <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
     <span
