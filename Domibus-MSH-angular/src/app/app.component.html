@@ -77,10 +77,13 @@
               <span>{{currentUser}}</span>
             </button>
 
+            <hr/>
+
             <button md-menu-item (click)="logout($event)">
               <md-icon>power_settings_new</md-icon>
               <span>Logout</span>
             </button>
+
           </div>
 
           <div *ngIf="!currentUser" style="text-align: center; vertical-align: middle;margin: 2px;">
@@ -89,7 +92,6 @@
               <span>Not logged in</span>
             </button>
           </div>
-
 
         </md-menu>
       </div>
