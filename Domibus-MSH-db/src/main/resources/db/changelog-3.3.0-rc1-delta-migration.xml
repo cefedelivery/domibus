@@ -289,4 +289,5 @@
             UPDATE TB_ROUTING_CRITERIA SET NAME = 'SERVICE' WHERE UPPER(NAME) = 'SEVICE';
         </sql>
     </changeSet>
+
 </databaseChangeLog>

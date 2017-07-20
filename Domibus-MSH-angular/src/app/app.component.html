@@ -67,11 +67,25 @@
         <button md-icon-button [md-menu-trigger-for]="settingsMenu">
           <md-icon>menu</md-icon>
         </button>
+
         <md-menu x-position="before" #settingsMenu="mdMenu">
-          <button md-menu-item (click)="logout($event)">
-            <md-icon>power_settings_new</md-icon>
-            <span>Logout</span>
-          </button>
+
+          <div *ngIf="currentUser">
+            <div style="text-align: center; vertical-align: middle;margin: 2px;">
+              Logged in as: {{currentUser}}
+            </div>
+
+            <button md-menu-item (click)="logout($event)">
+              <md-icon>power_settings_new</md-icon>
+              <span>Logout</span>
+            </button>
+          </div>
+
+          <div *ngIf="!currentUser" style="text-align: center; vertical-align: middle;margin: 2px;">
+            Not logged in
+          </div>
+
+
         </md-menu>
       </div>
     </div>

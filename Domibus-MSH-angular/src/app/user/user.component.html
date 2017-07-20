@@ -9,7 +9,8 @@
   [scrollbarH]="true"
   [loadingIndicator]="false"
   [selected]="selected"
-  [selectionType]="'single'">
+  [selectionType]="'single'"
+  [selectCheck]="singleSelectCheck">
   <ngx-datatable-column name="Username" prop="userName" [canAutoResize]="true">
     <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
     <span

@@ -1,15 +1,18 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.xml.xpath.*;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 
 /**
@@ -17,7 +20,6 @@ import javax.xml.xpath.*;
  */
 @Service
 public class NonRepudiationChecker {
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(NonRepudiationChecker.class);
     private static final String XPATH_EXPRESSION_STRING = "/*/*/*[local-name() = 'Reference']/@URI  | /*/*/*[local-name() = 'Reference']/*[local-name() = 'DigestValue']";
     private final XPath xPath = XPathFactory.newInstance().newXPath();
 
@@ -29,7 +31,7 @@ public class NonRepudiationChecker {
         } catch (final XPathExpressionException e) {
             assert false;
             // due to the fact that we use a static expression this can never occur.
-            throw new RuntimeException(e);
+            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "XPath problem occurred", e);
         }
 
         if (nodes == null) {
