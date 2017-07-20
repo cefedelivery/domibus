@@ -71,9 +71,11 @@
         <md-menu x-position="before" #settingsMenu="mdMenu">
 
           <div *ngIf="currentUser">
-            <div style="text-align: center; vertical-align: middle;margin: 2px;">
-              Logged in as: {{currentUser}}
-            </div>
+
+            <button md-menu-item disabled="true">
+              <md-icon>person</md-icon>
+              <span>{{currentUser}}</span>
+            </button>
 
             <button md-menu-item (click)="logout($event)">
               <md-icon>power_settings_new</md-icon>
@@ -82,7 +84,10 @@
           </div>
 
           <div *ngIf="!currentUser" style="text-align: center; vertical-align: middle;margin: 2px;">
-            Not logged in
+            <button md-menu-item disabled="true">
+              <md-icon>person_outline</md-icon>
+              <span>Not logged in</span>
+            </button>
           </div>
 
 
