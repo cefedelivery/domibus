@@ -110,7 +110,7 @@ export class MessageFilterComponent {
     }
   }
 
-  updateValueProperty(cell, cellValue, row) {
+  /*updateValueProperty(cell, cellValue, row) {
     switch (cell) {
       case 'from':
         this.rows[row.$$index].from.expression = cellValue;
@@ -129,9 +129,9 @@ export class MessageFilterComponent {
         this.hasError('service', cellValue);
         break;
     }
-  }
+  }*/
 
-  updateValue(event, cell, row) {
+  /*updateValue(event, cell, row) {
     this.editing[row.$$index + '-' + cell] = false;
 
     let edited = false;
@@ -183,7 +183,7 @@ export class MessageFilterComponent {
       this.enableCancel = true;
       this.alertService.clearAlert();
     }
-  }
+  }*/
 
   buttonNew() {
     let formRef: MdDialogRef<EditMessageFilterComponent> = this.dialog.open(EditMessageFilterComponent, {data: {backendFilterNames: this.backendFilterNames}});
@@ -311,18 +311,22 @@ export class MessageFilterComponent {
     }
   }
 
+  private disableSelectionAndButtons() {
+    this.selected = [];
+    this.enableMoveDown = false;
+    this.enableMoveUp = false;
+    this.enableCancel = false;
+    this.enableSave = false;
+    this.enableEdit = false;
+    this.enableDelete = false;
+  }
+
   cancelDialog() {
     let dialogRef = this.dialog.open(CancelMessagefilterDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       switch (result) {
         case 'Yes' :
-          this.enableCancel = false;
-          this.enableSave = false;
-          this.enableDelete = false;
-
-          this.enableMoveUp = this.rowNumber > 0;
-          this.enableMoveDown = this.rowNumber != this.rows.length - 1;
-
+          this.disableSelectionAndButtons();
           this.getBackendFiltersInfo();
 
           break;
@@ -338,8 +342,7 @@ export class MessageFilterComponent {
     dialogRef.afterClosed().subscribe(result => {
       switch (result) {
         case 'Save' :
-          this.enableCancel = false;
-          this.enableSave = false;
+          this.disableSelectionAndButtons();
           this.rollback = this.rows.slice();
           this.http.put('rest/messagefilters', JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
             this.alertService.success("The operation 'update message filters' completed successfully.", false);
@@ -359,11 +362,14 @@ export class MessageFilterComponent {
     this.enableCancel = true;
     this.enableSave = true;
     this.enableDelete = false;
+    this.enableEdit = false;
 
     this.enableMoveUp = false;
     this.enableMoveDown = false;
 
     this.rows.splice(this.rowNumber, 1);
+
+    this.selected = [];
   }
 
   buttonMoveUp() {
@@ -411,9 +417,16 @@ export class MessageFilterComponent {
     console.log('Select Event', selected, this.selected);
 
     if (isNullOrUndefined(selected) || selected.length == 0) {
+      // unselect
+      this.enableMoveDown = false;
+      this.enableMoveUp = false;
+      this.enableDelete = false;
+      this.enableEdit = false;
+
       return;
     }
 
+    // select
     this.rowNumber = this.selected[0].$$index;
 
     this.selected.splice(0, this.selected.length);
@@ -424,23 +437,23 @@ export class MessageFilterComponent {
     this.enableEdit = selected.length == 1;
   }
 
-  onActivate(event) {
+  /*onActivate(event) {
     console.log('Activate Event', event);
-  }
+  }*/
 
-  isValidFromToService(str: string) {
+  /*isValidFromToService(str: string) {
     return str == '' || (/^[a-zA-Z0-9_:-]+:[a-zA-Z0-9_:-]+$/.test(str));
-  }
+  }*/
 
-  isValidAction(str: string) {
+  /*isValidAction(str: string) {
     return str == '' || (/^[a-zA-Z0-9_:-]+$/.test(str));
-  }
+  }*/
 
   singleSelectCheck(row: any) {
     return this.selected.indexOf(row) === -1;
   }
 
-  hasError(type: string, str: string) {
+  /*hasError(type: string, str: string) {
     switch (type) {
       case 'from':
       case 'to':
@@ -464,5 +477,5 @@ export class MessageFilterComponent {
       default:
         return false;
     }
-  }
+  }*/
 }

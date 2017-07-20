@@ -17,18 +17,16 @@ export class EditMessageFilterComponent {
   service: string;
   action: string;
 
-  backendFilterNames = [];
+  backendFilterNames : Array<String> = [];
 
   messageFilterForm:FormGroup;
-
-
 
   constructor(public dialogRef: MdDialogRef<EditMessageFilterComponent>,
               @Inject(MD_DIALOG_DATA) public data: any,
               fb: FormBuilder) {
     if(isNullOrUndefined(data.edit)) {
       this.backendFilterNames = data.backendFilterNames;
-      this.plugin = '';
+      this.plugin = this.backendFilterNames[0].toString();
       this.from = '';
       this.to = '';
       this.action = '';
@@ -46,9 +44,17 @@ export class EditMessageFilterComponent {
       this.action = isNullOrUndefined(backEntry.action) ? '' : backEntry.action.expression;
       this.service = isNullOrUndefined(backEntry.service) ? '' : backEntry.service.expression;
       this.messageFilterForm = fb.group({
-        'messagefilterplugin': [null, Validators.required]
+        'plugin': [null, Validators.required],
+        'from': [null, Validators.pattern],
+        'to': [null, Validators.pattern],
+        'action': [null, Validators.pattern],
+        'service': [null, Validators.pattern]
       });
     }
+  }
+
+  updatePlugin(event) {
+    this.plugin = event.value;
   }
 
   updateFrom(event) {

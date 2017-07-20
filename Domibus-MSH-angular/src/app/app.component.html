@@ -17,7 +17,7 @@
       <md-icon>message</md-icon>
       <span>Messages</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/messagefilter']" id="messagefilter_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/messagefilter']" *ngIf="hasAdmin()" id="messagefilter_id">
       <md-icon>filter_list</md-icon>
       <span>Message Filter</span>
     </button>
@@ -38,7 +38,7 @@
       <span>Truststore</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/user']" *ngIf="hasAdmin()" id="user_id">
-      <md-icon>person</md-icon>
+      <md-icon>people</md-icon>
       <span>Users</span>
     </button>
 

@@ -14,7 +14,6 @@
           [selected]="selected"
           [selectionType]="'single'"
           [selectCheck]="singleSelectCheck"
-          (activate)="onActivate($event)"
           (select)='onSelect($event)'>
           <ngx-datatable-column name="Plugin" prop="backendName" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
@@ -62,13 +61,13 @@
           <tr>
             <td>
               <button md-raised-button color="primary" type="button" [disabled]="!enableMoveUp" (click)="buttonMoveUp()" id="moveupbutton_id">
-                <md-icon>arrow_upwards</md-icon>
+                <md-icon>arrow_drop_up</md-icon>
                 <span>Move Up</span>
               </button>
             </td>
             <td>
               <button md-raised-button color="primary" type="button" [disabled]="!enableMoveDown" (click)="buttonMoveDown()" id="movedownbutton_id">
-                <md-icon>arrow_downwards</md-icon>
+                <md-icon>arrow_drop_down</md-icon>
                 <span>Move Down</span>
               </button>
             </td>

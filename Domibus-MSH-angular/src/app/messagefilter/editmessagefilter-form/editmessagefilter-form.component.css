@@ -9,3 +9,8 @@
 .formError {
   color: red;
 }
+
+.alertMessage {
+  font-size: 30%;
+  color: red;
+}
