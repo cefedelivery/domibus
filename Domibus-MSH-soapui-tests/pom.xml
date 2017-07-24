@@ -68,6 +68,7 @@
                         <value>redDbUser=root</value>
                         <value>redDbPassword=123456</value>
                         <value>updateReport=false</value>
+                        <value>thirdGateway=false</value>
                     </projectProperties>
                     <soapuiProperties>
                         <property>
