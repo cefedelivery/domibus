@@ -58,7 +58,7 @@ export class JmsComponent implements OnInit {
   ngOnInit() {
     // set fromDate equals to now - 3 days
     this.request.fromDate = new Date(Date.now());
-    this.request.fromDate.setDate(this.request.fromDate.getDate()-3);
+    this.request.fromDate.setDate(this.request.fromDate.getDate() - 3);
 
     // set toDate equals to now
     this.request.toDate = new Date(Date.now());
@@ -77,7 +77,7 @@ export class JmsComponent implements OnInit {
             this.selectedSource = destinations[key];
           }
         }
-        if(searchSelectedDestination) {
+        if (searchSelectedDestination) {
           this.search();
         }
         // console.log(this.queues);
@@ -153,7 +153,35 @@ export class JmsComponent implements OnInit {
 
   move() {
     let dialogRef: MdDialogRef<MoveDialogComponent> = this.dialog.open(MoveDialogComponent);
-    dialogRef.componentInstance.queues = this.queues;
+
+    if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
+
+      for (let message of this.selectedMessages) {
+
+        try {
+          let originalQueue = message.customProperties.originalQueue;
+          if (!isNullOrUndefined(originalQueue)) {
+            let queue = this.queues.filter((queue) => queue.name === originalQueue).pop();
+            dialogRef.componentInstance.queues.push(queue);
+            dialogRef.componentInstance.destinationsChoiceDisabled = true;
+            dialogRef.componentInstance.selectedSource = queue;
+            break;
+          }
+        }
+        catch (e) {
+          console.error(e);
+        }
+      }
+
+      if (dialogRef.componentInstance.queues.length == 0) {
+        console.warn("Unable to determine the original queue for the selected messages");
+        dialogRef.componentInstance.queues.push(...this.queues);
+      }
+    } else {
+      dialogRef.componentInstance.queues.push(...this.queues);
+    }
+
+
     dialogRef.afterClosed().subscribe(result => {
       if (!isNullOrUndefined(result) && !isNullOrUndefined(result.destination)) {
         let messageIds = this.selectedMessages.map((message) => message.id);
