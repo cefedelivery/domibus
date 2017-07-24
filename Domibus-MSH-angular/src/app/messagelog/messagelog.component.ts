@@ -54,6 +54,8 @@ export class MessageLogComponent {
   msgStatus: Array<String>;
   notifStatus: Array<String>;
 
+  advancedSearch: boolean;
+
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
@@ -188,11 +190,11 @@ export class MessageLogComponent {
   }
 
   onSelect({selected}) {
-    console.log('Select Event', selected, this.selected);
+    // console.log('Select Event', selected, this.selected);
   }
 
   onActivate(event) {
-    console.log('Activate Event', event);
+    // console.log('Activate Event', event);
   }
 
   changePageSize(newPageLimit: number) {
@@ -251,6 +253,10 @@ export class MessageLogComponent {
   download() {
     const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace("${messageId}", this.selected[0].messageId);
     this.downloadNative(url);
+  }
+
+  toggleAdvancedSearch() {
+    this.advancedSearch = !this.advancedSearch;
   }
 
   private downloadNative(content) {
