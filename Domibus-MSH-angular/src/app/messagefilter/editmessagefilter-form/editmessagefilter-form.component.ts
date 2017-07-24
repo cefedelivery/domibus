@@ -31,13 +31,6 @@ export class EditMessageFilterComponent {
       this.to = '';
       this.action = '';
       this.service = '';
-      this.messageFilterForm = fb.group({
-        'plugin': [null, Validators.required],
-        'from': [null, Validators.pattern],
-        'to': [null, Validators.pattern],
-        'action': [null, Validators.pattern],
-        'service': [null, Validators.pattern]
-      });
     } else {
       let backEntry: BackendFilterEntry = new BackendFilterEntry(this.data.edit.entityId,
         this.data.edit.index,
@@ -50,14 +43,14 @@ export class EditMessageFilterComponent {
       this.to = isNullOrUndefined(backEntry.to) ? '' : backEntry.to.expression;
       this.action = isNullOrUndefined(backEntry.action) ? '' : backEntry.action.expression;
       this.service = isNullOrUndefined(backEntry.service) ? '' : backEntry.service.expression;
-      this.messageFilterForm = fb.group({
-        'plugin': [null, Validators.required],
-        'from': [null, Validators.pattern],
-        'to': [null, Validators.pattern],
-        'action': [null, Validators.pattern],
-        'service': [null, Validators.pattern]
-      });
     }
+    this.messageFilterForm = fb.group({
+      'plugin': [null, Validators.required],
+      'from': [null, Validators.pattern],
+      'to': [null, Validators.pattern],
+      'action': [null, Validators.pattern],
+      'service': [null, Validators.pattern]
+    });
   }
 
   updatePlugin(event) {
