@@ -52,7 +52,7 @@
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
                     <testSuite>WS-Auto for Bamboo</testSuite>
-                    <testCase>Dom000-Clean Database</testCase>
+                    <!--<testCase>Dom000-Clean Database</testCase>-->
                     <!--<testCase>Dom118-Submit message-Data-AgreementRefId-Value</testCase>-->
                     <projectProperties>
                         <value>localUrl=http://localhost:8180</value>
