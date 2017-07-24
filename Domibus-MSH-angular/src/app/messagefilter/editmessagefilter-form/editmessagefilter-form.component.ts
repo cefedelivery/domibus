@@ -31,6 +31,13 @@ export class EditMessageFilterComponent {
       this.to = '';
       this.action = '';
       this.service = '';
+      this.messageFilterForm = fb.group({
+        'plugin': [null, Validators.required],
+        'from': [null, Validators.pattern],
+        'to': [null, Validators.pattern],
+        'action': [null, Validators.pattern],
+        'service': [null, Validators.pattern]
+      });
     } else {
       let backEntry: BackendFilterEntry = new BackendFilterEntry(this.data.edit.entityId,
         this.data.edit.index,

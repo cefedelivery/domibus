@@ -216,6 +216,7 @@ export class MessageFilterComponent {
     let formRef: MdDialogRef<EditMessageFilterComponent> = this.dialog.open(EditMessageFilterComponent, {data: {backendFilterNames: this.backendFilterNames, edit: this.selected[0]}});
     formRef.afterClosed().subscribe(result => {
       if(result == true) {
+        this.updateSelectedPlugin(formRef.componentInstance.plugin);
         this.updateSelectedFrom(formRef.componentInstance.from);
         this.updateSelectedTo(formRef.componentInstance.to);
         this.updateSelectedAction(formRef.componentInstance.action);
@@ -261,6 +262,10 @@ export class MessageFilterComponent {
       // create
       this.createRoutingCriteria('to', value);
     }
+  }
+
+  private updateSelectedPlugin(value: string) {
+    this.rows[this.rowNumber].backendName = value;
   }
 
   private updateSelectedFrom(value: string) {
@@ -367,7 +372,10 @@ export class MessageFilterComponent {
     this.enableMoveUp = false;
     this.enableMoveDown = false;
 
-    this.rows.splice(this.rowNumber, 1);
+    // we need to use the old for loop approach to don't mess with the entries on the top before
+    for (let i = this.selected.length - 1; i >= 0; i--) {
+      this.rows.splice(this.selected[i].index, 1);
+    }
 
     this.selected = [];
   }
@@ -431,9 +439,9 @@ export class MessageFilterComponent {
 
     this.selected.splice(0, this.selected.length);
     this.selected.push(...selected);
-    this.enableMoveDown = selected.length > 0 && this.rowNumber < this.rows.length - 1;
-    this.enableMoveUp = selected.length > 0 && this.rowNumber > 0;
-    this.enableDelete = selected.length == 1;
+    this.enableMoveDown = selected.length == 1 && this.rowNumber < this.rows.length - 1;
+    this.enableMoveUp = selected.length == 1 && this.rowNumber > 0;
+    this.enableDelete = selected.length > 0;
     this.enableEdit = selected.length == 1;
   }
 
@@ -449,9 +457,9 @@ export class MessageFilterComponent {
     return str == '' || (/^[a-zA-Z0-9_:-]+$/.test(str));
   }*/
 
-  singleSelectCheck(row: any) {
+  /*singleSelectCheck(row: any) {
     return this.selected.indexOf(row) === -1;
-  }
+  }*/
 
   /*hasError(type: string, str: string) {
     switch (type) {

@@ -1,58 +1,58 @@
-<div class="messageFilter" style="overflow-x:auto;">
+<div class="selectionCriteria" style="overflow-x:auto;">
   <md-card style="margin:0;padding:10px;">
     <md-card-content>
       <p class="domibusTextHeading" style="margin:0;font-weight: bold">Message Filter</p>
       <form name="messageFilterForm" #messageFilterForm="ngForm">
         <ngx-datatable
           #mydatatable
-          class="material"
-          [headerHeight]="50"
+          class="material striped"
           [columnMode]="'force'"
+          [headerHeight]="50"
           [footerHeight]="50"
           [rowHeight]="'auto'"
           [rows]="rows"
           [selected]="selected"
-          [selectionType]="'single'"
-          [selectCheck]="singleSelectCheck"
-          (select)='onSelect($event)'>
+          [selectionType]="'multi'"
+          (select)='onSelect($event)'
+          id="messageFilterTable">
           <ngx-datatable-column name="Plugin" prop="backendName" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable">
+              <span class="justified, clickable" (dblclick)="buttonEdit()">
                 {{value}}
               </span>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="From" prop="from.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable">
+              <span class="justified, clickable" (dblclick)="buttonEdit()">
                 {{value}}
               </span>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="To" prop="to.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable">
+              <span class="justified, clickable" (dblclick)="buttonEdit()">
                 {{value}}
               </span>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="Action" prop="action.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable">
+              <span class="justified, clickable" (dblclick)="buttonEdit()">
                 {{value}}
               </span>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="Service" prop="service.expression" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable">
+              <span class="justified, clickable" (dblclick)="buttonEdit()">
                 {{value}}
               </span>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="Persisted" prop="persisted" [sortable]="false">
             <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <input autofocus type="checkbox" [checked]="value" disabled />
+              <input autofocus type="checkbox" [checked]="value" disabled (dblclick)="buttonEdit()"/>
             </ng-template>
           </ngx-datatable-column>
         </ngx-datatable>
