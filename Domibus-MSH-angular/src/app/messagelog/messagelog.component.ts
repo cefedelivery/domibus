@@ -253,6 +253,10 @@ export class MessageLogComponent {
     this.downloadNative(url);
   }
 
+  singleSelectCheck(row: any) {
+    return this.selected.indexOf(row) === -1;
+  }
+
   private downloadNative(content) {
     var element = document.createElement('a');
     element.setAttribute('href', content);

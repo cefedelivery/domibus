@@ -1,6 +1,8 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.message.UserMessageException;
+import eu.domibus.api.messaging.MessagingException;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
@@ -129,11 +131,11 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, userMessageHandlerContext.getMessageId());
                 LOG.info("Ping message " + userMessageHandlerContext.isPingMessage());
-            } catch (TransformerException | SOAPException | JAXBException | IOException e) {
-                throw new RuntimeException(e);
+            } catch (TransformerException | SOAPException | IOException e) {
+                throw new UserMessageException(e);
             } catch (final EbMS3Exception e) {
                 try {
-                    if (!userMessageHandlerContext.isPingMessage() && userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer() && messaging != null) {
+                    if (!userMessageHandlerContext.isPingMessage() && userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer()) {
                         backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
                     }
                 } catch (Exception ex) {
@@ -214,7 +216,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         try {
             messaging = getMessaging(request);
         } catch (SOAPException | JAXBException e) {
-            throw new RuntimeException(e);
+            throw new MessagingException(DomibusCoreErrorCode.DOM_001, "Problems getting message", e);
         }
         return messaging;
     }

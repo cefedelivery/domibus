@@ -41,9 +41,14 @@
                              brokerURL="${activeMQ.transportConnector.uri}"
                              userName="${activeMQ.username}" password="${activeMQ.password}">
         <!-- do not remove this! otherwise the redeliveryPolicy configured in activemq.xml will be ignored -->
-        <amq:redeliveryPolicy>
-            <amq:redeliveryPolicy />
-        </amq:redeliveryPolicy>
+        <amq:redeliveryPolicyMap>
+            <amq:redeliveryPolicyMap><!-- Don't know why a double nesting -->
+                <amq:defaultEntry>
+                    <!-- default policy-->
+                    <amq:redeliveryPolicy maximumRedeliveries="0"/>
+                </amq:defaultEntry>
+            </amq:redeliveryPolicyMap>
+        </amq:redeliveryPolicyMap>
     </amq:xaConnectionFactory>
 
 

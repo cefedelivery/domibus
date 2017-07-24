@@ -50,9 +50,9 @@ export class MessageFilterComponent {
 
       let newRows = [];
       this.backendFilterNames = [];
-      if(!isNullOrUndefined(result.messageFilterEntries)) {
+      if (!isNullOrUndefined(result.messageFilterEntries)) {
         for (let i = 0; i < result.messageFilterEntries.length; i++) {
-          let currentFilter : BackendFilterEntry = result.messageFilterEntries[i];
+          let currentFilter: BackendFilterEntry = result.messageFilterEntries[i];
           if (isNullOrUndefined(currentFilter)) {
             continue;
           }
@@ -66,7 +66,7 @@ export class MessageFilterComponent {
 
         this.rows = newRows;
 
-        if(!this.areFiltersPersisted && this.backendFilterNames.length > 1) {
+        if (!this.areFiltersPersisted && this.backendFilterNames.length > 1) {
           this.alertService.error("Several filters in the table were not configured yet (Persisted flag is not checked). " +
             "It is strongly recommended to double check the filters configuration and afterwards save it.");
           this.enableSave = true;
@@ -92,7 +92,7 @@ export class MessageFilterComponent {
   }
 
   createValueProperty(cell, newProp, row) {
-    switch(cell) {
+    switch (cell) {
       case 'from':
         this.rows[row.$$index].from = newProp;
         break;
@@ -109,7 +109,7 @@ export class MessageFilterComponent {
   }
 
   updateValueProperty(cell, cellValue, row) {
-    switch(cell) {
+    switch (cell) {
       case 'from':
         this.rows[row.$$index].from.expression = cellValue;
         this.hasError('from', cellValue);
@@ -134,12 +134,12 @@ export class MessageFilterComponent {
 
     let edited = false;
 
-    if(cell == 'plugin' && event.target.value.trim() != '') {
+    if (cell == 'plugin' && event.target.value.trim() != '') {
       this.rows[row.$$index].backendName = event.target.value;
       edited = true;
     }
 
-    if(!edited) {
+    if (!edited) {
       if (this.rows[row.$$index].routingCriterias == null) {
         this.rows[row.$$index].routingCriterias = [];
       }
@@ -167,8 +167,8 @@ export class MessageFilterComponent {
       }
     }
 
-    if(!edited && event.target.value.trim() != '') {
-      if(!this.hasError(cell,event.target.value)) {
+    if (!edited && event.target.value.trim() != '') {
+      if (!this.hasError(cell, event.target.value)) {
         let newRC = new RoutingCriteriaEntry(null, cell, event.target.value);
         this.rows[row.$$index].routingCriterias.push(newRC);
         this.createValueProperty(cell, newRC, row);
@@ -187,19 +187,19 @@ export class MessageFilterComponent {
     this.enableCancel = true;
     this.enableSave = true;
     this.enableDelete = false;
-    this.rows.push( {"backendName" : ''});
+    this.rows.push({"backendName": ''});
   }
 
   cancelDialog() {
     let dialogRef = this.dialog.open(CancelMessagefilterDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
-      switch(result) {
+      switch (result) {
         case 'Yes' :
           this.enableCancel = false;
           this.enableSave = false;
           this.enableDelete = false;
 
-          this.enableMoveUp = this.rowNumber  > 0;
+          this.enableMoveUp = this.rowNumber > 0;
           this.enableMoveDown = this.rowNumber != this.rows.length - 1;
 
           this.getBackendFiltersInfo();
@@ -215,12 +215,12 @@ export class MessageFilterComponent {
     let headers = new Headers({'Content-Type': 'application/json'});
     let dialogRef = this.dialog.open(MessagefilterDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
-      switch(result) {
+      switch (result) {
         case 'Save' :
           this.enableCancel = false;
           this.enableSave = false;
           this.rollback = this.rows.slice();
-          this.http.put('rest/messagefilters', JSON.stringify(this.rows), { headers: headers }).subscribe(res => {
+          this.http.put('rest/messagefilters', JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
             this.alertService.success("The operation 'update message filters' completed successfully.", false);
             this.getBackendFiltersInfo();
           }, err => {
@@ -229,7 +229,7 @@ export class MessageFilterComponent {
 
           break;
         case 'Cancel':
-          // do nothing
+        // do nothing
       }
     });
   }
@@ -246,18 +246,18 @@ export class MessageFilterComponent {
   }
 
   buttonMoveUp() {
-    if(this.rowNumber < 1) {
+    if (this.rowNumber < 1) {
       return;
     }
     let array = this.rows.slice();
     let move = array[this.rowNumber];
-    array[this.rowNumber] = array[this.rowNumber-1];
-    array[this.rowNumber-1] = move;
+    array[this.rowNumber] = array[this.rowNumber - 1];
+    array[this.rowNumber - 1] = move;
 
     this.rows = array.slice();
     this.rowNumber--;
 
-    if(this.rowNumber == 0) {
+    if (this.rowNumber == 0) {
       this.enableMoveUp = false;
     }
     this.enableMoveDown = true;
@@ -266,19 +266,19 @@ export class MessageFilterComponent {
   }
 
   buttonMoveDown() {
-    if(this.rowNumber > this.rows.length - 1) {
+    if (this.rowNumber > this.rows.length - 1) {
       return;
     }
 
     let array = this.rows.slice();
     let move = array[this.rowNumber];
-    array[this.rowNumber] = array[this.rowNumber+1];
-    array[this.rowNumber+1] = move;
+    array[this.rowNumber] = array[this.rowNumber + 1];
+    array[this.rowNumber + 1] = move;
 
     this.rows = array.slice();
     this.rowNumber++;
 
-    if(this.rowNumber == this.rows.length - 1) {
+    if (this.rowNumber == this.rows.length - 1) {
       this.enableMoveDown = false;
     }
     this.enableMoveUp = true;
@@ -286,10 +286,10 @@ export class MessageFilterComponent {
     this.enableCancel = true;
   }
 
-  onSelect({ selected }) {
+  onSelect({selected}) {
     console.log('Select Event', selected, this.selected);
 
-    if(isUndefined(selected)) {
+    if (isNullOrUndefined(selected) || selected.length == 0) {
       return;
     }
 
@@ -307,30 +307,34 @@ export class MessageFilterComponent {
   }
 
   isValidFromToService(str: string) {
-    return str=='' || (/^[a-zA-Z0-9_:-]+:[a-zA-Z0-9_:-]+$/.test(str));
+    return str == '' || (/^[a-zA-Z0-9_:-]+:[a-zA-Z0-9_:-]+$/.test(str));
   }
 
   isValidAction(str: string) {
-    return str=='' || (/^[a-zA-Z0-9_:-]+$/.test(str));
+    return str == '' || (/^[a-zA-Z0-9_:-]+$/.test(str));
+  }
+
+  singleSelectCheck(row: any) {
+    return this.selected.indexOf(row) === -1;
   }
 
   hasError(type: string, str: string) {
-    switch(type) {
+    switch (type) {
       case 'from':
       case 'to':
-        if(!this.isValidFromToService(str)) {
+        if (!this.isValidFromToService(str)) {
           this.alertService.error(type.toUpperCase() + " rule is [PARTYID]:[TYPE] and '" + str + "' is not according to that.");
           return true;
         }
         return false;
       case 'action':
-        if(!this.isValidAction(str)) {
+        if (!this.isValidAction(str)) {
           this.alertService.error(type.toUpperCase() + " rule is [ACTION] and '" + str + "' is not according to that.");
           return true;
         }
         return false;
       case 'service':
-        if(!this.isValidFromToService(str)) {
+        if (!this.isValidFromToService(str)) {
           this.alertService.error(type.toUpperCase() + " rule is [SERVICE]:[TYPE] and '" + str + "' is not according to that.");
           return true;
         }

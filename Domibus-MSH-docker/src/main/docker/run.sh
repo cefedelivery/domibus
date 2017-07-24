@@ -39,6 +39,7 @@ sed -i -e "s/<blue_hostname>:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-
 sed -i -e "s/<red_hostname>:8080/domibusred:8080/g" ./domibus-gw-sample-pmode-red.xml
 $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:8180 $SOURCE_CODE/../Domibus-MSH-tomcat/domibus-gw-sample-pmode-blue.xml
 $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:9080 $SOURCE_CODE/../Domibus-MSH-tomcat/domibus-gw-sample-pmode-red.xml
+
 mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
 
 cd $SOURCE_CODE/../Domibus-MSH-soapui-tests
@@ -63,4 +64,4 @@ sudo wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
 
 sudo cp $MYSQL_CONNECTOR/$MYSQL_CONNECTOR-bin.jar ./src/main/soapui/lib
 ### Comment the line below to disable the soapUI tests for 3.3-rc1 ###
-#mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
+mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test
