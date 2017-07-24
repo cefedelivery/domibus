@@ -12,7 +12,6 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.common.util.MessageAttemptUtil;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;
@@ -54,8 +53,6 @@ public class PullRequestHandlerImplTest {
     @Injectable
     MessageAttemptService messageAttemptService;
 
-    @Injectable
-    MessageAttemptUtil messageAttemptUtil;
 
     @Injectable
     RetryService retryService;

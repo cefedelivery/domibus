@@ -12,7 +12,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.common.util.MessageAttemptUtil;
+import eu.domibus.common.util.MessageAttemptBuilder;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
@@ -59,8 +59,7 @@ public class PullRequestHandler {
     @Autowired
     private MessageAttemptService messageAttemptService;
 
-    @Autowired
-    private MessageAttemptUtil messageAttemptUtil;
+
 
     @Autowired
     private MessageExchangeService messageExchangeService;
@@ -156,13 +155,16 @@ public class PullRequestHandler {
             } else {
                 messageExchangeService.handleReliability(messageId, checkResult, null, leg);
                 try {
-                    final MessageAttempt attempt = messageAttemptUtil.saveMessageAttempt(messageId, attemptStatus, attemptError, startDate);
+                    final MessageAttempt attempt = MessageAttemptBuilder.create()
+                            .setMessageId(messageId)
+                            .setAttemptStatus(attemptStatus)
+                            .setAttemptError(attemptError)
+                            .setStartDate(startDate).build();
                     messageAttemptService.create(attempt);
                 } catch (Exception e) {
                     LOG.error("Could not create the message attempt", e);
                 }
             }
-
         }
         return soapMessage;
     }
