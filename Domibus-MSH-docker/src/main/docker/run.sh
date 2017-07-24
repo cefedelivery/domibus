@@ -53,6 +53,13 @@ sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-red.xml
 $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:8180 $SOURCE_CODE/../Domibus-MSH-soapui-tests/domibus-gw-sample-pmode-blue.xml
 $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:9080 $SOURCE_CODE/../Domibus-MSH-soapui-tests/domibus-gw-sample-pmode-red.xml
 
+# Display the loaded pModes
+echo PMODE BLUE
+head -60 $SOURCE_CODE/../Domibus-MSH-soapui-tests/domibus-gw-sample-pmode-blue.xml
+
+echo PMODE RED
+head -60 $SOURCE_CODE/../Domibus-MSH-soapui-tests/domibus-gw-sample-pmode-red.xml
+
 MYSQL_CONNECTOR="mysql-connector-java-5.1.40"
 
 echo $MYSQL_CONNECTOR
