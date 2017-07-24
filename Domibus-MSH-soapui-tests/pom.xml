@@ -60,7 +60,7 @@
                         <value>driverBlue=com.mysql.jdbc.Driver</value>
                         <value>driverRed=com.mysql.jdbc.Driver</value>
                         <value>jdbcUrlBlue=jdbc:mysql://127.0.0.1:3304/domibus</value>
-                        <value>jdbcUrlRed=jdbc:mysql://127.0.0.1:3305/domibus</value>
+                        <value>jdbcUrlRed=jdbc:mysql://127.0.0.1:3302/domibus</value>
                         <value>databaseBlue=mysql</value>
                         <value>databaseRed=mysql</value>
                         <value>blueDbUser=root</value>
