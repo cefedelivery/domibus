@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.receiver.handler;
 
 import eu.domibus.api.message.attempt.MessageAttempt;
+import eu.domibus.api.message.attempt.MessageAttemptBuilder;
 import eu.domibus.api.message.attempt.MessageAttemptService;
 import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.api.security.ChainCertificateInvalidException;
@@ -12,7 +13,6 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.common.util.MessageAttemptBuilder;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;

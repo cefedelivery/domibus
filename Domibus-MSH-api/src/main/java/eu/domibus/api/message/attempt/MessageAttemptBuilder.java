@@ -1,7 +1,4 @@
-package eu.domibus.common.util;
-
-import eu.domibus.api.message.attempt.MessageAttempt;
-import eu.domibus.api.message.attempt.MessageAttemptStatus;
+package eu.domibus.api.message.attempt;
 
 import java.sql.Timestamp;
 
