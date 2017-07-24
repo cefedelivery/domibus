@@ -20,13 +20,15 @@ class Domibus
     def sqlBlue=null;
     def sqlRed=null;
 	def sqlGreen=null;
+	def thirdGateway = "false";
 
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
-        this.log = log
-        this.messageExchange = messageExchange
-        this.context=context
+        this.log = log;
+        this.messageExchange = messageExchange;
+        this.context=context;
+		thirdGateway = context.expand( '${#Project#thirdGateway}' )
     }
 
     // Class destructor
@@ -59,8 +61,10 @@ class Domibus
 		
 		sqlBlue=connectTo(context.expand( '${#Project#databaseBlue}' ),context.expand('${#Project#driverBlue}'),context.expand('${#Project#jdbcUrlBlue}'),context.expand( '${#Project#blueDbUser}' ),context.expand( '${#Project#blueDbPassword}' ));
 		sqlRed=connectTo(context.expand( '${#Project#databaseRed}' ),context.expand('${#Project#driverRed}'),context.expand('${#Project#jdbcUrlRed}'),context.expand( '${#Project#redDbUser}' ),context.expand( '${#Project#redDbPassword}' ));
-		//sqlGreen=connectTo(context.expand( '${#Project#databaseGreen}' ),context.expand('${#Project#driverGreen}'),context.expand('${#Project#jdbcUrlGreen}'),context.expand( '${#Project#greenDbUser}' ),context.expand( '${#Project#greenDbPassword}' ));
-    }
+		if(thirdGateway.toLowerCase().trim()=="true"){
+			sqlGreen=connectTo(context.expand( '${#Project#databaseGreen}' ),context.expand('${#Project#driverGreen}'),context.expand('${#Project#jdbcUrlGreen}'),context.expand( '${#Project#greenDbUser}' ),context.expand( '${#Project#greenDbPassword}' ));
+		}
+	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Close the DB connection opened previously
     def closeConnection(){
@@ -256,7 +260,9 @@ class Domibus
     def executeListOfQueriesOnAllDB(String[] sqlQueriesList) {
         executeListOfSqlQueries(sqlQueriesList,"BLUE");
         executeListOfSqlQueries(sqlQueriesList,"RED");
-		//executeListOfSqlQueries(sqlQueriesList,"GREEN");
+		if(thirdGateway.toLowerCase().trim()=="true"){
+			executeListOfSqlQueries(sqlQueriesList,"GREEN");
+		}
     }
 
     def executeListOfQueriesOnBlue(String[] sqlQueriesList) {
@@ -445,8 +451,23 @@ class Domibus
     }
 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+    // Start several gateways
+    static def startSetMSHs(int dom1,int dom2,int dom3, context, log){
+ 
+		if(dom1>0){
+			startMSH("sender", context, log);
+		}
+		if(dom2>0){
+			startMSH("receiver", context, log);
+		}
+		if(dom3>0){
+			startMSH("receivergreen", context, log);
+		}		
+	} 
+
     // Start Gateway
     static def startMSH(String side, context, log){
+		def confirmation = 0;
         def outputCatcher = new StringBuffer()
         def errorCatcher = new StringBuffer()
         def pathS=context.expand( '${#Project#pathExeSender}' )
@@ -455,39 +476,44 @@ class Domibus
         def proc=null
 		def passedDuration=0
 
-
-		if(pingMSH(side,context,log).equals("200")){
-			log.info side.toUpperCase()+" is already running!"
-		}
-		else{
-			log.info "Trying to start the " + side.toUpperCase()
-			if(side.toLowerCase()=="sender"){
-				proc="cmd /c cd ${pathS} && startup.bat".execute()
+		while(confirmation<=1){ 		
+			if(pingMSH(side,context,log).equals("200")){
+				log.info side.toUpperCase()+" is already running!";
+				confirmation++;
 			}
 			else{
-				if(side.toLowerCase()=="receiver"){
-					proc="cmd /c cd ${pathR} && startup.bat".execute()
-				}
-				else{
-					if((side.toLowerCase()=="receivergreen")){
-						proc="cmd /c cd ${pathRG} && startup.bat".execute()
+				if(confirmation>0){
+					log.info "Trying to start the " + side.toUpperCase()
+					if(side.toLowerCase()=="sender"){
+						proc="cmd /c cd ${pathS} && startup.bat".execute()
 					}
 					else{
-						assert (false) , "Incorrect side"
+						if(side.toLowerCase()=="receiver"){
+							proc="cmd /c cd ${pathR} && startup.bat".execute()
+						}
+						else{
+							if((side.toLowerCase()=="receivergreen")){
+								proc="cmd /c cd ${pathRG} && startup.bat".execute()
+							}
+							else{
+								assert (false) , "Incorrect side"
+							}
+						}
+					}		
+					if(proc!=null){
+						proc.consumeProcessOutput(outputCatcher, errorCatcher)
+						proc.waitFor()
 					}
-				}
+					assert((!errorCatcher)&&(proc!=null)), locateTest(context)+"Error:startMSH: Error while trying to start the MSH."
+					while((!pingMSH(side,context,log).equals("200"))&&(passedDuration<100000)){
+						passedDuration=passedDuration+2000
+						sleep(2000)
+					}
+					assert(pingMSH(side,context,log).equals("200")),locateTest(context)+"Error:startMSH: Error while trying to start the MSH."
+					log.info "--- DONE - " + side.toUpperCase() + " started ---"
+				}			
 			}
-			if(proc!=null){
-				proc.consumeProcessOutput(outputCatcher, errorCatcher)
-				proc.waitFor()
-			}
-			assert((!errorCatcher)&&(proc!=null)), locateTest(context)+"Error:startMSH: Error while trying to start the MSH."
-			while((!pingMSH(side,context,log).equals("200"))&&(passedDuration<100000)){
-				passedDuration=passedDuration+2000
-				sleep(2000)
-			}
-			assert(pingMSH(side,context,log).equals("200")),locateTest(context)+"Error:startMSH: Error while trying to start the MSH."
-			log.info "--- DONE - " + side.toUpperCase() + " started ---"
+			confirmation++;
 		}
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII

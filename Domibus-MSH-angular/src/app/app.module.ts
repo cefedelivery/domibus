@@ -1,8 +1,11 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {FormsModule,ReactiveFormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpModule, Http, XHRBackend, RequestOptions} from '@angular/http';
-import {MaterialModule, MdSelectModule} from '@angular/material';
+import {
+  MdDialogModule, MdIconModule, MdInputModule, MdMenuModule, MdSelectModule,
+  MdSidenavModule
+} from '@angular/material';
 import {MdButtonModule} from '@angular/material';
 import 'hammerjs';
 
@@ -41,10 +44,11 @@ import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
 import {MessagefilterDialogComponent} from "./messagefilter/messagefilter-dialog/messagefilter-dialog.component";
 import {CancelMessagefilterDialogComponent} from "./messagefilter/cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
 import {MessageDialogComponent} from './jms/message-dialog/message-dialog.component';
-import { PasswordComponent } from './user/password/password-dialog.component';
+import {PasswordComponent} from './user/password/password-dialog.component';
 import {DatePipe} from './customDate/datePipe';
-import { DefaultPasswordDialogComponent } from './security/default-password-dialog/default-password-dialog.component';
+import {DefaultPasswordDialogComponent} from './security/default-password-dialog/default-password-dialog.component';
 import {EditMessageFilterComponent} from "./messagefilter/editmessagefilter-form/editmessagefilter-form.component";
+import {Md2Module} from "md2";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -100,8 +104,12 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     FormsModule,
     HttpModule,
     NgxDatatableModule,
-    MaterialModule,
     MdButtonModule,
+    MdDialogModule,
+    MdMenuModule,
+    MdInputModule,
+    MdIconModule,
+    MdSidenavModule,
     MdSelectModule,
     Md2Module.forRoot(),
     routing,
