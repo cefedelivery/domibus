@@ -235,14 +235,14 @@ export class MessageLogComponent {
   }
 
   isResendButtonEnabled() {
-    if (this.selected && this.selected[0] && !this.selected[0].deleted && this.selected[0].messageStatus === "SEND_FAILURE")
+    if (this.selected && this.selected.length == 1 && !this.selected[0].deleted && this.selected[0].messageStatus === "SEND_FAILURE")
       return true;
 
     return false;
   }
 
   isDownloadButtonEnabled(): boolean {
-    if (this.selected && this.selected[0] && !this.selected[0].deleted)
+    if (this.selected && this.selected.length == 1 && !this.selected[0].deleted)
       return true;
 
     return false;
@@ -251,10 +251,6 @@ export class MessageLogComponent {
   download() {
     const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace("${messageId}", this.selected[0].messageId);
     this.downloadNative(url);
-  }
-
-  singleSelectCheck(row: any) {
-    return this.selected.indexOf(row) === -1;
   }
 
   private downloadNative(content) {
