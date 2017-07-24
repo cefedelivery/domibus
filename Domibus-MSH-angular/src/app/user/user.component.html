@@ -9,8 +9,7 @@
   [scrollbarH]="true"
   [loadingIndicator]="false"
   [selected]="selected"
-  [selectionType]="'single'"
-  [selectCheck]="singleSelectCheck">
+  [selectionType]="'multi'">
   <ngx-datatable-column name="Username" prop="userName" [canAutoResize]="true">
     <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
     <span
@@ -24,7 +23,6 @@
         autofocus
         (blur)="updateValue($event, 'userName', row)"
         *ngIf="editing[row.$$index + '-userName']"
-        type="text"
         [value]="value"
       />
     </ng-template>
@@ -43,7 +41,6 @@
       <input
         (blur)="updateValue($event,'email',row)"
         *ngIf="editing[row.$$index + '-email']"
-        type="text"
         [value]="value"
         autofocus
         onshow="focus()"
