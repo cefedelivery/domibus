@@ -109,20 +109,21 @@
 
 <app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event.value)"
                  id="pagesize_id"></app-row-limiter>
-
-<i class="material-icons" *ngIf="columnSelection" (click)="toggleColumnSelection()">expand_less</i>
-<i class="material-icons" *ngIf="!columnSelection" (click)="toggleColumnSelection()">expand_more</i>
-<div *ngIf="columnSelection">
+<div style="margin-top: 10px">
+  <i class="material-icons" *ngIf="columnSelection" (click)="toggleColumnSelection()">expand_less</i>
+  <i class="material-icons" *ngIf="!columnSelection" (click)="toggleColumnSelection()">expand_more</i>
+</div>
+<div *ngIf="columnSelection" style="margin-bottom: 10px">
   <h4 style="margin-top: 5px;margin-bottom: 5px">Available Columns</h4>
-    <div *ngFor='let col of allColumns' style="display: inline-block;margin:5px;">
-      <input
-        type='checkbox'
-        [id]="col.name"
-        (click)='toggle(col)'
-        [checked]='isChecked(col)'
-      />
-      <label [attr.for]="col.name">{{col.name}}</label>
-    </div>
+  <div *ngFor='let col of allColumns' style="display: inline-block;margin:5px;">
+    <input
+      type='checkbox'
+      [id]="col.name"
+      (click)='toggle(col)'
+      [checked]='isChecked(col)'
+    />
+    <label [attr.for]="col.name">{{col.name}}</label>
+  </div>
 </div>
 
 <ngx-datatable
