@@ -1,0 +1,60 @@
+<div style="width: 700px">
+  <p class="domibusTextSmall" style="margin:0;font-weight: bold">User Edit</p>
+  <form [formGroup]="userForm">
+    <md-card style="margin:0;padding:10px;">
+      <div>
+        <md-input-container [style.width]="'100%'">
+          <input mdInput placeholder="Username" name="username" id="username_id" [value]="username" (blur)="updateUsername($event)" [formControl]="userForm.controls['username']">
+          <div *ngIf="userForm.controls['username'].hasError('required')" style="color:red; font-size: 70%">You should type an username</div>
+        </md-input-container>
+      </div>
+
+      <div>
+        <md-input-container [style.width]="'100%'">
+          <input mdInput placeholder="Email" name="email" id="email_id" [value]="email" [formControl]="userForm.controls['email']">
+        </md-input-container>
+      </div>
+
+      <div>
+        <md2-select mdInput placeholder="Roles" multiple="true" [style.width]="'100%'" [formControl]="userForm.controls['roles']" [ngModel]="roles">
+          <md2-option *ngFor="let item of existingRoles" [value]="item">{{item}}</md2-option>
+        </md2-select>
+      </div>
+
+      <div>
+        <md-input-container [style.width]="'100%'">
+          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [formControl]="userForm.controls['password']">
+        </md-input-container>
+      </div>
+
+      <div>
+        <md-input-container [style.width]="'100%'">
+          <input mdInput placeholder="Confirmation" name="confirmation" id="confirmation_id" type="password" [formControl]="userForm.controls['confirmation']">
+        </md-input-container>
+      </div>
+
+      <div>
+        Active<input type="checkbox" [checked]="active" [formControl]="userForm.controls['active']">
+      </div>
+
+      <table class="buttonsRow">
+        <tr>
+          <td>
+            <button md-raised-button color="primary" md-dialog-close>
+              <md-icon>cancel</md-icon>
+              <span>Cancel</span>
+            </button>
+          </td>
+          <td>
+            <!-- Can optionally provide a result for the closing dialog. -->
+            <button md-raised-button color="primary" [md-dialog-close]="true" (click)="submitForm()" type="submit" [disabled]="!userForm.valid">
+              <md-icon>check_circle</md-icon>
+              <span>OK</span>
+            </button>
+          </td>
+        </tr>
+      </table>
+
+    </md-card>
+  </form>
+</div>

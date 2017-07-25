@@ -1,107 +1,94 @@
-<ngx-datatable
-  id="userTable"
-  class="material striped"
-  [rows]="users"
-  [columnMode]="'force'"
-  [headerHeight]="50"
-  [footerHeight]="50"
-  [rowHeight]="'auto'"
-  [scrollbarH]="true"
-  [loadingIndicator]="false"
-  [selected]="selected"
-  [selectionType]="'multi'">
-  <ngx-datatable-column name="Username" prop="userName" [canAutoResize]="true">
-    <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-    <span
-      title="Double click to edit"
-      (dblclick)="userNameDblClick(row.$$index)"
-      *ngIf="!editing[row.$$index + '-userName']"
-      class="clickAble">
-      {{value}}
-    </span>
-      <input
-        autofocus
-        (blur)="updateValue($event, 'userName', row)"
-        *ngIf="editing[row.$$index + '-userName']"
-        [value]="value"
-      />
-    </ng-template>
+<div class="selectionCriteria" style="overflow-x:auto;">
+  <md-card style="margin:0;padding:10px;">
+    <md-card-content>
+      <p class="domibusTextHeading" style="margin:0;font-weight: bold">Users</p>
+      <ngx-datatable
+        id="userTable"
+        class="material striped"
+        [rows]="users"
+        [columnMode]="'force'"
+        [headerHeight]="50"
+        [footerHeight]="50"
+        [rowHeight]="'auto'"
+        [scrollbarH]="true"
+        [loadingIndicator]="false"
+        [selected]="selected"
+        [selectionType]="'multi'"
+        (select)='onSelect($event)'>
 
-  </ngx-datatable-column>
-  <ngx-datatable-column name="Email" prop="email" [canAutoResize]="true">
-    <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-    <span
-      title="Double click to edit"
-      (dblclick)="editing[row.$$index + '-email'] = true"
-      *ngIf="!editing[row.$$index + '-email']"
-      class="clickAble">
-      {{value}}
+        <ngx-datatable-column name="Username" prop="userName" [canAutoResize]="true">
+          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+            <span (dblclick)="buttonEdit()"
+                  class="clickAble"
+                  style="word-wrap: break-word">
+              {{value}}
+            </span>
+          </ng-template>
+        </ngx-datatable-column>
 
-    </span>
-      <input
-        (blur)="updateValue($event,'email',row)"
-        *ngIf="editing[row.$$index + '-email']"
-        [value]="value"
-        autofocus
-        onshow="focus()"
-      />
-    </ng-template>
-  </ngx-datatable-column>
-  <ngx-datatable-column name="Role" prop="roles" [canAutoResize]="true">
-    <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-    <span
-      title="Double click to edit"
-      (dblclick)="editing[row.$$index + '-roles'] = true"
-      *ngIf="!editing[row.$$index + '-roles']"
-      class="clickAble"
-      style="text-transform:uppercase">
-                {{value}}
-              </span>
-      <input
-        autofocus
-        (blur)="updateValue($event,'roles',row)"
-        *ngIf="editing[row.$$index + '-roles']"
-        type="text"
-        [value]="value"
-        style="text-transform:uppercase"
-      />
-    </ng-template>
-  </ngx-datatable-column>
-  <ngx-datatable-column name="Password" prop="password" [canAutoResize]="true">
-    <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-      <span title="Double click to edit" (dblclick)="openPasswordDialog(row.$$index)"
-            class="password-field" class="clickAble">******</span>
-    </ng-template>
-  </ngx-datatable-column>
+        <ngx-datatable-column name="Email" prop="email" [canAutoResize]="true">
+          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+            <span (dblclick)="buttonEdit()"
+                  class="clickAble"
+                  style="word-wrap: break-word">
+              {{value}}
+            </span>
+          </ng-template>
+        </ngx-datatable-column>
 
-  <ngx-datatable-column name="Active" [canAutoResize]="true">
-    <ng-template ngx-datatable-cell-template let-row="row">
-      <input type="checkbox" [checked]="row['active']" (change)="updateCheckBox($event,'active',row)">
-    </ng-template>
-  </ngx-datatable-column>
+        <ngx-datatable-column name="Role" prop="roles" [canAutoResize]="true">
+          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+            <span (dblclick)="buttonEdit()"
+                  class="clickAble"
+                  style="word-wrap: break-word">
+              {{value}}
+            </span>
+          </ng-template>
+        </ngx-datatable-column>
 
+        <ngx-datatable-column name="Password" prop="password" [canAutoResize]="true">
+          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+            <span (dblclick)="openPasswordDialog(row.$$index)"
+                  class="password-field" class="clickAble">
+              ******
+            </span>
+          </ng-template>
+        </ngx-datatable-column>
 
-</ngx-datatable>
+        <ngx-datatable-column name="Active" [canAutoResize]="true">
+          <ng-template ngx-datatable-cell-template let-row="row">
+            <input type="checkbox" [checked]="row['active']" disabled>
+          </ng-template>
+        </ngx-datatable-column>
 
-<div style="position: fixed;bottom:10px">
-  <button id="userCancelButton" md-raised-button (click)="cancel()" color="primary"
-          [disabled]="userCancelButtonDisabled">
-    <md-icon>cancel</md-icon>
-    <span>Cancel</span>
-  </button>
-  <button id="userSaveButton" md-raised-button (click)="save()" color="primary" [disabled]="userSaveButtonDisabled">
-    <md-icon>save</md-icon>
-    <span>Save</span>
-  </button>
-  <button id="userNewButton" md-raised-button (click)="newUser()" color="primary" [disabled]="userNewButtonDisabled">
-    <md-icon>move_to_inbox</md-icon>
-    <span>New</span>
-  </button>
-  <button id="userDeleteButton" md-raised-button color="primary" [disabled]="true">
-    <md-icon>delete</md-icon>
-    <span>Delete</span>
-  </button>
+      </ngx-datatable>
+
+      <table class="buttonsRow">
+        <tr>
+          <td>
+            <button id="userCancelButton" md-raised-button (click)="cancel()" color="primary" [disabled]="!enableCancel">
+              <md-icon>cancel</md-icon>
+              <span>Cancel</span>
+            </button>
+            <button id="userSaveButton" md-raised-button (click)="save()" color="primary" [disabled]="!enableSave">
+              <md-icon>save</md-icon>
+              <span>Save</span>
+            </button>
+            <button id="userNewButton" md-raised-button (click)="newUser()" color="primary">
+              <md-icon>add</md-icon>
+              <span>New</span>
+            </button>
+            <button id="userEditButton" md-raised-button (click)="buttonEdit()" color="primary" [disabled]="!enableEdit" >
+              <md-icon>edit</md-icon>
+              <span>Edit</span>
+            </button>
+            <button id="userDeleteButton" md-raised-button (click)="deleteUser()" color="primary" [disabled]="!enableDelete">
+              <md-icon>delete</md-icon>
+              <span>Delete</span>
+            </button>
+          </td>
+        </tr>
+      </table>
+    </md-card-content>
+  </md-card>
 </div>
-
-
-

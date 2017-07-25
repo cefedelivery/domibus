@@ -7,6 +7,8 @@ import {UserValidatorService} from "app/user/uservalidator.service";
 import {AlertService} from "../alert/alert.service";
 import {MessagefilterDialogComponent} from "app/messagefilter/messagefilter-dialog/messagefilter-dialog.component";
 import {CancelMessagefilterDialogComponent} from "../messagefilter/cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
+import {EditUserComponent} from "app/user/edituser-form/edituser-form.component";
+import {isNullOrUndefined} from "util";
 
 
 @Component({
@@ -22,11 +24,17 @@ export class UserComponent implements OnInit {
   pageSize: number = 10;
   editing = {};
   zone: NgZone;
-  userSaveButtonDisabled = false;
-  userNewButtonDisabled = false;
-  userCancelButtonDisabled = false;
-  editedUser: UserResponseRO;
+
   selected = [];
+
+  enableCancel = false;
+  enableSave = false;
+  enableDelete = false;
+  enableEdit = false;
+
+  rowNumber = -1;
+
+  editedUser: UserResponseRO;
   test: boolean = false;
 
   constructor(private userService: UserService, public dialog: MdDialog, private userValidatorService: UserValidatorService, private alertService: AlertService) {
@@ -39,6 +47,25 @@ export class UserComponent implements OnInit {
 
   getUsers(): void {
     this.userService.getUsers().subscribe(users => this.users = users);
+  }
+
+  onSelect({selected}) {
+    console.log('Select Event', selected, this.selected);
+
+    if (isNullOrUndefined(selected) || selected.length == 0) {
+      // unselect
+      this.enableDelete = false;
+      this.enableEdit = false;
+
+      return;
+    }
+
+    this.rowNumber = this.selected[0].$$index;
+
+    this.selected.splice(0, this.selected.length);
+    this.selected.push(...selected);
+    this.enableDelete = selected.length > 0;
+    this.enableEdit = selected.length == 1;
   }
 
   updateValue(event, cell, row) {
@@ -81,6 +108,28 @@ export class UserComponent implements OnInit {
     });
   }
 
+  buttonNew() {
+    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {});
+    formRef.afterClosed().subscribe(result => {
+      if(result == true) {
+
+        this.enableSave = true;
+        this.enableCancel = true;
+      }
+    });
+  }
+
+  buttonEdit() {
+    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {data: this.users[this.rowNumber]});
+    formRef.afterClosed().subscribe(result => {
+      if(result == true) {
+
+        this.enableSave = true;
+        this.enableCancel = true;
+      }
+    });
+  }
+
   openPasswordDialog(rowIndex) {
     let dialogRef: MdDialogRef<PasswordComponent> = this.dialog.open(PasswordComponent, {data: this.users[rowIndex]});
     dialogRef.afterClosed().subscribe(result => {
@@ -105,6 +154,10 @@ export class UserComponent implements OnInit {
         }
       });
     }
+  }
+
+  deleteUser() {
+
   }
 
   filterModifiedUser(): UserResponseRO[] {
