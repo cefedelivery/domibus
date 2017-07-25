@@ -70,6 +70,9 @@ public class CachingPModeProviderTest {
     @Injectable
     Configuration configuration;
 
+    @Injectable
+    ProcessPartyExtractorProvider processPartyExtractorProvider;
+
     @Tested
     CachingPModeProvider cachingPModeProvider;
 
