@@ -28,12 +28,12 @@ public class ProcessValidatorTest {
         assertEquals(2, pullProcessStatuses.size());
         assertTrue(pullProcessStatuses.contains(MORE_THAN_ONE_LEG_FOR_THE_SAME_MPC));
         assertTrue(pullProcessStatuses.contains(NO_RESPONDER));
-        process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1];[name:leg2]}", "responderParties{[name:resp1];[name:resp2]}");
+        process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1];[name:leg2]}", "initiatorParties{[name:resp1];[name:resp2]}");
         pullProcessStatuses = getProcessStatuses(process);
         assertEquals(2, pullProcessStatuses.size());
         assertTrue(pullProcessStatuses.contains(MORE_THAN_ONE_LEG_FOR_THE_SAME_MPC));
         assertTrue(pullProcessStatuses.contains(TOO_MANY_RESPONDER));
-        process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1];[name:leg2]}", "responderParties{[name:resp1]}");
+        process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1];[name:leg2]}", "initiatorParties{[name:resp1]}");
         pullProcessStatuses = getProcessStatuses(process);
         assertEquals(1, pullProcessStatuses.size());
         assertTrue(pullProcessStatuses.contains(MORE_THAN_ONE_LEG_FOR_THE_SAME_MPC));
@@ -49,7 +49,7 @@ public class ProcessValidatorTest {
 
     @Test
     public void checkProcessWithNoLegs() throws Exception {
-        Set<PullProcessStatus> processStatuses = getProcessStatuses(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "responderParties{[name:resp1]}"));
+        Set<PullProcessStatus> processStatuses = getProcessStatuses(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "initiatorParties{[name:resp1]}"));
         assertEquals(1, processStatuses.size());
         assertTrue(processStatuses.contains(NO_PROCESS_LEG));
     }
@@ -66,7 +66,7 @@ public class ProcessValidatorTest {
 
     @Test
     public void checkProcessValidityWithOneLeg() throws Exception {
-        Set<PullProcessStatus> processStatuses = getProcessStatuses(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1]}", "responderParties{[name:resp1]}"));
+        Set<PullProcessStatus> processStatuses = getProcessStatuses(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1]}", "initiatorParties{[name:resp1]}"));
         assertEquals(1, processStatuses.size());
         assertTrue(processStatuses.contains(ONE_MATCHING_PROCESS));
     }

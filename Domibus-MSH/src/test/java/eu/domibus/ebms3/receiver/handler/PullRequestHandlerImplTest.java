@@ -1,18 +1,26 @@
 package eu.domibus.ebms3.receiver.handler;
 
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.message.attempt.MessageAttempt;
+import eu.domibus.api.message.attempt.MessageAttemptService;
+import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
+import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.MessageTestUtility;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
+import eu.domibus.ebms3.sender.RetryService;
+import eu.domibus.pki.DomibusCertificateException;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.cxf.phase.PhaseInterceptorChain;
@@ -41,6 +49,12 @@ public class PullRequestHandlerImplTest {
 
     @Injectable
     ReliabilityMatcher pullRequestMatcher;
+
+    @Injectable
+    MessageAttemptService messageAttemptService;
+
+    @Injectable
+    RetryService retryService;
 
     @Tested
     PullRequestHandler pullRequestHandler;
@@ -75,14 +89,14 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             result = ebMS3Exception;
         }};
-        pullRequestHandler.handlePullRequest(messageId, pullContext);
+        pullRequestHandler.handleRequest(messageId, pullContext);
         new Verifications() {{
             eu.domibus.ebms3.common.model.Error error;
             messageBuilder.buildSOAPFaultMessage(error = withCapture());
             error.equals(ebMS3Exception.getFaultInfo());
             times = 1;
 
-            reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
             times = 1;
 
         }};
@@ -120,7 +134,7 @@ public class PullRequestHandlerImplTest {
             messagingDao.findUserMessageByMessageId(messageId);
             result = userMessage;
         }};
-        pullRequestHandler.handlePullRequest(messageId, pullContext);
+        pullRequestHandler.handleRequest(messageId, pullContext);
         new Verifications() {{
 
             PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
@@ -132,7 +146,7 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             times = 1;
 
-            reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK, null, legConfiguration);
+            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK, null, legConfiguration);
             times = 1;
 
         }};
@@ -146,12 +160,115 @@ public class PullRequestHandlerImplTest {
                                                     @Mocked final LegConfiguration legConfiguration,
                                                     @Mocked final PullContext pullContext) throws EbMS3Exception {
 
-        pullRequestHandler.handlePullRequest(null, pullContext);
+        pullRequestHandler.notifyNoMessage(pullContext);
         new Verifications() {{
 
             SignalMessage signal;
             messageBuilder.buildSOAPMessage(signal = withCapture(), withAny(legConfiguration));
             Assert.assertEquals(1, signal.getError().size());
+        }};
+    }
+
+    @Test
+    public void testHandlePullRequestWithInvalidSenderCertificate(
+            @Mocked final PhaseInterceptorChain pi,
+            @Mocked final Process process,
+            @Mocked final LegConfiguration legConfiguration,
+            @Mocked final PullContext pullContext) throws EbMS3Exception {
+
+        final String messageId = "whatEverId";
+
+        new Expectations() {{
+
+            messageExchangeService.verifySenderCertificate(legConfiguration, pullContext.getResponder().getName());
+            result = new DomibusCertificateException("test");
+
+
+        }};
+        pullRequestHandler.handleRequest(messageId, pullContext);
+        new Verifications() {{
+            EbMS3Exception e = null;
+            reliabilityChecker.handleEbms3Exception(e = withCapture(), messageId);
+            times = 1;
+            Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0101, e.getErrorCode());
+            Error faultInfo = null;
+            messageBuilder.buildSOAPFaultMessage(faultInfo = withCapture());
+            times = 1;
+            Assert.assertEquals("EBMS:0101", faultInfo.getErrorCode());
+            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            times = 1;
+            MessageAttempt attempt = null;
+            messageAttemptService.create(withAny(attempt));
+            times = 1;
+
+
+        }};
+    }
+
+    @Test
+    public void testHandlePullRequestConfigurationException(
+            @Mocked final PhaseInterceptorChain pi,
+            @Mocked final Process process,
+            @Mocked final LegConfiguration legConfiguration,
+            @Mocked final PullContext pullContext) throws EbMS3Exception {
+
+        final String messageId = "whatEverId";
+
+        new Expectations() {{
+
+            messageExchangeService.verifySenderCertificate(legConfiguration, pullContext.getResponder().getName());
+            result = new ConfigurationException();
+
+
+        }};
+        pullRequestHandler.handleRequest(messageId, pullContext);
+        new Verifications() {{
+            EbMS3Exception e = null;
+            reliabilityChecker.handleEbms3Exception(e = withCapture(), messageId);
+            times = 1;
+            Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0010, e.getErrorCode());
+            Error faultInfo = null;
+            messageBuilder.buildSOAPFaultMessage(faultInfo = withCapture());
+            times = 1;
+            Assert.assertEquals("EBMS:0010", faultInfo.getErrorCode());
+            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            times = 1;
+            MessageAttempt attempt = null;
+            messageAttemptService.create(withAny(attempt));
+            times = 1;
+
+
+        }};
+    }
+
+    @Test
+    public void testHandlePullRequestWithInvalidReceiverCertificate(
+            @Mocked final PhaseInterceptorChain pi,
+            @Mocked final Process process,
+            @Mocked final LegConfiguration legConfiguration,
+            @Mocked final PullContext pullContext) throws EbMS3Exception {
+
+        final String messageId = "whatEverID";
+        new Expectations() {{
+
+            messageExchangeService.verifyReceiverCerficate(legConfiguration, pullContext.getInitiator().getName());
+            result = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "invalid certificate");
+
+
+        }};
+        pullRequestHandler.handleRequest(messageId, pullContext);
+        new Verifications() {{
+            retryService.purgeTimedoutMessage(messageId);
+            times = 1;
+            messageBuilder.buildSOAPFaultMessage(withAny(new Error()));
+            times = 0;
+            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            times = 0;
+            MessageAttempt attempt = null;
+            messageAttemptService.create(withAny(attempt));
+            times = 0;
+
+
         }};
     }
 

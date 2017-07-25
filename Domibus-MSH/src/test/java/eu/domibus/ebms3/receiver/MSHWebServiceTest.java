@@ -265,7 +265,7 @@ public class MSHWebServiceTest {
             result = pullContext;
 
 
-            messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getResponder());
+            messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
             result = messageId;
 
         }};
@@ -274,7 +274,7 @@ public class MSHWebServiceTest {
             messageExchangeService.extractProcessOnMpc(mpcQualifiedName);
             times = 1;
 
-            messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getResponder());
+            messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
             times = 1;
 
             pullRequestHandler.handlePullRequestInNewTransaction(messageId, pullContext);

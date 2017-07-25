@@ -49,10 +49,10 @@ public class ProcessDaoImplTestIT extends AbstractIT{
     @Test
     @Transactional
     @Rollback
-    public void findPullByResponder() throws Exception {
+    public void findPullByInitiator() throws Exception {
         loadBluePullPmodeFile();
         Party party = pModeDao.getReceiverParty(":red_gw");
-        List<Process> pullProcessesByIniator = processDao.findPullProcessesByResponder(party);
+        List<Process> pullProcessesByIniator = processDao.findPullProcessesInitiator(party);
         assertEquals(1,pullProcessesByIniator.size());
 
         Process process = pullProcessesByIniator.get(0);

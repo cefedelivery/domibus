@@ -1,10 +1,13 @@
 package eu.domibus.common.services;
 
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
+import eu.domibus.ebms3.sender.ReliabilityChecker;
+import eu.domibus.ebms3.sender.ResponseHandler;
 
 /**
  * @author Thomas Dussart
@@ -31,10 +34,10 @@ public interface MessageExchangeService {
      * Check if a message exist for the association mpc/responder. If it does it returns the first one that arrived.
      *
      * @param mpc       the mpc contained in the pull request.
-     * @param responder the party for who this message is related.
+     * @param initiator the party for who this message is related.
      * @return a UserMessage id  if found.
      */
-    String retrieveReadyToPullUserMessageId(String mpc, Party responder);
+    String retrieveReadyToPullUserMessageId(String mpc, Party initiator);
 
     /**
      * When a pull request comes in, there is very litle information.  From this information we retrieve
@@ -62,4 +65,11 @@ public interface MessageExchangeService {
 
     //@thom test this method.
     void removeRawMessageIssuedByPullRequest(String messageId);
+
+
+    void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
+
+    void verifyReceiverCerficate(final LegConfiguration legConfiguration, String receiverName);
+
+    void verifySenderCertificate(LegConfiguration legConfiguration, String receiverName);
 }
