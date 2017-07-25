@@ -47,6 +47,7 @@ import {PasswordComponent} from './user/password/password-dialog.component';
 import {DatePipe} from './customDate/datePipe';
 import {DefaultPasswordDialogComponent} from './security/default-password-dialog/default-password-dialog.component';
 import {Md2Module} from "md2";
+import {MessagelogDetailsComponent} from './messagelog/messagelog-details/messagelog-details.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -79,7 +80,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessagefilterDialogComponent,
     PasswordComponent,
     DatePipe,
-    DefaultPasswordDialogComponent
+    DefaultPasswordDialogComponent,
+    MessagelogDetailsComponent
   ],
   entryComponents: [
     AppComponent,
@@ -89,6 +91,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessagelogDialogComponent,
     MoveDialogComponent,
     MessageDialogComponent,
+    MessagelogDetailsComponent,
     CancelMessagefilterDialogComponent,
     MoveDialogComponent,
     PasswordComponent,

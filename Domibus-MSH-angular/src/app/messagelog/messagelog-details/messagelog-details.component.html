@@ -1,0 +1,92 @@
+<h2 md-dialog-title>Message details</h2>
+<md-dialog-content style="height:450px;width:650px">
+  <md-card>
+    <md-card-content>
+      <!--<md-card-title-group>-->
+      <!--<md-card-title>Header</md-card-title>-->
+      <!--</md-card-title-group>-->
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Message Id" value="{{message.messageId}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="From Party Id" value="{{message.fromPartyId}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="To Party Id" value="{{message.toPartyId}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Message Status" value="{{message.messageStatus}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Notification Status" value="{{message.notificationStatus}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Received" value="{{message.received}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="AP Role" value="{{message.mshRole}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Send Attempts" value="{{message.sendAttempts}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Send Attempts Max" value="{{message.sendAttemptsMax}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Next Attempt" value="{{message.nextAttempt | domibusDate: dateFormat}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Conversation Id" value="{{message.conversationId}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Message Type" value="{{message.messageType}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Deleted" value="{{message.deleted | domibusDate: dateFormat }}" readonly/>
+      </md-input-container>
+
+      <!--<md-input-container style="width:100%">-->
+        <!--<input mdInput placeholder="Failed" value="{{message.nextAttempt}}" readonly/>-->
+      <!--</md-input-container>-->
+      <!---->
+      <!--<md-input-container style="width:100%">-->
+      <!--<input mdInput placeholder="Restored" value="{{message.nextAttempt}}" readonly/>-->
+      <!--</md-input-container>      -->
+
+      <md-input-container style="width:100%">
+      <input mdInput placeholder="Original Sender" value="{{message.originalSender}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+      <input mdInput placeholder="Final Recipient" value="{{message.finalRecipient}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+      <input mdInput placeholder="Ref To Message Id" value="{{message.refToMessageId}}" readonly/>
+      </md-input-container>
+
+    </md-card-content>
+  </md-card>
+
+</md-dialog-content>
+
+<md-dialog-actions>
+  <button id="messageLogDetailsOKButton" md-raised-button color="primary" (click)="dialogRef.close({})"
+          style="margin-top:10px">
+    <md-icon>check circle</md-icon>
+    <span>Ok</span>
+  </button>
+</md-dialog-actions>
+

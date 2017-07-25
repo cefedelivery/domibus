@@ -133,8 +133,9 @@
   [selectionType]="'multi'"
   (activate)="onActivate($event)"
   (select)="onSelect($event)">
+
   <!-- Message Id -->
-  <ngx-datatable-column name="Message Id" [width]="500">
+  <ngx-datatable-column name="Message Id" [width]="275">
     <ng-template let-column="column">
       {{column.name}}
     </ng-template>
@@ -142,17 +143,9 @@
       <span class="text-select">{{value}}</span>
     </ng-template>
   </ngx-datatable-column>
-  <!-- Conversation Id -->
-  <ngx-datatable-column name="Conversation Id" [width]="400" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
+
   <!-- From Party Id -->
-  <ngx-datatable-column name="From Party Id" [canAutoResize]="true">
+  <ngx-datatable-column name="From Party Id">
     <ng-template let-column="column">
       {{column.name}}
     </ng-template>
@@ -160,8 +153,9 @@
       <span class="text-select">{{value}}</span>
     </ng-template>
   </ngx-datatable-column>
+
   <!-- To Party Id -->
-  <ngx-datatable-column name="To Party Id" [canAutoResize]="true">
+  <ngx-datatable-column name="To Party Id">
     <ng-template let-column="column">
       {{column.name}}
     </ng-template>
@@ -169,8 +163,9 @@
       <span class="text-select">{{value}}</span>
     </ng-template>
   </ngx-datatable-column>
+
   <!-- Status -->
-  <ngx-datatable-column name="Message Status" [canAutoResize]="true">
+  <ngx-datatable-column name="Message Status" [width]="175">
     <ng-template let-column="column">
       {{column.name}}
     </ng-template>
@@ -178,8 +173,9 @@
       <span class="text-select">{{value}}</span>
     </ng-template>
   </ngx-datatable-column>
+
   <!-- Notification Status -->
-  <ngx-datatable-column name="Notification Status" [canAutoResize]="true">
+  <ngx-datatable-column name="Notification Status" [width]="175">
     <ng-template let-column="column">
       {{column.name}}
     </ng-template>
@@ -187,8 +183,19 @@
       <span class="text-select">{{value}}</span>
     </ng-template>
   </ngx-datatable-column>
+
+  <!-- Received -->
+  <ngx-datatable-column name="Received">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+
   <!-- MSH Role -->
-  <ngx-datatable-column name="AP Role" prop="mshRole" [canAutoResize]="true">
+  <ngx-datatable-column name="AP Role" prop="mshRole">
     <ng-template let-column="column">
       {{column.prop}}
     </ng-template>
@@ -196,53 +203,9 @@
       <span class="text-select">{{value}}</span>
     </ng-template>
   </ngx-datatable-column>
-  <!-- Message Type -->
-  <ngx-datatable-column name="Message Type" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Deleted -->
-  <ngx-datatable-column name="Deleted" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Received -->
-  <ngx-datatable-column name="Received" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Failed -->
-  <ngx-datatable-column name="Failed" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Restored -->
-  <ngx-datatable-column name="Restored" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
+
   <!-- Failed Send Attempts -->
-  <ngx-datatable-column name="Send Attempts" [canAutoResize]="true">
+  <ngx-datatable-column name="Send Attempts">
     <ng-template let-column="column">
       {{column.name}}
     </ng-template>
@@ -250,8 +213,9 @@
       <span class="text-select">{{value}}</span>
     </ng-template>
   </ngx-datatable-column>
+
   <!-- Send Attempts Max -->
-  <ngx-datatable-column name="Send Attempts Max" [canAutoResize]="true">
+  <ngx-datatable-column name="Send Attempts Max">
     <ng-template let-column="column">
       {{column.name}}
     </ng-template>
@@ -259,8 +223,9 @@
       <span class="text-select">{{value}}</span>
     </ng-template>
   </ngx-datatable-column>
+
   <!-- Next Attempt -->
-  <ngx-datatable-column name="Next Attempt" [canAutoResize]="true">
+  <ngx-datatable-column name="Next Attempt">
     <ng-template let-column="column">
       {{column.name}}
     </ng-template>
@@ -268,8 +233,59 @@
       <span class="text-select">{{value | domibusDate: dateFormat}}</span>
     </ng-template>
   </ngx-datatable-column>
+
+  <!-- Conversation Id -->
+  <ngx-datatable-column name="Conversation Id" [width]="275">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+
+  <!-- Message Type -->
+  <ngx-datatable-column name="Message Type">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+
+  <!-- Deleted -->
+  <ngx-datatable-column name="Deleted">
+    <ng-template let-column="column">
+      {{column.name}}
+    </ng-template>
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+    </ng-template>
+  </ngx-datatable-column>
+
+  <!--&lt;!&ndash; Failed &ndash;&gt;-->
+  <!--<ngx-datatable-column name="Failed">-->
+    <!--<ng-template let-column="column">-->
+      <!--{{column.name}}-->
+    <!--</ng-template>-->
+    <!--<ng-template let-value="value" ngx-datatable-cell-template>-->
+      <!--<span class="text-select">{{value | domibusDate: dateFormat}}</span>-->
+    <!--</ng-template>-->
+  <!--</ngx-datatable-column>-->
+
+  <!--&lt;!&ndash; Restored &ndash;&gt;-->
+  <!--<ngx-datatable-column name="Restored">-->
+    <!--<ng-template let-column="column">-->
+      <!--{{column.name}}-->
+    <!--</ng-template>-->
+    <!--<ng-template let-value="value" ngx-datatable-cell-template>-->
+      <!--<span class="text-select">{{value | domibusDate: dateFormat}}</span>-->
+    <!--</ng-template>-->
+  <!--</ngx-datatable-column>-->
+
   <!-- Original Sender -->
-  <ngx-datatable-column name="Original Sender" [width]="400" [canAutoResize]="true">
+  <ngx-datatable-column name="Original Sender" [width]="400">
     <ng-template let-column="column">
       {{column.name}}
     </ng-template>
@@ -277,8 +293,9 @@
       <span class="text-select">{{value}}</span>
     </ng-template>
   </ngx-datatable-column>
+
   <!-- Final Recipient -->
-  <ngx-datatable-column name="Final Recipient" [width]="400" [canAutoResize]="true">
+  <ngx-datatable-column name="Final Recipient" [width]="400">
     <ng-template let-column="column">
       {{column.name}}
     </ng-template>
@@ -286,8 +303,9 @@
       <span class="text-select">{{value}}</span>
     </ng-template>
   </ngx-datatable-column>
+
   <!-- Ref To Message Id -->
-  <ngx-datatable-column name="Ref To Message Id" [canAutoResize]="true">
+  <ngx-datatable-column name="Ref To Message Id">
     <ng-template let-column="column">
       {{column.name}}
     </ng-template>
@@ -295,6 +313,7 @@
       <span class="text-select">{{value}}</span>
     </ng-template>
   </ngx-datatable-column>
+
 </ngx-datatable>
 
 <div style="margin:5px">

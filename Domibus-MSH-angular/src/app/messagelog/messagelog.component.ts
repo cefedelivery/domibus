@@ -4,7 +4,8 @@ import {MessageLogResult} from "./messagelogresult";
 import {Observable} from "rxjs";
 import {AlertService} from "../alert/alert.service";
 import {MessagelogDialogComponent} from "app/messagelog/messagelog-dialog/messagelog-dialog.component";
-import {MdDialog} from "@angular/material";
+import {MdDialog, MdDialogRef} from "@angular/material";
+import {MessagelogDetailsComponent} from "app/messagelog/messagelog-details/messagelog-details.component";
 
 @Component({
   moduleId: module.id,
@@ -37,7 +38,7 @@ export class MessageLogComponent {
   count: number = 0;
   offset: number = 0;
   //default value
-  orderBy: string = "messageId";
+  orderBy: string = "received";
   //default value
   asc: boolean = false;
 
@@ -195,6 +196,10 @@ export class MessageLogComponent {
 
   onActivate(event) {
     // console.log('Activate Event', event);
+
+    if ("dblclick" === event.type) {
+      this.details(event.row);
+    }
   }
 
   changePageSize(newPageLimit: number) {
@@ -253,6 +258,15 @@ export class MessageLogComponent {
   download() {
     const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace("${messageId}", this.selected[0].messageId);
     this.downloadNative(url);
+  }
+
+  details(selectedRow: any) {
+    let dialogRef: MdDialogRef<MessagelogDetailsComponent> = this.dialog.open(MessagelogDetailsComponent);
+    dialogRef.componentInstance.message = selectedRow;
+    // dialogRef.componentInstance.currentSearchSelectedSource = this.currentSearchSelectedSource;
+    dialogRef.afterClosed().subscribe(result => {
+      //Todo:
+    });
   }
 
   toggleAdvancedSearch() {

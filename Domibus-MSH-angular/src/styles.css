@@ -18,6 +18,7 @@ html, body {
   -ms-user-select: text;
   -o-user-select: text;
   user-select: text;
+  word-wrap:break-word;
 }
 
 
