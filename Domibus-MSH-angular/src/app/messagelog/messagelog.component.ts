@@ -1,4 +1,4 @@
-import {Component} from "@angular/core";
+import {Component, TemplateRef, ViewChild} from "@angular/core";
 import {Http, URLSearchParams, Response} from "@angular/http";
 import {MessageLogResult} from "./messagelogresult";
 import {Observable} from "rxjs";
@@ -20,6 +20,10 @@ export class MessageLogComponent {
   static readonly DOWNLOAD_MESSAGE_URL: string = 'rest/message/${messageId}/download';
   static readonly MESSAGE_LOG_URL: string = 'rest/messagelog';
 
+  @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('rowTpl') rowTpl: TemplateRef<any>;
+  @ViewChild('hdrTpl') hdrTpl: TemplateRef<any>;
+
   selected = [];
 
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
@@ -34,6 +38,8 @@ export class MessageLogComponent {
 
   filter: any = {};
   loading: boolean = false;
+  allColumns = [];
+  selectedColumns = [];
   rows = [];
   count: number = 0;
   offset: number = 0;
@@ -56,11 +62,101 @@ export class MessageLogComponent {
   notifStatus: Array<String>;
 
   advancedSearch: boolean;
+  columnSelection: boolean;
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   ngOnInit() {
+    this.allColumns = [
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Message Id',
+        width: 275
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'From Party Id'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'To Party Id'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Message Status',
+        width: 175
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Notification Status',
+        width: 175
+      },
+      {
+        cellTemplate: this.rowWithDateFormatTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Received'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'AP Role',
+        prop: 'mshRole'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Send Attempts'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Send Attempts Max'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Next Attempt'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Conversation Id'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Message Type'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Deleted'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Original Sender'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Final Recipient'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Ref To Message Id'
+      },
+
+    ];
+
+    this.selectedColumns = [...this.allColumns]
     this.page(this.offset, this.pageSize, this.orderBy, this.asc);
   }
 
@@ -271,6 +367,28 @@ export class MessageLogComponent {
 
   toggleAdvancedSearch() {
     this.advancedSearch = !this.advancedSearch;
+  }
+
+  toggleColumnSelection() {
+    this.columnSelection = !this.columnSelection;
+  }
+
+  toggle(col) {
+    const isChecked = this.isChecked(col);
+
+    if(isChecked) {
+      this.selectedColumns = this.selectedColumns.filter(c => {
+        return c.name !== col.name;
+      });
+    } else {
+      this.selectedColumns = [...this.selectedColumns, col];
+    }
+  }
+
+  isChecked(col) {
+    return this.selectedColumns.find(c => {
+      return c.name === col.name;
+    });
   }
 
   private downloadNative(content) {

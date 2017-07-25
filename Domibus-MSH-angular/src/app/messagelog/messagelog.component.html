@@ -1,7 +1,6 @@
 <div class="selectionCriteria" style="overflow-x:auto;">
   <md-card style="margin:0;padding:10px;">
 
-
     <md-card-content>
       <p class="domibusTextHeading" style="margin:0;font-weight: bold">Messages</p>
       <i class="material-icons" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()">expand_less</i>
@@ -111,10 +110,26 @@
 <app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event.value)"
                  id="pagesize_id"></app-row-limiter>
 
+<i class="material-icons" *ngIf="columnSelection" (click)="toggleColumnSelection()">expand_less</i>
+<i class="material-icons" *ngIf="!columnSelection" (click)="toggleColumnSelection()">expand_more</i>
+<div *ngIf="columnSelection">
+  <h4 style="margin-top: 5px;margin-bottom: 5px">Available Columns</h4>
+    <div *ngFor='let col of allColumns' style="display: inline-block;margin:5px;">
+      <input
+        type='checkbox'
+        [id]="col.name"
+        (click)='toggle(col)'
+        [checked]='isChecked(col)'
+      />
+      <label [attr.for]="col.name">{{col.name}}</label>
+    </div>
+</div>
+
 <ngx-datatable
   id="messageLogTable"
   class="material striped"
   [rows]="rows"
+  [columns]="selectedColumns"
   [columnMode]="'auto'"
   [headerHeight]="50"
   [footerHeight]="50"
@@ -133,188 +148,19 @@
   [selectionType]="'multi'"
   (activate)="onActivate($event)"
   (select)="onSelect($event)">
-
-  <!-- Message Id -->
-  <ngx-datatable-column name="Message Id" [width]="275">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- From Party Id -->
-  <ngx-datatable-column name="From Party Id">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- To Party Id -->
-  <ngx-datatable-column name="To Party Id">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- Status -->
-  <ngx-datatable-column name="Message Status" [width]="175">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- Notification Status -->
-  <ngx-datatable-column name="Notification Status" [width]="175">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- Received -->
-  <ngx-datatable-column name="Received">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- MSH Role -->
-  <ngx-datatable-column name="AP Role" prop="mshRole">
-    <ng-template let-column="column">
-      {{column.prop}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- Failed Send Attempts -->
-  <ngx-datatable-column name="Send Attempts">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- Send Attempts Max -->
-  <ngx-datatable-column name="Send Attempts Max">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- Next Attempt -->
-  <ngx-datatable-column name="Next Attempt">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- Conversation Id -->
-  <ngx-datatable-column name="Conversation Id" [width]="275">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- Message Type -->
-  <ngx-datatable-column name="Message Type">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- Deleted -->
-  <ngx-datatable-column name="Deleted">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!--&lt;!&ndash; Failed &ndash;&gt;-->
-  <!--<ngx-datatable-column name="Failed">-->
-    <!--<ng-template let-column="column">-->
-      <!--{{column.name}}-->
-    <!--</ng-template>-->
-    <!--<ng-template let-value="value" ngx-datatable-cell-template>-->
-      <!--<span class="text-select">{{value | domibusDate: dateFormat}}</span>-->
-    <!--</ng-template>-->
-  <!--</ngx-datatable-column>-->
-
-  <!--&lt;!&ndash; Restored &ndash;&gt;-->
-  <!--<ngx-datatable-column name="Restored">-->
-    <!--<ng-template let-column="column">-->
-      <!--{{column.name}}-->
-    <!--</ng-template>-->
-    <!--<ng-template let-value="value" ngx-datatable-cell-template>-->
-      <!--<span class="text-select">{{value | domibusDate: dateFormat}}</span>-->
-    <!--</ng-template>-->
-  <!--</ngx-datatable-column>-->
-
-  <!-- Original Sender -->
-  <ngx-datatable-column name="Original Sender" [width]="400">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- Final Recipient -->
-  <ngx-datatable-column name="Final Recipient" [width]="400">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
-  <!-- Ref To Message Id -->
-  <ngx-datatable-column name="Ref To Message Id">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-
 </ngx-datatable>
+
+<ng-template #hdrTpl let-column="column" ngx-datatable-header-template>
+  <strong>{{column.name}}</strong>
+</ng-template>
+
+<ng-template #rowTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+  <span class="text-select">{{value}}</span>
+</ng-template>
+
+<ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+  <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+</ng-template>
 
 <div style="margin:5px">
   <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()"
