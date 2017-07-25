@@ -1,7 +1,7 @@
 
 [![License badge](https://img.shields.io/badge/license-EUPL-blue.svg)](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus?preview=/46992642/47186330/eupl1.1.-licence-en.pdf)
 [![Documentation badge](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus)
-[![Docker](https://img.shields.io/badge/docker-tomcat-green.svg)](https://hub.docker.com/r/fiware/domibus-tomcat/)
+[![Docker](https://img.shields.io/badge/docker-25-yellowgreen.svg)](https://hub.docker.com/r/fiware/domibus-tomcat/)
 [![Support badge]( https://img.shields.io/badge/support-sof-yellowgreen.svg)](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Support)
 
 # <a name="top"></a>Domibus 
