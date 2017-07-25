@@ -376,7 +376,7 @@ export class MessageLogComponent {
   toggle(col) {
     const isChecked = this.isChecked(col);
 
-    if(isChecked) {
+    if (isChecked) {
       this.selectedColumns = this.selectedColumns.filter(c => {
         return c.name !== col.name;
       });
@@ -389,6 +389,14 @@ export class MessageLogComponent {
     return this.selectedColumns.find(c => {
       return c.name === col.name;
     });
+  }
+
+  selectAllColumns() {
+    this.selectedColumns = [...this.allColumns]
+  }
+
+  selectNoColumns() {
+    this.selectedColumns = []
   }
 
   private downloadNative(content) {

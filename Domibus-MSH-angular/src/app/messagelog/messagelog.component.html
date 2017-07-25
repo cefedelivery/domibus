@@ -124,6 +124,12 @@
     />
     <label [attr.for]="col.name">{{col.name}}</label>
   </div>
+  <button md-raised-button color="primary" (click)="selectAllColumns()"
+          id="all_button_id">All
+  </button>
+  <button md-raised-button color="primary" (click)="selectNoColumns()"
+          id="none_button_id">None
+  </button>
 </div>
 
 <ngx-datatable
