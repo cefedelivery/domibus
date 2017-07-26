@@ -26,7 +26,7 @@
       </md-input-container>
 
       <md-input-container style="width:100%">
-        <input mdInput placeholder="Received" value="{{message.received}}" readonly/>
+        <input mdInput placeholder="Received" value="{{message.received | domibusDate: dateFormat}}" readonly/>
       </md-input-container>
 
       <md-input-container style="width:100%">
@@ -57,24 +57,24 @@
         <input mdInput placeholder="Deleted" value="{{message.deleted | domibusDate: dateFormat }}" readonly/>
       </md-input-container>
 
-      <!--<md-input-container style="width:100%">-->
-        <!--<input mdInput placeholder="Failed" value="{{message.nextAttempt}}" readonly/>-->
-      <!--</md-input-container>-->
-      <!---->
-      <!--<md-input-container style="width:100%">-->
-      <!--<input mdInput placeholder="Restored" value="{{message.nextAttempt}}" readonly/>-->
-      <!--</md-input-container>      -->
-
       <md-input-container style="width:100%">
-      <input mdInput placeholder="Original Sender" value="{{message.originalSender}}" readonly/>
+        <input mdInput placeholder="Failed" value="{{message.failed}}" readonly/>
       </md-input-container>
 
       <md-input-container style="width:100%">
-      <input mdInput placeholder="Final Recipient" value="{{message.finalRecipient}}" readonly/>
+        <input mdInput placeholder="Restored" value="{{message.restored}}" readonly/>
       </md-input-container>
 
       <md-input-container style="width:100%">
-      <input mdInput placeholder="Ref To Message Id" value="{{message.refToMessageId}}" readonly/>
+        <input mdInput placeholder="Original Sender" value="{{message.originalSender}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Final Recipient" value="{{message.finalRecipient}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Ref To Message Id" value="{{message.refToMessageId}}" readonly/>
       </md-input-container>
 
     </md-card-content>
@@ -85,8 +85,8 @@
 <md-dialog-actions>
   <button id="messageLogDetailsOKButton" md-raised-button color="primary" (click)="dialogRef.close({})"
           style="margin-top:10px">
-    <md-icon>check circle</md-icon>
-    <span>Ok</span>
+    <md-icon>close</md-icon>
+    <span>Close</span>
   </button>
 </md-dialog-actions>
 
