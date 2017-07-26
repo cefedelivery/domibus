@@ -7,7 +7,6 @@ import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -26,6 +25,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +36,7 @@ import javax.jms.MessageListener;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
+import java.util.Properties;
 
 
 /**
@@ -48,7 +49,8 @@ import java.sql.Timestamp;
 public class MessageSender implements MessageListener {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageSender.class);
 
-
+    protected static String DOMIBUS_SENDER_CERTIFICATE_VALIDATION ="domibus.sending.certificate.validation.sender.enabled";
+    protected static String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION ="domibus.sending.certificate.validation.receiver.enabled";
 
     @Autowired
     private UserMessageService userMessageService;
@@ -84,6 +86,10 @@ public class MessageSender implements MessageListener {
     @Autowired
     private MessageAttemptService messageAttemptService;
 
+
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
 
     private void sendUserMessage(final String messageId) {
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
@@ -126,30 +132,10 @@ public class MessageSender implements MessageListener {
             Validate.notNull(receiverParty, "Responder party was not found");
 
             if (!policyService.isNoSecurityPolicy(policy)) {
-                // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
-                try {
-                    certificateService.isCertificateValid(sendingParty.getName());
-                    LOG.info("Sender certificate exists and is valid [" + sendingParty.getName() + "]");
-                } catch (DomibusCertificateException dcEx) {
-                    String msg = "Could not find and verify sender's certificate [" + sendingParty.getName() + "]";
-                    LOG.error(msg, dcEx);
-                    EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, msg, null, dcEx);
-                    ex.setMshRole(MSHRole.SENDING);
-                    throw ex;
-                }
-
-                if (certificateService.isCertificateValidationEnabled()) {
-                    try {
-                        boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
-                        if (!certificateChainValid) {
-                            LOG.error("Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
-                            retryService.purgeTimedoutMessage(messageId);
-                            abortSending = true;
-                            return;
-                        }
-                    } catch (Exception e) {
-                        LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
-                    }
+                if(!checkCertificatesValidity(sendingParty.getName(), receiverParty.getName())) {
+                    // this flag is used in the finally clause
+                    abortSending = true;
+                    return;
                 }
             }
 
@@ -180,27 +166,56 @@ public class MessageSender implements MessageListener {
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
         } finally {
-            boolean skipHandling = false;
             if (abortSending) {
-                LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
-                skipHandling = true;
+                LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
+                retryService.purgeTimedoutMessage(messageId);
+                return;
             }
-            if(!skipHandling) {
-                reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
-                try {
-                    attempt.setError(attemptError);
-                    attempt.setStatus(attemptStatus);
-                    attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
-                    messageAttemptService.create(attempt);
-                } catch (Exception e) {
-                    LOG.error("Could not create the message attempt", e);
-                }
+            reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+            try {
+                attempt.setError(attemptError);
+                attempt.setStatus(attemptStatus);
+                attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
+                messageAttemptService.create(attempt);
+            } catch (Exception e) {
+                LOG.error("Could not create the message attempt", e);
             }
-
         }
     }
 
+    protected Boolean checkCertificatesValidity(String sender, String receiver) {
+        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION, "true"))) {
+            // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
+            try {
+                if(!certificateService.isCertificateChainValid(sender)) {
+                    LOG.error("Cannot send message: sender certificate is not valid or it has been revoked [" + sender + "]");
+                    return false;
+                }
+                LOG.info("Sender certificate exists and is valid [" + sender + "]");
+            } catch (DomibusCertificateException dce) {
+                // Is this an error and we stop the sending or we just log a warning that we were not able to validate the cert?
+                // my opinion is that since the option is enabled, we should validate no matter what => this is an error
+                LOG.error("Could not verify if the certificate chain is valid for alias " + sender, dce);
+                return false;
+            }
+        }
 
+        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION, "true"))) {
+            // Verifies the validity of receiver's certificate and reduces security issues due to possible hacked access points.
+            try {
+                if (!certificateService.isCertificateChainValid(receiver)) {
+                    LOG.error("Cannot send message: receiver certificate is not valid or it has been revoked [" + receiver + "]");
+                    return false;
+                }
+            } catch (DomibusCertificateException dce) {
+                // Is this an error and we stop the sending or we just log a warning that we were not able to validate the cert?
+                // my opinion is that since the option is enabled, we should validate no matter what => this is an error
+                LOG.error("Could not verify if the certificate chain is valid for alias " + receiver, dce);
+                return false;
+            }
+        }
+        return true;
+    }
 
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)

@@ -8,6 +8,8 @@ import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.pki.CertificateService;
+import eu.domibus.pki.DomibusCertificateException;
 import org.apache.cxf.binding.soap.SoapFault;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.SoapVersion;
@@ -55,6 +57,8 @@ import java.util.Properties;
 public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     protected static final String DOMIBUS_SENDERPARTY_TRUST_VERIFICATION = "domibus.senderparty.trust.verification";
+    protected static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ON_RECEIVING = "domibus.receiving.certificate.validation.sender.enabled";
+
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TrustSenderInterceptor.class);
 
@@ -65,6 +69,9 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     @Autowired
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
+
+    @Autowired
+    private CertificateService certificateService;
 
     public TrustSenderInterceptor() {
         super(false);
@@ -78,44 +85,64 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     /**
      * Intercepts a message to verify that the sender is trusted.
      *
+     * There will be two validations: a) the sender certificate is
+     *
      * @param message the incoming CXF soap message to handle
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
-        if(!isInterceptorEnabled())
-            return;
 
-        String msgId = (String) message.getExchange().get(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY);
+        String messageId = (String) message.getExchange().get(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY);
         if (!isMessageSecured(message)) {
-            LOG.info("Message [" + msgId + "] does not contain security info ==> skipping sender trust verification.");
+            LOG.info("Message [" + messageId + "] does not contain security info ==> skipping sender trust verification.");
             return;
         }
 
-        try {
-            LOG.debug("Verifying sender trust for message [" + msgId + "]");
-            String senderPartyName = getSenderPartyName(message);
-            X509Certificate certificate = getSenderCertificate(message);
-            if(certificate != null && org.apache.commons.lang.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), senderPartyName) ) {
-                LOG.info("Sender [" + senderPartyName + "] is trusted for message [" + msgId + "]");
-                return;
-            }
-            LOG.error("Sender [" + senderPartyName + "] is not trusted for message [" + msgId + "]. To disable this check, set the property " + DOMIBUS_SENDERPARTY_TRUST_VERIFICATION + " to false.");
-            EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, "Sender [" + senderPartyName + "] is not trusted", msgId, null);
+        LOG.info("Validate sender certificate");
+        String senderPartyName = getSenderPartyName(message);
+        X509Certificate certificate = getSenderCertificate(message);
+        if(!checkSenderPartyTrust(certificate, senderPartyName, messageId)) {
+            EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, "Sender [" + senderPartyName + "] is not trusted", messageId, null);
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
-            throw ebMS3Ex;
-        } catch (Exception ex) {
-            LOG.error("Error while verifying parties trust", ex);
-            throw new Fault(ex);
+            throw new Fault(ebMS3Ex);
+        }
+
+        if(!checkCertificateValidity(certificate, senderPartyName)) {
+            EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, "Sender [" + senderPartyName + "] certificate is not valid or has been revoked", messageId, null);
+            ebMS3Ex.setMshRole(MSHRole.RECEIVING);
+            throw new Fault(ebMS3Ex);
         }
     }
 
-    protected Boolean isInterceptorEnabled() {
-        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDERPARTY_TRUST_VERIFICATION, "false"))) {
-            LOG.debug("Sender alias verification is enabled");
+    protected Boolean checkCertificateValidity(X509Certificate certificate, String sender) {
+        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ON_RECEIVING, "true"))) {
+            try {
+                if (!certificateService.isCertificateValid(certificate)) {
+                    LOG.error("Cannot receive message: sender certificate is not valid or it has been revoked [" + sender + "]");
+                    return false;
+                }
+                LOG.info("Sender certificate exists and is valid [" + sender + "]");
+            } catch (DomibusCertificateException dce) {
+                LOG.error("Could not verify if the certificate chain is valid for alias " + sender, dce);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected Boolean checkSenderPartyTrust(X509Certificate certificate, String sender, String messageId) {
+        if (!Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDERPARTY_TRUST_VERIFICATION, "false"))) {
+            LOG.debug("Sender alias verification is disabled");
             return true;
         }
 
-        LOG.debug("Sender alias verification is disabled");
+        LOG.info("Verifying sender trust for message [" + messageId + "]");
+        if(certificate != null && org.apache.commons.lang.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), sender) ) {
+            LOG.info("Sender [" + sender + "] is trusted for message [" + messageId + "]");
+            return true;
+        }
+
+        LOG.error("Sender [" + sender + "] is not trusted for message [" + messageId + "]. To disable this check, set the property " + DOMIBUS_SENDERPARTY_TRUST_VERIFICATION + " to false.");
         return false;
     }
 

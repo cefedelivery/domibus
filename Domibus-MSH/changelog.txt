@@ -1,3 +1,9 @@
+Domibus 3.3-FR
+- Block receiving of message in case the sender's certificate is not valid or revoked.
+Three more properties added (check domibus.properties for details):
+    o domibus.sending.certificate.validation.receiver.enabled (default true)
+    o domibus.sending.certificate.validation.sender.enabled (default true)
+    o domibus.receiving.certificate.validation.sender.enabled (default true)
 Domibus 3.3-RC1
 - Configuration of Domibus is done with domibus.properties instead of externalized spring xml files
 - Add the possibility to pull messages
