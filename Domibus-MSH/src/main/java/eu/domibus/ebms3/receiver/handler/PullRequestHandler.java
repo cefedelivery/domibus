@@ -143,7 +143,7 @@ public class PullRequestHandler {
             } catch (EbMS3Exception e1) {
                 throw new WebServiceException(e1);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) { // NOSONAR: This was done on purpose.
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
