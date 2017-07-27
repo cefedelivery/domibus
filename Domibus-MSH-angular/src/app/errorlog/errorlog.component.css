@@ -30,3 +30,7 @@
   width:100px;
   text-align:right;
 }
+
+md-select,md-input-container {
+  margin: 0.5%;
+}

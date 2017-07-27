@@ -4,9 +4,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpModule, Http, XHRBackend, RequestOptions} from '@angular/http';
 import {
   MdDialogModule, MdIconModule, MdInputModule, MdMenuModule, MdSelectModule,
-  MdSidenavModule
+  MdSidenavModule, MdButtonModule, MdListModule
 } from '@angular/material';
-import {MdButtonModule} from '@angular/material';
 import 'hammerjs';
 
 import {NgxDatatableModule} from '@swimlane/ngx-datatable';
@@ -47,6 +46,8 @@ import {MessageDialogComponent} from './jms/message-dialog/message-dialog.compon
 import {PasswordComponent} from './user/password/password-dialog.component';
 import {DatePipe} from './customDate/datePipe';
 import {DefaultPasswordDialogComponent} from './security/default-password-dialog/default-password-dialog.component';
+import {MessagelogDetailsComponent} from './messagelog/messagelog-details/messagelog-details.component';
+import {ErrorlogDetailsComponent} from './errorlog/errorlog-details/errorlog-details.component';
 import {EditMessageFilterComponent} from "./messagefilter/editmessagefilter-form/editmessagefilter-form.component";
 import {EditUserComponent} from "app/user/edituser-form/edituser-form.component";
 
@@ -83,6 +84,9 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     DatePipe,
     DefaultPasswordDialogComponent,
     EditMessageFilterComponent,
+    MessagelogDetailsComponent,
+    ErrorlogDetailsComponent,
+    EditMessageFilterComponent,
     EditUserComponent
   ],
   entryComponents: [
@@ -93,11 +97,14 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessagelogDialogComponent,
     MoveDialogComponent,
     MessageDialogComponent,
+    MessagelogDetailsComponent,
+    MessagelogDetailsComponent,
     CancelMessagefilterDialogComponent,
     MoveDialogComponent,
     PasswordComponent,
     DefaultPasswordDialogComponent,
     EditMessageFilterComponent,
+    ErrorlogDetailsComponent,
     EditUserComponent
   ],
   imports: [
@@ -111,10 +118,12 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MdMenuModule,
     MdInputModule,
     MdIconModule,
+    MdListModule,
     MdSidenavModule,
     MdSelectModule,
-    Md2Module.forRoot(),
     routing,
+    ReactiveFormsModule,
+    Md2Module,
     ReactiveFormsModule,
     Md2SelectModule
   ],

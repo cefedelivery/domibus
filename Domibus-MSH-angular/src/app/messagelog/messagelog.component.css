@@ -3,7 +3,7 @@
 }
 
 .inputField {
-  width:33%;
+  width:30%;
 }
 
 .inputFieldParties {
@@ -37,4 +37,8 @@
 .dateTimeTitle {
   width:100px;
   text-align:right;
+}
+
+md-select,md-input-container {
+  margin: 0.5%;
 }
