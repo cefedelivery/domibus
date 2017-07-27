@@ -116,11 +116,11 @@ public class ProcessValidator {
 
     private PullProcessStatus checkResponderConfiguration(final Process process) {
         PullProcessStatus status = ONE_MATCHING_PROCESS;
-        if (process.getResponderParties().size() > 1) {
+        if (process.getInitiatorParties().size() > 1) {
             LOG.warn("Pull process should only have one responder configured for mpc");
             status = TOO_MANY_RESPONDER;
         }
-        if (process.getResponderParties().size() == 0) {
+        if (process.getInitiatorParties().size() == 0) {
             LOG.warn("No responder configured.");
             status = NO_RESPONDER;
         }

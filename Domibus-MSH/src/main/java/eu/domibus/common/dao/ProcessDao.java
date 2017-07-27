@@ -24,7 +24,7 @@ public interface ProcessDao {
      * @param party the initiator.
      * @return the matching processes.
      */
-    List<Process> findPullProcessesByResponder(final Party party);
+    List<Process> findPullProcessesInitiator(final Party party);
 
 
     /**

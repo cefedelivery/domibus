@@ -183,13 +183,13 @@ class Domibus
     // Wait until status or timer expire
     def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null){
         def messageID=null
-        def waitMax=15_000
+        def waitMax=30_000
         def numberAttempts=0
         def maxNumberAttempts=4
         def interval=1000
         def messageStatus="INIT"
         def wait=false
-        log.info "waitForStatus params: messageID: " + messageID + " RMSH: " + RMSH + " IDMes: " + IDMes + " bonusTimeForSender: " + bonusTimeForSender + " bonusTimeForReceiver: " + bonusTimeForReceiver
+        //log.info "waitForStatus params: messageID: " + messageID + " RMSH: " + RMSH + " IDMes: " + IDMes + " bonusTimeForSender: " + bonusTimeForSender + " bonusTimeForReceiver: " + bonusTimeForReceiver
         if(IDMes!=null){
             messageID=IDMes
         }
@@ -197,6 +197,8 @@ class Domibus
             messageID=findReturnedMessageID()
         }
 
+		log.info "waitForStatus params: messageID: " + messageID +" SMSH: "+SMSH+ " RMSH: " + RMSH + " IDMes: " + IDMes + " bonusTimeForSender: " + bonusTimeForSender + " bonusTimeForReceiver: " + bonusTimeForReceiver
+		
         if(bonusTimeForSender){
             log.info "Waiting time for Sender extended to 500 seconds"
             waitMax=500_000
@@ -214,7 +216,7 @@ class Domibus
                     messageStatus=it.MESSAGE_STATUS
                     numberAttempts=it.SEND_ATTEMPTS
                 }
-                log.info "messageStatus="+messageStatus + " SMSH="+ SMSH
+                log.info "SENDER: Expected Message Status ="+ SMSH +"-- Current Message Status = "+messageStatus; 
                 if((SMSH=="SEND_FAILURE")&&(messageStatus=="WAITING_FOR_RETRY")){
                     if(((maxNumberAttempts-numberAttempts)>0)&&(!wait)){
                         wait=true
