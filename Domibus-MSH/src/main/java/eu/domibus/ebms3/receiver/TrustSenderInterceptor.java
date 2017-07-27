@@ -85,7 +85,9 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     /**
      * Intercepts a message to verify that the sender is trusted.
      *
-     * There will be two validations: a) the sender certificate is
+     * There will be two validations:
+     *      a) the sender certificate is valid and not revoked and
+     *      b) the sender party name is included in the CN of the certificate
      *
      * @param message the incoming CXF soap message to handle
      */
