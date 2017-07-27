@@ -32,10 +32,6 @@ export class MessageLogComponent {
   timestampToMinDate: Date = null;
   timestampToMaxDate: Date = new Date();
 
-  notifiedFromMaxDate: Date = new Date();
-  notifiedToMinDate: Date = null;
-  notifiedToMaxDate: Date = new Date();
-
   filter: any = {};
   loading: boolean = false;
   allColumns = [];
@@ -168,13 +164,16 @@ export class MessageLogComponent {
         name: 'Restored'
       }
 
-    ];
+    ]
 
     this.selectedColumns = this.allColumns.filter(col => {
       return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type"].indexOf(col.name) != -1
     })
 
-    this.page(this.offset, this.pageSize, this.orderBy, this.asc);
+    this.filter.receivedTo = new Date()
+    this.filter.receivedTo.setHours(23, 59, 59, 999)
+
+    this.page(this.offset, this.pageSize, this.orderBy, this.asc)
   }
 
   getMessageLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<MessageLogResult> {
@@ -431,13 +430,5 @@ export class MessageLogComponent {
 
   onTimestampToChange(event) {
     this.timestampFromMaxDate = event.value;
-  }
-
-  onNotifiedFromChange(event) {
-    this.notifiedToMinDate = event.value;
-  }
-
-  onNotifiedToChange(event) {
-    this.notifiedFromMaxDate = event.value;
   }
 }

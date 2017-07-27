@@ -56,12 +56,9 @@ export class JmsComponent implements OnInit {
   }
 
   ngOnInit() {
-    // set fromDate equals to now - 3 days
-    this.request.fromDate = new Date(Date.now());
-    this.request.fromDate.setDate(this.request.fromDate.getDate() - 3);
-
     // set toDate equals to now
-    this.request.toDate = new Date(Date.now());
+    this.request.toDate = new Date()
+    this.request.toDate.setHours(23,59,59,999)
 
     this.getDestinations(true);
   }
