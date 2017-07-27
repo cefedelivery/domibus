@@ -52,14 +52,15 @@
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
                     <testSuite>WS-Auto for Bamboo</testSuite>
+                    <!--<testCase>Dom001-Push-Submit Message-Basic Flow</testCase>-->
                     <!--<testCase>Dom118-Submit message-Data-AgreementRefId-Value</testCase>-->
                     <projectProperties>
-                        <value>localUrl=http://localhost:8180</value>
-                        <value>remoteUrl=http://localhost:9080</value>
+                        <value>localUrl=http://localhost:8180/domibus</value>
+                        <value>remoteUrl=http://localhost:9080/domibus</value>
                         <value>driverBlue=com.mysql.jdbc.Driver</value>
                         <value>driverRed=com.mysql.jdbc.Driver</value>
                         <value>jdbcUrlBlue=jdbc:mysql://127.0.0.1:3304/domibus</value>
-                        <value>jdbcUrlRed=jdbc:mysql://127.0.0.1:3305/domibus</value>
+                        <value>jdbcUrlRed=jdbc:mysql://127.0.0.1:3302/domibus</value>
                         <value>databaseBlue=mysql</value>
                         <value>databaseRed=mysql</value>
                         <value>blueDbUser=root</value>
@@ -67,6 +68,8 @@
                         <value>redDbUser=root</value>
                         <value>redDbPassword=123456</value>
                         <value>updateReport=false</value>
+                        <value>thirdGateway=false</value>
+                        <value>pdfAttachment=${projectDir}\\resources\\fileSmall.pdf</value>
                     </projectProperties>
                     <soapuiProperties>
                         <property>

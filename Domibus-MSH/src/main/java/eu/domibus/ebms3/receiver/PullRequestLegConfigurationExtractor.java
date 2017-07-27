@@ -39,7 +39,7 @@ public class PullRequestLegConfigurationExtractor extends AbstractSignalLegConfi
             LegConfiguration legConfiguration = pullContext.getProcess().getLegs().iterator().next();
             MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(pullContext.getAgreement(),
                     pullContext.getInitiator().getName(),
-                    pullContext.getResponder().getName(),
+                    pullContext.getInitiator().getName(),
                     legConfiguration.getService().getName(),
                     legConfiguration.getAction().getName(),
                     legConfiguration.getName());
