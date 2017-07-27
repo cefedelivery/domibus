@@ -38,16 +38,16 @@
           p:backendConnector-ref="backendFSPlugin"/>
 
     <!-- quartz job for the retry  -->
-    <bean id="fsPluginRetryWorkerJob"
+    <bean id="fsPluginPurgeSentWorkerJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSRetryWorker"/>
+        <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSPurgeSentWorker"/>
         <property name="durability" value="true"/>
     </bean>
 
-    <bean id="fsPluginRetryWorkerTrigger"
+    <bean id="fsPluginPurgeSentWorkerTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="fsPluginRetryWorkerJob"/>
-        <property name="cronExpression" value="${fsPlugin.messages.retry.worker.cronExpression}"/>
+        <property name="jobDetail" ref="fsPluginPurgeSentWorkerJob"/>
+        <property name="cronExpression" value="${fsPlugin.messages.sent.purge.worker.cronExpression}"/>
     </bean>
 
     <!-- customizable list of triggers to be executed by quartz -->
@@ -55,7 +55,7 @@
           class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list merge="true">
-                <ref bean="fsPluginRetryWorkerTrigger"/>
+                <ref bean="fsPluginPurgeSentWorkerTrigger"/>
             </list>
         </property>
     </bean>
