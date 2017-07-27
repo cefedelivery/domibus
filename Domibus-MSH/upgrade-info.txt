@@ -1,3 +1,6 @@
+Domibus 3.3-FR (from 3.3-RC1)
+               - Rename "domibus.senderparty.trust.verification" to "domibus.sender.trust.validation.onreceiving" in your domibus.properties file. If the property is not defined, do nothing. Default value "false" has not been changed.
+               - Rename "domibus.certificate.validation.enabled" to "domibus.receiver.certificate.validation.onsending" in your domibus.properties file. If the property is not defined, do nothing. Default value "true" has not been changed.
 Domibus 3.3-RC1 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-rc1-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-rc1-migration.ddl for Oracle)

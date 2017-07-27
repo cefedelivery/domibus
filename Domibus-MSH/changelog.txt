@@ -4,6 +4,7 @@ Three more properties added (check domibus.properties for details):
     o domibus.sending.certificate.validation.receiver.enabled (default true)
     o domibus.sending.certificate.validation.sender.enabled (default true)
     o domibus.receiving.certificate.validation.sender.enabled (default true)
+Property "domibus.senderparty.trust.verification" was renamed to "domibus.sender.trust.validation.onreceiving"
 Domibus 3.3-RC1
 - Configuration of Domibus is done with domibus.properties instead of externalized spring xml files
 - Add the possibility to pull messages

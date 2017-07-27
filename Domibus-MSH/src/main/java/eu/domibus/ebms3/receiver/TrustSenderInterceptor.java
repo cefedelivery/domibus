@@ -56,8 +56,8 @@ import java.util.Properties;
  */
 public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
-    protected static final String DOMIBUS_SENDERPARTY_TRUST_VERIFICATION = "domibus.senderparty.trust.verification";
-    protected static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ON_RECEIVING = "domibus.receiving.certificate.validation.sender.enabled";
+    protected static final String DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING = "domibus.sender.trust.validation.onreceiving";
+    protected static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING = "domibus.sender.certificate.validation.onreceiving";
 
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TrustSenderInterceptor.class);
@@ -117,7 +117,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
     protected Boolean checkCertificateValidity(X509Certificate certificate, String sender) {
-        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ON_RECEIVING, "true"))) {
+        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true"))) {
             try {
                 if (!certificateService.isCertificateValid(certificate)) {
                     LOG.error("Cannot receive message: sender certificate is not valid or it has been revoked [" + sender + "]");
@@ -133,7 +133,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
     protected Boolean checkSenderPartyTrust(X509Certificate certificate, String sender, String messageId) {
-        if (!Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDERPARTY_TRUST_VERIFICATION, "false"))) {
+        if (!Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false"))) {
             LOG.debug("Sender alias verification is disabled");
             return true;
         }
@@ -144,7 +144,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             return true;
         }
 
-        LOG.error("Sender [" + sender + "] is not trusted for message [" + messageId + "]. To disable this check, set the property " + DOMIBUS_SENDERPARTY_TRUST_VERIFICATION + " to false.");
+        LOG.error("Sender [" + sender + "] is not trusted for message [" + messageId + "]. To disable this check, set the property " + DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING + " to false.");
         return false;
     }
 

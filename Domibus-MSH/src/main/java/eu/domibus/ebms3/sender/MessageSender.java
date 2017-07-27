@@ -49,8 +49,8 @@ import java.util.Properties;
 public class MessageSender implements MessageListener {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageSender.class);
 
-    protected static String DOMIBUS_SENDER_CERTIFICATE_VALIDATION ="domibus.sending.certificate.validation.sender.enabled";
-    protected static String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION ="domibus.sending.certificate.validation.receiver.enabled";
+    protected static String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING ="domibus.sender.certificate.validation.onsending";
+    protected static String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING ="domibus.receiver.certificate.validation.onsending";
 
     @Autowired
     private UserMessageService userMessageService;
@@ -184,7 +184,7 @@ public class MessageSender implements MessageListener {
     }
 
     protected Boolean checkCertificatesValidity(String sender, String receiver) {
-        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION, "true"))) {
+        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
             try {
                 if(!certificateService.isCertificateChainValid(sender)) {
@@ -200,7 +200,7 @@ public class MessageSender implements MessageListener {
             }
         }
 
-        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION, "true"))) {
+        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             // Verifies the validity of receiver's certificate and reduces security issues due to possible hacked access points.
             try {
                 if (!certificateService.isCertificateChainValid(receiver)) {

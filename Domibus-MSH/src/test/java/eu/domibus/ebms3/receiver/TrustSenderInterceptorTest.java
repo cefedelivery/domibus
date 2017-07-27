@@ -48,7 +48,7 @@ public class TrustSenderInterceptorTest {
         final X509Certificate expiredCertificate = pkiUtil.createCertificate(BigInteger.ONE, new DateTime().minusDays(2).toDate(), new DateTime().minusDays(1).toDate(), null);
 
         new Expectations() {{
-            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ON_RECEIVING, "true");
+            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
             result = "true";
             certificateService.isCertificateValid(certificate);
             result = true;
@@ -66,7 +66,7 @@ public class TrustSenderInterceptorTest {
         final X509Certificate expiredCertificate = pkiUtil.createCertificate(BigInteger.ONE, new DateTime().minusDays(2).toDate(), new DateTime().minusDays(1).toDate(), null);
 
         new Expectations() {{
-            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ON_RECEIVING, "true");
+            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
             result = "false";
         }};
         Assert.assertTrue(trustSenderInterceptor.checkCertificateValidity(expiredCertificate, "test sender"));
@@ -77,7 +77,7 @@ public class TrustSenderInterceptorTest {
         final X509Certificate certificate = pkiUtil.createCertificate(BigInteger.ONE, null);
 
         new Expectations() {{
-            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDERPARTY_TRUST_VERIFICATION, "false");
+            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
             result = "true";
         }};
 
@@ -90,7 +90,7 @@ public class TrustSenderInterceptorTest {
         final X509Certificate certificate = pkiUtil.createCertificate(BigInteger.ONE, null);
 
         new Expectations() {{
-            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDERPARTY_TRUST_VERIFICATION, "false");
+            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
             result = "false";
         }};
 
