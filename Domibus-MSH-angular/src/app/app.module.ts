@@ -4,9 +4,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpModule, Http, XHRBackend, RequestOptions} from '@angular/http';
 import {
   MdDialogModule, MdIconModule, MdInputModule, MdMenuModule, MdSelectModule,
-  MdSidenavModule
+  MdSidenavModule, MdButtonModule, MdListModule
 } from '@angular/material';
-import {MdButtonModule} from '@angular/material';
 import 'hammerjs';
 
 import {NgxDatatableModule} from '@swimlane/ngx-datatable';
@@ -46,9 +45,9 @@ import {MessageDialogComponent} from './jms/message-dialog/message-dialog.compon
 import {PasswordComponent} from './user/password/password-dialog.component';
 import {DatePipe} from './customDate/datePipe';
 import {DefaultPasswordDialogComponent} from './security/default-password-dialog/default-password-dialog.component';
-import {Md2Module} from "md2";
 import {MessagelogDetailsComponent} from './messagelog/messagelog-details/messagelog-details.component';
 import {ErrorlogDetailsComponent} from './errorlog/errorlog-details/errorlog-details.component';
+import {Md2Module} from 'md2';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -111,11 +110,12 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MdMenuModule,
     MdInputModule,
     MdIconModule,
+    MdListModule,
     MdSidenavModule,
     MdSelectModule,
-    Md2Module.forRoot(),
     routing,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Md2Module,
   ],
   providers: [
     AuthenticatedGuard,

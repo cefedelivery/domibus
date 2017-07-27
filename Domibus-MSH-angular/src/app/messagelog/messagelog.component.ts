@@ -100,7 +100,8 @@ export class MessageLogComponent {
       {
         cellTemplate: this.rowWithDateFormatTpl,
         headerTemplate: this.hdrTpl,
-        name: 'Received'
+        name: 'Received',
+        width: 155
       },
       {
         cellTemplate: this.rowTpl,
@@ -119,9 +120,10 @@ export class MessageLogComponent {
         name: 'Send Attempts Max'
       },
       {
-        cellTemplate: this.rowTpl,
+        cellTemplate: this.rowWithDateFormatTpl,
         headerTemplate: this.hdrTpl,
-        name: 'Next Attempt'
+        name: 'Next Attempt',
+        width: 155
       },
       {
         cellTemplate: this.rowTpl,
@@ -131,12 +133,14 @@ export class MessageLogComponent {
       {
         cellTemplate: this.rowTpl,
         headerTemplate: this.hdrTpl,
-        name: 'Message Type'
+        name: 'Message Type',
+        width: 160
       },
       {
-        cellTemplate: this.rowTpl,
+        cellTemplate: this.rowWithDateFormatTpl,
         headerTemplate: this.hdrTpl,
-        name: 'Deleted'
+        name: 'Deleted',
+        width: 155
       },
       {
         cellTemplate: this.rowTpl,
@@ -153,10 +157,23 @@ export class MessageLogComponent {
         headerTemplate: this.hdrTpl,
         name: 'Ref To Message Id'
       },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Failed'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Restored'
+      }
 
     ];
 
-    this.selectedColumns = [...this.allColumns]
+    this.selectedColumns = this.allColumns.filter(col => {
+      return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type"].indexOf(col.name) != -1
+    })
+
     this.page(this.offset, this.pageSize, this.orderBy, this.asc);
   }
 

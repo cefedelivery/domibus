@@ -3,8 +3,7 @@
 
     <md-card-content>
       <p class="domibusTextHeading" style="margin:0;font-weight: bold">Messages</p>
-      <i class="material-icons" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()">expand_less</i>
-      <i class="material-icons" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()">expand_more</i>
+
       <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
 
         <md-input-container class="inputField">
@@ -97,24 +96,30 @@
                         #timestampControl="ngModel" id="receivedto_id" class="dateTableField" *ngIf="advancedSearch">
         </md2-datepicker>
 
-        <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
-          <md-icon>search</md-icon>
-          <span>Search</span>
-        </button>
-
+        <div style="display:inline-block">
+          <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
+            <md-icon>search</md-icon>
+            <span>Search</span>
+          </button>
+          <a class="domibusLink" href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()">Advanced</a>
+          <a class="domibusLink" href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()">Basic</a>
+        </div>
       </form>
     </md-card-content>
   </md-card>
 </div>
 
-<app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event.value)"
-                 id="pagesize_id"></app-row-limiter>
-<div style="margin-top: 10px">
-  <i class="material-icons" *ngIf="columnSelection" (click)="toggleColumnSelection()">expand_less</i>
-  <i class="material-icons" *ngIf="!columnSelection" (click)="toggleColumnSelection()">expand_more</i>
+<div style="display:inline-flex;position:relative;margin-bottom: 10px">
+  <app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event.value)"
+                   id="pagesize_id"></app-row-limiter>
+  <div style="margin-left:5px">
+    <div style="position:absolute;bottom: -2px;float:left">
+      <a class="domibusLink" href="#" *ngIf="!columnSelection" (click)="toggleColumnSelection()">Columns</a>
+      <a class="domibusLink" href="#" *ngIf="columnSelection" (click)="toggleColumnSelection()">Columns</a>
+    </div>
+  </div>
 </div>
 <div *ngIf="columnSelection" style="margin-bottom: 10px">
-  <h4 style="margin-top: 5px;margin-bottom: 5px">Available Columns</h4>
   <div *ngFor='let col of allColumns' style="display: inline-block;margin:5px;">
     <input
       type='checkbox'
@@ -137,7 +142,7 @@
   class="material striped"
   [rows]="rows"
   [columns]="selectedColumns"
-  [columnMode]="'auto'"
+  [columnMode]="'force'"
   [headerHeight]="50"
   [footerHeight]="50"
   [rowHeight]="'auto'"

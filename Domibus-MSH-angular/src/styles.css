@@ -11,6 +11,7 @@ html, body {
   padding: 0;
   height: 100%;
   width: 100%;
+  font-family: 'Open Sans', sans-serif;
 }
 .text-select {
   -webkit-user-select: text;
@@ -23,29 +24,28 @@ html, body {
 
 
 .domibusTextRegular {
-  font-family: 'Open Sans', sans-serif;
   font-size: 18pt;
 
 }
 
 .domibusTextSpace {
-  font-family: 'Open Sans', sans-serif;
   font-size: 15pt;
 }
 
 .domibusTextHeading {
-  font-family: 'Open Sans', sans-serif;
   font-size: 38pt;
 }
 
 .domibusTextHeadingBold {
-  font-family: 'Open Sans', sans-serif;
   font-size: 38pt;
   margin:0;
   font-weight: bold
 }
 
 .domibusTextSmall {
-  font-family: 'Open Sans', sans-serif;
   font-size: 13pt;
+}
+
+.domibusTextTiny {
+  font-size: 9pt;
 }
