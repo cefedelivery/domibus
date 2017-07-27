@@ -78,7 +78,18 @@ $datatable_background_color_active: map-get($mat-grey, 300);
   color: #0d0d0d;
 }
 
-.domibusLink{
+.domibusLink {
   color: map-get($mat-blue, A200);
-  vertical-align: bottom;
+}
+
+.expandableSearch {
+  a {
+    @extend .domibusLink;
+    vertical-align: bottom;
+  }
+}
+
+div.expandableSearch {
+  display: inline-block;
+  margin-left: 15px;
 }

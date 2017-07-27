@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {MdDialogRef} from "@angular/material";
 
 @Component({
   selector: 'app-errorlog-details',
@@ -7,7 +8,9 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ErrorlogDetailsComponent implements OnInit {
 
-  constructor() { }
+  message;
+
+  constructor(public dialogRef: MdDialogRef<ErrorlogDetailsComponent>) { }
 
   ngOnInit() {
   }
