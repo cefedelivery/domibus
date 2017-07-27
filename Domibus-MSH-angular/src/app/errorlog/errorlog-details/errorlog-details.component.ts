@@ -9,6 +9,7 @@ import {MdDialogRef} from "@angular/material";
 export class ErrorlogDetailsComponent implements OnInit {
 
   message;
+  dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
   constructor(public dialogRef: MdDialogRef<ErrorlogDetailsComponent>) { }
 
