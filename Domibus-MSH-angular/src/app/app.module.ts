@@ -9,6 +9,7 @@ import {
 import 'hammerjs';
 
 import {NgxDatatableModule} from '@swimlane/ngx-datatable';
+import {Md2Module, Md2SelectModule} from 'md2';
 
 import {AppComponent} from './app.component';
 import {LoginComponent} from "./login/login.component";
@@ -46,7 +47,7 @@ import {PasswordComponent} from './user/password/password-dialog.component';
 import {DatePipe} from './customDate/datePipe';
 import {DefaultPasswordDialogComponent} from './security/default-password-dialog/default-password-dialog.component';
 import {MessagelogDetailsComponent} from './messagelog/messagelog-details/messagelog-details.component';
-import {Md2Module} from 'md2';
+import {EditMessageFilterComponent} from "./messagefilter/editmessagefilter-form/editmessagefilter-form.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -80,6 +81,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     PasswordComponent,
     DatePipe,
     DefaultPasswordDialogComponent,
+    EditMessageFilterComponent,
     MessagelogDetailsComponent
   ],
   entryComponents: [
@@ -94,7 +96,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     CancelMessagefilterDialogComponent,
     MoveDialogComponent,
     PasswordComponent,
-    DefaultPasswordDialogComponent
+    DefaultPasswordDialogComponent,
+    EditMessageFilterComponent
   ],
   imports: [
     BrowserModule,
@@ -113,6 +116,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     routing,
     ReactiveFormsModule,
     Md2Module,
+    ReactiveFormsModule,
+    Md2SelectModule
   ],
   providers: [
     AuthenticatedGuard,
