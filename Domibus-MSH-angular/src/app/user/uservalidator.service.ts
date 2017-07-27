@@ -95,9 +95,9 @@ export class UserValidatorService{
 
   matchPassword(form: AbstractControl) {
       let password = form.get('password').value; // to get value in input tag
-      let confirmPassword = form.get('passwordConfirmation').value; // to get value in input tag
+      let confirmPassword = form.get('confirmation').value; // to get value in input tag
       if(password != confirmPassword) {
-        form.get('passwordConfirmation').setErrors( {confirmation: true} )
+        form.get('confirmation').setErrors( {confirmation: true} )
       }
     }
 }

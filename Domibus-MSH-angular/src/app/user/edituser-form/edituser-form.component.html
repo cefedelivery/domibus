@@ -4,37 +4,44 @@
     <md-card style="margin:0;padding:10px;">
       <div>
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Username" name="username" id="username_id" [value]="username" (blur)="updateUsername($event)" [formControl]="userForm.controls['username']">
-          <div *ngIf="userForm.controls['username'].hasError('required')" style="color:red; font-size: 70%">You should type an username</div>
+          <input mdInput placeholder="Username" name="username" id="username_id" [value]="userName" (blur)="updateUserName($event)" [disabled]="editMode">
+          <div *ngIf="userForm.controls['userName'].hasError('required')" style="color:red; font-size: 70%">You should type an username</div>
         </md-input-container>
       </div>
 
       <div>
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Email" name="email" id="email_id" [value]="email" [formControl]="userForm.controls['email']">
+          <input mdInput placeholder="Email" name="email" id="email_id" [value]="email" (blur)="updateEmail($event)" [formControl]="userForm.controls['email']" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}">
+          <div *ngIf="userForm.controls['email'].hasError('pattern')" style="color:red; font-size: 70%">You should type an email</div>
         </md-input-container>
       </div>
 
       <div>
-        <md2-select mdInput placeholder="Roles" multiple="true" [style.width]="'100%'" [formControl]="userForm.controls['roles']" [ngModel]="roles">
+        <md2-select mdInput placeholder="Roles" id="roles_id" multiple [style.width]="'100%'" [formControl]="userForm.controls['roles']" [(ngModel)]="roles" required>
           <md2-option *ngFor="let item of existingRoles" [value]="item">{{item}}</md2-option>
         </md2-select>
+        <div *ngIf="userForm.controls['roles'].hasError('required')" style="color:red; font-size: 70%">You need to chose at least one role for this user</div>
       </div>
 
       <div>
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [formControl]="userForm.controls['password']">
+          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [value]="password" (blur)="updatePassword($event)" [formControl]="userForm.controls['password']">
+          <div *ngIf="userForm.controls['password'].hasError('required')" style="color:red; font-size: 70%">You should type a password</div>
+          <div *ngIf="userForm.controls['password'].dirty && userForm.controls['password'].hasError('minlength')" style="color:red; font-size: 70%">Minimum password length is 8</div>
+          <div *ngIf="userForm.controls['password'].dirty && userForm.controls['password'].hasError('maxlength')" style="color:red; font-size: 70%">Maximum password length is 32</div>
         </md-input-container>
       </div>
 
       <div>
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Confirmation" name="confirmation" id="confirmation_id" type="password" [formControl]="userForm.controls['confirmation']">
+          <input mdInput placeholder="Confirmation" name="confirmation" id="confirmation_id" type="password" [value]="confirmation" [formControl]="userForm.controls['confirmation']">
+          <div *ngIf="userForm.controls['confirmation'].hasError('required')" style="color:red; font-size: 70%">You should type a password</div>
+          <div *ngIf="(userForm.controls['password'].dirty || userForm.controls['confirmation'].dirty) && userForm.controls['confirmation'].hasError('confirmation')" style="color:red; font-size: 70%">Passwords do not match</div>
         </md-input-container>
       </div>
 
       <div>
-        Active<input type="checkbox" [checked]="active" [formControl]="userForm.controls['active']">
+        Active<input type="checkbox" [checked]="active" (blur)="updateActive($event)" [formControl]="userForm.controls['active']">
       </div>
 
       <table class="buttonsRow">
@@ -47,7 +54,7 @@
           </td>
           <td>
             <!-- Can optionally provide a result for the closing dialog. -->
-            <button md-raised-button color="primary" [md-dialog-close]="true" (click)="submitForm()" type="submit" [disabled]="!userForm.valid">
+            <button md-raised-button color="primary" [md-dialog-close]="true" (click)="submitForm()" [disabled]="!userForm.valid">
               <md-icon>check_circle</md-icon>
               <span>OK</span>
             </button>

@@ -23,7 +23,7 @@ export class UserComponent implements OnInit {
   users: Array<UserResponseRO> = [];
   pageSize: number = 10;
   editing = {};
-  zone: NgZone;
+  //zone: NgZone;
 
   selected = [];
 
@@ -38,7 +38,7 @@ export class UserComponent implements OnInit {
   test: boolean = false;
 
   constructor(private userService: UserService, public dialog: MdDialog, private userValidatorService: UserValidatorService, private alertService: AlertService) {
-    this.zone = new NgZone({enableLongStackTrace: false});
+    //this.zone = new NgZone({enableLongStackTrace: false});
   }
 
   ngOnInit(): void {
@@ -68,7 +68,7 @@ export class UserComponent implements OnInit {
     this.enableEdit = selected.length == 1;
   }
 
-  updateValue(event, cell, row) {
+  /*updateValue(event, cell, row) {
     //@thom check if this zone is really needed.
     this.zone.run(() => {
       this.clearEditing();
@@ -79,7 +79,7 @@ export class UserComponent implements OnInit {
         }
       }
     });
-  }
+  }*/
 
   updateCheckBox(event, cell, row) {
     let checked: boolean = event.srcElement.checked;
@@ -96,33 +96,43 @@ export class UserComponent implements OnInit {
     this.users = this.users.slice();
   }
 
-  newUser(): void {
-    this.zone.run(() => {
-      this.clearEditing();
-      this.editedUser = new UserResponseRO("", "", "", true, UserState[UserState.NEW], [""]);
-      this.users.push(this.editedUser);
-      this.users = this.users.slice();
-      let userCount = this.users.length;
-      console.log('usecount ' + userCount);
-      this.editing[userCount - 1 + '-' + 'userName'] = true;
-    });
-  }
-
-  buttonNew() {
-    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {});
+  buttonNew(): void {
+    this.editedUser = new UserResponseRO("", "", "", true, UserState[UserState.NEW], [""]);
+    this.users.push(this.editedUser);
+    this.users = this.users.slice();
+    this.rowNumber = this.users.length - 1;
+    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {data: {edit: false, user: this.users[this.rowNumber]}});
     formRef.afterClosed().subscribe(result => {
       if(result == true) {
+        this.updateUsername(formRef.componentInstance.userName);
+        this.updateEmail(formRef.componentInstance.email);
+        this.updateRoles(formRef.componentInstance.roles.toString());
+        this.updatePassword(formRef.componentInstance.password);
+        this.updateActive(formRef.componentInstance.active);
+        if(UserState[UserState.PERSISTED]===this.users[this.rowNumber].status) {
+          this.users[this.rowNumber].status = UserState[UserState.UPDATED]
+        }
 
         this.enableSave = true;
         this.enableCancel = true;
+      } else {
+        this.users.pop();
       }
     });
   }
 
   buttonEdit() {
-    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {data: this.users[this.rowNumber]});
+    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {data: {edit: true, user: this.users[this.rowNumber]}});
     formRef.afterClosed().subscribe(result => {
       if(result == true) {
+        //this.updateUsername(formRef.componentInstance.userName);
+        this.updateEmail(formRef.componentInstance.email);
+        this.updateRoles(formRef.componentInstance.roles.toString());
+        this.updatePassword(formRef.componentInstance.password);
+        this.updateActive(formRef.componentInstance.active);
+        if(UserState[UserState.PERSISTED]===this.users[this.rowNumber].status) {
+          this.users[this.rowNumber].status = UserState[UserState.UPDATED]
+        }
 
         this.enableSave = true;
         this.enableCancel = true;
@@ -130,7 +140,27 @@ export class UserComponent implements OnInit {
     });
   }
 
-  openPasswordDialog(rowIndex) {
+  private updateUsername(value: string) {
+    this.users[this.rowNumber].userName = value;
+  }
+
+  private updateEmail(value: string) {
+    this.users[this.rowNumber].email = value;
+  }
+
+  private updateRoles(value: string) {
+    this.users[this.rowNumber].roles = value;
+  }
+
+  private updatePassword(value: string) {
+    this.users[this.rowNumber].password = value;
+  }
+
+  private updateActive(value: boolean) {
+    this.users[this.rowNumber].active = value;
+  }
+
+  /*openPasswordDialog(rowIndex) {
     let dialogRef: MdDialogRef<PasswordComponent> = this.dialog.open(PasswordComponent, {data: this.users[rowIndex]});
     dialogRef.afterClosed().subscribe(result => {
       if (result == true) {
@@ -141,7 +171,7 @@ export class UserComponent implements OnInit {
         });
       }
     });
-  }
+  }*/
 
   cancel() {
     let filteredUsers = this.filterModifiedUser();
@@ -183,6 +213,9 @@ export class UserComponent implements OnInit {
               user.authorities = user.roles.split(",");
             }
             this.userService.saveUsers(filteredUsers);
+
+            this.enableSave = false;
+            this.enableCancel = false;
           }
         });
       }

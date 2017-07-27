@@ -13,10 +13,14 @@ export class EditUserComponent implements OnInit {
 
   existingRoles = [];
 
-  username = '';
+  password:any;
+  confirmation:any;
+  userName = '';
   email = '';
   active = true;
   roles = [];
+
+  editMode: boolean;
 
   userForm: FormGroup;
 
@@ -25,34 +29,66 @@ export class EditUserComponent implements OnInit {
               fb: FormBuilder,
               userValidatorService:UserValidatorService) {
 
-    this.username = data.userName;
-    this.email = data.email;
-    this.roles = data.roles.split(",");
+    this.editMode = data.edit;
+    this.userName = data.user.userName;
+    this.email = data.user.email;
+    this.roles = data.user.roles.split(",");
+    this.password = data.user.password;
+    this.confirmation = data.user.password;
+    this.active = data.user.active;
 
-    this.userForm = fb.group({
-      'username': [Validators.required],
-      'email': [null],
-      'roles': [Validators.required],
-      'password': [null, Validators.compose([Validators.required, Validators.minLength(8), Validators.maxLength(32)])],
-      'confirmation': [null, Validators.required],
-      'active': [Validators.required]
-    });
+    if(this.editMode) {
+      this.userForm = fb.group({
+        'userName': [],
+        'email': [null, Validators.pattern],
+        'roles': [Validators.required],
+        'password': [null, Validators.compose([Validators.minLength(8), Validators.maxLength(32)])],
+        'confirmation': [null],
+        'active': [Validators.required]
+      }, {
+        validator: userValidatorService.matchPassword
+      });
+    } else {
+      this.userForm = fb.group({
+        'userName': [Validators.required],
+        'email': [null, Validators.pattern],
+        'roles': [Validators.required],
+        'password': [Validators.compose([Validators.required, Validators.minLength(8), Validators.maxLength(32)])],
+        'confirmation': [Validators.required],
+        'active': [Validators.required]
+      }, {
+        validator: userValidatorService.matchPassword
+      });
+    }
   }
 
   ngOnInit() {
-    this.existingRoles = ["USER_ADMIN", "USER_ROLE"];
+    this.existingRoles = ["ROLE_ADMIN", "ROLE_USER"];
   }
 
-  updateUsername(event) {
-
+  updateUserName(event) {
+    this.userName = event.target.value;
   }
 
-  selectRoles(event) {
+  updateEmail(event) {
+    this.email = event.target.value;
+  }
 
+  updatePassword(event) {
+    this.password = event.target.value;
+  }
+
+  updateConfirmation(event) {
+    this.confirmation = event.target.value;
+  }
+
+  updateActive(event) {
+    this.active = event.target.checked;
   }
 
   submitForm() {
-
+    debugger;
+    this.dialogRef.close(true);
   }
 
 
