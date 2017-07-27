@@ -54,7 +54,7 @@ public class FSPluginProperties extends Properties {
      * @return See {@link FSPluginProperties#getSentAction()}
      */
     public String getSentAction(String domain) {
-        return getDomainProperty(domain, SENT_ACTION, ACTION_ARCHIVE);
+        return getDomainProperty(domain, SENT_ACTION, ACTION_DELETE);
     }
 
     /**
