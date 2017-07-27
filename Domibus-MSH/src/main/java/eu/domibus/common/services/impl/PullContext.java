@@ -18,20 +18,20 @@ import java.util.Collection;
 public class PullContext {
 
     private Process process;
-    private Party initiator;
+    private Party responder;
     private String mpcQualifiedName;
     public static final String MPC = "mpc";
     public static final String PMODE_KEY = "pmodKey";
     public static final String NOTIFY_BUSINNES_ON_ERROR = "NOTIFY_BUSINNES_ON_ERROR";
 
-    public PullContext(final Process process, final Party initiator, final String mpcQualifiedName) {
+    public PullContext(final Process process, final Party responder, final String mpcQualifiedName) {
         Validate.notNull(process);
-        Validate.notNull(initiator);
+        Validate.notNull(responder);
         Validate.notNull(mpcQualifiedName);
-        Validate.isTrue(process.getResponderParties().size() == 1);
+        Validate.isTrue(process.getInitiatorParties().size() == 1);
         this.process = process;
         this.mpcQualifiedName = mpcQualifiedName;
-        this.initiator = initiator;
+        this.responder = responder;
     }
 
     public String getAgreement() {
@@ -45,16 +45,16 @@ public class PullContext {
         return process;
     }
 
-    public Party getResponder() {
-        return process.getResponderParties().iterator().next();
+    public Party getInitiator() {
+        return process.getInitiatorParties().iterator().next();
     }
 
     public String getMpcQualifiedName() {
         return mpcQualifiedName;
     }
 
-    public Party getInitiator() {
-        return initiator;
+    public Party getResponder() {
+        return responder;
     }
 
     public LegConfiguration filterLegOnMpc() {

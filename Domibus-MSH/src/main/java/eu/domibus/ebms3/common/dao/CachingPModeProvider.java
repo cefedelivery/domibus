@@ -31,6 +31,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +51,8 @@ public class CachingPModeProvider extends PModeProvider {
     //Dont access directly, use getter instead
     private Configuration configuration;
 
+    @Autowired
+    private ProcessPartyExtractorProvider processPartyExtractorProvider;
     protected synchronized Configuration getConfiguration() {
         if (this.configuration == null) {
             this.init();
@@ -72,10 +75,11 @@ public class CachingPModeProvider extends PModeProvider {
     protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
         final List<LegConfiguration> candidates = new ArrayList<>();
         for (final Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
+            final ProcessTypePartyExtractor processTypePartyExtractor = processPartyExtractorProvider.getProcessTypePartyExtractor(process.getMepBinding().getName(), senderParty, receiverParty);
             for (final Party party : process.getInitiatorParties()) {
-                if (StringUtils.equalsIgnoreCase(party.getName(), senderParty)) {
+                if (StringUtils.equalsIgnoreCase(party.getName(), processTypePartyExtractor.getSenderParty())) {
                     for (final Party responder : process.getResponderParties()) {
-                        if (StringUtils.equalsIgnoreCase(responder.getName(), receiverParty)) {
+                        if (StringUtils.equalsIgnoreCase(responder.getName(), processTypePartyExtractor.getReceiverParty())) {
                             if (process.getAgreement() != null && StringUtils.equalsIgnoreCase(process.getAgreement().getName(), agreementName)
                                     || (StringUtils.equalsIgnoreCase(agreementName, OPTIONAL_AND_EMPTY) && process.getAgreement() == null)
                                     // Please notice that this is only for backward compatibility and will be removed ASAP!

@@ -176,10 +176,10 @@
                  initiatorRole="defaultInitiatorRole"
                  responderRole="defaultResponderRole">
             <initiatorParties>
-                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
             </initiatorParties>
             <responderParties>
-                <responderParty name="red_gw"/>
+                <responderParty name="blue_gw"/>
             </responderParties>
             <legs>
                 <leg name="pullLeg2"/>

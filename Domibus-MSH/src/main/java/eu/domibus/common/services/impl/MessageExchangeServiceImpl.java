@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.reliability.ReliabilityException;
+import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.model.configuration.*;
@@ -14,10 +15,16 @@ import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.sender.ReliabilityChecker;
+import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.pki.CertificateService;
+import eu.domibus.pki.PolicyService;
+import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
@@ -64,12 +71,24 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Autowired
     private UserMessageLogDao messageLogDao;
 
-
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
 
     @Autowired
     private ProcessValidator processValidator;
+
+    @Autowired
+    private PModeProvider pModeProvider;
+
+    @Autowired
+    private PolicyService policyService;
+
+    @Autowired
+    private CertificateService certificateService;
+
+    @Autowired
+    private ReliabilityChecker reliabilityChecker;
+
 
     /**
      * {@inheritDoc}
@@ -99,13 +118,13 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return;
         }
         Configuration configuration = configurationDAO.read();
-        Party responderParty = configuration.getParty();
-        List<Process> pullProcesses = processDao.findPullProcessesByResponder(responderParty);
+        Party initiator = configuration.getParty();
+        List<Process> pullProcesses = processDao.findPullProcessesInitiator(initiator);
         for (Process pullProcess : pullProcesses) {
             try {
                 processValidator.validatePullProcess(Lists.newArrayList(pullProcess));
                 for (LegConfiguration legConfiguration : pullProcess.getLegs()) {
-                    for (Party initiatorParty : pullProcess.getInitiatorParties()) {
+                    for (Party initiatorParty : pullProcess.getResponderParties()) {
                         String mpcQualifiedName = legConfiguration.getDefaultMpc().getQualifiedName();
                         //@thom remove the pullcontext from here.
                         PullContext pullContext = new PullContext(pullProcess,
@@ -113,7 +132,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                                 mpcQualifiedName);
                         MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(pullContext.getAgreement(),
                                 initiatorParty.getName(),
-                                responderParty.getName(),
+                                initiator.getName(),
                                 legConfiguration.getService().getName(),
                                 legConfiguration.getAction().getName(),
                                 legConfiguration.getName());
@@ -144,8 +163,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String retrieveReadyToPullUserMessageId(final String mpc, final Party responder) {
-        Set<Identifier> identifiers = responder.getIdentifiers();
+    public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
+        Set<Identifier> identifiers = initiator.getIdentifiers();
         List<MessagePullDto> messagingOnStatusReceiverAndMpc = new ArrayList<>();
         for (Identifier identifier : identifiers) {
             messagingOnStatusReceiverAndMpc.addAll(messagingDao.findMessagingOnStatusReceiverAndMpc(identifier.getPartyId(), MessageStatus.READY_TO_PULL, mpc));
@@ -157,8 +176,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return messagePullDto.getMessageId();
         }
         return null;
-
-
     }
 
     /**
@@ -206,5 +223,47 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         }
         return rawXmlByMessageId;
     }
+
+
+    //temporary solution to create new transaction on handlereliability.
+    //It should be change in the reliability checker but we need to test the impact first.
+    //New transaction is needed because every bean can potentialy invalidate the transaction, but
+    //the state of the message must be saved.
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+        reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+    }
+
+    @Override
+    public void verifyReceiverCerficate(final LegConfiguration legConfiguration, String receiverName) {
+        Policy policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+        if (!policyService.isNoSecurityPolicy(policy)) {
+            if (certificateService.isCertificateValidationEnabled()) {
+                final ChainCertificateInvalidException chainCertificateInvalidException = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]");
+                try {
+                    boolean certificateChainValid = certificateService.isCertificateChainValid(receiverName);
+                    if (!certificateChainValid) {
+                        throw chainCertificateInvalidException;
+                    }
+                } catch (Exception e) {
+                    throw chainCertificateInvalidException;
+                }
+            }
+        }
+    }
+
+
+    @Override
+    public void verifySenderCertificate(final LegConfiguration legConfiguration, String receiverName) {
+        Policy policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+        if (!policyService.isNoSecurityPolicy(policy))
+            // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
+            certificateService.isCertificateValid(receiverName);
+        LOG.info("Sender certificate exists and is valid [" + receiverName + "]");
+
+    }
+
+
 }
 
