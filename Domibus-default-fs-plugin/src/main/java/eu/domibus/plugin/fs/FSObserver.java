@@ -80,65 +80,69 @@ public class FSObserver {
         public void run() {
             WatchKey key = null;
             boolean stopWatching = false;
+            boolean validKey = true;
 
-            while (!stopWatching) {
+            while (!stopWatching && validKey) {
 
                 try {
                     LOG.debug("Taking from watcher");
                     key = watcher.take();
                 } catch (InterruptedException x) {
+                    LOG.error("Taking key from file system watcher was interrupted", x);
                     return;
                 }
 
                 List<WatchEvent<?>> events = key.pollEvents();
                 LOG.debug("Got {} FS events", events.size());
                 
-                for (WatchEvent<?> event : events) {
-                    WatchEvent.Kind<?> kind = event.kind();
-
-                    // This key is registered only
-                    // for ENTRY_CREATE events,
-                    // but an OVERFLOW event can
-                    // occur regardless if events
-                    // are lost or discarded.
-                    if (kind == OVERFLOW) {
-                        LOG.warn("File system watcher has overflown");
-                        continue;
-                    }
-
-                    // The filename is the
-                    // context of the event.
-                    WatchEvent<Path> ev = (WatchEvent<Path>) event;
-                    Path filename = ev.context();
-                    LOG.debug("Got FS event for filename: {}", filename);
-
-                    // This is just example code from the tutorial
-                    // Might be useful later
-                    // Verify that the new file is a text file.
-                    try {
-                        // Resolve the filename against the directory.
-                        // If the filename is "test" and the directory is "foo",
-                        // the resolved name is "test/foo".
-                        Path child = dir.resolve(filename);
-                        if (!Files.probeContentType(child).equals("text/plain")) {
-                            LOG.info("New file {} is not a plain text file.", filename);
-                            continue;
-                        }
-                    } catch (IOException x) {
-                        System.err.println(x);
-                        continue;
-                    }
-
-                    // do things with file
-                }
+                handleEvents(events);
 
                 // Reset the key -- this step is critical if you want to
                 // receive further watch events.  If the key is no longer valid,
                 // the directory is inaccessible so exit the loop.
-                boolean valid = key.reset();
-                if (!valid) {
-                    break;
+                validKey = key.reset();
+            }
+        }
+        
+        private void handleEvents(List<WatchEvent<?>> events) {
+            for (WatchEvent<?> event : events) {
+                WatchEvent.Kind<?> kind = event.kind();
+
+                // This key is registered only for ENTRY_CREATE events,
+                // but an OVERFLOW event can occur regardless if events
+                // are lost or discarded.
+                if (kind == OVERFLOW) {
+                    handleOverflowEvent(event);
+                } else {
+                    handleCreateEvent(event);
                 }
+            }
+        }
+        
+        private void handleOverflowEvent(WatchEvent<?> event) {
+            LOG.warn("File system watcher has overflown");
+        }
+
+        private void handleCreateEvent(WatchEvent<?> event) {
+            // The filename is the context of the event.
+            WatchEvent<Path> ev = (WatchEvent<Path>) event;
+            Path filename = ev.context();
+            LOG.debug("Got FS event for filename: {}", filename);
+            
+            // Resolve the filename against the directory.
+            // If the filename is "test" and the directory is "foo",
+            // the resolved name is "test/foo".
+            Path filePath = dir.resolve(filename);
+            handleCreatedFile(filePath);
+        }
+        
+        private void handleCreatedFile(Path filePath) {
+            // Just do a simple operation to simulate handling of the file
+            try {
+                String probedContentType = Files.probeContentType(filePath);
+                LOG.info("New file {} has mime type: {}.", filePath, probedContentType);
+            } catch (IOException x) {
+                LOG.error("IO error handling file system messsage", x);
             }
         }
     }
