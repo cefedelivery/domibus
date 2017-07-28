@@ -7,9 +7,11 @@ import java.util.Properties;
  */
 public class FSPluginProperties extends Properties {
 
-    private static final String PROPERTY_PREFIX = "fsPlugin.messages.";
+    private static final String PROPERTY_PREFIX = "fsplugin.messages.";
 
-    private static final String DOMAIN_PREFIX = "domain.";
+    private static final String DOMAIN_PREFIX = "fsplugin.domains.";
+    
+    private static final String MESSAGES_SECTION = ".messages.";
 
     private static final String ACTION_ARCHIVE = "archive";
 
@@ -88,7 +90,7 @@ public class FSPluginProperties extends Properties {
     }
 
     private String getDomainProperty(String domain, String propertyName, String defaultValue) {
-        String domainFullPropertyName = PROPERTY_PREFIX + DOMAIN_PREFIX + domain + "." + propertyName;
+        String domainFullPropertyName = DOMAIN_PREFIX + domain + MESSAGES_SECTION + propertyName;
         if (containsKey(domainFullPropertyName)) {
             return getProperty(domainFullPropertyName, defaultValue);
         }

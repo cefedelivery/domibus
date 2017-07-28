@@ -47,7 +47,7 @@
     <bean id="fsPluginPurgeSentWorkerTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="fsPluginPurgeSentWorkerJob"/>
-        <property name="cronExpression" value="${fsPlugin.messages.sent.purge.worker.cronExpression}"/>
+        <property name="cronExpression" value="${fsplugin.messages.sent.purge.worker.cronExpression}"/>
     </bean>
 
     <!-- customizable list of triggers to be executed by quartz -->
