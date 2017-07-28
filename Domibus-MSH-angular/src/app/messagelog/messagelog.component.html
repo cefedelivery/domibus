@@ -1,4 +1,4 @@
-<div class="selectionCriteria" style="overflow-x:auto;">
+<div class="selectionCriteria">
   <md-card style="margin:0;padding:10px;">
 
     <md-card-content>
@@ -120,11 +120,13 @@
     />
     <label [attr.for]="col.name">{{col.name}}</label>
   </div>
-  <button md-raised-button color="primary" (click)="selectAllColumns()"
-          id="all_button_id">All
+  <button md-raised-button color="primary" (click)="selectAllColumns()" id="all_button_id">
+    <md-icon>check_box</md-icon>
+    <span>All</span>
   </button>
-  <button md-raised-button color="primary" (click)="selectNoColumns()"
-          id="none_button_id">None
+  <button md-raised-button color="primary" (click)="selectNoColumns()" id="none_button_id">
+    <md-icon>check_box_outline_blank</md-icon>
+    <span>None</span>
   </button>
 </div>
 
@@ -166,11 +168,13 @@
 </ng-template>
 
 <div style="margin:5px">
-  <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()"
-          id="downloadbutton_id">Download
+  <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()" id="downloadbutton_id">
+    <md-icon>file_download</md-icon>
+    <span>Download</span>
   </button>
-  <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()"
-          id="resendbutton_id">Resend
+  <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()" id="resendbutton_id">
+    <md-icon>send</md-icon>
+    <span>Resend</span>
   </button>
 
 </div>
