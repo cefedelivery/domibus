@@ -49,3 +49,7 @@ html, body {
 .domibusTextTiny {
   font-size: 9pt;
 }
+
+span.md2-datepicker-arrow {
+  display: none;
+}
