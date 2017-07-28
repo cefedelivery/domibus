@@ -9,7 +9,7 @@ import {UserValidatorService} from "../uservalidator.service";
   providers:[UserValidatorService]
 })
 
-export class EditUserComponent implements OnInit {
+export class EditUserComponent {
 
   existingRoles = [];
 
@@ -29,6 +29,8 @@ export class EditUserComponent implements OnInit {
               fb: FormBuilder,
               userValidatorService:UserValidatorService) {
 
+    this.existingRoles = data.userroles;
+
     this.editMode = data.edit;
     this.userName = data.user.userName;
     this.email = data.user.email;
@@ -42,7 +44,7 @@ export class EditUserComponent implements OnInit {
         'userName': [],
         'email': [null, Validators.pattern],
         'roles': [Validators.required],
-        'password': [null, Validators.compose([Validators.minLength(8), Validators.maxLength(32)])],
+        'password': [null, Validators.pattern],
         'confirmation': [null],
         'active': [Validators.required]
       }, {
@@ -53,17 +55,13 @@ export class EditUserComponent implements OnInit {
         'userName': [Validators.required],
         'email': [null, Validators.pattern],
         'roles': [Validators.required],
-        'password': [Validators.compose([Validators.required, Validators.minLength(8), Validators.maxLength(32)])],
+        'password': [Validators.required, Validators.pattern],
         'confirmation': [Validators.required],
         'active': [Validators.required]
       }, {
         validator: userValidatorService.matchPassword
       });
     }
-  }
-
-  ngOnInit() {
-    this.existingRoles = ["ROLE_ADMIN", "ROLE_USER"];
   }
 
   updateUserName(event) {
@@ -87,9 +85,7 @@ export class EditUserComponent implements OnInit {
   }
 
   submitForm() {
-    debugger;
     this.dialogRef.close(true);
   }
-
 
 }

@@ -27,7 +27,7 @@ import java.util.List;
 @Service
 public class UserManagementServiceImpl implements UserService {
 
-    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);
 
     @Autowired
     private UserDao userDao;
@@ -66,6 +66,21 @@ public class UserManagementServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public void deleteUsers(List<eu.domibus.api.user.User> users) {
+        Collection<eu.domibus.api.user.User> usersForDeletion = filterDeleteUsers(users);
+
+        Collection<User> listUsers = new ArrayList<>();
+        for(eu.domibus.api.user.User user : usersForDeletion) {
+            User userEntity = domainConverter.convert(user, User.class);
+            userEntity.setPassword("");
+            listUsers.add(userEntity);
+        }
+
+        userDao.deleteAll(listUsers);
+    }
+
+    @Override
+    @Transactional
     public void saveUsers(List<eu.domibus.api.user.User> users) {
         Collection<eu.domibus.api.user.User> newUsers = filterNewUsers(users);
         LOG.debug("New users:" + newUsers.size());
@@ -76,6 +91,18 @@ public class UserManagementServiceImpl implements UserService {
         Collection<eu.domibus.api.user.User> passwordChangedModifiedUsers = filterModifiedUserWithPasswordChange(users);
         LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
         updateUserWithPasswordChange(passwordChangedModifiedUsers);
+    }
+
+    @Override
+    public List<eu.domibus.api.user.UserRole> findUserRoles() {
+        List<UserRole> userRolesEntities = userRoleDao.listRoles();
+
+        List<eu.domibus.api.user.UserRole> userRoles = new ArrayList<>();
+        for (UserRole userRoleEntity : userRolesEntities) {
+            eu.domibus.api.user.UserRole userRole = new eu.domibus.api.user.UserRole(userRoleEntity.getName());
+            userRoles.add(userRole);
+        }
+        return userRoles;
     }
 
     private void insertNewUsers(Collection<eu.domibus.api.user.User> users) {
@@ -125,6 +152,15 @@ public class UserManagementServiceImpl implements UserService {
             @Override
             public boolean apply(eu.domibus.api.user.User user) {
                 return UserState.NEW.name().equals(user.getStatus());
+            }
+        });
+    }
+
+    private Collection<eu.domibus.api.user.User> filterDeleteUsers(List<eu.domibus.api.user.User> users) {
+        return Collections2.filter(users, new Predicate<eu.domibus.api.user.User>() {
+            @Override
+            public boolean apply(eu.domibus.api.user.User user) {
+                return UserState.DELETE.name().equals(user.getStatus());
             }
         });
     }

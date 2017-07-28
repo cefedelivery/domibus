@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 
 import eu.domibus.api.user.User;
+import eu.domibus.api.user.UserRole;
 import eu.domibus.common.services.UserService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -53,6 +55,23 @@ public class UserResource {
         LOG.debug("Saving "+ usersRo.size()+"");
         List<eu.domibus.api.user.User> users = domainConverter.convert(usersRo, eu.domibus.api.user.User.class);
         userService.saveUsers(users);
+    }
+
+    @RequestMapping(value = {"/delete"}, method = POST)
+    public void delete(@RequestBody List<UserResponseRO> usersRo) {
+        LOG.debug("Deleting "+ usersRo.size()+"");
+        List<eu.domibus.api.user.User> users = domainConverter.convert(usersRo, eu.domibus.api.user.User.class);
+        userService.deleteUsers(users);
+    }
+
+    @RequestMapping(value = {"/userroles"}, method = GET)
+    public List<String> userRoles() {
+        List<String> result = new ArrayList<>();
+        List<UserRole> userRoles = userService.findUserRoles();
+        for(UserRole userRole : userRoles) {
+            result.add(userRole.getRole());
+        }
+        return result;
     }
 
 

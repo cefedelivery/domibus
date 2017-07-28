@@ -25,10 +25,17 @@
 
       <div>
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [value]="password" (blur)="updatePassword($event)" [formControl]="userForm.controls['password']">
+          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [value]="password" (blur)="updatePassword($event)" [formControl]="userForm.controls['password']" pattern="^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,32}$">
           <div *ngIf="userForm.controls['password'].hasError('required')" style="color:red; font-size: 70%">You should type a password</div>
-          <div *ngIf="userForm.controls['password'].dirty && userForm.controls['password'].hasError('minlength')" style="color:red; font-size: 70%">Minimum password length is 8</div>
-          <div *ngIf="userForm.controls['password'].dirty && userForm.controls['password'].hasError('maxlength')" style="color:red; font-size: 70%">Maximum password length is 32</div>
+          <div *ngIf="userForm.controls['password'].dirty && userForm.controls['password'].hasError('pattern')" style="color:red; font-size: 70%">
+            Password should follow all of these rules:<br>
+            - Minimum length: 8 characters<br>
+            - Maximum length: 32 characters<br>
+            - At least one letter in lowercase<br>
+            - At least one letter in uppercase<br>
+            - At least one digit<br>
+            - At least one special character
+          </div>
         </md-input-container>
       </div>
 
@@ -36,7 +43,7 @@
         <md-input-container [style.width]="'100%'">
           <input mdInput placeholder="Confirmation" name="confirmation" id="confirmation_id" type="password" [value]="confirmation" [formControl]="userForm.controls['confirmation']">
           <div *ngIf="userForm.controls['confirmation'].hasError('required')" style="color:red; font-size: 70%">You should type a password</div>
-          <div *ngIf="(userForm.controls['password'].dirty || userForm.controls['confirmation'].dirty) && userForm.controls['confirmation'].hasError('confirmation')" style="color:red; font-size: 70%">Passwords do not match</div>
+          <div *ngIf="userForm.controls['password'].dirty && userForm.controls['confirmation'].dirty && userForm.controls['confirmation'].hasError('confirmation')" style="color:red; font-size: 70%">Passwords do not match</div>
         </md-input-container>
       </div>
 

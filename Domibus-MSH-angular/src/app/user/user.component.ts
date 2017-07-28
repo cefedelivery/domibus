@@ -9,6 +9,7 @@ import {MessagefilterDialogComponent} from "app/messagefilter/messagefilter-dial
 import {CancelMessagefilterDialogComponent} from "../messagefilter/cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
 import {EditUserComponent} from "app/user/edituser-form/edituser-form.component";
 import {isNullOrUndefined} from "util";
+import {Http, Headers} from "@angular/http";
 
 
 @Component({
@@ -21,6 +22,7 @@ import {isNullOrUndefined} from "util";
 
 export class UserComponent implements OnInit {
   users: Array<UserResponseRO> = [];
+  userRoles: Array<String> = [];
   pageSize: number = 10;
   editing = {};
   //zone: NgZone;
@@ -37,16 +39,21 @@ export class UserComponent implements OnInit {
   editedUser: UserResponseRO;
   test: boolean = false;
 
-  constructor(private userService: UserService, public dialog: MdDialog, private userValidatorService: UserValidatorService, private alertService: AlertService) {
+  constructor(private http: Http, private userService: UserService, public dialog: MdDialog, private userValidatorService: UserValidatorService, private alertService: AlertService) {
     //this.zone = new NgZone({enableLongStackTrace: false});
   }
 
   ngOnInit(): void {
     this.getUsers();
+    this.getUserRoles();
   }
 
   getUsers(): void {
     this.userService.getUsers().subscribe(users => this.users = users);
+  }
+
+  getUserRoles() : void {
+    this.userService.getUserRoles().subscribe( userroles => this.userRoles = userroles);
   }
 
   onSelect({selected}) {
@@ -60,6 +67,7 @@ export class UserComponent implements OnInit {
       return;
     }
 
+    // select
     this.rowNumber = this.selected[0].$$index;
 
     this.selected.splice(0, this.selected.length);
@@ -101,7 +109,7 @@ export class UserComponent implements OnInit {
     this.users.push(this.editedUser);
     this.users = this.users.slice();
     this.rowNumber = this.users.length - 1;
-    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {data: {edit: false, user: this.users[this.rowNumber]}});
+    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {data: {edit: false, user: this.users[this.rowNumber], userroles: this.userRoles}});
     formRef.afterClosed().subscribe(result => {
       if(result == true) {
         this.updateUsername(formRef.componentInstance.userName);
@@ -122,7 +130,7 @@ export class UserComponent implements OnInit {
   }
 
   buttonEdit() {
-    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {data: {edit: true, user: this.users[this.rowNumber]}});
+    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {data: {edit: true, user: this.users[this.rowNumber], userroles: this.userRoles}});
     formRef.afterClosed().subscribe(result => {
       if(result == true) {
         //this.updateUsername(formRef.componentInstance.userName);
@@ -186,12 +194,28 @@ export class UserComponent implements OnInit {
     }
   }
 
-  deleteUser() {
+  buttonDelete() {
+    this.enableCancel = true;
+    this.enableSave = true;
+    this.enableDelete = false;
+    this.enableEdit = false;
+
+    // we need to use the old for loop approach to don't mess with the entries on the top before
+    for (let i = this.selected.length - 1; i >= 0; i--) {
+      //this.users.splice(this.selected[i].$$index, 1);
+      this.selected[i].status = UserState[UserState.DELETE];
+    }
+
+    this.selected = [];
 
   }
 
   filterModifiedUser(): UserResponseRO[] {
-    return this.users.filter(user => user.status !== UserState[UserState.PERSISTED]);
+    return this.users.filter(user => (user.status !== UserState[UserState.PERSISTED] && user.status !== UserState[UserState.DELETE]));
+  }
+
+  filterDeletedUsers(): UserResponseRO[] {
+    return this.users.filter(user => user.status === UserState[UserState.DELETE]);
   }
 
   userNameDblClick(number) {
@@ -201,18 +225,44 @@ export class UserComponent implements OnInit {
     }
   }
 
+  /*save() {
+    let headers = new Headers({'Content-Type': 'application/json'});
+    let dialogRef = this.dialog.open(MessagefilterDialogComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      switch (result) {
+        case 'Save' :
+          this.http.put('rest/user/save', JSON.stringify(this.users), {headers: headers}).subscribe(res => {
+            this.alertService.success("The operation 'update message filters' completed successfully.", false);
+
+          }, err => {
+            this.alertService.error("The operation 'update message filters' not completed successfully.", false);
+          });
+          break;
+      }
+    });
+  }*/
+
   save() {
-    let filteredUsers = this.filterModifiedUser();
-    if (filteredUsers.length > 0) {
-      if (this.userValidatorService.validateUsers(filteredUsers, this.users)) {
+    let filteredDeletedUsers = this.filterDeletedUsers();
+    // delete
+    if (filteredDeletedUsers.length > 0) {
+      this.userService.deleteUsers(filteredDeletedUsers);
+      this.enableSave = false;
+      this.enableCancel = false;
+    }
+
+    let filteredModifiedUsers = this.filterModifiedUser();
+    // edit or new
+    if (filteredModifiedUsers.length > 0) {
+      if (this.userValidatorService.validateUsers(filteredModifiedUsers, this.users)) {
         let dialogRef: MdDialogRef<MessagefilterDialogComponent> = this.dialog.open(MessagefilterDialogComponent);
         dialogRef.afterClosed().subscribe(result => {
           if (result === "Save") {
-            for (let u in filteredUsers) {
-              let user: UserResponseRO = filteredUsers[u];
+            for (let u in filteredModifiedUsers) {
+              let user: UserResponseRO = filteredModifiedUsers[u];
               user.authorities = user.roles.split(",");
             }
-            this.userService.saveUsers(filteredUsers);
+            this.userService.saveUsers(filteredModifiedUsers);
 
             this.enableSave = false;
             this.enableCancel = false;
@@ -220,6 +270,17 @@ export class UserComponent implements OnInit {
         });
       }
     }
-  }
+    /*else {
+           // delete
+           let dialogRef: MdDialogRef<MessagefilterDialogComponent> = this.dialog.open(MessagefilterDialogComponent);
+           dialogRef.afterClosed().subscribe(result => {
+             if (result === "Save") {
+               //this.userService.saveUsers(this.users);
 
+               this.enableSave = false;
+               this.enableCancel = false;
+             }
+           });
+         }*/
+  }
 }

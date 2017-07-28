@@ -1,4 +1,4 @@
-<div class="selectionCriteria" style="overflow-x:auto;">
+<div class="selectionCriteria">
   <md-card style="margin:0;padding:10px;">
     <md-card-content>
       <p class="domibusTextHeading" style="margin:0;font-weight: bold">Users</p>
@@ -82,7 +82,7 @@
               <md-icon>edit</md-icon>
               <span>Edit</span>
             </button>
-            <button id="userDeleteButton" md-raised-button (click)="deleteUser()" color="primary" [disabled]="!enableDelete">
+            <button id="userDeleteButton" md-raised-button (click)="buttonDelete()" color="primary" [disabled]="true">
               <md-icon>delete</md-icon>
               <span>Delete</span>
             </button>

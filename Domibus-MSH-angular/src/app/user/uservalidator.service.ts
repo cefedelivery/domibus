@@ -72,20 +72,12 @@ export class UserValidatorService{
       if (user.roles == null || user.roles.trim() === "") {
         errorMessage = errorMessage.concat("User " + number + " has no role defined\n");
       }
-      else {
-        let authorities = user.roles.split(",");
-        for (let a in authorities) {
-          if (authorities[a].trim().toUpperCase() !== "ROLE_USER" && authorities[a].trim().toUpperCase() !== "ROLE_ADMIN") {
-            errorMessage = errorMessage.concat("Role should be ROLE_USER or ROLE_ADMIN separated by ,\n");
-          }
-        }
-      }
       return errorMessage;
     }
 
    validateEmail(user:UserResponseRO,number): string{
     let email:string=user.email;
-    var EMAIL_REGEXP = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i;
+    let EMAIL_REGEXP = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i;
 
     if (email!= "" && (email.length <= 5 || !EMAIL_REGEXP.test(email))) {
       return "incorrectMailFormat for user "+number;

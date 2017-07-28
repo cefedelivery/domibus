@@ -1,10 +1,9 @@
 package eu.domibus.common.dao.security;
 
 import eu.domibus.common.model.security.User;
-import eu.domibus.common.model.security.UserRole;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  *
@@ -21,4 +20,8 @@ public interface UserDao {
     User loadActiveUserByUsername(String userName);
 
     void update(final User entity);
+
+    void delete(final User entity);
+
+    void deleteAll(final Collection<User> delete);
 }
