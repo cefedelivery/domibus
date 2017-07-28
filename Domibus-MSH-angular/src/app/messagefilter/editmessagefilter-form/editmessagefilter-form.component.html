@@ -41,16 +41,16 @@
       <table class="buttonsRow">
         <tr>
           <td>
-            <button md-raised-button color="primary" md-dialog-close>
-              <md-icon>cancel</md-icon>
-              <span>Cancel</span>
+            <!-- Can optionally provide a result for the closing dialog. -->
+            <button md-raised-button color="primary" [md-dialog-close]="true" (click)="submitForm()" type="submit" [disabled]="!messageFilterForm.valid" id="okbutton_id">
+              <md-icon>check_circle</md-icon>
+              <span>OK</span>
             </button>
           </td>
           <td>
-            <!-- Can optionally provide a result for the closing dialog. -->
-            <button md-raised-button color="primary" [md-dialog-close]="true" (click)="submitForm()" type="submit" [disabled]="!messageFilterForm.valid">
-              <md-icon>check_circle</md-icon>
-              <span>OK</span>
+            <button md-raised-button color="primary" md-dialog-close id="cancelbutton_id">
+              <md-icon>cancel</md-icon>
+              <span>Cancel</span>
             </button>
           </td>
         </tr>

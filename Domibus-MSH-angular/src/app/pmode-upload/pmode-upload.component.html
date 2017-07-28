@@ -13,10 +13,16 @@
     </div>
     <div class="divTableRow">
       <div class="divTableCell">
-        <button md-raised-button color="primary" (click)="submit()" id="uploadbutton_id">Upload</button>
+        <button md-raised-button color="primary" (click)="submit()" id="uploadbutton_id">
+          <md-icon>file_upload</md-icon>
+          <span>Upload</span>
+        </button>
       </div>
       <div class="divTableCell">
-        <button md-raised-button color="primary" (click)="dialogRef.close('Cancel')" id="cancelbutton_id">Cancel</button>
+        <button md-raised-button color="primary" (click)="dialogRef.close('Cancel')" id="cancelbutton_id">
+          <md-icon>cancel</md-icon>
+          <span>Cancel</span>
+        </button>
       </div>
     </div>
   </div>
