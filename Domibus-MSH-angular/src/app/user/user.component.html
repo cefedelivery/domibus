@@ -83,7 +83,7 @@
 
 </ngx-datatable>
 
-<div style="position: fixed;bottom:10px">
+<div style="margin:5px">
   <button id="userCancelButton" md-raised-button (click)="cancel()" color="primary"
           [disabled]="userCancelButtonDisabled">
     <md-icon>cancel</md-icon>
@@ -94,7 +94,7 @@
     <span>Save</span>
   </button>
   <button id="userNewButton" md-raised-button (click)="newUser()" color="primary" [disabled]="userNewButtonDisabled">
-    <md-icon>move_to_inbox</md-icon>
+    <md-icon>add</md-icon>
     <span>New</span>
   </button>
   <button id="userDeleteButton" md-raised-button color="primary" [disabled]="true">
