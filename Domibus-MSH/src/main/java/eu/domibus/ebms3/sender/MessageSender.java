@@ -4,6 +4,7 @@ import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
 import eu.domibus.api.message.attempt.MessageAttemptStatus;
+import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
@@ -11,6 +12,7 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -49,9 +51,6 @@ import java.util.Properties;
 public class MessageSender implements MessageListener {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageSender.class);
 
-    protected static String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING ="domibus.sender.certificate.validation.onsending";
-    protected static String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING ="domibus.receiver.certificate.validation.onsending";
-
     @Autowired
     private UserMessageService userMessageService;
 
@@ -81,15 +80,13 @@ public class MessageSender implements MessageListener {
     private RetryService retryService;
 
     @Autowired
-    PolicyService policyService;
-
-    @Autowired
     private MessageAttemptService messageAttemptService;
 
+    @Autowired
+    private MessageExchangeService messageExchangeService;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    PolicyService policyService;
 
     private void sendUserMessage(final String messageId) {
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
@@ -131,12 +128,13 @@ public class MessageSender implements MessageListener {
             Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
             Validate.notNull(receiverParty, "Responder party was not found");
 
-            if (!policyService.isNoSecurityPolicy(policy)) {
-                if(!checkCertificatesValidity(sendingParty.getName(), receiverParty.getName())) {
-                    // this flag is used in the finally clause
-                    abortSending = true;
-                    return;
-                }
+            try {
+                messageExchangeService.verifyReceiverCerficate(legConfiguration, receiverParty.getName());
+                messageExchangeService.verifySenderCertificate(legConfiguration, sendingParty.getName());
+            } catch (ChainCertificateInvalidException ccie) {
+                // this flag is used in the finally clause
+                abortSending = true;
+                return;
             }
 
             LOG.debug("PMode found : " + pModeKey);
@@ -181,40 +179,6 @@ public class MessageSender implements MessageListener {
                 LOG.error("Could not create the message attempt", e);
             }
         }
-    }
-
-    protected Boolean checkCertificatesValidity(String sender, String receiver) {
-        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
-            // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
-            try {
-                if(!certificateService.isCertificateChainValid(sender)) {
-                    LOG.error("Cannot send message: sender certificate is not valid or it has been revoked [" + sender + "]");
-                    return false;
-                }
-                LOG.info("Sender certificate exists and is valid [" + sender + "]");
-            } catch (DomibusCertificateException dce) {
-                // Is this an error and we stop the sending or we just log a warning that we were not able to validate the cert?
-                // my opinion is that since the option is enabled, we should validate no matter what => this is an error
-                LOG.error("Could not verify if the certificate chain is valid for alias " + sender, dce);
-                return false;
-            }
-        }
-
-        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
-            // Verifies the validity of receiver's certificate and reduces security issues due to possible hacked access points.
-            try {
-                if (!certificateService.isCertificateChainValid(receiver)) {
-                    LOG.error("Cannot send message: receiver certificate is not valid or it has been revoked [" + receiver + "]");
-                    return false;
-                }
-            } catch (DomibusCertificateException dce) {
-                // Is this an error and we stop the sending or we just log a warning that we were not able to validate the cert?
-                // my opinion is that since the option is enabled, we should validate no matter what => this is an error
-                LOG.error("Could not verify if the certificate chain is valid for alias " + receiver, dce);
-                return false;
-            }
-        }
-        return true;
     }
 
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)

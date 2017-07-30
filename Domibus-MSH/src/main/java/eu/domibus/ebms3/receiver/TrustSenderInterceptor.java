@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
@@ -205,6 +206,9 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
                 LOG.info("Check for message embedded certificate in the BinarySecurityToken tag");
                 cert = getCertificateFromBinarySecurityToken(getSecurityHeader(msg));
             }
+            if(cert == null) {
+                throw new SoapFault("CertificateException: Could not extract the certificate for validation", version.getSender());
+            }
             return cert;
         } catch (CertificateException certEx) {
             throw new SoapFault("CertificateException", certEx, version.getSender());
@@ -216,7 +220,12 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
     private X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader) throws WSSecurityException, CertificateException {
-        Node binarySecurityTokenTag = securityHeader.getElementsByTagName("wsse:BinarySecurityToken").item(0).getFirstChild();
+
+        NodeList binarySecurityTokenElement = securityHeader.getElementsByTagName("wsse:BinarySecurityToken");
+        if(binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null)
+            return null;
+
+        Node binarySecurityTokenTag = binarySecurityTokenElement.item(0).getFirstChild();
         if(binarySecurityTokenTag == null || !( binarySecurityTokenTag instanceof TextImpl) ) {
             return null;
         }
