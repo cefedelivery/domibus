@@ -19,6 +19,8 @@ import org.apache.wss4j.dom.WSConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -83,7 +85,7 @@ public class ReliabilityChecker {
                 messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) response.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
             } catch (JAXBException | SOAPException e) {
                 LOG.error(e.getMessage(), e);
-                return CheckResult.FAIL;
+                return matcher.fails();
             }
 
             final SignalMessage signalMessage = messaging.getSignalMessage();
@@ -103,7 +105,7 @@ public class ReliabilityChecker {
                         final UserMessage userMessageInRequest = this.jaxbContext.createUnmarshaller().unmarshal((Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue().getUserMessage();
                         if (!userMessage.equals(userMessageInRequest)) {
                             ReliabilityChecker.LOG.warn("Reliability check failed, the user message in the request does not match the user message in the response.");
-                            return CheckResult.FAIL;
+                            return matcher.fails();
                         }
 
                         return CheckResult.OK;
@@ -178,7 +180,7 @@ public class ReliabilityChecker {
 
         }
         LOG.businessError(DomibusMessageCode.BUS_RELIABILITY_GENERAL_ERROR, messageId);
-        return CheckResult.FAIL;
+        return matcher.fails();
 
     }
 
@@ -201,8 +203,10 @@ public class ReliabilityChecker {
     }
 
     public enum CheckResult {
-        OK, FAIL, WAITING_FOR_CALLBACK
+        OK, SEND_FAIL, PULL_FAILED, WAITING_FOR_CALLBACK
     }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
     public void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
         switch (reliabilityCheckSuccessful) {
             case OK:
@@ -224,8 +228,12 @@ public class ReliabilityChecker {
             case WAITING_FOR_CALLBACK:
                 userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
                 break;
-            case FAIL:
-                updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+            case SEND_FAIL:
+                updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
+                break;
+            case PULL_FAILED:
+                updateRetryLoggingService.updatePulledMessageRetryLogging(messageId, legConfiguration);
+                break;
         }
     }
 

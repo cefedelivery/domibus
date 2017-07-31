@@ -96,7 +96,7 @@ public class PullRequestHandlerImplTest {
             error.equals(ebMS3Exception.getFaultInfo());
             times = 1;
 
-            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            messageExchangeService.handlePullRequestReliability(messageId, ReliabilityChecker.CheckResult.SEND_FAIL, null, legConfiguration);
             times = 1;
 
         }};
@@ -146,7 +146,7 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             times = 1;
 
-            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK, null, legConfiguration);
+            messageExchangeService.handlePullRequestReliability(messageId, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK, null, legConfiguration);
             times = 1;
 
         }};
@@ -195,7 +195,7 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPFaultMessage(faultInfo = withCapture());
             times = 1;
             Assert.assertEquals("EBMS:0101", faultInfo.getErrorCode());
-            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            messageExchangeService.handlePullRequestReliability(messageId, ReliabilityChecker.CheckResult.SEND_FAIL, null, legConfiguration);
             times = 1;
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));
@@ -231,7 +231,7 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPFaultMessage(faultInfo = withCapture());
             times = 1;
             Assert.assertEquals("EBMS:0010", faultInfo.getErrorCode());
-            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            messageExchangeService.handlePullRequestReliability(messageId, ReliabilityChecker.CheckResult.SEND_FAIL, null, legConfiguration);
             times = 1;
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));
@@ -262,7 +262,7 @@ public class PullRequestHandlerImplTest {
             times = 1;
             messageBuilder.buildSOAPFaultMessage(withAny(new Error()));
             times = 0;
-            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            messageExchangeService.handlePullRequestReliability(messageId, ReliabilityChecker.CheckResult.SEND_FAIL, null, legConfiguration);
             times = 0;
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));
