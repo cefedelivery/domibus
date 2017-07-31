@@ -99,7 +99,7 @@ public class UpdateRetryLoggingServiceTest {
         final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
         final UserMessageLog userMessageLog = new UserMessageLog();
-        userMessageLog.setSendAttempts(3);
+        userMessageLog.setSendAttempts(2);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(receivedTime));
         userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
@@ -115,6 +115,7 @@ public class UpdateRetryLoggingServiceTest {
 
         updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
 
+        assertEquals(3, userMessageLog.getSendAttempts());
 
         new Verifications() {{
             messageLogDao.setAsNotified(messageId);
@@ -143,7 +144,7 @@ public class UpdateRetryLoggingServiceTest {
         final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
         final UserMessageLog userMessageLog = new UserMessageLog();
-        userMessageLog.setSendAttempts(3);
+        userMessageLog.setSendAttempts(2);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(receivedTime));
         userMessageLog.setNotificationStatus(NotificationStatus.NOT_REQUIRED);
@@ -184,7 +185,7 @@ public class UpdateRetryLoggingServiceTest {
         final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
         final UserMessageLog userMessageLog = new UserMessageLog();
-        userMessageLog.setSendAttempts(3);
+        userMessageLog.setSendAttempts(2);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(receivedTime));
         userMessageLog.setNotificationStatus(NotificationStatus.NOT_REQUIRED);

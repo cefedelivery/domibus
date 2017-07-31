@@ -300,7 +300,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(getNotificationStatus(legConfiguration))
                     .setMpc(message.getUserMessage().getMpc())
-                    .setSendAttemptsMax(getMaxAttempts(legConfiguration))
+                    .setSendAttemptsMax(getMaxAttempts(legConfiguration)+1) // counting retries after the first send attempt
                     .setBackendName(backendName)
                     .setEndpoint(to.getEndpoint());
 
