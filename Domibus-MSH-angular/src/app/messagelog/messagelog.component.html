@@ -2,100 +2,102 @@
   <md-card style="margin:0;padding:10px;">
 
     <md-card-content>
-      <p class="domibusTextHeading" style="margin:0;font-weight: bold">Messages</p>
+      <h1>Messages</h1>
 
-      <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
-        <md-input-container class="inputField">
-          <input mdInput placeholder="Message Id" name="messageId" [(ngModel)]="filter.messageId"
-                 #messageId="ngModel" id="messageid_id">
-        </md-input-container>
-        <md-input-container class="inputField" *ngIf="advancedSearch">
-          <input mdInput placeholder="Conversation Id" name="conversationId" [(ngModel)]="filter.conversationId"
-                 #conversationId="ngModel" id="conversationid_id">
-        </md-input-container>
+      <div class="panel">
+        <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
+          <md-input-container class="inputField">
+            <input mdInput placeholder="Message Id" name="messageId" [(ngModel)]="filter.messageId"
+                   #messageId="ngModel" id="messageid_id">
+          </md-input-container>
+          <md-input-container class="inputField" *ngIf="advancedSearch">
+            <input mdInput placeholder="Conversation Id" name="conversationId" [(ngModel)]="filter.conversationId"
+                   #conversationId="ngModel" id="conversationid_id">
+          </md-input-container>
 
-        <br *ngIf="advancedSearch">
+          <br *ngIf="advancedSearch">
 
-        <md-select placeholder="AP Role" name="mshRole" [(ngModel)]="filter.mshRole" id="aprole_id"
-                   *ngIf="advancedSearch">
-          <md-option [value]="''">
-          </md-option>
-          <md-option *ngFor="let role of mshRoles" [value]="role">
-            {{role}}
-          </md-option>
-        </md-select>
-        <md-select placeholder="Message Type" name="messageType" [(ngModel)]="filter.messageType" id="messagetype_id"
-                   *ngIf="advancedSearch">
-          <md-option [value]="''">
-          </md-option>
-          <md-option *ngFor="let type of msgTypes" [value]="type">
-            {{type}}
-          </md-option>
-        </md-select>
-        <md-select placeholder="Message Status" [(ngModel)]="filter.messageStatus" name="messageStatus"
-                   id="messagestatus_id">
-          <md-option [value]="''">
-          </md-option>
-          <md-option *ngFor="let mstatus of msgStatus" [value]="mstatus">
-            {{mstatus}}
-          </md-option>
-        </md-select>
-        <md-select placeholder="Notification Status" [(ngModel)]="filter.notificationStatus" class="optionField"
-                   name="notificationStatus" id="notificationstatus_id" *ngIf="advancedSearch">
-          <md-option [value]="''">
-          </md-option>
-          <md-option *ngFor="let nstatus of notifStatus" [value]="nstatus">
-            {{nstatus}}
-          </md-option>
-        </md-select>
-        <md-input-container class="inputFieldParties">
-          <input mdInput placeholder="From Party Id" name="fromPartyId" [(ngModel)]="filter.fromPartyId"
-                 #fromPartyId="ngModel" id="frompartyid_id">
-        </md-input-container>
-        <md-input-container class="inputFieldParties">
-          <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId"
-                 #toPartyId="ngModel" id="topartyid_id">
-        </md-input-container>
-        <md-input-container class="inputField" *ngIf="advancedSearch">
-          <input mdInput placeholder="Reference Message Id" name="refToMessageId" [(ngModel)]="filter.refToMessageId"
-                 #refToMessageId="ngModel" id="referencemessageid_id">
-        </md-input-container>
-        <md-input-container class="inputField" *ngIf="advancedSearch">
-          <input mdInput placeholder="Original Sender" name="originalSender" [(ngModel)]="filter.originalSender"
-                 #originalSender="ngModel" id="originalsender_id">
-        </md-input-container>
-        <md-input-container class="inputField" *ngIf="advancedSearch">
-          <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient"
-                 #finalRecipient="ngModel" id="finalrecipient_id">
-        </md-input-container>
+          <md-select placeholder="AP Role" name="mshRole" [(ngModel)]="filter.mshRole" id="aprole_id"
+                     *ngIf="advancedSearch">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let role of mshRoles" [value]="role">
+              {{role}}
+            </md-option>
+          </md-select>
+          <md-select placeholder="Message Type" name="messageType" [(ngModel)]="filter.messageType" id="messagetype_id"
+                     *ngIf="advancedSearch">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let type of msgTypes" [value]="type">
+              {{type}}
+            </md-option>
+          </md-select>
+          <md-select placeholder="Message Status" [(ngModel)]="filter.messageStatus" name="messageStatus"
+                     id="messagestatus_id">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let mstatus of msgStatus" [value]="mstatus">
+              {{mstatus}}
+            </md-option>
+          </md-select>
+          <md-select placeholder="Notification Status" [(ngModel)]="filter.notificationStatus" class="optionField"
+                     name="notificationStatus" id="notificationstatus_id" *ngIf="advancedSearch">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let nstatus of notifStatus" [value]="nstatus">
+              {{nstatus}}
+            </md-option>
+          </md-select>
+          <md-input-container class="inputFieldParties">
+            <input mdInput placeholder="From Party Id" name="fromPartyId" [(ngModel)]="filter.fromPartyId"
+                   #fromPartyId="ngModel" id="frompartyid_id">
+          </md-input-container>
+          <md-input-container class="inputFieldParties">
+            <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId"
+                   #toPartyId="ngModel" id="topartyid_id">
+          </md-input-container>
+          <md-input-container class="inputField" *ngIf="advancedSearch">
+            <input mdInput placeholder="Reference Message Id" name="refToMessageId" [(ngModel)]="filter.refToMessageId"
+                   #refToMessageId="ngModel" id="referencemessageid_id">
+          </md-input-container>
+          <md-input-container class="inputField" *ngIf="advancedSearch">
+            <input mdInput placeholder="Original Sender" name="originalSender" [(ngModel)]="filter.originalSender"
+                   #originalSender="ngModel" id="originalsender_id">
+          </md-input-container>
+          <md-input-container class="inputField" *ngIf="advancedSearch">
+            <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient"
+                   #finalRecipient="ngModel" id="finalrecipient_id">
+          </md-input-container>
 
-        <md2-datepicker placeholder="Sent from:"
-                        [(ngModel)]="filter.receivedFrom"
-                        name="receivedFrom"
-                        [type]="'datetime'"
-                        [max]="timestampFromMaxDate"
-                        (change)='onTimestampFromChange($event)'
-                        #timestampControl="ngModel" id="receivedfrom_id" class="dateTableField" *ngIf="advancedSearch">
-        </md2-datepicker>
-        <md2-datepicker placeholder="Received up to:"
-                        [(ngModel)]="filter.receivedTo"
-                        name="receivedTo"
-                        [min]="timestampToMinDate"
-                        [max]="timestampToMaxDate"
-                        (change)='onTimestampToChange($event)'
-                        [type]="'datetime'"
-                        #timestampControl="ngModel" id="receivedto_id" class="dateTableField" *ngIf="advancedSearch">
-        </md2-datepicker>
+          <md2-datepicker placeholder="Sent from:"
+                          [(ngModel)]="filter.receivedFrom"
+                          name="receivedFrom"
+                          [type]="'datetime'"
+                          [max]="timestampFromMaxDate"
+                          (change)='onTimestampFromChange($event)'
+                          #timestampControl="ngModel" id="receivedfrom_id" class="dateTableField" *ngIf="advancedSearch">
+          </md2-datepicker>
+          <md2-datepicker placeholder="Received up to:"
+                          [(ngModel)]="filter.receivedTo"
+                          name="receivedTo"
+                          [min]="timestampToMinDate"
+                          [max]="timestampToMaxDate"
+                          (change)='onTimestampToChange($event)'
+                          [type]="'datetime'"
+                          #timestampControl="ngModel" id="receivedto_id" class="dateTableField" *ngIf="advancedSearch">
+          </md2-datepicker>
 
-        <div class="expandableSearch">
-          <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
-            <md-icon>search</md-icon>
-            <span>Search</span>
-          </button>
-          <a href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()">Advanced</a>
-          <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()">Basic</a>
-        </div>
-      </form>
+          <div class="expandableSearch">
+            <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
+              <md-icon>search</md-icon>
+              <span>Search</span>
+            </button>
+            <a href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()">Advanced</a>
+            <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()">Basic</a>
+          </div>
+        </form>
+      </div>
     </md-card-content>
   </md-card>
 </div>
@@ -120,11 +122,13 @@
     />
     <label [attr.for]="col.name">{{col.name}}</label>
   </div>
-  <button md-raised-button color="primary" (click)="selectAllColumns()"
-          id="all_button_id">All
+  <button md-raised-button color="primary" (click)="selectAllColumns()" id="all_button_id">
+    <md-icon>check_box</md-icon>
+    <span>All</span>
   </button>
-  <button md-raised-button color="primary" (click)="selectNoColumns()"
-          id="none_button_id">None
+  <button md-raised-button color="primary" (click)="selectNoColumns()" id="none_button_id">
+    <md-icon>check_box_outline_blank</md-icon>
+    <span>None</span>
   </button>
 </div>
 
@@ -165,12 +169,13 @@
   <span class="text-select">{{value | domibusDate: dateFormat}}</span>
 </ng-template>
 
-<div style="margin:5px">
-  <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()"
-          id="downloadbutton_id">Download
+<div class="group-btn">
+  <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()" id="downloadbutton_id">
+    <md-icon>file_download</md-icon>
+    <span>Download</span>
   </button>
-  <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()"
-          id="resendbutton_id">Resend
+  <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()" id="resendbutton_id">
+    <md-icon>send</md-icon>
+    <span>Resend</span>
   </button>
-
 </div>

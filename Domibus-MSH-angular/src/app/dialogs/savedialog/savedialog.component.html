@@ -1,5 +1,5 @@
 <div style="width: 500px">
-  <h1 md-dialog-title>Do you want to save your changes? <br>Click on "Cancel" to abort or "Save" to proceed.
+  <h1 md-dialog-title>Do you want to save your changes? <br>Click on "Save" to proceed or "Cancel" to abort.
   </h1>
 
   <div class="divTable">
@@ -7,15 +7,15 @@
 
       <div class="divTableRow">
         <div class="divTableCell">
-          <button md-raised-button color="primary" (click)="dialogRef.close('Cancel')" id="cancelbutton_id">
-            <md-icon>cancel</md-icon>
-            <span>Cancel</span>
-          </button>
-        </div>
-        <div class="divTableCell">
           <button md-raised-button color="primary" (click)="dialogRef.close('Save')" id="savebutton_id">
             <md-icon>save</md-icon>
             <span>Save</span>
+          </button>
+        </div>
+        <div class="divTableCell">
+          <button md-raised-button color="primary" (click)="dialogRef.close('Cancel')" id="cancelbutton_id">
+            <md-icon>cancel</md-icon>
+            <span>Cancel</span>
           </button>
         </div>
       </div>
