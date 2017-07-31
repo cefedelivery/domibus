@@ -1,6 +1,6 @@
 Domibus 3.3-FR
-- Block receiving of message in case the sender's certificate is not valid or revoked.
-Three more properties added (check domibus.properties for details):
+- Block the receiving of the message in case the sender's certificate is not valid or revoked.
+Three more properties added (for more details check domibus.properties file):
     o domibus.sending.certificate.validation.receiver.enabled (default true)
     o domibus.sending.certificate.validation.sender.enabled (default true)
     o domibus.receiving.certificate.validation.sender.enabled (default true)
