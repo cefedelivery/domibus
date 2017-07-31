@@ -63,6 +63,8 @@
                    physicalName="domibus.notification.webservice"/>
             <queue id="jmsBackendNotificationQueue"
                    physicalName="domibus.notification.jms"/>
+            <queue id="filesystemBackendNotificationQueue"
+                   physicalName="domibus.notification.filesystem"/>
 
             <!-- Internal queues of JMS backend plugin -->
             <queue id="jmsPluginToBackendQueue"
