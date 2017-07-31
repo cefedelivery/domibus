@@ -3,8 +3,8 @@ import {MdDialogRef} from "@angular/material";
 
 @Component({
   selector: 'app-messagefilter-dialog',
-  templateUrl: './messagefilter-dialog.component.html',
-  styleUrls: ['./messagefilter-dialog.component.css']
+  templateUrl: './savedialog.component.html',
+  styleUrls: ['./savedialog.component.css']
 })
 export class MessagefilterDialogComponent implements OnInit {
 

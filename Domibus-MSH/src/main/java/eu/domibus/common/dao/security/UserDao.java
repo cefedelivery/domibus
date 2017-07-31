@@ -21,6 +21,8 @@ public interface UserDao {
 
     void update(final User entity);
 
+    void update(final List<User> users);
+
     void delete(final User entity);
 
     void deleteAll(final Collection<User> delete);

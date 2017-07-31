@@ -40,8 +40,8 @@ import {MessagelogDialogComponent} from './messagelog/messagelog-dialog/messagel
 import {JmsComponent} from './jms/jms.component';
 import {RowLimiterComponent} from './common/row-limiter/row-limiter.component';
 import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
-import {MessagefilterDialogComponent} from "./messagefilter/messagefilter-dialog/messagefilter-dialog.component";
-import {CancelMessagefilterDialogComponent} from "./messagefilter/cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
+import {MessagefilterDialogComponent} from "./dialogs/savedialog/savedialog.component";
+import {CancelDialogComponent} from "./dialogs/canceldialog/canceldialog.component";
 import {MessageDialogComponent} from './jms/message-dialog/message-dialog.component';
 import {PasswordComponent} from './user/password/password-dialog.component';
 import {DatePipe} from './customDate/datePipe';
@@ -74,7 +74,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessagefilterDialogComponent,
     PmodeUploadComponent,
     MessagelogDialogComponent,
-    CancelMessagefilterDialogComponent,
+    CancelDialogComponent,
     JmsComponent,
     RowLimiterComponent,
     MoveDialogComponent,
@@ -99,7 +99,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessageDialogComponent,
     MessagelogDetailsComponent,
     MessagelogDetailsComponent,
-    CancelMessagefilterDialogComponent,
+    CancelDialogComponent,
     MoveDialogComponent,
     PasswordComponent,
     DefaultPasswordDialogComponent,

@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {MessagefilterDialogComponent} from "./messagefilter-dialog/messagefilter-dialog.component";
+import {MessagefilterDialogComponent} from "../dialogs/savedialog/savedialog.component";
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {AlertService} from "../alert/alert.service";
 import {Http, Headers, Response} from "@angular/http";
@@ -7,7 +7,7 @@ import {Observable} from "rxjs/Observable";
 import {MessageFilterResult} from "./messagefilterresult";
 import {BackendFilterEntry} from "./backendfilterentry";
 import {RoutingCriteriaEntry} from "./routingcriteriaentry";
-import {CancelMessagefilterDialogComponent} from "./cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
+import {CancelDialogComponent} from "../dialogs/canceldialog/canceldialog.component";
 import {isNullOrUndefined, isUndefined} from "util";
 import {EditMessageFilterComponent} from "./editmessagefilter-form/editmessagefilter-form.component";
 
@@ -20,10 +20,8 @@ import {EditMessageFilterComponent} from "./editmessagefilter-form/editmessagefi
 
 export class MessageFilterComponent {
 
-  editing = {};
   rows = [];
   selected = [];
-  rollback = [];
 
   backendFilterNames = [];
 
@@ -42,7 +40,6 @@ export class MessageFilterComponent {
   areFiltersPersisted: boolean;
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
-    this.rollback = this.rows.slice();
   }
 
 
@@ -252,7 +249,7 @@ export class MessageFilterComponent {
   }
 
   cancelDialog() {
-    let dialogRef = this.dialog.open(CancelMessagefilterDialogComponent);
+    let dialogRef = this.dialog.open(CancelDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       switch (result) {
         case 'Yes' :
@@ -273,7 +270,6 @@ export class MessageFilterComponent {
       switch (result) {
         case 'Save' :
           this.disableSelectionAndButtons();
-          this.rollback = this.rows.slice();
           this.http.put('rest/messagefilters', JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
             this.alertService.success("The operation 'update message filters' completed successfully.", false);
             this.getBackendFiltersInfo();

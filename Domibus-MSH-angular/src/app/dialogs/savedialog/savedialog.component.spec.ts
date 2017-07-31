@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MessagefilterDialogComponent } from './messagefilter-dialog.component';
+import { MessagefilterDialogComponent } from './savedialog.component';
 
 describe('MessagelogDialogComponent', () => {
   let component: MessagefilterDialogComponent;

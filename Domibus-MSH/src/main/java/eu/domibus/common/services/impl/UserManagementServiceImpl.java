@@ -105,6 +105,35 @@ public class UserManagementServiceImpl implements UserService {
         return userRoles;
     }
 
+    @Override
+    @Transactional
+    public void updateUsers(List<eu.domibus.api.user.User> users) {
+        // insertion
+        Collection<eu.domibus.api.user.User> newUsers = filterNewUsers(users);
+        LOG.debug("New users:" + newUsers.size());
+        insertNewUsers(newUsers);
+
+        // deletion
+        List<User> usersEntities = domainConverter.convert(users, User.class);
+        List<User> allUsersEntities = userDao.listUsers();
+        List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
+        userDao.deleteAll(usersEntitiesToDelete);
+
+        // update
+        Collection<eu.domibus.api.user.User> noPasswordChangedModifiedUsers = filterModifiedUserWithoutPasswordChange(users);
+        LOG.debug("Modified users without password change:" + noPasswordChangedModifiedUsers.size());
+        updateUserWithoutPasswordChange(noPasswordChangedModifiedUsers);
+        Collection<eu.domibus.api.user.User> passwordChangedModifiedUsers = filterModifiedUserWithPasswordChange(users);
+        LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
+        updateUserWithPasswordChange(passwordChangedModifiedUsers);
+    }
+
+    private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
+        List<User> result = new ArrayList<>(masterData);
+        result.removeAll(newData);
+        return result;
+    }
+
     private void insertNewUsers(Collection<eu.domibus.api.user.User> users) {
         for (eu.domibus.api.user.User user : users) {
             List<String> authorities = user.getAuthorities();

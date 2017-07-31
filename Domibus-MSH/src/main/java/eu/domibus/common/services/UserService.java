@@ -1,5 +1,7 @@
 package eu.domibus.common.services;
 
+import eu.domibus.api.user.User;
+
 import java.util.List;
 
 /**
@@ -29,4 +31,9 @@ public interface UserService{
      * get all user roles
      */
     List<eu.domibus.api.user.UserRole> findUserRoles();
+
+    /**
+     * update users
+     */
+    void updateUsers(List<User> users);
 }
