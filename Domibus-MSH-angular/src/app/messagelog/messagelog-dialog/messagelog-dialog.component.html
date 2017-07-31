@@ -6,10 +6,16 @@
 
     <div class="divTableRow">
       <div class="divTableCell">
-        <button id="messageDialogResendButton" md-raised-button color="primary" (click)="dialogRef.close('Resend')">Resend</button>
+        <button id="messageDialogResendButton" md-raised-button color="primary" (click)="dialogRef.close('Resend')">
+          <md-icon>send</md-icon>
+          <span>Resend</span>
+        </button>
       </div>
       <div class="divTableCell">
-        <button id="messageDialogCancelButton" md-raised-button color="primary" (click)="dialogRef.close('Cancel')">Cancel</button>
+        <button id="messageDialogCancelButton" md-raised-button color="primary" (click)="dialogRef.close('Cancel')">
+          <md-icon>cancel</md-icon>
+          <span>Cancel</span>
+        </button>
       </div>
     </div>
   </div>
