@@ -185,7 +185,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (ReliabilityException r) {
             LOG.warn(r.getMessage());
         } finally {
-            reliabilityService.handlePullReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+            reliabilityService.handlePullReceiptReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
         }
         return null;
     }

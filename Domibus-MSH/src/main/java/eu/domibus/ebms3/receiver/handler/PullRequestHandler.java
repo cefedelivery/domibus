@@ -155,7 +155,7 @@ public class PullRequestHandler {
                 LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
                 retryService.purgeTimedoutMessage(messageId);
             } else {
-                reliabilityService.handlePullReliability(messageId, checkResult, null, leg);
+                reliabilityService.handleReliability(messageId, checkResult, null, leg);
                 try {
                     final MessageAttempt attempt = MessageAttemptBuilder.create()
                             .setMessageId(messageId)

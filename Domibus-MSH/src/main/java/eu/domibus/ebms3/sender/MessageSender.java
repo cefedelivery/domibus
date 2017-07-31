@@ -166,7 +166,7 @@ public class MessageSender implements MessageListener {
                 retryService.purgeTimedoutMessage(messageId);
                 return;
             }
-            reliabilityService.handlePushReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+            reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
             try {
                 attempt.setError(attemptError);
                 attempt.setStatus(attemptStatus);

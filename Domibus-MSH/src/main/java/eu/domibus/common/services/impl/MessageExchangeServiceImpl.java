@@ -36,7 +36,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static eu.domibus.common.MessageStatus.READY_TO_PULL;
 import static eu.domibus.common.MessageStatus.SEND_ENQUEUED;
@@ -55,7 +58,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     protected static String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING ="domibus.sender.certificate.validation.onsending";
     protected static String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING ="domibus.receiver.certificate.validation.onsending";
 
-    //@thom add more coverage here.
     @Autowired
     private ProcessDao processDao;
     @Autowired
@@ -184,8 +186,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     /**
      * {@inheritDoc}
-     *
-     * @thom test this method
      */
     @Override
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {

@@ -66,7 +66,7 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
 
     protected void verifySendMessageAck(SendResponse response) throws InterruptedException, SQLException{
         // Required in order to let time to the message to be consumed
-        TimeUnit.SECONDS.sleep(4);
+        TimeUnit.SECONDS.sleep(10);
 
         Assert.assertNotNull(response);
         String messageId = response.getMessageID().get(0);
