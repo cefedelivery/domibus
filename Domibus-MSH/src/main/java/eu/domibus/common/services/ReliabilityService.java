@@ -11,7 +11,7 @@ import eu.domibus.ebms3.sender.ResponseHandler;
 
 public interface ReliabilityService {
     /**
-     * Method supposed to be called in a finally block after pushing or being pulled.
+     * Method supposed to be called in a finally block after pushing.
      * It will handle the notifications and increase of messages attempts.
      *
      * @param messageId                  the processed message id.
@@ -23,6 +23,8 @@ public interface ReliabilityService {
 
 
     /**
+     * Method supposed to be called in a finally block after pull.
+     * It will handle the notifications and increase of messages attempts.
      * In the case of a pull request, the transaction that handle the reliability should also remove the raw message saved in order to validate
      * the non repudiation message.
      *
