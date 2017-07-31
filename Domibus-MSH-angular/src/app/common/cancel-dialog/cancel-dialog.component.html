@@ -7,13 +7,13 @@
 
       <div class="divTableRow">
         <div class="divTableCell">
-          <button md-raised-button color="primary" (click)="dialogRef.close('No')" id="nobutton_id">
+          <button md-raised-button color="primary" (click)="dialogRef.close(false)" id="nobutton_id">
             <md-icon>cancel</md-icon>
             <span>No</span>
           </button>
         </div>
         <div class="divTableCell">
-          <button md-raised-button color="primary" (click)="dialogRef.close('Yes')" id="yesbutton_id">
+          <button md-raised-button color="primary" (click)="dialogRef.close(true)" id="yesbutton_id">
             <md-icon>check_circle</md-icon>
             <span>Yes</span>
           </button>

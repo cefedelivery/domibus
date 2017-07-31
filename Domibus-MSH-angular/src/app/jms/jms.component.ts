@@ -6,13 +6,15 @@ import {isNullOrUndefined} from "util";
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {MoveDialogComponent} from "./move-dialog/move-dialog.component";
 import {MessageDialogComponent} from "./message-dialog/message-dialog.component";
+import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
+import {DirtyOperations} from "../common/dirty-operations";
 
 @Component({
   selector: 'app-jms',
   templateUrl: './jms.component.html',
   styleUrls: ['./jms.component.css']
 })
-export class JmsComponent implements OnInit {
+export class JmsComponent implements OnInit,DirtyOperations {
 
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
@@ -140,8 +142,12 @@ export class JmsComponent implements OnInit {
   }
 
   cancel() {
-    this.search();
-    this.alertService.success("The operation 'message updates cancelled' completed successfully");
+    let dialogRef: MdDialogRef<CancelDialogComponent> = this.dialog.open(CancelDialogComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.search();
+      }
+    });
   }
 
   save() {
@@ -250,6 +256,11 @@ export class JmsComponent implements OnInit {
       }
     )
   }
+
+  isDirty(): boolean {
+    return !isNullOrUndefined(this.markedForDeletionMessages) && this.markedForDeletionMessages.length > 0;
+  }
+
 
 
 }
