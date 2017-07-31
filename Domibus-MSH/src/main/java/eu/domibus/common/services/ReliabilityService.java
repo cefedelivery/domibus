@@ -3,8 +3,6 @@ package eu.domibus.common.services;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Thomas Dussart
@@ -21,6 +19,17 @@ public interface ReliabilityService {
      * @param isOk                       sub status when reliability is ok.
      * @param legConfiguration           the legconfiguration of this message exchange.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
+    void handlePushReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
+
+
+    /**
+     * In the case of a pull request, the transaction that handle the reliability should also remove the raw message saved in order to validate
+     * the non repudiation message.
+     *
+     * @param messageId
+     * @param reliabilityCheckSuccessful
+     * @param isOk
+     * @param legConfiguration
+     */
+    void handlePullReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
 }

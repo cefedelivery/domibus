@@ -19,7 +19,6 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
-import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -224,16 +223,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         return rawXmlByMessageId;
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void handlePullRequestReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
-        removeRawMessageIssuedByPullRequest(messageId);
-        reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
-    }
 
     @Override
     public void verifyReceiverCerficate(final LegConfiguration legConfiguration, String receiverName) {

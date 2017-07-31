@@ -29,8 +29,6 @@ import eu.domibus.pki.DomibusCertificateException;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.WebServiceException;
@@ -74,7 +72,7 @@ public class PullRequestHandler {
     @Autowired
     private ReliabilityService reliabilityService;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+
     public SOAPMessage handlePullRequestInNewTransaction(String messageId, PullContext pullContext) {
         if (messageId != null) {
             return handleRequest(messageId, pullContext);
@@ -157,7 +155,7 @@ public class PullRequestHandler {
                 LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
                 retryService.purgeTimedoutMessage(messageId);
             } else {
-                reliabilityService.handleReliability(messageId, checkResult, null, leg);
+                reliabilityService.handlePushReliability(messageId, checkResult, null, leg);
                 try {
                     final MessageAttempt attempt = MessageAttemptBuilder.create()
                             .setMessageId(messageId)

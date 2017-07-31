@@ -12,6 +12,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
@@ -98,6 +99,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Autowired
     private PullRequestHandler pullRequestHandler;
 
+    @Autowired
+    private ReliabilityService reliabilityService;
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
@@ -154,7 +157,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     SOAPMessage handlePullRequestReceipt(SOAPMessage request, Messaging messaging) {
         String messageId = messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
-        ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
+        ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.PULL_FAILED;
         ResponseHandler.CheckResult isOk = null;
         LegConfiguration legConfiguration = null;
         try {
@@ -171,7 +174,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 throw e;
             }
             reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, request, pModeKey, pullReceiptMatcher);
-
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
@@ -183,8 +185,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (ReliabilityException r) {
             LOG.warn(r.getMessage());
         } finally {
-            reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
-            messageExchangeService.removeRawMessageIssuedByPullRequest(messageId);
+            reliabilityService.handlePullReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
         }
         return null;
     }
@@ -203,6 +204,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         }
         return soapMessage;
     }
+
 
     SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();

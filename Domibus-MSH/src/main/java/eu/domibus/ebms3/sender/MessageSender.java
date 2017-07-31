@@ -189,7 +189,7 @@ public class MessageSender implements MessageListener {
                 skipHandling = true;
             }
             if(!skipHandling) {
-                reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+                reliabilityService.handlePushReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
                 try {
                     attempt.setError(attemptError);
                     attempt.setStatus(attemptStatus);
