@@ -91,22 +91,5 @@ public class SetPolicyInInterceptorIT extends AbstractIT {
 
         // handle message without adding any content
         setPolicyInInterceptor.handleMessage(sm);
-
-    }
-
-    private SoapMessage createSoapMessage(String dataset) {
-        InputStream is = getClass().getClassLoader().getResourceAsStream("dataset/as4/" + dataset);
-
-        SoapMessage sm = new SoapMessage(new MessageImpl());
-        sm.setContent(InputStream.class, is);
-        InterceptorChain ic = new PhaseInterceptorChain((new PhaseManagerImpl()).getOutPhases());
-        sm.setInterceptorChain(ic);
-        ExchangeImpl exchange = new ExchangeImpl();
-        Bus bus = new ExtensionManagerBus();
-        bus.setExtension(new PolicyBuilderImpl(bus), PolicyBuilder.class);
-        exchange.put(Bus.class, bus);
-        sm.setExchange(exchange);
-
-        return sm;
     }
 }
