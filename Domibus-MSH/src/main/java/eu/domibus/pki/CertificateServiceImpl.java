@@ -81,12 +81,6 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public boolean isCertificateValidationEnabled() {
-        String certificateValidationEnabled = domibusProperties.getProperty("domibus.certificate.validation.enabled", "true");
-        return Boolean.valueOf(certificateValidationEnabled);
-    }
-
-    @Override
     public boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException {
         boolean isValid = checkValidity(cert);
         if (!isValid) {

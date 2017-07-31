@@ -41,7 +41,6 @@ import {JmsComponent} from './jms/jms.component';
 import {RowLimiterComponent} from './common/row-limiter/row-limiter.component';
 import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
 import {MessagefilterDialogComponent} from "./messagefilter/messagefilter-dialog/messagefilter-dialog.component";
-import {CancelMessagefilterDialogComponent} from "./messagefilter/cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
 import {MessageDialogComponent} from './jms/message-dialog/message-dialog.component';
 import {PasswordComponent} from './user/password/password-dialog.component';
 import {DatePipe} from './customDate/datePipe';
@@ -49,6 +48,8 @@ import {DefaultPasswordDialogComponent} from './security/default-password-dialog
 import {MessagelogDetailsComponent} from './messagelog/messagelog-details/messagelog-details.component';
 import {ErrorlogDetailsComponent} from './errorlog/errorlog-details/errorlog-details.component';
 import {EditMessageFilterComponent} from "./messagefilter/editmessagefilter-form/editmessagefilter-form.component";
+import {CancelDialogComponent} from './common/cancel-dialog/cancel-dialog.component';
+import {DirtyGuard} from "./common/dirty.guard";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -73,7 +74,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessagefilterDialogComponent,
     PmodeUploadComponent,
     MessagelogDialogComponent,
-    CancelMessagefilterDialogComponent,
+    CancelDialogComponent,
     JmsComponent,
     RowLimiterComponent,
     MoveDialogComponent,
@@ -84,7 +85,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     DefaultPasswordDialogComponent,
     EditMessageFilterComponent,
     MessagelogDetailsComponent,
-    ErrorlogDetailsComponent
+    ErrorlogDetailsComponent,
+    CancelDialogComponent
   ],
   entryComponents: [
     AppComponent,
@@ -96,7 +98,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessageDialogComponent,
     MessagelogDetailsComponent,
     MessagelogDetailsComponent,
-    CancelMessagefilterDialogComponent,
+    CancelDialogComponent,
     MoveDialogComponent,
     PasswordComponent,
     DefaultPasswordDialogComponent,
@@ -127,6 +129,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     AuthenticatedGuard,
     AuthorizedGuard,
     AuthorizedAdminGuard,
+    DirtyGuard,
     HttpEventService,
     SecurityService,
     SecurityEventService,
