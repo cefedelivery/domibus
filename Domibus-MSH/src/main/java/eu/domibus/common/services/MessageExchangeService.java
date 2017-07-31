@@ -67,7 +67,16 @@ public interface MessageExchangeService {
     void removeRawMessageIssuedByPullRequest(String messageId);
 
 
-    void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
+    /**
+     * In the case of a pull request, the transaction that handle the reliability should also remove the raw message saved in order to validate
+     * the non repudiation message.
+     *
+     * @param messageId
+     * @param reliabilityCheckSuccessful
+     * @param isOk
+     * @param legConfiguration
+     */
+    void handlePullRequestReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
 
     void verifyReceiverCerficate(final LegConfiguration legConfiguration, String receiverName);
 

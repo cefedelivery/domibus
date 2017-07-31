@@ -225,13 +225,13 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     }
 
 
-    //temporary solution to create new transaction on handlereliability.
-    //It should be change in the reliability checker but we need to test the impact first.
-    //New transaction is needed because every bean can potentialy invalidate the transaction, but
-    //the state of the message must be saved.
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+    public void handlePullRequestReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+        removeRawMessageIssuedByPullRequest(messageId);
         reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 

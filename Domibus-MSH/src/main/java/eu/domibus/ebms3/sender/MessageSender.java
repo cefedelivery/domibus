@@ -7,11 +7,11 @@ import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -84,6 +84,9 @@ public class MessageSender implements MessageListener {
     @Autowired
     private MessageAttemptService messageAttemptService;
 
+    @Autowired
+    private ReliabilityService reliabilityService;
+
 
     private void sendUserMessage(final String messageId) {
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
@@ -95,7 +98,7 @@ public class MessageSender implements MessageListener {
         String attemptError = null;
 
 
-        ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
+        ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.SEND_FAIL;
         // Assuming that everything goes fine
         ResponseHandler.CheckResult isOk = ResponseHandler.CheckResult.OK;
 
@@ -186,7 +189,7 @@ public class MessageSender implements MessageListener {
                 skipHandling = true;
             }
             if(!skipHandling) {
-                reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+                reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
                 try {
                     attempt.setError(attemptError);
                     attempt.setStatus(attemptStatus);
