@@ -6,7 +6,8 @@ import {PasswordComponent} from "./password/password-dialog.component";
 import {UserValidatorService} from "app/user/uservalidator.service";
 import {AlertService} from "../alert/alert.service";
 import {MessagefilterDialogComponent} from "app/messagefilter/messagefilter-dialog/messagefilter-dialog.component";
-import {CancelMessagefilterDialogComponent} from "../messagefilter/cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
+import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
+import {DirtyOperations} from "../common/dirty-operations";
 
 
 @Component({
@@ -17,7 +18,8 @@ import {CancelMessagefilterDialogComponent} from "../messagefilter/cancelmessage
 })
 
 
-export class UserComponent implements OnInit {
+export class UserComponent implements OnInit ,DirtyOperations{
+
   users: Array<UserResponseRO> = [];
   pageSize: number = 10;
   editing = {};
@@ -97,9 +99,9 @@ export class UserComponent implements OnInit {
   cancel() {
     let filteredUsers = this.filterModifiedUser();
     if (filteredUsers.length > 0) {
-      let dialogRef: MdDialogRef<CancelMessagefilterDialogComponent> = this.dialog.open(CancelMessagefilterDialogComponent);
+      let dialogRef: MdDialogRef<CancelDialogComponent> = this.dialog.open(CancelDialogComponent);
       dialogRef.afterClosed().subscribe(result => {
-        if (result === "Yes") {
+        if (result) {
           this.users = [];
           this.getUsers();
         }
@@ -134,6 +136,10 @@ export class UserComponent implements OnInit {
         });
       }
     }
+  }
+
+  isDirty(): boolean {
+    return this.filterModifiedUser().length > 0;
   }
 
 }
