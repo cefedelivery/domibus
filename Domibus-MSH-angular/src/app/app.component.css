@@ -10,10 +10,18 @@ md-sidenav-container {
 }
 
 md-sidenav {
-  width: 300px;
   text-align: center;
   box-shadow: 7px 7px 10px #9B9B9B;
   /*border: dashed red;*/
+}
+
+md-sidenav.menu-expanded {
+  width: 220px;
+
+}
+
+md-sidenav.menu-collapsed {
+  width: 50px;
 }
 
 html, body, material-app, md-sidenav-container, .my-content {
@@ -23,9 +31,21 @@ html, body, material-app, md-sidenav-container, .my-content {
   /*border: dashed red;*/
 }
 
-.sideNavButton {
+.menu-expanded .sideNavButton {
   text-align: left;
   padding-left: 20%;
+}
+
+
+.menu-collapsed .sideNavButton {
+  text-align: center;
+  padding: 0 !important;
+  max-width: 50px !important;
+  min-width: 0px !important;
+}
+
+.menu-collapsed.mat-sidenav {
+  min-width: 1vw !important;
 }
 
 #topLogo {

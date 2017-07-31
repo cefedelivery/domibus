@@ -12,6 +12,8 @@ export class AppComponent implements OnInit {
 
   isAdmin: boolean;
   _currentUser: string;
+  fullMenu: boolean = true;
+  menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed"
 
   constructor(private securityService: SecurityService,
               private router: Router,
@@ -52,5 +54,10 @@ export class AppComponent implements OnInit {
   logout(event: Event): void {
     event.preventDefault();
     this.securityService.logout();
+  }
+
+  toggleMenu() {
+    this.fullMenu = !this.fullMenu
+    this.menuClass = this.fullMenu ? "menu-expanded" : "menu-collapsed"
   }
 }
