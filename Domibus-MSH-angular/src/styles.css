@@ -13,6 +13,12 @@ html, body {
   width: 100%;
   font-family: 'Open Sans', sans-serif;
 }
+
+.mat-dialog-title .mat-button, .mat-raised-button, .mat-icon-button{
+  font-family: 'Open Sans', sans-serif !important;
+}
+
+
 .text-select {
   -webkit-user-select: text;
   -moz-user-select: text;
