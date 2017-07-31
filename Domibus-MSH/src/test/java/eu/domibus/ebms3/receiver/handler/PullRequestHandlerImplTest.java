@@ -101,7 +101,7 @@ public class PullRequestHandlerImplTest {
             error.equals(ebMS3Exception.getFaultInfo());
             times = 1;
 
-            reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
+            reliabilityService.handleBusinessMessageReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
             times = 1;
 
         }};
@@ -151,7 +151,7 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             times = 1;
 
-            reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK, null, legConfiguration);
+            reliabilityService.handleBusinessMessageReliability(messageId, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK, null, legConfiguration);
             times = 1;
 
         }};
@@ -200,7 +200,7 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPFaultMessage(faultInfo = withCapture());
             times = 1;
             Assert.assertEquals("EBMS:0101", faultInfo.getErrorCode());
-            reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
+            reliabilityService.handleBusinessMessageReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
             times = 1;
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));
@@ -236,7 +236,7 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPFaultMessage(faultInfo = withCapture());
             times = 1;
             Assert.assertEquals("EBMS:0010", faultInfo.getErrorCode());
-            reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
+            reliabilityService.handleBusinessMessageReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
             times = 1;
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));

@@ -23,7 +23,7 @@ public interface ReliabilityService {
      * @param isOk                       sub status when reliability is ok.
      * @param legConfiguration           the legconfiguration of this message exchange.
      */
-    void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
+    void handleBusinessMessageReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
 
 
     /**

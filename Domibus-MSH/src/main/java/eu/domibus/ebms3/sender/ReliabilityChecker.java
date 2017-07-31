@@ -3,7 +3,6 @@ package eu.domibus.ebms3.sender;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
-import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -11,7 +10,6 @@ import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -19,8 +17,6 @@ import org.apache.wss4j.dom.WSConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -52,12 +48,6 @@ public class ReliabilityChecker {
     private PModeProvider pModeProvider;
     @Autowired
     private UserMessageLogDao userMessageLogDao;
-    @Autowired
-    private BackendNotificationService backendNotificationService;
-    @Autowired
-    private MessagingDao messagingDao;
-    @Autowired
-    private UpdateRetryLoggingService updateRetryLoggingService;
     @Autowired
     private ErrorLogDao errorLogDao;
     @Autowired
@@ -206,36 +196,6 @@ public class ReliabilityChecker {
         OK, SEND_FAIL, PULL_FAILED, WAITING_FOR_CALLBACK
     }
 
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
-        switch (reliabilityCheckSuccessful) {
-            case OK:
-                switch (isOk) {
-                    case OK:
-                        userMessageLogDao.setMessageAsAcknowledged(messageId);
-                        break;
-                    case WARNING:
-                        userMessageLogDao.setMessageAsAckWithWarnings(messageId);
-                        break;
-                    default:
-                        assert false;
-                }
-                backendNotificationService.notifyOfSendSuccess(messageId);
-                userMessageLogDao.setAsNotified(messageId);
-                messagingDao.clearPayloadData(messageId);
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS);
-                break;
-            case WAITING_FOR_CALLBACK:
-                userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
-                break;
-            case SEND_FAIL:
-                updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
-                break;
-            case PULL_FAILED:
-                updateRetryLoggingService.updatePulledMessageRetryLogging(messageId, legConfiguration);
-                break;
-        }
-    }
 
     /**
      * This method is responsible for the ebMS3 error handling (creation of errorlogs and marking message as sent)
