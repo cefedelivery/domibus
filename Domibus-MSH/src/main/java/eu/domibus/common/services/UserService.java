@@ -22,12 +22,6 @@ public interface UserService{
     void saveUsers(List<eu.domibus.api.user.User> users);
 
     /**
-     * deletes list of users
-     * @param users list of users
-     */
-    void deleteUsers(List<eu.domibus.api.user.User> users);
-
-    /**
      * get all user roles
      */
     List<eu.domibus.api.user.UserRole> findUserRoles();

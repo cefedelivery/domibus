@@ -66,21 +66,6 @@ public class UserManagementServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUsers(List<eu.domibus.api.user.User> users) {
-        Collection<eu.domibus.api.user.User> usersForDeletion = filterDeleteUsers(users);
-
-        Collection<User> listUsers = new ArrayList<>();
-        for(eu.domibus.api.user.User user : usersForDeletion) {
-            User userEntity = domainConverter.convert(user, User.class);
-            userEntity.setPassword("");
-            listUsers.add(userEntity);
-        }
-
-        userDao.deleteAll(listUsers);
-    }
-
-    @Override
-    @Transactional
     public void saveUsers(List<eu.domibus.api.user.User> users) {
         Collection<eu.domibus.api.user.User> newUsers = filterNewUsers(users);
         LOG.debug("New users:" + newUsers.size());
@@ -106,8 +91,15 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void updateUsers(List<eu.domibus.api.user.User> users) {
+        // update
+        Collection<eu.domibus.api.user.User> noPasswordChangedModifiedUsers = filterModifiedUserWithoutPasswordChange(users);
+        LOG.debug("Modified users without password change:" + noPasswordChangedModifiedUsers.size());
+        updateUserWithoutPasswordChange(noPasswordChangedModifiedUsers);
+        Collection<eu.domibus.api.user.User> passwordChangedModifiedUsers = filterModifiedUserWithPasswordChange(users);
+        LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
+        updateUserWithPasswordChange(passwordChangedModifiedUsers);
+
         // insertion
         Collection<eu.domibus.api.user.User> newUsers = filterNewUsers(users);
         LOG.debug("New users:" + newUsers.size());
@@ -118,14 +110,6 @@ public class UserManagementServiceImpl implements UserService {
         List<User> allUsersEntities = userDao.listUsers();
         List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
         userDao.deleteAll(usersEntitiesToDelete);
-
-        // update
-        Collection<eu.domibus.api.user.User> noPasswordChangedModifiedUsers = filterModifiedUserWithoutPasswordChange(users);
-        LOG.debug("Modified users without password change:" + noPasswordChangedModifiedUsers.size());
-        updateUserWithoutPasswordChange(noPasswordChangedModifiedUsers);
-        Collection<eu.domibus.api.user.User> passwordChangedModifiedUsers = filterModifiedUserWithPasswordChange(users);
-        LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
-        updateUserWithPasswordChange(passwordChangedModifiedUsers);
     }
 
     private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
@@ -181,15 +165,6 @@ public class UserManagementServiceImpl implements UserService {
             @Override
             public boolean apply(eu.domibus.api.user.User user) {
                 return UserState.NEW.name().equals(user.getStatus());
-            }
-        });
-    }
-
-    private Collection<eu.domibus.api.user.User> filterDeleteUsers(List<eu.domibus.api.user.User> users) {
-        return Collections2.filter(users, new Predicate<eu.domibus.api.user.User>() {
-            @Override
-            public boolean apply(eu.domibus.api.user.User user) {
-                return UserState.DELETE.name().equals(user.getStatus());
             }
         });
     }

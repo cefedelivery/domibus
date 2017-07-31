@@ -8,6 +8,5 @@ package eu.domibus.api.user;
 public enum UserState {
     PERSISTED,
     NEW,
-    UPDATED,
-    DELETE
+    UPDATED
 }

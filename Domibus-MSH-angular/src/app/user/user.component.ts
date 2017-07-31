@@ -181,12 +181,14 @@ export class UserComponent implements OnInit {
         case 'Save' :
           this.disableSelectionAndButtons();
           this.http.put('rest/user/users', JSON.stringify(this.users), {headers: headers}).subscribe(res => {
-            this.alertService.success("The operation 'update users' completed successfully.", false);
             this.getUsers();
+            this.getUserRoles();
+            this.alertService.success("The operation 'update users' completed successfully.", false);
           }, err => {
+            this.getUsers();
+            this.getUserRoles();
             this.alertService.error("The operation 'update users' not completed successfully.", false);
           });
-
           break;
         case 'Cancel':
         // do nothing
