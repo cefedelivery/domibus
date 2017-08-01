@@ -1,6 +1,68 @@
+<md-card>
+  <md-card-content>
+    <p class="domibusTextHeading" style="margin:0;font-weight: bold">Truststore</p>
+  </md-card-content>
+  <!--// <app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>-->
+</md-card>
+
+<ngx-datatable
+  id="errorLogTable"
+  class="material striped"
+  [rows]="trustStoreEntries"
+  [columnMode]="'force'"
+  [headerHeight]="50"
+  [footerHeight]="50"
+  [rowHeight]="'auto'"
+  [scrollbarH]="true"
+  [loadingIndicator]="loading"
+  [selectionType]="'multi'"
+  [selected]="selectedMessages"
+  [limit]="pageSize"
+  [sorts]="[{prop: 'alias', dir: 'desc'}]"
+  (activate)="onActivate($event)"
+  (select)="onSelect($event)">
+
+  <ngx-datatable-column name="Name" prop="name">
+  </ngx-datatable-column>
+
+  <ngx-datatable-column name="Subject" prop="subject">
+  </ngx-datatable-column>
+
+  <ngx-datatable-column name="Issuer" prop="issuer">
+  </ngx-datatable-column>
+
+  <ngx-datatable-column name="Valid from" prop="validFrom">
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      {{value | date: dateFormat}}
+    </ng-template>
+  </ngx-datatable-column>
+
+  <ngx-datatable-column name="Valid until" prop="validUntil">
+    <ng-template let-value="value" ngx-datatable-cell-template>
+      {{value | date: dateFormat}}
+    </ng-template>
+  </ngx-datatable-column>
+</ngx-datatable>
+
+<div>
+  <md-tab-group>
+    <md-tab label="XML">
+      <md-input-container class="pmodes-text-area">
+        <textarea mdInput></textarea>
+      </md-input-container>
+      <div>
+        <button md-raised-button color="primary" (click)="upload()" id="uploadbutton_id">
+          <md-icon>file_upload</md-icon>
+          <span>Upload</span>
+        </button>
+      </div>
+    </md-tab>
+  </md-tab-group>
+</div>
+
+
 <div class="divTable">
   <div class="divTableBody">
-
     <div class="divTableRow">
       <div class="divTableCell firstColumn"><label for="password">Truststore password</label></div>
       <div class="divTableCell">
@@ -25,3 +87,4 @@
     </div>
   </div>
 </div>
+
