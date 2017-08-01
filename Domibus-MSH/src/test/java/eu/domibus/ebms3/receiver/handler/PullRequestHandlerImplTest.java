@@ -11,6 +11,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.Error;
@@ -56,8 +57,12 @@ public class PullRequestHandlerImplTest {
     @Injectable
     RetryService retryService;
 
+    @Injectable
+    ReliabilityService reliabilityService;
+
     @Tested
     PullRequestHandler pullRequestHandler;
+
 
     @Test
     public void testHandlePullRequestMessageFoundWithErro(
@@ -96,7 +101,7 @@ public class PullRequestHandlerImplTest {
             error.equals(ebMS3Exception.getFaultInfo());
             times = 1;
 
-            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
             times = 1;
 
         }};
@@ -146,7 +151,7 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             times = 1;
 
-            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK, null, legConfiguration);
+            reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK, null, legConfiguration);
             times = 1;
 
         }};
@@ -195,7 +200,7 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPFaultMessage(faultInfo = withCapture());
             times = 1;
             Assert.assertEquals("EBMS:0101", faultInfo.getErrorCode());
-            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
             times = 1;
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));
@@ -231,7 +236,7 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPFaultMessage(faultInfo = withCapture());
             times = 1;
             Assert.assertEquals("EBMS:0010", faultInfo.getErrorCode());
-            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
             times = 1;
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));
@@ -262,7 +267,7 @@ public class PullRequestHandlerImplTest {
             times = 1;
             messageBuilder.buildSOAPFaultMessage(withAny(new Error()));
             times = 0;
-            messageExchangeService.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, legConfiguration);
+            reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.SEND_FAIL, null, legConfiguration);
             times = 0;
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));

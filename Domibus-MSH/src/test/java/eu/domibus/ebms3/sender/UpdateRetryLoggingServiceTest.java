@@ -113,7 +113,7 @@ public class UpdateRetryLoggingServiceTest {
         }};
 
 
-        updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
 
         new Verifications() {{
@@ -156,7 +156,7 @@ public class UpdateRetryLoggingServiceTest {
             result = userMessageLog;
         }};
 
-        updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
         new Verifications() {{
             messagingDao.clearPayloadData(messageId);
@@ -194,7 +194,7 @@ public class UpdateRetryLoggingServiceTest {
             result = userMessageLog;
         }};
 
-        updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
         new Verifications() {{
             messagingDao.clearPayloadData(messageId); times = 0;
@@ -236,7 +236,7 @@ public class UpdateRetryLoggingServiceTest {
         }};
 
 
-        updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
 
         new Verifications() {{
@@ -280,7 +280,7 @@ public class UpdateRetryLoggingServiceTest {
         }};
 
 
-        updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
 
         new Verifications() {{
@@ -319,7 +319,7 @@ public class UpdateRetryLoggingServiceTest {
         }};
 
 
-        updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
 
         assertEquals(MessageStatus.WAITING_FOR_RETRY, userMessageLog.getMessageStatus());

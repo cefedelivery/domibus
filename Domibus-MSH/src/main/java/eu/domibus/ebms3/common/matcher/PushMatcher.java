@@ -2,6 +2,7 @@ package eu.domibus.ebms3.common.matcher;
 
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReplyPattern;
+import eu.domibus.ebms3.sender.ReliabilityChecker;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -21,5 +22,10 @@ public class PushMatcher implements ReliabilityMatcher {
     @Override
     public boolean matchReliableReceipt(LegConfiguration legConfiguration) {
         return legConfiguration.getReliability() != null && ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern());
+    }
+
+    @Override
+    public ReliabilityChecker.CheckResult fails() {
+        return ReliabilityChecker.CheckResult.SEND_FAIL;
     }
 }

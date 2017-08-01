@@ -13,6 +13,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
+import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
@@ -150,6 +151,9 @@ public class MSHWebServiceTest {
     @Injectable
     PullRequestHandler pullRequestHandler;
 
+    @Injectable
+    ReliabilityService reliabilityService;
+
 
     /**
      * Happy flow unit testing with actual data
@@ -277,7 +281,7 @@ public class MSHWebServiceTest {
             messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
             times = 1;
 
-            pullRequestHandler.handlePullRequestInNewTransaction(messageId, pullContext);
+            pullRequestHandler.handlePullRequest(messageId, pullContext);
             times = 1;
         }};
     }
@@ -323,8 +327,7 @@ public class MSHWebServiceTest {
             responseHandler.handle(request);
             times = 1;
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
-            reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, withAny(legConfiguration));
-            messageExchangeService.removeRawMessageIssuedByPullRequest(messageId);
+            reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, withAny(legConfiguration));
         }};
 
     }
@@ -351,7 +354,7 @@ public class MSHWebServiceTest {
 
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
             times = 0;
-            reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, withAny(legConfiguration));
+            reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, withAny(legConfiguration));
             times = 1;
 
         }};
@@ -380,7 +383,7 @@ public class MSHWebServiceTest {
 
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
             times = 0;
-            reliabilityChecker.handleReliability(messageId, ReliabilityChecker.CheckResult.FAIL, null, withAny(legConfiguration));
+            reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, withAny(legConfiguration));
             times = 1;
 
         }};
