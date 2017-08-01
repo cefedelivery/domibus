@@ -73,7 +73,7 @@ public class PullRequestHandler {
     private ReliabilityService reliabilityService;
 
 
-    public SOAPMessage handlePullRequestInNewTransaction(String messageId, PullContext pullContext) {
+    public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
             return handleRequest(messageId, pullContext);
         } else {

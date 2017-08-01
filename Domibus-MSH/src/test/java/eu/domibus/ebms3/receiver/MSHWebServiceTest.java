@@ -281,7 +281,7 @@ public class MSHWebServiceTest {
             messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
             times = 1;
 
-            pullRequestHandler.handlePullRequestInNewTransaction(messageId, pullContext);
+            pullRequestHandler.handlePullRequest(messageId, pullContext);
             times = 1;
         }};
     }
