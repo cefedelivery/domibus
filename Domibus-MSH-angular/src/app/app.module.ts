@@ -40,8 +40,6 @@ import {MessagelogDialogComponent} from './messagelog/messagelog-dialog/messagel
 import {JmsComponent} from './jms/jms.component';
 import {RowLimiterComponent} from './common/row-limiter/row-limiter.component';
 import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
-import {MessagefilterDialogComponent} from "./dialogs/savedialog/savedialog.component";
-import {CancelDialogComponent} from "./dialogs/canceldialog/canceldialog.component";
 import {MessageDialogComponent} from './jms/message-dialog/message-dialog.component';
 import {PasswordComponent} from './user/password/password-dialog.component';
 import {DatePipe} from './customDate/datePipe';
@@ -49,7 +47,10 @@ import {DefaultPasswordDialogComponent} from './security/default-password-dialog
 import {MessagelogDetailsComponent} from './messagelog/messagelog-details/messagelog-details.component';
 import {ErrorlogDetailsComponent} from './errorlog/errorlog-details/errorlog-details.component';
 import {EditMessageFilterComponent} from "./messagefilter/editmessagefilter-form/editmessagefilter-form.component";
+import {CancelDialogComponent} from './common/cancel-dialog/cancel-dialog.component';
+import {DirtyGuard} from "./common/dirty.guard";
 import {EditUserComponent} from "app/user/edituser-form/edituser-form.component";
+import {MessagefilterDialogComponent} from "./dialogs/savedialog/savedialog.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -79,7 +80,6 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     RowLimiterComponent,
     MoveDialogComponent,
     MessageDialogComponent,
-    MessagefilterDialogComponent,
     PasswordComponent,
     DatePipe,
     DefaultPasswordDialogComponent,
@@ -108,7 +108,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     EditUserComponent
   ],
   imports: [
-    BrowserModule,//
+    BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
     HttpModule,
@@ -131,6 +131,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     AuthenticatedGuard,
     AuthorizedGuard,
     AuthorizedAdminGuard,
+    DirtyGuard,
     HttpEventService,
     SecurityService,
     SecurityEventService,

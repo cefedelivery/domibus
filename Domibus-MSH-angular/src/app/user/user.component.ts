@@ -9,6 +9,7 @@ import {CancelDialogComponent} from "../dialogs/canceldialog/canceldialog.compon
 import {EditUserComponent} from "app/user/edituser-form/edituser-form.component";
 import {isNullOrUndefined} from "util";
 import {Http, Headers} from "@angular/http";
+import {DirtyOperations} from "../common/dirty-operations";
 
 
 @Component({
@@ -19,7 +20,8 @@ import {Http, Headers} from "@angular/http";
 })
 
 
-export class UserComponent implements OnInit {
+export class UserComponent implements OnInit ,DirtyOperations{
+
   users: Array<UserResponseRO> = [];
   userRoles: Array<String> = [];
   pageSize: number = 10;
@@ -194,6 +196,10 @@ export class UserComponent implements OnInit {
         // do nothing
       }
     });
+  }
+
+  isDirty(): boolean {
+    return this.enableCancel;
   }
 
 }

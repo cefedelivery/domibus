@@ -23,6 +23,7 @@ import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
+import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static eu.domibus.common.MessageStatus.READY_TO_PULL;
 import static eu.domibus.common.MessageStatus.SEND_ENQUEUED;
@@ -54,6 +52,10 @@ import static eu.domibus.common.services.impl.PullContext.*;
 public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageExchangeService.class);
+
+    protected static String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING ="domibus.sender.certificate.validation.onsending";
+    protected static String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING ="domibus.receiver.certificate.validation.onsending";
+
     //@thom add more coverage here.
     @Autowired
     private ProcessDao processDao;
@@ -89,6 +91,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Autowired
     private ReliabilityChecker reliabilityChecker;
 
+    @Autowired
+    @Qualifier("domibusProperties")
+    private java.util.Properties domibusProperties;
 
     /**
      * {@inheritDoc}
@@ -235,35 +240,48 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 
+
+
+
     @Override
     public void verifyReceiverCerficate(final LegConfiguration legConfiguration, String receiverName) {
         Policy policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
-        if (!policyService.isNoSecurityPolicy(policy)) {
-            if (certificateService.isCertificateValidationEnabled()) {
-                final ChainCertificateInvalidException chainCertificateInvalidException = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]");
-                try {
-                    boolean certificateChainValid = certificateService.isCertificateChainValid(receiverName);
-                    if (!certificateChainValid) {
-                        throw chainCertificateInvalidException;
-                    }
-                } catch (Exception e) {
+        if (policyService.isNoSecurityPolicy(policy)) {
+            return;
+        }
+        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+            final ChainCertificateInvalidException chainCertificateInvalidException = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]");
+            try {
+                boolean certificateChainValid = certificateService.isCertificateChainValid(receiverName);
+                if (!certificateChainValid) {
                     throw chainCertificateInvalidException;
                 }
+                LOG.info("Receiver certificate exists and is valid [" + receiverName + "]");
+            } catch (DomibusCertificateException e) {
+                throw chainCertificateInvalidException;
             }
         }
     }
 
-
     @Override
-    public void verifySenderCertificate(final LegConfiguration legConfiguration, String receiverName) {
+    public void verifySenderCertificate(final LegConfiguration legConfiguration, String senderName) {
         Policy policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
-        if (!policyService.isNoSecurityPolicy(policy))
-            // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
-            certificateService.isCertificateValid(receiverName);
-        LOG.info("Sender certificate exists and is valid [" + receiverName + "]");
-
+        if (policyService.isNoSecurityPolicy(policy)) {
+            return;
+        }
+        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+            final ChainCertificateInvalidException chainCertificateInvalidException = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]");
+            try {
+                if (!certificateService.isCertificateChainValid(senderName)) {
+                    throw chainCertificateInvalidException;
+                }
+                LOG.info("Sender certificate exists and is valid [" + senderName + "]");
+            } catch (DomibusCertificateException dce) {
+                // Is this an error and we stop the sending or we just log a warning that we were not able to validate the cert?
+                // my opinion is that since the option is enabled, we should validate no matter what => this is an error
+                throw chainCertificateInvalidException;
+            }
+        }
     }
-
-
 }
 

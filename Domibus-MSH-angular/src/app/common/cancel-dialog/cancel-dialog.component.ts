@@ -2,9 +2,9 @@ import {Component, OnInit} from '@angular/core';
 import {MdDialogRef} from "@angular/material";
 
 @Component({
-  selector: 'app-messagefilter-dialog',
-  templateUrl: './canceldialog.component.html',
-  styleUrls: ['./canceldialog.component.css']
+  selector: 'app-cancel-dialog',
+  templateUrl: './cancel-dialog.component.html',
+  styleUrls: ['./cancel-dialog.component.css']
 })
 export class CancelDialogComponent implements OnInit {
 
@@ -13,5 +13,5 @@ export class CancelDialogComponent implements OnInit {
 
   ngOnInit() {
   }
-}
 
+}
