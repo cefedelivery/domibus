@@ -81,6 +81,7 @@ public class MessageSender implements MessageListener {
 
     @Autowired
     PolicyService policyService;
+
     @Autowired
     private ReliabilityService reliabilityService;
 
