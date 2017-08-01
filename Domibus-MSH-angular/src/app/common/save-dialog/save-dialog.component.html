@@ -1,23 +1,25 @@
-<div style="width: 500px">
-  <h1 md-dialog-title>Do you want to save your changes? <br>Click on "Save" to proceed or "Cancel" to abort.
-  </h1>
+<div style="width: 500px;text-align: center">
+  <h1 md-dialog-title>Do you want to save your changes?</h1>
 
   <div class="divTable">
     <div class="divTableBody">
 
       <div class="divTableRow">
+
         <div class="divTableCell">
-          <button md-raised-button color="primary" (click)="dialogRef.close('Save')" id="savebutton_id">
-            <md-icon>save</md-icon>
-            <span>Save</span>
+          <button md-raised-button color="primary" (click)="dialogRef.close(true)" id="yesbutton_id">
+            <md-icon>check_circle</md-icon>
+            <span>Yes</span>
           </button>
         </div>
+
         <div class="divTableCell">
-          <button md-raised-button color="primary" (click)="dialogRef.close('Cancel')" id="cancelbutton_id">
+          <button md-raised-button color="primary" (click)="dialogRef.close(false)" id="nobutton_id">
             <md-icon>cancel</md-icon>
-            <span>Cancel</span>
+            <span>No</span>
           </button>
         </div>
+
       </div>
     </div>
   </div>

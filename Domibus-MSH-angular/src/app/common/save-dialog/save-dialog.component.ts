@@ -6,9 +6,9 @@ import {MdDialogRef} from "@angular/material";
   templateUrl: './save-dialog.component.html',
   styleUrls: ['./save-dialog.component.css']
 })
-export class MessagefilterDialogComponent implements OnInit {
+export class SaveDialogComponent implements OnInit {
 
-  constructor(public dialogRef: MdDialogRef<MessagefilterDialogComponent>) {
+  constructor(public dialogRef: MdDialogRef<SaveDialogComponent>) {
   }
 
   ngOnInit() {

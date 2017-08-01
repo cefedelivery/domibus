@@ -1,5 +1,4 @@
 import {Component} from "@angular/core";
-import {MessagefilterDialogComponent} from "../common/save-dialog/save-dialog.component";
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {AlertService} from "../alert/alert.service";
 import {Http, Headers, Response} from "@angular/http";
@@ -11,6 +10,7 @@ import {isNullOrUndefined, isUndefined} from "util";
 import {EditMessageFilterComponent} from "./editmessagefilter-form/editmessagefilter-form.component";
 import {DirtyOperations} from "../common/dirty-operations";
 import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
+import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
 
 @Component({
   moduleId: module.id,
@@ -128,8 +128,8 @@ export class MessageFilterComponent implements DirtyOperations{
         let backendEntry = new BackendFilterEntry(0, this.rowNumber + 1, formRef.componentInstance.plugin, routingCriterias, false);
         this.rows.push(backendEntry);
 
-        this.enableSave = true;
-        this.enableCancel = true;
+        this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
+        this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
       }
     });
 
@@ -150,8 +150,8 @@ export class MessageFilterComponent implements DirtyOperations{
         this.updateSelectedAction(formRef.componentInstance.action);
         this.updateSelectedService(formRef.componentInstance.service);
 
-        this.enableSave = true;
-        this.enableCancel = true;
+        this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
+        this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
       }
     });
   }
@@ -266,10 +266,9 @@ export class MessageFilterComponent implements DirtyOperations{
 
   saveDialog() {
     let headers = new Headers({'Content-Type': 'application/json'});
-    let dialogRef = this.dialog.open(MessagefilterDialogComponent);
+    let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
-      switch (result) {
-        case 'Save' :
+      if (result) {
           this.disableSelectionAndButtons();
           this.http.put('rest/messagefilters', JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
             this.alertService.success("The operation 'update message filters' completed successfully.", false);
@@ -277,10 +276,6 @@ export class MessageFilterComponent implements DirtyOperations{
           }, err => {
             this.alertService.error("The operation 'update message filters' not completed successfully.", false);
           });
-
-          break;
-        case 'Cancel':
-        // do nothing
       }
     });
   }

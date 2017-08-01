@@ -22,4 +22,6 @@ public interface UserDao {
     void update(final User entity);
 
     void update(final List<User> users);
+
+    void deleteAll(final Collection<User> delete);
 }

@@ -4,12 +4,12 @@ import {UserService} from "./user.service";
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {UserValidatorService} from "app/user/uservalidator.service";
 import {AlertService} from "../alert/alert.service";
-import {MessagefilterDialogComponent} from "app/common/save-dialog/save-dialog.component";
 import {EditUserComponent} from "app/user/edituser-form/edituser-form.component";
 import {isNullOrUndefined} from "util";
 import {Http, Headers} from "@angular/http";
 import {DirtyOperations} from "../common/dirty-operations";
 import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
+import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
 
 
 @Component({
@@ -172,10 +172,9 @@ export class UserComponent implements OnInit ,DirtyOperations{
 
   saveDialog() {
     let headers = new Headers({'Content-Type': 'application/json'});
-    let dialogRef = this.dialog.open(MessagefilterDialogComponent);
+    let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
-      switch (result) {
-        case 'Save' :
+      if (result) {
           this.disableSelectionAndButtons();
           this.http.put('rest/user/users', JSON.stringify(this.users), {headers: headers}).subscribe(res => {
             this.getUsers();
@@ -186,9 +185,6 @@ export class UserComponent implements OnInit ,DirtyOperations{
             this.getUserRoles();
             this.alertService.error("The operation 'update users' not completed successfully.", false);
           });
-          break;
-        case 'Cancel':
-        // do nothing
       }
     });
   }
