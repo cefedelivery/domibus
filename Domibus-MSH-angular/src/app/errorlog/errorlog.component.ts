@@ -1,8 +1,10 @@
-﻿import {Component} from "@angular/core";
+﻿import {Component, TemplateRef, ViewChild} from "@angular/core";
 import {Observable} from "rxjs";
 import {Http, Response, URLSearchParams} from "@angular/http";
 import {ErrorLogResult} from "./errorlogresult";
 import {AlertService} from "../alert/alert.service";
+import {ErrorlogDetailsComponent} from "app/errorlog/errorlog-details/errorlog-details.component";
+import {MdDialog, MdDialogRef} from "@angular/material";
 
 @Component({
   moduleId: module.id,
@@ -13,6 +15,10 @@ import {AlertService} from "../alert/alert.service";
 
 export class ErrorLogComponent {
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
+
+  @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('rowTpl') rowTpl: TemplateRef<any>;
+  @ViewChild('hdrTpl') hdrTpl: TemplateRef<any>;
 
   timestampFromMaxDate: Date = new Date();
   timestampToMinDate: Date = null;
@@ -43,10 +49,72 @@ export class ErrorLogComponent {
   mshRoles: Array<String>;
   errorCodes: Array<String>;
 
-  constructor(private http: Http, private alertService: AlertService) {
+  advancedSearch: boolean;
+  columnSelection: boolean;
+
+  allColumns = [];
+  selectedColumns = [];
+
+  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   ngOnInit() {
+    this.allColumns = [
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: "Signal Message Id",
+        prop: "errorSignalMessageId"
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: "AP Role",
+        prop: "mshRole",
+        width: 50
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Message Id',
+        prop: "messageInErrorId",
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Error Code',
+        width: 50
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Error Detail',
+        width: 350
+      },
+      {
+        cellTemplate: this.rowWithDateFormatTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Timestamp',
+        width: 180
+      },
+      {
+        cellTemplate: this.rowWithDateFormatTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Notified'
+      }
+
+    ]
+
+    this.filter.timestampTo = new Date()
+    this.filter.timestampTo.setHours(23, 59, 59, 999)
+
+    this.filter.notifiedTo = new Date()
+    this.filter.notifiedTo.setHours(23, 59, 59, 999)
+
+    this.selectedColumns = this.allColumns.filter(col => {
+      return ["Message Id", "Error Code", "Timestamp"].indexOf(col.name) != -1
+    })
+
     this.page(this.offset, this.pageSize, this.orderBy, this.asc);
   }
 
@@ -182,6 +250,63 @@ export class ErrorLogComponent {
 
   onNotifiedToChange(event) {
     this.notifiedFromMaxDate = event.value;
+  }
+
+  toggleAdvancedSearch(): boolean {
+    this.advancedSearch = !this.advancedSearch;
+    return false;//to prevent default navigation
+  }
+
+  toggleColumnSelection(): boolean {
+    this.columnSelection = !this.columnSelection;
+    return false;//to prevent default navigation
+  }
+
+  toggle(col) {
+    const isChecked = this.isChecked(col);
+
+    if (isChecked) {
+      this.selectedColumns = this.selectedColumns.filter(c => {
+        return c.name !== col.name;
+      });
+    } else {
+      this.selectedColumns = [...this.selectedColumns, col];
+    }
+  }
+
+  isChecked(col) {
+    return this.selectedColumns.find(c => {
+      return c.name === col.name;
+    });
+  }
+
+  selectAllColumns() {
+    this.selectedColumns = [...this.allColumns]
+  }
+
+  selectNoColumns() {
+    this.selectedColumns = []
+  }
+
+  onSelect({selected}) {
+    // console.log('Select Event', selected, this.selected);
+  }
+
+  onActivate(event) {
+    // console.log('Activate Event', event);
+
+    if ("dblclick" === event.type) {
+      this.details(event.row);
+    }
+  }
+
+  details(selectedRow: any) {
+    let dialogRef: MdDialogRef<ErrorlogDetailsComponent> = this.dialog.open(ErrorlogDetailsComponent);
+    dialogRef.componentInstance.message = selectedRow;
+    // dialogRef.componentInstance.currentSearchSelectedSource = this.currentSearchSelectedSource;
+    dialogRef.afterClosed().subscribe(result => {
+      //Todo:
+    });
   }
 
 }

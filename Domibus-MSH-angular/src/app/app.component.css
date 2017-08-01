@@ -40,28 +40,3 @@ html, body, material-app, md-sidenav-container, .my-content {
 #topLogoText {
   text-align: left;
 }
-
-#bottomLogo {
-  position: absolute;
-  bottom: 0px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-  /*border: solid yellow;*/
-  margin-top: 25px;
-  margin-bottom: 25px;
-}
-
-#sandwichMenuHolder {
-  /*width: 100%;*/
-  position: relative;
-  height: 50px;
-  display: block;
-  /*border: solid red;*/
-}
-
-#sandwichMenu {
-  float: right;
-  /*border: solid mediumpurple;*/
-}

@@ -7,9 +7,10 @@ import {Observable} from "rxjs/Observable";
 import {MessageFilterResult} from "./messagefilterresult";
 import {BackendFilterEntry} from "./backendfilterentry";
 import {RoutingCriteriaEntry} from "./routingcriteriaentry";
-import {CancelMessagefilterDialogComponent} from "./cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
-import {isNullOrUndefined, isUndefined} from "util";
+import {isNullOrUndefined} from "util";
 import {EditMessageFilterComponent} from "./editmessagefilter-form/editmessagefilter-form.component";
+import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
+import {DirtyOperations} from "../common/dirty-operations";
 
 @Component({
   moduleId: module.id,
@@ -18,7 +19,7 @@ import {EditMessageFilterComponent} from "./editmessagefilter-form/editmessagefi
   styleUrls: ['./messagefilter.component.css']
 })
 
-export class MessageFilterComponent {
+export class MessageFilterComponent implements DirtyOperations{
 
   editing = {};
   rows = [];
@@ -113,19 +114,19 @@ export class MessageFilterComponent {
   buttonNew() {
     let formRef: MdDialogRef<EditMessageFilterComponent> = this.dialog.open(EditMessageFilterComponent, {data: {backendFilterNames: this.backendFilterNames}});
     formRef.afterClosed().subscribe(result => {
-      if(result == true) {
-        let routingCriterias : Array<RoutingCriteriaEntry> = [];
-        if(!isNullOrUndefined(formRef.componentInstance.from)) {
-          routingCriterias.push(new RoutingCriteriaEntry(0,'from',formRef.componentInstance.from));
+      if (result == true) {
+        let routingCriterias: Array<RoutingCriteriaEntry> = [];
+        if (!isNullOrUndefined(formRef.componentInstance.from)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0, 'from', formRef.componentInstance.from));
         }
-        if(!isNullOrUndefined(formRef.componentInstance.to)) {
-          routingCriterias.push(new RoutingCriteriaEntry(0,'to',formRef.componentInstance.to));
+        if (!isNullOrUndefined(formRef.componentInstance.to)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0, 'to', formRef.componentInstance.to));
         }
-        if(!isNullOrUndefined(formRef.componentInstance.action)) {
-          routingCriterias.push(new RoutingCriteriaEntry(0,'action',formRef.componentInstance.action));
+        if (!isNullOrUndefined(formRef.componentInstance.action)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0, 'action', formRef.componentInstance.action));
         }
-        if(!isNullOrUndefined(formRef.componentInstance.service)) {
-          routingCriterias.push(new RoutingCriteriaEntry(0,'service',formRef.componentInstance.service));
+        if (!isNullOrUndefined(formRef.componentInstance.service)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0, 'service', formRef.componentInstance.service));
         }
         let backendEntry = new BackendFilterEntry(0, this.rowNumber + 1, formRef.componentInstance.plugin, routingCriterias, false);
         this.rows.push(backendEntry);
@@ -138,9 +139,14 @@ export class MessageFilterComponent {
   }
 
   buttonEdit() {
-    let formRef: MdDialogRef<EditMessageFilterComponent> = this.dialog.open(EditMessageFilterComponent, {data: {backendFilterNames: this.backendFilterNames, edit: this.selected[0]}});
+    let formRef: MdDialogRef<EditMessageFilterComponent> = this.dialog.open(EditMessageFilterComponent, {
+      data: {
+        backendFilterNames: this.backendFilterNames,
+        edit: this.selected[0]
+      }
+    });
     formRef.afterClosed().subscribe(result => {
-      if(result == true) {
+      if (result == true) {
         this.updateSelectedPlugin(formRef.componentInstance.plugin);
         this.updateSelectedFrom(formRef.componentInstance.from);
         this.updateSelectedTo(formRef.componentInstance.to);
@@ -165,7 +171,7 @@ export class MessageFilterComponent {
   }
 
   private createRoutingCriteria(rc: string, value: string) {
-    if(value.length == 0) {
+    if (value.length == 0) {
       return;
     }
     let newRC = new RoutingCriteriaEntry(null, rc, value);
@@ -174,8 +180,8 @@ export class MessageFilterComponent {
   }
 
   private updateSelectedTo(value: string) {
-    if(!isNullOrUndefined(this.rows[this.rowNumber].to)) {
-      if(value.length == 0) {
+    if (!isNullOrUndefined(this.rows[this.rowNumber].to)) {
+      if (value.length == 0) {
         // delete
         this.deleteRoutingCriteria('to');
         this.rows[this.rowNumber].to.expression = '';
@@ -194,8 +200,8 @@ export class MessageFilterComponent {
   }
 
   private updateSelectedFrom(value: string) {
-    if(!isNullOrUndefined(this.rows[this.rowNumber].from)) {
-      if(value.length == 0) {
+    if (!isNullOrUndefined(this.rows[this.rowNumber].from)) {
+      if (value.length == 0) {
         // delete
         this.deleteRoutingCriteria('from');
         this.rows[this.rowNumber].from.expression = '';
@@ -210,8 +216,8 @@ export class MessageFilterComponent {
   }
 
   private updateSelectedAction(value: string) {
-    if(!isNullOrUndefined(this.rows[this.rowNumber].action)) {
-      if(value.length == 0) {
+    if (!isNullOrUndefined(this.rows[this.rowNumber].action)) {
+      if (value.length == 0) {
         // delete
         this.deleteRoutingCriteria('action');
         this.rows[this.rowNumber].action.expression = '';
@@ -226,8 +232,8 @@ export class MessageFilterComponent {
   }
 
   private updateSelectedService(value: string) {
-    if(!isNullOrUndefined(this.rows[this.rowNumber].service)) {
-      if(value.length == 0) {
+    if (!isNullOrUndefined(this.rows[this.rowNumber].service)) {
+      if (value.length == 0) {
         // delete
         this.deleteRoutingCriteria('service');
         this.rows[this.rowNumber].service.expression = '';
@@ -252,16 +258,11 @@ export class MessageFilterComponent {
   }
 
   cancelDialog() {
-    let dialogRef = this.dialog.open(CancelMessagefilterDialogComponent);
+    let dialogRef = this.dialog.open(CancelDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
-      switch (result) {
-        case 'Yes' :
-          this.disableSelectionAndButtons();
-          this.getBackendFiltersInfo();
-
-          break;
-        case 'No':
-        // do nothing
+      if (result) {
+        this.disableSelectionAndButtons();
+        this.getBackendFiltersInfo();
       }
     });
   }
@@ -369,4 +370,9 @@ export class MessageFilterComponent {
     this.enableDelete = selected.length > 0;
     this.enableEdit = selected.length == 1;
   }
+
+  isDirty(): boolean {
+    return this.enableCancel;
+  }
+
 }
