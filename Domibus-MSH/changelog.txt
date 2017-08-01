@@ -5,6 +5,8 @@ Two more properties were added (for more details check domibus.properties file):
     o domibus.sender.certificate.validation.onreceiving=true
 Renamed "domibus.senderparty.trust.verification" to "domibus.sender.trust.validation.onreceiving". Default value "false" has not been changed.
 Renamed "domibus.certificate.validation.enabled" to "domibus.receiver.certificate.validation.onsending". Default value "true" has not been changed.
+- discard domibus.internal.dispatch.queue from using the DLQ queue.
+- discard domibus.internal.pull.queue from using the DLQ queue.
 Domibus 3.3-RC1
 - Configuration of Domibus is done with domibus.properties instead of externalized spring xml files
 - Add the possibility to pull messages
