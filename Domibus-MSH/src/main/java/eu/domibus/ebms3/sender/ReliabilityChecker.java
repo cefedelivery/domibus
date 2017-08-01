@@ -46,10 +46,13 @@ public class ReliabilityChecker {
 
     @Autowired
     private PModeProvider pModeProvider;
+
     @Autowired
     private UserMessageLogDao userMessageLogDao;
+
     @Autowired
     private ErrorLogDao errorLogDao;
+
     @Autowired
     private ReliabilityMatcher pushMatcher;
 
