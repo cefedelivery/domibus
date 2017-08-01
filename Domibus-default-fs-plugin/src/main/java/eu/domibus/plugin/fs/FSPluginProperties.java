@@ -1,11 +1,21 @@
 package eu.domibus.plugin.fs;
 
+import java.util.LinkedHashSet;
 import java.util.Properties;
+
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 
 /**
  * @author @author FERNANDES Henrique, GONCALVES Bruno
  */
 public class FSPluginProperties extends Properties {
+    
+    DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSPluginProperties.class);
 
     private static final String PROPERTY_PREFIX = "fsplugin.messages.";
 
@@ -24,9 +34,44 @@ public class FSPluginProperties extends Properties {
     private static final String SENT_PURGE_WORKER_CRONEXPRESSION = "sent.purge.worker.cronExpression";
 
     private static final String SENT_PURGE_EXPIRED = "sent.purge.expired";
+    
+    Set<String> domains;
 
     // TODO Add all the plugin properties
     // https://ec.europa.eu/cefdigital/tracker/browse/EDELIVERY-2361
+    
+    public Set<String> getDomains() {
+        if (domains == null) {
+            domains = readDomains();
+        }
+        
+        return domains;
+    }
+
+    private Set<String> readDomains() {
+        Set<String> tempDomains = new LinkedHashSet<>();
+         
+        for (String propName : this.stringPropertyNames()) {
+            if (propName.startsWith(DOMAIN_PREFIX)) {
+                LOG.debug("Found domain property {}", propName);
+                
+                String domain = extractDomainName(propName);
+                
+                if (!tempDomains.contains(domain)) {
+                    tempDomains.add(domain);
+                    LOG.debug("Found domain {}", domain);
+                }
+            }
+        }
+        
+        return tempDomains;
+    }
+
+    private String extractDomainName(String propName) {
+        String unprefixedProp = StringUtils.removeStart(propName, DOMAIN_PREFIX);
+        String domain = StringUtils.substringBefore(unprefixedProp, ".");
+        return domain;
+    }
 
     /**
      * @return The location of the directory that the plugin will use to manage the messages to be sent and received
