@@ -108,7 +108,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     EditUserComponent
   ],
   imports: [
-    BrowserModule,
+    BrowserModule,//
     BrowserAnimationsModule,
     FormsModule,
     HttpModule,
