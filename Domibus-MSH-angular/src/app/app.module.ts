@@ -50,7 +50,7 @@ import {EditMessageFilterComponent} from "./messagefilter/editmessagefilter-form
 import {CancelDialogComponent} from './common/cancel-dialog/cancel-dialog.component';
 import {DirtyGuard} from "./common/dirty.guard";
 import {EditUserComponent} from "app/user/edituser-form/edituser-form.component";
-import {MessagefilterDialogComponent} from "./dialogs/savedialog/savedialog.component";
+import {MessagefilterDialogComponent} from "./common/save-dialog/save-dialog.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);

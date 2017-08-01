@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {MessagefilterDialogComponent} from "../dialogs/savedialog/savedialog.component";
+import {MessagefilterDialogComponent} from "../common/save-dialog/save-dialog.component";
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {AlertService} from "../alert/alert.service";
 import {Http, Headers, Response} from "@angular/http";

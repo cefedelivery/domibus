@@ -4,12 +4,12 @@ import {UserService} from "./user.service";
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {UserValidatorService} from "app/user/uservalidator.service";
 import {AlertService} from "../alert/alert.service";
-import {MessagefilterDialogComponent} from "app/dialogs/savedialog/savedialog.component";
-import {CancelDialogComponent} from "../dialogs/canceldialog/canceldialog.component";
+import {MessagefilterDialogComponent} from "app/common/save-dialog/save-dialog.component";
 import {EditUserComponent} from "app/user/edituser-form/edituser-form.component";
 import {isNullOrUndefined} from "util";
 import {Http, Headers} from "@angular/http";
 import {DirtyOperations} from "../common/dirty-operations";
+import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
 
 
 @Component({
