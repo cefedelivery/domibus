@@ -163,14 +163,9 @@ export class UserComponent implements OnInit ,DirtyOperations{
   cancelDialog() {
     let dialogRef = this.dialog.open(CancelDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
-      switch (result) {
-        case 'Yes' :
-          this.disableSelectionAndButtons();
-          this.getUsers();
-
-          break;
-        case 'No':
-        // do nothing
+      if (result) {
+        this.users = [];
+        this.getUsers();
       }
     });
   }
