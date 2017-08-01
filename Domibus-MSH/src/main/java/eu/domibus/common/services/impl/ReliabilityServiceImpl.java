@@ -48,8 +48,8 @@ public class ReliabilityServiceImpl implements ReliabilityService {
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void handleBusinessMessageReliability(final String messageId, final ReliabilityChecker.CheckResult reliabilityCheckSuccessful, final ResponseHandler.CheckResult isOk, final LegConfiguration legConfiguration) {
-        handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+    public void handleReliability(final String messageId, final ReliabilityChecker.CheckResult reliabilityCheckSuccessful, final ResponseHandler.CheckResult isOk, final LegConfiguration legConfiguration) {
+        changeMessageStatusAndNotify(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 
     /**
@@ -63,10 +63,10 @@ public class ReliabilityServiceImpl implements ReliabilityService {
         } catch (ReliabilityException e) {
             LOG.warn("There should be a raw xml entry for this message.");
         }
-        handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+        changeMessageStatusAndNotify(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 
-    private void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+    private void changeMessageStatusAndNotify(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
         switch (reliabilityCheckSuccessful) {
             case OK:
                 switch (isOk) {
