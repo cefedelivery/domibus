@@ -5,7 +5,6 @@
 @import '~@swimlane/ngx-datatable/release/assets/icons.css';
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
-
 html, body {
   margin: 0;
   padding: 0;
@@ -13,13 +12,23 @@ html, body {
   width: 100%;
   font-family: 'Open Sans', sans-serif;
 }
+
+.mat-dialog-title {
+  font-family: 'Open Sans', sans-serif !important;
+}
+
+.mat-button, .mat-raised-button, .mat-icon-button {
+  font-family: 'Open Sans', sans-serif !important;
+  font-weight: bolder !important;
+}
+
 .text-select {
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
   -o-user-select: text;
   user-select: text;
-  word-wrap:break-word;
+  word-wrap: break-word;
 }
 
 .domibusTextRegular {
@@ -42,7 +51,7 @@ html, body {
 .domibusTextHeadingBold {
   font-family: 'Open Sans', sans-serif;
   font-size: 38pt;
-  margin:0;
+  margin: 0;
   font-weight: bold
 }
 
@@ -57,6 +66,7 @@ h1 {
   font-size: 48px;
   margin-top: 0;
 }
+
 h2 {
   font-size: 36px;
 }
@@ -64,13 +74,13 @@ h2 {
 /* --- EC LOGO -------------------- */
 /*----------------------------------*/
 #bottomLogo {
-  display:none;
+  display: none;
 }
 
 /* --- SIDEBAR -------------------- */
 /*----------------------------------*/
 md-sidenav[_ngcontent-c0] {
-    box-shadow: 0px 0px 2px #9B9B9B !important;
+  box-shadow: 0px 0px 2px #9B9B9B !important;
 }
 
 /* --- LOGO ---*/
@@ -85,21 +95,26 @@ md-sidenav[_ngcontent-c0] {
 }
 
 /* --- MENU ---*/
-.mat-sidenav {}
+.mat-sidenav {
+}
+
 .mat-sidenav button {
-  box-shadow:none;
-  border-radius:0;
-  line-height:50px !important;
+  box-shadow: none;
+  border-radius: 0;
+  line-height: 50px !important;
   letter-spacing: 1px;
 }
+
 .sideNavButton[_ngcontent-c0] {
   padding-left: 20px !important;
 }
+
 .mat-sidenav button.cdk-focused {
-  color:#03A9F4;
+  color: #03A9F4;
 }
+
 .mat-sidenav button:hover, .mat-sidenav button.current {
-  color:#03A9F4;
+  color: #03A9F4;
 }
 
 /* --- HAMBURGER MENU -------------------- */
@@ -116,34 +131,38 @@ md-sidenav[_ngcontent-c0] {
   right: 10px;
   top: 0;
 }
+
 #sandwichMenu .mat-icon-button {
   height: 40px;
   width: 40px;
 }
+
 #sandwichMenu .mat-button-wrapper {
 }
+
 #sandwichMenu .mat-icon.material-icons {
   height: 40px;
   width: 40px;
-  font-size:40px;
+  font-size: 40px;
   line-height: 1;
 }
+
 #sandwichMenu .material-icons:hover {
-  color:#03A9F4;
+  color: #03A9F4;
 }
 
 /* --- CONTENT -------------------- */
 /*----------------------------------*/
 .mat-sidenav-container {
-    background-color: #F5F5F5;
-    color: rgba(0,0,0,.99);
+  background-color: #F5F5F5;
+  color: rgba(0, 0, 0, .99);
 }
 
 .panel {
   padding: 20px;
   background: #FFF;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.24);
- }
+}
 
 
 

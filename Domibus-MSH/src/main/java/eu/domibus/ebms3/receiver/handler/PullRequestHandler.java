@@ -12,6 +12,7 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
@@ -28,8 +29,6 @@ import eu.domibus.pki.DomibusCertificateException;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.WebServiceException;
@@ -70,8 +69,11 @@ public class PullRequestHandler {
     @Autowired
     private ReliabilityChecker reliabilityChecker;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public SOAPMessage handlePullRequestInNewTransaction(String messageId, PullContext pullContext) {
+    @Autowired
+    private ReliabilityService reliabilityService;
+
+
+    public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
             return handleRequest(messageId, pullContext);
         } else {
@@ -99,7 +101,7 @@ public class PullRequestHandler {
 
     SOAPMessage handleRequest(String messageId, PullContext pullContext) {
         LegConfiguration leg = null;
-        ReliabilityChecker.CheckResult checkResult = ReliabilityChecker.CheckResult.FAIL;
+        ReliabilityChecker.CheckResult checkResult = ReliabilityChecker.CheckResult.PULL_FAILED;
         MessageAttemptStatus attemptStatus = MessageAttemptStatus.SUCCESS;
         String attemptError = null;
         final Timestamp startDate = new Timestamp(System.currentTimeMillis());
@@ -153,7 +155,7 @@ public class PullRequestHandler {
                 LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
                 retryService.purgeTimedoutMessage(messageId);
             } else {
-                messageExchangeService.handleReliability(messageId, checkResult, null, leg);
+                reliabilityService.handleReliability(messageId, checkResult, null, leg);
                 try {
                     final MessageAttempt attempt = MessageAttemptBuilder.create()
                             .setMessageId(messageId)
@@ -168,4 +170,5 @@ public class PullRequestHandler {
         }
         return soapMessage;
     }
+
 }
