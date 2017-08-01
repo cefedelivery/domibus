@@ -1,8 +1,10 @@
 package eu.domibus.pki;
 
+import eu.domibus.api.security.TrustStoreEntry;
+
 import javax.naming.InvalidNameException;
-import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 /**
  * @Author Cosmin Baciu
@@ -19,4 +21,6 @@ public interface CertificateService {
     String extractCommonName(final X509Certificate certificate) throws InvalidNameException;
 
     X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password);
+
+    List<TrustStoreEntry> getTrustStoreEntries();
 }

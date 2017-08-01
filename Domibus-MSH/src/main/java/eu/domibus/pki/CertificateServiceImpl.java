@@ -1,6 +1,7 @@
 package eu.domibus.pki;
 
-import eu.domibus.api.security.TrustoreEntry;
+import com.google.common.collect.Lists;
+import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.wss4j.common.crypto.CryptoService;
@@ -21,6 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
@@ -175,15 +177,32 @@ public class CertificateServiceImpl implements CertificateService {
         }
     }
 
-    public List<TrustoreEntry> getTrustoreEntries() {
-        final KeyStore trustStore = cryptoService.getTrustStore();
+    /**
+     * Method in charge of returning truststore's entries.
+     *
+     * @return truststore entries.
+     */
+    @Override
+    public List<TrustStoreEntry> getTrustStoreEntries() {
         try {
+            final KeyStore trustStore = cryptoService.getTrustStore();
+            List<TrustStoreEntry> trustStoreEntries = new ArrayList<>();
             final Enumeration<String> aliases = trustStore.aliases();
             while (aliases.hasMoreElements()) {
-                trustStore.getCertificate(aliases.nextElement());
+                final String alias = aliases.nextElement();
+                final X509Certificate certificate = (X509Certificate) trustStore.getCertificate(alias);
+                TrustStoreEntry trustStoreEntry = new TrustStoreEntry(
+                        alias,
+                        certificate.getSubjectDN().getName(),
+                        certificate.getIssuerDN().getName(),
+                        certificate.getNotBefore(),
+                        certificate.getNotAfter());
+                trustStoreEntries.add(trustStoreEntry);
             }
+            return trustStoreEntries;
         } catch (KeyStoreException e) {
-            e.printStackTrace();
+            LOG.warn(e.getMessage(), e);
+            return Lists.newArrayList();
         }
     }
 }

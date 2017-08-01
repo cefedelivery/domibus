@@ -7,7 +7,7 @@ import java.util.Date;
  * @since 3.3
  */
 
-public class TrustoreEntry {
+public class TrustStoreEntry {
 
     private String name;
     private String subject;
@@ -15,7 +15,7 @@ public class TrustoreEntry {
     private Date validFrom;
     private Date validUntil;
 
-    public TrustoreEntry(String name, String subject, String issuer, Date validFrom, Date validUntil) {
+    public TrustStoreEntry(String name, String subject, String issuer, Date validFrom, Date validUntil) {
         this.name = name;
         this.subject = subject;
         this.issuer = issuer;
