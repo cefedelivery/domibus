@@ -93,8 +93,8 @@
               <md-icon>search</md-icon>
               <span>Search</span>
             </button>
-            <a href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()">Advanced</a>
-            <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()">Basic</a>
+            <a href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()" id="advancedlink_id">Advanced</a>
+            <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()" id="basiclink_id">Basic</a>
           </div>
         </form>
       </div>
@@ -107,8 +107,8 @@
                    id="pagesize_id"></app-row-limiter>
   <div style="margin-left:5px">
     <div style="position:absolute;bottom: -2px;float:left">
-      <a class="domibusLink" href="#" *ngIf="!columnSelection" (click)="toggleColumnSelection()">Columns</a>
-      <a class="domibusLink" href="#" *ngIf="columnSelection" (click)="toggleColumnSelection()">Columns</a>
+      <a class="domibusLink" href="#" *ngIf="!columnSelection" (click)="toggleColumnSelection()" id="columnslinkoff_id">Columns</a>
+      <a class="domibusLink" href="#" *ngIf="columnSelection" (click)="toggleColumnSelection()" id="columnslinkon_id">Columns</a>
     </div>
   </div>
 </div>

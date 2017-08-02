@@ -22,6 +22,7 @@ export class PModeComponent {
   private url = "rest/pmode";
 
   private pModeExists = false;
+  private pModeContents: string = '';
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
@@ -37,6 +38,7 @@ export class PModeComponent {
         const HTTP_OK = 200;
         if(res.status == HTTP_OK) {
           this.pModeExists = true;
+          this.pModeContents = res.text();
         }
       }, err => {
         this.pModeExists = false;
