@@ -111,7 +111,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     PasswordComponent,
     DefaultPasswordDialogComponent,
     EditMessageFilterComponent,
-    ErrorlogDetailsComponent
+    ErrorlogDetailsComponent,
+    TruststoreDialogComponent
   ],
   imports: [
     BrowserModule,

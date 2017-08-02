@@ -1,4 +1,6 @@
 import {Component, OnInit} from "@angular/core";
+import {TrustStoreEntry} from "../trustore.model";
+import {MdDialogRef} from "@angular/material";
 
 @Component({
   selector: 'app-truststore-dialog',
@@ -7,7 +9,10 @@ import {Component, OnInit} from "@angular/core";
 })
 export class TruststoreDialogComponent implements OnInit {
 
-  constructor() {
+  trustStoreEntry: TrustStoreEntry;
+  dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
+
+  constructor(public dialogRef: MdDialogRef<TruststoreDialogComponent>) {
   }
 
   ngOnInit() {

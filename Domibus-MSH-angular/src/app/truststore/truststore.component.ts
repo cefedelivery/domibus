@@ -6,6 +6,8 @@ import "rxjs/add/operator/map";
 import "rxjs/add/operator/catch";
 import {TrustStoreService} from "./trustore.service";
 import {TrustStoreEntry} from "./trustore.model";
+import {TruststoreDialogComponent} from "./truststore-dialog/truststore-dialog.component";
+import {MdDialog, MdDialogRef} from "@angular/material";
 
 @Component({
   selector: 'app-truststore',
@@ -36,7 +38,7 @@ export class TruststoreComponent implements OnInit {
   @ViewChild('password')
   private password;
 
-  constructor(private http: Http, private alertService: AlertService, private trustStoreService: TrustStoreService) {
+  constructor(private http: Http, private alertService: AlertService, private trustStoreService: TrustStoreService, public dialog: MdDialog) {
   }
 
   ngOnInit(): void {
@@ -74,8 +76,16 @@ export class TruststoreComponent implements OnInit {
     console.log('Activate Event', event);
 
     if ("dblclick" === event.type) {
-      //this.details(event.row);
+      this.details(event.row);
     }
+  }
+
+  details(selectedRow: any) {
+    let dialogRef: MdDialogRef<TruststoreDialogComponent> = this.dialog.open(TruststoreDialogComponent);
+    dialogRef.componentInstance.trustStoreEntry = selectedRow;
+    dialogRef.afterClosed().subscribe(result => {
+      //Todo:
+    });
   }
 
 }
