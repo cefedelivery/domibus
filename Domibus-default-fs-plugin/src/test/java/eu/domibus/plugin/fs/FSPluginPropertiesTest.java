@@ -14,14 +14,11 @@ public class FSPluginPropertiesTest {
     
     private static final String DEFAULT_PROPERTIES_PATH = "./src/test/resources/fsPlugin.properties";
     
-    private static final String DOMAIN = "DOMAIN1";
+    private static final String DOMAIN1 = "DOMAIN1";
     
-    private static final String LOCATION = "/tmp/fs_plugin_data";
-    private static final String DOMAIN_LOCATION = "/tmp/fs_plugin_data/DOMAIN1";
-    private static final String SENT_ACTION = "delete";
-    private static final String SENT_PURGE_WORKER_CRON_EXP = "0/60 * * * * ?";
-    private static final int SENT_PURGE_EXPIRED = 600;
-    
+    private static final String DEFAULT_LOCATION = "/tmp/fs_plugin_data";
+    private static final String DOMAIN1_LOCATION = "/tmp/fs_plugin_data/DOMAIN1";
+
     private FSPluginProperties fSPluginProperties;
 
     @Before
@@ -36,27 +33,37 @@ public class FSPluginPropertiesTest {
 
     @Test
     public void getLocation() throws Exception {
-        Assert.assertEquals(LOCATION, fSPluginProperties.getLocation());
+        Assert.assertEquals(DEFAULT_LOCATION, fSPluginProperties.getLocation());
     }
     
     @Test
     public void getLocationInDomain() throws Exception {
-        Assert.assertEquals(DOMAIN_LOCATION, fSPluginProperties.getLocation(DOMAIN));
+        Assert.assertEquals(DOMAIN1_LOCATION, fSPluginProperties.getLocation(DOMAIN1));
     }
 
     @Test
     public void getSentAction() throws Exception {
-        Assert.assertEquals(SENT_ACTION, fSPluginProperties.getSentAction());
+        Assert.assertEquals("delete", fSPluginProperties.getSentAction());
     }
 
     @Test
-    public void getSentPurgeWorkerCronexpression() throws Exception {
-        Assert.assertEquals(SENT_PURGE_WORKER_CRON_EXP, fSPluginProperties.getSentPurgeWorkerCronExpression());
+    public void getSentPurgeWorkerCronExpression() throws Exception {
+        Assert.assertEquals("0/60 * * * * ?", fSPluginProperties.getSentPurgeWorkerCronExpression());
     }
     
     @Test
     public void getSentPurgeExpired() throws Exception {
-        Assert.assertEquals(SENT_PURGE_EXPIRED, fSPluginProperties.getSentPurgeExpired());
+        Assert.assertEquals(600, fSPluginProperties.getSentPurgeExpired());
+    }
+
+    @Test
+    public void getUser() throws Exception {
+        Assert.assertEquals("user1", fSPluginProperties.getUser(DOMAIN1));
+    }
+
+    @Test
+    public void getPassword() throws Exception {
+        Assert.assertEquals("pass1", fSPluginProperties.getPassword(DOMAIN1));
     }
 
 }

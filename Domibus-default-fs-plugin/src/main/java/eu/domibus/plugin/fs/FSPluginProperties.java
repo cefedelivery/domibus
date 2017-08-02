@@ -1,14 +1,12 @@
 package eu.domibus.plugin.fs;
 
-import java.util.LinkedHashSet;
-import java.util.Properties;
-
-import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
-
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.LinkedHashSet;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author @author FERNANDES Henrique, GONCALVES Bruno
@@ -34,6 +32,10 @@ public class FSPluginProperties extends Properties {
     private static final String SENT_PURGE_WORKER_CRONEXPRESSION = "sent.purge.worker.cronExpression";
 
     private static final String SENT_PURGE_EXPIRED = "sent.purge.expired";
+
+    private static final String USER = "user";
+
+    private static final String PASSWORD = "password";
     
     Set<String> domains;
 
@@ -133,6 +135,15 @@ public class FSPluginProperties extends Properties {
     public int getSentPurgeExpired(String domain) {
         return Integer.parseInt(getDomainProperty(domain, SENT_PURGE_EXPIRED, "600"));
     }
+
+    public String getUser(String domain) {
+        return getDomainProperty(domain, USER, null);
+    }
+
+    public String getPassword(String domain) {
+        return getDomainProperty(domain, PASSWORD, null);
+    }
+
 
     private String getDomainProperty(String domain, String propertyName, String defaultValue) {
         String domainFullPropertyName = DOMAIN_PREFIX + domain + MESSAGES_SECTION + propertyName;
