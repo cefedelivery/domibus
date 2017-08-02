@@ -12,8 +12,8 @@ import java.util.Set;
  * @author @author FERNANDES Henrique, GONCALVES Bruno
  */
 public class FSPluginProperties extends Properties {
-    
-    DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSPluginProperties.class);
+
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSPluginProperties.class);
 
     private static final String PROPERTY_PREFIX = "fsplugin.messages.";
 
@@ -37,11 +37,8 @@ public class FSPluginProperties extends Properties {
 
     private static final String PASSWORD = "password";
     
-    Set<String> domains;
+    private Set<String> domains;
 
-    // TODO Add all the plugin properties
-    // https://ec.europa.eu/cefdigital/tracker/browse/EDELIVERY-2361
-    
     public Set<String> getDomains() {
         if (domains == null) {
             domains = readDomains();
@@ -143,7 +140,6 @@ public class FSPluginProperties extends Properties {
     public String getPassword(String domain) {
         return getDomainProperty(domain, PASSWORD, null);
     }
-
 
     private String getDomainProperty(String domain, String propertyName, String defaultValue) {
         String domainFullPropertyName = DOMAIN_PREFIX + domain + MESSAGES_SECTION + propertyName;
