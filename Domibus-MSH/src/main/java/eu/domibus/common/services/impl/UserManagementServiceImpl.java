@@ -27,7 +27,7 @@ import java.util.List;
 @Service
 public class UserManagementServiceImpl implements UserService {
 
-    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);
 
     @Autowired
     private UserDao userDao;
@@ -76,6 +76,46 @@ public class UserManagementServiceImpl implements UserService {
         Collection<eu.domibus.api.user.User> passwordChangedModifiedUsers = filterModifiedUserWithPasswordChange(users);
         LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
         updateUserWithPasswordChange(passwordChangedModifiedUsers);
+    }
+
+    @Override
+    public List<eu.domibus.api.user.UserRole> findUserRoles() {
+        List<UserRole> userRolesEntities = userRoleDao.listRoles();
+
+        List<eu.domibus.api.user.UserRole> userRoles = new ArrayList<>();
+        for (UserRole userRoleEntity : userRolesEntities) {
+            eu.domibus.api.user.UserRole userRole = new eu.domibus.api.user.UserRole(userRoleEntity.getName());
+            userRoles.add(userRole);
+        }
+        return userRoles;
+    }
+
+    @Override
+    public void updateUsers(List<eu.domibus.api.user.User> users) {
+        // update
+        Collection<eu.domibus.api.user.User> noPasswordChangedModifiedUsers = filterModifiedUserWithoutPasswordChange(users);
+        LOG.debug("Modified users without password change:" + noPasswordChangedModifiedUsers.size());
+        updateUserWithoutPasswordChange(noPasswordChangedModifiedUsers);
+        Collection<eu.domibus.api.user.User> passwordChangedModifiedUsers = filterModifiedUserWithPasswordChange(users);
+        LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
+        updateUserWithPasswordChange(passwordChangedModifiedUsers);
+
+        // insertion
+        Collection<eu.domibus.api.user.User> newUsers = filterNewUsers(users);
+        LOG.debug("New users:" + newUsers.size());
+        insertNewUsers(newUsers);
+
+        // deletion
+        List<User> usersEntities = domainConverter.convert(users, User.class);
+        List<User> allUsersEntities = userDao.listUsers();
+        List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
+        userDao.deleteAll(usersEntitiesToDelete);
+    }
+
+    private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
+        List<User> result = new ArrayList<>(masterData);
+        result.removeAll(newData);
+        return result;
     }
 
     private void insertNewUsers(Collection<eu.domibus.api.user.User> users) {

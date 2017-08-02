@@ -13,6 +13,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -20,14 +21,11 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
-import eu.domibus.pki.CertificateService;
-import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
 import org.apache.commons.lang.Validate;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +36,6 @@ import javax.jms.MessageListener;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
-import java.util.Properties;
 
 
 /**
@@ -74,9 +71,6 @@ public class MessageSender implements MessageListener {
     private ResponseHandler responseHandler;
 
     @Autowired
-    private CertificateService certificateService;
-
-    @Autowired
     private RetryService retryService;
 
     @Autowired
@@ -88,6 +82,10 @@ public class MessageSender implements MessageListener {
     @Autowired
     PolicyService policyService;
 
+    @Autowired
+    private ReliabilityService reliabilityService;
+
+
     private void sendUserMessage(final String messageId) {
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
 
@@ -98,7 +96,7 @@ public class MessageSender implements MessageListener {
         String attemptError = null;
 
 
-        ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
+        ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.SEND_FAIL;
         // Assuming that everything goes fine
         ResponseHandler.CheckResult isOk = ResponseHandler.CheckResult.OK;
 
@@ -169,7 +167,7 @@ public class MessageSender implements MessageListener {
                 retryService.purgeTimedoutMessage(messageId);
                 return;
             }
-            reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+            reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
             try {
                 attempt.setError(attemptError);
                 attempt.setStatus(attemptStatus);

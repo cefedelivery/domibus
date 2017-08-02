@@ -19,7 +19,6 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
-import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -37,7 +36,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static eu.domibus.common.MessageStatus.READY_TO_PULL;
 import static eu.domibus.common.MessageStatus.SEND_ENQUEUED;
@@ -56,7 +58,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     protected static String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING ="domibus.sender.certificate.validation.onsending";
     protected static String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING ="domibus.receiver.certificate.validation.onsending";
 
-    //@thom add more coverage here.
     @Autowired
     private ProcessDao processDao;
     @Autowired
@@ -185,8 +186,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     /**
      * {@inheritDoc}
-     *
-     * @thom test this method
      */
     @Override
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
@@ -228,19 +227,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         }
         return rawXmlByMessageId;
     }
-
-
-    //temporary solution to create new transaction on handlereliability.
-    //It should be change in the reliability checker but we need to test the impact first.
-    //New transaction is needed because every bean can potentialy invalidate the transaction, but
-    //the state of the message must be saved.
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
-        reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
-    }
-
-
 
 
     @Override

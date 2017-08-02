@@ -2,6 +2,8 @@ package eu.domibus.web.rest;
 
 
 import eu.domibus.api.user.User;
+import eu.domibus.api.user.UserRole;
+import eu.domibus.api.user.UserState;
 import eu.domibus.common.services.UserService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
@@ -10,12 +12,13 @@ import eu.domibus.web.rest.ro.UserResponseRO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import java.util.Objects;
 
 /**
  * @author Thomas Dussart
@@ -40,19 +43,45 @@ public class UserResource {
     /**
      * {@inheritDoc}
      */
-    @RequestMapping(value = {"/users"}, method = GET)
+    @RequestMapping(value = {"/users"}, method = RequestMethod.GET)
     public List<UserResponseRO> users() {
         LOG.debug("Retrieving usersRo !");
         List<User> users = userService.findUsers();
         return prepareResponse(users);
     }
 
+    @RequestMapping(value = {"/users"}, method = RequestMethod.PUT)
+    public void updateUsers(@RequestBody List<UserResponseRO> userROS) {
+        updateUserRoles(userROS);
+        List<User> users = domainConverter.convert(userROS, User.class);
+        userService.updateUsers(users);
+    }
 
-    @RequestMapping(value = {"/save"}, method = POST)
+    private void updateUserRoles(List<UserResponseRO> userROS) {
+        for(UserResponseRO userRo: userROS) {
+            if (Objects.equals(userRo.getStatus(), UserState.NEW.name()) || Objects.equals(userRo.getStatus(), UserState.UPDATED.name())) {
+                List<String> auths = Arrays.asList(userRo.getRoles().split(","));
+                userRo.setAuthorities(auths);
+            }
+        }
+    }
+
+
+    @RequestMapping(value = {"/save"}, method = RequestMethod.POST)
     public void save(@RequestBody List<UserResponseRO> usersRo) {
         LOG.debug("Saving "+ usersRo.size()+"");
         List<eu.domibus.api.user.User> users = domainConverter.convert(usersRo, eu.domibus.api.user.User.class);
         userService.saveUsers(users);
+    }
+
+    @RequestMapping(value = {"/userroles"}, method = RequestMethod.GET)
+    public List<String> userRoles() {
+        List<String> result = new ArrayList<>();
+        List<UserRole> userRoles = userService.findUserRoles();
+        for(UserRole userRole : userRoles) {
+            result.add(userRole.getRole());
+        }
+        return result;
     }
 
 

@@ -131,6 +131,8 @@
                  <spring:constructor-arg name="filter" ref="testFilter" />
                  <spring:constructor-arg name="resendDelay" value="10000" />
              </spring:bean>-->
+            <discardingDLQBrokerPlugin dropOnly="domibus.internal.dispatch.queue" reportInterval="10000"/>
+            <discardingDLQBrokerPlugin dropOnly="domibus.internal.pull.queue" reportInterval="10000"/>
         </plugins>
     </broker>
 

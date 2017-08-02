@@ -1,8 +1,6 @@
 package eu.domibus.common.services;
 
-import eu.domibus.common.model.security.User;
-import eu.domibus.common.model.security.UserRole;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import eu.domibus.api.user.User;
 
 import java.util.List;
 
@@ -22,4 +20,14 @@ public interface UserService{
      * @param users to create of update.
      */
     void saveUsers(List<eu.domibus.api.user.User> users);
+
+    /**
+     * get all user roles
+     */
+    List<eu.domibus.api.user.UserRole> findUserRoles();
+
+    /**
+     * update users
+     */
+    void updateUsers(List<User> users);
 }

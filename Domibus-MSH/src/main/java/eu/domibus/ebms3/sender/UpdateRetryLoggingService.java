@@ -38,12 +38,31 @@ public class UpdateRetryLoggingService {
     private Properties domibusProperties;
 
     /**
-     * This method is responsible for the handling of retries for a given message
+     * This method is responsible for the handling of retries for a given sent message.
+     * In case of failure the message will be put back in waiting_for_retry status, after a certain amount of retry/time
+     * it will be marked as failed.
      *
      * @param messageId        id of the message that needs to be retried
      * @param legConfiguration processing information for the message
      */
-    public void updateRetryLogging(final String messageId, final LegConfiguration legConfiguration) {
+    public void updatePushedMessageRetryLogging(final String messageId, final LegConfiguration legConfiguration) {
+        updateRetryLogging(messageId, legConfiguration, MessageStatus.WAITING_FOR_RETRY);
+    }
+
+    /**
+     * This method is responsible for the handling of retries for a given sent message.
+     * In case of failure the message will be put back in READY_TO_PULL status, after a certain amount of retry/time
+     * it will be marked as failed.
+     *
+     * @param messageId        id of the message that needs to be retried
+     * @param legConfiguration processing information for the message
+     */
+
+    public void updatePulledMessageRetryLogging(final String messageId, final LegConfiguration legConfiguration) {
+        updateRetryLogging(messageId, legConfiguration, MessageStatus.READY_TO_PULL);
+    }
+
+    private void updateRetryLogging(final String messageId, final LegConfiguration legConfiguration, MessageStatus messageStatus) {
         LOG.debug("Updating retry for message");
         MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
         //userMessageLog.setMessageStatus(MessageStatus.SEND_ATTEMPT_FAILED); //This is not stored in the database
@@ -52,11 +71,7 @@ public class UpdateRetryLoggingService {
             LOG.debug("Updating send attempts to [{}]", userMessageLog.getSendAttempts());
             if (legConfiguration.getReceptionAwareness() != null) {
                 userMessageLog.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(userMessageLog.getNextAttempt(), userMessageLog.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
-                if (MessageStatus.BEING_PULLED.equals(userMessageLog.getMessageStatus())) {
-                    userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
-                } else {
-                    userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RETRY);
-                }
+                userMessageLog.setMessageStatus(messageStatus);
                 LOG.debug("Updating status to [{}]", userMessageLog.getMessageStatus());
                 userMessageLogDao.update(userMessageLog);
             }
