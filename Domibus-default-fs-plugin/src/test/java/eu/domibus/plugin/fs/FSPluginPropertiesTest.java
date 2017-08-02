@@ -1,11 +1,11 @@
 package eu.domibus.plugin.fs;
 
-import java.io.FileInputStream;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.FileInputStream;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -16,9 +16,9 @@ public class FSPluginPropertiesTest {
     
     private static final String DOMAIN = "DOMAIN1";
     
-    private static final String LOCATION = "/tmp/fsPlugin";
-    private static final String DOMAIN_LOCATION = "/tmp/fsPlugin/DOMAIN1";
-    private static final String SENT_ACTION = "archive";
+    private static final String LOCATION = "/tmp/fs_plugin_data";
+    private static final String DOMAIN_LOCATION = "/tmp/fs_plugin_data/DOMAIN1";
+    private static final String SENT_ACTION = "delete";
     private static final String SENT_PURGE_WORKER_CRON_EXP = "0/60 * * * * ?";
     private static final int SENT_PURGE_EXPIRED = 600;
     
