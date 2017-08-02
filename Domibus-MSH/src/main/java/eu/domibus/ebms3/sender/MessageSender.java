@@ -165,16 +165,16 @@ public class MessageSender implements MessageListener {
             if (abortSending) {
                 LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
                 retryService.purgeTimedoutMessage(messageId);
-                return;
-            }
-            reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
-            try {
-                attempt.setError(attemptError);
-                attempt.setStatus(attemptStatus);
-                attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
-                messageAttemptService.create(attempt);
-            } catch (Exception e) {
-                LOG.error("Could not create the message attempt", e);
+            } else {
+                reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+                try {
+                    attempt.setError(attemptError);
+                    attempt.setStatus(attemptStatus);
+                    attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
+                    messageAttemptService.create(attempt);
+                } catch (Exception e) {
+                    LOG.error("Could not create the message attempt", e);
+                }
             }
         }
     }
