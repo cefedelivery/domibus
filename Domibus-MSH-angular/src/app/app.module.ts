@@ -40,9 +40,7 @@ import {MessagelogDialogComponent} from './messagelog/messagelog-dialog/messagel
 import {JmsComponent} from './jms/jms.component';
 import {RowLimiterComponent} from './common/row-limiter/row-limiter.component';
 import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
-import {MessagefilterDialogComponent} from "./messagefilter/messagefilter-dialog/messagefilter-dialog.component";
 import {MessageDialogComponent} from './jms/message-dialog/message-dialog.component';
-import {PasswordComponent} from './user/password/password-dialog.component';
 import {DatePipe} from './customDate/datePipe';
 import {DefaultPasswordDialogComponent} from './security/default-password-dialog/default-password-dialog.component';
 import {MessagelogDetailsComponent} from './messagelog/messagelog-details/messagelog-details.component';
@@ -50,6 +48,8 @@ import {ErrorlogDetailsComponent} from './errorlog/errorlog-details/errorlog-det
 import {EditMessageFilterComponent} from "./messagefilter/editmessagefilter-form/editmessagefilter-form.component";
 import {CancelDialogComponent} from './common/cancel-dialog/cancel-dialog.component';
 import {DirtyGuard} from "./common/dirty.guard";
+import {EditUserComponent} from "app/user/edituser-form/edituser-form.component";
+import {SaveDialogComponent} from "./common/save-dialog/save-dialog.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -69,41 +69,34 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     PModeComponent,
     IsAuthorized,
     TruststoreComponent,
-    PModeComponent,
     PmodeUploadComponent,
-    MessagefilterDialogComponent,
-    PmodeUploadComponent,
+    SaveDialogComponent,
     MessagelogDialogComponent,
     CancelDialogComponent,
     JmsComponent,
     RowLimiterComponent,
     MoveDialogComponent,
     MessageDialogComponent,
-    MessagefilterDialogComponent,
-    PasswordComponent,
     DatePipe,
     DefaultPasswordDialogComponent,
     EditMessageFilterComponent,
     MessagelogDetailsComponent,
     ErrorlogDetailsComponent,
-    CancelDialogComponent
+    EditUserComponent
   ],
   entryComponents: [
     AppComponent,
-    PmodeUploadComponent,
-    MessagefilterDialogComponent,
     PmodeUploadComponent,
     MessagelogDialogComponent,
     MoveDialogComponent,
     MessageDialogComponent,
     MessagelogDetailsComponent,
-    MessagelogDetailsComponent,
     CancelDialogComponent,
-    MoveDialogComponent,
-    PasswordComponent,
+    SaveDialogComponent,
     DefaultPasswordDialogComponent,
     EditMessageFilterComponent,
-    ErrorlogDetailsComponent
+    ErrorlogDetailsComponent,
+    EditUserComponent
   ],
   imports: [
     BrowserModule,
@@ -122,7 +115,6 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     routing,
     ReactiveFormsModule,
     Md2Module,
-    ReactiveFormsModule,
     Md2SelectModule
   ],
   providers: [
