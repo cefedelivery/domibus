@@ -21,13 +21,6 @@ export class TruststoreComponent implements OnInit {
   loading: boolean = false;
 
   rows: Array<any> = [];
-  pageSizes: Array<any> = [
-    {key: '10', value: 10},
-    {key: '25', value: 25},
-    {key: '50', value: 50},
-    {key: '100', value: 100}
-  ];
-  pageSize: number = this.pageSizes[0].value;
 
   constructor(private http: Http, private alertService: AlertService, private trustStoreService: TrustStoreService, public dialog: MdDialog) {
   }
@@ -63,11 +56,9 @@ export class TruststoreComponent implements OnInit {
   openEditTrustStore() {
     let dialogRef: MdDialogRef<TrustStoreUploadComponent> = this.dialog.open(TrustStoreUploadComponent);
     dialogRef.afterClosed().subscribe(updated => {
-      debugger;
       if (updated == true) {
         this.getTrustStoreEntries();
       }
     });
   }
-
 }

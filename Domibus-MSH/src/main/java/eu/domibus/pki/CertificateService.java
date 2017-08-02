@@ -22,5 +22,10 @@ public interface CertificateService {
 
     X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password);
 
+    /**
+     * Returne the detail of the truststore entries.
+     *
+     * @return a list of certificate
+     */
     List<TrustStoreEntry> getTrustStoreEntries();
 }

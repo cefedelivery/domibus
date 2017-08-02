@@ -178,9 +178,7 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     /**
-     * Method in charge of returning truststore's entries.
-     *
-     * @return truststore entries.
+     * {@inheritDoc}
      */
     @Override
     public List<TrustStoreEntry> getTrustStoreEntries() {

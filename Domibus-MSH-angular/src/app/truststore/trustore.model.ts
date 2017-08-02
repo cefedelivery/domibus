@@ -1,5 +1,6 @@
 /**
- * Created by dussath on 8/1/17.
+ * @author Thomas Dussart
+ * @since 3.3
  */
 export class TrustStoreEntry {
   name: string
@@ -7,6 +8,5 @@ export class TrustStoreEntry {
   issuer: string;
   validFrom: string;
   validUntil: string;
-
 }
 
