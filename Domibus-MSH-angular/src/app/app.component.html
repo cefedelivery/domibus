@@ -14,32 +14,32 @@
     </div>
 
     <button md-raised-button class="sideNavButton" [routerLink]="['/']" id="messages_id">
-      <md-icon md-tooltip="Messages" mdTooltipDisabled="{{fullMenu}}">message</md-icon>
+      <md-icon md-tooltip="Messages" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">message</md-icon>
       <span *ngIf="fullMenu">Messages</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/messagefilter']" *ngIf="hasAdmin()"
             id="messagefilter_id">
-      <md-icon md-tooltip="Message Filter" mdTooltipDisabled="{{fullMenu}}">filter_list</md-icon>
+      <md-icon md-tooltip="Message Filter" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">filter_list</md-icon>
       <span *ngIf="fullMenu">Message Filter</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/errorlog']" id="errorlog_id">
-      <md-icon md-tooltip="Error Log" mdTooltipDisabled="{{fullMenu}}">sms_failed</md-icon>
+      <md-icon md-tooltip="Error Log" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">sms_failed</md-icon>
       <span *ngIf="fullMenu">Error Log</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="hasAdmin()" id="pmode_id">
-      <md-icon md-tooltip="PMode" mdTooltipDisabled="{{fullMenu}}">description</md-icon>
+      <md-icon md-tooltip="PMode" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">description</md-icon>
       <span *ngIf="fullMenu">PMode</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/jms']" *ngIf="hasAdmin()" id="jmsmonitoring_id">
-      <md-icon md-tooltip="JMS Monitoring" mdTooltipDisabled="{{fullMenu}}">computer</md-icon>
+      <md-icon md-tooltip="JMS Monitoring" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">computer</md-icon>
       <span *ngIf="fullMenu">JMS Monitoring</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="hasAdmin()" id="truststore_id">
-      <md-icon md-tooltip="Truststore" mdTooltipDisabled="{{fullMenu}}">vpn_key</md-icon>
+      <md-icon md-tooltip="Truststore" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">vpn_key</md-icon>
       <span *ngIf="fullMenu">Truststore</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/user']" *ngIf="hasAdmin()" id="user_id">
-      <md-icon md-tooltip="Users" mdTooltipDisabled="{{fullMenu}}">people</md-icon>
+      <md-icon md-tooltip="Users" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">people</md-icon>
       <span *ngIf="fullMenu">Users</span>
     </button>
 
