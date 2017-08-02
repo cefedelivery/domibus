@@ -1,7 +1,5 @@
 package eu.domibus.plugin.fs;
 
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -10,22 +8,20 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
+ * File System Plugin Properties
+ *
+ * All the plugin configurable properties must be accessed and handled through this component.
+ *
  * @author @author FERNANDES Henrique, GONCALVES Bruno
  */
 @Component
 public class FSPluginProperties extends Properties {
-
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSPluginProperties.class);
 
     private static final String PROPERTY_PREFIX = "fsplugin.messages.";
 
     private static final String DOMAIN_PREFIX = "fsplugin.domains.";
     
     private static final String MESSAGES_SECTION = ".messages.";
-
-    private static final String ACTION_ARCHIVE = "archive";
-
-    private static final String ACTION_DELETE = "delete";
 
     private static final String LOCATION = "location";
 
@@ -35,11 +31,25 @@ public class FSPluginProperties extends Properties {
 
     private static final String SENT_PURGE_EXPIRED = "sent.purge.expired";
 
+    private static final String FAILED_ACTION = "failed.action";
+
+    private static final String FAILED_PURGE_WORKER_CRONEXPRESSION = "failed.purge.worker.cronExpression";
+
+    private static final String FAILED_PURGE_EXPIRED = "failed.purge.expired";
+
+    private static final String RECEIVED_PURGE_EXPIRED = "received.purge.expired";
+
+    private static final String RECEIVED_PURGE_WORKER_CRONEXPRESSION = "received.purge.worker.cronExpression";
+
     private static final String USER = "user";
 
     private static final String PASSWORD = "password";
     
     private Set<String> domains;
+
+    public static final String ACTION_DELETE = "delete";
+
+    public static final String ACTION_ARCHIVE = "archive";
 
     public Set<String> getDomains() {
         if (domains == null) {
@@ -83,21 +93,13 @@ public class FSPluginProperties extends Properties {
      * @return The cron expression that defines the frequency of the sent messages purge job
      */
     public String getSentPurgeWorkerCronExpression() {
-        return getSentPurgeWorkerCronExpression(null);
-    }
-
-    /**
-     * @param domain The domain property qualifier
-     * @return See {@link FSPluginProperties#getSentPurgeWorkerCronExpression()}
-     */
-    public String getSentPurgeWorkerCronExpression(String domain) {
-        return getDomainProperty(domain, SENT_PURGE_WORKER_CRONEXPRESSION, "0/60 * * * * ?");
+        return getProperty(PROPERTY_PREFIX + SENT_PURGE_WORKER_CRONEXPRESSION);
     }
 
     /**
      * @return The time interval (seconds) to purge sent messages
      */
-    public int getSentPurgeExpired() {
+    public Integer getSentPurgeExpired() {
         return getSentPurgeExpired(null);
     }
 
@@ -105,8 +107,70 @@ public class FSPluginProperties extends Properties {
      * @param domain The domain property qualifier
      * @return See {@link FSPluginProperties#getSentPurgeExpired()}
      */
-    public int getSentPurgeExpired(String domain) {
-        return Integer.parseInt(getDomainProperty(domain, SENT_PURGE_EXPIRED, "600"));
+    public Integer getSentPurgeExpired(String domain) {
+        String value = getDomainProperty(domain, SENT_PURGE_EXPIRED, "600");
+        return StringUtils.isNotEmpty(value) ? Integer.parseInt(value) : null;
+    }
+
+    /**
+     * @return The plugin action when message fails
+     */
+    public String getFailedAction() {
+        return getFailedAction(null);
+    }
+
+    /**
+     * @param domain The domain property qualifier
+     * @return See {@link FSPluginProperties#getFailedAction()}
+     */
+    public String getFailedAction(String domain) {
+        return getDomainProperty(domain, FAILED_ACTION, ACTION_DELETE);
+    }
+
+    /**
+     * @return The cron expression that defines the frequency of the failed messages purge job
+     */
+    public String getFailedPurgeWorkerCronExpression() {
+        return getProperty(PROPERTY_PREFIX + FAILED_PURGE_WORKER_CRONEXPRESSION);
+    }
+
+    /**
+     * @return The time interval (seconds) to purge failed messages
+     */
+    public Integer getFailedPurgeExpired() {
+        return getFailedPurgeExpired(null);
+    }
+
+    /**
+     * @param domain The domain property qualifier
+     * @return See {@link FSPluginProperties#getFailedPurgeExpired()}
+     */
+    public Integer getFailedPurgeExpired(String domain) {
+        String value = getDomainProperty(domain, FAILED_PURGE_EXPIRED, "600");
+        return StringUtils.isNotEmpty(value) ? Integer.parseInt(value) : null;
+    }
+
+    /**
+     * @return The time interval (seconds) to purge received messages
+     */
+    public Integer getReceivedPurgeExpired() {
+        return getReceivedPurgeExpired(null);
+    }
+
+    /**
+     * @param domain The domain property qualifier
+     * @return See {@link FSPluginProperties#getReceivedPurgeExpired()}
+     */
+    public Integer getReceivedPurgeExpired(String domain) {
+        String value = getDomainProperty(domain, RECEIVED_PURGE_EXPIRED, "600");
+        return StringUtils.isNotEmpty(value) ? Integer.parseInt(value) : null;
+    }
+
+    /**
+     * @return The cron expression that defines the frequency of the received messages purge job
+     */
+    public String getReceivedPurgeWorkerCronExpression() {
+        return getProperty(PROPERTY_PREFIX + RECEIVED_PURGE_WORKER_CRONEXPRESSION);
     }
 
     /**

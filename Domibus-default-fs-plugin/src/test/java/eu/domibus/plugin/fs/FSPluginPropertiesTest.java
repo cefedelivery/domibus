@@ -1,6 +1,5 @@
 package eu.domibus.plugin.fs;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,52 +29,73 @@ public class FSPluginPropertiesTest {
         fSPluginProperties.load(new FileInputStream(DEFAULT_PROPERTIES_PATH));
     }
 
-    @After
-    public void tearDown() throws Exception {
-    }
-
     @Test
-    public void getLocation() throws Exception {
+    public void getLocationTest() throws Exception {
         Assert.assertEquals(DEFAULT_LOCATION, fSPluginProperties.getLocation());
     }
     
     @Test
-    public void getLocationInDomain() throws Exception {
+    public void getLocationInDomainTest() throws Exception {
         Assert.assertEquals(DOMAIN1_LOCATION, fSPluginProperties.getLocation(DOMAIN1));
     }
 
     @Test
-    public void getLocationInNonExistentDomain() throws Exception {
+    public void getLocationInNonExistentDomainTest() throws Exception {
         Assert.assertEquals(DEFAULT_LOCATION, fSPluginProperties.getLocation(NONEXISTENT_DOMAIN));
     }
 
     @Test
-    public void getSentAction() throws Exception {
-        Assert.assertEquals("delete", fSPluginProperties.getSentAction());
+    public void getSentActionTest() throws Exception {
+        Assert.assertEquals(FSPluginProperties.ACTION_DELETE, fSPluginProperties.getSentAction());
     }
 
     @Test
-    public void getSentPurgeWorkerCronExpression() throws Exception {
+    public void getSentPurgeWorkerCronExpressionTest() throws Exception {
         Assert.assertEquals("0/60 * * * * ?", fSPluginProperties.getSentPurgeWorkerCronExpression());
     }
     
     @Test
-    public void getSentPurgeExpired() throws Exception {
-        Assert.assertEquals(600, fSPluginProperties.getSentPurgeExpired());
+    public void getSentPurgeExpiredTest() throws Exception {
+        Assert.assertEquals(Integer.valueOf(600), fSPluginProperties.getSentPurgeExpired());
     }
 
     @Test
-    public void getUser() throws Exception {
+    public void getFailedActionTest() throws Exception {
+        Assert.assertEquals(FSPluginProperties.ACTION_ARCHIVE, fSPluginProperties.getFailedAction());
+    }
+
+    @Test
+    public void getFailedPurgeWorkerCronExpressionTest() throws Exception {
+        Assert.assertEquals("0/60 * * * * ?", fSPluginProperties.getFailedPurgeWorkerCronExpression());
+    }
+
+    @Test
+    public void getFailedPurgeExpiredTest() throws Exception {
+        Assert.assertEquals(null, fSPluginProperties.getFailedPurgeExpired());
+    }
+
+    @Test
+    public void getReceivedPurgeExpiredTest() throws Exception {
+        Assert.assertEquals(Integer.valueOf(600), fSPluginProperties.getReceivedPurgeExpired());
+    }
+
+    @Test
+    public void getReceivedPurgeWorkerCronExpressionTest() throws Exception {
+        Assert.assertEquals("0/60 * * * * ?", fSPluginProperties.getReceivedPurgeWorkerCronExpression());
+    }
+
+    @Test
+    public void getUserTest() throws Exception {
         Assert.assertEquals("user1", fSPluginProperties.getUser(DOMAIN1));
     }
 
     @Test
-    public void getPassword() throws Exception {
+    public void getPasswordTest() throws Exception {
         Assert.assertEquals("pass1", fSPluginProperties.getPassword(DOMAIN1));
     }
 
     @Test
-    public void getDomains() throws Exception {
+    public void getDomainsTest() throws Exception {
         Set<String> expected = new HashSet<>();
         expected.add(DOMAIN1);
         Assert.assertEquals(expected, fSPluginProperties.getDomains());
