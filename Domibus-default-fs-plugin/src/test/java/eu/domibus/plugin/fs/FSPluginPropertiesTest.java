@@ -6,6 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.FileInputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -15,6 +17,7 @@ public class FSPluginPropertiesTest {
     private static final String DEFAULT_PROPERTIES_PATH = "./src/test/resources/fsPlugin.properties";
     
     private static final String DOMAIN1 = "DOMAIN1";
+    private static final String NONEXISTENT_DOMAIN = "NONEXISTENT_DOMAIN";
     
     private static final String DEFAULT_LOCATION = "/tmp/fs_plugin_data";
     private static final String DOMAIN1_LOCATION = "/tmp/fs_plugin_data/DOMAIN1";
@@ -42,6 +45,11 @@ public class FSPluginPropertiesTest {
     }
 
     @Test
+    public void getLocationInNonExistentDomain() throws Exception {
+        Assert.assertEquals(DEFAULT_LOCATION, fSPluginProperties.getLocation(NONEXISTENT_DOMAIN));
+    }
+
+    @Test
     public void getSentAction() throws Exception {
         Assert.assertEquals("delete", fSPluginProperties.getSentAction());
     }
@@ -64,6 +72,13 @@ public class FSPluginPropertiesTest {
     @Test
     public void getPassword() throws Exception {
         Assert.assertEquals("pass1", fSPluginProperties.getPassword(DOMAIN1));
+    }
+
+    @Test
+    public void getDomains() throws Exception {
+        Set<String> expected = new HashSet<>();
+        expected.add(DOMAIN1);
+        Assert.assertEquals(expected, fSPluginProperties.getDomains());
     }
 
 }

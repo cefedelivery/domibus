@@ -3,6 +3,7 @@ package eu.domibus.plugin.fs;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashSet;
 import java.util.Properties;
@@ -11,6 +12,7 @@ import java.util.Set;
 /**
  * @author @author FERNANDES Henrique, GONCALVES Bruno
  */
+@Component
 public class FSPluginProperties extends Properties {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSPluginProperties.class);
@@ -43,33 +45,7 @@ public class FSPluginProperties extends Properties {
         if (domains == null) {
             domains = readDomains();
         }
-        
         return domains;
-    }
-
-    private Set<String> readDomains() {
-        Set<String> tempDomains = new LinkedHashSet<>();
-         
-        for (String propName : this.stringPropertyNames()) {
-            if (propName.startsWith(DOMAIN_PREFIX)) {
-                LOG.debug("Found domain property {}", propName);
-                
-                String domain = extractDomainName(propName);
-                
-                if (!tempDomains.contains(domain)) {
-                    tempDomains.add(domain);
-                    LOG.debug("Found domain {}", domain);
-                }
-            }
-        }
-        
-        return tempDomains;
-    }
-
-    private String extractDomainName(String propName) {
-        String unprefixedProp = StringUtils.removeStart(propName, DOMAIN_PREFIX);
-        String domain = StringUtils.substringBefore(unprefixedProp, ".");
-        return domain;
     }
 
     /**
@@ -133,10 +109,18 @@ public class FSPluginProperties extends Properties {
         return Integer.parseInt(getDomainProperty(domain, SENT_PURGE_EXPIRED, "600"));
     }
 
+    /**
+     * @param domain The domain property qualifier
+     * @return the user used to access the location specified by the property
+     */
     public String getUser(String domain) {
         return getDomainProperty(domain, USER, null);
     }
 
+    /**
+     * @param domain The domain property qualifier
+     * @return the password used to access the location specified by the property
+     */
     public String getPassword(String domain) {
         return getDomainProperty(domain, PASSWORD, null);
     }
@@ -147,6 +131,27 @@ public class FSPluginProperties extends Properties {
             return getProperty(domainFullPropertyName, defaultValue);
         }
         return getProperty(PROPERTY_PREFIX + propertyName, defaultValue);
+    }
+
+    private Set<String> readDomains() {
+        Set<String> tempDomains = new LinkedHashSet<>();
+
+        for (String propName : this.stringPropertyNames()) {
+            if (propName.startsWith(DOMAIN_PREFIX)) {
+                String domain = extractDomainName(propName);
+                if (!tempDomains.contains(domain)) {
+                    tempDomains.add(domain);
+                }
+            }
+        }
+
+        return tempDomains;
+    }
+
+    private String extractDomainName(String propName) {
+        String unprefixedProp = StringUtils.removeStart(propName, DOMAIN_PREFIX);
+        String domain = StringUtils.substringBefore(unprefixedProp, ".");
+        return domain;
     }
 
 }
