@@ -1,5 +1,6 @@
 package eu.domibus.common.services.impl;
 
+import com.codahale.metrics.Timer;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
@@ -13,14 +14,17 @@ import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
+import eu.domibus.ebms3.sender.MessageSender;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.plugin.handler.DatabaseMessageHandler;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import eu.domibus.util.MessageUtil;
 import eu.domibus.util.SoapUtil;
@@ -50,10 +54,11 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Iterator;
 
+import static com.codahale.metrics.MetricRegistry.name;
+
 /**
  * @author Thomas Dussart
  * @since 3.3
- *
  */
 @org.springframework.stereotype.Service
 public class UserMessageHandlerService {
@@ -94,7 +99,9 @@ public class UserMessageHandlerService {
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
 
-    public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging,final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
+    InputStream generateAS4ReceiptStream;
+
+    public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging, final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
         userMessageHandlerContext.setLegConfiguration(legConfiguration);
         boolean pingMessage;
@@ -115,24 +122,37 @@ public class UserMessageHandlerService {
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
             userMessageHandlerContext.setMessageId(messageId);
 
+//            final Timer.Context checkCharsetContext = Metrics.METRIC_REGISTRY.timer(name(UserMessageHandlerService.class, "checkCharset")).time();
             checkCharset(messaging);
+//            checkCharsetContext.stop();
+//            final Timer.Context checkPingContext = Metrics.METRIC_REGISTRY.timer(name(UserMessageHandlerService.class, "checkPing")).time();
             pingMessage = checkPingMessage(messaging.getUserMessage());
+//            checkPingContext.stop();
             userMessageHandlerContext.setPingMessage(pingMessage);
-            final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
+            final boolean messageExists = false;// legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
             LOG.debug("Message duplication status:{}", messageExists);
             if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
+                Timer persistReceivedMessage = Metrics.METRIC_REGISTRY.timer(name(UserMessageHandlerService.class, "persistReceivedMessage"));
+                final Timer.Context persistReceivedMessageContext = persistReceivedMessage.time();
                 persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
+                persistReceivedMessageContext.stop();
                 try {
-                    backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
+                    final Timer.Context notifyContext = Metrics.METRIC_REGISTRY.timer(name(UserMessageHandlerService.class, "notifyMessageReceived")).time();
+//                    backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
+                    notifyContext.stop();
                 } catch (SubmissionValidationException e) {
                     LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
                 }
             }
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
-            return generateReceipt(request, legConfiguration, messageExists);
+            final Timer.Context receiptContext = Metrics.METRIC_REGISTRY.timer(name(UserMessageHandlerService.class, "generateReceipt")).time();
+            final SOAPMessage soapMessage = generateReceipt(request, legConfiguration, messageExists);
+            receiptContext.stop();
+            return soapMessage;
         }
     }
+
     /**
      * Required for AS4_TA_12
      *
@@ -186,13 +206,13 @@ public class UserMessageHandlerService {
 
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
         LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
-        try {
-            payloadProfileValidator.validate(messaging, pmodeKey);
-            propertyProfileValidator.validate(messaging, pmodeKey);
-        } catch (EbMS3Exception e) {
-            e.setMshRole(MSHRole.RECEIVING);
-            throw e;
-        }
+//        try {
+//            payloadProfileValidator.validate(messaging, pmodeKey);
+//            propertyProfileValidator.validate(messaging, pmodeKey);
+//        } catch (EbMS3Exception e) {
+//            e.setMshRole(MSHRole.RECEIVING);
+//            throw e;
+//        }
 
         try {
             messagingService.storeMessage(messaging);
@@ -218,17 +238,17 @@ public class UserMessageHandlerService {
         // Saves the user message log
         userMessageLogDao.create(umlBuilder.build());
 
-        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
-        try {
-            String rawXMLMessage = SoapUtil.getRawXMLMessage(request);
-            LOG.debug("Persist raw XML envelope: " + rawXMLMessage);
-            RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
-            rawEnvelopeLog.setRawXML(rawXMLMessage);
-            rawEnvelopeLog.setUserMessage(userMessage);
-            rawEnvelopeLogDao.create(rawEnvelopeLog);
-        } catch (TransformerException e) {
-            LOG.warn("Unable to log the raw message XML due to: ", e);
-        }
+//        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
+//        try {
+//            String rawXMLMessage = SoapUtil.getRawXMLMessage(request);
+//            LOG.debug("Persist raw XML envelope: " + rawXMLMessage);
+//            RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+//            rawEnvelopeLog.setRawXML(rawXMLMessage);
+//            rawEnvelopeLog.setUserMessage(userMessage);
+//            rawEnvelopeLogDao.create(rawEnvelopeLog);
+//        } catch (TransformerException e) {
+//            LOG.warn("Unable to log the raw message XML due to: ", e);
+//        }
 
         return userMessage.getMessageInfo().getMessageId();
     }
@@ -323,6 +343,8 @@ public class UserMessageHandlerService {
         if (ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())) {
             LOG.info("Generating receipt for incoming message");
             try {
+
+                final Timer.Context transformContext = Metrics.METRIC_REGISTRY.timer(name(UserMessageHandlerService.class, "transform")).time();
                 responseMessage = messageFactory.createMessage();
                 InputStream generateAS4ReceiptStream = this.getClass().getClassLoader().getResourceAsStream(XSLT_GENERATE_AS4_RECEIPT_XSL);
                 Source messageToReceiptTransform = new StreamSource(generateAS4ReceiptStream);
@@ -335,7 +357,11 @@ public class UserMessageHandlerService {
                 final DOMResult domResult = new DOMResult();
                 transformer.transform(requestMessage, domResult);
                 responseMessage.getSOAPPart().setContent(new DOMSource(domResult.getNode()));
+                transformContext.stop();
+
+                final Timer.Context saveResponse = Metrics.METRIC_REGISTRY.timer(name(UserMessageHandlerService.class, "saveResponse")).time();
                 saveResponse(responseMessage);
+                saveResponse.stop();
 
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, legConfiguration.getReliability().isNonRepudiation());
             } catch (TransformerConfigurationException | SOAPException e) {
@@ -351,6 +377,14 @@ public class UserMessageHandlerService {
             }
         }
         return responseMessage;
+    }
+
+    protected InputStream getMessageToReceiptTransform() {
+        if (generateAS4ReceiptStream == null) {
+            generateAS4ReceiptStream = this.getClass().getClassLoader().getResourceAsStream(XSLT_GENERATE_AS4_RECEIPT_XSL);
+        }
+
+        return generateAS4ReceiptStream;
     }
 
     public ErrorResult createErrorResult(EbMS3Exception ebm3Exception) {
@@ -370,10 +404,14 @@ public class UserMessageHandlerService {
         try {
             Messaging messaging = getMessaging(responseMessage);
             final SignalMessage signalMessage = messaging.getSignalMessage();
+            final Timer.Context saveSignalContext = Metrics.METRIC_REGISTRY.timer(name(UserMessageHandlerService.class, "saveSignal")).time();
             // Stores the signal message
             signalMessageDao.create(signalMessage);
+            saveSignalContext.stop();
             // Updating the reference to the signal message
+            final Timer.Context findMessagingContext = Metrics.METRIC_REGISTRY.timer(name(UserMessageHandlerService.class, "findMessaging")).time();
             Messaging sentMessage = messagingDao.findMessageByMessageId(messaging.getSignalMessage().getMessageInfo().getRefToMessageId());
+            findMessagingContext.stop();
             if (sentMessage != null) {
                 sentMessage.setSignalMessage(signalMessage);
                 messagingDao.update(sentMessage);
@@ -385,7 +423,9 @@ public class UserMessageHandlerService {
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(NotificationStatus.NOT_REQUIRED);
             // Saves an entry of the signal message log
+            final Timer.Context saveSignalLogContext = Metrics.METRIC_REGISTRY.timer(name(UserMessageHandlerService.class, "saveSignalLog")).time();
             signalMessageLogDao.create(smlBuilder.build());
+            saveSignalLogContext.stop();
         } catch (JAXBException | SOAPException ex) {
             LOG.error("Unable to save the SignalMessage due to error: ", ex);
         }

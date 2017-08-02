@@ -1,5 +1,6 @@
 package eu.domibus.plugin.handler;
 
+import com.codahale.metrics.Timer;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.*;
@@ -18,6 +19,7 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
@@ -43,6 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * This class is responsible of handling the plugins requests for all the operations exposed.
@@ -220,20 +224,25 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Transactional
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
+        final Timer.Context reliabilityContext = Metrics.METRIC_REGISTRY.timer(name(DatabaseMessageHandler.class, "submit")).time();
         if (StringUtils.isNotEmpty(messageData.getMessageId())) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());
         }
         LOG.info("Preparing to submit message");
-        if (!authUtils.isUnsecureLoginAllowed()) {
-            authUtils.hasUserOrAdminRole();
-        }
+//        if (!authUtils.isUnsecureLoginAllowed()) {
+//            authUtils.hasUserOrAdminRole();
+//        }
 
-        String originalUser = authUtils.getOriginalUserFromSecurityContext();
-        LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
+//        String originalUser = authUtils.getOriginalUserFromSecurityContext();
+//        LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
+
 
         UserMessage userMessage = transformer.transformFromSubmission(messageData);
 
-        validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
+
+//        final Timer.Context validationContext = Metrics.METRIC_REGISTRY.timer(name(DatabaseMessageHandler.class, "validation")).time();
+
+//        validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
 
         try {
             // MessageInfo is always initialized in the get method
@@ -253,14 +262,16 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 backendMessageValidator.validateRefToMessageId(refToMessageId);
             }
             // handle if the messageId is unique. This should only fail if the ID is set from the outside
-            if (!MessageStatus.NOT_FOUND.equals(userMessageLogDao.getMessageStatus(messageId))) {
-                throw new DuplicateMessageException("Message with id [" + messageId + "] already exists. Message identifiers must be unique");
-            }
+//            if (!MessageStatus.NOT_FOUND.equals(userMessageLogDao.getMessageStatus(messageId))) {
+//                throw new DuplicateMessageException("Message with id [" + messageId + "] already exists. Message identifiers must be unique");
+//            }
 
             Messaging message = ebMS3Of.createMessaging();
             message.setUserMessage(userMessage);
 
+            final Timer.Context findUserMessageExchangeContext = Metrics.METRIC_REGISTRY.timer(name(DatabaseMessageHandler.class, "findUserMessageExchangeContext")).time();
             MessageExchangeConfiguration userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            findUserMessageExchangeContext.stop();
             String pModeKey = userMessageExchangeConfiguration.getPmodeKey();
             Party to = messageValidations(userMessage, pModeKey, backendName);
 
@@ -268,11 +279,15 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
             fillMpc(userMessage, legConfiguration, to);
 
-            payloadProfileValidator.validate(message, pModeKey);
-            propertyProfileValidator.validate(message, pModeKey);
+//            payloadProfileValidator.validate(message, pModeKey);
+//            propertyProfileValidator.validate(message, pModeKey);
 
             boolean compressed = compressionService.handleCompression(userMessage, legConfiguration);
             LOG.debug("Compression for message with id: " + messageId + " applied: " + compressed);
+
+//            validationContext.stop();
+
+            final Timer.Context saveContext = Metrics.METRIC_REGISTRY.timer(name(DatabaseMessageHandler.class, "save")).time();
 
             try {
                 messagingService.storeMessage(message);
@@ -282,11 +297,21 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
             }
-            messageExchangeService.upgradeMessageExchangeStatus(userMessageExchangeConfiguration);
+            saveContext.stop();
+
+//            final Timer.Context pullContext = Metrics.METRIC_REGISTRY.timer(name(DatabaseMessageHandler.class, "pull")).time();
+//
+//            messageExchangeService.upgradeMessageExchangeStatus(userMessageExchangeConfiguration);
+//            pullContext.stop();
+
+            final Timer.Context scheduleContext = Metrics.METRIC_REGISTRY.timer(name(DatabaseMessageHandler.class, "scheduleSending")).time();
             if(MessageStatus.READY_TO_PULL!= userMessageExchangeConfiguration.getMessageStatus()) {
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
             }
+            scheduleContext.stop();
+
+            final Timer.Context userMessageLogContext = Metrics.METRIC_REGISTRY.timer(name(DatabaseMessageHandler.class, "userMessageLog")).time();
 
             // Builds the user message log
             UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
@@ -300,7 +325,10 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                     .setEndpoint(to.getEndpoint());
 
             userMessageLogDao.create(umlBuilder.build());
+            userMessageLogContext.stop();
+
             LOG.info("Message submitted");
+            reliabilityContext.stop();
             return userMessage.getMessageInfo().getMessageId();
 
         } catch (EbMS3Exception ebms3Ex) {
@@ -312,17 +340,17 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     private Party messageValidations(UserMessage userMessage, String pModeKey, String backendName) throws EbMS3Exception, MessagingProcessingException {
         try {
-            Party from = pModeProvider.getSenderParty(pModeKey);
+//            Party from = pModeProvider.getSenderParty(pModeKey);
             Party to = pModeProvider.getReceiverParty(pModeKey);
-            backendMessageValidator.validateParties(from, to);
-
-            Configuration config = pModeProvider.getConfigurationDAO().read();
-            backendMessageValidator.validateInitiatorParty(config.getParty(), from);
-            backendMessageValidator.validateResponderParty(config.getParty(), to);
-
-            Role fromRole = pModeProvider.getBusinessProcessRole(userMessage.getPartyInfo().getFrom().getRole());
-            Role toRole = pModeProvider.getBusinessProcessRole(userMessage.getPartyInfo().getTo().getRole());
-            backendMessageValidator.validatePartiesRoles(fromRole, toRole);
+//            backendMessageValidator.validateParties(from, to);
+//
+//            Configuration config = pModeProvider.getConfigurationDAO().read();
+//            backendMessageValidator.validateInitiatorParty(config.getParty(), from);
+//            backendMessageValidator.validateResponderParty(config.getParty(), to);
+//
+//            Role fromRole = pModeProvider.getBusinessProcessRole(userMessage.getPartyInfo().getFrom().getRole());
+//            Role toRole = pModeProvider.getBusinessProcessRole(userMessage.getPartyInfo().getTo().getRole());
+//            backendMessageValidator.validatePartiesRoles(fromRole, toRole);
             return to;
         } catch (IllegalArgumentException runTimEx) {
             LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", runTimEx);

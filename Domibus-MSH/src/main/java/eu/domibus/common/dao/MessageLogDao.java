@@ -2,6 +2,7 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -67,6 +68,8 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
             case ACKNOWLEDGED:
             case ACKNOWLEDGED_WITH_WARNING:
                 messageLog.setDeleted(new Date());
+                //TODO based on condition
+                messageLog.setNotificationStatus(NotificationStatus.NOTIFIED);
                 break;
             case DOWNLOADED:
                 messageLog.setDownloaded(new Date());

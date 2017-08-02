@@ -1,11 +1,13 @@
 package eu.domibus.ebms3.receiver;
 
+import com.codahale.metrics.Timer;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.SoapService;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.logging.DomibusLogger;
@@ -42,6 +44,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * This interceptor is responsible for discovery and setup of WS-Security Policies for incoming messages.
@@ -90,6 +94,8 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
+        final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(SetPolicyInInterceptor.class, "handleMessage")).time();
+
         final String httpMethod = (String) message.get("org.apache.cxf.request.method");
         //TODO add the below logic to a separate interceptor
         if(org.apache.commons.lang.StringUtils.containsIgnoreCase(httpMethod, "GET")) {
@@ -104,11 +110,15 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         String messageId = null;
 
         try {
+            final Timer.Context soapServiceContext = Metrics.METRIC_REGISTRY.timer(name(SetPolicyInInterceptor.class, "soapService.getMessage")).time();
             messaging=soapService.getMessage(message);
+            soapServiceContext.stop();
             LegConfigurationExtractor legConfigurationExtractor = messageLegConfigurationFactory.extractMessageConfiguration(message, messaging);
             if(legConfigurationExtractor ==null)return;
 
+//            final Timer.Context extractLegContextConfiguration = Metrics.METRIC_REGISTRY.timer(name(SetPolicyInInterceptor.class, "extractMessageConfiguration")).time();
             final LegConfiguration legConfiguration= legConfigurationExtractor.extractMessageConfiguration();
+//            extractLegContextConfiguration.stop();
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();
             final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));
@@ -132,6 +142,8 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messageId : "unknown", e);
             ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ex);
+        } finally {
+            handleMessageContext.stop();
         }
 
     }
@@ -148,7 +160,9 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
         @Override
         public void handleMessage(final SoapMessage message) {
+//            final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(CheckEBMSHeaderInterceptor.class, "handleMessage")).time();
             HeaderUtil.getHeaderQNameInOperationParam(message).add(ObjectFactory._Messaging_QNAME);
+//            handleMessageContext.stop();
         }
 
         @Override
@@ -169,6 +183,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
         @Override
         public void handleMessage(final SoapMessage message) throws Fault {
+//            final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(SOAPMessageBuilderInterceptor.class, "handleMessage")).time();
             final SOAPMessage result = message.getContent(SOAPMessage.class);
             try {
                 SAAJInInterceptor.replaceHeaders(result, message);
@@ -201,6 +216,8 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
             } catch (final SOAPException soapEx) {
                 LOG.error("Could not replace headers for incoming Message", soapEx);
+            } finally {
+//                handleMessageContext.stop();
             }
 
         }

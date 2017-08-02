@@ -24,6 +24,16 @@
     </build>
 
     <dependencies>
+        <!-- Dropwizard -->
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-servlets</artifactId>
+        </dependency>
+        <!-- End Dropwizard -->
         <!-- Domibus modules -->
         <dependency>
             <groupId>eu.domibus</groupId>

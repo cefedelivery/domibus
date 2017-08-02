@@ -1,9 +1,12 @@
 package eu.domibus.ebms3.receiver;
 
+import com.codahale.metrics.Timer;
 import com.sun.org.apache.xerces.internal.dom.TextImpl;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
@@ -45,6 +48,8 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Properties;
 
+import static com.codahale.metrics.MetricRegistry.name;
+
 /**
  * This interceptor is responsible of the trust of an incoming messages.
  * Useful info on this topic are here: http://tldp.org/HOWTO/SSL-Certificates-HOWTO/x64.html
@@ -85,6 +90,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         if(!isInterceptorEnabled())
             return;
 
+        final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(TrustSenderInterceptor.class, "handleMessage")).time();
         String msgId = (String) message.getExchange().get(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY);
         if (!isMessageSecured(message)) {
             LOG.info("Message [" + msgId + "] does not contain security info ==> skipping sender trust verification.");
@@ -106,6 +112,8 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         } catch (Exception ex) {
             LOG.error("Error while verifying parties trust", ex);
             throw new Fault(ex);
+        } finally {
+            handleMessageContext.stop();
         }
     }
 
@@ -239,6 +247,14 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         return null;
     }
 
+
+    public static void main(String[] args) {
+        String name = "eu.domibus.TestInterceptor@safsadfsadfa";
+        final String substringBefore = org.apache.commons.lang.StringUtils.substringBefore(name, "@");
+        System.out.println(substringBefore);
+
+
+    }
 }
 
 

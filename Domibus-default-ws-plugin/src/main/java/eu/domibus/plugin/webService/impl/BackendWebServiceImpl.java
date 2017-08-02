@@ -20,8 +20,11 @@
 package eu.domibus.plugin.webService.impl;
 
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
+import com.codahale.metrics.Timer;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
+import eu.domibus.api.metrics.Metrics;
+import static com.codahale.metrics.MetricRegistry.name;
 import eu.domibus.ext.exceptions.AuthenticationException;
 import eu.domibus.ext.exceptions.DomibusServiceException;
 import eu.domibus.ext.exceptions.MessageAcknowledgeException;
@@ -100,6 +103,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public SendResponse sendMessage(final SendRequest sendRequest, final Messaging ebMSHeaderInfo) throws SendMessageFault {
+        final Timer.Context reliabilityContext = Metrics.METRIC_REGISTRY.timer(name(BackendWebServiceImpl.class, "sendMessage")).time();
         LOG.info("Received message");
 
         final PayloadType bodyload = sendRequest.getBodyload();
@@ -152,7 +156,9 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         }
         final String messageId;
         try {
+            final Timer.Context context = Metrics.METRIC_REGISTRY.timer(name(BackendWebServiceImpl.class, "submit")).time();
             messageId = this.submit(ebMSHeaderInfo);
+            context.stop();
         } catch (final MessagingProcessingException mpEx) {
             LOG.error("Message submission failed", mpEx);
             throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
@@ -160,6 +166,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         LOG.info("Received message from backend to send, assigning messageID" + messageId);
         final SendResponse response = WEBSERVICE_OF.createSendResponse();
         response.getMessageID().add(messageId);
+        reliabilityContext.stop();
         return response;
     }
 
@@ -176,6 +183,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SendMessageFault {
+        final Timer.Context reliabilityContext = Metrics.METRIC_REGISTRY.timer(name(BackendWebServiceImpl.class, "submitMessage")).time();
         LOG.info("Received message");
 
         final LargePayloadType bodyload = submitRequest.getBodyload();
@@ -228,7 +236,9 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         }
         final String messageId;
         try {
+            final Timer.Context context = Metrics.METRIC_REGISTRY.timer(name(BackendWebServiceImpl.class, "submit")).time();
             messageId = this.submit(ebMSHeaderInfo);
+            context.stop();
         } catch (final MessagingProcessingException mpEx) {
             LOG.error("Message submission failed", mpEx);
             throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
@@ -236,6 +246,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         LOG.info("Received message from backend to send, assigning messageID" + messageId);
         final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
         response.getMessageID().add(messageId);
+        reliabilityContext.stop();
         return response;
     }
 
@@ -514,5 +525,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public void messageSendFailed(final String messageId) {
         throw new UnsupportedOperationException("Operation not yet implemented");
     }
+
+
 
 }

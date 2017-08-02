@@ -66,6 +66,9 @@ public class MessageLogResource {
             @RequestParam(value = "receivedTo", required = false) String receivedTo) {
 
         LOGGER.debug("Getting message log");
+        column = "received";
+        asc = false;
+        pageSize = 100;
 
         MessageLogResultRO result = new MessageLogResultRO();
 

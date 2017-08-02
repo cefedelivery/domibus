@@ -80,10 +80,10 @@ public class PolicyServiceImpl implements PolicyService {
     public boolean isNoSecurityPolicy(Policy policy) {
 
         if (null == policy) {
-            LOG.securityWarn(DomibusMessageCode.SEC_NO_SECURITY_POLICY_USED, "Security policy provided is null! Assuming no security policy - no signature is specified!");
+//            LOG.securityWarn(DomibusMessageCode.SEC_NO_SECURITY_POLICY_USED, "Security policy provided is null! Assuming no security policy - no signature is specified!");
             return true;
         } else if (policy.isEmpty()) {
-            LOG.securityWarn(DomibusMessageCode.SEC_NO_SECURITY_POLICY_USED, "Policy components are empty! No security policy specified!");
+//            LOG.securityWarn(DomibusMessageCode.SEC_NO_SECURITY_POLICY_USED, "Policy components are empty! No security policy specified!");
             return true;
         } else {
             return false;

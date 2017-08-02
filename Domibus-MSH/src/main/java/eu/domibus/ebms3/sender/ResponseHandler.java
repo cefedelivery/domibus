@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.sender;
 
+import com.codahale.metrics.Timer;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -9,7 +10,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
-import eu.domibus.ebms3.common.model.*;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
@@ -30,10 +31,8 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * @author Christian Koch, Stefan Mueller, Federico Martini
@@ -63,50 +62,57 @@ public class ResponseHandler {
     private MessagingDao messagingDao;
 
     public CheckResult handle(final SOAPMessage response) throws EbMS3Exception {
-
+        final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(ResponseHandler.class, "handle")).time();
         final Messaging messaging;
 
         try {
-            messaging = getMessaging(response);
-        } catch (JAXBException | SOAPException ex) {
-            logger.error("Error while un-marshalling message", ex);
-            return CheckResult.UNMARSHALL_ERROR;
-        }
 
-        final SignalMessage signalMessage = messaging.getSignalMessage();
 
-        try {
-            String rawXMLMessage = SoapUtil.getRawXMLMessage(response);
-            logger.debug("Persist raw XML envelope: " + rawXMLMessage);
-            RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
-            rawEnvelopeLog.setRawXML(rawXMLMessage);
-            rawEnvelopeLog.setSignalMessage(signalMessage);
-            rawEnvelopeLogDao.create(rawEnvelopeLog);
-        } catch (TransformerException e) {
-            logger.warn("Unable to log the raw message XML due to: ", e);
-        }
+            try {
+                messaging = getMessaging(response);
+            } catch (JAXBException | SOAPException ex) {
+                logger.error("Error while un-marshalling message", ex);
+                return CheckResult.UNMARSHALL_ERROR;
+            }
 
-        // Stores the signal message
-        signalMessageDao.create(signalMessage);
-        // Updating the reference to the signal message
-        Messaging sentMessage = messagingDao.findMessageByMessageId(messaging.getSignalMessage().getMessageInfo().getRefToMessageId());
-        if (sentMessage != null) {
-            sentMessage.setSignalMessage(signalMessage);
-            messagingDao.update(sentMessage);
+            final SignalMessage signalMessage = messaging.getSignalMessage();
+/*
+            try {
+                String rawXMLMessage = SoapUtil.getRawXMLMessage(response);
+                logger.debug("Persist raw XML envelope: " + rawXMLMessage);
+                RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+                rawEnvelopeLog.setRawXML(rawXMLMessage);
+                rawEnvelopeLog.setSignalMessage(signalMessage);
+                rawEnvelopeLogDao.create(rawEnvelopeLog);
+            } catch (TransformerException e) {
+                logger.warn("Unable to log the raw message XML due to: ", e);
+            }
+*/
+            // Stores the signal message
+            signalMessageDao.create(signalMessage);
+            // Updating the reference to the signal message
+            Messaging sentMessage = messagingDao.findMessageByMessageId(messaging.getSignalMessage().getMessageInfo().getRefToMessageId());
+            if (sentMessage != null) {
+                sentMessage.setSignalMessage(signalMessage);
+                messagingDao.update(sentMessage);
+            }
+            // Builds the signal message log
+            SignalMessageLogBuilder smlBuilder = SignalMessageLogBuilder.create()
+                    .setMessageId(signalMessage.getMessageInfo().getMessageId())
+                    .setMessageStatus(MessageStatus.RECEIVED)
+                    .setMshRole(MSHRole.RECEIVING)
+                    .setNotificationStatus(NotificationStatus.NOT_REQUIRED);
+            // Saves an entry of the signal message log
+            signalMessageLogDao.create(smlBuilder.build());
+            // Checks if the signal message is Ok
+            if (signalMessage.getError() == null || signalMessage.getError().size() == 0) {
+                return CheckResult.OK;
+            }
+            return handleErrors(signalMessage);
+
+        } finally {
+            handleMessageContext.stop();
         }
-        // Builds the signal message log
-        SignalMessageLogBuilder smlBuilder = SignalMessageLogBuilder.create()
-                .setMessageId(signalMessage.getMessageInfo().getMessageId())
-                .setMessageStatus(MessageStatus.RECEIVED)
-                .setMshRole(MSHRole.RECEIVING)
-                .setNotificationStatus(NotificationStatus.NOT_REQUIRED);
-        // Saves an entry of the signal message log
-        signalMessageLogDao.create(smlBuilder.build());
-        // Checks if the signal message is Ok
-        if (signalMessage.getError() == null || signalMessage.getError().size() == 0) {
-            return CheckResult.OK;
-        }
-        return handleErrors(signalMessage);
 
     }
 

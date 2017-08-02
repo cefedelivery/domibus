@@ -19,6 +19,8 @@
 
 package eu.domibus.ebms3.receiver;
 
+import com.codahale.metrics.Timer;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -29,6 +31,8 @@ import org.apache.cxf.phase.Phase;
 
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * This interceptor is responsible for the exchange of parameters from a org.apache.cxf.binding.soap.SoapMessage to a javax.xml.soap.SOAPException
@@ -45,13 +49,15 @@ public class PropertyValueExchangeInterceptor extends AbstractSoapInterceptor {
 
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
-
+//        final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(PropertyValueExchangeInterceptor.class, "handleMessage")).time();
         final SOAPMessage jaxwsMessage = message.getContent(javax.xml.soap.SOAPMessage.class);
         try {
             jaxwsMessage.setProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, message.getContextualProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY));
 
         } catch (final SOAPException e) {
             PropertyValueExchangeInterceptor.LOG.error("", e);
+        } finally {
+//            handleMessageContext.stop();
         }
     }
 }

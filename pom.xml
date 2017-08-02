@@ -41,6 +41,7 @@
         <jackson.version>2.8.6</jackson.version>
         <domibus-ext-services-api.version>1.0-SNAPSHOT</domibus-ext-services-api.version>
         <commons-test.version>4.2</commons-test.version>
+        <metrics.version>3.2.3</metrics.version>
 
         <!-- Sonar properties -->
         <sonar.binaries>target/classes</sonar.binaries>
@@ -113,6 +114,19 @@
                 <scope>provided</scope>
             </dependency>
             <!-- End Domibus modules -->
+
+            <!-- Dropwizard -->
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-servlets</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+            <!-- End Dropwizard -->
 
             <!-- Dozer -->
             <dependency>
@@ -301,6 +315,17 @@
             <dependency>
                 <groupId>org.apache.activemq</groupId>
                 <artifactId>activemq-spring</artifactId>
+                <version>${activemq.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>activemq-web</artifactId>
                 <version>${activemq.version}</version>
                 <exclusions>
                     <exclusion>

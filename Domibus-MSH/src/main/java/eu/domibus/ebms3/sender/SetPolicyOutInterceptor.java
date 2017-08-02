@@ -1,41 +1,33 @@
 package eu.domibus.ebms3.sender;
 
+import com.codahale.metrics.Timer;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.pki.PolicyService;
 import org.apache.commons.lang.Validate;
-import org.apache.cxf.attachment.AttachmentImpl;
-import org.apache.cxf.attachment.AttachmentUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
-import org.apache.cxf.helpers.CastUtils;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.message.Attachment;
-import org.apache.cxf.message.Message;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.policy.PolicyInInterceptor;
 import org.apache.cxf.ws.policy.PolicyVerificationOutInterceptor;
 import org.apache.cxf.ws.security.SecurityConstants;
-import org.apache.cxf.wsdl.interceptors.BareOutInterceptor;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.MimeHeader;
-import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import java.util.ArrayList;
-import java.util.Iterator;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * This interceptor is responsible for discovery and setup of WS-Security Policies for outgoing messages
@@ -71,6 +63,8 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
+        final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(SetPolicyOutInterceptor.class, "handleMessage")).time();
+
         LOG.debug("SetPolicyOutInterceptor");
         final String pModeKey = (String) message.getContextualProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
         message.getInterceptorChain().add(new PrepareAttachmentInterceptor());
@@ -98,6 +92,8 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
             throw new Fault(new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Could not find policy file " + domibusConfigurationService.getConfigLocation() + "/" + this.pModeProvider.getLegConfiguration(pModeKey).getSecurity(), null, null));
         }
 
+        handleMessageContext.stop();
+
     }
 
 
@@ -111,9 +107,10 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
 
         @Override
         public void handleMessage(final SoapMessage message) throws Fault {
-
+            final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(LogAfterPolicyCheckInterceptor.class, "handleMessage")).time();
             final SOAPMessage soapMessage = message.getContent(SOAPMessage.class);
             soapMessage.removeAllAttachments();
+            handleMessageContext.stop();
         }
     }
 }

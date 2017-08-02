@@ -1,5 +1,7 @@
 package eu.domibus.common.services.impl;
 
+import com.codahale.metrics.Timer;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.services.MessagingService;
@@ -8,6 +10,7 @@ import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.plugin.handler.DatabaseMessageHandler;
 import org.apache.commons.io.IOUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -17,6 +20,8 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.util.UUID;
 import java.util.zip.GZIPOutputStream;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * @author Ioana Dragusanu
@@ -42,6 +47,7 @@ public class MessagingServiceImpl implements MessagingService {
         if (messaging == null || messaging.getUserMessage() == null)
             return;
 
+        final Timer.Context scheduleContext = Metrics.METRIC_REGISTRY.timer(name(DatabaseMessageHandler.class, "storeAttachments")).time();
         if (messaging.getUserMessage().getPayloadInfo() != null && messaging.getUserMessage().getPayloadInfo().getPartInfo() != null) {
             for (PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
                 try {
@@ -53,8 +59,11 @@ public class MessagingServiceImpl implements MessagingService {
                 }
             }
         }
+        scheduleContext.stop();
 
+        final Timer.Context context = Metrics.METRIC_REGISTRY.timer(name(MessagingServiceImpl.class, "messagingDao.create(messaging)")).time();
         messagingDao.create(messaging);
+        context.stop();
     }
 
     protected void storeBinary(PartInfo partInfo) throws IOException {

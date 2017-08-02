@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.sender;
 
+import com.codahale.metrics.Timer;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
@@ -7,11 +8,11 @@ import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -37,6 +38,8 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
 
+import static com.codahale.metrics.MetricRegistry.name;
+
 
 /**
  * This class is responsible for the handling of outgoing messages.
@@ -47,8 +50,6 @@ import java.sql.Timestamp;
 @Service(value = "messageSenderService")
 public class MessageSender implements MessageListener {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageSender.class);
-
-
 
     @Autowired
     private UserMessageService userMessageService;
@@ -86,13 +87,14 @@ public class MessageSender implements MessageListener {
 
 
     private void sendUserMessage(final String messageId) {
+        final Timer.Context context = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "onMessage")).time();
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
 
-        MessageAttempt attempt = new MessageAttempt();
-        attempt.setMessageId(messageId);
-        attempt.setStartDate(new Timestamp(System.currentTimeMillis()));
-        MessageAttemptStatus attemptStatus = MessageAttemptStatus.SUCCESS;
-        String attemptError = null;
+//        MessageAttempt attempt = new MessageAttempt();
+//        attempt.setMessageId(messageId);
+//        attempt.setStartDate(new Timestamp(System.currentTimeMillis()));
+//        MessageAttemptStatus attemptStatus = MessageAttemptStatus.SUCCESS;
+//        String attemptError = null;
 
 
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
@@ -103,11 +105,15 @@ public class MessageSender implements MessageListener {
         final String pModeKey;
 
         Boolean abortSending = false;
+        final Timer.Context findUserMessage = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "findUserMessage")).time();
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        findUserMessage.stop();
         try {
+            final Timer.Context legConfigContext = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "legConfigContext")).time();
             pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+            legConfigContext.stop();
             LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
 
             Policy policy;
@@ -125,7 +131,7 @@ public class MessageSender implements MessageListener {
             Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
             Validate.notNull(receiverParty, "Responder party was not found");
 
-            if (!policyService.isNoSecurityPolicy(policy)) {
+           /* if (!policyService.isNoSecurityPolicy(policy)) {
                 // Verifies the validity of sender's certificate and reduces security issues due to possible hacked access points.
                 try {
                     certificateService.isCertificateValid(sendingParty.getName());
@@ -151,11 +157,16 @@ public class MessageSender implements MessageListener {
                         LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
                     }
                 }
-            }
+            }*/
 
             LOG.debug("PMode found : " + pModeKey);
+            final Timer.Context buildSoapMessageContext = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "messageBuilder.buildSOAPMessage(userMessage, legConfiguration)")).time();
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
+            buildSoapMessageContext.stop();
+//            Timer dispatchTimer = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "dispatch"));
+//            final Timer.Context dispatchContext = dispatchTimer.time();
             final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
+//            dispatchContext.stop();
             isOk = responseHandler.handle(response);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
                 EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occurred during marshalling", messageId, null);
@@ -169,35 +180,44 @@ public class MessageSender implements MessageListener {
             } else {
                 LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
             }
-            attemptError = soapFEx.getMessage();
-            attemptStatus = MessageAttemptStatus.ERROR;
+//            attemptError = soapFEx.getMessage();
+//            attemptStatus = MessageAttemptStatus.ERROR;
         } catch (final EbMS3Exception e) {
             reliabilityChecker.handleEbms3Exception(e, messageId);
-            attemptError = e.getMessage();
-            attemptStatus = MessageAttemptStatus.ERROR;
+//            attemptError = e.getMessage();
+//            attemptStatus = MessageAttemptStatus.ERROR;
         } catch (Throwable e) {
             LOG.error("Error sending message [{}]", messageId, e);
-            attemptError = e.getMessage();
-            attemptStatus = MessageAttemptStatus.ERROR;
+//            attemptError = e.getMessage();
+//            attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
         } finally {
-            if (abortSending) {
-                LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
-                return;
-            }
-            reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
             try {
-                attempt.setError(attemptError);
-                attempt.setStatus(attemptStatus);
-                attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
-                messageAttemptService.create(attempt);
-            } catch (Exception e) {
-                LOG.error("Could not create the message attempt", e);
+                if (abortSending) {
+                    LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
+                    return;
+                }
+//                final Timer.Context reliabilityContext = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "handleReliability")).time();
+//                reliabilityChecker.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+//                reliabilityContext.stop();
+
+//                final Timer.Context attemptContext = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "attempt")).time();
+//                try {
+//                    attempt.setError(attemptError);
+//                    attempt.setStatus(attemptStatus);
+//                    attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
+//                    messageAttemptService.create(attempt);
+//                } catch (Exception e) {
+//                    LOG.error("Could not create the message attempt", e);
+//                } finally {
+//                    attemptContext.stop();
+//                }
+            } finally {
+                context.stop();
             }
 
         }
     }
-
 
 
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
@@ -221,5 +241,7 @@ public class MessageSender implements MessageListener {
         }
         sendUserMessage(messageId);
     }
+
+
 
 }

@@ -1,9 +1,12 @@
 package eu.domibus.pmode;
 
+import com.codahale.metrics.*;
 import eu.domibus.AbstractIT;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
+import eu.domibus.plugin.webService.impl.BackendWebServiceImpl;
 import eu.domibus.web.rest.PModeResource;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.Validate;
@@ -24,6 +27,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 
 /**
@@ -230,5 +235,19 @@ public class UploadPModeIT extends AbstractIT {
             System.out.println("Error: " + ioEx.getMessage());
             throw ioEx;
         }
+    }
+
+    public static void main(String[] args) {
+        testTimer();
+        testTimer();
+        testTimer();
+
+    }
+
+    private static void testTimer() {
+        final long currentTimeMillis = System.currentTimeMillis();
+        final com.codahale.metrics.Timer.Context buildSoapMessageContext = Metrics.METRIC_REGISTRY.timer(name(UploadPModeIT.class, "messageBuilder.buildSOAPMessage(userMessage, legConfiguration)")).time();
+        buildSoapMessageContext.stop();
+        System.out.println(System.currentTimeMillis() - currentTimeMillis);
     }
 }

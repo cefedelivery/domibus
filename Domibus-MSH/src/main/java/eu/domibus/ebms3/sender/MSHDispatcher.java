@@ -19,7 +19,9 @@
 
 package eu.domibus.ebms3.sender;
 
+import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -40,6 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
@@ -47,6 +50,10 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPBinding;
 import java.net.ConnectException;
 import java.util.Properties;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -66,6 +73,12 @@ public class MSHDispatcher {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHDispatcher.class);
 
+    Dispatch<SOAPMessage> dispatch;
+
+    @Autowired
+    @Qualifier("taskExecutor")
+    Executor executor;
+
     @Autowired
     private TLSReader tlsReader;
 
@@ -75,11 +88,21 @@ public class MSHDispatcher {
 
     @Transactional(propagation = Propagation.MANDATORY)
     public SOAPMessage dispatch(final SOAPMessage soapMessage, String endpoint, final Policy policy, final LegConfiguration legConfiguration, final String pModeKey) throws EbMS3Exception {
+        final Timer.Context createDispatcherContext = Metrics.METRIC_REGISTRY.timer(name(MSHDispatcher.class, "createWSServiceDispatcher")).time();
         final Dispatch<SOAPMessage> dispatch = createWSServiceDispatcher(endpoint);//service.createDispatch(PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
+        createDispatcherContext.stop();
+
+
+//        dispatch.getRequestContext().put("thread.local.request.context", "true");
         dispatch.getRequestContext().put(PolicyConstants.POLICY_OVERRIDE, policy);
         dispatch.getRequestContext().put(ASYMMETRIC_SIG_ALGO_PROPERTY, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm());
         dispatch.getRequestContext().put(PMODE_KEY_CONTEXT_PROPERTY, pModeKey);
+
+        final Timer.Context getClientContext = Metrics.METRIC_REGISTRY.timer(name(MSHDispatcher.class, "getClient")).time();
         final Client client = ((DispatchImpl<SOAPMessage>) dispatch).getClient();
+        getClientContext.stop();
+
+        final Timer.Context prepareClientContext = Metrics.METRIC_REGISTRY.timer(name(MSHDispatcher.class, "prepareClient")).time();
         final HTTPConduit httpConduit = (HTTPConduit) client.getConduit();
         final HTTPClientPolicy httpClientPolicy = httpConduit.getClient();
         httpConduit.setClient(httpClientPolicy);
@@ -91,9 +114,13 @@ public class MSHDispatcher {
         httpClientPolicy.setReceiveTimeout(receiveTimeout);
         httpClientPolicy.setAllowChunking(Boolean.valueOf(domibusProperties.getProperty("domibus.dispatcher.allowChunking", "false")));
 
-        final TLSClientParameters params = tlsReader.getTlsClientParameters();
-        if (params != null && endpoint.startsWith("https://")) {
-            httpConduit.setTlsClientParameters(params);
+
+
+        if (endpoint.startsWith("https://")) {
+            final TLSClientParameters params = tlsReader.getTlsClientParameters();
+            if (params != null) {
+                httpConduit.setTlsClientParameters(params);
+            }
         }
         final SOAPMessage result;
 
@@ -105,25 +132,36 @@ public class MSHDispatcher {
         } else {
             LOG.info("No proxy configured");
         }
+        prepareClientContext.stop();
+
+        final Timer.Context invokeContext = Metrics.METRIC_REGISTRY.timer(name(MSHDispatcher.class, "dispatch.invoke")).time();
         try {
             result = dispatch.invoke(soapMessage);
         } catch (final WebServiceException e) {
             Exception exception = e;
-            if(e.getCause() instanceof ConnectException) {
+            if (e.getCause() instanceof ConnectException) {
                 exception = new WebServiceException("Error dispatching message to [" + endpoint + "]: possible reason is that the receiver is not available", e);
             }
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0005, "Error dispatching message to " + endpoint, null, exception);
             ex.setMshRole(MSHRole.SENDING);
             throw ex;
+        } finally {
+            invokeContext.stop();
         }
+
         return result;
     }
 
+    //create a pool of Dispatch and associate it to an endpoint
     protected Dispatch<SOAPMessage> createWSServiceDispatcher(String endpoint) {
-        final javax.xml.ws.Service service = javax.xml.ws.Service.create(SERVICE_NAME);
-        service.addPort(PORT_NAME, SOAPBinding.SOAP12HTTP_BINDING, endpoint);
-        final Dispatch<SOAPMessage> dispatch = service.createDispatch(PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
+        if(dispatch == null) {
+            final javax.xml.ws.Service service = javax.xml.ws.Service.create(SERVICE_NAME);
+            service.setExecutor(executor);
+            service.addPort(PORT_NAME, SOAPBinding.SOAP12HTTP_BINDING, endpoint);
+            dispatch = service.createDispatch(PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
+        }
         return dispatch;
+
     }
 
     protected void configureProxy(final HTTPClientPolicy httpClientPolicy, HTTPConduit httpConduit) {

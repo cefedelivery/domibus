@@ -47,7 +47,7 @@ export class MessageLogComponent {
     {key: '50', value: 50},
     {key: '100', value: 100}
   ];
-  pageSize: number = this.pageSizes[0].value;
+  pageSize: number = 100;
 
   mshRoles: Array<String>;
   msgTypes: Array<String>;
