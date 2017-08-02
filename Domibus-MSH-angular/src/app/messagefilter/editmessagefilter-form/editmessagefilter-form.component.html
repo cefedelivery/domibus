@@ -1,0 +1,62 @@
+<div style="width: 500px">
+  <p class="domibusTextSmall" style="margin:0;font-weight: bold">Message Filter Edit</p>
+  <form [formGroup]="messageFilterForm">
+    <md-card style="margin:0;padding:10px;">
+      <div>
+        <md2-select mdInput placeholder="Plugin" floatPlaceholder="always" (change)="updatePlugin($event)" [(ngModel)]="plugin" [style.width]="'100%'" [formControl]="messageFilterForm.controls['plugin']">
+          <md2-option *ngFor="let bName of backendFilterNames" [value]="bName.toString()">
+            {{bName.toString()}}
+          </md2-option>
+        </md2-select>
+      </div>
+
+      <div>
+        <md-input-container [style.width]="'100%'">
+          <input mdInput placeholder="From" name="from" id="from" [value]="from" (blur)="updateFrom($event)" [formControl]="messageFilterForm.controls['from']" pattern="[a-zA-Z0-9_:-]+:[a-zA-Z0-9_:-]+">
+          <div *ngIf="messageFilterForm.controls['from'].hasError('pattern')" style="color:red; font-size: 70%">You should follow the rule: [partyName]:[partyType]</div>
+        </md-input-container>
+      </div>
+
+      <div>
+        <md-input-container [style.width]="'100%'">
+          <input mdInput placeholder="To" name="to" id="to" [value]="to" (blur)="updateTo($event)" [formControl]="messageFilterForm.controls['to']" pattern="[a-zA-Z0-9_:-]+:[a-zA-Z0-9_:-]+">
+          <div *ngIf="messageFilterForm.controls['to'].hasError('pattern')" style="color:red; font-size: 70%">You should follow the rule: [partyName]:[partyType]</div>
+        </md-input-container>
+      </div>
+
+      <div>
+        <md-input-container [style.width]="'100%'">
+          <input mdInput placeholder="Action" name="action" id="action" [value]="action" (blur)="updateAction($event)" [formControl]="messageFilterForm.controls['action']" pattern="[a-zA-Z0-9_:-]+">
+          <div *ngIf="messageFilterForm.controls['action'].hasError('pattern')" style="color:red; font-size: 70%">You should follow the rule : [action]</div>
+        </md-input-container>
+      </div>
+
+      <div>
+        <md-input-container [style.width]="'100%'">
+          <input mdInput placeholder="Service" name="service" id="service" [value]="service" (blur)="updateService($event)" [formControl]="messageFilterForm.controls['service']" pattern="[a-zA-Z0-9_:-]+:[a-zA-Z0-9_:-]+">
+          <div *ngIf="messageFilterForm.controls['service'].hasError('pattern')" style="color:red; font-size: 70%">You should follow the rule: [serviceName]:[serviceType]</div>
+        </md-input-container>
+      </div>
+
+      <table class="buttonsRow">
+        <tr>
+          <td>
+            <!-- Can optionally provide a result for the closing dialog. -->
+            <button md-raised-button color="primary" [md-dialog-close]="true" (click)="submitForm()" type="submit" [disabled]="!messageFilterForm.valid" id="okbutton_id">
+              <md-icon>check_circle</md-icon>
+              <span>OK</span>
+            </button>
+          </td>
+          <td>
+            <button md-raised-button color="primary" md-dialog-close id="cancelbutton_id">
+              <md-icon>cancel</md-icon>
+              <span>Cancel</span>
+            </button>
+          </td>
+        </tr>
+      </table>
+
+      <div></div>
+    </md-card>
+  </form>
+</div>

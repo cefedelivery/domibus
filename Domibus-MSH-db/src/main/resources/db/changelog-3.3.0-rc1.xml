@@ -41,4 +41,5 @@
             <column name="ROLE_ID" value="2" type="INT"/>
         </insert>
     </changeSet>
+
 </databaseChangeLog>

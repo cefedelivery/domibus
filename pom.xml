@@ -49,10 +49,10 @@
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
         <sonar.scm.disabled>true</sonar.scm.disabled>
         <sonar.exclusions>
-            **/validators/EbMS3MessageValidator.java, **/controller/AdminGUIController.java,
-            **/discovery/PartyIndentifierResolverService.java,
-            **/quartz/**, **/target/**, **/eu/domibus/spring/SpringContextProvider.java,
-            **/eu/domibus/taskexecutor/weblogic/DomibusDelegatingWork.java
+            **/target/**,
+            **/Domibus-MSH-angular/node_modules/**,
+            **/web.xml,
+            **/common/model/configuration/**
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
         <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar/</sonar.host.url>

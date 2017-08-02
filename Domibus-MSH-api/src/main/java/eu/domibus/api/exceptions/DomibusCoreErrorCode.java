@@ -16,7 +16,16 @@ public enum DomibusCoreErrorCode {
     /**
      * Authentication error
      */
-    DOM_002("002");
+    DOM_002("002"),
+    /**
+     * Invalid pmode configuration
+     */
+    DOM_003("003"),
+
+    /**
+     * Problem with Raw message when trying to handle non repudiation. (Pull)
+     */
+    DOM_004("004");
 
     private final String errorCode;
 

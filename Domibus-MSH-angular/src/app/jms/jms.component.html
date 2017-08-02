@@ -44,7 +44,8 @@
         <div style="display: inline-block;width:auto">
           <button id="jmsSearchButton" md-raised-button color="primary" (click)="search()">
             <md-icon>search</md-icon>
-            <span>Search</span></button>
+            <span>Search</span>
+          </button>
         </div>
       </div>
     </md-card-content>
@@ -62,7 +63,7 @@
   [rowHeight]="'auto'"
   [scrollbarH]="true"
   [loadingIndicator]="loading"
-  [selectionType]="'multiClick'"
+  [selectionType]="'multi'"
   [selected]="selectedMessages"
   [limit]="pageSize"
   [sorts]="[{prop: 'timestamp', dir: 'desc'}]"

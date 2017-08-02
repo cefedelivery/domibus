@@ -17,7 +17,7 @@
       <md-icon>message</md-icon>
       <span>Messages</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/messagefilter']" id="messagefilter_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/messagefilter']" *ngIf="hasAdmin()" id="messagefilter_id">
       <md-icon>filter_list</md-icon>
       <span>Message Filter</span>
     </button>
@@ -38,7 +38,7 @@
       <span>Truststore</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/user']" *ngIf="hasAdmin()" id="user_id">
-      <md-icon>person</md-icon>
+      <md-icon>people</md-icon>
       <span>Users</span>
     </button>
 
@@ -67,11 +67,32 @@
         <button md-icon-button [md-menu-trigger-for]="settingsMenu">
           <md-icon>menu</md-icon>
         </button>
+
         <md-menu x-position="before" #settingsMenu="mdMenu">
-          <button md-menu-item (click)="logout($event)">
-            <md-icon>power_settings_new</md-icon>
-            <span>Logout</span>
-          </button>
+
+          <div *ngIf="currentUser">
+
+            <button md-menu-item disabled="true">
+              <md-icon>person</md-icon>
+              <span>{{currentUser}}</span>
+            </button>
+
+            <hr/>
+
+            <button md-menu-item (click)="logout($event)">
+              <md-icon>power_settings_new</md-icon>
+              <span>Logout</span>
+            </button>
+
+          </div>
+
+          <div *ngIf="!currentUser" style="text-align: center; vertical-align: middle;margin: 2px;">
+            <button md-menu-item disabled="true">
+              <md-icon>person_outline</md-icon>
+              <span>Not logged in</span>
+            </button>
+          </div>
+
         </md-menu>
       </div>
     </div>

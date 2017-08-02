@@ -31,9 +31,9 @@ public class UserDetailServiceImplTest {
     private UserDetailServiceImpl userDetailService;
     @Test
     public void loadUserByUsernameSuccesfully() throws Exception {
-        User user = new User();
-        user.setUserName("admin");
-        user.setPassword("whateverdifferentthandefaultpasswordhash");
+        User user = new User("admin", "whateverdifferentthandefaultpasswordhash");
+//        user.setUserName("admin");
+//        user.setPassword("whateverdifferentthandefaultpasswordhash");
         when(userDao.loadActiveUserByUsername(eq("admin"))).thenReturn(user);
         UserDetail admin = (UserDetail) userDetailService.loadUserByUsername("admin");
 
@@ -44,9 +44,9 @@ public class UserDetailServiceImplTest {
 
     @Test
     public void loadUserByUsernameSuccesfullyUsingDefaultPassword() throws Exception {
-        User user = new User();
-        user.setUserName("user");
-        user.setPassword("$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36");
+        User user = new User("user", "$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36");
+//        user.setUserName("user");
+//        user.setPassword("$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36");
         when(userDao.loadActiveUserByUsername(eq("admin"))).thenReturn(user);
         UserDetail admin = (UserDetail) userDetailService.loadUserByUsername("admin");
 

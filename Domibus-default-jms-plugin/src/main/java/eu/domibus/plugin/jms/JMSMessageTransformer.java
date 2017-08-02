@@ -165,7 +165,7 @@ public class JMSMessageTransformer
             messageOut.setIntProperty(TOTAL_NUMBER_OF_PAYLOADS, submission.getPayloads().size());
         } catch (final JMSException | IOException ex) {
             LOG.error("Error while filling the MapMessage", ex);
-            throw new RuntimeException(ex);
+            throw new DefaultJmsPluginException(ex);
         }
 
         return messageOut;
@@ -173,7 +173,6 @@ public class JMSMessageTransformer
 
     private String findMime(Collection<Submission.TypedProperty> props) {
         for (Submission.TypedProperty prop : props) {
-//            if (MIME_TYPE.equals(prop.getKey()) && !hasLength(prop.getType())) {
             if (MIME_TYPE.equals(prop.getKey()) && isEmpty(trim(prop.getType()))) {
                 return prop.getValue();
             }
@@ -289,7 +288,6 @@ public class JMSMessageTransformer
             for (int i = 1; i <= numPayloads; i++) {
                 final String propPayload = String.valueOf(MessageFormat.format(PAYLOAD_NAME_FORMAT, i));
 
-//                final String bodyloadFileName = BODYLOAD_FILE_NAME_FORMAT;
                 final String contentId;
                 final String mimeType;
                 String description = null;
@@ -331,7 +329,7 @@ public class JMSMessageTransformer
             }
         } catch (final JMSException ex) {
             LOG.error("Error while getting properties from MapMessage", ex);
-            throw new RuntimeException(ex);
+            throw new DefaultJmsPluginException(ex);
         }
         return target;
     }

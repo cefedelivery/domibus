@@ -44,18 +44,6 @@ public class CertificateServiceImplTest {
     }
 
     @Test
-    public void testIsCertificateValidationEnabled() throws Exception {
-        new Expectations() {{
-            domibusProperties.getProperty("domibus.certificate.validation.enabled", "true");
-            returns("true", "false");
-        }};
-
-        Assert.assertTrue(certificateService.isCertificateValidationEnabled());
-        Assert.assertFalse(certificateService.isCertificateValidationEnabled());
-
-    }
-
-    @Test
     public void testIsCertificateChainValid(@Injectable final KeyStore trustStore) throws Exception {
         final String receiverAlias = "red_gw";
 

@@ -1,3 +1,17 @@
+Domibus 3.3-FR (from 3.3-RC1)
+               - Rename "domibus.senderparty.trust.verification" to "domibus.sender.trust.validation.onreceiving" in your domibus.properties file. If the property is not defined, do nothing. Default value "false" has not been changed.
+               - Rename "domibus.certificate.validation.enabled" to "domibus.receiver.certificate.validation.onsending" in your domibus.properties file. If the property is not defined, do nothing. Default value "true" has not been changed.
+               - [Tomcat only]
+                    o in file \conf\domibus\internal\activemq.xml
+                       add the following two entries in the broker/plugins section like described bellow:
+                             <broker>
+                                  ......
+                                <plugins>
+                                     ......
+                                     <discardingDLQBrokerPlugin dropOnly="domibus.internal.dispatch.queue" reportInterval="10000"/>
+                                     <discardingDLQBrokerPlugin dropOnly="domibus.internal.pull.queue" reportInterval="10000"/>
+                                </plugins>
+                             </broker>
 Domibus 3.3-RC1 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-rc1-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-rc1-migration.ddl for Oracle)
@@ -23,6 +37,8 @@ Domibus 3.3-RC1 (from 3.2.5):
                         </jaxws:outFaultInterceptors>
 
                     </jaxws:endpoint>
+
+               - If not already the case modify the certificate alias from the keystore in order to match the party name of the sender AP
 
                - The external Spring configuration files(domibus-configuration.xml, domibus-datasources.xml, domibus-plugins.xml, domibus-security.xml, domibus-transactions.xml, persistence.xml) are not used anymore.
                 All the properties defined in those files have been externalized in a new property file named "domibus.properties" which is specific to each supported server(Tomcat/WebLogic/WildFly).
@@ -156,16 +172,33 @@ Domibus 3.3-RC1 (from 3.2.5):
 
 
                 - [Tomcat only]
-                     o in file \conf\domibus\internal\activemq.xml add the following queue in the destinations section:
-                        <broker .....>
-                          .............................
-                          <destinations>
-                          .............................
-                            <queue id="pullMessageQueue" physicalName="domibus.internal.pull.queue"/>
-                          .............................
-                          </<destinations>>
-                          .............................
-                        </broker>
+                     o in file \conf\domibus\internal\activemq.xml
+                        - add the following queue in the destinations section:
+                                <broker .....>
+                                  .............................
+                                  <destinations>
+                                  .............................
+                                    <queue id="pullMessageQueue" physicalName="domibus.internal.pull.queue"/>
+                                  .............................
+                                  </<destinations>>
+                                  .............................
+                                </broker>
+
+                        - the configuration for the redelivery plugin should now look like the one below:
+                                <redeliveryPlugin fallbackToDeadLetter="true" sendToDlqIfMaxRetriesExceeded="true">
+                                    <redeliveryPolicyMap>
+                                        <redeliveryPolicyMap>
+                                            <defaultEntry>
+                                                <!-- default policy-->
+                                                <redeliveryPolicy maximumRedeliveries="10" redeliveryDelay="300000"/>
+                                            </defaultEntry>
+                                            <redeliveryPolicyEntries>
+                                                <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0"/>
+                                                <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0"/>
+                                            </redeliveryPolicyEntries>
+                                        </redeliveryPolicyMap>
+                                    </redeliveryPolicyMap>
+                                </redeliveryPlugin>
 
                 Optional changes
 

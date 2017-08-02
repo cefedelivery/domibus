@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import com.google.common.primitives.Ints;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
@@ -72,7 +73,7 @@ public class ErrorLogResource {
 
         long entries = errorLogDao.countEntries(filters);
         LOGGER.debug("count [{}]", entries);
-        result.setCount(Long.valueOf(entries).intValue());
+        result.setCount(Ints.checkedCast(entries));
 
         final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(pageSize * page, pageSize, column, asc, filters);
         result.setErrorLogEntries(convert(errorLogEntries));

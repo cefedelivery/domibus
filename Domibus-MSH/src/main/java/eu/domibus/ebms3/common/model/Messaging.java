@@ -79,7 +79,7 @@ public class Messaging extends AbstractBaseEntity {
     @XmlAnyElement(lax = true)
     @Transient
     //According to how we read the spec those attributes serve no purpose in the AS4 profile, therefore they are discarded
-    protected List<Object> any;
+    protected List<Object> any; //NOSONAR
 
     /**
      * The OPTIONAL element is named

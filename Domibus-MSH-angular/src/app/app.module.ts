@@ -1,13 +1,15 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {FormsModule,ReactiveFormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpModule, Http, XHRBackend, RequestOptions} from '@angular/http';
-import {MaterialModule, MdSelectModule} from '@angular/material';
-import {MdButtonModule} from '@angular/material';
+import {
+  MdDialogModule, MdIconModule, MdInputModule, MdMenuModule, MdSelectModule,
+  MdSidenavModule, MdButtonModule, MdListModule
+} from '@angular/material';
 import 'hammerjs';
 
 import {NgxDatatableModule} from '@swimlane/ngx-datatable';
-import {Md2Module}  from 'md2';
+import {Md2Module, Md2SelectModule} from 'md2';
 
 import {AppComponent} from './app.component';
 import {LoginComponent} from "./login/login.component";
@@ -38,12 +40,16 @@ import {MessagelogDialogComponent} from './messagelog/messagelog-dialog/messagel
 import {JmsComponent} from './jms/jms.component';
 import {RowLimiterComponent} from './common/row-limiter/row-limiter.component';
 import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
-import {MessagefilterDialogComponent} from "./messagefilter/messagefilter-dialog/messagefilter-dialog.component";
-import {CancelMessagefilterDialogComponent} from "./messagefilter/cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
 import {MessageDialogComponent} from './jms/message-dialog/message-dialog.component';
-import { PasswordComponent } from './user/password/password-dialog.component';
 import {DatePipe} from './customDate/datePipe';
-import { DefaultPasswordDialogComponent } from './security/default-password-dialog/default-password-dialog.component';
+import {DefaultPasswordDialogComponent} from './security/default-password-dialog/default-password-dialog.component';
+import {MessagelogDetailsComponent} from './messagelog/messagelog-details/messagelog-details.component';
+import {ErrorlogDetailsComponent} from './errorlog/errorlog-details/errorlog-details.component';
+import {EditMessageFilterComponent} from "./messagefilter/editmessagefilter-form/editmessagefilter-form.component";
+import {CancelDialogComponent} from './common/cancel-dialog/cancel-dialog.component';
+import {DirtyGuard} from "./common/dirty.guard";
+import {EditUserComponent} from "app/user/edituser-form/edituser-form.component";
+import {SaveDialogComponent} from "./common/save-dialog/save-dialog.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -63,33 +69,34 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     PModeComponent,
     IsAuthorized,
     TruststoreComponent,
-    PModeComponent,
     PmodeUploadComponent,
-    MessagefilterDialogComponent,
-    PmodeUploadComponent,
+    SaveDialogComponent,
     MessagelogDialogComponent,
-    CancelMessagefilterDialogComponent,
+    CancelDialogComponent,
     JmsComponent,
     RowLimiterComponent,
     MoveDialogComponent,
     MessageDialogComponent,
-    MessagefilterDialogComponent,
-    PasswordComponent,
     DatePipe,
-    DefaultPasswordDialogComponent
+    DefaultPasswordDialogComponent,
+    EditMessageFilterComponent,
+    MessagelogDetailsComponent,
+    ErrorlogDetailsComponent,
+    EditUserComponent
   ],
   entryComponents: [
     AppComponent,
     PmodeUploadComponent,
-    MessagefilterDialogComponent,
-    PmodeUploadComponent,
     MessagelogDialogComponent,
     MoveDialogComponent,
     MessageDialogComponent,
-    CancelMessagefilterDialogComponent,
-    MoveDialogComponent,
-    PasswordComponent,
-    DefaultPasswordDialogComponent
+    MessagelogDetailsComponent,
+    CancelDialogComponent,
+    SaveDialogComponent,
+    DefaultPasswordDialogComponent,
+    EditMessageFilterComponent,
+    ErrorlogDetailsComponent,
+    EditUserComponent
   ],
   imports: [
     BrowserModule,
@@ -97,17 +104,24 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     FormsModule,
     HttpModule,
     NgxDatatableModule,
-    MaterialModule,
     MdButtonModule,
+    MdDialogModule,
+    MdMenuModule,
+    MdInputModule,
+    MdIconModule,
+    MdListModule,
+    MdSidenavModule,
     MdSelectModule,
-    Md2Module.forRoot(),
     routing,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Md2Module,
+    Md2SelectModule
   ],
   providers: [
     AuthenticatedGuard,
     AuthorizedGuard,
     AuthorizedAdminGuard,
+    DirtyGuard,
     HttpEventService,
     SecurityService,
     SecurityEventService,
