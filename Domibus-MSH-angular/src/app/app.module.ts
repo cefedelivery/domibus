@@ -3,16 +3,10 @@ import {NgModule} from "@angular/core";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {Http, HttpModule, RequestOptions, XHRBackend} from "@angular/http";
 import {
-  MdButtonModule,
-  MdDialogModule,
-  MdIconModule,
-  MdInputModule,
-  MdListModule,
-  MdMenuModule,
-  MdSelectModule,
-  MdSidenavModule
-} from "@angular/material";
-import "hammerjs";
+  MdDialogModule, MdIconModule, MdInputModule, MdMenuModule, MdSelectModule,
+  MdSidenavModule, MdButtonModule, MdListModule, MdTooltipModule
+} from '@angular/material';
+import 'hammerjs';
 
 import {NgxDatatableModule} from "@swimlane/ngx-datatable";
 import {Md2Module, Md2SelectModule} from "md2";
@@ -118,6 +112,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     NgxDatatableModule,
     MdButtonModule,
     MdDialogModule,
+    MdTooltipModule,
     MdMenuModule,
     MdInputModule,
     MdIconModule,
