@@ -66,3 +66,7 @@ html, body, material-app, md-sidenav-container, .my-content {
 #topLogoText {
   text-align: left;
 }
+
+#collapse_id,#expand_id {
+  text-align: center;width:50px;height:50px;min-width: 0
+}
