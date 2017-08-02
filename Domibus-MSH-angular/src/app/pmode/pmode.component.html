@@ -1,19 +1,27 @@
-﻿<div>
-  <md-tab-group>
-    <md-tab label="XML">
-      <md-input-container class="pmodes-text-area">
-        <textarea mdInput></textarea>
-      </md-input-container>
-      <div>
+﻿<div class="selectionCriteria">
+  <md-card style="margin:0;padding:10px;">
+    <md-card-content>
+      <p class="domibusTextHeading" style="margin:0;font-weight: bold">PMode</p>
+      <div class="textarea" *ngIf="pModeExists">
+        <textarea id="pmodetextarea_id" class="textarea" disabled>{{pModeContents}}</textarea>
+      </div>
+      <div class="pModeInfo" *ngIf="!pModeExists">
+        <span>No PMode uploaded yet</span>
+      </div>
+      <table class="buttonsRow">
+        <tr>
+          <td>
         <button md-raised-button color="primary" (click)="upload()" id="uploadbutton_id">
           <md-icon>file_upload</md-icon>
           <span>Upload</span>
         </button>
-        <button md-raised-button color="primary" (click)="download()" id="downloadbutton_id">
+        <button md-raised-button color="primary" (click)="download()" id="downloadbutton_id" [disabled]="!pModeExists">
           <md-icon>file_download</md-icon>
           <span>Download</span>
         </button>
-      </div>
-    </md-tab>
-  </md-tab-group>
+          </td>
+        </tr>
+      </table>
+    </md-card-content>
+  </md-card>
 </div>

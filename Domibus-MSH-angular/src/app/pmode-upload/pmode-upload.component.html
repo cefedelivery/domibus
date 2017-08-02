@@ -1,4 +1,4 @@
-<h1 md-dialog-title>PModes Upload</h1>
+<h1 md-dialog-title>Upload File</h1>
 
 <div class="divTable">
   <div class="divTableBody">
@@ -8,18 +8,17 @@
         <input #fileInput type="file" id="pmode" accept=".xml">
       </div>
       <div class="divTableCell">
-        <!--<label for="pmode">File</label>-->
       </div>
     </div>
     <div class="divTableRow">
       <div class="divTableCell">
-        <button md-raised-button color="primary" (click)="submit()" id="uploadbutton_id">
-          <md-icon>file_upload</md-icon>
-          <span>Upload</span>
+        <button md-raised-button color="primary" (click)="submit()" id="okbuttonupload_id">
+          <md-icon>check_circle</md-icon>
+          <span>OK</span>
         </button>
       </div>
       <div class="divTableCell">
-        <button md-raised-button color="primary" (click)="dialogRef.close('Cancel')" id="cancelbutton_id">
+        <button md-raised-button color="primary" (click)="dialogRef.close('Cancel')" id="cancelbuttonupload_id">
           <md-icon>cancel</md-icon>
           <span>Cancel</span>
         </button>
