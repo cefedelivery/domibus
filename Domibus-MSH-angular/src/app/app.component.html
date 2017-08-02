@@ -64,7 +64,7 @@
     <alert></alert>
     <div id="sandwichMenuHolder">
       <div id="sandwichMenu">
-        <button md-icon-button [md-menu-trigger-for]="settingsMenu">
+        <button md-icon-button [md-menu-trigger-for]="settingsMenu" id="settingsmenu_id">
           <md-icon>menu</md-icon>
         </button>
 
@@ -72,14 +72,14 @@
 
           <div *ngIf="currentUser">
 
-            <button md-menu-item disabled="true">
+            <button md-menu-item disabled="true" id="currentuser_id">
               <md-icon>person</md-icon>
               <span>{{currentUser}}</span>
             </button>
 
             <hr/>
 
-            <button md-menu-item (click)="logout($event)">
+            <button md-menu-item (click)="logout($event)" id="logout_id">
               <md-icon>power_settings_new</md-icon>
               <span>Logout</span>
             </button>
