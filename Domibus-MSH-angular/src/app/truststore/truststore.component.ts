@@ -1,13 +1,13 @@
-import {Component, OnInit, ViewChild} from "@angular/core";
+import {Component, OnInit} from "@angular/core";
 import {Http} from "@angular/http";
 import {AlertService} from "app/alert/alert.service";
-// Import RxJs required methods
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/catch";
 import {TrustStoreService} from "./trustore.service";
 import {TrustStoreEntry} from "./trustore.model";
 import {TruststoreDialogComponent} from "./truststore-dialog/truststore-dialog.component";
 import {MdDialog, MdDialogRef} from "@angular/material";
+import {TrustStoreUploadComponent} from "./truststore-upload/truststore-upload.component";
 
 @Component({
   selector: 'app-truststore',
@@ -16,8 +16,6 @@ import {MdDialog, MdDialogRef} from "@angular/material";
   providers: [TrustStoreService]
 })
 export class TruststoreComponent implements OnInit {
-
-  private url = "rest/truststore";
   trustStoreEntries: Array<TrustStoreEntry> = [];
   selectedMessages: Array<any> = [];
   loading: boolean = false;
@@ -31,13 +29,6 @@ export class TruststoreComponent implements OnInit {
   ];
   pageSize: number = this.pageSizes[0].value;
 
-
-  @ViewChild('fileInput')
-  private fileInput;
-
-  @ViewChild('password')
-  private password;
-
   constructor(private http: Http, private alertService: AlertService, private trustStoreService: TrustStoreService, public dialog: MdDialog) {
   }
 
@@ -49,23 +40,6 @@ export class TruststoreComponent implements OnInit {
     this.trustStoreService.getEntries().subscribe(trustStoreEntries => this.trustStoreEntries = trustStoreEntries);
   }
 
-  public submit() {
-    let fi = this.fileInput.nativeElement;
-    console.log(this.password.nativeElement);
-    let input = new FormData();
-    input.append('truststore', fi.files[0]);
-    input.append('password', this.password.nativeElement.value);
-    this.http.post(this.url, input).subscribe(res => {
-        this.alertService.success(res.text(), false);
-      },
-      err => {
-        this.alertService.error("Error updating truststore file", false);
-      }
-    );
-
-
-  }
-
   onSelect({selected}) {
     console.log('Select Event');
     this.selectedMessages.splice(0, this.selectedMessages.length);
@@ -74,17 +48,25 @@ export class TruststoreComponent implements OnInit {
 
   onActivate(event) {
     console.log('Activate Event', event);
-
     if ("dblclick" === event.type) {
       this.details(event.row);
     }
   }
 
   details(selectedRow: any) {
-    let dialogRef: MdDialogRef<TruststoreDialogComponent> = this.dialog.open(TruststoreDialogComponent);
-    dialogRef.componentInstance.trustStoreEntry = selectedRow;
+    let dialogRef: MdDialogRef<TruststoreDialogComponent> = this.dialog.open(TruststoreDialogComponent, {data: {trustStoreEntry: selectedRow}});
     dialogRef.afterClosed().subscribe(result => {
-      //Todo:
+
+    });
+  }
+
+  openEditTrustStore() {
+    let dialogRef: MdDialogRef<TrustStoreUploadComponent> = this.dialog.open(TrustStoreUploadComponent);
+    dialogRef.afterClosed().subscribe(updated => {
+      debugger;
+      if (updated == true) {
+        this.getTrustStoreEntries();
+      }
     });
   }
 

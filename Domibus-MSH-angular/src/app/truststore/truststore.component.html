@@ -1,6 +1,6 @@
-<md-card>
+<md-card style="margin:0;padding:10px;">
   <md-card-content>
-    <p class="domibusTextHeading" style="margin:0;font-weight: bold">Truststore</p>
+    <h1 id="truststoreheader_id">Truststore</h1>
   </md-card-content>
   <!--// <app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>-->
 </md-card>
@@ -51,7 +51,7 @@
         <textarea mdInput></textarea>
       </md-input-container>
       <div>
-        <button md-raised-button color="primary" (click)="upload()" id="uploadbutton_id">
+        <button md-raised-button color="primary" (click)="openEditTrustStore()" id="uploadbutton_id">
           <md-icon>file_upload</md-icon>
           <span>Upload</span>
         </button>
@@ -61,6 +61,7 @@
 </div>
 
 
+<!--
 <div class="divTable">
   <div class="divTableBody">
     <div class="divTableRow">
@@ -88,3 +89,4 @@
   </div>
 </div>
 
+-->
