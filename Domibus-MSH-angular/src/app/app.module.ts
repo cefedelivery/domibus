@@ -4,7 +4,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpModule, Http, XHRBackend, RequestOptions} from '@angular/http';
 import {
   MdDialogModule, MdIconModule, MdInputModule, MdMenuModule, MdSelectModule,
-  MdSidenavModule, MdButtonModule, MdListModule
+  MdSidenavModule, MdButtonModule, MdListModule, MdTooltipModule
 } from '@angular/material';
 import 'hammerjs';
 
@@ -113,6 +113,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     NgxDatatableModule,
     MdButtonModule,
     MdDialogModule,
+    MdTooltipModule,
     MdMenuModule,
     MdInputModule,
     MdIconModule,

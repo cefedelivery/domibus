@@ -48,13 +48,19 @@ html, body, material-app, md-sidenav-container, .my-content {
   min-width: 1vw !important;
 }
 
-#topLogo {
+.menu-expanded #topLogo {
   display: flex;
   justify-content: center;
   align-items: center;
-  /*border: solid greenyellow;*/
   padding-top: 35px;
   padding-bottom: 35px
+}
+
+.menu-collapsed #topLogo {
+  display: block;
+  padding-top: 35px;
+  padding-bottom: 35px;
+  padding-left: 0px;
 }
 
 #topLogoText {
