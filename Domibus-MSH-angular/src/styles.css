@@ -31,35 +31,6 @@ html, body {
   word-wrap: break-word;
 }
 
-.domibusTextRegular {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18pt;
-
-}
-
-.domibusTextSpace {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 15pt;
-}
-
-.domibusTextHeading {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 38pt;
-  padding-bottom: 20px;
-}
-
-.domibusTextHeadingBold {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 38pt;
-  margin: 0;
-  font-weight: bold
-}
-
-.domibusTextSmall {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 13pt;
-}
-
 /* --- HEADING -------------------- */
 /*----------------------------------*/
 h1 {
@@ -81,17 +52,6 @@ h2 {
 /*----------------------------------*/
 md-sidenav[_ngcontent-c0] {
   box-shadow: 0px 0px 2px #9B9B9B !important;
-}
-
-/* --- LOGO ---*/
-#topLogo[_ngcontent-c0] {
-  -webkit-box-pack: left !important;
-  -ms-flex-pack: left !important;
-  justify-content: left !important;
-  -webkit-box-align: left !important;
-  -ms-flex-align: left !important;
-  align-items: left !important;
-  padding-left: 10px;
 }
 
 /* --- MENU ---*/
@@ -163,6 +123,20 @@ md-sidenav[_ngcontent-c0] {
   background: #FFF;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.24);
 }
+
+md-card {
+  margin: 0;
+  padding: 10px;
+}
+
+.selectionCriteria md-select, md-input-container {
+  margin-right: 2%;
+}
+
+.selectionCriteria md-input-container, md-select, md2-datepicker {
+  width: 30%;
+}
+
 
 
 

@@ -6,6 +6,8 @@ import {AlertService} from "../alert/alert.service";
 import {MessagelogDialogComponent} from "app/messagelog/messagelog-dialog/messagelog-dialog.component";
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {MessagelogDetailsComponent} from "app/messagelog/messagelog-details/messagelog-details.component";
+import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
+import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 
 @Component({
   moduleId: module.id,
@@ -16,17 +18,18 @@ import {MessagelogDetailsComponent} from "app/messagelog/messagelog-details/mess
 
 export class MessageLogComponent {
 
+  @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('rowTpl') public rowTpl: TemplateRef<any>;
+  @ViewChild('hdrTpl') public hdrTpl: TemplateRef<any>;
+
+  columnPicker: ColumnPickerBase = new ColumnPickerBase()
+  rowLimiter: RowLimiterBase = new RowLimiterBase()
+
   static readonly RESEND_URL: string = 'rest/message/${messageId}/restore';
   static readonly DOWNLOAD_MESSAGE_URL: string = 'rest/message/${messageId}/download';
   static readonly MESSAGE_LOG_URL: string = 'rest/messagelog';
 
-  @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
-  @ViewChild('rowTpl') rowTpl: TemplateRef<any>;
-  @ViewChild('hdrTpl') hdrTpl: TemplateRef<any>;
-
   selected = [];
-
-  dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
   timestampFromMaxDate: Date = new Date();
   timestampToMinDate: Date = null;
@@ -34,8 +37,6 @@ export class MessageLogComponent {
 
   filter: any = {};
   loading: boolean = false;
-  allColumns = [];
-  selectedColumns = [];
   rows = [];
   count: number = 0;
   offset: number = 0;
@@ -44,27 +45,19 @@ export class MessageLogComponent {
   //default value
   asc: boolean = false;
 
-  pageSizes: Array<any> = [
-    {key: '10', value: 10},
-    {key: '25', value: 25},
-    {key: '50', value: 50},
-    {key: '100', value: 100}
-  ];
-  pageSize: number = this.pageSizes[0].value;
-
   mshRoles: Array<String>;
   msgTypes: Array<String>;
   msgStatus: Array<String>;
   notifStatus: Array<String>;
 
   advancedSearch: boolean;
-  columnSelection: boolean;
+
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   ngOnInit() {
-    this.allColumns = [
+    this.columnPicker.allColumns = [
       {
         cellTemplate: this.rowTpl,
         headerTemplate: this.hdrTpl,
@@ -166,14 +159,14 @@ export class MessageLogComponent {
 
     ]
 
-    this.selectedColumns = this.allColumns.filter(col => {
+    this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type"].indexOf(col.name) != -1
     })
 
     this.filter.receivedTo = new Date()
     this.filter.receivedTo.setHours(23, 59, 59, 999)
 
-    this.page(this.offset, this.pageSize, this.orderBy, this.asc)
+    this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc)
   }
 
   getMessageLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<MessageLogResult> {
@@ -252,7 +245,7 @@ export class MessageLogComponent {
     this.getMessageLogEntries(offset, pageSize, orderBy, asc).subscribe((result: MessageLogResult) => {
       console.log("messageLog response:" + result);
       this.offset = offset;
-      this.pageSize = pageSize;
+      this.rowLimiter.pageSize = pageSize;
       this.orderBy = orderBy;
       this.asc = asc;
       this.count = result.count;
@@ -299,7 +292,7 @@ export class MessageLogComponent {
     if (event.newValue === 'desc') {
       ascending = false;
     }
-    this.page(this.offset, this.pageSize, event.column.prop, ascending);
+    this.page(this.offset, this.rowLimiter.pageSize, event.column.prop, ascending);
   }
 
   onSelect({selected}) {
@@ -321,7 +314,7 @@ export class MessageLogComponent {
 
   search() {
     console.log("Searching using filter:" + this.filter);
-    this.page(0, this.pageSize, this.orderBy, this.asc);
+    this.page(0, this.rowLimiter.pageSize, this.orderBy, this.asc);
   }
 
   resendDialog() {
@@ -383,36 +376,6 @@ export class MessageLogComponent {
 
   toggleAdvancedSearch() {
     this.advancedSearch = !this.advancedSearch;
-  }
-
-  toggleColumnSelection() {
-    this.columnSelection = !this.columnSelection;
-  }
-
-  toggle(col) {
-    const isChecked = this.isChecked(col);
-
-    if (isChecked) {
-      this.selectedColumns = this.selectedColumns.filter(c => {
-        return c.name !== col.name;
-      });
-    } else {
-      this.selectedColumns = [...this.selectedColumns, col];
-    }
-  }
-
-  isChecked(col) {
-    return this.selectedColumns.find(c => {
-      return c.name === col.name;
-    });
-  }
-
-  selectAllColumns() {
-    this.selectedColumns = [...this.allColumns]
-  }
-
-  selectNoColumns() {
-    this.selectedColumns = []
   }
 
   private downloadNative(content) {

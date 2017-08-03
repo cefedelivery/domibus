@@ -1,3 +1,6 @@
-.rowsDiv {
-  margin-top:30px;
+md-select {
+  width: 80px;
+  margin-top: 20px;
+  margin-left: 5px;
+  margin-bottom: 5px;
 }

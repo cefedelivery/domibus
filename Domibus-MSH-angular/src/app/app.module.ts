@@ -1,5 +1,5 @@
 import {BrowserModule} from "@angular/platform-browser";
-import {NgModule} from "@angular/core";
+import {NgModule, ViewContainerRef} from "@angular/core";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {Http, HttpModule, RequestOptions, XHRBackend} from "@angular/http";
 import {
@@ -52,6 +52,7 @@ import {EditUserComponent} from "app/user/edituser-form/edituser-form.component"
 import {SaveDialogComponent} from "./common/save-dialog/save-dialog.component";
 import {TruststoreDialogComponent} from "./truststore/truststore-dialog/truststore-dialog.component";
 import {TrustStoreUploadComponent} from "./truststore/truststore-upload/truststore-upload.component";
+import { ColumnPickerComponent } from './common/column-picker/column-picker.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -86,7 +87,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     ErrorlogDetailsComponent,
     EditUserComponent,
     TruststoreDialogComponent,
-    TrustStoreUploadComponent
+    TrustStoreUploadComponent,
+    ColumnPickerComponent
   ],
   entryComponents: [
     AppComponent,

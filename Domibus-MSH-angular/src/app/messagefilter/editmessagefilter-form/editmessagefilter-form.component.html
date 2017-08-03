@@ -1,7 +1,7 @@
 <div style="width: 500px">
   <p class="domibusTextSmall" style="margin:0;font-weight: bold">Message Filter Edit</p>
   <form [formGroup]="messageFilterForm">
-    <md-card style="margin:0;padding:10px;">
+    <md-card>
       <div>
         <md2-select mdInput placeholder="Plugin" id="backendfilter_id" floatPlaceholder="always" (change)="updatePlugin($event)" [(ngModel)]="plugin" [style.width]="'100%'" [formControl]="messageFilterForm.controls['plugin']">
           <md2-option *ngFor="let bName of backendFilterNames" [value]="bName.toString()">
