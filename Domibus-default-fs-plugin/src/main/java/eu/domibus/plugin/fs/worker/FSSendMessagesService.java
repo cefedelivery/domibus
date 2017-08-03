@@ -66,33 +66,6 @@ public class FSSendMessagesService {
     @Resource(name = "backendFSPlugin")
     private BackendFSImpl backendFSPlugin;
     
-    
-    
-    
-    
-    
-    
-    
-    /*
-    * FIXME: Code to help development
-    * MUST be removed
-    */
-    private static final String DEFAULT_PROPERTIES_PATH = "./src/main/resources/fsPlugin.properties";
-    private FSSendMessagesService() throws IOException {
-        fsPluginProperties = new FSPluginProperties();
-        fsPluginProperties.load(new FileInputStream(DEFAULT_PROPERTIES_PATH));
-    }
-    public static void main(String args[]) throws IOException {
-        FSSendMessagesService me = new FSSendMessagesService();
-        me.sendMessages();
-    }
-    
-    
-    
-    
-    
-    
-
     /**
      * Triggering the purge means that the message files from the SENT directory 
      * older than X seconds will be removed
@@ -144,6 +117,8 @@ public class FSSendMessagesService {
                 LOG.debug("{}: Metadata found and valid", processableFile.getName());
                 
                 backendFSPlugin.submit(new FSMessage(processableFile, metadata));
+                
+                LOG.debug("{}: Message submitted successfully", processableFile.getName());
             } catch (JAXBException | FileSystemException ex) {
                 throw new FSMetadataException("Metadata file is not an XML file", ex);
             } catch (MessagingProcessingException ex) {

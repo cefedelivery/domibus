@@ -8,12 +8,14 @@ import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
 
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.util.FileObjectDataSource;
+import org.springframework.stereotype.Component;
 
 import eu.domibus.plugin.fs.ebms3.AgreementRef;
 import eu.domibus.plugin.fs.ebms3.CollaborationInfo;
@@ -31,10 +33,16 @@ import eu.domibus.plugin.fs.ebms3.UserMessage;
  *
  * @author @author FERNANDES Henrique, GONCALVES Bruno
  */
+@Component
 public class FSMessageTransformer
         implements MessageRetrievalTransformer<FSMessage>, MessageSubmissionTransformer<FSMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSMessageTransformer.class);
+    
+    private static final String DEFAULT_CONTENT_ID = "cid:message";
+    private static final String DEFAULT_MIME_TYPE =  "text/xml";
+    public static final String MIME_TYPE = "MimeType";
+    public static final String CHARSET = "CharacterSet";
 
     /**
      * The default properties to be used
@@ -97,9 +105,12 @@ public class FSMessageTransformer
 
     private void setPayload(Submission submission, final FileObject file) {
         FileObjectDataSource dataSource = new FileObjectDataSource(file);
-        submission.addPayload(DEFAULT_CONTENT_ID, new DataHandler(dataSource));
+        
+        ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(1);
+        payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, DEFAULT_MIME_TYPE));
+        
+        submission.addPayload(DEFAULT_CONTENT_ID, new DataHandler(dataSource), payloadProperties);
     }
-    private static final String DEFAULT_CONTENT_ID = "cid:message";
 
     private void setMessageProperties(Submission submission, MessageProperties messageProperties) {
         for (Property messageProperty : messageProperties.getProperty()) {
@@ -138,8 +149,10 @@ public class FSMessageTransformer
         To to = partyInfo.getTo();
         
         submission.addFromParty(from.getPartyId().getValue(), from.getPartyId().getType());
+        submission.setFromRole(from.getRole());
         if (to != null) {
             submission.addToParty(to.getPartyId().getValue(), to.getPartyId().getType());
+            submission.setToRole(to.getRole());
         }
     }
 }
