@@ -1,13 +1,15 @@
 package eu.domibus.pki;
 
-import eu.domibus.wss4j.common.crypto.CryptoService;
+import com.google.common.collect.Lists;
+import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.wss4j.common.crypto.CryptoService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.apache.commons.lang.StringUtils;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
@@ -20,6 +22,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -169,6 +174,33 @@ public class CertificateServiceImpl implements CertificateService {
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
             LOG.error("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password);
             throw new DomibusCertificateException("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<TrustStoreEntry> getTrustStoreEntries() {
+        try {
+            final KeyStore trustStore = cryptoService.getTrustStore();
+            List<TrustStoreEntry> trustStoreEntries = new ArrayList<>();
+            final Enumeration<String> aliases = trustStore.aliases();
+            while (aliases.hasMoreElements()) {
+                final String alias = aliases.nextElement();
+                final X509Certificate certificate = (X509Certificate) trustStore.getCertificate(alias);
+                TrustStoreEntry trustStoreEntry = new TrustStoreEntry(
+                        alias,
+                        certificate.getSubjectDN().getName(),
+                        certificate.getIssuerDN().getName(),
+                        certificate.getNotBefore(),
+                        certificate.getNotAfter());
+                trustStoreEntries.add(trustStoreEntry);
+            }
+            return trustStoreEntries;
+        } catch (KeyStoreException e) {
+            LOG.warn(e.getMessage(), e);
+            return Lists.newArrayList();
         }
     }
 }
