@@ -1,4 +1,5 @@
 Domibus 3.3-FR
+- Fix sendAttempt counter (initial one plus number of retries defined in the pmode)
 - Block the receiving of the message in case the sender's certificate is not valid or revoked.
 Two more properties were added (for more details check domibus.properties file):
     o domibus.sender.certificate.validation.onsending=true
