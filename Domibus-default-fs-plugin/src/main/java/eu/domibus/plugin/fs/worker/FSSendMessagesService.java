@@ -1,11 +1,10 @@
 package eu.domibus.plugin.fs.worker;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -49,6 +48,9 @@ public class FSSendMessagesService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSSendMessagesService.class);
     
+    private static final String UUID_PATTERN = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+    private static final Pattern PROCESSED_FILE_PATTERN = Pattern.compile(
+            UUID_PATTERN + ".*", Pattern.CASE_INSENSITIVE);
     private static final List<String> STATE_SUFFIXES;
     
     static {
@@ -113,12 +115,12 @@ public class FSSendMessagesService {
         if (metadataFile.exists()) {
             try {
                 UserMessage metadata = parseMetadata(metadataFile);
-                
                 LOG.debug("{}: Metadata found and valid", processableFile.getName());
                 
-                backendFSPlugin.submit(new FSMessage(processableFile, metadata));
-                
+                String messageId = backendFSPlugin.submit(new FSMessage(processableFile, metadata));
                 LOG.debug("{}: Message submitted successfully", processableFile.getName());
+                
+                renameProcessedFile(processableFile, messageId);
             } catch (JAXBException | FileSystemException ex) {
                 throw new FSMetadataException("Metadata file is not an XML file", ex);
             } catch (MessagingProcessingException ex) {
@@ -129,6 +131,13 @@ public class FSSendMessagesService {
         }
     }
 
+    private void renameProcessedFile(FileObject processableFile, String messageId) throws FileSystemException {
+        String newFileName = messageId + "_" + processableFile.getName().getBaseName();
+        FileObject newFile = processableFile.resolveFile("../" + newFileName);
+        
+        processableFile.moveTo(newFile);
+    }
+
     private List<FileObject> filterProcessableFiles(FileObject[] files) {
         List<FileObject> filteredFiles = new LinkedList<>();
         
@@ -137,7 +146,9 @@ public class FSSendMessagesService {
             
             if (!StringUtils.equals(baseName, "metadata.xml")) {
                 if (!StringUtils.endsWithAny(baseName, STATE_SUFFIXES.toArray(new String[0]))) {
-                    filteredFiles.add(file);
+                    if (!PROCESSED_FILE_PATTERN.matcher(baseName).matches()) {
+                        filteredFiles.add(file);
+                    }
                 }
             }
         }
