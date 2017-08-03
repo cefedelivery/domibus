@@ -9,6 +9,8 @@ import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 /**
  * File system backend integration plugin.
  *
@@ -17,6 +19,9 @@ import javax.annotation.PostConstruct;
 public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
+    
+    @Autowired
+    private FSMessageTransformer defaultTransformer;
 
     /**
      * Creates a new <code>BackendFSImpl</code>.
@@ -41,7 +46,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
      */
     @Override
     public MessageSubmissionTransformer<FSMessage> getMessageSubmissionTransformer() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.defaultTransformer;
     }
 
     /**
@@ -53,7 +58,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
      */
     @Override
     public MessageRetrievalTransformer<FSMessage> getMessageRetrievalTransformer() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.defaultTransformer;
     }
 
     @Override
