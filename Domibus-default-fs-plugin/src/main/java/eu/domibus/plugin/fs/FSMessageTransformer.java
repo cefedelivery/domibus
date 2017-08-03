@@ -10,6 +10,21 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+import javax.activation.DataHandler;
+
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.util.FileObjectDataSource;
+
+import eu.domibus.plugin.fs.ebms3.AgreementRef;
+import eu.domibus.plugin.fs.ebms3.CollaborationInfo;
+import eu.domibus.plugin.fs.ebms3.From;
+import eu.domibus.plugin.fs.ebms3.MessageProperties;
+import eu.domibus.plugin.fs.ebms3.PartyInfo;
+import eu.domibus.plugin.fs.ebms3.Property;
+import eu.domibus.plugin.fs.ebms3.Service;
+import eu.domibus.plugin.fs.ebms3.To;
+import eu.domibus.plugin.fs.ebms3.UserMessage;
+
 /**
  * This class is responsible for transformations from {@link FSMessage} to
  * {@link eu.domibus.plugin.Submission} and vice versa
@@ -66,6 +81,65 @@ public class FSMessageTransformer
      */
     @Override
     public Submission transformToSubmission(final FSMessage messageIn) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        UserMessage metadata = messageIn.getMetadata();
+        Submission submission = new Submission();
+        
+        setPartyInfo(submission, metadata.getPartyInfo());
+        
+        setCollaborationInfo(submission, metadata.getCollaborationInfo());
+        
+        setMessageProperties(submission, metadata.getMessageProperties());
+        
+        setPayload(submission, messageIn.getFile());
+        
+        return submission;
+    }
+
+    private void setPayload(Submission submission, final FileObject file) {
+        FileObjectDataSource dataSource = new FileObjectDataSource(file);
+        submission.addPayload(DEFAULT_CONTENT_ID, new DataHandler(dataSource));
+    }
+    private static final String DEFAULT_CONTENT_ID = "cid:message";
+
+    private void setMessageProperties(Submission submission, MessageProperties messageProperties) {
+        for (Property messageProperty : messageProperties.getProperty()) {
+            String name = messageProperty.getName();
+            String value = messageProperty.getValue();
+            String type = messageProperty.getType();
+            
+            if (type != null) {
+                submission.addMessageProperty(name, value, type);
+            } else {
+                submission.addMessageProperty(name, value);
+            }
+        }
+    }
+
+    private void setCollaborationInfo(Submission submission, CollaborationInfo collaborationInfo) {
+        AgreementRef agreementRef = collaborationInfo.getAgreementRef();
+        Service service = collaborationInfo.getService();
+        
+        if (agreementRef != null) {
+            submission.setAgreementRef(agreementRef.getValue());
+            submission.setAgreementRefType(agreementRef.getType());
+        }
+        submission.setService(service.getValue());
+        submission.setServiceType(service.getType());
+        submission.setAction(collaborationInfo.getAction());
+        
+        // TODO: is this bit needed?
+        if (collaborationInfo.getConversationId() != null) {
+            submission.setConversationId(collaborationInfo.getConversationId());
+        }
+    }
+
+    private void setPartyInfo(Submission submission, PartyInfo partyInfo) {
+        From from = partyInfo.getFrom();
+        To to = partyInfo.getTo();
+        
+        submission.addFromParty(from.getPartyId().getValue(), from.getPartyId().getType());
+        if (to != null) {
+            submission.addToParty(to.getPartyId().getValue(), to.getPartyId().getType());
+        }
     }
 }

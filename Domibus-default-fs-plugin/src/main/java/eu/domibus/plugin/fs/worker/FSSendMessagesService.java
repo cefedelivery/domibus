@@ -32,6 +32,9 @@ import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
 
 import eu.domibus.common.MessageStatus;
+import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.plugin.fs.BackendFSImpl;
+import eu.domibus.plugin.fs.FSMessage;
 import eu.domibus.plugin.fs.ebms3.ObjectFactory;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
 import eu.domibus.plugin.fs.exception.FSMetadataException;
@@ -60,6 +63,8 @@ public class FSSendMessagesService {
     @Resource(name = "fsPluginProperties")
     private FSPluginProperties fsPluginProperties;
     
+    @Resource(name = "backendFSPlugin")
+    private BackendFSImpl backendFSPlugin;
     
     
     
@@ -137,8 +142,12 @@ public class FSSendMessagesService {
                 UserMessage metadata = parseMetadata(metadataFile);
                 
                 LOG.debug("{}: Metadata found and valid", processableFile.getName());
+                
+                backendFSPlugin.submit(new FSMessage(processableFile, metadata));
             } catch (JAXBException | FileSystemException ex) {
                 throw new FSMetadataException("Metadata file is not an XML file", ex);
+            } catch (MessagingProcessingException ex) {
+                LOG.error("Error occurred submitting message to Domibus", ex);
             }
         } else {
             throw new FSMetadataException("Metadata file is missing");
