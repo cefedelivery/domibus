@@ -115,10 +115,46 @@
             <artifactId>quartz</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-vfs2</artifactId>
+            <version>2.1</version>
+        </dependency>
+        <dependency>
+            <!--
+                Not available in public repositories
+                Has to be built from SVN tag:
+                http://svn.apache.org/repos/asf/commons/proper/vfs/tags/commons-vfs2-project-2.1
+            -->
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-vfs2-sandbox</artifactId>
+            <version>2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>jcifs</groupId>
+            <artifactId>jcifs</artifactId>
+            <version>0.8.3</version>
+        </dependency>
 
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>2.3.1</version>
+                <executions>
+                    <execution>
+                        <id>xjc</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <packageName>eu.domibus.plugin.fs.ebms3</packageName>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
