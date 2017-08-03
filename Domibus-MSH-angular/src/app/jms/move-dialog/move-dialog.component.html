@@ -5,7 +5,7 @@
 </h1>
 
 <div style="width:100%;margin-bottom: 15px;">
-  <md-select placeholder="Destination" [(ngModel)]="selectedSource" name="jmsQueueSelector" id="jmsQueueSelector"
+  <md-select placeholder="Destination" [(ngModel)]="selectedSource" name="jmsQueueSelector" id="jmsqueuedestination_id"
              style="width:100%" disabled={{destinationsChoiceDisabled}}>
     <md-option *ngFor="let queue of queues" [value]="queue" style="width:100%">
       {{queue.internal ? "[internal]" :""}} {{queue.name}} ({{queue.numberOfMessages}})

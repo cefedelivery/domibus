@@ -1,7 +1,7 @@
 ﻿<div class="selectionCriteria">
   <md-card style="margin:0;padding:10px;">
     <md-card-content>
-      <p class="domibusTextHeading" style="margin:0;font-weight: bold">PMode</p>
+      <h1 id="pmodeheader_id">PMode</h1>
       <div class="textarea" *ngIf="pModeExists">
         <textarea id="pmodetextarea_id" class="textarea" disabled>{{pModeContents}}</textarea>
       </div>
@@ -11,14 +11,14 @@
       <table class="buttonsRow">
         <tr>
           <td>
-        <button md-raised-button color="primary" (click)="upload()" id="uploadbutton_id">
-          <md-icon>file_upload</md-icon>
-          <span>Upload</span>
-        </button>
-        <button md-raised-button color="primary" (click)="download()" id="downloadbutton_id" [disabled]="!pModeExists">
-          <md-icon>file_download</md-icon>
-          <span>Download</span>
-        </button>
+            <button md-raised-button color="primary" (click)="upload()" id="uploadbutton_id">
+              <md-icon>file_upload</md-icon>
+              <span>Upload</span>
+            </button>
+            <button md-raised-button color="primary" (click)="download()" id="downloadbutton_id" [disabled]="!pModeExists">
+              <md-icon>file_download</md-icon>
+              <span>Download</span>
+            </button>
           </td>
         </tr>
       </table>
