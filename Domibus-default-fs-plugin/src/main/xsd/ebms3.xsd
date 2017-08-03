@@ -25,7 +25,7 @@
             <xsd:element name="PartyInfo" type="PartyInfo" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="CollaborationInfo" type="CollaborationInfo" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="MessageProperties" type="tns:MessageProperties" minOccurs="1" maxOccurs="1"/>
-            <xsd:element name="PayloadInfo" type="tns:PayloadInfo" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="PayloadInfo" type="tns:PayloadInfo" minOccurs="0" maxOccurs="1"/>
         </xsd:all>
         <xsd:attribute name="mpc" type="xsd:anyURI" use="optional"/>
     </xsd:complexType>
