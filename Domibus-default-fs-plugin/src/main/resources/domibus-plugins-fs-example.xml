@@ -51,19 +51,14 @@
     </bean>
 
     <!-- customizable list of triggers to be executed by quartz -->
-    <bean id="fsPluginTriggerList" parent="domibusStandardTriggerList"
-          class="org.springframework.beans.factory.config.ListFactoryBean">
+    <bean id="fsPluginTriggerList" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
-            <list merge="true">
+            <list>
                 <ref bean="fsPluginPurgeSentWorkerTrigger"/>
             </list>
         </property>
     </bean>
-    
-    <bean id="fsPluginFSObserver"
-          class="eu.domibus.plugin.fs.FSObserver">
-    </bean>
-    
+
     <!-- TODO: compare with Quartz-based implementation -->
     <task:executor id="fsPluginObserverExecutor" queue-capacity="1" />
 
