@@ -3,6 +3,7 @@ package eu.domibus.plugin.fs;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -15,7 +16,7 @@ import java.util.Set;
  * @author @author FERNANDES Henrique, GONCALVES Bruno
  */
 @Component
-public class FSPluginProperties extends Properties {
+public class FSPluginProperties {
 
     private static final String PROPERTY_PREFIX = "fsplugin.messages.";
 
@@ -44,6 +45,9 @@ public class FSPluginProperties extends Properties {
     private static final String USER = "user";
 
     private static final String PASSWORD = "password";
+
+    @Resource(name = "fsPluginProperties")
+    private Properties properties;
     
     private Set<String> domains;
 
@@ -93,7 +97,7 @@ public class FSPluginProperties extends Properties {
      * @return The cron expression that defines the frequency of the sent messages purge job
      */
     public String getSentPurgeWorkerCronExpression() {
-        return getProperty(PROPERTY_PREFIX + SENT_PURGE_WORKER_CRONEXPRESSION);
+        return properties.getProperty(PROPERTY_PREFIX + SENT_PURGE_WORKER_CRONEXPRESSION);
     }
 
     /**
@@ -131,7 +135,7 @@ public class FSPluginProperties extends Properties {
      * @return The cron expression that defines the frequency of the failed messages purge job
      */
     public String getFailedPurgeWorkerCronExpression() {
-        return getProperty(PROPERTY_PREFIX + FAILED_PURGE_WORKER_CRONEXPRESSION);
+        return properties.getProperty(PROPERTY_PREFIX + FAILED_PURGE_WORKER_CRONEXPRESSION);
     }
 
     /**
@@ -170,7 +174,7 @@ public class FSPluginProperties extends Properties {
      * @return The cron expression that defines the frequency of the received messages purge job
      */
     public String getReceivedPurgeWorkerCronExpression() {
-        return getProperty(PROPERTY_PREFIX + RECEIVED_PURGE_WORKER_CRONEXPRESSION);
+        return properties.getProperty(PROPERTY_PREFIX + RECEIVED_PURGE_WORKER_CRONEXPRESSION);
     }
 
     /**
@@ -189,18 +193,26 @@ public class FSPluginProperties extends Properties {
         return getDomainProperty(domain, PASSWORD, null);
     }
 
+    Properties getProperties() {
+        return properties;
+    }
+
+    void setProperties(Properties properties) {
+        this.properties = properties;
+    }
+
     private String getDomainProperty(String domain, String propertyName, String defaultValue) {
         String domainFullPropertyName = DOMAIN_PREFIX + domain + MESSAGES_SECTION + propertyName;
-        if (containsKey(domainFullPropertyName)) {
-            return getProperty(domainFullPropertyName, defaultValue);
+        if (properties.containsKey(domainFullPropertyName)) {
+            return properties.getProperty(domainFullPropertyName, defaultValue);
         }
-        return getProperty(PROPERTY_PREFIX + propertyName, defaultValue);
+        return properties.getProperty(PROPERTY_PREFIX + propertyName, defaultValue);
     }
 
     private Set<String> readDomains() {
         Set<String> tempDomains = new LinkedHashSet<>();
 
-        for (String propName : this.stringPropertyNames()) {
+        for (String propName : properties.stringPropertyNames()) {
             if (propName.startsWith(DOMAIN_PREFIX)) {
                 String domain = extractDomainName(propName);
                 if (!tempDomains.contains(domain)) {

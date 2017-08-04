@@ -1,28 +1,19 @@
 package eu.domibus.plugin.fs;
 
-import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
-
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.List;
+
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 
 /**
  * File system observer.
@@ -36,8 +27,8 @@ public class FSObserver {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSObserver.class);
     
     private static final String OUTGOING_FOLDER_NAME = "OUT";
-    
-    @Resource(name = "fsPluginProperties")
+
+    @Autowired
     private FSPluginProperties fsPluginProperties;
     
     @Autowired

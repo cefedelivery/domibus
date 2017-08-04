@@ -3,10 +3,8 @@ package eu.domibus.plugin.fs.worker;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.fs.FSPluginProperties;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 
 /**
@@ -17,7 +15,7 @@ public class FSPurgeSentService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSPurgeSentService.class);
 
-    @Resource(name = "fsPluginProperties")
+    @Autowired
     private FSPluginProperties fsPluginProperties;
 
     /**
