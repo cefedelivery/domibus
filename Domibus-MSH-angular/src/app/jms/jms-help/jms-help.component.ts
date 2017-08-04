@@ -1,16 +1,10 @@
-import {Component, OnInit} from "@angular/core";
+import {Component} from "@angular/core";
 
 @Component({
   selector: 'app-jms-help',
   templateUrl: './jms-help.component.html',
   styleUrls: ['./jms-help.component.css']
 })
-export class JmsHelpComponent implements OnInit {
-
-  constructor() {
-  }
-
-  ngOnInit() {
-  }
+export class JmsHelpComponent {
 
 }
