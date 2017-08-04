@@ -1,6 +1,7 @@
 
 <h1 id="usersheader_id">Users</h1>
 
+
 <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
                    (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
 
@@ -42,9 +43,6 @@
   <input type="checkbox" [checked]="row['active']" disabled>
 </ng-template>
 
-<ng-template #hdrTpl let-column="column" ngx-datatable-header-template>
-  <strong>{{column.name}}</strong>
-</ng-template>
 
 <table class="buttonsRow">
   <tr>

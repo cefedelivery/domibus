@@ -23,8 +23,6 @@ export class ErrorLogComponent {
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
   @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
-  @ViewChild('rowTpl') rowTpl: TemplateRef<any>;
-  @ViewChild('hdrTpl') hdrTpl: TemplateRef<any>;
 
   timestampFromMaxDate: Date = new Date();
   timestampToMinDate: Date = null;
@@ -55,45 +53,33 @@ export class ErrorLogComponent {
   ngOnInit() {
     this.columnPicker.allColumns = [
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: "Signal Message Id",
         prop: "errorSignalMessageId"
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: "AP Role",
         prop: "mshRole",
         width: 50
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Message Id',
         prop: "messageInErrorId",
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Error Code',
         width: 50
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Error Detail',
         width: 350
       },
       {
         cellTemplate: this.rowWithDateFormatTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Timestamp',
         width: 180
       },
       {
         cellTemplate: this.rowWithDateFormatTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Notified'
       }
 

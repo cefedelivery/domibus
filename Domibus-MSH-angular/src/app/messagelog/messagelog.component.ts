@@ -19,8 +19,6 @@ import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 export class MessageLogComponent {
 
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
-  @ViewChild('rowTpl') public rowTpl: TemplateRef<any>;
-  @ViewChild('hdrTpl') public hdrTpl: TemplateRef<any>;
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase()
   rowLimiter: RowLimiterBase = new RowLimiterBase()
@@ -59,101 +57,68 @@ export class MessageLogComponent {
   ngOnInit() {
     this.columnPicker.allColumns = [
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Message Id',
         width: 275
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'From Party Id'
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'To Party Id'
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Message Status',
         width: 175
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Notification Status',
         width: 175
       },
       {
         cellTemplate: this.rowWithDateFormatTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Received',
         width: 155
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'AP Role',
         prop: 'mshRole'
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Send Attempts'
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Send Attempts Max'
       },
       {
         cellTemplate: this.rowWithDateFormatTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Next Attempt',
         width: 155
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Conversation Id'
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Message Type',
         width: 160
       },
       {
         cellTemplate: this.rowWithDateFormatTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Deleted',
         width: 155
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Original Sender'
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Final Recipient'
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Ref To Message Id'
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Failed'
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Restored'
       }
 

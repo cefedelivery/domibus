@@ -29,7 +29,6 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
   @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
   @ViewChild('rowWithJSONTpl') rowWithJSONTpl: TemplateRef<any>;
-  @ViewChild('hdrTpl') hdrTpl: TemplateRef<any>;
 
   queues = [];
 
@@ -62,38 +61,32 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
     this.columnPicker.allColumns = [
       {
-        headerTemplate: this.hdrTpl,
         name: 'ID',
         prop: 'id'
       },
       {
-        headerTemplate: this.hdrTpl,
         name: 'JMS Type',
         prop: 'type',
         width: 80
       },
       {
-        headerTemplate: this.hdrTpl,
         cellTemplate: this.rowWithDateFormatTpl,
         name: 'Time',
         prop: 'timestamp',
         width: 80
       },
       {
-        headerTemplate: this.hdrTpl,
         name: 'Content',
         prop: 'content'
 
       },
       {
-        headerTemplate: this.hdrTpl,
         cellTemplate: this.rowWithJSONTpl,
         name: 'Custom prop',
         prop: 'customProperties',
         width: 250
       },
       {
-        headerTemplate: this.hdrTpl,
         cellTemplate: this.rowWithJSONTpl,
         name: 'JMS prop',
         prop: 'jmsproperties',

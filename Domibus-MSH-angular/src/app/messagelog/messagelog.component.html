@@ -133,14 +133,6 @@
   (select)="onSelect($event)">
 </ngx-datatable>
 
-<ng-template #hdrTpl let-column="column" ngx-datatable-header-template>
-  <strong>{{column.name}}</strong>
-</ng-template>
-
-<ng-template #rowTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-  <span class="text-select">{{value}}</span>
-</ng-template>
-
 <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
   <span class="text-select">{{value | domibusDate: dateFormat}}</span>
 </ng-template>

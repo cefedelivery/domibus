@@ -26,7 +26,6 @@ export class UserComponent implements OnInit, DirtyOperations {
   @ViewChild('passwordTpl') passwordTpl: TemplateRef<any>;
   @ViewChild('editableTpl') editableTpl: TemplateRef<any>;
   @ViewChild('checkBoxTpl') checkBoxTpl: TemplateRef<any>;
-  @ViewChild('hdrTpl') public hdrTpl: TemplateRef<any>;
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase()
   rowLimiter: RowLimiterBase = new RowLimiterBase()
@@ -56,28 +55,24 @@ export class UserComponent implements OnInit, DirtyOperations {
   ngOnInit(): void {
     this.columnPicker.allColumns = [
       {
-        headerTemplate: this.hdrTpl,
         cellTemplate: this.editableTpl,
         name: 'Username',
         prop: 'userName',
         canAutoResize: true
       },
       {
-        headerTemplate: this.hdrTpl,
         cellTemplate: this.editableTpl,
         name: 'Email',
         prop: 'email',
         canAutoResize: true
       },
       {
-        headerTemplate: this.hdrTpl,
         cellTemplate: this.editableTpl,
         name: 'Role',
         prop: 'roles',
         canAutoResize: true
       },
       {
-        headerTemplate: this.hdrTpl,
         cellTemplate: this.passwordTpl,
         name: 'Password',
         prop: 'password',
@@ -85,7 +80,6 @@ export class UserComponent implements OnInit, DirtyOperations {
 
       },
       {
-        headerTemplate: this.hdrTpl,
         cellTemplate: this.checkBoxTpl,
         name: 'Active',
         canAutoResize: true
