@@ -3,13 +3,13 @@ package eu.domibus.plugin.fs;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * File system backend integration plugin.
@@ -63,7 +63,12 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     @Override
     public void deliverMessage(String messageId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        LOG.debug("Delivering File System Message {}", messageId);
+        try {
+            FSMessage fsMessage = downloadMessage(messageId, null);
+        } catch (MessageNotFoundException e) {
+            LOG.error("An error occurred during message download", e);
+        }
     }
 
     @Override

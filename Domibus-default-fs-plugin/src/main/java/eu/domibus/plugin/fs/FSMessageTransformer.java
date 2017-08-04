@@ -3,29 +3,23 @@ package eu.domibus.plugin.fs;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.Submission;
+import eu.domibus.plugin.fs.ebms3.*;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
-
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Properties;
-
-import javax.activation.DataHandler;
-
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemManager;
+import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.util.FileObjectDataSource;
 import org.springframework.stereotype.Component;
 
-import eu.domibus.plugin.fs.ebms3.AgreementRef;
-import eu.domibus.plugin.fs.ebms3.CollaborationInfo;
-import eu.domibus.plugin.fs.ebms3.From;
-import eu.domibus.plugin.fs.ebms3.MessageProperties;
-import eu.domibus.plugin.fs.ebms3.PartyInfo;
-import eu.domibus.plugin.fs.ebms3.Property;
-import eu.domibus.plugin.fs.ebms3.Service;
-import eu.domibus.plugin.fs.ebms3.To;
-import eu.domibus.plugin.fs.ebms3.UserMessage;
+import javax.activation.DataHandler;
+import javax.annotation.Resource;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * This class is responsible for transformations from {@link FSMessage} to
@@ -43,6 +37,9 @@ public class FSMessageTransformer
     private static final String DEFAULT_MIME_TYPE =  "text/xml";
     public static final String MIME_TYPE = "MimeType";
     public static final String CHARSET = "CharacterSet";
+
+    @Resource(name = "fsPluginProperties")
+    private FSPluginProperties fsPluginProperties;
 
     /**
      * The default properties to be used
@@ -63,6 +60,7 @@ public class FSMessageTransformer
      * @throws java.io.IOException
      */
     public FSMessageTransformer(String defaultProperties) throws IOException {
+        // TODO check what are these props
         properties = new Properties();
         properties.load(new FileReader(defaultProperties));
     }
@@ -77,7 +75,21 @@ public class FSMessageTransformer
      */
     @Override
     public FSMessage transformFromSubmission(final Submission submission, final FSMessage messageOut) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        UserMessage metadata = new UserMessage();
+        metadata.setPartyInfo(getPartyInfoFromSubmission(submission));
+        metadata.setCollaborationInfo(getCollaborationInfoFromSubmission(submission));
+        metadata.setMessageProperties(getMessagePropertiesFromSubmission(submission));
+
+        try {
+            // TODO Properly handle file path in the right place (probably not here!)
+            String filePath = fsPluginProperties.getLocation() + "/IN/" + submission.getMessageId() + ".txt";
+
+            FileObject fileObject = getPayloadFromSubmission(submission, filePath);
+            return new FSMessage(fileObject, metadata);
+        } catch (IOException e) {
+            LOG.error("Could not get the file from submission " + submission.getMessageId(), e);
+        }
+        return null;
     }
 
     /**
@@ -93,11 +105,8 @@ public class FSMessageTransformer
         Submission submission = new Submission();
         
         setPartyInfo(submission, metadata.getPartyInfo());
-        
         setCollaborationInfo(submission, metadata.getCollaborationInfo());
-        
         setMessageProperties(submission, metadata.getMessageProperties());
-        
         setPayload(submission, messageIn.getFile());
         
         return submission;
@@ -112,6 +121,23 @@ public class FSMessageTransformer
         submission.addPayload(DEFAULT_CONTENT_ID, new DataHandler(dataSource), payloadProperties);
     }
 
+    private FileObject getPayloadFromSubmission(Submission submission, String filePath) throws IOException {
+        FileSystemManager fsManager = VFS.getManager();
+        FileObject fileObject = fsManager.resolveFile(filePath);
+
+        Set<Submission.Payload> payloads = submission.getPayloads();
+        if (payloads.size() == 1) {
+            Submission.Payload payload = payloads.iterator().next();
+            Collection<Submission.TypedProperty> payloadProperties = payload.getPayloadProperties();
+
+            DataHandler payloadDatahandler = payload.getPayloadDatahandler();
+            payloadDatahandler.writeTo(fileObject.getContent().getOutputStream());
+        } else {
+            LOG.warn("Payloads size should be 1");
+        }
+        return fileObject;
+    }
+
     private void setMessageProperties(Submission submission, MessageProperties messageProperties) {
         for (Property messageProperty : messageProperties.getProperty()) {
             String name = messageProperty.getName();
@@ -124,6 +150,19 @@ public class FSMessageTransformer
                 submission.addMessageProperty(name, value);
             }
         }
+    }
+
+    private MessageProperties getMessagePropertiesFromSubmission(Submission submission) {
+        MessageProperties messageProperties = new MessageProperties();
+
+        for (Submission.TypedProperty typedProperty: submission.getMessageProperties()) {
+            Property messageProperty = new Property();
+            messageProperty.setType(typedProperty.getType());
+            messageProperty.setName(typedProperty.getKey());
+            messageProperty.setValue(typedProperty.getValue());
+            messageProperties.getProperty().add(messageProperty);
+        }
+        return messageProperties;
     }
 
     private void setCollaborationInfo(Submission submission, CollaborationInfo collaborationInfo) {
@@ -144,6 +183,24 @@ public class FSMessageTransformer
         }
     }
 
+    private CollaborationInfo getCollaborationInfoFromSubmission(Submission submission) {
+        AgreementRef agreementRef = new AgreementRef();
+        agreementRef.setType(submission.getAgreementRef());
+        agreementRef.setType(submission.getAgreementRefType());
+
+        Service service = new Service();
+        service.setType(submission.getServiceType());
+        service.setValue(submission.getService());
+
+        CollaborationInfo collaborationInfo = new CollaborationInfo();
+        collaborationInfo.setAgreementRef(agreementRef);
+        collaborationInfo.setService(service);
+        collaborationInfo.setAction(submission.getAction());
+        collaborationInfo.setConversationId(submission.getConversationId());
+
+        return collaborationInfo;
+    }
+
     private void setPartyInfo(Submission submission, PartyInfo partyInfo) {
         From from = partyInfo.getFrom();
         To to = partyInfo.getTo();
@@ -154,5 +211,38 @@ public class FSMessageTransformer
             submission.addToParty(to.getPartyId().getValue(), to.getPartyId().getType());
             submission.setToRole(to.getRole());
         }
+    }
+
+    private PartyInfo getPartyInfoFromSubmission(Submission submission) {
+        // From
+        Submission.Party fromParty = submission.getFromParties().iterator().next();
+        String fromRole = submission.getFromRole();
+
+        PartyId fromPartyId = new PartyId();
+        fromPartyId.setType(fromParty.getPartyIdType());
+        fromPartyId.setValue(fromParty.getPartyId());
+
+        From from = new From();
+        from.setPartyId(fromPartyId);
+        from.setRole(fromRole);
+
+        // To
+        Submission.Party toParty = submission.getToParties().iterator().next();
+        String toRole = submission.getToRole();
+
+        PartyId toPartyId = new PartyId();
+        toPartyId.setType(toParty.getPartyIdType());
+        toPartyId.setValue(toParty.getPartyId());
+
+        To to = new To();
+        to.setPartyId(toPartyId);
+        to.setRole(toRole);
+
+        // PartyInfo
+        PartyInfo partyInfo = new PartyInfo();
+        partyInfo.setFrom(from);
+        partyInfo.setTo(to);
+
+        return partyInfo;
     }
 }

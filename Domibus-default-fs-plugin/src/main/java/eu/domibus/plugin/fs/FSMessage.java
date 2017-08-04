@@ -1,8 +1,7 @@
 package eu.domibus.plugin.fs;
 
-import org.apache.commons.vfs2.FileObject;
-
 import eu.domibus.plugin.fs.ebms3.UserMessage;
+import org.apache.commons.vfs2.FileObject;
 
 /**
  * File System message
@@ -10,14 +9,16 @@ import eu.domibus.plugin.fs.ebms3.UserMessage;
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
 public class FSMessage {
-    
-    FileObject file;
-    
-    UserMessage metadata;
 
-    public FSMessage() {
-    }
+    private final FileObject file;
+    
+    private final UserMessage metadata;
 
+    /**
+     * Creates a FSMessage with the given file and metadata
+     * @param file The file object
+     * @param metadata UserMessage metadata
+     */
     public FSMessage(FileObject file, UserMessage metadata) {
         this.file = file;
         this.metadata = metadata;
@@ -27,16 +28,8 @@ public class FSMessage {
         return file;
     }
 
-    public void setFile(FileObject file) {
-        this.file = file;
-    }
-
     public UserMessage getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(UserMessage metadata) {
-        this.metadata = metadata;
-    }
-    
 }
