@@ -102,11 +102,16 @@
   </md-card>
 </div>
 
-<app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
-                   (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
-
-<app-row-limiter [pageSizes]="rowLimiter.pageSizes" (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
-
+<div style="display:inline-flex">
+  <div>
+    <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                     (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+  </div>
+  <div>
+    <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                       (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+  </div>
+</div>
 
 <ngx-datatable
   id="messageLogTable"
@@ -138,11 +143,13 @@
 </ng-template>
 
 <div class="group-btn">
-  <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()" id="downloadbutton_id">
+  <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()"
+          id="downloadbutton_id">
     <md-icon>file_download</md-icon>
     <span>Download</span>
   </button>
-  <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()" id="resendbutton_id">
+  <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()"
+          id="resendbutton_id">
     <md-icon>send</md-icon>
     <span>Resend</span>
   </button>

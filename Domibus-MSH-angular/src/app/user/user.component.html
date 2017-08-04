@@ -1,11 +1,16 @@
-
 <h1 id="usersheader_id">Users</h1>
 
 
-<app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
-                   (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
-
-<app-row-limiter [pageSizes]="rowLimiter.pageSizes" (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+<div style="display:inline-flex">
+  <div>
+    <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                     (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+  </div>
+  <div>
+    <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                       (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+  </div>
+</div>
 
 <ngx-datatable
   id="userTable"
@@ -47,7 +52,8 @@
 <table class="buttonsRow">
   <tr>
     <td>
-      <button id="userCancelButton" md-raised-button (click)="cancelDialog()" color="primary" [disabled]="!enableCancel">
+      <button id="userCancelButton" md-raised-button (click)="cancelDialog()" color="primary"
+              [disabled]="!enableCancel">
         <md-icon>cancel</md-icon>
         <span>Cancel</span>
       </button>
@@ -59,11 +65,12 @@
         <md-icon>add</md-icon>
         <span>New</span>
       </button>
-      <button id="userEditButton" md-raised-button (click)="buttonEdit()" color="primary" [disabled]="!enableEdit" >
+      <button id="userEditButton" md-raised-button (click)="buttonEdit()" color="primary" [disabled]="!enableEdit">
         <md-icon>edit</md-icon>
         <span>Edit</span>
       </button>
-      <button id="userDeleteButton" md-raised-button (click)="buttonDelete()" color="primary" [disabled]="!enableDelete">
+      <button id="userDeleteButton" md-raised-button (click)="buttonDelete()" color="primary"
+              [disabled]="!enableDelete">
         <md-icon>delete</md-icon>
         <span>Delete</span>
       </button>

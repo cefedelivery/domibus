@@ -97,10 +97,16 @@
   </md-card>
 </div>
 
-<app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
-                   (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
-
-<app-row-limiter [pageSizes]="rowLimiter.pageSizes" (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+<div style="display:inline-flex">
+  <div>
+    <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                     (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+  </div>
+  <div>
+    <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                       (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+  </div>
+</div>
 
 
 <ngx-datatable
