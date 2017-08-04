@@ -24,18 +24,12 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileSystemManager;
-import org.apache.commons.vfs2.FileSystemOptions;
-import org.apache.commons.vfs2.FileType;
-import org.apache.commons.vfs2.FileTypeSelector;
-import org.apache.commons.vfs2.VFS;
-import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
-import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
-import org.apache.commons.vfs2.util.FileObjectDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.domibus.common.MessageStatus;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.fs.BackendFSImpl;
+import eu.domibus.plugin.fs.FSFilesManager;
 import eu.domibus.plugin.fs.FSMessage;
 import eu.domibus.plugin.fs.ebms3.ObjectFactory;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
@@ -53,6 +47,7 @@ public class FSSendMessagesService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSSendMessagesService.class);
     
     private static final String OUTGOING_FOLDER = "OUT";
+    private static final String METADATA_FILE_NAME = "metadata.xml";
     private static final String UUID_PATTERN = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
     private static final Pattern PROCESSED_FILE_PATTERN = Pattern.compile(
             UUID_PATTERN + ".*", Pattern.CASE_INSENSITIVE);
@@ -72,6 +67,9 @@ public class FSSendMessagesService {
     
     @Resource(name = "backendFSPlugin")
     private BackendFSImpl backendFSPlugin;
+    
+    @Autowired
+    private FSFilesManager fsFilesManager;
     
     /**
      * Triggering the purge means that the message files from the SENT directory 
@@ -96,10 +94,10 @@ public class FSSendMessagesService {
                 rootDir = setUpFileSystem();
             }
             
-            FileObject outgoingFolder = ensureOutgoingFolderExists(rootDir);
+            FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, OUTGOING_FOLDER);
             
             // TODO: remove this
-            FileObject[] contentFiles = outgoingFolder.findFiles(new FileTypeSelector(FileType.FILE));
+            FileObject[] contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
             LOG.debug(Arrays.toString(contentFiles));
             
             List<FileObject> processableFiles = filterProcessableFiles(contentFiles);
@@ -118,35 +116,15 @@ public class FSSendMessagesService {
         }
     }
 
-    private FileObject ensureOutgoingFolderExists(FileObject rootDir) throws FSSetUpException {
-        try {
-            if (!rootDir.exists()) {
-                throw new FSSetUpException("Root location does not exist: " + rootDir.getName());
-            } else {
-                FileObject outgoingDir = rootDir.resolveFile(OUTGOING_FOLDER);
-                if (!outgoingDir.exists()) {
-                    outgoingDir.createFolder();
-                } else {
-                    if (outgoingDir.getType() != FileType.FOLDER) {
-                        throw new FSSetUpException("Outgoing path exists and is not a folder");
-                    }
-                }
-                return outgoingDir;
-            }
-        } catch (FileSystemException ex) {
-            throw new FSSetUpException("IO error setting up folders", ex);
-        }
-    }
-
     private void processFile(FileObject processableFile) throws FileSystemException, FSMetadataException {
-        FileObject metadataFile = processableFile.resolveFile("../metadata.xml");
+        FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, METADATA_FILE_NAME);
         
         if (metadataFile.exists()) {
             try {
                 UserMessage metadata = parseMetadata(metadataFile);
                 LOG.debug("{}: Metadata found and valid", processableFile.getName());
                 
-                DataHandler dataHandler = new DataHandler(new FileObjectDataSource(processableFile));
+                DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
                 FSMessage message= new FSMessage(dataHandler, metadata);
                 String messageId = backendFSPlugin.submit(message);
                 LOG.debug("{}: Message submitted successfully", processableFile.getName());
@@ -164,9 +142,8 @@ public class FSSendMessagesService {
 
     private void renameProcessedFile(FileObject processableFile, String messageId) throws FileSystemException {
         String newFileName = messageId + "_" + processableFile.getName().getBaseName();
-        FileObject newFile = processableFile.resolveFile("../" + newFileName);
         
-        processableFile.moveTo(newFile);
+        fsFilesManager.renameFile(processableFile, newFileName);
     }
 
     private List<FileObject> filterProcessableFiles(FileObject[] files) {
@@ -187,21 +164,25 @@ public class FSSendMessagesService {
         return filteredFiles;
     }
 
-    private FileObject setUpFileSystem(String domain) throws FileSystemException {
-        StaticUserAuthenticator auth = new StaticUserAuthenticator(null,
-                fsPluginProperties.getUser(domain), fsPluginProperties.getPassword(domain));
-        FileSystemOptions opts = new FileSystemOptions();
-        DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(opts, auth);
+    private FileObject setUpFileSystem(String domain) throws FileSystemException, FSSetUpException {
+        String location = fsPluginProperties.getLocation(domain);
+        String authDomain = null;
+        String user = fsPluginProperties.getUser(domain);
+        String password = fsPluginProperties.getPassword(domain);
         
-        FileSystemManager fsManager = VFS.getManager();
-        FileObject rootDir = fsManager.resolveFile(fsPluginProperties.getLocation(domain), opts);
+        FileObject rootDir;
+        if (StringUtils.isEmpty(user) || StringUtils.isEmpty(password)) {
+            rootDir = fsFilesManager.getEnsureRootLocation(location);
+        } else {
+            rootDir = fsFilesManager.getEnsureRootLocation(location, authDomain, user, password);
+        }
         
         return rootDir;
     }
     
-    private FileObject setUpFileSystem() throws FileSystemException {        
-        FileSystemManager fsManager = VFS.getManager();
-        FileObject rootDir = fsManager.resolveFile(fsPluginProperties.getLocation());
+    private FileObject setUpFileSystem() throws FileSystemException, FSSetUpException {        
+        String location = fsPluginProperties.getLocation();
+        FileObject rootDir = fsFilesManager.getEnsureRootLocation(location);
         
         return rootDir;
     }

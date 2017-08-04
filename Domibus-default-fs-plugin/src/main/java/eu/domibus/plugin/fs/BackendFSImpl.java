@@ -17,8 +17,8 @@ import javax.annotation.Resource;
 
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemManager;
-import org.apache.commons.vfs2.VFS;
+
+import eu.domibus.plugin.fs.exception.FSSetUpException;
 
 /**
  * File system backend integration plugin.
@@ -34,6 +34,9 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     
     @Autowired
     private FSMessageTransformer defaultTransformer;
+    
+    @Autowired
+    private FSFilesManager fsFilesManager;
     
     @Resource(name = "fsPluginProperties")
     private FSPluginProperties fsPluginProperties;
@@ -89,14 +92,15 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         }
             
         try {
-            String filePath = fsPluginProperties.getLocation() + "/" + INCOMING_FOLDER + "/" + messageId + "." + DEFAULT_EXTENSION;
+            FileObject rootDir = fsFilesManager.getEnsureRootLocation(fsPluginProperties.getLocation());
+            FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, INCOMING_FOLDER);
+            String fileName = messageId + "." + DEFAULT_EXTENSION;
             
-            FileSystemManager fsManager = VFS.getManager();
-            try (FileObject fileObject = fsManager.resolveFile(filePath);
+            try (FileObject fileObject = incomingFolder.resolveFile(fileName);
                     FileContent fileContent = fileObject.getContent()) {
                 fsMessage.getDataHandler().writeTo(fileContent.getOutputStream());
             }
-        } catch (IOException ex) {
+        } catch (IOException | FSSetUpException ex) {
             LOG.error("An error occured saving downloaded message", ex);
         }
     }
