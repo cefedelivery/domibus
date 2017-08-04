@@ -3,7 +3,6 @@ package eu.domibus.plugin.fs.worker;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.fs.FSPluginProperties;
-
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -26,8 +25,6 @@ public class FSPurgeSentService {
      */
     public void resendFailedFSMessages() {
         LOG.debug("Purging sent file system messages...");
-        LOG.debug("location: {}", fsPluginProperties.getLocation());
-        LOG.debug("location DOMAIN1: {}", fsPluginProperties.getLocation("DOMAIN1"));
     }
 
 }

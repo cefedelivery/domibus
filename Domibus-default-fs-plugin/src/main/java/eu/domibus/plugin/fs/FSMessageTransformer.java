@@ -6,6 +6,7 @@ import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.*;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
+import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
@@ -14,11 +15,9 @@ import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import javax.annotation.Resource;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -40,30 +39,6 @@ public class FSMessageTransformer
 
     @Resource(name = "fsPluginProperties")
     private FSPluginProperties fsPluginProperties;
-
-    /**
-     * The default properties to be used
-     */
-    private final Properties properties;
-    
-    /**
-     * Creates a new <code>FSMessageTransformer</code>.
-     */
-    public FSMessageTransformer() {
-        properties = new Properties();
-    }
-    
-    /**
-     * Creates a new <code>FSMessageTransformer</code> with the given properties.
-     * 
-     * @param defaultProperties Default properties
-     * @throws java.io.IOException
-     */
-    public FSMessageTransformer(String defaultProperties) throws IOException {
-        // TODO check what are these props
-        properties = new Properties();
-        properties.load(new FileReader(defaultProperties));
-    }
 
     /**
      * Transforms {@link eu.domibus.plugin.Submission} to {@link FSMessage}
@@ -131,7 +106,9 @@ public class FSMessageTransformer
             Collection<Submission.TypedProperty> payloadProperties = payload.getPayloadProperties();
 
             DataHandler payloadDatahandler = payload.getPayloadDatahandler();
-            payloadDatahandler.writeTo(fileObject.getContent().getOutputStream());
+            FileContent fileContent = fileObject.getContent();
+            payloadDatahandler.writeTo(fileContent.getOutputStream());
+            fileContent.close();
         } else {
             LOG.warn("Payloads size should be 1");
         }
