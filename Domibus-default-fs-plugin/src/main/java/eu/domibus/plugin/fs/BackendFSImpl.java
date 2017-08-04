@@ -29,6 +29,9 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
     
+    private static final String INCOMING_FOLDER = "IN";
+    private static final String DEFAULT_EXTENSION = "txt";
+    
     @Autowired
     private FSMessageTransformer defaultTransformer;
     
@@ -86,7 +89,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         }
             
         try {
-            String filePath = fsPluginProperties.getLocation() + "/IN/" + messageId + ".txt";
+            String filePath = fsPluginProperties.getLocation() + "/" + INCOMING_FOLDER + "/" + messageId + "." + DEFAULT_EXTENSION;
             
             FileSystemManager fsManager = VFS.getManager();
             try (FileObject fileObject = fsManager.resolveFile(filePath);
@@ -94,7 +97,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 fsMessage.getDataHandler().writeTo(fileContent.getOutputStream());
             }
         } catch (IOException ex) {
-            LOG.error("An error occured saving downloaded message");
+            LOG.error("An error occured saving downloaded message", ex);
         }
     }
 
