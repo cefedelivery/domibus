@@ -1,0 +1,15 @@
+<md-dialog-content style="height:450px;width:750px">
+  <md-card>
+    <md-card-content>
+      <div #container></div>
+    </md-card-content>
+  </md-card>
+</md-dialog-content>
+
+<md-dialog-actions>
+  <button id="closebutton_id" md-raised-button color="primary" (click)="dialogRef.close({})"
+          style="margin-top:10px">
+    <md-icon>close</md-icon>
+    <span>Close</span>
+  </button>
+</md-dialog-actions>
