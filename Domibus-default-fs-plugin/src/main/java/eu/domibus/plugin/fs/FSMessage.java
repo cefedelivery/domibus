@@ -1,7 +1,8 @@
 package eu.domibus.plugin.fs;
 
+import javax.activation.DataHandler;
+
 import eu.domibus.plugin.fs.ebms3.UserMessage;
-import org.apache.commons.vfs2.FileObject;
 
 /**
  * File System message
@@ -10,22 +11,22 @@ import org.apache.commons.vfs2.FileObject;
  */
 public class FSMessage {
 
-    private final FileObject file;
+    private final DataHandler dataHandler;
     
     private final UserMessage metadata;
-
+    
     /**
-     * Creates a FSMessage with the given file and metadata
-     * @param file The file object
+     * Creates a FSMessage with the given data handler and metadata
+     * @param dataHandler  The data handler
      * @param metadata UserMessage metadata
      */
-    public FSMessage(FileObject file, UserMessage metadata) {
-        this.file = file;
+    public FSMessage(DataHandler dataHandler, UserMessage metadata) {
+        this.dataHandler = dataHandler;
         this.metadata = metadata;
     }
-
-    public FileObject getFile() {
-        return file;
+    
+    public DataHandler getDataHandler() {
+        return dataHandler;
     }
 
     public UserMessage getMetadata() {

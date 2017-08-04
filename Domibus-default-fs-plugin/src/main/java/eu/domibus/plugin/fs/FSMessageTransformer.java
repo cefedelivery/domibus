@@ -6,19 +6,16 @@ import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.*;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
-import org.apache.commons.vfs2.FileContent;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemManager;
-import org.apache.commons.vfs2.VFS;
-import org.apache.commons.vfs2.util.FileObjectDataSource;
+
 import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
-import javax.annotation.Resource;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
+
+import eu.domibus.plugin.fs.exception.FSPayloadException;
 
 /**
  * This class is responsible for transformations from {@link FSMessage} to
@@ -37,9 +34,6 @@ public class FSMessageTransformer
     public static final String MIME_TYPE = "MimeType";
     public static final String CHARSET = "CharacterSet";
 
-    @Resource(name = "fsPluginProperties")
-    private FSPluginProperties fsPluginProperties;
-
     /**
      * Transforms {@link eu.domibus.plugin.Submission} to {@link FSMessage}
      *
@@ -56,15 +50,12 @@ public class FSMessageTransformer
         metadata.setMessageProperties(getMessagePropertiesFromSubmission(submission));
 
         try {
-            // TODO Properly handle file path in the right place (probably not here!)
-            String filePath = fsPluginProperties.getLocation() + "/IN/" + submission.getMessageId() + ".txt";
-
-            FileObject fileObject = getPayloadFromSubmission(submission, filePath);
-            return new FSMessage(fileObject, metadata);
-        } catch (IOException e) {
-            LOG.error("Could not get the file from submission " + submission.getMessageId(), e);
+            DataHandler dataHandler = getPayloadFromSubmission(submission);
+            return new FSMessage(dataHandler, metadata);
+        } catch (FSPayloadException ex) {
+            LOG.error("Could not get the file from submission " + submission.getMessageId(), ex);
+            throw new RuntimeException(ex);
         }
-        return null;
     }
 
     /**
@@ -82,37 +73,28 @@ public class FSMessageTransformer
         setPartyInfo(submission, metadata.getPartyInfo());
         setCollaborationInfo(submission, metadata.getCollaborationInfo());
         setMessageProperties(submission, metadata.getMessageProperties());
-        setPayload(submission, messageIn.getFile());
+        setPayload(submission, messageIn.getDataHandler());
         
         return submission;
     }
 
-    private void setPayload(Submission submission, final FileObject file) {
-        FileObjectDataSource dataSource = new FileObjectDataSource(file);
-        
+    private void setPayload(Submission submission, final DataHandler dataHandler) {
         ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(1);
         payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, DEFAULT_MIME_TYPE));
         
-        submission.addPayload(DEFAULT_CONTENT_ID, new DataHandler(dataSource), payloadProperties);
+        submission.addPayload(DEFAULT_CONTENT_ID, dataHandler, payloadProperties);
     }
 
-    private FileObject getPayloadFromSubmission(Submission submission, String filePath) throws IOException {
-        FileSystemManager fsManager = VFS.getManager();
-        FileObject fileObject = fsManager.resolveFile(filePath);
-
+    private DataHandler getPayloadFromSubmission(Submission submission) throws FSPayloadException {
         Set<Submission.Payload> payloads = submission.getPayloads();
         if (payloads.size() == 1) {
             Submission.Payload payload = payloads.iterator().next();
             Collection<Submission.TypedProperty> payloadProperties = payload.getPayloadProperties();
 
-            DataHandler payloadDatahandler = payload.getPayloadDatahandler();
-            FileContent fileContent = fileObject.getContent();
-            payloadDatahandler.writeTo(fileContent.getOutputStream());
-            fileContent.close();
+            return payload.getPayloadDatahandler();
         } else {
-            LOG.warn("Payloads size should be 1");
+            throw new FSPayloadException("Payloads size should be 1");
         }
-        return fileObject;
     }
 
     private void setMessageProperties(Submission submission, MessageProperties messageProperties) {

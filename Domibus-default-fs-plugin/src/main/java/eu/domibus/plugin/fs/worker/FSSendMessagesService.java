@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.activation.DataHandler;
+
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.fs.FSPluginProperties;
@@ -29,6 +31,7 @@ import org.apache.commons.vfs2.FileTypeSelector;
 import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
+import org.apache.commons.vfs2.util.FileObjectDataSource;
 
 import eu.domibus.common.MessageStatus;
 import eu.domibus.messaging.MessagingProcessingException;
@@ -143,7 +146,9 @@ public class FSSendMessagesService {
                 UserMessage metadata = parseMetadata(metadataFile);
                 LOG.debug("{}: Metadata found and valid", processableFile.getName());
                 
-                String messageId = backendFSPlugin.submit(new FSMessage(processableFile, metadata));
+                DataHandler dataHandler = new DataHandler(new FileObjectDataSource(processableFile));
+                FSMessage message= new FSMessage(dataHandler, metadata);
+                String messageId = backendFSPlugin.submit(message);
                 LOG.debug("{}: Message submitted successfully", processableFile.getName());
                 
                 renameProcessedFile(processableFile, messageId);
