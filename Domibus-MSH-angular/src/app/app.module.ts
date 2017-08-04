@@ -61,6 +61,13 @@ import {TruststoreDialogComponent} from "./truststore/truststore-dialog/truststo
 import {TrustStoreUploadComponent} from "./truststore/truststore-upload/truststore-upload.component";
 import {PageHelperComponent} from "./common/page-helper/page-helper.component";
 import {HelpDialogComponent} from "./common/page-helper/help-dialog/help-dialog.component";
+import {PmodeHelpComponent} from "./pmode/pmode-help/pmode-help.component";
+import {JmsHelpComponent} from "./jms/jms-help/jms-help.component";
+import {TruststoreHelpComponent} from "./truststore/truststore-help/truststore-help.component";
+import {ErrorlogHelpComponent} from "./errorlog/errorlog-help/errorlog-help.component";
+import {MessagelogHelpComponent} from "./messagelog/messagelog-help/messagelog-help.component";
+import {MessagefilterHelpComponent} from "./messagefilter/messagefilter-help/messagefilter-help.component";
+import {UserHelpComponent} from "./user/user-help/user-help.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -97,7 +104,14 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TruststoreDialogComponent,
     TrustStoreUploadComponent,
     PageHelperComponent,
-    HelpDialogComponent
+    HelpDialogComponent,
+    PmodeHelpComponent,
+    JmsHelpComponent,
+    TruststoreHelpComponent,
+    ErrorlogHelpComponent,
+    MessagelogHelpComponent,
+    MessagefilterHelpComponent,
+    UserHelpComponent
   ],
   entryComponents: [
     AppComponent,
