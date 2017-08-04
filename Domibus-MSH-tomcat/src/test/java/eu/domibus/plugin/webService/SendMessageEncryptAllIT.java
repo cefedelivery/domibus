@@ -19,7 +19,6 @@ package eu.domibus.plugin.webService;
  */
 
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.AbstractSendMessageIT;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.ebms3.sender.NonRepudiationChecker;
@@ -30,7 +29,6 @@ import eu.domibus.plugin.webService.generated.SendRequest;
 import eu.domibus.plugin.webService.generated.SendResponse;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

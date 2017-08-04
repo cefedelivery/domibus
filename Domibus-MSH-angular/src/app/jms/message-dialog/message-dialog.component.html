@@ -12,7 +12,7 @@
         <input mdInput placeholder="Id" value="{{message.id}}" readonly/>
       </md-input-container>
       <md-input-container style="width:100%">
-        <input mdInput placeholder="Timestamp" value="{{message.timestamp| date:'medium'}}" readonly/>
+        <input mdInput placeholder="Timestamp" value="{{message.timestamp| domibusDate: dateFormat}}" readonly/>
       </md-input-container>
       <md-input-container style="width:100%">
         <input mdInput placeholder="JMS Type" value="{{message.type}}" readonly/>
@@ -61,9 +61,8 @@
 </md-dialog-content>
 
 <md-dialog-actions>
-  <button id="messageDialogOkButton" md-raised-button color="primary" (click)="dialogRef.close({})"
-          style="margin-top:10px">
-    <md-icon>check circle</md-icon>
-    <span>Ok</span>
+  <button id="messageDialogCloseButton" md-raised-button color="primary" (click)="dialogRef.close({})" style="margin-top:10px">
+    <md-icon>close</md-icon>
+    <span>Close</span>
   </button>
 </md-dialog-actions>

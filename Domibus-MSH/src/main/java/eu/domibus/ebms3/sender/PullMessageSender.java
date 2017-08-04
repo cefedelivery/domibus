@@ -27,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -66,6 +68,7 @@ public class PullMessageSender {
 
     @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
     @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "internalJmsListenerContainerFactory")
+    @Transactional(propagation = Propagation.REQUIRED)
     public void processPullRequest(final MapMessage map) {
         boolean notifiyBusinessOnError = false;
         Messaging messaging = null;
@@ -110,7 +113,6 @@ public class PullMessageSender {
             mshDispatcher.dispatch(acknowlegement,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
 
         } catch (TransformerException | SOAPException | IOException | JMSException e) {
-            //@thom change this exception handling.
             LOG.error(e.getMessage(), e);
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Error handling new UserMessage", e);
         } catch (final EbMS3Exception e) {

@@ -1,7 +1,7 @@
 <div class="selectionCriteria">
-  <md-card>
+  <md-card style="margin:0;padding:10px;">
     <md-card-content>
-      <p class="domibusTextHeading" style="margin:0;font-weight: bold">JMS Monitoring</p>
+      <h1 id="jmsmonitoringheader_id">JMS Monitoring</h1>
       <div style="width:100%">
         <div style="display: inline-block;width: 90%;height: auto;">
           <div>
@@ -44,7 +44,8 @@
         <div style="display: inline-block;width:auto">
           <button id="jmsSearchButton" md-raised-button color="primary" (click)="search()">
             <md-icon>search</md-icon>
-            <span>Search</span></button>
+            <span>Search</span>
+          </button>
         </div>
       </div>
     </md-card-content>
@@ -62,7 +63,7 @@
   [rowHeight]="'auto'"
   [scrollbarH]="true"
   [loadingIndicator]="loading"
-  [selectionType]="'multiClick'"
+  [selectionType]="'multi'"
   [selected]="selectedMessages"
   [limit]="pageSize"
   [sorts]="[{prop: 'timestamp', dir: 'desc'}]"

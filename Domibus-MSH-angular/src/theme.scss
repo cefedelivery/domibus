@@ -30,6 +30,7 @@ $input-app-theme: mat-light-theme($input-app-primary, $input-app-accent, $input-
 @include mat-tabs-theme($input-app-theme)
 @include mat-select-theme($input-app-theme)
 @include mat-option-theme($input-app-theme)
+@include mat-list-theme($input-app-theme)
 
 $datatable_background_color_hover: map-get($mat-grey, 300);
 $datatable_background_color_focus: map-get($mat-grey, 100);
@@ -75,4 +76,20 @@ $datatable_background_color_active: map-get($mat-grey, 300);
 .ngx-datatable.material.multi-click-selection .datatable-body-row.active:focus .datatable-row-group {
   background-color: $datatable_background_color_focus;
   color: #0d0d0d;
+}
+
+.domibusLink {
+  color: map-get($mat-blue, A200);
+}
+
+.expandableSearch {
+  a {
+    @extend .domibusLink;
+    vertical-align: bottom;
+  }
+}
+
+div.expandableSearch {
+  display: inline-block;
+  margin-left: 15px;
 }

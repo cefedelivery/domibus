@@ -16,6 +16,20 @@ export class UserService {
       .catch(this.handleError);
   }
 
+  getUserRoles():Observable<String[]> {
+    return this.http.get("rest/user/userroles")
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
+  deleteUsers(users:Array<UserResponseRO>):void {
+    this.http.post("rest/user/delete", users).subscribe(res => {
+      this.alertService.success("User(s) deleted", false);
+    }, err => {
+      this.alertService.error(err, false);
+    });
+  }
+
   saveUsers(users:Array<UserResponseRO>):void{
     this.http.post("rest/user/save", users).subscribe(res => {
       this.changeUserStatus(users);
@@ -31,7 +45,6 @@ export class UserService {
       users[u].password="";
     }
   }
-
 
 private extractData(res: Response) {
   let body = res.json();

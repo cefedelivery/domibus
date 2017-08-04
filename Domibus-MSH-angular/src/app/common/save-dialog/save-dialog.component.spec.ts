@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MessagefilterDialogComponent } from './messagefilter-dialog.component';
+import { SaveDialogComponent } from './save-dialog.component';
 
 describe('MessagelogDialogComponent', () => {
-  let component: MessagefilterDialogComponent;
-  let fixture: ComponentFixture<MessagefilterDialogComponent>;
+  let component: SaveDialogComponent;
+  let fixture: ComponentFixture<SaveDialogComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MessagefilterDialogComponent ]
+      declarations: [ SaveDialogComponent ]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(MessagefilterDialogComponent);
+    fixture = TestBed.createComponent(SaveDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,10 +1,11 @@
-import {Component} from "@angular/core";
+import {Component, TemplateRef, ViewChild} from "@angular/core";
 import {Http, URLSearchParams, Response} from "@angular/http";
 import {MessageLogResult} from "./messagelogresult";
 import {Observable} from "rxjs";
 import {AlertService} from "../alert/alert.service";
 import {MessagelogDialogComponent} from "app/messagelog/messagelog-dialog/messagelog-dialog.component";
-import {MdDialog} from "@angular/material";
+import {MdDialog, MdDialogRef} from "@angular/material";
+import {MessagelogDetailsComponent} from "app/messagelog/messagelog-details/messagelog-details.component";
 
 @Component({
   moduleId: module.id,
@@ -19,6 +20,10 @@ export class MessageLogComponent {
   static readonly DOWNLOAD_MESSAGE_URL: string = 'rest/message/${messageId}/download';
   static readonly MESSAGE_LOG_URL: string = 'rest/messagelog';
 
+  @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('rowTpl') rowTpl: TemplateRef<any>;
+  @ViewChild('hdrTpl') hdrTpl: TemplateRef<any>;
+
   selected = [];
 
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
@@ -27,17 +32,15 @@ export class MessageLogComponent {
   timestampToMinDate: Date = null;
   timestampToMaxDate: Date = new Date();
 
-  notifiedFromMaxDate: Date = new Date();
-  notifiedToMinDate: Date = null;
-  notifiedToMaxDate: Date = new Date();
-
   filter: any = {};
   loading: boolean = false;
+  allColumns = [];
+  selectedColumns = [];
   rows = [];
   count: number = 0;
   offset: number = 0;
   //default value
-  orderBy: string = "messageId";
+  orderBy: string = "received";
   //default value
   asc: boolean = false;
 
@@ -54,11 +57,123 @@ export class MessageLogComponent {
   msgStatus: Array<String>;
   notifStatus: Array<String>;
 
+  advancedSearch: boolean;
+  columnSelection: boolean;
+
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   ngOnInit() {
-    this.page(this.offset, this.pageSize, this.orderBy, this.asc);
+    this.allColumns = [
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Message Id',
+        width: 275
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'From Party Id'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'To Party Id'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Message Status',
+        width: 175
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Notification Status',
+        width: 175
+      },
+      {
+        cellTemplate: this.rowWithDateFormatTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Received',
+        width: 155
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'AP Role',
+        prop: 'mshRole'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Send Attempts'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Send Attempts Max'
+      },
+      {
+        cellTemplate: this.rowWithDateFormatTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Next Attempt',
+        width: 155
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Conversation Id'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Message Type',
+        width: 160
+      },
+      {
+        cellTemplate: this.rowWithDateFormatTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Deleted',
+        width: 155
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Original Sender'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Final Recipient'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Ref To Message Id'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Failed'
+      },
+      {
+        cellTemplate: this.rowTpl,
+        headerTemplate: this.hdrTpl,
+        name: 'Restored'
+      }
+
+    ]
+
+    this.selectedColumns = this.allColumns.filter(col => {
+      return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type"].indexOf(col.name) != -1
+    })
+
+    this.filter.receivedTo = new Date()
+    this.filter.receivedTo.setHours(23, 59, 59, 999)
+
+    this.page(this.offset, this.pageSize, this.orderBy, this.asc)
   }
 
   getMessageLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<MessageLogResult> {
@@ -188,11 +303,15 @@ export class MessageLogComponent {
   }
 
   onSelect({selected}) {
-    console.log('Select Event', selected, this.selected);
+    // console.log('Select Event', selected, this.selected);
   }
 
   onActivate(event) {
-    console.log('Activate Event', event);
+    // console.log('Activate Event', event);
+
+    if ("dblclick" === event.type) {
+      this.details(event.row);
+    }
   }
 
   changePageSize(newPageLimit: number) {
@@ -253,6 +372,49 @@ export class MessageLogComponent {
     this.downloadNative(url);
   }
 
+  details(selectedRow: any) {
+    let dialogRef: MdDialogRef<MessagelogDetailsComponent> = this.dialog.open(MessagelogDetailsComponent);
+    dialogRef.componentInstance.message = selectedRow;
+    // dialogRef.componentInstance.currentSearchSelectedSource = this.currentSearchSelectedSource;
+    dialogRef.afterClosed().subscribe(result => {
+      //Todo:
+    });
+  }
+
+  toggleAdvancedSearch() {
+    this.advancedSearch = !this.advancedSearch;
+  }
+
+  toggleColumnSelection() {
+    this.columnSelection = !this.columnSelection;
+  }
+
+  toggle(col) {
+    const isChecked = this.isChecked(col);
+
+    if (isChecked) {
+      this.selectedColumns = this.selectedColumns.filter(c => {
+        return c.name !== col.name;
+      });
+    } else {
+      this.selectedColumns = [...this.selectedColumns, col];
+    }
+  }
+
+  isChecked(col) {
+    return this.selectedColumns.find(c => {
+      return c.name === col.name;
+    });
+  }
+
+  selectAllColumns() {
+    this.selectedColumns = [...this.allColumns]
+  }
+
+  selectNoColumns() {
+    this.selectedColumns = []
+  }
+
   private downloadNative(content) {
     var element = document.createElement('a');
     element.setAttribute('href', content);
@@ -268,13 +430,5 @@ export class MessageLogComponent {
 
   onTimestampToChange(event) {
     this.timestampFromMaxDate = event.value;
-  }
-
-  onNotifiedFromChange(event) {
-    this.notifiedToMinDate = event.value;
-  }
-
-  onNotifiedToChange(event) {
-    this.notifiedFromMaxDate = event.value;
   }
 }

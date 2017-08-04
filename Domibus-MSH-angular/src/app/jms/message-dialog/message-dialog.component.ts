@@ -10,6 +10,7 @@ export class MessageDialogComponent implements OnInit {
 
   message: any;
   currentSearchSelectedSource: any;
+  dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
   constructor(public dialogRef: MdDialogRef<MessageDialogComponent>) {
   }
