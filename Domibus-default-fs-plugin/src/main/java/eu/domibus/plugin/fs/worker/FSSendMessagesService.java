@@ -1,10 +1,8 @@
 package eu.domibus.plugin.fs.worker;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
 
@@ -26,9 +24,9 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import eu.domibus.common.MessageStatus;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.fs.BackendFSImpl;
+import eu.domibus.plugin.fs.FSFileNameHelper;
 import eu.domibus.plugin.fs.FSFilesManager;
 import eu.domibus.plugin.fs.FSMessage;
 import eu.domibus.plugin.fs.ebms3.ObjectFactory;
@@ -48,19 +46,6 @@ public class FSSendMessagesService {
     
     private static final String OUTGOING_FOLDER = "OUT";
     private static final String METADATA_FILE_NAME = "metadata.xml";
-    private static final String UUID_PATTERN = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
-    private static final Pattern PROCESSED_FILE_PATTERN = Pattern.compile(
-            UUID_PATTERN + ".*", Pattern.CASE_INSENSITIVE);
-    private static final List<String> STATE_SUFFIXES;
-    
-    static {
-        List<String> tempStateSuffixes = new LinkedList<>();
-        for (MessageStatus status : MessageStatus.values()) {
-            tempStateSuffixes.add(status.name());
-        }
-        
-        STATE_SUFFIXES = Collections.unmodifiableList(tempStateSuffixes);
-    }
 
     @Resource(name = "fsPluginProperties")
     private FSPluginProperties fsPluginProperties;
@@ -141,7 +126,7 @@ public class FSSendMessagesService {
     }
 
     private void renameProcessedFile(FileObject processableFile, String messageId) throws FileSystemException {
-        String newFileName = messageId + "_" + processableFile.getName().getBaseName();
+        String newFileName = FSFileNameHelper.deriveFileName(processableFile.getName().getBaseName(), messageId);
         
         fsFilesManager.renameFile(processableFile, newFileName);
     }
@@ -152,9 +137,9 @@ public class FSSendMessagesService {
         for (FileObject file : files) {
             String baseName = file.getName().getBaseName();
             
-            if (!StringUtils.equals(baseName, "metadata.xml")) {
-                if (!StringUtils.endsWithAny(baseName, STATE_SUFFIXES.toArray(new String[0]))) {
-                    if (!PROCESSED_FILE_PATTERN.matcher(baseName).matches()) {
+            if (!StringUtils.equals(baseName, METADATA_FILE_NAME)) {
+                if (!FSFileNameHelper.isAnyState(baseName)) {
+                    if (!FSFileNameHelper.isProcessed(baseName)) {
                         filteredFiles.add(file);
                     }
                 }
