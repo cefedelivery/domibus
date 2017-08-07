@@ -1,14 +1,26 @@
 <div class="selectionCriteria">
-  <md-card style="margin:0;padding:10px;">
+  <md-card>
     <md-card-content>
       <h1 id="truststoreheader_id">Truststore</h1>
 
+
+      <div style="display:inline-flex">
+        <div>
+          <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                           (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+        </div>
+        <div>
+          <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                             (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+        </div>
+      </div>
 
       <ngx-datatable
         id="errorLogTable"
         class="material striped"
         [rows]="trustStoreEntries"
         [columnMode]="'force'"
+        [columns]="columnPicker.selectedColumns"
         [headerHeight]="50"
         [footerHeight]="50"
         [rowHeight]="'auto'"
@@ -16,31 +28,17 @@
         [loadingIndicator]="loading"
         [selectionType]="'multi'"
         [selected]="selectedMessages"
+        [limit]="rowLimiter.pageSize"
         [sorts]="[{prop: 'alias', dir: 'desc'}]"
         (activate)="onActivate($event)"
         (select)="onSelect($event)">
 
-        <ngx-datatable-column name="Name" prop="name">
-        </ngx-datatable-column>
 
-        <ngx-datatable-column name="Subject" prop="subject">
-        </ngx-datatable-column>
-
-        <ngx-datatable-column name="Issuer" prop="issuer">
-        </ngx-datatable-column>
-
-        <ngx-datatable-column name="Valid from" prop="validFrom">
-          <ng-template let-value="value" ngx-datatable-cell-template>
-            {{value | date: dateFormat}}
-          </ng-template>
-        </ngx-datatable-column>
-
-        <ngx-datatable-column name="Valid until" prop="validUntil">
-          <ng-template let-value="value" ngx-datatable-cell-template>
-            {{value | date: dateFormat}}
-          </ng-template>
-        </ngx-datatable-column>
       </ngx-datatable>
+
+      <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+      </ng-template>
 
       <table class="buttonsRow">
         <tr>
@@ -55,3 +53,5 @@
     </md-card-content>
   </md-card>
 </div>
+
+

@@ -21,14 +21,6 @@
   margin-top:30px;
 }
 
-.selectionCriteria {
-  margin-top:5px;
-}
-
-.inputField {
-  width:350px;
-}
-
 .pluginRow {
   width: 100%;
 }
@@ -42,7 +34,3 @@
   height: 80%;
 }
 
-.dateTimeTitle {
-  width:100px;
-  text-align:right;
-}
