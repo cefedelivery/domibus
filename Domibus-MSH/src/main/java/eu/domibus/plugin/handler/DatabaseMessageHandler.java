@@ -1,5 +1,6 @@
 package eu.domibus.plugin.handler;
 
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
@@ -8,10 +9,12 @@ import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
-import eu.domibus.common.model.configuration.*;
+import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Mpc;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
@@ -22,8 +25,6 @@ import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.common.model.ObjectFactory;
-import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -41,8 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.stereotype.Service;
 
 /**
  * This class is responsible of handling the plugins requests for all the operations exposed.
@@ -76,6 +75,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
+
+    @Autowired
+    private UserMessageLogService userMessageLogService;
 
     @Autowired
     private SignalMessageLogDao signalMessageLogDao;
@@ -132,7 +134,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
         }
 
-        userMessageLogDao.setMessageAsDownloaded(messageId);
+        userMessageLogService.setMessageAsDownloaded(messageId);
         // Deleting the message and signal message if the retention download is zero and the payload is not stored on the file system.
         if (userMessage != null && 0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc()) && !userMessage.isPayloadOnFileSystem()) {
             messagingDao.clearPayloadData(messageId);
@@ -143,12 +145,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 }
             }
             // Sets the message log status to DELETED
-            userMessageLogDao.setMessageAsDeleted(messageId);
+            userMessageLogService.setMessageAsDeleted(messageId);
             // Sets the log status to deleted also for the signal messages (if present).
             List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
             if (!signalMessageIds.isEmpty()) {
                 for (String signalMessageId : signalMessageIds) {
-                    signalMessageLogDao.setMessageAsDeleted(signalMessageId);
+                    userMessageLogService.setMessageAsDeleted(signalMessageId);
                 }
             }
         }
@@ -233,7 +235,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
         UserMessage userMessage = transformer.transformFromSubmission(messageData);
 
-        if(userMessage == null) {
+        if (userMessage == null) {
             LOG.warn("UserMessage is null");
             throw new MessageNotFoundException("UserMessage is null");
         }
@@ -293,18 +295,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 userMessageService.scheduleSending(messageId);
             }
 
-            // Builds the user message log
-            UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
-                    .setMessageId(userMessage.getMessageInfo().getMessageId())
-                    .setMessageStatus(messageStatus)
-                    .setMshRole(MSHRole.SENDING)
-                    .setNotificationStatus(getNotificationStatus(legConfiguration))
-                    .setMpc(message.getUserMessage().getMpc())
-                    .setSendAttemptsMax(getMaxAttempts(legConfiguration))
-                    .setBackendName(backendName)
-                    .setEndpoint(to.getEndpoint());
+            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint());
 
-            userMessageLogDao.create(umlBuilder.build());
             LOG.info("Message submitted");
             return userMessage.getMessageInfo().getMessageId();
 

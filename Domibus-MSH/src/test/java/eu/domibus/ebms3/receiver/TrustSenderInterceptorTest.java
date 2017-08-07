@@ -2,10 +2,10 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.PKIUtil;
-import mockit.*;
+import mockit.Expectations;
+import mockit.Injectable;
+import mockit.Tested;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,7 +24,6 @@ import java.util.Properties;
 @RunWith(JMockit.class)
 public class TrustSenderInterceptorTest {
 
-    private static final Log LOG = LogFactory.getLog(TrustSenderInterceptorTest.class);
 
     @Injectable
     Properties domibusProperties;

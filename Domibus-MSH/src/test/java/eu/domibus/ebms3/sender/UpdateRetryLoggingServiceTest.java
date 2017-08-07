@@ -19,6 +19,7 @@
 
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
@@ -59,6 +60,9 @@ public class UpdateRetryLoggingServiceTest {
 
     @Injectable
     private UserMessageLogDao messageLogDao;
+
+    @Injectable
+    private UserMessageLogService messageLogService;
 
     @Injectable
     private MessagingDao messagingDao;
@@ -118,7 +122,7 @@ public class UpdateRetryLoggingServiceTest {
 
         new Verifications() {{
             messageLogDao.setAsNotified(messageId);
-            messageLogDao.setMessageAsSendFailure(messageId);
+            messageLogService.setMessageAsSendFailure(messageId);
             messagingDao.clearPayloadData(messageId);
         }};
 
@@ -160,7 +164,7 @@ public class UpdateRetryLoggingServiceTest {
 
         new Verifications() {{
             messagingDao.clearPayloadData(messageId);
-            messageLogDao.setMessageAsSendFailure(messageId);
+            messageLogService.setMessageAsSendFailure(messageId);
             messageLogDao.setAsNotified(messageId); times = 0;
         }};
 
@@ -198,7 +202,7 @@ public class UpdateRetryLoggingServiceTest {
 
         new Verifications() {{
             messagingDao.clearPayloadData(messageId); times = 0;
-            messageLogDao.setMessageAsSendFailure(messageId);
+            messageLogService.setMessageAsSendFailure(messageId);
             messageLogDao.setAsNotified(messageId); times = 0;
         }};
 
@@ -241,7 +245,7 @@ public class UpdateRetryLoggingServiceTest {
 
         new Verifications() {{
             messageLogDao.setAsNotified(messageId);
-            messageLogDao.setMessageAsSendFailure(messageId);
+            messageLogService.setMessageAsSendFailure(messageId);
             messagingDao.clearPayloadData(messageId);
         }};
 
@@ -285,7 +289,7 @@ public class UpdateRetryLoggingServiceTest {
 
         new Verifications() {{
             messageLogDao.setAsNotified(messageId);
-            messageLogDao.setMessageAsSendFailure(messageId);
+            messageLogService.setMessageAsSendFailure(messageId);
             messagingDao.clearPayloadData(messageId);
         }};
 

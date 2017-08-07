@@ -2,6 +2,8 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageException;
+import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
@@ -62,37 +64,56 @@ public class UserMessageHandlerService {
 
     private static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageHandlerService.class);
+
     @Autowired
     private PModeProvider pModeProvider;
+
     @Autowired
     private TransformerFactory transformerFactory;
+
     @Autowired
     private CompressionService compressionService;
+
     @Autowired
     private BackendNotificationService backendNotificationService;
+
     @Autowired
     private UserMessageLogDao userMessageLogDao;
+
+    @Autowired
+    private UserMessageLogService userMessageLogService;
+
     @Autowired
     private PayloadProfileValidator payloadProfileValidator;
+
     @Autowired
     private PropertyProfileValidator propertyProfileValidator;
+
     @Autowired
     private MessagingService messagingService;
+
     @Autowired
     private MessageFactory messageFactory;
+
     @Autowired
     private MessageIdGenerator messageIdGenerator;
+
     @Autowired
     private TimestampDateFormatter timestampDateFormatter;
+
     @Autowired
     private SignalMessageDao signalMessageDao;
+
     @Autowired
     private MessagingDao messagingDao;
+
     @Autowired
     private SignalMessageLogDao signalMessageLogDao;
+
     @Qualifier("jaxbContextEBMS")
     @Autowired
     protected JAXBContext jaxbContext;
+
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
 
@@ -123,9 +144,11 @@ public class UserMessageHandlerService {
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
             LOG.debug("Message duplication status:{}", messageExists);
             if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
-                persistReceivedMessage(request, legConfiguration, pmodeKey, messaging);
+                final BackendFilter matchingBackendFilter = backendNotificationService.getMatchingBackendFilter(messaging.getUserMessage());
+                String backendName = (matchingBackendFilter != null ? matchingBackendFilter.getBackendName() : null);
+                persistReceivedMessage(request, legConfiguration, pmodeKey, messaging, backendName);
                 try {
-                    backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
+                    backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
                 } catch (SubmissionValidationException e) {
                     LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
@@ -180,7 +203,7 @@ public class UserMessageHandlerService {
      * @throws EbMS3Exception
      */
     //TODO: improve error handling
-    String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging) throws SOAPException, TransformerException, EbMS3Exception {
+    String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging, final String backendName) throws SOAPException, TransformerException, EbMS3Exception {
         LOG.info("Persisting received message");
         UserMessage userMessage = messaging.getUserMessage();
 
@@ -207,18 +230,15 @@ public class UserMessageHandlerService {
         Party to = pModeProvider.getReceiverParty(pmodeKey);
         Validate.notNull(to, "Responder party was not found");
 
-        // Builds the user message log
-        UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
-                .setMessageId(userMessage.getMessageInfo().getMessageId())
-                .setMessageStatus(MessageStatus.RECEIVED)
-                .setMshRole(MSHRole.RECEIVING)
-                .setNotificationStatus(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED)
-                .setMpc(StringUtils.isEmpty(userMessage.getMpc()) ? Ebms3Constants.DEFAULT_MPC : userMessage.getMpc())
-                .setSendAttemptsMax(0)
-                .setBackendName(getFinalRecipientName(userMessage))
-                .setEndpoint(to.getEndpoint());
-        // Saves the user message log
-        userMessageLogDao.create(umlBuilder.build());
+        userMessageLogService.save(
+                userMessage.getMessageInfo().getMessageId(),
+                MessageStatus.RECEIVED.toString(),
+                (legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED).toString(),
+                MSHRole.RECEIVING.toString(),
+                0,
+                StringUtils.isEmpty(userMessage.getMpc()) ? Ebms3Constants.DEFAULT_MPC : userMessage.getMpc(),
+                backendName,
+                to.getEndpoint());
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
         try {

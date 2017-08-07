@@ -7,9 +7,9 @@ import eu.domibus.jms.spi.InternalJMSManager;
 import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Component;
@@ -42,7 +42,7 @@ import java.util.*;
 @Component
 public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
-    private static final Log LOG = LogFactory.getLog(InternalJMSManagerWeblogic.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(InternalJMSManagerWeblogic.class);
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
     private static final String PROPERTY_JNDI_NAME = "Jndi";

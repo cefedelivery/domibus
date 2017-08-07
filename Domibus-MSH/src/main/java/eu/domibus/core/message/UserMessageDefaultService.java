@@ -5,6 +5,7 @@ import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
@@ -37,6 +38,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.ByteArrayOutputStream;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -59,6 +61,9 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Autowired
     private MessagingDao messagingDao;
+
+    @Autowired
+    private UserMessageLogService userMessageLogService;
 
     @Autowired
     private UserMessageServiceHelper userMessageServiceHelper;
@@ -118,7 +123,9 @@ public class UserMessageDefaultService implements UserMessageService {
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Could not restore message [" + messageId + "]. Message status is [" + MessageStatus.DELETED + "]");
         }
 
-        userMessageLog.setMessageStatus(MessageStatus.SEND_ENQUEUED);
+        final MessageStatus newMessageStatus = MessageStatus.SEND_ENQUEUED;
+        backendNotificationService.notifyOfMessageStatusChange(userMessageLog, newMessageStatus, new Timestamp(System.currentTimeMillis()));
+        userMessageLog.setMessageStatus(newMessageStatus);
         final Date currentDate = new Date();
         userMessageLog.setRestored(currentDate);
         userMessageLog.setFailed(null);
@@ -230,7 +237,7 @@ public class UserMessageDefaultService implements UserMessageService {
             }
         }
         messagingDao.clearPayloadData(messageId);
-        userMessageLogDao.setMessageAsDeleted(messageId);
+        userMessageLogService.setMessageAsDeleted(messageId);
         handleSignalMessageDelete(messageId);
     }
 
@@ -244,7 +251,7 @@ public class UserMessageDefaultService implements UserMessageService {
         List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
         if (!signalMessageIds.isEmpty()) {
             for (String signalMessageId : signalMessageIds) {
-                signalMessageLogDao.setMessageAsDeleted(signalMessageId);
+                userMessageLogService.setMessageAsDeleted(signalMessageId);
             }
         }
     }
