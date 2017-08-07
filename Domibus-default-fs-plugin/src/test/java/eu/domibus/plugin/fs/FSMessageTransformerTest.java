@@ -9,6 +9,13 @@ import org.junit.Test;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import java.io.InputStream;
+import java.nio.file.FileSystemException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -48,13 +55,14 @@ public class FSMessageTransformerTest {
     }
 
     @Test
-    public void transformFromSubmissionNormalFlowTest() throws Exception {
+    public void transformFromSubmissionNormalFlow() throws Exception {
         String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
         String conversationId = "ae413adb-920c-4d9c-a5a7-b5b2596eaf1c@domibus.eu";
-        String payload = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+        String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 
         // Submission
         Submission submission = new Submission();
+        submission.setMessageId(messageId);
         submission.addFromParty(DOMIBUS_BLUE, UNREGISTERED_PARTY_TYPE);
         submission.setFromRole(INITIATOR_ROLE);
         submission.addToParty(DOMIBUS_RED, UNREGISTERED_PARTY_TYPE);
@@ -65,14 +73,12 @@ public class FSMessageTransformerTest {
         submission.setAction(ACTION_TC1LEG1);
         submission.setAgreementRefType(EMPTY_STR);
         submission.setAgreementRef(AGREEMENT_REF_A1);
+        submission.setConversationId(conversationId);
 
         submission.addMessageProperty(PROPERTY_ORIGINAL_SENDER, ORIGINAL_SENDER);
         submission.addMessageProperty(PROPERTY_FINAL_RECIPIENT, FINAL_RECIPIENT);
 
-        submission.setMessageId(messageId);
-        submission.setConversationId(conversationId);
-
-        DataHandler payLoadDataHandler = new DataHandler(new ByteArrayDataSource(payload.getBytes(), TEXT_XML));
+        DataHandler payLoadDataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
         Submission.TypedProperty submissionTypedProperty = new Submission.TypedProperty(MIME_TYPE, TEXT_XML);
         Collection<Submission.TypedProperty> listTypedProperty = new ArrayList<>();
         listTypedProperty.add(submissionTypedProperty);
@@ -117,14 +123,68 @@ public class FSMessageTransformerTest {
 
         DataHandler dataHandler = fsMessage.getDataHandler();
         Assert.assertEquals(TEXT_XML, dataHandler.getContentType());
-        Assert.assertEquals(payload, dataHandler.getContent());
+        Assert.assertEquals(payloadContent, dataHandler.getContent());
     }
 
     @Test
-    public void transformToSubmission() throws Exception {
+    public void transformToSubmissionNormalFlow() throws Exception {
+        String metadataResource = this.getClass().getSimpleName() + "_" + "transformToSubmissionNormalFlow.xml";
+        String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 
+        DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
+        UserMessage metadata = parseMetadata(this.getClass().getResourceAsStream(metadataResource));
+        FSMessage fsMessage = new FSMessage(dataHandler, metadata);
+
+        // Transform FSMessage to Submission
+        FSMessageTransformer transformer = new FSMessageTransformer();
+        Submission submission = transformer.transformToSubmission(fsMessage);
+
+        Assert.assertNotNull(submission);
+        Assert.assertEquals(1, submission.getFromParties().size());
+        Submission.Party fromParty = submission.getFromParties().iterator().next();
+        Assert.assertEquals(DOMIBUS_BLUE, fromParty.getPartyId());
+        Assert.assertEquals(UNREGISTERED_PARTY_TYPE, fromParty.getPartyIdType());
+        Assert.assertEquals(INITIATOR_ROLE, submission.getFromRole());
+
+        Assert.assertEquals(1, submission.getToParties().size());
+        Submission.Party toParty = submission.getToParties().iterator().next();
+        Assert.assertEquals(DOMIBUS_RED, toParty.getPartyId());
+        Assert.assertEquals(UNREGISTERED_PARTY_TYPE, toParty.getPartyIdType());
+        Assert.assertEquals(RESPONDER_ROLE, submission.getToRole());
+
+        Assert.assertNull(submission.getAgreementRefType());
+        Assert.assertNull(submission.getAgreementRef());
+        Assert.assertEquals(SERVICE_NOPROCESS, submission.getService());
+        Assert.assertEquals(SERVICE_TYPE_TC1, submission.getServiceType());
+        Assert.assertEquals(ACTION_TC1LEG1, submission.getAction());
+
+        Assert.assertEquals(2, submission.getMessageProperties().size());
+        for (Submission.TypedProperty typedProperty : submission.getMessageProperties()) {
+            if (PROPERTY_ORIGINAL_SENDER.equalsIgnoreCase(typedProperty.getKey())) {
+                Assert.assertEquals(ORIGINAL_SENDER, typedProperty.getValue());
+            }
+            if (PROPERTY_FINAL_RECIPIENT.equalsIgnoreCase(typedProperty.getKey())) {
+                Assert.assertEquals(FINAL_RECIPIENT, typedProperty.getValue());
+            }
+        }
+
+        Assert.assertEquals(1, submission.getPayloads().size());
+        Submission.Payload submissionPayload = submission.getPayloads().iterator().next();
+        Submission.TypedProperty payloadProperty = submissionPayload.getPayloadProperties().iterator().next();
+        Assert.assertEquals(MIME_TYPE, payloadProperty.getKey());
+        Assert.assertEquals(TEXT_XML, payloadProperty.getValue());
+
+        DataHandler payloadDatahandler = submissionPayload.getPayloadDatahandler();
+        Assert.assertEquals(TEXT_XML, payloadDatahandler.getContentType());
+        Assert.assertEquals(payloadContent, payloadDatahandler.getContent());
     }
 
-
+    private UserMessage parseMetadata(InputStream metadata) throws JAXBException, FileSystemException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
+        Unmarshaller um = jaxbContext.createUnmarshaller();
+        StreamSource streamSource = new StreamSource(metadata);
+        JAXBElement<UserMessage> jaxbElement = um.unmarshal(streamSource, UserMessage.class);
+        return jaxbElement.getValue();
+    }
 
 }
