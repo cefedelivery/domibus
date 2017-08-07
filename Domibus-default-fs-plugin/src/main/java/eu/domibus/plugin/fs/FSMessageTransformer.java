@@ -4,18 +4,15 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.*;
+import eu.domibus.plugin.fs.exception.FSPayloadException;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
-
 import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
-
-import eu.domibus.plugin.fs.exception.FSPayloadException;
 
 /**
  * This class is responsible for transformations from {@link FSMessage} to
@@ -47,6 +44,7 @@ public class FSMessageTransformer
         UserMessage metadata = new UserMessage();
         metadata.setPartyInfo(getPartyInfoFromSubmission(submission));
         metadata.setCollaborationInfo(getCollaborationInfoFromSubmission(submission));
+        metadata.setMessageInfo(getMessageInfoFromSubmission(submission));
         metadata.setMessageProperties(getMessagePropertiesFromSubmission(submission));
 
         try {
@@ -144,8 +142,8 @@ public class FSMessageTransformer
 
     private CollaborationInfo getCollaborationInfoFromSubmission(Submission submission) {
         AgreementRef agreementRef = new AgreementRef();
-        agreementRef.setType(submission.getAgreementRef());
         agreementRef.setType(submission.getAgreementRefType());
+        agreementRef.setValue(submission.getAgreementRef());
 
         Service service = new Service();
         service.setType(submission.getServiceType());
@@ -158,6 +156,12 @@ public class FSMessageTransformer
         collaborationInfo.setConversationId(submission.getConversationId());
 
         return collaborationInfo;
+    }
+
+    private MessageInfo getMessageInfoFromSubmission(Submission submission) {
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setMessageId(submission.getMessageId());
+        return messageInfo;
     }
 
     private void setPartyInfo(Submission submission, PartyInfo partyInfo) {
