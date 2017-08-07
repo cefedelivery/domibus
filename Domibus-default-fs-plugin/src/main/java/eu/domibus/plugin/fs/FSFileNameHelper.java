@@ -17,9 +17,10 @@ import eu.domibus.common.MessageStatus;
 public class FSFileNameHelper {
     
     private static final String NAME_SEPARATOR = "_";
+    private static final String EXTENSION_SEPARATOR = ".";
     private static final String UUID_PATTERN = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
     private static final Pattern PROCESSED_FILE_PATTERN = Pattern.compile(
-            UUID_PATTERN + ".*", Pattern.CASE_INSENSITIVE);
+            NAME_SEPARATOR + UUID_PATTERN + "@.", Pattern.CASE_INSENSITIVE);
     private static final List<String> STATE_SUFFIXES;
     
     static {
@@ -36,11 +37,20 @@ public class FSFileNameHelper {
     }
     
     public static boolean isProcessed(final String fileName) {
-        return PROCESSED_FILE_PATTERN.matcher(fileName).matches();
+        return PROCESSED_FILE_PATTERN.matcher(fileName).find();
     }
     
     public static String deriveFileName(final String fileName, final String messageId) {
-        return messageId + NAME_SEPARATOR + fileName;
+        int extensionIdx = StringUtils.lastIndexOf(fileName, EXTENSION_SEPARATOR);
+        
+        if (extensionIdx != -1) {
+            String fileNamePrefix = StringUtils.substring(fileName, 0, extensionIdx);
+            String fileNameSuffix = StringUtils.substring(fileName, extensionIdx + 1);
+            
+            return fileNamePrefix + NAME_SEPARATOR + messageId + EXTENSION_SEPARATOR + fileNameSuffix;
+        } else {
+            return fileName + NAME_SEPARATOR + messageId;
+        }
     }
 
 }
