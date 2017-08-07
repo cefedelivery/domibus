@@ -104,7 +104,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     EditUserComponent,
     TruststoreDialogComponent,
     TrustStoreUploadComponent,
-    ColumnPickerComponent
+    ColumnPickerComponent,
     TrustStoreUploadComponent,
     PageHelperComponent,
     HelpDialogComponent,

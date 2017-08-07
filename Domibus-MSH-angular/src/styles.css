@@ -137,6 +137,10 @@ md-card {
   width: 30%;
 }
 
+.mat-select-arrow {
+  display:none;
+}
+
 
 
 
