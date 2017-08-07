@@ -1,6 +1,4 @@
 import {Component, OnInit, TemplateRef, ViewChild} from "@angular/core";
-import {Http} from "@angular/http";
-import {AlertService} from "app/alert/alert.service";
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/catch";
 import {TrustStoreService} from "./trustore.service";
@@ -31,7 +29,7 @@ export class TruststoreComponent implements OnInit {
 
   rows: Array<any> = [];
 
-  constructor(private http: Http, private alertService: AlertService, private trustStoreService: TrustStoreService, public dialog: MdDialog) {
+  constructor(private trustStoreService: TrustStoreService, public dialog: MdDialog) {
   }
 
   ngOnInit(): void {

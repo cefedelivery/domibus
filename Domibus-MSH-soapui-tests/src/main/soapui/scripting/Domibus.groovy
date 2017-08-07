@@ -116,9 +116,11 @@ class Domibus
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Verification of message existence
-    def verifyMessagePresence(int presence1,int presence2, String IDMes=null){
-        def messageID=null
-        sleep(sleepDelay)
+    def verifyMessagePresence(int presence1,int presence2, String IDMes=null, int mapDoms = 3){
+        def messageID=null;
+		def sqlSender = null; def sqlReceiver = null;
+        sleep(sleepDelay);
+		
         if(IDMes!=null){
             messageID=IDMes
         }
@@ -126,10 +128,25 @@ class Domibus
             messageID=findReturnedMessageID()
         }
         def total=0
-        openConnection()
+        openConnection();
+		// Choose 2 Domibus between blue, red and green
+		switch(mapDoms){
+			case 3:
+				sqlSender = sqlBlue; sqlReceiver = sqlRed;
+				break;
+			case 5:
+				sqlSender = sqlBlue; sqlReceiver = sqlGreen;
+				break;
+			case 6:
+				sqlSender = sqlRed; sqlReceiver = sqlGreen;
+				break;
+			default:
+				sqlSender = sqlBlue; sqlReceiver = sqlRed;
+				break;
+		}
 
         // Sender DB
-        sqlBlue.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
+        sqlSender.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
             total=it.lignes
         }
         if(presence1==1){
@@ -143,7 +160,7 @@ class Domibus
         // Receiver DB
         total=0
         sleep(sleepDelay)
-        sqlRed.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
+        sqlReceiver.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
             total=it.lignes
         }
         if(presence2==1){
@@ -153,27 +170,45 @@ class Domibus
             assert(total==0),locateTest(context)+"Error:verifyMessagePresence: Message with ID "+messageID+" is found in receiver side."
         }
 
-        closeConnection()
+        closeConnection();
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Verification of message unicity
-    def verifyMessageUnicity(String IDMes=null){
-        sleep(sleepDelay)
-        def messageID
-        def total=0
+    def verifyMessageUnicity(String IDMes=null, int mapDoms = 3){
+        sleep(sleepDelay);
+        def messageID;
+        def total=0;
+		def sqlSender = null; def sqlReceiver = null;
+		
         if(IDMes!=null){
             messageID=IDMes
         }
         else{
             messageID=findReturnedMessageID()
         }
-        openConnection()
-        sqlBlue.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
+        openConnection();
+		// Choose 2 Domibus between blue, red and green
+		switch(mapDoms){
+			case 3:
+				sqlSender = sqlBlue; sqlReceiver = sqlRed;
+				break;
+			case 5:
+				sqlSender = sqlBlue; sqlReceiver = sqlGreen;
+				break;
+			case 6:
+				sqlSender = sqlRed; sqlReceiver = sqlGreen;
+				break;
+			default:
+				sqlSender = sqlBlue; sqlReceiver = sqlRed;
+				break;
+		}
+		
+        sqlSender.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
             total=it.lignes
         }
         assert(total==1),locateTest(context)+"Error:verifyMessageUnicity: Message found "+total+" times in sender side."
         sleep(sleepDelay)
-        sqlBlue.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
+        sqlReceiver.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
             total=it.lignes
         }
         assert(total==1),locateTest(context)+"Error:verifyMessageUnicity: Message found "+total+" times in receiver side."
@@ -181,14 +216,16 @@ class Domibus
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Wait until status or timer expire
-    def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null){
-        def messageID=null
-        def waitMax=30_000
-        def numberAttempts=0
-        def maxNumberAttempts=4
-        def interval=1000
-        def messageStatus="INIT"
-        def wait=false
+    def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null, int mapDoms = 3){
+        def messageID=null;
+        def waitMax=30_000;
+        def numberAttempts=0;
+        def maxNumberAttempts=4;
+        def interval=1000;
+        def messageStatus="INIT";
+        def wait=false;
+		def sqlSender = null; def sqlReceiver = null;
+		
         //log.info "waitForStatus params: messageID: " + messageID + " RMSH: " + RMSH + " IDMes: " + IDMes + " bonusTimeForSender: " + bonusTimeForSender + " bonusTimeForReceiver: " + bonusTimeForReceiver
         if(IDMes!=null){
             messageID=IDMes
@@ -203,7 +240,24 @@ class Domibus
             log.info "Waiting time for Sender extended to 500 seconds"
             waitMax=500_000
         }
-        openConnection()
+
+        openConnection();
+		// Choose 2 Domibus between blue, red and green
+		switch(mapDoms){
+			case 3:
+				sqlSender = sqlBlue; sqlReceiver = sqlRed;
+				break;
+			case 5:
+				sqlSender = sqlBlue; sqlReceiver = sqlGreen;
+				break;
+			case 6:
+				sqlSender = sqlRed; sqlReceiver = sqlGreen;
+				break;
+			default:
+				sqlSender = sqlBlue; sqlReceiver = sqlRed;
+				break;
+		}
+		
         if(SMSH){
             while(((messageStatus!=SMSH)&&(waitMax>0))||(wait)){
                 sleep(interval)
@@ -212,7 +266,7 @@ class Domibus
                 }
                 log.info "maxNumberAttempts-numberAttempts: "+maxNumberAttempts+"-"+numberAttempts
                 log.info "WAIT: "+waitMax
-                sqlBlue.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
+                sqlSender.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
                     messageStatus=it.MESSAGE_STATUS
                     numberAttempts=it.SEND_ATTEMPTS
                 }
@@ -245,7 +299,7 @@ class Domibus
             while((messageStatus!=RMSH)&&(waitMax>0)){
                 sleep(interval)
                 waitMax=waitMax-interval
-                sqlRed.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
+                sqlReceiver.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
                     messageStatus=it.MESSAGE_STATUS
                 }
                 log.info "W:" + waitMax + " M:" + messageStatus
@@ -258,7 +312,6 @@ class Domibus
     }
 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-
     def executeListOfQueriesOnAllDB(String[] sqlQueriesList) {
         executeListOfSqlQueries(sqlQueriesList,"BLUE");
         executeListOfSqlQueries(sqlQueriesList,"RED");
@@ -266,22 +319,22 @@ class Domibus
 			executeListOfSqlQueries(sqlQueriesList,"GREEN");
 		}
     }
-
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     def executeListOfQueriesOnBlue(String[] sqlQueriesList) {
         log.info "Executing SQL queries on sender/Blue"
         executeListOfSqlQueries(sqlQueriesList,"BLUE")
     }
-
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     def executeListOfQueriesOnRed(String[] sqlQueriesList) {
         log.info "Executing SQL queries on receiver/Red"
         executeListOfSqlQueries(sqlQueriesList,"RED")
     }
-	
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII	
 	def executeListOfQueriesOnGreen(String[] sqlQueriesList) {
         log.info "Executing SQL queries on Third/Green"
         executeListOfSqlQueries(sqlQueriesList,"GREEN")
     }
-
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     def executeListOfSqlQueries(String[] sqlQueriesList, String targetSchema) {
         def connectionOpenedInsideMethod = false
         def sqlDB
@@ -316,7 +369,7 @@ class Domibus
             closeConnection()
         }
     }
-
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Clean all the messages from the DB
     def cleanDatabaseAll(){
         log.info "Clean all message related information from DB"
@@ -344,12 +397,12 @@ class Domibus
         closeConnection()
 		log.info "Cleaning Done."
     }
-
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Clean single message identified by messageID starting with provided value
     def cleanDBMessageIDStartsWith(String messageID){
         cleanDBMessageID(messageID, true)
     }
-
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Clean single message identified by ID
     def cleanDBMessageID(String messageID, boolean  messgaeIDStartWithProvidedValue = false){
         log.info "Clean from DB information related to the message with ID: " + messageID
@@ -383,8 +436,8 @@ class Domibus
         closeConnection()
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-
 // Static methods
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Returns: "--TestCase--testStep--"  
     static def String locateTest(context){
         return("--"+context.testCase.name+"--"+context.testCase.getTestStepAt(context.getCurrentStepIndex()).getLabel()+"--  ");
@@ -403,7 +456,7 @@ class Domibus
         return outStatus
     }
 
-
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     static def showPopUpForManualCheck(messagePrefix, log, testRunner) {
         def message = messagePrefix + """
 
@@ -427,7 +480,7 @@ class Domibus
             log.info "SKIP MANUAL TEST STEP: Check skipped bu user."
         }
     }
-
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     static def showPopUpForManualConfigurationChange(messagePrefix, log, testRunner) {
         def message = messagePrefix + """
 
@@ -469,15 +522,18 @@ class Domibus
 
     // Start Gateway
     static def startMSH(String side, context, log){
+		def MAX_WAIT_TIME=100000; // Maximum time to wait for the domibus to start. 
+		def STEP_WAIT_TIME=2000; // Time to wait before re-checking the domibus status.
 		def confirmation = 0;
-        def outputCatcher = new StringBuffer()
-        def errorCatcher = new StringBuffer()
-        def pathS=context.expand( '${#Project#pathExeSender}' )
-        def pathR=context.expand( '${#Project#pathExeReceiver}' )
-		def pathRG=context.expand( '${#Project#pathExeGreen}' )
-        def proc=null
-		def passedDuration=0
-
+        def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+        def pathS=context.expand( '${#Project#pathExeSender}' );
+        def pathR=context.expand( '${#Project#pathExeReceiver}' );
+		def pathRG=context.expand( '${#Project#pathExeGreen}' );
+        def proc=null;
+		def passedDuration=0;
+ 
+		// In case of ping failure try 2 times: from experience, sometimes domibus is running and for some reason the ping fails (trying 2 times could reduce the error occurence).
 		while(confirmation<=1){ 		
 			if(pingMSH(side,context,log).equals("200")){
 				log.info side.toUpperCase()+" is already running!";
@@ -507,57 +563,71 @@ class Domibus
 						proc.waitFor()
 					}
 					assert((!errorCatcher)&&(proc!=null)), locateTest(context)+"Error:startMSH: Error while trying to start the MSH."
-					while((!pingMSH(side,context,log).equals("200"))&&(passedDuration<100000)){
-						passedDuration=passedDuration+2000
-						sleep(2000)
+					while((!pingMSH(side,context,log).equals("200"))&&(passedDuration<MAX_WAIT_TIME)){
+						passedDuration=passedDuration+STEP_WAIT_TIME
+						sleep(STEP_WAIT_TIME)
 					}
 					assert(pingMSH(side,context,log).equals("200")),locateTest(context)+"Error:startMSH: Error while trying to start the MSH."
 					log.info "--- DONE - " + side.toUpperCase() + " started ---"
 				}			
 			}
+			sleep(STEP_WAIT_TIME);
 			confirmation++;
 		}
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-    // Stop Gateway
+	// Stop several gateways
+    static def stopSetMSHs(int dom1,int dom2,int dom3, context, log){
+ 
+		if(dom1>0){
+			stopMSH("sender", context, log);
+		}
+		if(dom2>0){
+			stopMSH("receiver", context, log);
+		}
+		if(dom3>0){
+			stopMSH("receivergreen", context, log);
+		}		
+	}
+	
+	// Stop Gateway
     static def stopMSH(String side, context, log){
-        def outputCatcher = new StringBuffer()
-        def errorCatcher = new StringBuffer()
-        def proc=null
-        def pathS=context.expand( '${#Project#pathExeSender}' )
-        def pathR=context.expand( '${#Project#pathExeReceiver}' )
-		def pathRG=context.expand( '${#Project#pathExeGreen}' )
-		def passedDuration=0
+		def MAX_WAIT_TIME=5000; // Maximum time to wait for the domibus to stop.
+		def STEP_WAIT_TIME=500; // Time to wait before re-checking the domibus status.
+        def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+        def proc=null;
+        def pathS=context.expand( '${#Project#pathExeSender}' );
+        def pathR=context.expand( '${#Project#pathExeReceiver}' );
+		def pathRG=context.expand( '${#Project#pathExeGreen}' );
+		def passedDuration=0;
 
 		if(!pingMSH(side,context,log).equals("200")){
 			log.info side.toUpperCase()+" is not running!"
 		}
 		else{
-			log.info "Trying to stop the " + side.toUpperCase()
-			if(side.toLowerCase()=="sender"){
-				proc="cmd /c cd ${pathS} && shutdown.bat".execute()
-			}
-			else{
-				if(side.toLowerCase()=="receiver"){
-					proc="cmd /c cd ${pathR} && shutdown.bat".execute()
-				}
-				else{
-					if((side.toLowerCase()=="receivergreen")){
-						proc="cmd /c cd ${pathRG} && shutdown.bat".execute()
-					}
-					else{
-						assert (false) , "Incorrect side"
-					}
-				}
+			log.info "Trying to stop the " + side.toUpperCase();
+			switch(side.toLowerCase()){
+				case "sender":
+					proc="cmd /c cd ${pathS} && shutdown.bat".execute();
+					break;
+				case "receiver":
+					proc="cmd /c cd ${pathR} && shutdown.bat".execute();
+					break;
+				case "receivergreen":
+					proc="cmd /c cd ${pathRG} && shutdown.bat".execute();
+					break;
+				default:
+					assert (false) , "Unknown side.";
 			}
 			if(proc!=null){
 				proc.consumeProcessOutput(outputCatcher, errorCatcher)
 				proc.waitFor()
 			}
 			assert((!errorCatcher)&&(proc!=null)),locateTest(context)+"Error:stopMSH: Error while trying to stop the MSH."
-			while((pingMSH(side,context,log).equals("200"))&&(passedDuration<5000)){
-				passedDuration=passedDuration+500
-				sleep(500)
+			while((pingMSH(side,context,log).equals("200"))&&(passedDuration<MAX_WAIT_TIME)){
+				passedDuration=passedDuration+STEP_WAIT_TIME;
+				sleep(STEP_WAIT_TIME);
 			}
 			assert(!pingMSH(side,context,log).equals("200")),locateTest(context)+"Error:startMSH: Error while trying to stop the MSH."
 			log.info "--- DONE - " + side.toUpperCase() + " stopped ---"
@@ -578,6 +648,184 @@ class Domibus
 
 	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def uploadPmode(String side, String baseFilePath, String extFilePath,context,log, String outcome = "successfully"){
+		log.info "Start upload PMode for Domibus \""+side+"\".";
+	    def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+        def proc=null; def commandString = null; 
+		
+		def String output = fetchCookieHeader(side,context,log);		
+		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
+		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context);
+		
+		
+		switch(side.toLowerCase()){
+			case "sender":
+				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F  file=@"+pmodeFile;
+				break;
+			case "receiver":
+				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F  file=@"+pmodeFile;
+				break;
+			case "receivergreen":
+				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F  file=@"+pmodeFile;
+				break;
+			case "testEnv":
+				commandString="curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F  file=@"+pmodeFile;
+				break;
+			default:
+				assert (false) , "Unknown side."
+		}
+
+		//log.info commandString
+		if(commandString){
+			proc = commandString.execute();
+			if(proc!=null){
+				proc.consumeProcessOutput(outputCatcher, errorCatcher)
+				proc.waitFor()
+			}
+		}
+		//log.info errorCatcher.toString();
+		assert(outputCatcher.toString().contains(outcome)),"Error:uploadPmode: Error while trying to connect to domibus."
+		if(outcome.toLowerCase()=="successfully"){
+			log.info outputCatcher.toString()+" Domibus: \""+side+"\".";
+		}
+		else{
+			log.info "Upload PMode was not done for Domibus: \""+side+"\".";
+		}
+
+	} 
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def uploadTruststore(String side, String baseFilePath, String extFilePath,context,log,String tsPassword="test123"){
+		log.info "Start upload truststore for Domibus \""+side+"\".";
+	    def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+        def proc=null; def commandString = null; 
+		
+		def String output = fetchCookieHeader(side,context,log);		
+		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
+		def String truststoreFile = computePathRessources(baseFilePath,extFilePath,context);
+				
+		switch(side.toLowerCase()){
+			case "sender":
+				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/truststore -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
+				break;
+			case "receiver":
+				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/truststore -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
+				break;
+			case "receivergreen":
+				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/truststore -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
+				break;
+			case "testEnv":
+				commandString="curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/truststore -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
+				break;
+			default:
+				assert (false) , "Unknown side."
+		}
+
+		//log.info commandString
+		if(commandString){
+			proc = commandString.execute();
+			if(proc!=null){
+				proc.consumeProcessOutput(outputCatcher, errorCatcher)
+				proc.waitFor()
+			}
+		}
+		assert(outputCatcher.toString().contains("successfully")),"Error:uploadTruststore: Error while trying to connect to domibus."
+		log.info outputCatcher.toString()+" Domibus: \""+side+"\".";
+		
+
+	} 
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def setMessageFilters(String side, String filterChoice,context,log){
+		log.info "Start update message filters for Domibus \""+side+"\".";
+	    def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+        def proc=null; def commandString = null;
+		def firstBck = "backendWebservice"; def secondBck = "Jms";
+		def firstEntId = "1"; def SecondEntId = "2";
+		
+		def String output = fetchCookieHeader(side,context,log);		
+		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
+		
+		if(filterChoice.toLowerCase()!="ws"){
+			firstBck="Jms";firstEntId="2";secondBck="backendWebservice";SecondEntId="1";
+		}
+				
+		switch(side.toLowerCase()){
+			case "sender":
+				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
+				break;
+			case "receiver":
+				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
+				break;
+			case "receivergreen":
+				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
+				break;
+			default:
+				assert (false) , "Unknown side."
+		}
+
+		//log.info commandString
+		if(commandString){
+			proc = commandString.execute();
+			if(proc!=null){
+				proc.consumeProcessOutput(outputCatcher, errorCatcher)
+				proc.waitFor()
+			}
+		}
+		assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus."
+		
+		log.info "Message filters update done successfully for Domibus: \""+side+"\".";
+
+	} 
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def fetchCookieHeader(String side,context,log){
+		def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+        def proc=null; def commandString = null; 
+		//def JSESSIONID = null; def XSRFTOKEN = null;def XXSRFTOKEN = null;
+		
+		
+		switch(side.toLowerCase()){
+			case "sender":
+				commandString = "curl "+context.expand( '${#Project#localUrl}' )+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
+				break;
+			case "receiver":
+				commandString = "curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
+				break;
+			case "receivergreen":
+				commandString = "curl "+context.expand( '${#Project#greenUrl}' )+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
+				break;
+			case "testEnv":
+				commandString = "curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
+				break;
+			default:
+				assert (false) , "Unknown side."
+		}
+		
+		//log.info commandString;
+		if(commandString){
+			proc = commandString.execute();
+			if(proc!=null){
+				proc.consumeProcessOutput(outputCatcher, errorCatcher)
+				proc.waitFor()
+			}
+		}
+
+		assert(outputCatcher.toString().contains("200 OK")),"Error:Authenticating user: Error while trying to connect to domibus."
+		return outputCatcher.toString();
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def computePathRessources(String type,String extension,context){
+		def returnPath = null;
+		if(type.toLowerCase()=="special"){
+			returnPath = (context.expand('${#Project#specialPModesPath}')+extension).replace("\\\\","\\").replace("\\","\\\\");			
+		}else{
+			returnPath = (context.expand('${#Project#defaultPModesPath}')+extension).replace("\\\\","\\").replace("\\","\\\\");
+		}
+		return returnPath.toString();
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Ping Gateway
     static def String pingMSH(String side, context, log){
         def outputCatcher = new StringBuffer()
@@ -585,22 +833,23 @@ class Domibus
         def proc=null
 		def commandString = null;
 
-        if(side.toLowerCase()=="sender"){
-			commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#localUrl}' )+"/services";
-        }
-        else{
-            if(side.toLowerCase()=="receiver"){
-				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#remoteUrl}' )+"/services"
-            }
-            else{
-				if((side.toLowerCase()=="receivergreen")){
-					commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#greenUrl}' )+"/services"
-				}
-				else{
-					assert (false) , "Incorrect side"
-				}
-            }
-        }
+		switch(side.toLowerCase()){
+			case "sender":
+				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#localUrl}' )+"/services";
+				break;
+			case "receiver":
+				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#remoteUrl}' )+"/services";
+				break;
+			case "receivergreen":
+				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#greenUrl}' )+"/services";
+				break;
+			case "testEnv":
+				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#testEnvUrl}' )+"/services"
+				break;
+			default:
+				assert (false) , "Unknown side."
+		}
+		
 		if(commandString){
 			proc = commandString.execute();
 			if(proc!=null){
