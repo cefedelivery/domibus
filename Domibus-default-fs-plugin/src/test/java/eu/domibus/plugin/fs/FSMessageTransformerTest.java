@@ -55,7 +55,7 @@ public class FSMessageTransformerTest {
     }
 
     @Test
-    public void transformFromSubmissionNormalFlow() throws Exception {
+    public void testTransformFromSubmissionNormalFlow() throws Exception {
         String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
         String conversationId = "ae413adb-920c-4d9c-a5a7-b5b2596eaf1c@domibus.eu";
         String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
@@ -127,8 +127,8 @@ public class FSMessageTransformerTest {
     }
 
     @Test
-    public void transformToSubmissionNormalFlow() throws Exception {
-        String metadataResource = this.getClass().getSimpleName() + "_" + "transformToSubmissionNormalFlow.xml";
+    public void testTransformToSubmissionNormalFlow() throws Exception {
+        String metadataResource = this.getClass().getSimpleName() + "_" + "testTransformToSubmissionNormalFlow_metadata.xml";
         String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 
         DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
