@@ -70,9 +70,10 @@ public class UpdateRetryLoggingService {
     private void updateRetryLogging(final String messageId, final LegConfiguration legConfiguration, MessageStatus messageStatus) {
         LOG.debug("Updating retry for message");
         MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
-        //userMessageLog.setMessageStatus(MessageStatus.SEND_ATTEMPT_FAILED); //This is not stored in the database
+        userMessageLog.setSendAttempts(userMessageLog.getSendAttempts() + 1);
+        LOG.debug("Updating sendAttempts to [{}]", userMessageLog.getSendAttempts());
+        userMessageLogDao.update(userMessageLog);
         if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
-            userMessageLog.setSendAttempts(userMessageLog.getSendAttempts() + 1);
             LOG.debug("Updating send attempts to [{}]", userMessageLog.getSendAttempts());
             if (legConfiguration.getReceptionAwareness() != null) {
                 userMessageLog.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(userMessageLog.getNextAttempt(), userMessageLog.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
@@ -101,6 +102,7 @@ public class UpdateRetryLoggingService {
      * Check if the message can be sent again: there is time and attempts left
      */
     protected boolean hasAttemptsLeft(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
+        // retries start after the first send attempt
         if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()
                 && (getScheduledStartTime(userMessageLog) + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis()) {
             return true;

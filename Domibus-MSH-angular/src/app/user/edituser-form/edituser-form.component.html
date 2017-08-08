@@ -1,7 +1,7 @@
 <div style="width: 700px">
   <p class="domibusTextSmall" style="margin:0;font-weight: bold">User Edit</p>
   <form [formGroup]="userForm">
-    <md-card style="margin:0;padding:10px;">
+    <md-card>
       <div>
         <md-input-container [style.width]="'100%'">
           <input mdInput placeholder="Username" name="username" id="username_id" [value]="userName" (blur)="updateUserName($event)" [disabled]="editMode">
@@ -54,16 +54,13 @@
       <table class="buttonsRow">
         <tr>
           <td>
-            <button md-raised-button color="primary" md-dialog-close>
-              <md-icon>cancel</md-icon>
-              <span>Cancel</span>
-            </button>
-          </td>
-          <td>
-            <!-- Can optionally provide a result for the closing dialog. -->
-            <button md-raised-button color="primary" [md-dialog-close]="true" (click)="submitForm()" [disabled]="!userForm.valid">
+            <button md-raised-button color="primary" [md-dialog-close]="true" (click)="submitForm()" id="editbuttonok_id" [disabled]="!userForm.valid">
               <md-icon>check_circle</md-icon>
               <span>OK</span>
+            </button>
+            <button md-raised-button color="primary" id="editbuttoncancel_id" md-dialog-close>
+              <md-icon>cancel</md-icon>
+              <span>Cancel</span>
             </button>
           </td>
         </tr>

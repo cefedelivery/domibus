@@ -1,6 +1,8 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.common.services.DomibusCacheService;
+import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.pki.CertificateService;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -9,7 +11,6 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -35,6 +36,12 @@ public class TruststoreResourceTest {
 
     @Injectable
     DomibusCacheService domibusCacheService;
+
+    @Injectable
+    CertificateService certificateService;
+
+    @Injectable
+    DomainCoreConverter domainConverter;
 
     @Test
     public void testUploadTruststoreFileSuccess() {

@@ -1,59 +1,6 @@
-.inputFieldParties {
-  width:15%;
-}
-
-.optionField {
-  width:15%;
-}
-
-.filterTable {
-  width:100%;
-}
-
-.filterTable td {
-  width :33%
-}
-
-.filterTable td {
-  width :33%
-}
-
-.dateTimeTitle {
-  width:100px;
-  text-align:right;
-}
-
-md-select, md-input-container {
-  margin: 0.5%;
-}
-
-/* --- FORM -------------------- */
-/* ----------------------------- */
-
-/* --- Common ---*/
-.inputField, .mat-select, .mat-input-container, .dateTableField {
-  width:30%;
-  margin-right: 2%;
-}
-
 /* --- Select ---*/
 .mat-select{
   padding:20px 0;
-}
-
-/* --- Expandable Search ---*/
-.expandableSearch {
-  margin: 20px 0 0 0;
-  display:block;
-}
-/* Link Advanced */
-.expandableSearch a {
-  margin-left: 10px;
-  color: #03A9F4;
-}
-/* Button Search */
-.expandableSearch .mat-raised-button.mat-primary {
-    background-color: #03A9F4;
 }
 
 /* --- Button  ---*/

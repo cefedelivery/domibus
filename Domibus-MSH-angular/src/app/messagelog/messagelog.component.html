@@ -1,16 +1,16 @@
 <div class="selectionCriteria">
-  <md-card style="margin:0;padding:10px;">
+  <md-card>
 
     <md-card-content>
-      <h1>Messages</h1>
+      <h1 id="messagesheader_id">Messages</h1>
 
       <div class="panel">
         <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
-          <md-input-container class="inputField">
+          <md-input-container>
             <input mdInput placeholder="Message Id" name="messageId" [(ngModel)]="filter.messageId"
                    #messageId="ngModel" id="messageid_id">
           </md-input-container>
-          <md-input-container class="inputField" *ngIf="advancedSearch">
+          <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Conversation Id" name="conversationId" [(ngModel)]="filter.conversationId"
                    #conversationId="ngModel" id="conversationid_id">
           </md-input-container>
@@ -57,15 +57,15 @@
             <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId"
                    #toPartyId="ngModel" id="topartyid_id">
           </md-input-container>
-          <md-input-container class="inputField" *ngIf="advancedSearch">
+          <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Reference Message Id" name="refToMessageId" [(ngModel)]="filter.refToMessageId"
                    #refToMessageId="ngModel" id="referencemessageid_id">
           </md-input-container>
-          <md-input-container class="inputField" *ngIf="advancedSearch">
+          <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Original Sender" name="originalSender" [(ngModel)]="filter.originalSender"
                    #originalSender="ngModel" id="originalsender_id">
           </md-input-container>
-          <md-input-container class="inputField" *ngIf="advancedSearch">
+          <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient"
                    #finalRecipient="ngModel" id="finalrecipient_id">
           </md-input-container>
@@ -76,7 +76,7 @@
                           [type]="'datetime'"
                           [max]="timestampFromMaxDate"
                           (change)='onTimestampFromChange($event)'
-                          #timestampControl="ngModel" id="receivedfrom_id" class="dateTableField" *ngIf="advancedSearch">
+                          #timestampControl="ngModel" id="receivedfrom_id" *ngIf="advancedSearch">
           </md2-datepicker>
           <md2-datepicker placeholder="Received up to:"
                           [(ngModel)]="filter.receivedTo"
@@ -85,16 +85,16 @@
                           [max]="timestampToMaxDate"
                           (change)='onTimestampToChange($event)'
                           [type]="'datetime'"
-                          #timestampControl="ngModel" id="receivedto_id" class="dateTableField" *ngIf="advancedSearch">
+                          #timestampControl="ngModel" id="receivedto_id" *ngIf="advancedSearch">
           </md2-datepicker>
 
-          <div class="expandableSearch">
+          <div class="searchArea">
             <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
               <md-icon>search</md-icon>
               <span>Search</span>
             </button>
-            <a href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()">Advanced</a>
-            <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()">Basic</a>
+            <a href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()" id="advancedlink_id">Advanced</a>
+            <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()" id="basiclink_id">Basic</a>
           </div>
         </form>
       </div>
@@ -102,41 +102,22 @@
   </md-card>
 </div>
 
-<div style="display:inline-flex;position:relative;margin-bottom: 10px">
-  <app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event.value)"
-                   id="pagesize_id"></app-row-limiter>
-  <div style="margin-left:5px">
-    <div style="position:absolute;bottom: -2px;float:left">
-      <a class="domibusLink" href="#" *ngIf="!columnSelection" (click)="toggleColumnSelection()">Columns</a>
-      <a class="domibusLink" href="#" *ngIf="columnSelection" (click)="toggleColumnSelection()">Columns</a>
-    </div>
+<div style="display:inline-flex">
+  <div>
+    <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                     (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
   </div>
-</div>
-<div *ngIf="columnSelection" style="margin-bottom: 10px">
-  <div *ngFor='let col of allColumns' style="display: inline-block;margin:5px;">
-    <input
-      type='checkbox'
-      [id]="col.name"
-      (click)='toggle(col)'
-      [checked]='isChecked(col)'
-    />
-    <label [attr.for]="col.name">{{col.name}}</label>
+  <div>
+    <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                       (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
   </div>
-  <button md-raised-button color="primary" (click)="selectAllColumns()" id="all_button_id">
-    <md-icon>check_box</md-icon>
-    <span>All</span>
-  </button>
-  <button md-raised-button color="primary" (click)="selectNoColumns()" id="none_button_id">
-    <md-icon>check_box_outline_blank</md-icon>
-    <span>None</span>
-  </button>
 </div>
 
 <ngx-datatable
   id="messageLogTable"
   class="material striped"
   [rows]="rows"
-  [columns]="selectedColumns"
+  [columns]="columnPicker.selectedColumns"
   [columnMode]="'force'"
   [headerHeight]="50"
   [footerHeight]="50"
@@ -147,7 +128,7 @@
   [loadingIndicator]="loading"
   [count]="count"
   [offset]="offset"
-  [limit]="pageSize"
+  [limit]="rowLimiter.pageSize"
   [sorts]="[{prop: 'received', dir: 'desc'}]"
   (page)='onPage($event)'
   (sort)="onSort($event)"
@@ -157,24 +138,18 @@
   (select)="onSelect($event)">
 </ngx-datatable>
 
-<ng-template #hdrTpl let-column="column" ngx-datatable-header-template>
-  <strong>{{column.name}}</strong>
-</ng-template>
-
-<ng-template #rowTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-  <span class="text-select">{{value}}</span>
-</ng-template>
-
 <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
   <span class="text-select">{{value | domibusDate: dateFormat}}</span>
 </ng-template>
 
 <div class="group-btn">
-  <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()" id="downloadbutton_id">
+  <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()"
+          id="downloadbutton_id">
     <md-icon>file_download</md-icon>
     <span>Download</span>
   </button>
-  <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()" id="resendbutton_id">
+  <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()"
+          id="resendbutton_id">
     <md-icon>send</md-icon>
     <span>Resend</span>
   </button>
