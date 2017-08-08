@@ -1,8 +1,8 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.core.message.MessageConverterService;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.core.message.MessageConverterService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -16,9 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.xml.bind.JAXBException;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -45,7 +49,7 @@ public class MessageResource {
     }
 
     @RequestMapping(path = "{messageId:.+}/downloadOld", method = RequestMethod.GET)
-    public ResponseEntity<ByteArrayResource> download(@PathVariable(value = "messageId") String messageId) throws JAXBException {
+    public ResponseEntity<ByteArrayResource> download(@PathVariable(value = "messageId") String messageId) {
 
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         final byte[] content = getMessage(userMessage);
@@ -83,7 +87,7 @@ public class MessageResource {
         return messageConverterService.getAsByteArray(message);
     }
 
-    public Map<String, byte[]> getMessageWithAttachments(UserMessage userMessage) {
+    private Map<String, byte[]> getMessageWithAttachments(UserMessage userMessage) {
 
         Map<String, byte[]> ret = new HashMap<>();
 
@@ -98,7 +102,7 @@ public class MessageResource {
         return ret;
     }
 
-    public byte[] zip(Map<String, byte[]> message) throws IOException {
+    private byte[] zip(Map<String, byte[]> message) throws IOException {
         //creating byteArray stream, make it bufforable and passing this buffor to ZipOutputStream
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(byteArrayOutputStream);
@@ -112,13 +116,9 @@ public class MessageResource {
                 zipOutputStream.closeEntry();
             }
 
-            if (zipOutputStream != null) {
-                zipOutputStream.finish();
-                zipOutputStream.flush();
-            }
+            zipOutputStream.finish();
+            zipOutputStream.flush();
             return byteArrayOutputStream.toByteArray();
-        } finally {
-
         }
     }
 

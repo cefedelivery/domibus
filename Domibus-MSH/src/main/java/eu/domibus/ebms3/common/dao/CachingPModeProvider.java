@@ -31,10 +31,10 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,6 +51,8 @@ public class CachingPModeProvider extends PModeProvider {
     //Dont access directly, use getter instead
     private Configuration configuration;
 
+    @Autowired
+    private ProcessPartyExtractorProvider processPartyExtractorProvider;
     protected synchronized Configuration getConfiguration() {
         if (this.configuration == null) {
             this.init();
@@ -73,10 +75,11 @@ public class CachingPModeProvider extends PModeProvider {
     protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
         final List<LegConfiguration> candidates = new ArrayList<>();
         for (final Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
+            final ProcessTypePartyExtractor processTypePartyExtractor = processPartyExtractorProvider.getProcessTypePartyExtractor(process.getMepBinding().getName(), senderParty, receiverParty);
             for (final Party party : process.getInitiatorParties()) {
-                if (StringUtils.equalsIgnoreCase(party.getName(), senderParty)) {
+                if (StringUtils.equalsIgnoreCase(party.getName(), processTypePartyExtractor.getSenderParty())) {
                     for (final Party responder : process.getResponderParties()) {
-                        if (StringUtils.equalsIgnoreCase(responder.getName(), receiverParty)) {
+                        if (StringUtils.equalsIgnoreCase(responder.getName(), processTypePartyExtractor.getReceiverParty())) {
                             if (process.getAgreement() != null && StringUtils.equalsIgnoreCase(process.getAgreement().getName(), agreementName)
                                     || (StringUtils.equalsIgnoreCase(agreementName, OPTIONAL_AND_EMPTY) && process.getAgreement() == null)
                                     // Please notice that this is only for backward compatibility and will be removed ASAP!
@@ -140,7 +143,7 @@ public class CachingPModeProvider extends PModeProvider {
                             URI.create(partyIdType);
                         } catch (final IllegalArgumentException e) {
                             final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "no matching party found", null, e);
-                            ex.setErrorDetail("PartyId " + id.getValue() + " is not a valid URI [CORE] 5.2.2.3");
+                            ex.setErrorDetail("PartyId " + id.getValue() + " is not a valid URI [CORE]");
                             throw ex;
                         }
                     }
@@ -338,7 +341,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<String> updatePModes(final byte[] bytes) throws XmlProcessingException, IOException {
+    public List<String> updatePModes(final byte[] bytes) throws XmlProcessingException {
         List<String> messages = super.updatePModes(bytes);
         this.configuration = null;
         return messages;

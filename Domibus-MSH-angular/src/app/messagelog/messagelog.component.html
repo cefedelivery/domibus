@@ -1,102 +1,124 @@
-<div class="selectionCriteria" style="overflow-x:auto;">
-  <md-card style="margin:0;padding:10px;">
+<div class="selectionCriteria">
+  <md-card>
+
     <md-card-content>
-      <p class="domibusTextHeading" style="margin:0;font-weight: bold">Messages</p>
+      <h1 id="messagesheader_id">Messages</h1>
 
+      <div class="panel">
         <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
-          <md-input-container class="inputField">
-                  <input mdInput placeholder="Message Id" name="messageId" [(ngModel)]="filter.messageId"
-                         #messageId="ngModel"id="messageid_id">
-                </md-input-container>
-              <md-input-container class="inputField">
-                  <input mdInput placeholder="Conversation Id" name="conversationId" [(ngModel)]="filter.conversationId"
-                         #conversationId="ngModel"id="conversationid_id">
-                </md-input-container>
-              <md-select placeholder="AP Role" name="mshRole" [(ngModel)]="filter.mshRole"id="aprole_id">
-                  <md-option [value]="''">
-                  </md-option>
-                  <md-option *ngFor="let role of mshRoles" [value]="role">
-                    {{role}}
-                  </md-option>
-                </md-select>
-              <md-select placeholder="Message Type" name="messageType" [(ngModel)]="filter.messageType"id="messagetype_id">
-                  <md-option [value]="''">
-                  </md-option>
-                  <md-option *ngFor="let type of msgTypes" [value]="type">
-                    {{type}}
-                  </md-option>
-                </md-select>
-              <md-select placeholder="Message Status" [(ngModel)]="filter.messageStatus" name="messageStatus"id="messagestatus_id">
-                  <md-option [value]="''">
-                  </md-option>
-                  <md-option *ngFor="let mstatus of msgStatus" [value]="mstatus">
-                    {{mstatus}}
-                  </md-option>
-                </md-select>
-              <md-select placeholder="Notification Status" [(ngModel)]="filter.notificationStatus"class="optionField"
-                           name="notificationStatus"id="notificationstatus_id">
-                  <md-option [value]="''">
-                  </md-option>
-                  <md-option *ngFor="let nstatus of notifStatus" [value]="nstatus">
-                    {{nstatus}}
-                  </md-option>
-                </md-select>
-              <md-input-container class="inputFieldParties">
-                  <input mdInput placeholder="From Party Id" name="fromPartyId" [(ngModel)]="filter.fromPartyId"
-                         #fromPartyId="ngModel"id="frompartyid_id">
-                </md-input-container>
-              <md-input-container class="inputFieldParties">
-                  <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId"
-                         #toPartyId="ngModel"id="topartyid_id">
-                </md-input-container>
-              <md-input-container class="inputField">
-                  <input mdInput placeholder="Reference Message Id" name="refToMessageId" [(ngModel)]="filter.refToMessageId"
-                         #refToMessageId="ngModel"id="referencemessageid_id">
-                </md-input-container>
-              <md-input-container class="inputField">
-                  <input mdInput placeholder="Original Sender" name="originalSender" [(ngModel)]="filter.originalSender"
-                         #originalSender="ngModel"id="originalsender_id">
-                </md-input-container>
-              <md-input-container class="inputField">
-                  <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient"
-                         #finalRecipient="ngModel"id="finalrecipient_id">
-                </md-input-container>
+          <md-input-container>
+            <input mdInput placeholder="Message Id" name="messageId" [(ngModel)]="filter.messageId"
+                   #messageId="ngModel" id="messageid_id">
+          </md-input-container>
+          <md-input-container *ngIf="advancedSearch">
+            <input mdInput placeholder="Conversation Id" name="conversationId" [(ngModel)]="filter.conversationId"
+                   #conversationId="ngModel" id="conversationid_id">
+          </md-input-container>
 
-        Sent/Receive Time Period
-        <md2-datepicker placeholder="From:"
-                        [(ngModel)]="filter.receivedFrom"
-                        name="receivedFrom"
-                        [type]="'datetime'"
-                        [max]="timestampFromMaxDate"
-                        (change)='onTimestampFromChange($event)'
-                        #timestampControl="ngModel" id="receivedfrom_id" class="dateTableField">
-        </md2-datepicker>
-        <md2-datepicker placeholder="To:"
-                        [(ngModel)]="filter.receivedTo"
-                        name="receivedTo"
-                        [min]="timestampToMinDate"
-                        [max]="timestampToMaxDate"
-                        (change)='onTimestampToChange($event)'
-                        [type]="'datetime'"
-                        #timestampControl="ngModel" id="receivedto_id" class="dateTableField">
-        </md2-datepicker>
-        <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
-          <md-icon>search</md-icon>
-          <span>Search</span>
-        </button>
+          <br *ngIf="advancedSearch">
 
-      </form>
+          <md-select placeholder="AP Role" name="mshRole" [(ngModel)]="filter.mshRole" id="aprole_id"
+                     *ngIf="advancedSearch">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let role of mshRoles" [value]="role">
+              {{role}}
+            </md-option>
+          </md-select>
+          <md-select placeholder="Message Type" name="messageType" [(ngModel)]="filter.messageType" id="messagetype_id"
+                     *ngIf="advancedSearch">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let type of msgTypes" [value]="type">
+              {{type}}
+            </md-option>
+          </md-select>
+          <md-select placeholder="Message Status" [(ngModel)]="filter.messageStatus" name="messageStatus"
+                     id="messagestatus_id">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let mstatus of msgStatus" [value]="mstatus">
+              {{mstatus}}
+            </md-option>
+          </md-select>
+          <md-select placeholder="Notification Status" [(ngModel)]="filter.notificationStatus" class="optionField"
+                     name="notificationStatus" id="notificationstatus_id" *ngIf="advancedSearch">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let nstatus of notifStatus" [value]="nstatus">
+              {{nstatus}}
+            </md-option>
+          </md-select>
+          <md-input-container class="inputFieldParties">
+            <input mdInput placeholder="From Party Id" name="fromPartyId" [(ngModel)]="filter.fromPartyId"
+                   #fromPartyId="ngModel" id="frompartyid_id">
+          </md-input-container>
+          <md-input-container class="inputFieldParties">
+            <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId"
+                   #toPartyId="ngModel" id="topartyid_id">
+          </md-input-container>
+          <md-input-container *ngIf="advancedSearch">
+            <input mdInput placeholder="Reference Message Id" name="refToMessageId" [(ngModel)]="filter.refToMessageId"
+                   #refToMessageId="ngModel" id="referencemessageid_id">
+          </md-input-container>
+          <md-input-container *ngIf="advancedSearch">
+            <input mdInput placeholder="Original Sender" name="originalSender" [(ngModel)]="filter.originalSender"
+                   #originalSender="ngModel" id="originalsender_id">
+          </md-input-container>
+          <md-input-container *ngIf="advancedSearch">
+            <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient"
+                   #finalRecipient="ngModel" id="finalrecipient_id">
+          </md-input-container>
+
+          <md2-datepicker placeholder="Sent from:"
+                          [(ngModel)]="filter.receivedFrom"
+                          name="receivedFrom"
+                          [type]="'datetime'"
+                          [max]="timestampFromMaxDate"
+                          (change)='onTimestampFromChange($event)'
+                          #timestampControl="ngModel" id="receivedfrom_id" *ngIf="advancedSearch">
+          </md2-datepicker>
+          <md2-datepicker placeholder="Received up to:"
+                          [(ngModel)]="filter.receivedTo"
+                          name="receivedTo"
+                          [min]="timestampToMinDate"
+                          [max]="timestampToMaxDate"
+                          (change)='onTimestampToChange($event)'
+                          [type]="'datetime'"
+                          #timestampControl="ngModel" id="receivedto_id" *ngIf="advancedSearch">
+          </md2-datepicker>
+
+          <div class="searchArea">
+            <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
+              <md-icon>search</md-icon>
+              <span>Search</span>
+            </button>
+            <a href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()" id="advancedlink_id">Advanced</a>
+            <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()" id="basiclink_id">Basic</a>
+          </div>
+        </form>
+      </div>
     </md-card-content>
   </md-card>
 </div>
 
-<app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event.value)" id="pagesize_id"></app-row-limiter>
+<div style="display:inline-flex">
+  <div>
+    <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                     (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+  </div>
+  <div>
+    <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                       (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+  </div>
+</div>
 
 <ngx-datatable
   id="messageLogTable"
   class="material striped"
   [rows]="rows"
-  [columnMode]="'auto'"
+  [columns]="columnPicker.selectedColumns"
+  [columnMode]="'force'"
   [headerHeight]="50"
   [footerHeight]="50"
   [rowHeight]="'auto'"
@@ -106,180 +128,29 @@
   [loadingIndicator]="loading"
   [count]="count"
   [offset]="offset"
-  [limit]="pageSize"
-  [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
+  [limit]="rowLimiter.pageSize"
+  [sorts]="[{prop: 'received', dir: 'desc'}]"
   (page)='onPage($event)'
   (sort)="onSort($event)"
   [selected]="selected"
-  [selectionType]="'single'"
+  [selectionType]="'multi'"
   (activate)="onActivate($event)"
   (select)="onSelect($event)">
-  <!-- Message Id -->
-  <ngx-datatable-column name="Message Id" [width]="500">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Conversation Id -->
-  <ngx-datatable-column name="Conversation Id" [width]="400" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- From Party Id -->
-  <ngx-datatable-column name="From Party Id" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- To Party Id -->
-  <ngx-datatable-column name="To Party Id" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Status -->
-  <ngx-datatable-column name="Message Status" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Notification Status -->
-  <ngx-datatable-column name="Notification Status" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- MSH Role -->
-  <ngx-datatable-column name="AP Role" prop="mshRole" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.prop}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Message Type -->
-  <ngx-datatable-column name="Message Type" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Deleted -->
-  <ngx-datatable-column name="Deleted" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Received -->
-  <ngx-datatable-column name="Received" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Failed -->
-  <ngx-datatable-column name="Failed" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Restored -->
-  <ngx-datatable-column name="Restored" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Failed Send Attempts -->
-  <ngx-datatable-column name="Send Attempts" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Send Attempts Max -->
-  <ngx-datatable-column name="Send Attempts Max" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Next Attempt -->
-  <ngx-datatable-column name="Next Attempt" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Original Sender -->
-  <ngx-datatable-column name="Original Sender" [width]="400" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Final Recipient -->
-  <ngx-datatable-column name="Final Recipient" [width]="400" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <!-- Ref To Message Id -->
-  <ngx-datatable-column name="Ref To Message Id" [canAutoResize]="true">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
 </ngx-datatable>
 
-<div style="margin:5px">
-  <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()" id="downloadbutton_id">Download</button>
-  <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()" id="resendbutton_id">Resend</button>
+<ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+  <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+</ng-template>
 
+<div class="group-btn">
+  <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()"
+          id="downloadbutton_id">
+    <md-icon>file_download</md-icon>
+    <span>Download</span>
+  </button>
+  <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()"
+          id="resendbutton_id">
+    <md-icon>send</md-icon>
+    <span>Resend</span>
+  </button>
 </div>

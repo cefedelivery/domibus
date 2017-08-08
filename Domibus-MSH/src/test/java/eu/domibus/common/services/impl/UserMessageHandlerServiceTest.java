@@ -1,5 +1,7 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MSHRole;
@@ -13,9 +15,6 @@ import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
-import eu.domibus.common.services.impl.CompressionService;
-import eu.domibus.common.services.impl.MessageIdGenerator;
-import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -46,7 +45,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -58,7 +56,6 @@ import java.util.List;
 /**
  * @author Thomas Dussart
  * @since 3.3
- *
  */
 @RunWith(JMockit.class)
 public class UserMessageHandlerServiceTest {
@@ -82,6 +79,9 @@ public class UserMessageHandlerServiceTest {
 
     @Injectable
     UserMessageLogDao userMessageLogDao;
+
+    @Injectable
+    UserMessageLogService userMessageLogService;
 
     @Injectable
     JAXBContext jaxbContextEBMS;
@@ -139,6 +139,7 @@ public class UserMessageHandlerServiceTest {
         aProperty.setType(type);
         return aProperty;
     }
+
     @Test
     public void testCheckCharset_HappyFlow() throws EbMS3Exception {
         final Messaging messaging = new Messaging();
@@ -212,7 +213,7 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testInvoke_tc1Process_HappyFlow() throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
+    public void testInvoke_tc1Process_HappyFlow(@Injectable final BackendFilter matchingBackendFilter) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
@@ -222,7 +223,8 @@ public class UserMessageHandlerServiceTest {
         final Party receiverParty = getPartyFromConfiguration(configuration, RED);
 
         new Expectations(userMessageHandlerService) {{
-
+            backendNotificationService.getMatchingBackendFilter(messaging.getUserMessage());
+            result = matchingBackendFilter;
 
             pModeProvider.getLegConfiguration(withSubstring(PUSH_TESTCASE1_TC1ACTION));
             result = legConfiguration;
@@ -243,24 +245,24 @@ public class UserMessageHandlerServiceTest {
             result = soapResponseMessage;
         }};
 
-        userMessageHandlerService.handleNewUserMessage(pmodeKey,soapRequestMessage,messaging,new UserMessageHandlerContext());
+        userMessageHandlerService.handleNewUserMessage(pmodeKey, soapRequestMessage, messaging, new UserMessageHandlerContext());
 
         new Verifications() {{
             userMessageHandlerService.checkCharset(messaging);
             userMessageHandlerService.checkPingMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
-            backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
+            backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
         }};
     }
+
     @Test
-    public void testInvoke_PingMessage(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
+    public void testInvoke_PingMessage(@Injectable final BackendFilter matchingBackendFilter, @Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
-        final UserMessageHandlerContext userMessageHandlerContext=new UserMessageHandlerContext();
+        final UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
         new Expectations(userMessageHandlerService) {{
-
             messaging.getUserMessage().getMessageInfo().getMessageId();
             result = "TestMessage123";
 
@@ -280,17 +282,18 @@ public class UserMessageHandlerServiceTest {
             result = soapResponseMessage;
         }};
 
-        userMessageHandlerService.handleNewUserMessage(pmodeKey,soapRequestMessage,messaging, userMessageHandlerContext);
+        userMessageHandlerService.handleNewUserMessage(pmodeKey, soapRequestMessage, messaging, userMessageHandlerContext);
+
         Assert.assertTrue(userMessageHandlerContext.isPingMessage());
-        Assert.assertEquals("TestMessage123",userMessageHandlerContext.getMessageId());
+        Assert.assertEquals("TestMessage123", userMessageHandlerContext.getMessageId());
         Assert.assertNotNull(userMessageHandlerContext.getLegConfiguration());
         new Verifications() {{
             userMessageHandlerService.checkCharset(messaging);
             userMessageHandlerService.checkPingMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             times = 0;
-            backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
+            backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             times = 0;
             userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
         }};
@@ -361,7 +364,7 @@ public class UserMessageHandlerServiceTest {
             result = "TestMessageId123";
 
         }};
-        userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+        userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, "");
 
         new Verifications() {{
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
@@ -441,7 +444,7 @@ public class UserMessageHandlerServiceTest {
         }};
 
         try {
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, "");
         } catch (Exception e) {
             Assert.assertTrue("Expecting Ebms3 exception", e instanceof EbMS3Exception);
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0010, ((EbMS3Exception) e).getErrorCode());
@@ -457,6 +460,7 @@ public class UserMessageHandlerServiceTest {
             times = 0;
         }};
     }
+
     @Test
     public void testGenerateReceipt_NoResponse(@Injectable final LegConfiguration legConfiguration) {
         new Expectations(userMessageHandlerService) {{
@@ -478,7 +482,6 @@ public class UserMessageHandlerServiceTest {
             times = 0;
         }};
     }
-
 
 
     @Test
@@ -602,10 +605,6 @@ public class UserMessageHandlerServiceTest {
     }
 
 
-
-
-
-
     @Test
     public void testPersistReceivedMessage_CompressionError(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage, @Injectable final Party receiverParty, @Injectable final UserMessageLog userMessageLog) throws EbMS3Exception, TransformerException, SOAPException, JAXBException {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
@@ -624,7 +623,7 @@ public class UserMessageHandlerServiceTest {
             result = "TestMessageId123";
         }};
         try {
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, "");
             Assert.fail("Exception for compression failure expected!");
         } catch (EbMS3Exception e) {
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0303, e.getErrorCode());
@@ -681,9 +680,6 @@ public class UserMessageHandlerServiceTest {
             Assert.fail("No Errors expected in happy flow!");
         }
     }
-
-
-
 
 
     @Test
@@ -796,7 +792,7 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testInvoke_DuplicateMessage(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
+    public void testInvoke_DuplicateMessage(@Injectable final BackendFilter matchingBackendFilter, @Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
 
@@ -825,15 +821,15 @@ public class UserMessageHandlerServiceTest {
             result = soapResponseMessage;
         }};
 
-        userMessageHandlerService.handleNewUserMessage(pmodeKey,soapRequestMessage,messaging,new UserMessageHandlerContext());
+        userMessageHandlerService.handleNewUserMessage(pmodeKey, soapRequestMessage, messaging, new UserMessageHandlerContext());
 
         new Verifications() {{
             userMessageHandlerService.checkCharset(messaging);
             userMessageHandlerService.checkPingMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             times = 0;
-            backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
+            backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             times = 0;
             userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
             backendNotificationService.notifyMessageReceivedFailure(withAny(new UserMessage()), (ErrorResult) any);
@@ -842,7 +838,7 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testInvoke_ErrorInNotifyingIncomingMessage(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
+    public void testInvoke_ErrorInNotifyingIncomingMessage(@Injectable final BackendFilter matchingBackendFilter, @Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
 
@@ -864,10 +860,10 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkDuplicate(withAny(messaging));
             result = false;
 
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging);
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             result = any;
 
-            backendNotificationService.notifyMessageReceived(withAny(userMessage));
+            backendNotificationService.notifyMessageReceived(matchingBackendFilter, withAny(userMessage));
             result = new SubmissionValidationException("Error while submitting the message!!");
 
 
@@ -876,18 +872,19 @@ public class UserMessageHandlerServiceTest {
             UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
             userMessageHandlerContext.setPingMessage(true);
             userMessageHandlerContext.setLegConfiguration(legConfiguration);
-            userMessageHandlerService.handleNewUserMessage(pmodeKey,soapRequestMessage,messaging, userMessageHandlerContext);
+            userMessageHandlerService.handleNewUserMessage(pmodeKey, soapRequestMessage, messaging, userMessageHandlerContext);
         } catch (Exception e) {
             Assert.assertTrue("Expecting Ebms3exception!", e instanceof EbMS3Exception);
         }
 
         new Verifications() {{
-            backendNotificationService.notifyMessageReceived(messaging.getUserMessage());
+            backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
             times = 0;
-    //        backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), (ErrorResult) any);
+            //        backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), (ErrorResult) any);
         }};
     }
+
     @Test
     public void testGetMessaging(@Injectable final SOAPHeader soapHeader, @Injectable final Iterator soapChildElementsIterator, @Injectable final Node messagingXml) throws JAXBException, SOAPException, ParserConfigurationException, IOException, SAXException {
 
@@ -927,6 +924,7 @@ public class UserMessageHandlerServiceTest {
 
         return configuration;
     }
+
     public LegConfiguration getLegFromConfiguration(Configuration configuration, String legName) {
         LegConfiguration result = null;
         for (LegConfiguration legConfiguration1 : configuration.getBusinessProcesses().getLegConfigurations()) {

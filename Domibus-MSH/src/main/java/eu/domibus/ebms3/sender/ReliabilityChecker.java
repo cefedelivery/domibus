@@ -1,17 +1,16 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
-import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -48,28 +47,34 @@ public class ReliabilityChecker {
 
     @Autowired
     private PModeProvider pModeProvider;
+
     @Autowired
     private UserMessageLogDao userMessageLogDao;
+
     @Autowired
-    private BackendNotificationService backendNotificationService;
-    @Autowired
-    private MessagingDao messagingDao;
-    @Autowired
-    private UpdateRetryLoggingService updateRetryLoggingService;
+    private UserMessageLogService userMessageLogService;
+
     @Autowired
     private ErrorLogDao errorLogDao;
 
+    @Autowired
+    private ReliabilityMatcher pushMatcher;
+
     public CheckResult check(final SOAPMessage request, final SOAPMessage response, final String pmodeKey) throws EbMS3Exception {
+        return check(request, response, pmodeKey, pushMatcher);
+    }
+
+    public CheckResult check(final SOAPMessage request, final SOAPMessage response, final String pmodeKey, final ReliabilityMatcher matcher) throws EbMS3Exception {
 
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
         String messageId = null;
 
-        if (legConfiguration.getReliability() != null && ReplyPattern.CALLBACK.equals(legConfiguration.getReliability().getReplyPattern())) {
+        if (matcher.matchReliableCallBack(legConfiguration)) {
             LOG.debug("Reply pattern is waiting for callback, setting message status to WAITING_FOR_CALLBACK.");
             return CheckResult.WAITING_FOR_CALLBACK;
         }
 
-        if (legConfiguration.getReliability() != null && ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())) {
+        if (matcher.matchReliableReceipt(legConfiguration)) {
             LOG.debug("Checking reliability for outgoing message");
             final Messaging messaging;
 
@@ -77,7 +82,7 @@ public class ReliabilityChecker {
                 messaging = this.jaxbContext.createUnmarshaller().unmarshal((Node) response.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue();
             } catch (JAXBException | SOAPException e) {
                 LOG.error(e.getMessage(), e);
-                return CheckResult.FAIL;
+                return matcher.fails();
             }
 
             final SignalMessage signalMessage = messaging.getSignalMessage();
@@ -97,7 +102,7 @@ public class ReliabilityChecker {
                         final UserMessage userMessageInRequest = this.jaxbContext.createUnmarshaller().unmarshal((Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue().getUserMessage();
                         if (!userMessage.equals(userMessageInRequest)) {
                             ReliabilityChecker.LOG.warn("Reliability check failed, the user message in the request does not match the user message in the response.");
-                            return CheckResult.FAIL;
+                            return matcher.fails();
                         }
 
                         return CheckResult.OK;
@@ -172,7 +177,7 @@ public class ReliabilityChecker {
 
         }
         LOG.businessError(DomibusMessageCode.BUS_RELIABILITY_GENERAL_ERROR, messageId);
-        return CheckResult.FAIL;
+        return matcher.fails();
 
     }
 
@@ -195,33 +200,9 @@ public class ReliabilityChecker {
     }
 
     public enum CheckResult {
-        OK, FAIL, WAITING_FOR_CALLBACK
+        OK, SEND_FAIL, PULL_FAILED, WAITING_FOR_CALLBACK
     }
-    public void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
-        switch (reliabilityCheckSuccessful) {
-            case OK:
-                switch (isOk) {
-                    case OK:
-                        userMessageLogDao.setMessageAsAcknowledged(messageId);
-                        break;
-                    case WARNING:
-                        userMessageLogDao.setMessageAsAckWithWarnings(messageId);
-                        break;
-                    default:
-                        assert false;
-                }
-                backendNotificationService.notifyOfSendSuccess(messageId);
-                userMessageLogDao.setAsNotified(messageId);
-                messagingDao.clearPayloadData(messageId);
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS);
-                break;
-            case WAITING_FOR_CALLBACK:
-                userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
-                break;
-            case FAIL:
-                updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
-        }
-    }
+
 
     /**
      * This method is responsible for the ebMS3 error handling (creation of errorlogs and marking message as sent)
@@ -232,7 +213,7 @@ public class ReliabilityChecker {
     public void handleEbms3Exception(final EbMS3Exception exceptionToHandle, final String messageId) {
         exceptionToHandle.setRefToMessageId(messageId);
         if (!exceptionToHandle.isRecoverable() && !Boolean.parseBoolean(System.getProperty(UNRECOVERABLE_ERROR_RETRY))) {
-            userMessageLogDao.setMessageAsAcknowledged(messageId);
+            userMessageLogService.setMessageAsAcknowledged(messageId);
             // TODO Shouldn't clear the payload data here ?
         }
 

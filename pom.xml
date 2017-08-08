@@ -11,7 +11,6 @@
     <name>Domibus MSH</name>
     <modules>
         <module>Domibus-MSH</module>
-        <module>Domibus-MSH-angular</module>
         <module>Domibus-MSH-api</module>
         <module>Domibus-MSH-ext-services-delegate</module>
         <module>Domibus-MSH-logging</module>
@@ -49,10 +48,10 @@
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
         <sonar.scm.disabled>true</sonar.scm.disabled>
         <sonar.exclusions>
-            **/validators/EbMS3MessageValidator.java, **/controller/AdminGUIController.java,
-            **/discovery/PartyIndentifierResolverService.java,
-            **/quartz/**, **/target/**, **/eu/domibus/spring/SpringContextProvider.java,
-            **/eu/domibus/taskexecutor/weblogic/DomibusDelegatingWork.java
+            **/target/**,
+            **/Domibus-MSH-angular/node_modules/**,
+            **/web.xml,
+            **/common/model/configuration/**
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
         <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar/</sonar.host.url>
@@ -657,6 +656,15 @@
                 <module>Domibus-MSH-jms-wildfly</module>
                 <module>Domibus-MSH-taskexecutor-wildfly</module>
                 <module>Domibus-MSH-wildfly</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>UI</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>Domibus-MSH-angular</module>
             </modules>
         </profile>
         <profile>

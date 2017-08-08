@@ -1,7 +1,7 @@
 package eu.domibus.ebms3.common;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.attachment.AttachmentDataSource;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Attachment;
@@ -25,7 +25,7 @@ import java.util.Collection;
  */
 public class AttachmentCleanupInterceptor extends AbstractPhaseInterceptor<Message> {
 
-    private static final Log LOG = LogFactory.getLog(AttachmentCleanupInterceptor.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AttachmentCleanupInterceptor.class);
 
     public AttachmentCleanupInterceptor() {
         super(Phase.PREPARE_SEND_ENDING);

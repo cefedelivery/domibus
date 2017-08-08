@@ -2,14 +2,14 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
-import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
-import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -17,8 +17,6 @@ import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.endpoint.Client;
@@ -52,7 +50,8 @@ import java.util.Properties;
 @RunWith(JMockit.class)
 public class MSHDispatcherTest {
 
-    private static final Log LOG = LogFactory.getLog(MSHDispatcherTest.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHDispatcherTest.class);
+
     private static final String TEST_RESOURCES_DIR = "./src/test/resources";
     private static final String VALID_PMODE_CONFIG_URI = "samplePModes/domibus-configuration-valid.xml";
     private static final String COLON_SEPARATOR = ":";

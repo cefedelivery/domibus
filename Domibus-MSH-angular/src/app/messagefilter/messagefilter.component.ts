@@ -1,14 +1,16 @@
 import {Component} from "@angular/core";
-import {MessagefilterDialogComponent} from "./messagefilter-dialog/messagefilter-dialog.component";
-import {MdDialog} from "@angular/material";
+import {MdDialog, MdDialogRef} from "@angular/material";
 import {AlertService} from "../alert/alert.service";
 import {Http, Headers, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
 import {MessageFilterResult} from "./messagefilterresult";
 import {BackendFilterEntry} from "./backendfilterentry";
 import {RoutingCriteriaEntry} from "./routingcriteriaentry";
-import {CancelMessagefilterDialogComponent} from "./cancelmessagefilter-dialog/cancelmessagefilter-dialog.component";
 import {isNullOrUndefined, isUndefined} from "util";
+import {EditMessageFilterComponent} from "./editmessagefilter-form/editmessagefilter-form.component";
+import {DirtyOperations} from "../common/dirty-operations";
+import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
+import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
 
 @Component({
   moduleId: module.id,
@@ -17,12 +19,10 @@ import {isNullOrUndefined, isUndefined} from "util";
   styleUrls: ['./messagefilter.component.css']
 })
 
-export class MessageFilterComponent {
+export class MessageFilterComponent implements DirtyOperations{
 
-  editing = {};
   rows = [];
   selected = [];
-  rollback = [];
 
   backendFilterNames = [];
 
@@ -31,6 +31,7 @@ export class MessageFilterComponent {
   enableCancel = false;
   enableSave = false;
   enableDelete = false;
+  enableEdit = false;
 
   enableMoveUp = false;
   enableMoveDown = false;
@@ -40,7 +41,6 @@ export class MessageFilterComponent {
   areFiltersPersisted: boolean;
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
-    this.rollback = this.rows.slice();
   }
 
 
@@ -50,9 +50,9 @@ export class MessageFilterComponent {
 
       let newRows = [];
       this.backendFilterNames = [];
-      if(!isNullOrUndefined(result.messageFilterEntries)) {
+      if (!isNullOrUndefined(result.messageFilterEntries)) {
         for (let i = 0; i < result.messageFilterEntries.length; i++) {
-          let currentFilter : BackendFilterEntry = result.messageFilterEntries[i];
+          let currentFilter: BackendFilterEntry = result.messageFilterEntries[i];
           if (isNullOrUndefined(currentFilter)) {
             continue;
           }
@@ -66,7 +66,7 @@ export class MessageFilterComponent {
 
         this.rows = newRows;
 
-        if(!this.areFiltersPersisted) {
+        if (!this.areFiltersPersisted && this.backendFilterNames.length > 1) {
           this.alertService.error("Several filters in the table were not configured yet (Persisted flag is not checked). " +
             "It is strongly recommended to double check the filters configuration and afterwards save it.");
           this.enableSave = true;
@@ -92,133 +92,190 @@ export class MessageFilterComponent {
   }
 
   createValueProperty(cell, newProp, row) {
-    switch(cell) {
+    switch (cell) {
       case 'from':
-        this.rows[row.$$index].from = newProp;
+        this.rows[row].from = newProp;
         break;
       case 'to':
-        this.rows[row.$$index].to = newProp;
+        this.rows[row].to = newProp;
         break;
       case 'action':
-        this.rows[row.$$index].action = newProp;
+        this.rows[row].action = newProp;
         break;
-      case 'sevice':
-        this.rows[row.$$index].sevice = newProp;
+      case 'service':
+        this.rows[row].service = newProp;
         break;
-    }
-  }
-
-  updateValueProperty(cell, cellValue, row) {
-    switch(cell) {
-      case 'from':
-        this.rows[row.$$index].from.expression = cellValue;
-        break;
-      case 'to':
-        this.rows[row.$$index].to.expression = cellValue;
-        break;
-      case 'action':
-        this.rows[row.$$index].action.expression = cellValue;
-        break;
-      case 'sevice':
-        this.rows[row.$$index].sevice.expression = cellValue;
-        break;
-    }
-  }
-
-  updateValue(event, cell, row) {
-    this.editing[row.$$index + '-' + cell] = false;
-
-    let edited = false;
-
-    if(cell == 'plugin' && event.target.value.trim() != '') {
-      this.rows[row.$$index].backendName = event.target.value;
-      edited = true;
-    }
-
-    if(!edited) {
-      if (this.rows[row.$$index].routingCriterias == null) {
-        this.rows[row.$$index].routingCriterias = [];
-      }
-      let numRoutingCriterias = this.rows[row.$$index].routingCriterias.length;
-      for (let i = 0; i < numRoutingCriterias; i++) {
-        let routCriteria = this.rows[row.$$index].routingCriterias[i];
-        if (routCriteria.name == cell) {
-          if (routCriteria.expression == event.target.value) {
-            return;
-          } else {
-            if (event.target.value.trim() == '') {
-              this.rows[row.$$index].routingCriterias.splice(i, 1);
-            } else {
-              routCriteria.expression = event.target.value;
-            }
-            this.updateValueProperty(cell, event.target.value, row);
-            edited = true;
-            break;
-          }
-        }
-      }
-    }
-
-    if(!edited && event.target.value.trim() != '') {
-      let newRC = new RoutingCriteriaEntry(null,cell,event.target.value);
-      this.rows[row.$$index].routingCriterias.push(newRC);
-      this.createValueProperty(cell, newRC, row);
-      edited = true;
-    }
-
-    if (edited) {
-      this.enableSave = true;
-      this.enableCancel = true;
     }
   }
 
   buttonNew() {
-    this.enableCancel = true;
-    this.enableSave = true;
+    let formRef: MdDialogRef<EditMessageFilterComponent> = this.dialog.open(EditMessageFilterComponent, {data: {backendFilterNames: this.backendFilterNames}});
+    formRef.afterClosed().subscribe(result => {
+      if (result == true) {
+        let routingCriterias: Array<RoutingCriteriaEntry> = [];
+        if (!isNullOrUndefined(formRef.componentInstance.from)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0, 'from', formRef.componentInstance.from));
+        }
+        if (!isNullOrUndefined(formRef.componentInstance.to)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0, 'to', formRef.componentInstance.to));
+        }
+        if (!isNullOrUndefined(formRef.componentInstance.action)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0, 'action', formRef.componentInstance.action));
+        }
+        if (!isNullOrUndefined(formRef.componentInstance.service)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0, 'service', formRef.componentInstance.service));
+        }
+        let backendEntry = new BackendFilterEntry(0, this.rowNumber + 1, formRef.componentInstance.plugin, routingCriterias, false);
+        this.rows.push(backendEntry);
+
+        this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
+        this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+      }
+    });
+
+  }
+
+  buttonEdit() {
+    let formRef: MdDialogRef<EditMessageFilterComponent> = this.dialog.open(EditMessageFilterComponent, {
+      data: {
+        backendFilterNames: this.backendFilterNames,
+        edit: this.selected[0]
+      }
+    });
+    formRef.afterClosed().subscribe(result => {
+      if (result == true) {
+        this.updateSelectedPlugin(formRef.componentInstance.plugin);
+        this.updateSelectedFrom(formRef.componentInstance.from);
+        this.updateSelectedTo(formRef.componentInstance.to);
+        this.updateSelectedAction(formRef.componentInstance.action);
+        this.updateSelectedService(formRef.componentInstance.service);
+
+        this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
+        this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+      }
+    });
+  }
+
+  private deleteRoutingCriteria(rc: string) {
+    let numRoutingCriterias = this.rows[this.rowNumber].routingCriterias.length;
+    for (let i = 0; i < numRoutingCriterias; i++) {
+      let routCriteria = this.rows[this.rowNumber].routingCriterias[i];
+      if (routCriteria.name == rc) {
+        this.rows[this.rowNumber].routingCriterias.splice(i, 1);
+        return;
+      }
+    }
+  }
+
+  private createRoutingCriteria(rc: string, value: string) {
+    if (value.length == 0) {
+      return;
+    }
+    let newRC = new RoutingCriteriaEntry(null, rc, value);
+    this.rows[this.rowNumber].routingCriterias.push(newRC);
+    this.createValueProperty(rc, newRC, this.rowNumber);
+  }
+
+  private updateSelectedTo(value: string) {
+    if (!isNullOrUndefined(this.rows[this.rowNumber].to)) {
+      if (value.length == 0) {
+        // delete
+        this.deleteRoutingCriteria('to');
+        this.rows[this.rowNumber].to.expression = '';
+      } else {
+        // update
+        this.rows[this.rowNumber].to.expression = value;
+      }
+    } else {
+      // create
+      this.createRoutingCriteria('to', value);
+    }
+  }
+
+  private updateSelectedPlugin(value: string) {
+    this.rows[this.rowNumber].backendName = value;
+  }
+
+  private updateSelectedFrom(value: string) {
+    if (!isNullOrUndefined(this.rows[this.rowNumber].from)) {
+      if (value.length == 0) {
+        // delete
+        this.deleteRoutingCriteria('from');
+        this.rows[this.rowNumber].from.expression = '';
+      } else {
+        // update
+        this.rows[this.rowNumber].from.expression = value;
+      }
+    } else {
+      // create
+      this.createRoutingCriteria('from', value);
+    }
+  }
+
+  private updateSelectedAction(value: string) {
+    if (!isNullOrUndefined(this.rows[this.rowNumber].action)) {
+      if (value.length == 0) {
+        // delete
+        this.deleteRoutingCriteria('action');
+        this.rows[this.rowNumber].action.expression = '';
+      } else {
+        // update
+        this.rows[this.rowNumber].action.expression = value;
+      }
+    } else {
+      // create
+      this.createRoutingCriteria('action', value);
+    }
+  }
+
+  private updateSelectedService(value: string) {
+    if (!isNullOrUndefined(this.rows[this.rowNumber].service)) {
+      if (value.length == 0) {
+        // delete
+        this.deleteRoutingCriteria('service');
+        this.rows[this.rowNumber].service.expression = '';
+      } else {
+        // update
+        this.rows[this.rowNumber].service.expression = value;
+      }
+    } else {
+      // create
+      this.createRoutingCriteria('service', value);
+    }
+  }
+
+  private disableSelectionAndButtons() {
+    this.selected = [];
+    this.enableMoveDown = false;
+    this.enableMoveUp = false;
+    this.enableCancel = false;
+    this.enableSave = false;
+    this.enableEdit = false;
     this.enableDelete = false;
-    this.rows.push( {"backendName" : ''});
   }
 
   cancelDialog() {
-    let dialogRef = this.dialog.open(CancelMessagefilterDialogComponent);
+    let dialogRef = this.dialog.open(CancelDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
-      switch(result) {
-        case 'Yes' :
-          this.enableCancel = false;
-          this.enableSave = false;
-          this.enableDelete = false;
-
-          this.enableMoveUp = this.rowNumber  > 0;
-          this.enableMoveDown = this.rowNumber != this.rows.length - 1;
-
-          this.getBackendFiltersInfo();
-
-          break;
-        case 'No':
-        // do nothing
+      if (result) {
+        this.disableSelectionAndButtons();
+        this.getBackendFiltersInfo();
       }
     });
   }
 
   saveDialog() {
     let headers = new Headers({'Content-Type': 'application/json'});
-    let dialogRef = this.dialog.open(MessagefilterDialogComponent);
+    let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
-      switch(result) {
-        case 'Save' :
-          this.enableCancel = false;
-          this.enableSave = false;
-          this.rollback = this.rows.slice();
-          this.http.put('rest/messagefilters', JSON.stringify(this.rows), { headers: headers }).subscribe(res => {
+      if (result) {
+          this.disableSelectionAndButtons();
+          this.http.put('rest/messagefilters', JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
             this.alertService.success("The operation 'update message filters' completed successfully.", false);
             this.getBackendFiltersInfo();
           }, err => {
             this.alertService.error("The operation 'update message filters' not completed successfully.", false);
           });
-
-          break;
-        case 'Cancel':
-          // do nothing
       }
     });
   }
@@ -227,26 +284,32 @@ export class MessageFilterComponent {
     this.enableCancel = true;
     this.enableSave = true;
     this.enableDelete = false;
+    this.enableEdit = false;
 
     this.enableMoveUp = false;
     this.enableMoveDown = false;
 
-    this.rows.splice(this.rowNumber, 1);
+    // we need to use the old for loop approach to don't mess with the entries on the top before
+    for (let i = this.selected.length - 1; i >= 0; i--) {
+      this.rows.splice(this.selected[i].index, 1);
+    }
+
+    this.selected = [];
   }
 
   buttonMoveUp() {
-    if(this.rowNumber < 1) {
+    if (this.rowNumber < 1) {
       return;
     }
     let array = this.rows.slice();
     let move = array[this.rowNumber];
-    array[this.rowNumber] = array[this.rowNumber-1];
-    array[this.rowNumber-1] = move;
+    array[this.rowNumber] = array[this.rowNumber - 1];
+    array[this.rowNumber - 1] = move;
 
     this.rows = array.slice();
     this.rowNumber--;
 
-    if(this.rowNumber == 0) {
+    if (this.rowNumber == 0) {
       this.enableMoveUp = false;
     }
     this.enableMoveDown = true;
@@ -255,19 +318,19 @@ export class MessageFilterComponent {
   }
 
   buttonMoveDown() {
-    if(this.rowNumber > this.rows.length - 1) {
+    if (this.rowNumber > this.rows.length - 1) {
       return;
     }
 
     let array = this.rows.slice();
     let move = array[this.rowNumber];
-    array[this.rowNumber] = array[this.rowNumber+1];
-    array[this.rowNumber+1] = move;
+    array[this.rowNumber] = array[this.rowNumber + 1];
+    array[this.rowNumber + 1] = move;
 
     this.rows = array.slice();
     this.rowNumber++;
 
-    if(this.rowNumber == this.rows.length - 1) {
+    if (this.rowNumber == this.rows.length - 1) {
       this.enableMoveDown = false;
     }
     this.enableMoveUp = true;
@@ -275,23 +338,32 @@ export class MessageFilterComponent {
     this.enableCancel = true;
   }
 
-  onSelect({ selected }) {
+  onSelect({selected}) {
     console.log('Select Event', selected, this.selected);
 
-    if(isUndefined(selected)) {
+    if (isNullOrUndefined(selected) || selected.length == 0) {
+      // unselect
+      this.enableMoveDown = false;
+      this.enableMoveUp = false;
+      this.enableDelete = false;
+      this.enableEdit = false;
+
       return;
     }
 
+    // select
     this.rowNumber = this.selected[0].$$index;
 
     this.selected.splice(0, this.selected.length);
     this.selected.push(...selected);
-    this.enableMoveDown = selected.length > 0 && this.rowNumber < this.rows.length - 1;
-    this.enableMoveUp = selected.length > 0 && this.rowNumber > 0;
-    this.enableDelete = selected.length == 1;
+    this.enableMoveDown = selected.length == 1 && this.rowNumber < this.rows.length - 1;
+    this.enableMoveUp = selected.length == 1 && this.rowNumber > 0;
+    this.enableDelete = selected.length > 0;
+    this.enableEdit = selected.length == 1;
   }
 
-  onActivate(event) {
-    console.log('Activate Event', event);
+  isDirty(): boolean {
+    return this.enableCancel;
   }
+
 }

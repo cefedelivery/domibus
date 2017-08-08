@@ -35,7 +35,7 @@ public class GatewayConfigurationValidator {
     private DomibusConfigurationService domibusConfigurationService;
 
     @PostConstruct
-    public void validateConfiguration() throws Exception {
+    public void validateConfiguration() {
         LOG.info("Checking gateway configuration ...");
         validateCerts();
 
@@ -58,12 +58,13 @@ public class GatewayConfigurationValidator {
             return;
         }
 
-        try {
-            ks.load(new FileInputStream(trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file")), trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
+        try (FileInputStream fileInputStream = new FileInputStream(trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file"))) {
+            ks.load(fileInputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
         } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
             LOG.warn("Failed to load certificates! " + e.getMessage());
             warnOutput("CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
         }
+
         try {
             if (ks.containsAlias(BLUE_GW_ALIAS)) {
                 warnOutput("SAMPLE CERTIFICATES ARE BEING USED - NOT FOR PRODUCTION USAGE");
@@ -76,7 +77,7 @@ public class GatewayConfigurationValidator {
     }
 
     private void validateFileHash(String filename, String expectedHash) throws IOException {
-        File file = new File(domibusConfigurationService.getConfigLocation() + "/" + filename);
+        File file = new File(domibusConfigurationService.getConfigLocation(), filename);
         try {
             String hash = DigestUtils.sha256Hex(FileUtils.readFileToByteArray(file));
             LOG.debug("Hash for " + filename + ": " + hash);

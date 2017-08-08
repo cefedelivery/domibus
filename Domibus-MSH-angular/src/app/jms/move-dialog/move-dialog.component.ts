@@ -10,10 +10,10 @@ import {isNullOrUndefined} from "util";
 export class MoveDialogComponent implements OnInit {
 
   selectedSource: any;
-  public queues: Array<any>;
+  destinationsChoiceDisabled: boolean = false;
+  queues: Array<any> = [];
 
   constructor(public dialogRef: MdDialogRef<MoveDialogComponent>) {
-
   }
 
   ngOnInit() {

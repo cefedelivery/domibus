@@ -1,15 +1,12 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.model.logging.RawEnvelopeDto;
-import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
@@ -58,10 +55,10 @@ public class RetryService {
     private UserMessageLogDao userMessageLogDao;
 
     @Autowired
-    private MessagingDao messagingDao;
+    private UserMessageLogService userMessageLogService;
 
     @Autowired
-    private MessageExchangeService messageExchangeService;
+    private MessagingDao messagingDao;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {
@@ -92,11 +89,8 @@ public class RetryService {
     //@thom test this
     private void resetUnAcknowledgedPullMessage(){
         List<String> timedoutPullMessages = userMessageLogDao.findTimedoutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
-        for (String timedOutPullMessage : timedoutPullMessages) {
-            UserMessageLog timedOutUserMessageLog = userMessageLogDao.findByMessageId(timedOutPullMessage);
-            timedOutUserMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
-            messageExchangeService.removeRawMessageIssuedByPullRequest(timedOutUserMessageLog.getMessageId());
-            userMessageLogDao.update(timedOutUserMessageLog);
+        for (final String timedoutPullMessage : timedoutPullMessages) {
+            purgeTimedoutMessage(timedoutPullMessage);
         }
     }
 
@@ -117,7 +111,7 @@ public class RetryService {
             backendNotificationService.notifyOfSendFailure(messageIdToPurge);
             userMessageLogDao.setAsNotified(messageIdToPurge);
         }
-        userMessageLogDao.setMessageAsSendFailure(messageIdToPurge);
+        userMessageLogService.setMessageAsSendFailure(messageIdToPurge);
 
         if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
             messagingDao.clearPayloadData(messageIdToPurge);

@@ -1,22 +1,26 @@
 package eu.domibus.pki;
 
+import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.joda.time.DateTime;
-import org.junit.Assert;
+import org.joda.time.LocalDateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.math.BigInteger;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by Cosmin Baciu on 07-Jul-16.
@@ -41,18 +45,6 @@ public class CertificateServiceImplTest {
     @Before
     public void init() {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-    }
-
-    @Test
-    public void testIsCertificateValidationEnabled() throws Exception {
-        new Expectations() {{
-            domibusProperties.getProperty("domibus.certificate.validation.enabled", "true");
-            returns("true", "false");
-        }};
-
-        Assert.assertTrue(certificateService.isCertificateValidationEnabled());
-        Assert.assertFalse(certificateService.isCertificateValidationEnabled());
-
     }
 
     @Test
@@ -158,5 +150,80 @@ public class CertificateServiceImplTest {
 
         boolean certificateValid = certificateService.checkValidity(x509Certificate);
         assertFalse(certificateValid);
+    }
+
+    @Test
+    public void testGetTrustStoreEntries(@Mocked final KeyStore trustStore,
+                                         @Mocked final Enumeration<String> aliasEnum,
+                                         @Mocked final X509Certificate blueCertificate,
+                                         @Mocked final X509Certificate redCertificate) throws KeyStoreException {
+        final Date validFrom = LocalDateTime.now().toDate();
+        final Date validUntil = LocalDateTime.now().plusDays(10).toDate();
+        new Expectations() {{
+            aliasEnum.hasMoreElements();
+            returns(true, true, false);
+            aliasEnum.nextElement();
+            returns("blue_gw", "red_gw");
+
+            trustStore.aliases();
+            result = aliasEnum;
+
+            cryptoService.getTrustStore();
+            times = 1;
+            result = trustStore;
+
+            blueCertificate.getSubjectDN().getName();
+            result = "C=BE,O=eDelivery,CN=blue_gw";
+            blueCertificate.getIssuerDN().getName();
+            result = "C=BE,O=eDelivery,CN=blue_gw";
+            blueCertificate.getNotBefore();
+            result = validFrom;
+            blueCertificate.getNotAfter();
+            result = validUntil;
+
+            redCertificate.getSubjectDN().getName();
+            result = "C=BE,O=eDelivery,CN=red_gw";
+            redCertificate.getIssuerDN().getName();
+            result = "C=BE,O=eDelivery,CN=red_gw";
+            redCertificate.getNotBefore();
+            result = validFrom;
+            redCertificate.getNotAfter();
+            result = validUntil;
+
+            trustStore.getCertificate("blue_gw");
+            result = blueCertificate;
+            trustStore.getCertificate("red_gw");
+            result = redCertificate;
+        }};
+        final List<TrustStoreEntry> trustStoreEntries = certificateService.getTrustStoreEntries();
+        assertEquals(2, trustStoreEntries.size());
+
+        TrustStoreEntry trustStoreEntry = trustStoreEntries.get(0);
+        assertEquals("blue_gw", trustStoreEntry.getName());
+        assertEquals("C=BE,O=eDelivery,CN=blue_gw", trustStoreEntry.getSubject());
+        assertEquals("C=BE,O=eDelivery,CN=blue_gw", trustStoreEntry.getIssuer());
+        assertTrue(validFrom.compareTo(trustStoreEntry.getValidFrom()) == 0);
+        assertTrue(validUntil.compareTo(trustStoreEntry.getValidUntil()) == 0);
+
+        trustStoreEntry = trustStoreEntries.get(1);
+        assertEquals("red_gw", trustStoreEntry.getName());
+        assertEquals("C=BE,O=eDelivery,CN=red_gw", trustStoreEntry.getSubject());
+        assertEquals("C=BE,O=eDelivery,CN=red_gw", trustStoreEntry.getIssuer());
+        assertTrue(validFrom.compareTo(trustStoreEntry.getValidFrom()) == 0);
+        assertTrue(validUntil.compareTo(trustStoreEntry.getValidUntil()) == 0);
+    }
+
+    @Test
+    public void testGetTrustStoreEntriesWithKeyStoreException(@Mocked final KeyStore trustStore) throws KeyStoreException {
+
+        new Expectations() {{
+            trustStore.aliases();
+            result = new KeyStoreException();
+
+            cryptoService.getTrustStore();
+            times = 1;
+            result = trustStore;
+        }};
+        assertEquals(0, certificateService.getTrustStoreEntries().size());
     }
 }

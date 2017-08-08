@@ -23,7 +23,7 @@ public class ApplicationResource {
     private DomibusPropertiesService domibusPropertiesService;
 
     @RequestMapping(value = "info", method = RequestMethod.GET)
-    public DomibusInfoRO getDomibusInfo() throws Exception {
+    public DomibusInfoRO getDomibusInfo() {
         LOG.debug("Getting application info");
         final DomibusInfoRO domibusInfoRO = new DomibusInfoRO();
         domibusInfoRO.setVersion(domibusPropertiesService.getDisplayVersion());

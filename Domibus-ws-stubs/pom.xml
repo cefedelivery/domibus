@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>domibus-ws-stubs</artifactId>
+    <name>Domibus MSH Default WS Plugin Stubs</name>
 
     <build>
         <plugins>

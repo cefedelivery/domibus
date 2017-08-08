@@ -2,15 +2,12 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
-
-import java.util.List;
-
-import static org.springframework.util.StringUtils.hasLength;
 
 /**
  * @author idragusa
@@ -19,17 +16,22 @@ import static org.springframework.util.StringUtils.hasLength;
 @Repository
 public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
 
-    private static final Log LOG = LogFactory.getLog(RawEnvelopeLogDao.class);
+    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(RawEnvelopeLogDao.class);
 
     public RawEnvelopeLogDao() {
         super(RawEnvelopeLog.class);
     }
 
     //@thom test this class
-    public List<RawEnvelopeDto> findRawXmlByMessageId(final String messageId){
+    public RawEnvelopeDto findRawXmlByMessageId(final String messageId) {
         TypedQuery<RawEnvelopeDto> namedQuery = em.createNamedQuery("find.by.message.id", RawEnvelopeDto.class);
         namedQuery.setParameter("MESSAGE_ID",messageId);
-        return namedQuery.getResultList();
+        try {
+            return namedQuery.getSingleResult();
+        } catch (NoResultException nr) {
+            LOG.warn("The message should have an associate raw xml saved in the database.");
+            return null;
+        }
     }
 
     public void deleteRawMessage(final int id){

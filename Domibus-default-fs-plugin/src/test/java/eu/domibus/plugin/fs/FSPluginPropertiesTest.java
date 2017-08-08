@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -26,7 +27,9 @@ public class FSPluginPropertiesTest {
     @Before
     public void setUp() throws Exception {
         fSPluginProperties = new FSPluginProperties();
-        fSPluginProperties.load(new FileInputStream(DEFAULT_PROPERTIES_PATH));
+        Properties properties = new Properties();
+        properties.load(new FileInputStream(DEFAULT_PROPERTIES_PATH));
+        fSPluginProperties.setProperties(properties);
     }
 
     @Test

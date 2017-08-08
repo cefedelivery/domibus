@@ -23,7 +23,7 @@ import java.util.*;
 public class BlueCoatClientCertificateAuthentication implements Authentication {
 
     private static final Locale LOCALE = Locale.US;
-    private Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     private boolean authenticated;
     private String certificateId;

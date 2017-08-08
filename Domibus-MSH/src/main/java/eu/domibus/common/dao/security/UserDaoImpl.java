@@ -41,4 +41,11 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao{
         namedQuery.setParameter("USER_NAME",userName);
         return namedQuery.getSingleResult();
     }
+
+    @Override
+    public void update(final List<User> users) {
+        for (final User u : users) {
+            super.update(u);
+        }
+    }
 }

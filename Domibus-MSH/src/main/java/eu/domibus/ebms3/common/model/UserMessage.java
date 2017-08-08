@@ -49,16 +49,16 @@ public class UserMessage extends AbstractBaseEntity {
     protected MessageInfo messageInfo;
     @XmlElement(name = "PartyInfo", required = true)
     @Embedded
-    protected PartyInfo partyInfo;
+    protected PartyInfo partyInfo; //NOSONAR
     @XmlElement(name = "CollaborationInfo", required = true)
     @Embedded
-    protected CollaborationInfo collaborationInfo;
+    protected CollaborationInfo collaborationInfo; //NOSONAR
     @XmlElement(name = "MessageProperties")
     @Embedded
-    protected MessageProperties messageProperties;
+    protected MessageProperties messageProperties; //NOSONAR
     @XmlElement(name = "PayloadInfo")
     @Embedded
-    protected PayloadInfo payloadInfo;
+    protected PayloadInfo payloadInfo; //NOSONAR
     @XmlAttribute(name = "mpc")
     @XmlSchemaType(name = "anyURI")
     @Column(name = "MPC")

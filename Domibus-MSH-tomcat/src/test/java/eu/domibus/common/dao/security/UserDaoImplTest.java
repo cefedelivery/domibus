@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Thomas Dussart
@@ -24,11 +25,10 @@ public class UserDaoImplTest extends AbstractIT{
     @Transactional
     @Rollback
     public void listUsers() throws Exception {
-        User user=new User("userOne");
+        User user=new User("userOne", "test");
         UserRole userRole=new UserRole("ROLE_USER");
         user.addRole(userRole);
         user.setEmail("test@gmail.com");
-        user.setPassword("test");
         user.setActive(true);
         userDao.create(user);
         List<User> users = userDao.listUsers();
@@ -37,6 +37,20 @@ public class UserDaoImplTest extends AbstractIT{
         assertEquals("test@gmail.com",user.getEmail());
         assertEquals("test",user.getPassword());
         assertEquals(true,user.isEnabled());
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    public void loadActiveUserByUsername() {
+        User user = new User("userTwo", "test");
+        UserRole userRole = new UserRole("ROLE_USER");
+        user.addRole(userRole);
+        user.setEmail("test@gmail.com");
+        user.setActive(true);
+        userDao.create(user);
+        final User userOne = userDao.loadActiveUserByUsername("userTwo");
+        assertNotNull(userOne);
     }
 
 }
