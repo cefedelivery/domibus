@@ -9,13 +9,6 @@ import org.junit.Test;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-import java.io.InputStream;
-import java.nio.file.FileSystemException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -132,7 +125,7 @@ public class FSMessageTransformerTest {
         String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 
         DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
-        UserMessage metadata = parseMetadata(this.getClass().getResourceAsStream(metadataResource));
+        UserMessage metadata = FSTestHelper.parseMetadata(this.getClass().getResourceAsStream(metadataResource));
         FSMessage fsMessage = new FSMessage(dataHandler, metadata);
 
         // Transform FSMessage to Submission
@@ -177,14 +170,6 @@ public class FSMessageTransformerTest {
         DataHandler payloadDatahandler = submissionPayload.getPayloadDatahandler();
         Assert.assertEquals(TEXT_XML, payloadDatahandler.getContentType());
         Assert.assertEquals(payloadContent, payloadDatahandler.getContent());
-    }
-
-    private UserMessage parseMetadata(InputStream metadata) throws JAXBException, FileSystemException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
-        Unmarshaller um = jaxbContext.createUnmarshaller();
-        StreamSource streamSource = new StreamSource(metadata);
-        JAXBElement<UserMessage> jaxbElement = um.unmarshal(streamSource, UserMessage.class);
-        return jaxbElement.getValue();
     }
 
 }
