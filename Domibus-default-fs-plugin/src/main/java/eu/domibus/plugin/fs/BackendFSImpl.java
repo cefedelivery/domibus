@@ -17,6 +17,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.tika.mime.MimeTypeException;
 
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 
@@ -30,7 +31,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
     
     private static final String INCOMING_FOLDER = "IN";
-    private static final String DEFAULT_EXTENSION = "txt";
     
     @Autowired
     private FSMessageTransformer defaultTransformer;
@@ -94,7 +94,16 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         try {
             FileObject rootDir = fsFilesManager.getEnsureRootLocation(fsPluginProperties.getLocation());
             FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, INCOMING_FOLDER);
-            String fileName = messageId + "." + DEFAULT_EXTENSION;
+            
+            String fileName = messageId;
+            try {
+                String mimeType = fsMessage.getDataHandler().getContentType();
+                String extension = FSMimeTypeHelper.getExtension(mimeType);
+
+                fileName += extension;
+            } catch (MimeTypeException ex) {
+                LOG.warn("Error parsing MIME type", ex);
+            }
             
             try (FileObject fileObject = incomingFolder.resolveFile(fileName);
                     FileContent fileContent = fileObject.getContent()) {
