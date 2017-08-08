@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -27,7 +26,6 @@ public class FSMessageTransformer
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSMessageTransformer.class);
     
     private static final String DEFAULT_CONTENT_ID = "cid:message";
-    private static final String DEFAULT_MIME_TYPE =  "text/xml";
     public static final String MIME_TYPE = "MimeType";
     public static final String CHARSET = "CharacterSet";
 
@@ -78,7 +76,7 @@ public class FSMessageTransformer
 
     private void setPayload(Submission submission, final DataHandler dataHandler) {
         ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(1);
-        payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, DEFAULT_MIME_TYPE));
+        payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, FSMimeTypeHelper.fixMimeType(dataHandler.getContentType())));
         
         submission.addPayload(DEFAULT_CONTENT_ID, dataHandler, payloadProperties);
     }
@@ -87,7 +85,6 @@ public class FSMessageTransformer
         Set<Submission.Payload> payloads = submission.getPayloads();
         if (payloads.size() == 1) {
             Submission.Payload payload = payloads.iterator().next();
-            Collection<Submission.TypedProperty> payloadProperties = payload.getPayloadProperties();
 
             return payload.getPayloadDatahandler();
         } else {

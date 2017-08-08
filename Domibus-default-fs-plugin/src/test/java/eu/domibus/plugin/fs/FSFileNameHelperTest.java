@@ -4,8 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
- * @author bnazare
+ * @author FERNANDES Henrique, GONCALVES Bruno
  */
 public class FSFileNameHelperTest {
     
