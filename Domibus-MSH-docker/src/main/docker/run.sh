@@ -42,8 +42,6 @@ $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:9080
 
 localUrl="localUrl=http://localhost:8180/domibus"
 remoteUrl="remoteUrl=http://localhost:9080/domibus"
-#jdbcUrlBlue="jdbcUrlBlue=jdbc:mysql://127.0.0.1:3304/domibus" 
-#jdbcUrlRed="jdbcUrlRed=jdbc:mysql://127.0.0.1:3302/domibus"
 
 mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test -DlocalUrl="$localUrl" -DremoteUrl="$remoteUrl" #-DjdbcUrlBlue="$jdbcUrlBlue" -DjdbcUrlRed="$jdbcUrlRed"
 
@@ -71,5 +69,10 @@ sudo wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
 sudo cp $MYSQL_CONNECTOR/$MYSQL_CONNECTOR-bin.jar ./src/main/soapui/lib
 ### Comment the line below to disable the soapUI tests for 3.3-rc1 ###
 
-mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test -DlocalUrl="localUrl=http://localhost:8180/domibus" -DremoteUrl="remoteUrl=http://localhost:9080/domibus" -DjdbcUrlBlue="jdbcUrlBlue=jdbc:mysql://127.0.0.1:3304/domibus" -DjdbcUrlRed="jdbcUrlRed=jdbc:mysql://127.0.0.1:3302/domibus"
+localUrl="localUrl=http://localhost:8180/domibus"
+remoteUrl="remoteUrl=http://localhost:9080/domibus"
+jdbcUrlBlue="jdbcUrlBlue=jdbc:mysql://127.0.0.1:3304/domibus"
+jdbcUrlRed="jdbcUrlRed=jdbc:mysql://127.0.0.1:3302/domibus"
+
+mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test -DlocalUrl="$localUrl" -DremoteUrl="$remoteUrl" -DjdbcUrlBlue="$jdbcUrlBlue" -DjdbcUrlRed="$jdbcUrlRed"
 
