@@ -10,11 +10,7 @@
     </parent>
 
     <artifactId>domibus-ext-services-delegate</artifactId>
-    <name>Domibus EXT Services Delegate</name>
-
-    <properties>
-        <domibus-ext-services-api.version>1.0-SNAPSHOT</domibus-ext-services-api.version>
-    </properties>
+    <name>Domibus MSH Ext Services Delegate</name>
 
     <build>
         <plugins>

@@ -3,6 +3,7 @@ package eu.domibus.common.services.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.api.security.ChainCertificateInvalidException;
@@ -73,6 +74,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private JmsTemplate jmsPullTemplate;
     @Autowired
     private UserMessageLogDao messageLogDao;
+
+    @Autowired
+    private UserMessageLogService userMessageLogService;
 
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
@@ -178,7 +182,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
         if (!messagingOnStatusReceiverAndMpc.isEmpty()) {
             MessagePullDto messagePullDto = messagingOnStatusReceiverAndMpc.get(0);
-            messageLogDao.setIntermediaryPullStatus(messagePullDto.getMessageId());
+            userMessageLogService.setIntermediaryPullStatus(messagePullDto.getMessageId());
             return messagePullDto.getMessageId();
         }
         return null;

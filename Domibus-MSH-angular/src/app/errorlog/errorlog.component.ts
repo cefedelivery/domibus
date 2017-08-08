@@ -5,6 +5,8 @@ import {ErrorLogResult} from "./errorlogresult";
 import {AlertService} from "../alert/alert.service";
 import {ErrorlogDetailsComponent} from "app/errorlog/errorlog-details/errorlog-details.component";
 import {MdDialog, MdDialogRef} from "@angular/material";
+import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
+import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 
 @Component({
   moduleId: module.id,
@@ -14,11 +16,13 @@ import {MdDialog, MdDialogRef} from "@angular/material";
 })
 
 export class ErrorLogComponent {
+
+  columnPicker: ColumnPickerBase = new ColumnPickerBase()
+  rowLimiter: RowLimiterBase = new RowLimiterBase()
+
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
   @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
-  @ViewChild('rowTpl') rowTpl: TemplateRef<any>;
-  @ViewChild('hdrTpl') hdrTpl: TemplateRef<any>;
 
   timestampFromMaxDate: Date = new Date();
   timestampToMinDate: Date = null;
@@ -38,68 +42,44 @@ export class ErrorLogComponent {
   //default value
   asc: boolean = false;
 
-  pageSizes: Array<any> = [
-    {key: '10', value: 10},
-    {key: '25', value: 25},
-    {key: '50', value: 50},
-    {key: '100', value: 100}
-  ];
-  pageSize: number = this.pageSizes[0].value;
-
   mshRoles: Array<String>;
   errorCodes: Array<String>;
 
   advancedSearch: boolean;
-  columnSelection: boolean;
-
-  allColumns = [];
-  selectedColumns = [];
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   ngOnInit() {
-    this.allColumns = [
+    this.columnPicker.allColumns = [
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: "Signal Message Id",
         prop: "errorSignalMessageId"
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: "AP Role",
         prop: "mshRole",
         width: 50
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Message Id',
         prop: "messageInErrorId",
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Error Code',
         width: 50
       },
       {
-        cellTemplate: this.rowTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Error Detail',
         width: 350
       },
       {
         cellTemplate: this.rowWithDateFormatTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Timestamp',
         width: 180
       },
       {
         cellTemplate: this.rowWithDateFormatTpl,
-        headerTemplate: this.hdrTpl,
         name: 'Notified'
       }
 
@@ -111,11 +91,11 @@ export class ErrorLogComponent {
     this.filter.notifiedTo = new Date()
     this.filter.notifiedTo.setHours(23, 59, 59, 999)
 
-    this.selectedColumns = this.allColumns.filter(col => {
+    this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ["Message Id", "Error Code", "Timestamp"].indexOf(col.name) != -1
     })
 
-    this.page(this.offset, this.pageSize, this.orderBy, this.asc);
+    this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
   }
 
   getErrorLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<ErrorLogResult> {
@@ -170,7 +150,7 @@ export class ErrorLogComponent {
     this.getErrorLogEntries(offset, pageSize, orderBy, asc).subscribe((result: ErrorLogResult) => {
       console.log("errorLog response:" + result);
       this.offset = offset;
-      this.pageSize = pageSize;
+      this.rowLimiter.pageSize = pageSize;
       this.orderBy = orderBy;
       this.asc = asc;
       this.count = result.count;
@@ -223,7 +203,7 @@ export class ErrorLogComponent {
     if (event.newValue === 'desc') {
       ascending = false;
     }
-    this.page(this.offset, this.pageSize, event.column.prop, ascending);
+    this.page(this.offset, this.rowLimiter.pageSize, event.column.prop, ascending);
   }
 
   changePageSize(newPageLimit: number) {
@@ -233,7 +213,7 @@ export class ErrorLogComponent {
 
   search() {
     console.log("Searching using filter:" + this.filter);
-    this.page(0, this.pageSize, this.orderBy, this.asc);
+    this.page(0, this.rowLimiter.pageSize, this.orderBy, this.asc);
   }
 
   onTimestampFromChange(event) {
@@ -255,37 +235,6 @@ export class ErrorLogComponent {
   toggleAdvancedSearch(): boolean {
     this.advancedSearch = !this.advancedSearch;
     return false;//to prevent default navigation
-  }
-
-  toggleColumnSelection(): boolean {
-    this.columnSelection = !this.columnSelection;
-    return false;//to prevent default navigation
-  }
-
-  toggle(col) {
-    const isChecked = this.isChecked(col);
-
-    if (isChecked) {
-      this.selectedColumns = this.selectedColumns.filter(c => {
-        return c.name !== col.name;
-      });
-    } else {
-      this.selectedColumns = [...this.selectedColumns, col];
-    }
-  }
-
-  isChecked(col) {
-    return this.selectedColumns.find(c => {
-      return c.name === col.name;
-    });
-  }
-
-  selectAllColumns() {
-    this.selectedColumns = [...this.allColumns]
-  }
-
-  selectNoColumns() {
-    this.selectedColumns = []
   }
 
   onSelect({selected}) {

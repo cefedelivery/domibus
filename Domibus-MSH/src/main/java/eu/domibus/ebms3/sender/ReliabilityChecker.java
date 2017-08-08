@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
@@ -49,6 +50,9 @@ public class ReliabilityChecker {
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
+
+    @Autowired
+    private UserMessageLogService userMessageLogService;
 
     @Autowired
     private ErrorLogDao errorLogDao;
@@ -209,7 +213,7 @@ public class ReliabilityChecker {
     public void handleEbms3Exception(final EbMS3Exception exceptionToHandle, final String messageId) {
         exceptionToHandle.setRefToMessageId(messageId);
         if (!exceptionToHandle.isRecoverable() && !Boolean.parseBoolean(System.getProperty(UNRECOVERABLE_ERROR_RETRY))) {
-            userMessageLogDao.setMessageAsAcknowledged(messageId);
+            userMessageLogService.setMessageAsAcknowledged(messageId);
             // TODO Shouldn't clear the payload data here ?
         }
 

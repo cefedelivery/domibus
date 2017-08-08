@@ -3,6 +3,7 @@ package eu.domibus.core.message;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
 import eu.domibus.api.pmode.domain.LegConfiguration;
@@ -48,6 +49,9 @@ public class UserMessageDefaultServiceTest {
 
     @Injectable
     private UserMessageLogDao userMessageLogDao;
+
+    @Injectable
+    private UserMessageLogService userMessageLogService;
 
     @Injectable
     private MessagingDao messagingDao;
@@ -374,7 +378,7 @@ public class UserMessageDefaultServiceTest {
 
         new Verifications() {{
             messagingDao.clearPayloadData(messageId);
-            userMessageLogDao.setMessageAsDeleted(messageId);
+            userMessageLogService.setMessageAsDeleted(messageId);
         }};
     }
 
@@ -400,7 +404,7 @@ public class UserMessageDefaultServiceTest {
 
         new Verifications() {{
             messagingDao.clearPayloadData(messageId);
-            userMessageLogDao.setMessageAsDeleted(messageId);
+            userMessageLogService.setMessageAsDeleted(messageId);
 
             jmsManager.consumeMessage(queueName, messageId);
         }};

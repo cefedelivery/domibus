@@ -12,12 +12,14 @@
     </parent>
     <artifactId>domibus-default-ws-plugin</artifactId>
     <packaging>jar</packaging>
+    <name>Domibus MSH Default WS Plugin</name>
 
     <dependencies>
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-ext-services-api</artifactId>
             <version>${domibus-ext-services-api.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
