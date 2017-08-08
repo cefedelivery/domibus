@@ -10,6 +10,7 @@ import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.compo
 import {DirtyOperations} from "../common/dirty-operations";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
+import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'app-jms',
@@ -103,29 +104,38 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.request.toDate = new Date()
     this.request.toDate.setHours(23, 59, 59, 999)
 
-    this.getDestinations(true);
+    this.getDestinations().subscribe((response: Response) => {
+      this.setDefaultQueue('domibus.DLQ');
+      this.search();
+    });
+
   }
 
-  private getDestinations(searchSelectedDestination: boolean) {
-    this.http.get("rest/jms/destinations").subscribe(
+  private getDestinations(): Observable<Response> {
+    let observableResponse: Observable<Response> = this.http.get("rest/jms/destinations");
+
+    observableResponse.subscribe(
       (response: Response) => {
         this.queues = [];
         let destinations = response.json().jmsDestinations;
         for (let key in destinations) {
           this.queues.push(destinations[key]);
-          if (key.match('domibus\.DLQ')) {
-            this.selectedSource = destinations[key];
-          }
         }
-        if (searchSelectedDestination) {
-          this.search();
-        }
-        // console.log(this.queues);
       },
       (error: Response) => {
         this.alertService.error('Could not load queues: ' + error);
       }
     )
+
+    return observableResponse
+  }
+
+  private setDefaultQueue(queueName: string) {
+    this.queues.forEach(queue => {
+      if (queue.name === queueName) {
+        this.selectedSource = queue;
+      }
+    })
   }
 
   changePageSize(newPageSize: number) {
@@ -229,7 +239,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     dialogRef.afterClosed().subscribe(result => {
       if (!isNullOrUndefined(result) && !isNullOrUndefined(result.destination)) {
         let messageIds = this.selectedMessages.map((message) => message.id);
-        this.serverMove(this.selectedSource.name, result.destination, messageIds);
+        this.serverMove(this.currentSearchSelectedSource.name, result.destination, messageIds);
       }
     });
   }
@@ -263,7 +273,9 @@ export class JmsComponent implements OnInit, DirtyOperations {
         this.alertService.success("The operation 'move messages' completed successfully.");
 
         //refresh destinations
-        this.getDestinations(false);
+        this.getDestinations().subscribe((response: Response) => {
+          this.setDefaultQueue(this.currentSearchSelectedSource.name);
+        });
 
         //remove the selected rows
         let newRows = this.rows.filter((element) => {
@@ -286,7 +298,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     }, {headers: this.headers}).subscribe(
       () => {
         this.alertService.success("The operation 'updates on message(s)' completed successfully.");
-        this.getDestinations(false);
+        this.getDestinations();
         this.markedForDeletionMessages = [];
       },
       error => {
