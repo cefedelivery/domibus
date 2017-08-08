@@ -16,12 +16,18 @@ import java.nio.file.FileSystemException;
  */
 public abstract class FSTestHelper {
 
-    public static UserMessage parseMetadata(InputStream metadata) throws JAXBException, FileSystemException {
+    public static UserMessage getUserMessage(Class<?> testClass, String testName, String resourceName) throws JAXBException, FileSystemException {
+        InputStream metadata = getTestResource(testClass, testName, resourceName);
         JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
         Unmarshaller um = jaxbContext.createUnmarshaller();
         StreamSource streamSource = new StreamSource(metadata);
         JAXBElement<UserMessage> jaxbElement = um.unmarshal(streamSource, UserMessage.class);
         return jaxbElement.getValue();
+    }
+
+    public static InputStream getTestResource(Class<?> testClass, String testName, String resourceName) {
+        return testClass.getResourceAsStream(String.format("%s_%s_%s", testClass.getSimpleName(), testName,
+                resourceName));
     }
 
 }
