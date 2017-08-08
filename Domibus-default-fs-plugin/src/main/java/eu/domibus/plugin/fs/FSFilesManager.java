@@ -32,6 +32,8 @@ public class FSFilesManager {
     
     private static final String PARENT_RELATIVE_PATH = "../";
 
+    public static final String INCOMING_FOLDER = "IN";
+
     public FileObject getEnsureRootLocation(final String location, final String domain,
             final String user, final String password) throws FileSystemException, FSSetUpException {
         StaticUserAuthenticator auth = new StaticUserAuthenticator(domain, user, password);

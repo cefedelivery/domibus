@@ -29,9 +29,7 @@ import eu.domibus.plugin.fs.exception.FSSetUpException;
 public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
-    
-    private static final String INCOMING_FOLDER = "IN";
-    
+
     @Autowired
     private FSMessageTransformer defaultTransformer;
     
@@ -93,7 +91,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             
         try {
             FileObject rootDir = fsFilesManager.getEnsureRootLocation(fsPluginProperties.getLocation());
-            FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, INCOMING_FOLDER);
+            FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
             
             String fileName = messageId;
             try {
