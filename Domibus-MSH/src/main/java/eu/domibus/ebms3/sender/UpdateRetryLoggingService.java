@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Properties;
 
@@ -29,6 +31,9 @@ public class UpdateRetryLoggingService {
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
+
+    @Autowired
+    private UserMessageLogService userMessageLogService;
 
     @Autowired
     private MessagingDao messagingDao;
@@ -72,6 +77,7 @@ public class UpdateRetryLoggingService {
             LOG.debug("Updating send attempts to [{}]", userMessageLog.getSendAttempts());
             if (legConfiguration.getReceptionAwareness() != null) {
                 userMessageLog.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(userMessageLog.getNextAttempt(), userMessageLog.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
+                backendNotificationService.notifyOfMessageStatusChange(userMessageLog, messageStatus, new Timestamp(System.currentTimeMillis()));
                 userMessageLog.setMessageStatus(messageStatus);
                 LOG.debug("Updating status to [{}]", userMessageLog.getMessageStatus());
                 userMessageLogDao.update(userMessageLog);
@@ -84,7 +90,7 @@ public class UpdateRetryLoggingService {
                 backendNotificationService.notifyOfSendFailure(messageId);
                 userMessageLogDao.setAsNotified(messageId);
             }
-            userMessageLogDao.setMessageAsSendFailure(messageId);
+            userMessageLogService.setMessageAsSendFailure(messageId);
 
             if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
                 messagingDao.clearPayloadData(messageId);

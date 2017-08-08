@@ -2,6 +2,7 @@ package eu.domibus.plugin.handler;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
@@ -101,6 +102,9 @@ public class DatabaseMessageHandlerTest {
 
     @Injectable
     private UserMessageLogDao userMessageLogDao;
+
+    @Injectable
+    private UserMessageLogService userMessageLogService;
 
     @Injectable
     private SignalMessageLogDao signalMessageLogDao;
@@ -250,7 +254,7 @@ public class DatabaseMessageHandlerTest {
             result = true;
         }};
 
-        String messageId = dmh.submit(messageData, BACKEND);
+        final String messageId = dmh.submit(messageData, BACKEND);
         assertEquals(messageId, MESS_ID);
 
         new Verifications() {{
@@ -261,7 +265,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()));
-            userMessageLogDao.create(withAny(new UserMessageLog()));
+            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
             userMessageService.scheduleSending(MESS_ID);
         }};
 
@@ -327,7 +331,7 @@ public class DatabaseMessageHandlerTest {
             result = true;
         }};
 
-        String messageId = dmh.submit(messageData, BACKEND);
+        final String messageId = dmh.submit(messageData, BACKEND);
         assertEquals(messageId, MESS_ID);
 
         new Verifications() {{
@@ -342,8 +346,7 @@ public class DatabaseMessageHandlerTest {
             assertEquals("bdx:noprocess", message.getCollaborationInfo().getService().getValue());
             messagingService.storeMessage(withAny(new Messaging()));
             UserMessageLog userMessageLog;
-            userMessageLogDao.create(userMessageLog = withCapture());
-            assertEquals(MessageStatus.READY_TO_PULL, userMessageLog.getMessageStatus());
+            userMessageLogService.save(messageId, MessageStatus.READY_TO_PULL.toString(), anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
             userMessageService.scheduleSending(MESS_ID);
             times = 0;
         }};
@@ -392,7 +395,7 @@ public class DatabaseMessageHandlerTest {
             result = true;
         }};
 
-        String messageId = dmh.submit(messageData, BACKEND);
+        final String messageId = dmh.submit(messageData, BACKEND);
         assertEquals(messageId, MESS_ID);
 
         new Verifications() {{
@@ -403,7 +406,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()));
-            userMessageLogDao.create(withAny(new UserMessageLog()));
+            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
         }};
 
     }
@@ -998,12 +1001,12 @@ public class DatabaseMessageHandlerTest {
         new Verifications() {{
             authUtils.hasUserOrAdminRole();
             userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
-            userMessageLogDao.setMessageAsDownloaded(anyString);
+            userMessageLogService.setMessageAsDownloaded(anyString);
             pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc());
             messagingDao.clearPayloadData(anyString);
             signalMessageDao.findSignalMessagesByRefMessageId(MESS_ID);
-            userMessageLogDao.setMessageAsDeleted(anyString);
-            signalMessageLogDao.setMessageAsDeleted(anyString);
+            userMessageLogService.setMessageAsDeleted(anyString);
+            userMessageLogService.setMessageAsDeleted(anyString);
         }};
 
     }
@@ -1045,15 +1048,15 @@ public class DatabaseMessageHandlerTest {
         new Verifications() {{
             authUtils.hasUserOrAdminRole();
             userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
-            userMessageLogDao.setMessageAsDownloaded(anyString);
+            userMessageLogService.setMessageAsDownloaded(anyString);
             pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc());
             messagingDao.clearPayloadData(anyString);
             times = 0;
             signalMessageDao.findSignalMessagesByRefMessageId(MESS_ID);
             times = 0;
-            userMessageLogDao.setMessageAsDeleted(anyString);
+            userMessageLogService.setMessageAsDeleted(anyString);
             times = 0;
-            signalMessageLogDao.setMessageAsDeleted(anyString);
+            userMessageLogService.setMessageAsDeleted(anyString);
             times = 0;
         }};
 
