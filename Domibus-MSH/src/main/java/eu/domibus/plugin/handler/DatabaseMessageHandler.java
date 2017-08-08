@@ -1,5 +1,6 @@
 package eu.domibus.plugin.handler;
 
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
@@ -8,10 +9,12 @@ import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
-import eu.domibus.common.model.configuration.*;
+import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Mpc;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
@@ -22,8 +25,6 @@ import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.common.model.ObjectFactory;
-import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -41,8 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.stereotype.Service;
 
 /**
  * This class is responsible of handling the plugins requests for all the operations exposed.
@@ -335,7 +334,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     }
 
     private int getMaxAttempts(LegConfiguration legConfiguration) {
-        return legConfiguration.getReceptionAwareness() == null ? 1 : legConfiguration.getReceptionAwareness().getRetryCount();
+        return ( legConfiguration.getReceptionAwareness() == null ? 1 : legConfiguration.getReceptionAwareness().getRetryCount() ) + 1; // counting retries after the first send attempt
     }
 
     private void fillMpc(UserMessage userMessage, LegConfiguration legConfiguration, Party to) {

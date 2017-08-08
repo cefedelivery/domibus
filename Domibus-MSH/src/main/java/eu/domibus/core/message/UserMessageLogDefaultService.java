@@ -50,7 +50,7 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
 
     protected void updateMessageStatus(final String messageId, final MessageStatus newStatus) {
         final UserMessageLog messageLog = userMessageLogDao.findByMessageId(messageId);
-        if(MessageType.USER_MESSAGE == messageLog.getMessageType()) {
+        if (MessageType.USER_MESSAGE == messageLog.getMessageType()) {
             backendNotificationService.notifyOfMessageStatusChange(messageLog, newStatus, new Timestamp(System.currentTimeMillis()));
         }
         userMessageLogDao.setMessageStatus(messageLog, newStatus);

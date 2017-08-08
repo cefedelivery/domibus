@@ -13,7 +13,6 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
-import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
@@ -57,7 +56,6 @@ import java.util.Iterator;
 /**
  * @author Thomas Dussart
  * @since 3.3
- *
  */
 @org.springframework.stereotype.Service
 public class UserMessageHandlerService {
@@ -117,7 +115,7 @@ public class UserMessageHandlerService {
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
 
-    public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging,final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, SOAPException {
+    public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging, final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, SOAPException {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
         userMessageHandlerContext.setLegConfiguration(legConfiguration);
         boolean pingMessage;
@@ -158,6 +156,7 @@ public class UserMessageHandlerService {
             return generateReceipt(request, legConfiguration, messageExists);
         }
     }
+
     /**
      * Required for AS4_TA_12
      *
