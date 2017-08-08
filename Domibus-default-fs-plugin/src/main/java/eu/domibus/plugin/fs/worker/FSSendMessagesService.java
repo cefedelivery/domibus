@@ -47,7 +47,7 @@ public class FSSendMessagesService {
     private static final String OUTGOING_FOLDER = "OUT";
     private static final String METADATA_FILE_NAME = "metadata.xml";
 
-    @Resource(name = "fsPluginProperties")
+    @Autowired
     private FSPluginProperties fsPluginProperties;
     
     @Resource(name = "backendFSPlugin")

@@ -13,12 +13,15 @@ import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
 import org.apache.tika.mime.MimeTypeException;
 
+import eu.domibus.common.MessageStatus;
+import eu.domibus.common.MessageStatusChangeEvent;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 
 /**
@@ -36,7 +39,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     @Autowired
     private FSFilesManager fsFilesManager;
     
-    @Resource(name = "fsPluginProperties")
+    @Autowired
     private FSPluginProperties fsPluginProperties;
 
     /**
@@ -125,6 +128,82 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     @Override
     public void messageSendSuccess(String messageId) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void messageStatusChanged(MessageStatusChangeEvent event) {
+        LOG.debug("Message {} changed status from {} to {}", event.getMessageId(), event.getFromStatus(), event.getToStatus());
+        
+        boolean fileRenamed = renameMessageFile(null, event.getMessageId(), event.getToStatus());
+        if (!fileRenamed) {
+            for (String domain : fsPluginProperties.getDomains()) {
+                fileRenamed = renameMessageFile(domain, event.getMessageId(), event.getToStatus());
+                if (fileRenamed) {
+                    break;
+                }
+            }
+        }
+    }
+    
+    private boolean renameMessageFile(String domain, String messageId, MessageStatus status) {
+        try {
+            FileObject rootDir;
+            if (domain != null) {
+                rootDir = setUpFileSystem(domain);
+            } else {
+                rootDir = setUpFileSystem();
+            }
+            
+            // FIXME: remove magic string
+            FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, "OUT");
+            FileObject[] files = fsFilesManager.findAllDescendantFiles(outgoingFolder);
+            
+            FileObject targetFile = null;
+            for (FileObject file : files) {
+                if (file.getName().getBaseName().contains(messageId)) {
+                    targetFile = file;
+                    break;
+                }
+            }
+            
+            if (targetFile != null) {
+                String baseName = targetFile.getName().getBaseName();
+                String newName = FSFileNameHelper.deriveFileName(baseName, status);
+                fsFilesManager.renameFile(targetFile, newName);
+                
+                return true;
+            }
+        } catch (FileSystemException ex) {
+            LOG.error(null, ex);
+        } catch (FSSetUpException ex) {
+            LOG.error("Error setting up folders for domain: " + domain, ex);
+        }
+        
+        return false;
+    }
+    
+    // FIXME: this duplicates code in FSSendMessagesService
+    private FileObject setUpFileSystem(String domain) throws FileSystemException, FSSetUpException {
+        String location = fsPluginProperties.getLocation(domain);
+        String authDomain = null;
+        String user = fsPluginProperties.getUser(domain);
+        String password = fsPluginProperties.getPassword(domain);
+        
+        FileObject rootDir;
+        if (StringUtils.isEmpty(user) || StringUtils.isEmpty(password)) {
+            rootDir = fsFilesManager.getEnsureRootLocation(location);
+        } else {
+            rootDir = fsFilesManager.getEnsureRootLocation(location, authDomain, user, password);
+        }
+        
+        return rootDir;
+    }
+    
+    private FileObject setUpFileSystem() throws FileSystemException, FSSetUpException {        
+        String location = fsPluginProperties.getLocation();
+        FileObject rootDir = fsFilesManager.getEnsureRootLocation(location);
+        
+        return rootDir;
     }
 
 }

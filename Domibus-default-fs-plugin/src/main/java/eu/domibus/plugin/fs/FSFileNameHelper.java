@@ -26,7 +26,7 @@ public class FSFileNameHelper {
     static {
         List<String> tempStateSuffixes = new LinkedList<>();
         for (MessageStatus status : MessageStatus.values()) {
-            tempStateSuffixes.add(status.name());
+            tempStateSuffixes.add(EXTENSION_SEPARATOR + status.name());
         }
         
         STATE_SUFFIXES = Collections.unmodifiableList(tempStateSuffixes);
@@ -50,6 +50,15 @@ public class FSFileNameHelper {
             return fileNamePrefix + NAME_SEPARATOR + messageId + EXTENSION_SEPARATOR + fileNameSuffix;
         } else {
             return fileName + NAME_SEPARATOR + messageId;
+        }
+    }
+    
+    public static String deriveFileName(final String fileName, final MessageStatus status) {
+        if (isAnyState(fileName)) {
+            String strippedFileName = StringUtils.substringBeforeLast(fileName, EXTENSION_SEPARATOR);
+            return strippedFileName + EXTENSION_SEPARATOR + status.name();
+        } else {
+            return fileName + EXTENSION_SEPARATOR + status.name();
         }
     }
 

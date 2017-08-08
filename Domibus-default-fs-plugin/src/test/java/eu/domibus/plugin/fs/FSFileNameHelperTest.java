@@ -3,6 +3,8 @@ package eu.domibus.plugin.fs;
 import org.junit.Assert;
 import org.junit.Test;
 
+import eu.domibus.common.MessageStatus;
+
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
@@ -89,6 +91,20 @@ public class FSFileNameHelperTest {
         String result = FSFileNameHelper.deriveFileName("invoice","3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
 
         Assert.assertEquals("invoice_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu", result);
+    }
+
+    @Test
+    public void testDeriveFileName_NoStatus() {
+        String result = FSFileNameHelper.deriveFileName("invoice_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.pdf", MessageStatus.READY_TO_SEND);
+
+        Assert.assertEquals("invoice_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.pdf.READY_TO_SEND", result);
+    }
+    
+    @Test
+    public void testDeriveFileName_ReplaceStatus() {
+        String result = FSFileNameHelper.deriveFileName("invoice_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.pdf.READY_TO_SEND", MessageStatus.SEND_ENQUEUED);
+
+        Assert.assertEquals("invoice_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.pdf.SEND_ENQUEUED", result);
     }
     
 }
