@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<con:soapui-project id="1c29d1fb-f8ae-4ddb-ac43-1469a15001ec" activeEnvironment="Default" name="TESTS_WS" resourceRoot="" soapui-version="5.1.2-m-SNAPSHOT" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:WsdlInterface" id="9581111c-248c-4085-bf9f-dc452577042f" wsaVersion="NONE" name="BackendService_1_1SoapBinding" type="wsdl" bindingName="{http://org.ecodex.backend/1_1/}BackendService_1_1SoapBinding" soapVersion="1_2" anonymous="optional" definition="http://localhost:8080/domibus/services/backend?wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart="http://localhost:8080/domibus/services/backend?wsdl"><con:part><con:url>http://localhost:8080/domibus/services/backend?wsdl</con:url><con:content><![CDATA[<wsdl:definitions name="BackendService_1_1" targetNamespace="http://org.ecodex.backend/1_1/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://org.ecodex.backend/1_1/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns2="http://schemas.xmlsoap.org/soap/http" xmlns:ns1="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
+<con:soapui-project id="1c29d1fb-f8ae-4ddb-ac43-1469a15001ec" activeEnvironment="Default" name="TESTS_WS"
+                    resourceRoot="" soapui-version="5.3.0" abortOnError="false" runType="SEQUENTIAL"
+                    xmlns:con="http://eviware.com/soapui/config">
+    <con:settings/>
+    <con:interface xsi:type="con:WsdlInterface" id="9581111c-248c-4085-bf9f-dc452577042f" wsaVersion="NONE"
+                   name="BackendService_1_1SoapBinding" type="wsdl"
+                   bindingName="{http://org.ecodex.backend/1_1/}BackendService_1_1SoapBinding" soapVersion="1_2"
+                   anonymous="optional" definition="http://localhost:8080/domibus/services/backend?wsdl"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <con:settings/>
+        <con:definitionCache type="TEXT" rootPart="http://localhost:8080/domibus/services/backend?wsdl">
+            <con:part>
+                <con:url>http://localhost:8080/domibus/services/backend?wsdl</con:url>
+                <con:content><![CDATA[<wsdl:definitions name="BackendService_1_1" targetNamespace="http://org.ecodex.backend/1_1/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://org.ecodex.backend/1_1/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns2="http://schemas.xmlsoap.org/soap/http" xmlns:ns1="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
   <wsdl:types>
     <xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:tns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
       <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
@@ -6589,7 +6602,47 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
    </soap:Body>\r
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="7507d87e-0b5e-49e2-ae78-a69d70a5749a"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="6e2d30b5-28b8-46d9-b0c6-1917b9758ce3"/><con:assertion type="GroovyScriptAssertion" name="Script Assertion" disabled="true" id="cdd8de11-4c9f-4921-88ba-e3567e26fabe"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
 test.waitForStatus("ACKNOWLEDGED","DELETED","-Dom099-2-");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:loadTest id="53493c07-0865-4108-8af6-74d6c6462617" name="LoadTest 1"><con:settings/><con:threadCount>8</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>50</con:testLimit><con:limitType>COUNT_PER_THREAD</con:limitType><con:loadStrategy><con:type>Simple</con:type><con:config><testDelay>1000</testDelay><randomFactor>0.5</randomFactor></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval><con:reportParameters/></con:loadTest><con:tearDownScript>//def test = new Domibus(log,null,context);
+    test.finalize();
+</scriptText>
+</con:configuration>
+</con:assertion>
+    <con:credentials>
+        <con:authType>No Authorization</con:authType>
+    </con:credentials>
+    <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+    <con:jmsPropertyConfig/>
+    <con:wsaConfig mustUnderstand="NONE" version="200508"
+                   action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/>
+    <con:wsrmConfig version="1.2"/>
+</con:request>
+</con:config>
+</con:testStep>
+    <con:loadTest id="53493c07-0865-4108-8af6-74d6c6462617" name="LoadTest 1">
+        <con:settings>
+            <con:setting id="HttpSettings@close-connections">false</con:setting>
+        </con:settings>
+        <con:threadCount>8</con:threadCount>
+        <con:startDelay>0</con:startDelay>
+        <con:sampleInterval>250</con:sampleInterval>
+        <con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed>
+        <con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange>
+        <con:historyLimit>-1</con:historyLimit>
+        <con:testLimit>50</con:testLimit>
+        <con:limitType>COUNT_PER_THREAD</con:limitType>
+        <con:loadStrategy>
+            <con:type>Simple</con:type>
+            <con:config>
+                <testDelay>1000</testDelay>
+                <randomFactor>0.5</randomFactor>
+            </con:config>
+        </con:loadStrategy>
+        <con:assertion type="Step Status" name="Step Status"/>
+        <con:maxAssertionErrors>100</con:maxAssertionErrors>
+        <con:cancelExcessiveThreads>true</con:cancelExcessiveThreads>
+        <con:strategyInterval>500</con:strategyInterval>
+        <con:reportParameters/>
+    </con:loadTest>
+    <con:tearDownScript>//def test = new Domibus(log,null,context);
 //test.cleanDBMessageIDStartsWith("-Dom122-");
 //test.finalize();
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
@@ -15072,7 +15125,33 @@ declare namespace soap='http://www.w3.org/2003/05/soap-envelope';
                         <con:wsrmConfig version="1.2"/>
                     </con:request>
                 </con:config>
-            </con:testStep><con:loadTest id="0aaedf87-38ae-4a69-93d4-ab453845f206" name="LoadTest 1"><con:settings/><con:threadCount>8</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>50</con:testLimit><con:limitType>COUNT_PER_THREAD</con:limitType><con:loadStrategy><con:type>Simple</con:type><con:config><testDelay>1000</testDelay><randomFactor>0.5</randomFactor></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval><con:reportParameters/></con:loadTest><con:tearDownScript>//def test = new Domibus(log,null,context);
+</con:testStep>
+    <con:loadTest id="0aaedf87-38ae-4a69-93d4-ab453845f206" name="LoadTest 1">
+        <con:settings>
+            <con:setting id="HttpSettings@close-connections">false</con:setting>
+        </con:settings>
+        <con:threadCount>8</con:threadCount>
+        <con:startDelay>0</con:startDelay>
+        <con:sampleInterval>250</con:sampleInterval>
+        <con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed>
+        <con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange>
+        <con:historyLimit>-1</con:historyLimit>
+        <con:testLimit>50</con:testLimit>
+        <con:limitType>COUNT_PER_THREAD</con:limitType>
+        <con:loadStrategy>
+            <con:type>Simple</con:type>
+            <con:config>
+                <testDelay>1000</testDelay>
+                <randomFactor>0.5</randomFactor>
+            </con:config>
+        </con:loadStrategy>
+        <con:assertion type="Step Status" name="Step Status"/>
+        <con:maxAssertionErrors>100</con:maxAssertionErrors>
+        <con:cancelExcessiveThreads>true</con:cancelExcessiveThreads>
+        <con:strategyInterval>500</con:strategyInterval>
+        <con:reportParameters/>
+    </con:loadTest>
+    <con:tearDownScript>//def test = new Domibus(log,null,context);
 //test.cleanDBMessageIDStartsWith("-Dom122-");
 //test.finalize();
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
@@ -27639,7 +27718,40 @@ test.cleanDBMessageIDStartsWith("-Dom120-");
 Domibus.swapJdbcUrls("Green","Red",testRunner,log);
 test.cleanDBMessageIDStartsWith("-Dom120-");
 Domibus.swapJdbcUrls("Green","Red",testRunner,log);
-test.finalize();</script></con:config></con:testStep><con:loadTest id="6411ed7e-39e0-4421-b8e8-9a4ed689cd78" name="LoadTest 1"><con:settings/><con:threadCount>4</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>60</con:testLimit><con:limitType>TIME</con:limitType><con:loadStrategy><con:type>Simple</con:type></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval><con:reportParameters/></con:loadTest><con:tearDownScript>//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/></con:testCase><con:testCase id="ad6f447a-dfdc-44be-b020-305c86881e14" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Copy of Dom125-EDELIVERY-1731-Manual- CXF attachment temporary files leakage" searchProperties="true" disabled="true"><con:description>TODO 
+    test.finalize();
+</script>
+</con:config>
+</con:testStep>
+    <con:loadTest id="6411ed7e-39e0-4421-b8e8-9a4ed689cd78" name="LoadTest 1">
+        <con:settings>
+            <con:setting id="HttpSettings@close-connections">false</con:setting>
+        </con:settings>
+        <con:threadCount>4</con:threadCount>
+        <con:startDelay>0</con:startDelay>
+        <con:sampleInterval>250</con:sampleInterval>
+        <con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed>
+        <con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange>
+        <con:historyLimit>-1</con:historyLimit>
+        <con:testLimit>60</con:testLimit>
+        <con:limitType>TIME</con:limitType>
+        <con:loadStrategy>
+            <con:type>Simple</con:type>
+        </con:loadStrategy>
+        <con:assertion type="Step Status" name="Step Status"/>
+        <con:maxAssertionErrors>100</con:maxAssertionErrors>
+        <con:cancelExcessiveThreads>true</con:cancelExcessiveThreads>
+        <con:strategyInterval>500</con:strategyInterval>
+        <con:reportParameters/>
+    </con:loadTest>
+    <con:tearDownScript>//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript>
+    <con:properties/>
+    <con:reportParameters/>
+</con:testCase>
+    <con:testCase id="ad6f447a-dfdc-44be-b020-305c86881e14" failOnError="true" failTestCaseOnErrors="true"
+                  keepSession="false" maxResults="0"
+                  name="Copy of Dom125-EDELIVERY-1731-Manual- CXF attachment temporary files leakage"
+                  searchProperties="true" disabled="true">
+        <con:description>TODO
 	&lt;prop key="domibus.attachment.storage.location">../payloads&lt;/prop> 
 + create folders
 </con:description><con:settings/><con:testStep type="request" name="Submit Message with very Big attachment" id="f2e09ae7-5066-43c1-87ea-11469b00238b">

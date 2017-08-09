@@ -29,6 +29,14 @@
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-logging</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-servlets</artifactId>
+        </dependency>
         <!-- End Domibus modules -->
 
         <!-- Spring -->

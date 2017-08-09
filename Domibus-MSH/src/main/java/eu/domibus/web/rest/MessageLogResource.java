@@ -1,5 +1,7 @@
 package eu.domibus.web.rest;
 
+import com.codahale.metrics.Timer;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -11,6 +13,7 @@ import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.ebms3.receiver.MSHWebservice;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
 import org.slf4j.Logger;
@@ -24,6 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * @author Tiago Miguel
@@ -95,10 +100,21 @@ public class MessageLogResource {
             resultList = signalMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
 
         } else if (messageType == MessageType.USER_MESSAGE) {
+
+            Timer totalListMessages = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "listMessages"));
+            final Timer.Context totalListMessagesContext = totalListMessages.time();
+            Timer totalCountMessages = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "countMessages"));
+            final Timer.Context totalCountMessagesContext = totalCountMessages.time();
             int numberOfUserMessageLogs = userMessageLogDao.countAllInfo(column, asc, filters);
+            totalCountMessagesContext.close();
             LOGGER.debug("count User Messages Logs [{}]", numberOfUserMessageLogs);
             result.setCount(numberOfUserMessageLogs);
+            Timer pagingMessages = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pageMessages"));
+            final Timer.Context pagingMessagesContext = pagingMessages.time();
             resultList = userMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
+            pagingMessagesContext.close();
+            totalListMessagesContext.close();
+
         }
         result.setMessageLogEntries(convertMessageLogInfoList(resultList));
         result.setMshRoles(MSHRole.values());

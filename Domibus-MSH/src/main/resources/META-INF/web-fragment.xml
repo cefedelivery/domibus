@@ -27,6 +27,21 @@
         <tracking-mode>COOKIE</tracking-mode>
     </session-config>
 
+    <listener>
+        <listener-class>eu.domibus.core.metrics.HealthCheckServletContextListener</listener-class>
+    </listener>
+    <listener>
+        <listener-class>eu.domibus.core.metrics.MetricsServletContextListener</listener-class>
+    </listener>
+    <servlet>
+        <servlet-name>metrics</servlet-name>
+        <servlet-class>com.codahale.metrics.servlets.AdminServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>metrics</servlet-name>
+        <url-pattern>/metrics/*</url-pattern>
+    </servlet-mapping>
+
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>

@@ -10,6 +10,7 @@
 
     <!-- Skip the security; the REST services exposed in the domibus-ext-services-api are protected by an interceptor -->
     <http pattern="/ext/**" security="none"/>
+    <http pattern="/metrics/**" security="none"/>
 
     <http auto-config="true" pattern="/services/**">
         <csrf disabled="true"/>
