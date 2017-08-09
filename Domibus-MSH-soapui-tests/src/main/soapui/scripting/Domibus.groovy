@@ -39,6 +39,7 @@ class Domibus
 	// Connect to a schema
 	def connectTo(String database, String driver, String url, String dbUser, String dbPassword){
 		log.info("Open connection to DB: " + database + " Url: " + url);
+		
 		def sql = null;
 
         try{
@@ -47,17 +48,17 @@ class Domibus
 			}else{
                 sql = Sql.newInstance(url, driver)
 			}
+			log.info "Connection opened with success";
 			return sql;
         }
         catch (SQLException ex){
             assert 0,"SQLException occurred: " + ex;
         }
-
 	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII	
     // Open 3 DB connections
     def openConnection(){
-        log.debug "Open DB connections"
+        //log.debug "Open DB connections"
 		
 		sqlBlue=connectTo(context.expand( '${#Project#databaseBlue}' ),context.expand('${#Project#driverBlue}'),context.expand('${#Project#jdbcUrlBlue}'),context.expand( '${#Project#blueDbUser}' ),context.expand( '${#Project#blueDbPassword}' ));
 		sqlRed=connectTo(context.expand( '${#Project#databaseRed}' ),context.expand('${#Project#driverRed}'),context.expand('${#Project#jdbcUrlRed}'),context.expand( '${#Project#redDbUser}' ),context.expand( '${#Project#redDbPassword}' ));
