@@ -1,4 +1,4 @@
-import {Component, OnInit} from "@angular/core";
+import {Component, OnInit, TemplateRef, ViewChild} from "@angular/core";
 import {UserResponseRO, UserState} from "./user";
 import {UserService} from "./user.service";
 import {MdDialog, MdDialogRef} from "@angular/material";
@@ -10,7 +10,8 @@ import {Http, Headers} from "@angular/http";
 import {DirtyOperations} from "../common/dirty-operations";
 import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
 import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
-
+import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
+import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 
 @Component({
   moduleId: module.id,
@@ -20,11 +21,17 @@ import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
 })
 
 
-export class UserComponent implements OnInit ,DirtyOperations{
+export class UserComponent implements OnInit, DirtyOperations {
+
+  @ViewChild('passwordTpl') passwordTpl: TemplateRef<any>;
+  @ViewChild('editableTpl') editableTpl: TemplateRef<any>;
+  @ViewChild('checkBoxTpl') checkBoxTpl: TemplateRef<any>;
+
+  columnPicker: ColumnPickerBase = new ColumnPickerBase()
+  rowLimiter: RowLimiterBase = new RowLimiterBase()
 
   users: Array<UserResponseRO> = [];
   userRoles: Array<String> = [];
-  pageSize: number = 10;
 
   selected = [];
 
@@ -38,20 +45,63 @@ export class UserComponent implements OnInit ,DirtyOperations{
   editedUser: UserResponseRO;
   test: boolean = false;
 
-  constructor(private http: Http, private userService: UserService, public dialog: MdDialog, private userValidatorService: UserValidatorService, private alertService: AlertService) {
+  constructor(private http: Http,
+              private userService: UserService,
+              public dialog: MdDialog,
+              private userValidatorService: UserValidatorService,
+              private alertService: AlertService) {
   }
 
   ngOnInit(): void {
-    this.getUsers();
-    this.getUserRoles();
+    this.columnPicker.allColumns = [
+      {
+        cellTemplate: this.editableTpl,
+        name: 'Username',
+        prop: 'userName',
+        canAutoResize: true
+      },
+      {
+        cellTemplate: this.editableTpl,
+        name: 'Email',
+        prop: 'email',
+        canAutoResize: true
+      },
+      {
+        cellTemplate: this.editableTpl,
+        name: 'Role',
+        prop: 'roles',
+        canAutoResize: true
+      },
+      {
+        cellTemplate: this.passwordTpl,
+        name: 'Password',
+        prop: 'password',
+        canAutoResize: true
+
+      },
+      {
+        cellTemplate: this.checkBoxTpl,
+        name: 'Active',
+        canAutoResize: true
+      }
+
+    ]
+
+    this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
+      return ["Username", "Role", "Password"].indexOf(col.name) != -1
+    })
+
+    this.getUsers()
+
+    this.getUserRoles()
   }
 
   getUsers(): void {
     this.userService.getUsers().subscribe(users => this.users = users);
   }
 
-  getUserRoles() : void {
-    this.userService.getUserRoles().subscribe( userroles => this.userRoles = userroles);
+  getUserRoles(): void {
+    this.userService.getUserRoles().subscribe(userroles => this.userRoles = userroles);
   }
 
   onSelect({selected}) {
@@ -79,15 +129,21 @@ export class UserComponent implements OnInit ,DirtyOperations{
     this.users.push(this.editedUser);
     this.users = this.users.slice();
     this.rowNumber = this.users.length - 1;
-    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {data: {edit: false, user: this.users[this.rowNumber], userroles: this.userRoles}});
+    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
+      data: {
+        edit: false,
+        user: this.users[this.rowNumber],
+        userroles: this.userRoles
+      }
+    });
     formRef.afterClosed().subscribe(result => {
-      if(result == true) {
+      if (result == true) {
         this.updateUsername(formRef.componentInstance.userName);
         this.updateEmail(formRef.componentInstance.email);
         this.updateRoles(formRef.componentInstance.roles.toString());
         this.updatePassword(formRef.componentInstance.password);
         this.updateActive(formRef.componentInstance.active);
-        if(UserState[UserState.PERSISTED]===this.users[this.rowNumber].status) {
+        if (UserState[UserState.PERSISTED] === this.users[this.rowNumber].status) {
           this.users[this.rowNumber].status = UserState[UserState.UPDATED]
         }
 
@@ -100,15 +156,21 @@ export class UserComponent implements OnInit ,DirtyOperations{
   }
 
   buttonEdit() {
-    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {data: {edit: true, user: this.users[this.rowNumber], userroles: this.userRoles}});
+    let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
+      data: {
+        edit: true,
+        user: this.users[this.rowNumber],
+        userroles: this.userRoles
+      }
+    });
     formRef.afterClosed().subscribe(result => {
-      if(result == true) {
+      if (result == true) {
         //this.updateUsername(formRef.componentInstance.userName);
         this.updateEmail(formRef.componentInstance.email);
         this.updateRoles(formRef.componentInstance.roles.toString());
         this.updatePassword(formRef.componentInstance.password);
         this.updateActive(formRef.componentInstance.active);
-        if(UserState[UserState.PERSISTED]===this.users[this.rowNumber].status) {
+        if (UserState[UserState.PERSISTED] === this.users[this.rowNumber].status) {
           this.users[this.rowNumber].status = UserState[UserState.UPDATED]
         }
 
@@ -176,22 +238,27 @@ export class UserComponent implements OnInit ,DirtyOperations{
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-          this.disableSelectionAndButtons();
-          this.http.put('rest/user/users', JSON.stringify(this.users), {headers: headers}).subscribe(res => {
-            this.getUsers();
-            this.getUserRoles();
-            this.alertService.success("The operation 'update users' completed successfully.", false);
-          }, err => {
-            this.getUsers();
-            this.getUserRoles();
-            this.alertService.error("The operation 'update users' not completed successfully.", false);
-          });
+        this.disableSelectionAndButtons();
+        this.http.put('rest/user/users', JSON.stringify(this.users), {headers: headers}).subscribe(res => {
+          this.getUsers();
+          this.getUserRoles();
+          this.alertService.success("The operation 'update users' completed successfully.", false);
+        }, err => {
+          this.getUsers();
+          this.getUserRoles();
+          this.alertService.error("The operation 'update users' not completed successfully.", false);
+        });
       }
     });
   }
 
   isDirty(): boolean {
     return this.enableCancel;
+  }
+
+  changePageSize(newPageLimit: number) {
+    this.rowLimiter.pageSize = newPageLimit
+    this.getUsers()
   }
 
 }

@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {Http, Headers, Response} from "@angular/http";
 import {AlertService} from "../alert/alert.service";
 import {MessagesRequestRO} from "./ro/messages-request-ro";
@@ -8,19 +8,28 @@ import {MoveDialogComponent} from "./move-dialog/move-dialog.component";
 import {MessageDialogComponent} from "./message-dialog/message-dialog.component";
 import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
 import {DirtyOperations} from "../common/dirty-operations";
+import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
+import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
+import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'app-jms',
   templateUrl: './jms.component.html',
   styleUrls: ['./jms.component.css']
 })
-export class JmsComponent implements OnInit,DirtyOperations {
+export class JmsComponent implements OnInit, DirtyOperations {
+
+  columnPicker: ColumnPickerBase = new ColumnPickerBase()
+  rowLimiter: RowLimiterBase = new RowLimiterBase()
 
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
   timestampFromMaxDate: Date = new Date();
   timestampToMinDate: Date = null;
   timestampToMaxDate: Date = new Date();
+
+  @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('rowWithJSONTpl') rowWithJSONTpl: TemplateRef<any>;
 
   queues = [];
 
@@ -43,14 +52,6 @@ export class JmsComponent implements OnInit,DirtyOperations {
   loading: boolean = false;
 
   rows: Array<any> = [];
-  pageSizes: Array<any> = [
-    {key: '10', value: 10},
-    {key: '25', value: 25},
-    {key: '50', value: 50},
-    {key: '100', value: 100}
-  ];
-  pageSize: number = this.pageSizes[0].value;
-
   request = new MessagesRequestRO();
   private headers = new Headers({'Content-Type': 'application/json'});
 
@@ -58,37 +59,87 @@ export class JmsComponent implements OnInit,DirtyOperations {
   }
 
   ngOnInit() {
+
+    this.columnPicker.allColumns = [
+      {
+        name: 'ID',
+        prop: 'id'
+      },
+      {
+        name: 'JMS Type',
+        prop: 'type',
+        width: 80
+      },
+      {
+        cellTemplate: this.rowWithDateFormatTpl,
+        name: 'Time',
+        prop: 'timestamp',
+        width: 80
+      },
+      {
+        name: 'Content',
+        prop: 'content'
+
+      },
+      {
+        cellTemplate: this.rowWithJSONTpl,
+        name: 'Custom prop',
+        prop: 'customProperties',
+        width: 250
+      },
+      {
+        cellTemplate: this.rowWithJSONTpl,
+        name: 'JMS prop',
+        prop: 'jmsproperties',
+        width: 200
+      }
+
+    ]
+
+    this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
+      return ["ID", "Time", "Custom prop", "JMS prop"].indexOf(col.name) != -1
+    })
+
     // set toDate equals to now
     this.request.toDate = new Date()
-    this.request.toDate.setHours(23,59,59,999)
+    this.request.toDate.setHours(23, 59, 59, 999)
 
-    this.getDestinations(true);
+    this.getDestinations().subscribe((response: Response) => {
+      this.setDefaultQueue('domibus.DLQ');
+      this.search();
+    });
+
   }
 
-  private getDestinations(searchSelectedDestination: boolean) {
-    this.http.get("rest/jms/destinations").subscribe(
+  private getDestinations(): Observable<Response> {
+    let observableResponse: Observable<Response> = this.http.get("rest/jms/destinations");
+
+    observableResponse.subscribe(
       (response: Response) => {
         this.queues = [];
         let destinations = response.json().jmsDestinations;
         for (let key in destinations) {
           this.queues.push(destinations[key]);
-          if (key.match('domibus\.DLQ')) {
-            this.selectedSource = destinations[key];
-          }
         }
-        if (searchSelectedDestination) {
-          this.search();
-        }
-        // console.log(this.queues);
       },
       (error: Response) => {
         this.alertService.error('Could not load queues: ' + error);
       }
     )
+
+    return observableResponse
+  }
+
+  private setDefaultQueue(queueName: string) {
+    this.queues.forEach(queue => {
+      if (queue.name === queueName) {
+        this.selectedSource = queue;
+      }
+    })
   }
 
   changePageSize(newPageSize: number) {
-    this.pageSize = newPageSize;
+    this.rowLimiter.pageSize = newPageSize;
     this.search();
   }
 
@@ -188,7 +239,7 @@ export class JmsComponent implements OnInit,DirtyOperations {
     dialogRef.afterClosed().subscribe(result => {
       if (!isNullOrUndefined(result) && !isNullOrUndefined(result.destination)) {
         let messageIds = this.selectedMessages.map((message) => message.id);
-        this.serverMove(this.selectedSource.name, result.destination, messageIds);
+        this.serverMove(this.currentSearchSelectedSource.name, result.destination, messageIds);
       }
     });
   }
@@ -222,7 +273,9 @@ export class JmsComponent implements OnInit,DirtyOperations {
         this.alertService.success("The operation 'move messages' completed successfully.");
 
         //refresh destinations
-        this.getDestinations(false);
+        this.getDestinations().subscribe((response: Response) => {
+          this.setDefaultQueue(this.currentSearchSelectedSource.name);
+        });
 
         //remove the selected rows
         let newRows = this.rows.filter((element) => {
@@ -245,7 +298,7 @@ export class JmsComponent implements OnInit,DirtyOperations {
     }, {headers: this.headers}).subscribe(
       () => {
         this.alertService.success("The operation 'updates on message(s)' completed successfully.");
-        this.getDestinations(false);
+        this.getDestinations();
         this.markedForDeletionMessages = [];
       },
       error => {
@@ -257,7 +310,6 @@ export class JmsComponent implements OnInit,DirtyOperations {
   isDirty(): boolean {
     return !isNullOrUndefined(this.markedForDeletionMessages) && this.markedForDeletionMessages.length > 0;
   }
-
 
 
 }

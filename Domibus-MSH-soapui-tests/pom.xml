@@ -16,7 +16,6 @@
 
     <properties>
         <mysql.version>5.1.34</mysql.version>
-        <jdbc.url>jdbc:mysql://localhost:3306/domibus?pinGlobalTxToPhysicalConnection=true</jdbc.url>
         <soapui.root.folder>${project.basedir}/src/main/soapui</soapui.root.folder>
         <soapui.scripting.library>${soapui.root.folder}/scripting</soapui.scripting.library>
         <soapui.ext.libraries>${soapui.root.folder}/lib</soapui.ext.libraries>
@@ -55,12 +54,12 @@
                     <!--<testCase>Dom001-Push-Submit Message-Basic Flow</testCase>-->
                     <!--<testCase>Dom118-Submit message-Data-AgreementRefId-Value</testCase>-->
                     <projectProperties>
-                        <value>localUrl=http://localhost:8180/domibus</value>
-                        <value>remoteUrl=http://localhost:9080/domibus</value>
+                        <value>${localUrl}</value>
+                        <value>${remoteUrl}</value>
                         <value>driverBlue=com.mysql.jdbc.Driver</value>
                         <value>driverRed=com.mysql.jdbc.Driver</value>
-                        <value>jdbcUrlBlue=jdbc:mysql://127.0.0.1:3304/domibus</value>
-                        <value>jdbcUrlRed=jdbc:mysql://127.0.0.1:3302/domibus</value>
+                        <value>${jdbcUrlBlue}</value>
+                        <value>${jdbcUrlRed}</value>
                         <value>databaseBlue=mysql</value>
                         <value>databaseRed=mysql</value>
                         <value>blueDbUser=root</value>

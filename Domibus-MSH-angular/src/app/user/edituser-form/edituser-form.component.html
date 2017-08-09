@@ -1,7 +1,7 @@
 <div style="width: 700px">
   <p class="domibusTextSmall" style="margin:0;font-weight: bold">User Edit</p>
   <form [formGroup]="userForm">
-    <md-card style="margin:0;padding:10px;">
+    <md-card>
       <div>
         <md-input-container [style.width]="'100%'">
           <input mdInput placeholder="Username" name="username" id="username_id" [value]="userName" (blur)="updateUserName($event)" [disabled]="editMode">

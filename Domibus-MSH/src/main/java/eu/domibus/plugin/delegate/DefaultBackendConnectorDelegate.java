@@ -2,9 +2,10 @@ package eu.domibus.plugin.delegate;
 
 import eu.domibus.api.util.ClassUtil;
 import eu.domibus.common.MessageReceiveFailureEvent;
+import eu.domibus.common.MessageStatusChangeEvent;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.BackendConnector;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +16,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefaultBackendConnectorDelegate implements BackendConnectorDelegate {
 
-    private static final Log LOG = LogFactory.getLog(DefaultBackendConnectorDelegate.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DefaultBackendConnectorDelegate.class);
 
     @Autowired
     ClassUtil classUtil;
+
+    @Override
+    public void messageStatusChanged(BackendConnector backendConnector, MessageStatusChangeEvent event) {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Notifying connector about status change event [{}]", event);
+        }
+        backendConnector.messageStatusChanged(event);
+    }
 
     @Override
     public void messageReceiveFailed(BackendConnector backendConnector, MessageReceiveFailureEvent event) {

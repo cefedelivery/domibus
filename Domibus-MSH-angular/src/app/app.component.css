@@ -36,7 +36,6 @@ html, body, material-app, md-sidenav-container, .my-content {
   padding-left: 20%;
 }
 
-
 .menu-collapsed .sideNavButton {
   text-align: center;
   padding: 0 !important;
@@ -67,6 +66,27 @@ html, body, material-app, md-sidenav-container, .my-content {
   text-align: left;
 }
 
-#collapse_id,#expand_id {
-  text-align: center;width:50px;height:50px;min-width: 0
+#topLogoText h4 {
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 0.6em;
+}
+
+#topLogo {
+  height: 90px;
+  vertical-align: middle;
+}
+
+#collapse_id, #expand_id {
+  text-align: center;
+  width: 50px;
+  height: 50px;
+  min-width: 0
+}
+
+.helpMenu {
+  float: right;
+  width: 50px;
+  padding-top: 25px;
+  padding-right: 40px;
 }

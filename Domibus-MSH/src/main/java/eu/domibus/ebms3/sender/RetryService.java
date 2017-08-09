@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
@@ -54,10 +55,10 @@ public class RetryService {
     private UserMessageLogDao userMessageLogDao;
 
     @Autowired
-    private MessagingDao messagingDao;
+    private UserMessageLogService userMessageLogService;
 
     @Autowired
-    private MessageExchangeService messageExchangeService;
+    private MessagingDao messagingDao;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {
@@ -110,7 +111,7 @@ public class RetryService {
             backendNotificationService.notifyOfSendFailure(messageIdToPurge);
             userMessageLogDao.setAsNotified(messageIdToPurge);
         }
-        userMessageLogDao.setMessageAsSendFailure(messageIdToPurge);
+        userMessageLogService.setMessageAsSendFailure(messageIdToPurge);
 
         if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
             messagingDao.clearPayloadData(messageIdToPurge);

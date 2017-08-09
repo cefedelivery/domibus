@@ -1,5 +1,6 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
@@ -33,6 +34,9 @@ public class ReliabilityServiceImpl implements ReliabilityService {
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
+
+    @Autowired
+    private UserMessageLogService userMessageLogService;
 
     @Autowired
     private BackendNotificationService backendNotificationService;
@@ -71,10 +75,10 @@ public class ReliabilityServiceImpl implements ReliabilityService {
             case OK:
                 switch (isOk) {
                     case OK:
-                        userMessageLogDao.setMessageAsAcknowledged(messageId);
+                        userMessageLogService.setMessageAsAcknowledged(messageId);
                         break;
                     case WARNING:
-                        userMessageLogDao.setMessageAsAckWithWarnings(messageId);
+                        userMessageLogService.setMessageAsAckWithWarnings(messageId);
                         break;
                     default:
                         assert false;
@@ -85,7 +89,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS);
                 break;
             case WAITING_FOR_CALLBACK:
-                userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
+                userMessageLogService.setMessageAsWaitingForReceipt(messageId);
                 break;
             case SEND_FAIL:
                 updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);

@@ -2,6 +2,8 @@ package eu.domibus.plugin;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.common.MessageStatus;
+import eu.domibus.common.MessageStatusChangeEvent;
 import eu.domibus.common.NotificationType;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
@@ -12,14 +14,17 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.QueueBrowser;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -194,4 +199,39 @@ public class NotificationListenerServiceTest {
     }
 
 
+    @Test
+    public void testDoMessageStatusChange(@Injectable final Message message, @Injectable final BackendConnector backendConnector) throws Exception {
+        final String messageId = "1";
+        final MessageStatus fromStatus = MessageStatus.READY_TO_SEND;
+        final MessageStatus toStatus = MessageStatus.ACKNOWLEDGED;
+        final Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+        new Expectations() {{
+            message.getStringProperty(MessageConstants.MESSAGE_ID);
+            result = messageId;
+
+            message.getStringProperty("fromStatus");
+            result = fromStatus.toString();
+
+            message.getStringProperty("toStatus");
+            result = toStatus.toString();
+
+            message.getLongProperty("changeTimestamp");
+            result = timestamp.getTime();
+        }};
+
+
+        objNotificationListenerService.doMessageStatusChange(message);
+
+
+        new Verifications() {{
+            MessageStatusChangeEvent event = null;
+            backendConnectorDelegate.messageStatusChanged(backendConnector, event = withCapture());
+            Assert.assertEquals(event.getMessageId(), messageId);
+            Assert.assertEquals(event.getFromStatus(), fromStatus);
+            Assert.assertEquals(event.getToStatus(), toStatus);
+            Assert.assertEquals(event.getChangeTimestamp(), timestamp);
+        }};
+
+    }
 }

@@ -3,6 +3,7 @@ package eu.domibus.common.services.impl;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MessageStatus;
@@ -57,6 +58,9 @@ public class MessageExchangeServiceImplTest {
 
     @Mock
     private UserMessageLogDao messageLogDao;
+
+    @Mock
+    private UserMessageLogService messageLogService;
 
     @Spy
     private ProcessValidator processValidator;
@@ -227,7 +231,7 @@ public class MessageExchangeServiceImplTest {
         when(messagingDao.findMessagingOnStatusReceiverAndMpc(eq("party1"), eq(MessageStatus.READY_TO_PULL), eq(mpc))).thenReturn(messagePullDtos);
 
         final String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party);
-        verify(messageLogDao, times(1)).setIntermediaryPullStatus(eq(testMessageId));
+        verify(messageLogService, times(1)).setIntermediaryPullStatus(eq(testMessageId));
         assertEquals(testMessageId, messageId);
 
     }

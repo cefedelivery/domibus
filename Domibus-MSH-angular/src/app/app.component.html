@@ -2,14 +2,11 @@
   <md-sidenav mode="side" opened="true" ngClass="{{menuClass}}">
     <!-- sidenav content -->
     <div id="topLogo">
-      <!--<div>-->
-        <img src="assets/images/Domibus_logo_icon.svg" [attr.height]="fullMenu ? '74px' : '40px'" [attr.width]="fullMenu ? '74px' : '40px'"/>
-      <!--</div>-->
+      <img src="assets/images/Domibus_logo_icon.svg" [attr.height]="fullMenu ? '74px' : '40px'" [attr.width]="fullMenu ? '74px' : '40px'"/>
       <div id="topLogoText" *ngIf="fullMenu">
-        <p class="domibusTextSmall ">Domibus
-          <br class="domibusTextSmall"><b>Administration</b>
-          <br class="domibusTextSmall"><b>Console</b>
-        </p>
+        <h4>Domibus</h4>
+        <h4>Administration</h4>
+        <h4>Console</h4>
       </div>
     </div>
 
@@ -19,7 +16,8 @@
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/messagefilter']" *ngIf="hasAdmin()"
             id="messagefilter_id">
-      <md-icon md-tooltip="Message Filter" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">filter_list</md-icon>
+      <md-icon md-tooltip="Message Filter" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">filter_list
+      </md-icon>
       <span *ngIf="fullMenu">Message Filter</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/errorlog']" id="errorlog_id">
@@ -71,7 +69,9 @@
     </div>
 
   </md-sidenav>
-
+  <div class="helpMenu">
+    <page-helper></page-helper>
+  </div>
   <!-- primary content -->
   <div id=".my-content">
     <alert></alert>
