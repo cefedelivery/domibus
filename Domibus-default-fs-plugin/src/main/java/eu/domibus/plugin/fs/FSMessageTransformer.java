@@ -29,6 +29,8 @@ public class FSMessageTransformer
     public static final String MIME_TYPE = "MimeType";
     public static final String CHARSET = "CharacterSet";
 
+    private ObjectFactory objectFactory = new ObjectFactory();
+
     /**
      * Transforms {@link eu.domibus.plugin.Submission} to {@link FSMessage}
      *
@@ -39,10 +41,10 @@ public class FSMessageTransformer
      */
     @Override
     public FSMessage transformFromSubmission(final Submission submission, final FSMessage messageOut) {
-        UserMessage metadata = new UserMessage();
+        UserMessage metadata = objectFactory.createUserMessage();
         metadata.setPartyInfo(getPartyInfoFromSubmission(submission));
         metadata.setCollaborationInfo(getCollaborationInfoFromSubmission(submission));
-        metadata.setMessageInfo(getMessageInfoFromSubmission(submission));
+        //metadata.setMessageInfo(getMessageInfoFromSubmission(submission));
         metadata.setMessageProperties(getMessagePropertiesFromSubmission(submission));
 
         try {
@@ -107,10 +109,10 @@ public class FSMessageTransformer
     }
 
     private MessageProperties getMessagePropertiesFromSubmission(Submission submission) {
-        MessageProperties messageProperties = new MessageProperties();
+        MessageProperties messageProperties = objectFactory.createMessageProperties();
 
         for (Submission.TypedProperty typedProperty: submission.getMessageProperties()) {
-            Property messageProperty = new Property();
+            Property messageProperty = objectFactory.createProperty();
             messageProperty.setType(typedProperty.getType());
             messageProperty.setName(typedProperty.getKey());
             messageProperty.setValue(typedProperty.getValue());
@@ -138,15 +140,15 @@ public class FSMessageTransformer
     }
 
     private CollaborationInfo getCollaborationInfoFromSubmission(Submission submission) {
-        AgreementRef agreementRef = new AgreementRef();
+        AgreementRef agreementRef = objectFactory.createAgreementRef();
         agreementRef.setType(submission.getAgreementRefType());
         agreementRef.setValue(submission.getAgreementRef());
 
-        Service service = new Service();
+        Service service = objectFactory.createService();
         service.setType(submission.getServiceType());
         service.setValue(submission.getService());
 
-        CollaborationInfo collaborationInfo = new CollaborationInfo();
+        CollaborationInfo collaborationInfo = objectFactory.createCollaborationInfo();
         collaborationInfo.setAgreementRef(agreementRef);
         collaborationInfo.setService(service);
         collaborationInfo.setAction(submission.getAction());
@@ -155,11 +157,13 @@ public class FSMessageTransformer
         return collaborationInfo;
     }
 
+    /*
     private MessageInfo getMessageInfoFromSubmission(Submission submission) {
-        MessageInfo messageInfo = new MessageInfo();
+        MessageInfo messageInfo = objectFactory.createMessageInfo();
         messageInfo.setMessageId(submission.getMessageId());
         return messageInfo;
     }
+    */
 
     private void setPartyInfo(Submission submission, PartyInfo partyInfo) {
         From from = partyInfo.getFrom();
@@ -178,11 +182,11 @@ public class FSMessageTransformer
         Submission.Party fromParty = submission.getFromParties().iterator().next();
         String fromRole = submission.getFromRole();
 
-        PartyId fromPartyId = new PartyId();
+        PartyId fromPartyId = objectFactory.createPartyId();
         fromPartyId.setType(fromParty.getPartyIdType());
         fromPartyId.setValue(fromParty.getPartyId());
 
-        From from = new From();
+        From from = objectFactory.createFrom();
         from.setPartyId(fromPartyId);
         from.setRole(fromRole);
 
@@ -190,16 +194,16 @@ public class FSMessageTransformer
         Submission.Party toParty = submission.getToParties().iterator().next();
         String toRole = submission.getToRole();
 
-        PartyId toPartyId = new PartyId();
+        PartyId toPartyId = objectFactory.createPartyId();
         toPartyId.setType(toParty.getPartyIdType());
         toPartyId.setValue(toParty.getPartyId());
 
-        To to = new To();
+        To to = objectFactory.createTo();
         to.setPartyId(toPartyId);
         to.setRole(toRole);
 
         // PartyInfo
-        PartyInfo partyInfo = new PartyInfo();
+        PartyInfo partyInfo = objectFactory.createPartyInfo();
         partyInfo.setFrom(from);
         partyInfo.setTo(to);
 

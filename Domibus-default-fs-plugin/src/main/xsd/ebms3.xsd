@@ -21,22 +21,22 @@
 
     <xsd:complexType name="UserMessage">
         <xsd:all>
-            <xsd:element name="MessageInfo" type="MessageInfo" minOccurs="0" maxOccurs="1"/>
+            <!--xsd:element name="MessageInfo" type="MessageInfo" minOccurs="0" maxOccurs="1"/-->
             <xsd:element name="PartyInfo" type="PartyInfo" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="CollaborationInfo" type="CollaborationInfo" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="MessageProperties" type="tns:MessageProperties" minOccurs="1" maxOccurs="1"/>
-            <xsd:element name="PayloadInfo" type="tns:PayloadInfo" minOccurs="0" maxOccurs="1"/>
+            <!--xsd:element name="PayloadInfo" type="tns:PayloadInfo" minOccurs="0" maxOccurs="1"/-->
         </xsd:all>
         <xsd:attribute name="mpc" type="xsd:anyURI" use="optional"/>
     </xsd:complexType>
 
-    <xsd:complexType name="MessageInfo">
+    <!--xsd:complexType name="MessageInfo">
         <xsd:all>
             <xsd:element name="Timestamp" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="MessageId" type="tns:max255-non-empty-string" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="RefToMessageId" type="tns:max255-non-empty-string" minOccurs="0" maxOccurs="1"/>
         </xsd:all>
-    </xsd:complexType>
+    </xsd:complexType-->
 
     <xsd:complexType name="PartyInfo">
         <xsd:all>
@@ -93,20 +93,20 @@
         </xsd:simpleContent>
     </xsd:complexType>
 
-    <xsd:complexType name="PayloadInfo">
+    <!--xsd:complexType name="PayloadInfo">
         <xsd:sequence>
             <xsd:element name="PartInfo" type="tns:PartInfo" minOccurs="1" maxOccurs="unbounded"/>
         </xsd:sequence>
-    </xsd:complexType>
+    </xsd:complexType-->
 
-    <xsd:complexType name="PartInfo">
+    <!--xsd:complexType name="PartInfo">
         <xsd:all>
             <xsd:element type="Schema" name="Schema" minOccurs="0"/>
             <xsd:element name="Description" type="tns:Description" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="PartProperties" type="tns:PartProperties" minOccurs="0"/>
         </xsd:all>
         <xsd:attribute name="href" type="xsd:token" use="required"/>
-    </xsd:complexType>
+    </xsd:complexType-->
 
     <xsd:complexType name="Property">
         <xsd:simpleContent>
@@ -117,11 +117,11 @@
         </xsd:simpleContent>
     </xsd:complexType>
 
-    <xsd:complexType name="PartProperties">
+    <!--xsd:complexType name="PartProperties">
         <xsd:sequence>
             <xsd:element name="Property" type="tns:Property" maxOccurs="unbounded"/>
         </xsd:sequence>
-    </xsd:complexType>
+    </xsd:complexType-->
 
     <xsd:complexType name="MessageProperties">
         <xsd:sequence>
@@ -129,19 +129,19 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:complexType name="Schema">
+    <!--xsd:complexType name="Schema">
         <xsd:attribute type="xsd:anyURI" name="location" use="optional"/>
         <xsd:attribute type="tns:max255-non-empty-string" name="version" use="optional"/>
         <xsd:attribute type="tns:max255-non-empty-string" name="namespace" use="optional"/>
-    </xsd:complexType>
+    </xsd:complexType-->
 
-    <xsd:complexType name="Description">
+    <!--xsd:complexType name="Description">
         <xsd:simpleContent>
             <xsd:extension base="tns:max255-non-empty-string">
                 <xsd:attribute ref="xml:lang" use="required"/>
             </xsd:extension>
         </xsd:simpleContent>
-    </xsd:complexType>
+    </xsd:complexType-->
 
     <xsd:simpleType name="max255-non-empty-string">
         <xsd:restriction base="xsd:string">
