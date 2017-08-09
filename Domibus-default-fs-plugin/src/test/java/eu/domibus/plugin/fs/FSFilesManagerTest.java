@@ -135,9 +135,13 @@ public class FSFilesManagerTest {
     public void testSetUpFileSystem_Domain() throws Exception {
         new Expectations(instance) {{
             fsPluginProperties.getLocation("DOMAIN1");
-            fsPluginProperties.getUser("DOMAIN1");
-            fsPluginProperties.getPassword("DOMAIN1");
             result = "ram:///FSFilesManagerTest/samplefolder";
+            
+            fsPluginProperties.getUser("DOMAIN1");
+            result = "user";
+            
+            fsPluginProperties.getPassword("DOMAIN1");
+            result = "secret";
         }};
         
         FileObject result = instance.setUpFileSystem("DOMAIN1");
