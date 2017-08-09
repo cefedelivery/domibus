@@ -2,6 +2,7 @@ package eu.domibus.plugin.fs;
 
 import javax.activation.DataHandler;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
@@ -12,6 +13,7 @@ import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
 import org.apache.commons.vfs2.util.FileObjectDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -33,6 +35,10 @@ public class FSFilesManager {
     private static final String PARENT_RELATIVE_PATH = "../";
 
     public static final String INCOMING_FOLDER = "IN";
+    public static final String OUTGOING_FOLDER = "OUT";
+    
+    @Autowired
+    private FSPluginProperties fsPluginProperties;
 
     public FileObject getEnsureRootLocation(final String location, final String domain,
             final String user, final String password) throws FileSystemException, FSSetUpException {
@@ -102,6 +108,29 @@ public class FSFilesManager {
         file.moveTo(newFile);
         
         return newFile;
+    }
+    
+    public FileObject setUpFileSystem(String domain) throws FileSystemException, FSSetUpException {
+        String location = fsPluginProperties.getLocation(domain);
+        String authDomain = null;
+        String user = fsPluginProperties.getUser(domain);
+        String password = fsPluginProperties.getPassword(domain);
+        
+        FileObject rootDir;
+        if (StringUtils.isEmpty(user) || StringUtils.isEmpty(password)) {
+            rootDir = getEnsureRootLocation(location);
+        } else {
+            rootDir = getEnsureRootLocation(location, authDomain, user, password);
+        }
+        
+        return rootDir;
+    }
+    
+    public FileObject setUpFileSystem() throws FileSystemException, FSSetUpException {        
+        String location = fsPluginProperties.getLocation();
+        FileObject rootDir = getEnsureRootLocation(location);
+        
+        return rootDir;
     }
 
 }

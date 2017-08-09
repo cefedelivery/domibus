@@ -59,8 +59,39 @@ public class FSFileNameHelperTest {
 
     @Test
     public void testIsProcessed_Fail3() {
-        // missing message ID altogether
+        // missing message ID
         boolean result = FSFileNameHelper.isProcessed("invoice.pdf");
+        
+        Assert.assertFalse(result);
+    }
+    
+    @Test
+    public void testIsMessageRelated() {
+        boolean result = FSFileNameHelper.isMessageRelated("invoice_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.pdf", "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
+        
+        Assert.assertTrue(result);
+    }
+    
+    @Test
+    public void testIsMessageRelated_Fail1() {
+        // missing message ID
+        boolean result = FSFileNameHelper.isMessageRelated("invoice.pdf", "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
+        
+        Assert.assertFalse(result);
+    }
+    
+    @Test
+    public void testIsMessageRelated_Fail2() {
+        // missing one character in UUID in message ID
+        boolean result = FSFileNameHelper.isMessageRelated("invoice_c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.pdf", "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
+        
+        Assert.assertFalse(result);
+    }
+    
+    @Test
+    public void testIsMessageRelated_Fail3() {
+        // missing underscore before UUID
+        boolean result = FSFileNameHelper.isMessageRelated("invoice3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.pdf", "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
         
         Assert.assertFalse(result);
     }

@@ -40,6 +40,10 @@ public class FSFileNameHelper {
         return PROCESSED_FILE_PATTERN.matcher(fileName).find();
     }
     
+    public static boolean isMessageRelated(String fileName, String messageId) {
+        return fileName.contains(NAME_SEPARATOR + messageId);
+    }
+    
     public static String deriveFileName(final String fileName, final String messageId) {
         int extensionIdx = StringUtils.lastIndexOf(fileName, EXTENSION_SEPARATOR);
         

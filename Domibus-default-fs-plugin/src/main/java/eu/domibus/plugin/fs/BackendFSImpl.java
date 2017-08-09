@@ -93,7 +93,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         }
             
         try {
-            FileObject rootDir = fsFilesManager.getEnsureRootLocation(fsPluginProperties.getLocation());
+            FileObject rootDir = fsFilesManager.setUpFileSystem();
             FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
             
             String fileName = messageId;
@@ -149,18 +149,18 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         try {
             FileObject rootDir;
             if (domain != null) {
-                rootDir = setUpFileSystem(domain);
+                rootDir = fsFilesManager.setUpFileSystem(domain);
             } else {
-                rootDir = setUpFileSystem();
+                rootDir = fsFilesManager.setUpFileSystem();
             }
             
-            // FIXME: remove magic string
-            FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, "OUT");
+            FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
             FileObject[] files = fsFilesManager.findAllDescendantFiles(outgoingFolder);
             
             FileObject targetFile = null;
             for (FileObject file : files) {
-                if (file.getName().getBaseName().contains(messageId)) {
+                String baseName = file.getName().getBaseName();
+                if (FSFileNameHelper.isMessageRelated(baseName, messageId)) {
                     targetFile = file;
                     break;
                 }
@@ -180,30 +180,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         }
         
         return false;
-    }
-    
-    // FIXME: this duplicates code in FSSendMessagesService
-    private FileObject setUpFileSystem(String domain) throws FileSystemException, FSSetUpException {
-        String location = fsPluginProperties.getLocation(domain);
-        String authDomain = null;
-        String user = fsPluginProperties.getUser(domain);
-        String password = fsPluginProperties.getPassword(domain);
-        
-        FileObject rootDir;
-        if (StringUtils.isEmpty(user) || StringUtils.isEmpty(password)) {
-            rootDir = fsFilesManager.getEnsureRootLocation(location);
-        } else {
-            rootDir = fsFilesManager.getEnsureRootLocation(location, authDomain, user, password);
-        }
-        
-        return rootDir;
-    }
-    
-    private FileObject setUpFileSystem() throws FileSystemException, FSSetUpException {        
-        String location = fsPluginProperties.getLocation();
-        FileObject rootDir = fsFilesManager.getEnsureRootLocation(location);
-        
-        return rootDir;
     }
 
 }

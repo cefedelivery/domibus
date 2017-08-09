@@ -44,7 +44,6 @@ public class FSSendMessagesService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSSendMessagesService.class);
     
-    private static final String OUTGOING_FOLDER = "OUT";
     private static final String METADATA_FILE_NAME = "metadata.xml";
 
     @Autowired
@@ -74,12 +73,12 @@ public class FSSendMessagesService {
         try {
             FileObject rootDir;
             if (domain != null) {
-                rootDir = setUpFileSystem(domain);
+                rootDir = fsFilesManager.setUpFileSystem(domain);
             } else {
-                rootDir = setUpFileSystem();
+                rootDir = fsFilesManager.setUpFileSystem();
             }
             
-            FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, OUTGOING_FOLDER);
+            FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
             
             // TODO: remove this
             FileObject[] contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
@@ -147,29 +146,6 @@ public class FSSendMessagesService {
         }
         
         return filteredFiles;
-    }
-
-    private FileObject setUpFileSystem(String domain) throws FileSystemException, FSSetUpException {
-        String location = fsPluginProperties.getLocation(domain);
-        String authDomain = null;
-        String user = fsPluginProperties.getUser(domain);
-        String password = fsPluginProperties.getPassword(domain);
-        
-        FileObject rootDir;
-        if (StringUtils.isEmpty(user) || StringUtils.isEmpty(password)) {
-            rootDir = fsFilesManager.getEnsureRootLocation(location);
-        } else {
-            rootDir = fsFilesManager.getEnsureRootLocation(location, authDomain, user, password);
-        }
-        
-        return rootDir;
-    }
-    
-    private FileObject setUpFileSystem() throws FileSystemException, FSSetUpException {        
-        String location = fsPluginProperties.getLocation();
-        FileObject rootDir = fsFilesManager.getEnsureRootLocation(location);
-        
-        return rootDir;
     }
 
     private UserMessage parseMetadata(FileObject metadataFile) throws JAXBException, FileSystemException {
