@@ -249,4 +249,24 @@ public class BackendFSImplTest {
         Assert.assertNull(result);
     }
 
+    @Test
+    public void testResolveDomain_bdxNoprocessTC1Leg1() {
+        String service = "bdx:noprocess";
+        String action = "TC1Leg1";
+
+        final Set<String> domains = new HashSet<>();
+        domains.add("DOMAIN1");
+
+        new Expectations(1, backendFS) {{
+            fsPluginProperties.getDomains();
+            result = domains;
+
+            fsPluginProperties.getExpression("DOMAIN1");
+            result = "bdx:noprocess#TC1Leg1";
+        }};
+
+        String result = backendFS.resolveDomain(service, action);
+        Assert.assertEquals("DOMAIN1", result);
+    }
+
 }

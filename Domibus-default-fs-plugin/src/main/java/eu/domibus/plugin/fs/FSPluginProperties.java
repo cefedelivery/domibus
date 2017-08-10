@@ -46,7 +46,7 @@ public class FSPluginProperties {
 
     private static final String PASSWORD = "password";
 
-    private static final String EXPRESSION = "password";
+    private static final String EXPRESSION = "expression";
 
     @Resource(name = "fsPluginProperties")
     private Properties properties;

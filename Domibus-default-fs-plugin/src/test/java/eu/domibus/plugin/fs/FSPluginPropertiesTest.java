@@ -98,6 +98,11 @@ public class FSPluginPropertiesTest {
     }
 
     @Test
+    public void getExpressionTest() throws Exception {
+        Assert.assertEquals("bdx:noprocess#TC1Leg1", fSPluginProperties.getExpression(DOMAIN1));
+    }
+
+    @Test
     public void getDomainsTest() throws Exception {
         Set<String> expected = new HashSet<>();
         expected.add(DOMAIN1);
