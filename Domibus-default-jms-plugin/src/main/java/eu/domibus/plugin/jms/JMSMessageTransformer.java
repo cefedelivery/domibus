@@ -172,13 +172,17 @@ public class JMSMessageTransformer
             final String payFileNameProp = String.valueOf(MessageFormat.format(PAYLOAD_FILE_NAME_FORMAT, counter));
             if(p.getPayloadDatahandler() != null ) {
                 if (putAttachmentsInQueue) {
+                    LOG.debug("puAttachmentsInQueue is true");
                     messageOut.setBytes(propPayload, IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
                 } else {
+                    LOG.debug("puAttachmentsInQueue is false");
                     DataSource dataSource = p.getPayloadDatahandler().getDataSource();
                     if(dataSource instanceof FileDataSource) {
+                        LOG.debug("Payload File location will be added as property");
                         FileDataSource fileDataSource = (FileDataSource) dataSource;
                         messageOut.setStringProperty(payFileNameProp, fileDataSource.getFile().getAbsolutePath());
                     } else {
+                        LOG.warn("Payload File location will not be added as property since domibus.attachment.storage.location is not configured");
                         messageOut.setBytes(propPayload, IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
                     }
                 }
