@@ -233,7 +233,6 @@ public class BackendFSImplTest {
             result = domains;
 
             fsPluginProperties.getExpression("DOMAIN1");
-            // TODO confirm requirements ODRDocumentInvoiceService.*#Print.?
             result = "ODRDocumentInvoiceService.*#Print.?";
 
             fsPluginProperties.getExpression("DOMAIN2");

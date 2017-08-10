@@ -97,13 +97,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             return;
         }
 
-        // Resolve domain
-        CollaborationInfo collaborationInfo = fsMessage.getMetadata().getCollaborationInfo();
-        String service = collaborationInfo.getService().getValue();
-        String action = collaborationInfo.getAction();
-        String domain = resolveDomain(service, action);
-
         try {
+            String domain = resolveDomain(fsMessage);
             FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
             FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
             
@@ -124,6 +119,13 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         } catch (IOException | FSSetUpException ex) {
             LOG.error("An error occured saving downloaded message", ex);
         }
+    }
+
+    private String resolveDomain(FSMessage fsMessage) {
+        CollaborationInfo collaborationInfo = fsMessage.getMetadata().getCollaborationInfo();
+        String service = collaborationInfo.getService().getValue();
+        String action = collaborationInfo.getAction();
+        return resolveDomain(service, action);
     }
 
     protected String resolveDomain(String service, String action) {
