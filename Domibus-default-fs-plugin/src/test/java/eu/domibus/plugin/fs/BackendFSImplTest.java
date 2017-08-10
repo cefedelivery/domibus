@@ -171,13 +171,55 @@ public class BackendFSImplTest {
     }
 
     @Test
-    public void testResolveDomain() {
+    public void testResolveDomain_1() {
         String serviceDomain1 = "ODRDocumentInvoiceService123";
         String actionDomain1 = "PrintA";
 
+        final Set<String> domains = new HashSet<>();
+        domains.add("DOMAIN1");
+
+        new Expectations(1, backendFS) {{
+            fsPluginProperties.getDomains();
+            result = domains;
+
+            fsPluginProperties.getExpression("DOMAIN1");
+            // TODO confirm requirements ODRDocumentInvoiceService.*#Print.?
+            result = "ODRDocumentInvoiceService.*#Print.?";
+        }};
+
+        String result = backendFS.resolveDomain(serviceDomain1, actionDomain1);
+        Assert.assertEquals("DOMAIN1", result);
+    }
+
+    @Test
+    public void testResolveDomain_2() {
         String serviceDomain2 = "BRISReceptionService";
         String actionDomain2 = "SendEmailAction";
         String actionDomain2a = "ReceiveBillAction";
+
+        final Set<String> domains = new HashSet<>();
+        domains.add("DOMAIN1");
+        domains.add("DOMAIN2");
+
+        new Expectations(1, backendFS) {{
+            fsPluginProperties.getDomains();
+            result = domains;
+
+            fsPluginProperties.getExpression("DOMAIN2");
+            result = "BRISReceptionService#.*";
+        }};
+
+        String result = backendFS.resolveDomain(serviceDomain2, actionDomain2);
+        Assert.assertEquals("DOMAIN2", result);
+
+        result = backendFS.resolveDomain(serviceDomain2, actionDomain2a);
+        Assert.assertEquals("DOMAIN2", result);
+    }
+
+    @Test
+    public void testResolveDomain_WithoutMatch() {
+        String serviceDomain1 = "ODRDocumentInvoiceService123";
+        String actionDomain1 = "PrintA";
 
         String serviceWithoutMatch = "FSService123";
         String actionWithoutMatch = "SomeAction";
@@ -198,16 +240,7 @@ public class BackendFSImplTest {
             result = "BRISReceptionService#.*";
         }};
 
-        String result = backendFS.resolveDomain(serviceDomain1, actionDomain1);
-        Assert.assertEquals("DOMAIN1", result);
-
-        result = backendFS.resolveDomain(serviceDomain2, actionDomain2);
-        Assert.assertEquals("DOMAIN2", result);
-
-        result = backendFS.resolveDomain(serviceDomain2, actionDomain2a);
-        Assert.assertEquals("DOMAIN2", result);
-
-        result = backendFS.resolveDomain(serviceWithoutMatch, actionWithoutMatch);
+        String result = backendFS.resolveDomain(serviceWithoutMatch, actionWithoutMatch);
         Assert.assertNull(result);
 
         result = backendFS.resolveDomain(serviceDomain1, actionWithoutMatch);
