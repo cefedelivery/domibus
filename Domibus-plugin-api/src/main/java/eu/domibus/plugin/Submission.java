@@ -535,10 +535,6 @@ public class Submission {
         this.payloads.add(new Submission.Payload(contentId, payloadDatahandler, payloadProperties, inBody, description, schemaLocation));
     }
 
-    /*public void addPayload(final String contentId, final DataHandler payloadDatahandler, final Collection<TypedProperty> payloadProperties, final boolean inBody, final Description description, final String schemaLocation, final String internalFileName) {
-        this.payloads.add(new Submission.Payload(contentId, payloadDatahandler, payloadProperties, inBody, description, schemaLocation, internalFileName));
-    }*/
-
     /**
      * This method adds one originating party to the {@link java.util.Set} of {@link eu.domibus.plugin.Submission.Party} elements.
      * <p/>
