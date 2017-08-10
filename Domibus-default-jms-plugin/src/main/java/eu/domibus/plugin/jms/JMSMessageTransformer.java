@@ -26,22 +26,20 @@
 package eu.domibus.plugin.jms;
 
 
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import org.apache.commons.io.IOUtils;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang.StringUtils;
 
 import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.activation.URLDataSource;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.mail.util.ByteArrayDataSource;
-import java.io.*;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -87,11 +85,6 @@ public class JMSMessageTransformer
     @Override
     public MapMessage transformFromSubmission(final Submission submission, final MapMessage messageOut) {
         try {
-            final boolean putAttachmentsInQueue;
-            String putAttachmentsInQueueStr = properties.getProperty(PUT_ATTACHMENTS_IN_QUEUE);
-            putAttachmentsInQueue = StringUtils.isEmpty(putAttachmentsInQueueStr) ||
-                    "true".equalsIgnoreCase(putAttachmentsInQueueStr);
-
             messageOut.setStringProperty(ACTION, submission.getAction());
             messageOut.setStringProperty(SERVICE, submission.getService());
             messageOut.setStringProperty(SERVICE_TYPE, submission.getServiceType());
@@ -140,8 +133,10 @@ public class JMSMessageTransformer
                 }
             }
 
+            final boolean putAttachmentsInQueue = Boolean.parseBoolean(properties.getProperty(PUT_ATTACHMENTS_IN_QUEUE, "true"));
             for (final Submission.Payload p : submission.getPayloads()) {
-                counter = transformFromSubmissionHandlePayload(messageOut, putAttachmentsInQueue, counter, p);
+                transformFromSubmissionHandlePayload(messageOut, putAttachmentsInQueue, counter, p);
+                counter++;
             }
             messageOut.setIntProperty(TOTAL_NUMBER_OF_PAYLOADS, submission.getPayloads().size());
         } catch (final JMSException | IOException ex) {
@@ -152,8 +147,7 @@ public class JMSMessageTransformer
         return messageOut;
     }
 
-    private int transformFromSubmissionHandlePayload(MapMessage messageOut, boolean putAttachmentsInQueue, int counter, Submission.Payload p) throws JMSException, IOException {
-        int result = counter;
+    private void transformFromSubmissionHandlePayload(MapMessage messageOut, boolean putAttachmentsInQueue, int counter, Submission.Payload p) throws JMSException, IOException {
         if (p.isInBody()) {
             if(p.getPayloadDatahandler() != null) {
                 messageOut.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
@@ -172,11 +166,15 @@ public class JMSMessageTransformer
             final String payFileNameProp = String.valueOf(MessageFormat.format(PAYLOAD_FILE_NAME_FORMAT, counter));
             if(p.getPayloadDatahandler() != null ) {
                 if (putAttachmentsInQueue) {
-                    LOG.debug("puAttachmentsInQueue is true");
+                    LOG.debug("putAttachmentsInQueue is true");
                     messageOut.setBytes(propPayload, IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
                 } else {
-                    LOG.debug("puAttachmentsInQueue is false");
-                    DataSource dataSource = p.getPayloadDatahandler().getDataSource();
+                    LOG.debug("putAttachmentsInQueue is false");
+                    // TODO: like the findMime
+                    messageOut.setStringProperty(payFileNameProp, findFilename(p.getPayloadProperties()));
+
+                    //messageOut.setStringProperty(payFileNameProp, p.getPayloadDatahandler().getDataSource().getName());
+                    /*DataSource dataSource = p.getPayloadDatahandler().getDataSource();
                     if(dataSource instanceof FileDataSource) {
                         LOG.debug("Payload File location will be added as property");
                         FileDataSource fileDataSource = (FileDataSource) dataSource;
@@ -184,7 +182,7 @@ public class JMSMessageTransformer
                     } else {
                         LOG.warn("Payload File location will not be added as property since domibus.attachment.storage.location is not configured");
                         messageOut.setBytes(propPayload, IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
-                    }
+                    }*/
                 }
             }
             messageOut.setStringProperty(payMimeTypeProp, findMime(p.getPayloadProperties()));
@@ -193,18 +191,24 @@ public class JMSMessageTransformer
             if (p.getDescription() != null) {
                 messageOut.setStringProperty(payDescrip, p.getDescription().getValue());
             }
-            result++;
         }
-        return result;
     }
 
-    private String findMime(Collection<Submission.TypedProperty> props) {
+    private String findElement(String element, Collection<Submission.TypedProperty> props) {
         for (Submission.TypedProperty prop : props) {
-            if (MIME_TYPE.equals(prop.getKey()) && isEmpty(trim(prop.getType()))) {
+            if (element.equals(prop.getKey()) && isEmpty(trim(prop.getType()))) {
                 return prop.getValue();
             }
         }
         return null;
+    }
+
+    private String findMime(Collection<Submission.TypedProperty> props) {
+        return findElement(MIME_TYPE, props);
+    }
+
+    private String findFilename(Collection<Submission.TypedProperty> props) {
+        return findElement(PAYLOAD_FILENAME, props);
     }
 
     /**

@@ -153,7 +153,7 @@ public class SubmissionAS4Transformer {
 
         if (messaging.getPayloadInfo() != null) {
             for (final PartInfo partInfo : messaging.getPayloadInfo().getPartInfo()) {
-                transformFromMessagingSetPayload(result, partInfo);
+                addPayload(result, partInfo);
             }
         }
         result.setFromRole(messaging.getPartyInfo().getFrom().getRole());
@@ -175,12 +175,15 @@ public class SubmissionAS4Transformer {
         return result;
     }
 
-    private void transformFromMessagingSetPayload(Submission result, PartInfo partInfo) {
+    private void addPayload(Submission result, PartInfo partInfo) {
         final Collection<Submission.TypedProperty> properties = new ArrayList<>();
         if (partInfo.getPartProperties() != null) {
             for (final Property property : partInfo.getPartProperties().getProperties()) {
                 properties.add(new Submission.TypedProperty(property.getName(), property.getValue(), property.getType()));
             }
+        }
+        if (partInfo.getFileName() != null) {
+            properties.add(new Submission.TypedProperty("FileName", partInfo.getFileName(), ""));
         }
         Submission.Description description = null;
         if(partInfo.getDescription() != null){
