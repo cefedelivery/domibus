@@ -100,6 +100,8 @@ public class MessageLogResource {
             result.setCount(numberOfUserMessageLogs);
             resultList = userMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
         }
+        //needed here because the info is not needed for the queries but is used by the gui as the filter is returned with
+        //the result. Why??.
         filters.put("messageType", messageType);
         result.setMessageLogEntries(convertMessageLogInfoList(resultList));
         result.setMshRoles(MSHRole.values());

@@ -87,7 +87,6 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
 
     public int countAllInfo(boolean asc, HashMap<String, Object> filters) {
         String filteredSignalMessageLogQuery = signalMessageLogInfoFilter.countSignalMessageLogQuery(asc, filters);
-        LOG.info("*** BAD ***" + filteredSignalMessageLogQuery);
         TypedQuery<Number> countQuery = em.createQuery(filteredSignalMessageLogQuery, Number.class);
         countQuery = signalMessageLogInfoFilter.applyParameters(countQuery, filters);
         final Number count = countQuery.getSingleResult();
