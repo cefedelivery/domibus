@@ -101,7 +101,7 @@ public class BackendFSImplTest {
         final String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
         final String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
         final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
-        final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow", "metadata.xml");
+        final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
 
         new Expectations(backendFS) {{
             backendFS.downloadMessage(messageId, null);

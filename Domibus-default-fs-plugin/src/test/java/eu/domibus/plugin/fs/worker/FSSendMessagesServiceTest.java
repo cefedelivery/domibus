@@ -73,9 +73,9 @@ public class FSSendMessagesServiceTest {
         outgoingFolder = rootDir.resolveFile(FSFilesManager.OUTGOING_FOLDER);
         outgoingFolder.createFolder();
         
-        metadata = FSTestHelper.getUserMessage(this.getClass(), "testSendMessages", "metadata.xml");
+        metadata = FSTestHelper.getUserMessage(this.getClass(), "testSendMessages_metadata.xml");
         
-        try (InputStream testMetadata = FSTestHelper.getTestResource(this.getClass(), "testSendMessages", "metadata.xml")) {
+        try (InputStream testMetadata = FSTestHelper.getTestResource(this.getClass(), "testSendMessages_metadata.xml")) {
             metadataFile = outgoingFolder.resolveFile("metadata.xml");
             metadataFile.createFile();
             FileContent metadataFileContent = metadataFile.getContent();
@@ -83,7 +83,7 @@ public class FSSendMessagesServiceTest {
             metadataFile.close();
         }
         
-        try (InputStream testContent = FSTestHelper.getTestResource(this.getClass(), "testSendMessages", "content.xml")) {
+        try (InputStream testContent = FSTestHelper.getTestResource(this.getClass(), "testSendMessages_content.xml")) {
             contentFile = outgoingFolder.resolveFile("content.xml");
             contentFile.createFile();
             FileContent contentFileContent = contentFile.getContent();

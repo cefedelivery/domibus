@@ -124,7 +124,7 @@ public class FSMessageTransformerTest {
     @Test
     public void testTransformToSubmissionNormalFlow() throws Exception {
         String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-        UserMessage metadata = FSTestHelper.getUserMessage(this.getClass(), "testTransformToSubmissionNormalFlow", "metadata.xml");
+        UserMessage metadata = FSTestHelper.getUserMessage(this.getClass(), "testTransformToSubmissionNormalFlow_metadata.xml");
 
         DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
         FSMessage fsMessage = new FSMessage(dataHandler, metadata);
