@@ -104,7 +104,7 @@ public class FSSendMessagesServiceTest {
             fsPluginProperties.getDomains();
             result = Collections.emptySet();
             
-            fsFilesManager.setUpFileSystem();
+            fsFilesManager.setUpFileSystem(null);
             result = rootDir;
             
             fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);

@@ -111,25 +111,18 @@ public class FSFilesManager {
     }
     
     public FileObject setUpFileSystem(String domain) throws FileSystemException, FSSetUpException {
+        // Domain or default location
         String location = fsPluginProperties.getLocation(domain);
         String authDomain = null;
         String user = fsPluginProperties.getUser(domain);
         String password = fsPluginProperties.getPassword(domain);
-        
+
         FileObject rootDir;
         if (StringUtils.isEmpty(user) || StringUtils.isEmpty(password)) {
             rootDir = getEnsureRootLocation(location);
         } else {
             rootDir = getEnsureRootLocation(location, authDomain, user, password);
         }
-        
-        return rootDir;
-    }
-    
-    public FileObject setUpFileSystem() throws FileSystemException, FSSetUpException {        
-        String location = fsPluginProperties.getLocation();
-        FileObject rootDir = getEnsureRootLocation(location);
-        
         return rootDir;
     }
 

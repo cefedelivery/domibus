@@ -154,11 +154,11 @@ public class FSFilesManagerTest {
     @Test
     public void testSetUpFileSystem() throws Exception {
         new Expectations(instance) {{
-            fsPluginProperties.getLocation();
+            fsPluginProperties.getLocation(null);
             result = "ram:///FSFilesManagerTest";
         }};
         
-        FileObject result = instance.setUpFileSystem();
+        FileObject result = instance.setUpFileSystem(null);
         
         Assert.assertNotNull(result);
         Assert.assertTrue(result.exists());

@@ -71,13 +71,7 @@ public class FSSendMessagesService {
     
     private void sendMessages(String domain) {
         try {
-            FileObject rootDir;
-            if (domain != null) {
-                rootDir = fsFilesManager.setUpFileSystem(domain);
-            } else {
-                rootDir = fsFilesManager.setUpFileSystem();
-            }
-            
+            FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
             FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
             
             // TODO: remove this

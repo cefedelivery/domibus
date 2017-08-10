@@ -30,6 +30,8 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -149,7 +151,7 @@ public class BackendFSImplTest {
 //            fsPluginProperties.getDomains();
 //            result = Collections.emptySet();
             
-            fsFilesManager.setUpFileSystem();
+            fsFilesManager.setUpFileSystem(null);
             result = rootDir;
             
             fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
@@ -166,6 +168,53 @@ public class BackendFSImplTest {
         new VerificationsInOrder(1) {{
             fsFilesManager.renameFile(contentFile, "content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml.SEND_ENQUEUED");
         }};
+    }
+
+    @Test
+    public void testResolveDomain() {
+        String serviceDomain1 = "ODRDocumentInvoiceService123";
+        String actionDomain1 = "PrintA";
+
+        String serviceDomain2 = "BRISReceptionService";
+        String actionDomain2 = "SendEmailAction";
+        String actionDomain2a = "ReceiveBillAction";
+
+        String serviceWithoutMatch = "FSService123";
+        String actionWithoutMatch = "SomeAction";
+
+        final Set<String> domains = new HashSet<>();
+        domains.add("DOMAIN1");
+        domains.add("DOMAIN2");
+
+        new Expectations(1, backendFS) {{
+            fsPluginProperties.getDomains();
+            result = domains;
+
+            fsPluginProperties.getExpression("DOMAIN1");
+            // TODO confirm requirements ODRDocumentInvoiceService.*#Print.?
+            result = "ODRDocumentInvoiceService.*#Print.?";
+
+            fsPluginProperties.getExpression("DOMAIN2");
+            result = "BRISReceptionService#.*";
+        }};
+
+        String result = backendFS.resolveDomain(serviceDomain1, actionDomain1);
+        Assert.assertEquals("DOMAIN1", result);
+
+        result = backendFS.resolveDomain(serviceDomain2, actionDomain2);
+        Assert.assertEquals("DOMAIN2", result);
+
+        result = backendFS.resolveDomain(serviceDomain2, actionDomain2a);
+        Assert.assertEquals("DOMAIN2", result);
+
+        result = backendFS.resolveDomain(serviceWithoutMatch, actionWithoutMatch);
+        Assert.assertNull(result);
+
+        result = backendFS.resolveDomain(serviceDomain1, actionWithoutMatch);
+        Assert.assertNull(result);
+
+        result = backendFS.resolveDomain(serviceWithoutMatch, actionDomain1);
+        Assert.assertNull(result);
     }
 
 }

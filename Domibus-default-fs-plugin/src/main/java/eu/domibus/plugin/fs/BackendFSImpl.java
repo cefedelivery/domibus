@@ -1,12 +1,16 @@
 package eu.domibus.plugin.fs;
 
 import java.io.IOException;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.AbstractBackendConnector;
+import eu.domibus.plugin.fs.ebms3.CollaborationInfo;
+import eu.domibus.plugin.fs.ebms3.UserMessage;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 
@@ -88,12 +92,19 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         try {
             fsMessage = downloadMessage(messageId, null);
         } catch (MessageNotFoundException e) {
+            // TODO Check exception handling - throw anything please!
             LOG.error("An error occurred during message download", e);
             return;
         }
-            
+
+        // Resolve domain
+        CollaborationInfo collaborationInfo = fsMessage.getMetadata().getCollaborationInfo();
+        String service = collaborationInfo.getService().getValue();
+        String action = collaborationInfo.getAction();
+        String domain = resolveDomain(service, action);
+
         try {
-            FileObject rootDir = fsFilesManager.setUpFileSystem();
+            FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
             FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
             
             String fileName = messageId;
@@ -105,7 +116,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             } catch (MimeTypeException ex) {
                 LOG.warn("Error parsing MIME type", ex);
             }
-            
+
             try (FileObject fileObject = incomingFolder.resolveFile(fileName);
                     FileContent fileContent = fileObject.getContent()) {
                 fsMessage.getDataHandler().writeTo(fileContent.getOutputStream());
@@ -113,6 +124,20 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         } catch (IOException | FSSetUpException ex) {
             LOG.error("An error occured saving downloaded message", ex);
         }
+    }
+
+    protected String resolveDomain(String service, String action) {
+        String serviceAction = service + "#" + action;
+        Set<String> domains = fsPluginProperties.getDomains();
+        for (String domain : domains) {
+            String domainExpression = fsPluginProperties.getExpression(domain);
+            Pattern domainExpressionPattern = Pattern.compile(domainExpression);
+            boolean domainMatches = domainExpressionPattern.matcher(serviceAction).matches();
+            if (domainMatches){
+                return domain;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -147,13 +172,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     
     private boolean renameMessageFile(String domain, String messageId, MessageStatus status) {
         try {
-            FileObject rootDir;
-            if (domain != null) {
-                rootDir = fsFilesManager.setUpFileSystem(domain);
-            } else {
-                rootDir = fsFilesManager.setUpFileSystem();
-            }
-            
+            FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
             FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
             FileObject[] files = fsFilesManager.findAllDescendantFiles(outgoingFolder);
             

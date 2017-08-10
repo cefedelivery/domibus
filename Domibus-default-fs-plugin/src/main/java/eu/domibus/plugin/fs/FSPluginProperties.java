@@ -46,6 +46,8 @@ public class FSPluginProperties {
 
     private static final String PASSWORD = "password";
 
+    private static final String EXPRESSION = "password";
+
     @Resource(name = "fsPluginProperties")
     private Properties properties;
     
@@ -55,6 +57,8 @@ public class FSPluginProperties {
 
     public static final String ACTION_ARCHIVE = "archive";
 
+    // TODO check domains order - is is the properties order?
+    // they need to be evaluated first in order to determine if the message belongs to a specific domain.
     public Set<String> getDomains() {
         if (domains == null) {
             domains = readDomains();
@@ -199,6 +203,14 @@ public class FSPluginProperties {
 
     void setProperties(Properties properties) {
         this.properties = properties;
+    }
+
+    /**
+     * @param domain The domain expression property qualifier
+     * @return the regex expression used to determine the domain location
+     */
+    public String getExpression(String domain) {
+        return getDomainProperty(domain, EXPRESSION, null);
     }
 
     private String getDomainProperty(String domain, String propertyName, String defaultValue) {
