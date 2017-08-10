@@ -125,5 +125,17 @@ public class FSFilesManager {
         }
         return rootDir;
     }
+    
+    public void closeAll(FileObject[] files) {
+        for (FileObject file : files) {
+            try {
+                file.close();
+            } catch (FileSystemException ex) {
+                // errors with close are not very important at this point
+                // just log in case there's an underlying problem
+                LOG.warn("Error closing file", ex);
+            }
+        }
+    }
 
 }

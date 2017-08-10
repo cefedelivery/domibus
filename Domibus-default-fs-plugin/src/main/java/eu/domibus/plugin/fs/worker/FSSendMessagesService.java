@@ -70,15 +70,14 @@ public class FSSendMessagesService {
     }
     
     private void sendMessages(String domain) {
-        try {
-            FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-            FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+        try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
+                FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
             
             FileObject[] contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
             LOG.debug(Arrays.toString(contentFiles));
-            
+
             List<FileObject> processableFiles = filterProcessableFiles(contentFiles);
-            
+
             for (FileObject processableFile : processableFiles) {
                 try {
                     processFile(processableFile);
@@ -86,6 +85,8 @@ public class FSSendMessagesService {
                     LOG.error("Error processing file " + processableFile.getName().getURI(), ex);
                 }
             }
+
+            fsFilesManager.closeAll(contentFiles);
         } catch (FileSystemException ex) {
             LOG.error("Error sending messages", ex);
         } catch (FSSetUpException ex) {
@@ -94,26 +95,26 @@ public class FSSendMessagesService {
     }
 
     private void processFile(FileObject processableFile) throws FileSystemException, FSMetadataException {
-        FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, METADATA_FILE_NAME);
-        
-        if (metadataFile.exists()) {
-            try {
-                UserMessage metadata = parseMetadata(metadataFile);
-                LOG.debug("{}: Metadata found and valid", processableFile.getName());
-                
-                DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
-                FSMessage message= new FSMessage(dataHandler, metadata);
-                String messageId = backendFSPlugin.submit(message);
-                LOG.debug("{}: Message submitted successfully", processableFile.getName());
-                
-                renameProcessedFile(processableFile, messageId);
-            } catch (JAXBException | FileSystemException ex) {
-                throw new FSMetadataException("Metadata file is not an XML file", ex);
-            } catch (MessagingProcessingException ex) {
-                LOG.error("Error occurred submitting message to Domibus", ex);
+        try (FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, METADATA_FILE_NAME)) {
+            if (metadataFile.exists()) {
+                try {
+                    UserMessage metadata = parseMetadata(metadataFile);
+                    LOG.debug("{}: Metadata found and valid", processableFile.getName());
+                    
+                    DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
+                    FSMessage message= new FSMessage(dataHandler, metadata);
+                    String messageId = backendFSPlugin.submit(message);
+                    LOG.debug("{}: Message submitted successfully", processableFile.getName());
+                    
+                    renameProcessedFile(processableFile, messageId);
+                } catch (JAXBException | FileSystemException ex) {
+                    throw new FSMetadataException("Metadata file is not an XML file", ex);
+                } catch (MessagingProcessingException ex) {
+                    LOG.error("Error occurred submitting message to Domibus", ex);
+                }
+            } else {
+                throw new FSMetadataException("Metadata file is missing");
             }
-        } else {
-            throw new FSMetadataException("Metadata file is missing");
         }
     }
 

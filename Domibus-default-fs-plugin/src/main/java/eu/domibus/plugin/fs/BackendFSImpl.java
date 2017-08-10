@@ -17,8 +17,6 @@ import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
@@ -93,10 +91,9 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         }
 
         // Persist message
-        try {
-            String domain = resolveDomain(fsMessage);
-            FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-            FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
+        String domain = resolveDomain(fsMessage);
+        try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
+                FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER)) {
             
             String fileName = messageId;
             try {
@@ -174,9 +171,9 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     }
     
     private boolean renameMessageFile(String domain, String messageId, MessageStatus status) {
-        try {
-            FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-            FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+        try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
+                FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
+            
             FileObject[] files = fsFilesManager.findAllDescendantFiles(outgoingFolder);
             
             FileObject targetFile = null;
@@ -193,7 +190,10 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 String newName = FSFileNameHelper.deriveFileName(baseName, status);
                 fsFilesManager.renameFile(targetFile, newName);
                 
+                fsFilesManager.closeAll(files);
                 return true;
+            } else {
+                fsFilesManager.closeAll(files);
             }
         } catch (FileSystemException ex) {
             LOG.error("Error renaming file", ex);
