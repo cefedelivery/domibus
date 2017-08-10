@@ -19,6 +19,8 @@ import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 export class MessageLogComponent {
 
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('nextAttemptInfoTpl') public nextAttemptInfoTpl: TemplateRef<any>;
+  @ViewChild('nextAttemptInfoWithDateFormatTpl') public nextAttemptInfoWithDateFormatTpl: TemplateRef<any>;
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase()
   rowLimiter: RowLimiterBase = new RowLimiterBase()
@@ -84,13 +86,15 @@ export class MessageLogComponent {
         prop: 'mshRole'
       },
       {
+        cellTemplate: this.nextAttemptInfoTpl,
         name: 'Send Attempts'
       },
       {
+        cellTemplate: this.nextAttemptInfoTpl,
         name: 'Send Attempts Max'
       },
       {
-        cellTemplate: this.rowWithDateFormatTpl,
+        cellTemplate: this.nextAttemptInfoWithDateFormatTpl,
         name: 'Next Attempt',
         width: 155
       },
@@ -358,5 +362,11 @@ export class MessageLogComponent {
 
   onTimestampToChange(event) {
     this.timestampFromMaxDate = event.value;
+  }
+
+  private showNextAttemptInfo(row: any): boolean {
+    if (row && (row.messageType === "SIGNAL_MESSAGE" || row.mshRole === "RECEIVING"))
+      return false;
+    return true;
   }
 }
