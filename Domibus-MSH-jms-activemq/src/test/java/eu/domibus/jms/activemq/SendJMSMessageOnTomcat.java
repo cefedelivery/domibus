@@ -9,8 +9,8 @@ public class SendJMSMessageOnTomcat {
 
     public static void main(String[] args) {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-        Connection connection = null;
-        MessageProducer producer = null;
+        Connection connection;
+        MessageProducer producer;
         try {
             connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
 
@@ -58,7 +58,7 @@ public class SendJMSMessageOnTomcat {
             messageMap.setStringProperty("totalNumberOfPayloads", "1");
             messageMap.setStringProperty("payload_1_description", "message");
             messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-            messageMap.setStringProperty("payload_1_mimeType", "application/xml");
+            messageMap.setStringProperty("payload_1_mimeType", "text/xml");
             //messageMap.setStringProperty("p1InBody", "true"); // If true payload_1 will be sent in the body of the AS4 message. Only XML payloads may be sent in the AS4 message body. Optional
 
             String pay1 = "<test>test</test>";

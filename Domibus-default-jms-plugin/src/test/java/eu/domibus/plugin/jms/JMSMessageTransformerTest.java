@@ -3,15 +3,19 @@ package eu.domibus.plugin.jms;
 import eu.domibus.plugin.Submission;
 import org.apache.activemq.command.ActiveMQMapMessage;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.jms.MapMessage;
 import javax.mail.util.ByteArrayDataSource;
+import java.io.*;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Properties;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.*;
 
@@ -36,6 +40,18 @@ public class JMSMessageTransformerTest {
     private static final String PROTOCOL_AS4 = "AS4";
     private static final String SERVICE_NOPROCESS = "bdx:noprocess";
     private static final String SERVICE_TYPE_TC1 = "tc1";
+    private static final String PUT_ATTACHMENT_IN_QUEUE = "putAttachmentInQueue";
+    private static final String PAYLOAD_FILENAME = "FileName";
+    private static final String PAYLOAD_1_FILENAME = "payload_1_fileName";
+    private static final String FILENAME_TEST = "09878378732323.payload";
+
+    private static Properties properties;
+
+    @BeforeClass
+    public static void init() throws IOException {
+        properties = new Properties();
+        properties.load(new FileReader(DEFAULT_PROPERTIES_PATH));
+    }
 
     /**
      * Testing basic happy flow scenario of the transform from submission of JMS transformer
@@ -58,11 +74,23 @@ public class JMSMessageTransformerTest {
         submissionObj.setAgreementRef("12345");
         submissionObj.setRefToMessageId("123456");
 
+        boolean putAttachmentsInQueue = Boolean.parseBoolean(properties.getProperty(PUT_ATTACHMENT_IN_QUEUE));
+
         String strPayLoad1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-        DataHandler payLoadDataHandler = new DataHandler(new ByteArrayDataSource(strPayLoad1.getBytes(), DEFAULT_MT));
-        Submission.TypedProperty objTypedProperty = new Submission.TypedProperty(MIME_TYPE, DEFAULT_MT);
+        DataHandler payLoadDataHandler;
+        if(putAttachmentsInQueue) {
+            payLoadDataHandler = new DataHandler(new ByteArrayDataSource(strPayLoad1.getBytes(), DEFAULT_MT));
+        } else {
+            File file = new File(FILENAME_TEST);
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(strPayLoad1.getBytes());
+            payLoadDataHandler = new DataHandler(new FileDataSource(file));
+        }
+        Submission.TypedProperty objTypedProperty1 = new Submission.TypedProperty(MIME_TYPE, DEFAULT_MT);
+        Submission.TypedProperty objTypedProperty2 = new Submission.TypedProperty(PAYLOAD_FILENAME, FILENAME_TEST);
         Collection<Submission.TypedProperty> listTypedProperty = new ArrayList<>();
-        listTypedProperty.add(objTypedProperty);
+        listTypedProperty.add(objTypedProperty1);
+        listTypedProperty.add(objTypedProperty2);
         Submission.Payload objPayload1 = new Submission.Payload(PAYLOAD_ID, payLoadDataHandler, listTypedProperty, false, null, null);
         submissionObj.addPayload(objPayload1);
 
@@ -86,8 +114,10 @@ public class JMSMessageTransformerTest {
         Assert.assertEquals(FINAL_RECIPIENT, messageMap.getStringProperty(PROPERTY_FINAL_RECIPIENT));
         Assert.assertEquals("12345", messageMap.getStringProperty(AGREEMENT_REF));
         Assert.assertEquals("123456", messageMap.getStringProperty(REF_TO_MESSAGE_ID));
-
-
+        if(!putAttachmentsInQueue) {
+            File file = new File(FILENAME_TEST);
+            Assert.assertEquals(file.getAbsolutePath(), messageMap.getStringProperty(PAYLOAD_1_FILENAME));
+        }
     }
 
     /*
@@ -109,6 +139,7 @@ public class JMSMessageTransformerTest {
         messageMap.setStringProperty(JMSMessageConstants.PROPERTY_ORIGINAL_SENDER, ORIGINAL_SENDER);
         messageMap.setStringProperty(JMSMessageConstants.PROPERTY_FINAL_RECIPIENT, FINAL_RECIPIENT);
         messageMap.setStringProperty(JMSMessageConstants.PROTOCOL, PROTOCOL_AS4);
+        messageMap.setStringProperty(PAYLOAD_1_FILENAME, FILENAME_TEST);
 
         // Optional
         // messageMap.setStringProperty("conversationId", "123");
@@ -156,6 +187,9 @@ public class JMSMessageTransformerTest {
             for (Submission.TypedProperty objTypedProperty : objPayLoad.getPayloadProperties()) {
                 if (MIME_TYPE.equalsIgnoreCase(objTypedProperty.getKey())) {
                     Assert.assertEquals(DEFAULT_MT, objTypedProperty.getValue());
+                }
+                if (PAYLOAD_FILENAME.equalsIgnoreCase(objTypedProperty.getKey())) {
+                    Assert.assertEquals(FILENAME_TEST, objTypedProperty.getValue());
                 }
             }
         }

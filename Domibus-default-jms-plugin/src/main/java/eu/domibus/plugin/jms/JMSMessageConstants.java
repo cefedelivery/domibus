@@ -23,6 +23,11 @@ package eu.domibus.plugin.jms;
  * @author Christian Koch, Stefan Mueller
  */
 public class JMSMessageConstants {
+
+    private JMSMessageConstants() {
+        // empty constructor
+    }
+
     public static final String MESSAGE_ID = "messageId";
     public static final String P1_IN_BODY = "p1InBody";
     public static final String JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY = "messageType";
@@ -44,8 +49,6 @@ public class JMSMessageConstants {
     public static final String PROPERTY_ENDPOINT = "endPointAddress";
     public static final String PROTOCOL = "protocol";
     public static final String TOTAL_NUMBER_OF_PAYLOADS = "totalNumberOfPayloads";
-    public static final String PAYLOAD_FILE_NAME_FORMAT = "payload_{0}.bin";
-    public static final String BODYLOAD_FILE_NAME_FORMAT = "bodyload.bin";
     public static final String MESSAGE_TYPE_SUBMIT = "submitMessage";
     public static final String MESSAGE_TYPE_SUBMIT_RESPONSE = "submitResponse";
     public static final String MESSAGE_TYPE_INCOMING = "incomingMessage";
@@ -63,8 +66,10 @@ public class JMSMessageConstants {
     public static final String PAYLOAD_DESCRIPTION_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_DESCRIPTION_SUFFIX;
     private static final String PAYLOAD_MIME_TYPE_SUFFIX = "_mimeType";
     public static final String PAYLOAD_MIME_TYPE_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_MIME_TYPE_SUFFIX;
+    private static final String PAYLOAD_FILE_NAME_SUFFIX = "_fileName";
+    public static final String PAYLOAD_FILE_NAME_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_FILE_NAME_SUFFIX;
     private static final String PAYLOAD_MIME_CONTENT_ID_SUFFIX = "_mimeContentId";
     public static final String PAYLOAD_MIME_CONTENT_ID_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_MIME_CONTENT_ID_SUFFIX;
-
-
+    public static final String PUT_ATTACHMENTS_IN_QUEUE = "putAttachmentInQueue";
+    public static final String PAYLOAD_FILENAME = "FileName";
 }
