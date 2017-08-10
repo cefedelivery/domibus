@@ -56,11 +56,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         super(name);
     }
 
-    @PostConstruct
-    public void init() {
-        LOG.info("The File System Plugin is initialized.");
-    }
-
     /**
      * The implementations of the transformer classes are responsible for
      * transformation between the native backend formats and
@@ -89,13 +84,15 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     public void deliverMessage(String messageId) {
         LOG.debug("Delivering File System Message {}", messageId);
         FSMessage fsMessage;
-        
+
+        // Download message
         try {
             fsMessage = downloadMessage(messageId, null);
         } catch (MessageNotFoundException e) {
             throw new FSRuntimeException("Unable to download message " + messageId, e);
         }
 
+        // Persist message
         try {
             String domain = resolveDomain(fsMessage);
             FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
@@ -105,7 +102,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             try {
                 String mimeType = fsMessage.getDataHandler().getContentType();
                 String extension = FSMimeTypeHelper.getExtension(mimeType);
-
                 fileName += extension;
             } catch (MimeTypeException ex) {
                 LOG.warn("Error parsing MIME type", ex);
@@ -116,7 +112,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 fsMessage.getDataHandler().writeTo(fileContent.getOutputStream());
             }
         } catch (IOException | FSSetUpException ex) {
-            LOG.error("An error occured saving downloaded message", ex);
+            throw new FSRuntimeException("An error occurred persisting downloaded message " + messageId, ex);
         }
     }
 
@@ -127,7 +123,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         return resolveDomain(service, action);
     }
 
-    protected String resolveDomain(String service, String action) {
+    String resolveDomain(String service, String action) {
         String serviceAction = service + "#" + action;
         Set<String> domains = fsPluginProperties.getDomains();
         for (String domain : domains) {
@@ -200,7 +196,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 return true;
             }
         } catch (FileSystemException ex) {
-            LOG.error(null, ex);
+            LOG.error("Error renaming file", ex);
         } catch (FSSetUpException ex) {
             LOG.error("Error setting up folders for domain: " + domain, ex);
         }

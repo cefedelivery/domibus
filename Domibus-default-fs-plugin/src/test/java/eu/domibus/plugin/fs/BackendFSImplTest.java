@@ -6,6 +6,7 @@ import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.MessageLister;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
+import eu.domibus.plugin.fs.exception.FSRuntimeException;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
@@ -95,7 +96,7 @@ public class BackendFSImplTest {
 
 
     @Test
-    public void testDeliverMessageNormalFlow(@Injectable final FSMessage fsMessage)
+    public void testDeliverMessage_NormalFlow(@Injectable final FSMessage fsMessage)
             throws MessageNotFoundException, JAXBException, IOException, FSSetUpException {
 
         final String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
@@ -103,7 +104,7 @@ public class BackendFSImplTest {
         final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
         final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
 
-        new Expectations(backendFS) {{
+        new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
             result = new FSMessage(dataHandler, userMessage);
 
@@ -120,6 +121,19 @@ public class BackendFSImplTest {
 
         Assert.assertEquals(messageId + ".xml", fileMessage.getName().getBaseName());
         Assert.assertEquals(payloadContent, IOUtils.toString(fileMessage.getContent().getInputStream()));
+    }
+
+    @Test(expected = FSRuntimeException.class)
+    public void testDeliverMessage_MessageNotFound(@Injectable final FSMessage fsMessage) throws MessageNotFoundException {
+
+        final String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
+
+        new Expectations(1, backendFS) {{
+            backendFS.downloadMessage(messageId, null);
+            result = new MessageNotFoundException("message not found");
+        }};
+
+        backendFS.deliverMessage(messageId);
     }
 
     @Test
