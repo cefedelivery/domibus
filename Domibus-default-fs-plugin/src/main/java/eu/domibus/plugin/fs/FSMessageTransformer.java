@@ -133,7 +133,6 @@ public class FSMessageTransformer
         submission.setServiceType(service.getType());
         submission.setAction(collaborationInfo.getAction());
         
-        // TODO: is this bit needed?
         if (collaborationInfo.getConversationId() != null) {
             submission.setConversationId(collaborationInfo.getConversationId());
         }

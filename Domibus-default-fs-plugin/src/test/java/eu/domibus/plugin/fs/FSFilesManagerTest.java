@@ -60,7 +60,7 @@ public class FSFilesManagerTest {
         rootDir.close();
     }
 
-    // TODO: find a way to make this test run with a temporary filesystem
+    // This test fails with a temporary filesystem
     @Test(expected = FSSetUpException.class)
     public void testGetEnsureRootLocation_Auth() throws Exception {
         String location = "ram:///FSFilesManagerTest";
@@ -130,7 +130,7 @@ public class FSFilesManagerTest {
         Assert.assertTrue(result.exists());
     }
 
-    // TODO: find a way to make this test run with a temporary filesystem
+    // This test fails with a temporary filesystem
     @Test(expected = FSSetUpException.class)
     public void testSetUpFileSystem_Domain() throws Exception {
         new Expectations(instance) {{

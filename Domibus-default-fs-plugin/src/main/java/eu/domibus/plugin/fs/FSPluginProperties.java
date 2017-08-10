@@ -57,8 +57,9 @@ public class FSPluginProperties {
 
     public static final String ACTION_ARCHIVE = "archive";
 
-    // TODO check domains order - is is the properties order?
-    // they need to be evaluated first in order to determine if the message belongs to a specific domain.
+    /**
+     * @return The available domains set
+     */
     public Set<String> getDomains() {
         if (domains == null) {
             domains = readDomains();

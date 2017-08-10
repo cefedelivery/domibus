@@ -74,7 +74,6 @@ public class FSSendMessagesService {
             FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
             FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
             
-            // TODO: remove this
             FileObject[] contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
             LOG.debug(Arrays.toString(contentFiles));
             
