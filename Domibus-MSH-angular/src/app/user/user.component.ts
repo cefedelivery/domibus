@@ -12,6 +12,7 @@ import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.compo
 import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
+import {SecurityService} from "../security/security.service";
 
 @Component({
   moduleId: module.id,
@@ -27,8 +28,8 @@ export class UserComponent implements OnInit, DirtyOperations {
   @ViewChild('editableTpl') editableTpl: TemplateRef<any>;
   @ViewChild('checkBoxTpl') checkBoxTpl: TemplateRef<any>;
 
-  columnPicker: ColumnPickerBase = new ColumnPickerBase()
-  rowLimiter: RowLimiterBase = new RowLimiterBase()
+  columnPicker: ColumnPickerBase = new ColumnPickerBase();
+  rowLimiter: RowLimiterBase = new RowLimiterBase();
 
   users: Array<UserResponseRO> = [];
   userRoles: Array<String> = [];
@@ -49,7 +50,8 @@ export class UserComponent implements OnInit, DirtyOperations {
               private userService: UserService,
               public dialog: MdDialog,
               private userValidatorService: UserValidatorService,
-              private alertService: AlertService) {
+              private alertService: AlertService,
+              private securityService: SecurityService) {
   }
 
   ngOnInit(): void {
@@ -85,15 +87,15 @@ export class UserComponent implements OnInit, DirtyOperations {
         canAutoResize: true
       }
 
-    ]
+    ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ["Username", "Role", "Password"].indexOf(col.name) != -1
-    })
+    });
 
-    this.getUsers()
+    this.getUsers();
 
-    this.getUserRoles()
+    this.getUserRoles();
   }
 
   getUsers(): void {
@@ -122,6 +124,15 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.selected.push(...selected);
     this.enableDelete = selected.length > 0;
     this.enableEdit = selected.length == 1;
+  }
+
+  private selectedLoggedInUser(selected): boolean {
+    for(let entry of selected) {
+       if (this.securityService.getCurrentUser().username === entry.userName) {
+         return true;
+       }
+    }
+    return false;
   }
 
   buttonNew(): void {
@@ -206,6 +217,11 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.enableDelete = false;
     this.enableEdit = false;
 
+    if(this.selectedLoggedInUser(this.selected)) {
+      this.alertService.error("You cannot delete the logged in user: " + this.securityService.getCurrentUser().username);
+      return;
+    }
+
     // we need to use the old for loop approach to don't mess with the entries on the top before
     for (let i = this.selected.length - 1; i >= 0; i--) {
       this.users.splice(this.selected[i].$$index, 1);
@@ -257,8 +273,8 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   changePageSize(newPageLimit: number) {
-    this.rowLimiter.pageSize = newPageLimit
-    this.getUsers()
+    this.rowLimiter.pageSize = newPageLimit;
+    this.getUsers();
   }
 
 }
