@@ -42,9 +42,9 @@ $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:9080
 # TODO 1: log purpose:delete
 echo PMODES for the sample project
 echo II BLUE II
-head -40 domibus-gw-sample-pmode-blue.xml
+head -40 ./domibus-gw-sample-pmode-blue.xml
 echo II RED II
-head -40 domibus-gw-sample-pmode-red.xml
+head -40 ./domibus-gw-sample-pmode-red.xml
 echo END PMODES
 # TODO 1: log purpose:delete
 localUrl="localUrl=http://localhost:8180/domibus"
@@ -63,9 +63,9 @@ sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-red.xml
 # TODO 2: log purpose:delete
 echo PMODES for the main project
 echo II BLUE II
-head -60 domibus-gw-sample-pmode-blue.xml
+head -60 ./domibus-gw-sample-pmode-blue.xml
 echo II RED II
-head -60 domibus-gw-sample-pmode-red.xml
+head -60 ./domibus-gw-sample-pmode-red.xml
 echo END PMODES
 # TODO 2: log purpose:delete
 
