@@ -39,14 +39,7 @@ sed -i -e "s/<blue_hostname>:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-
 sed -i -e "s/<red_hostname>:8080/domibusred:8080/g" ./domibus-gw-sample-pmode-red.xml
 $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:8180 $SOURCE_CODE/../Domibus-MSH-tomcat/domibus-gw-sample-pmode-blue.xml
 $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:9080 $SOURCE_CODE/../Domibus-MSH-tomcat/domibus-gw-sample-pmode-red.xml
-# TODO 1: log purpose:delete
-echo PMODES for the sample project
-echo II BLUE II
-head -40 ./domibus-gw-sample-pmode-blue.xml
-echo II RED II
-head -40 ./domibus-gw-sample-pmode-red.xml
-echo END PMODES
-# TODO 1: log purpose:delete
+
 localUrl="localUrl=http://localhost:8180/domibus"
 remoteUrl="remoteUrl=http://localhost:9080/domibus"
 
@@ -60,14 +53,6 @@ sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-blue.xm
 sed -i -e "s/localhost:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-red.xml
 sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-red.xml
 
-# TODO 2: log purpose:delete
-echo PMODES for the main project
-echo II BLUE II
-head -60 ./domibus-gw-sample-pmode-blue.xml
-echo II RED II
-head -60 ./domibus-gw-sample-pmode-red.xml
-echo END PMODES
-# TODO 2: log purpose:delete
 
 $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:8180 $SOURCE_CODE/../Domibus-MSH-soapui-tests/domibus-gw-sample-pmode-blue.xml
 $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:9080 $SOURCE_CODE/../Domibus-MSH-soapui-tests/domibus-gw-sample-pmode-red.xml
