@@ -26,8 +26,10 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
+import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
+import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
@@ -74,7 +76,7 @@ public abstract class PModeProvider {
     public static final String SCHEMAS_DIR = "schemas/";
     public static final String DOMIBUS_PMODE_XSD = "domibus-pmode.xsd";
 
-    protected static final String OPTIONAL_AND_EMPTY = "OAE";
+    protected static final String OPTIONAL_AND_EMPTY = "OAEimp";
 
     @Autowired
     protected ConfigurationDAO configurationDAO;
@@ -98,6 +100,9 @@ public abstract class PModeProvider {
 
     @Autowired
     List<ConfigurationValidator> configurationValidators;
+
+    @Autowired
+    private ProcessDao processDao;
 
     public abstract void init();
 
@@ -289,6 +294,18 @@ public abstract class PModeProvider {
 
     protected String getLegConfigurationNameFromPModeKey(final String pModeKey) {
         return pModeKey.split(":")[5];
+    }
+
+    public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
+        return processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
+    }
+
+    public List<Process> findPullProcessesByInitiator(final Party party) {
+        return processDao.findPullProcessesByInitiator(party);
+    }
+
+    public List<Process> findPullProcessByMpc(final String mpc) {
+        return processDao.findPullProcessByMpc(mpc);
     }
 
 }

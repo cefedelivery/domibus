@@ -69,11 +69,11 @@ public class MessageLogResource {
 
         MessageLogResultRO result = new MessageLogResultRO();
 
+        //TODO why are those filters send back to the GUI??
         HashMap<String, Object> filters = new HashMap<>();
         filters.put("messageId", messageId);
         filters.put("conversationId", conversationId);
         filters.put("mshRole", mshRole);
-        filters.put("messageType", messageType);
         filters.put("messageStatus", messageStatus);
         filters.put("notificationStatus", notificationStatus);
         filters.put("fromPartyId", fromPartyId);
@@ -89,17 +89,18 @@ public class MessageLogResource {
 
         List<MessageLogInfo> resultList = new ArrayList<>();
         if (messageType == MessageType.SIGNAL_MESSAGE) {
-            int numberOfSignalMessageLogs = signalMessageLogDao.countAllInfo(column, asc, filters);
+            int numberOfSignalMessageLogs = signalMessageLogDao.countAllInfo(asc, filters);
             LOGGER.debug("count Signal Messages Logs [{}]", numberOfSignalMessageLogs);
             result.setCount(numberOfSignalMessageLogs);
             resultList = signalMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
 
         } else if (messageType == MessageType.USER_MESSAGE) {
-            int numberOfUserMessageLogs = userMessageLogDao.countAllInfo(column, asc, filters);
+            int numberOfUserMessageLogs = userMessageLogDao.countAllInfo(asc, filters);
             LOGGER.debug("count User Messages Logs [{}]", numberOfUserMessageLogs);
             result.setCount(numberOfUserMessageLogs);
             resultList = userMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
         }
+        filters.put("messageType", messageType);
         result.setMessageLogEntries(convertMessageLogInfoList(resultList));
         result.setMshRoles(MSHRole.values());
         result.setMsgTypes(MessageType.values());

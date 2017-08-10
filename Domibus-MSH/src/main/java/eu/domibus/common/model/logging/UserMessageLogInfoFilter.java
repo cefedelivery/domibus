@@ -25,4 +25,19 @@ public class UserMessageLogInfoFilter extends MessageLogInfoFilter {
         StringBuilder result = filterQuery(query, column, asc, filters);
         return result.toString();
     }
+
+    public String countUserMessageLogQuery(boolean asc, HashMap<String, Object> filters) {
+        String query = "select count(message.id) from UserMessageLog log, " +
+                "UserMessage message " +
+                "left join log.messageInfo info " +
+                "left join message.messageProperties.property propsFrom " +
+                "left join message.messageProperties.property propsTo " +
+                "left join message.partyInfo.from.partyId partyFrom " +
+                "left join message.partyInfo.to.partyId partyTo " +
+                "where message.messageInfo = info and propsFrom.name = 'originalSender'" +
+                "and propsTo.name = 'finalRecipient'";
+
+        StringBuilder result = filterQuery(query, null, asc, filters);
+        return result.toString();
+    }
 }

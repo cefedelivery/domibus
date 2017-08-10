@@ -27,8 +27,6 @@
           </md-select>
           <md-select placeholder="Message Type" name="messageType" [(ngModel)]="filter.messageType" id="messagetype_id"
                      *ngIf="advancedSearch">
-            <md-option [value]="''">
-            </md-option>
             <md-option *ngFor="let type of msgTypes" [value]="type">
               {{type}}
             </md-option>
