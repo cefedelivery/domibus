@@ -126,7 +126,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.enableEdit = selected.length == 1;
   }
 
-  private selectedLoggedInUser(selected): boolean {
+  private isLoggedInUserSelected(selected): boolean {
     for(let entry of selected) {
        if (this.securityService.getCurrentUser().username === entry.userName) {
          return true;
@@ -217,7 +217,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.enableDelete = false;
     this.enableEdit = false;
 
-    if(this.selectedLoggedInUser(this.selected)) {
+    if(this.isLoggedInUserSelected(this.selected)) {
       this.alertService.error("You cannot delete the logged in user: " + this.securityService.getCurrentUser().username);
       return;
     }
