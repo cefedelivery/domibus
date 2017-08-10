@@ -4,11 +4,13 @@ package eu.domibus.plugin.fs.worker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.xml.bind.JAXBException;
 
+import mockit.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
@@ -30,11 +32,6 @@ import eu.domibus.plugin.fs.FSPluginProperties;
 import eu.domibus.plugin.fs.FSTestHelper;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
-import mockit.Delegate;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.VerificationsInOrder;
 import mockit.integration.junit4.JMockit;
 
 /**
@@ -143,6 +140,51 @@ public class FSSendMessagesServiceTest {
         
         new VerificationsInOrder(1) {{
             fsFilesManager.renameFile(contentFile, "content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml");
+        }};
+    }
+
+    @Test
+    public void testSendMessages_Domain1_BadConfiguration() throws MessagingProcessingException, FileSystemException, FSSetUpException {
+        new Expectations(1, instance) {{
+            fsPluginProperties.getDomains();
+            result = Collections.singleton("DOMAIN1");
+
+            fsFilesManager.setUpFileSystem("DOMAIN1");
+            result = new FSSetUpException("Test-forced exception");
+        }};
+
+        instance.sendMessages();
+
+        new Verifications() {{
+            backendFSPlugin.submit(withAny(new FSMessage(null, null)));
+            maxTimes = 0;
+        }};
+    }
+
+    @Test()
+    public void testSendMessages_MetaDataException() throws MessagingProcessingException, FileSystemException, FSSetUpException {
+        new Expectations(1, instance) {{
+            fsPluginProperties.getDomains();
+            result = Collections.emptySet();
+
+            fsFilesManager.setUpFileSystem(null);
+            result = rootDir;
+
+            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+            result = outgoingFolder;
+
+            fsFilesManager.findAllDescendantFiles(outgoingFolder);
+            result = new FileObject[] { contentFile };
+
+            fsFilesManager.resolveSibling(contentFile, "metadata.xml");
+            result = rootDir.resolveFile("nonexistent_file");
+        }};
+
+        instance.sendMessages();
+
+        new Verifications() {{
+            backendFSPlugin.submit(withAny(new FSMessage(null, null)));
+            maxTimes = 0;
         }};
     }
     

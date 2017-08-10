@@ -82,12 +82,12 @@ public class FSSendMessagesService {
             for (FileObject processableFile : processableFiles) {
                 try {
                     processFile(processableFile);
-                } catch (FSMetadataException ex) {
-                    LOG.error(null, ex);
+                } catch (FSMetadataException | FileSystemException ex) {
+                    LOG.error("Error processing file " + processableFile.getName().getURI(), ex);
                 }
             }
         } catch (FileSystemException ex) {
-            LOG.error(null, ex);
+            LOG.error("Error sending messages", ex);
         } catch (FSSetUpException ex) {
             LOG.error("Error setting up folders for domain: " + domain, ex);
         }

@@ -33,9 +33,9 @@ public class FSFilesManagerTest {
     private FSPluginProperties fsPluginProperties;
     
     private FileObject rootDir;
-    
-    public FSFilesManagerTest() {
-    }
+
+    @Injectable
+    private FileObject mockedRootDir;
     
     @Before
     public void setUp() throws FileSystemException {
@@ -91,6 +91,21 @@ public class FSFilesManagerTest {
         Assert.assertNotNull(result);
         Assert.assertTrue(result.exists());
         Assert.assertEquals(result.getType(), FileType.FOLDER);
+    }
+
+    @Test(expected = FSSetUpException.class)
+    public void testGetEnsureChildFolder_FileSystemException() throws Exception {
+        final String folderName = "samplefolder";
+
+        new Expectations(instance) {{
+            mockedRootDir.exists();
+            result = true;
+
+            mockedRootDir.resolveFile(folderName);
+            result = new FileSystemException("some unexpected error");
+        }};
+
+        instance.getEnsureChildFolder(mockedRootDir, folderName);
     }
 
     @Test

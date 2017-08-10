@@ -2,6 +2,7 @@ package eu.domibus.plugin.fs;
 
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.*;
+import eu.domibus.plugin.fs.exception.FSRuntimeException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -48,7 +49,7 @@ public class FSMessageTransformerTest {
     }
 
     @Test
-    public void testTransformFromSubmissionNormalFlow() throws Exception {
+    public void testTransformFromSubmission_NormalFlow() throws Exception {
         String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
         String conversationId = "ae413adb-920c-4d9c-a5a7-b5b2596eaf1c@domibus.eu";
         String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
@@ -121,8 +122,37 @@ public class FSMessageTransformerTest {
         Assert.assertEquals(payloadContent, dataHandler.getContent());
     }
 
+    @Test(expected = FSRuntimeException.class)
+    public void testTransformFromSubmission_Exception() throws Exception {
+        String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
+        String conversationId = "ae413adb-920c-4d9c-a5a7-b5b2596eaf1c@domibus.eu";
+        String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+
+        // Submission
+        Submission submission = new Submission();
+        submission.setMessageId(messageId);
+        submission.addFromParty(DOMIBUS_BLUE, UNREGISTERED_PARTY_TYPE);
+        submission.setFromRole(INITIATOR_ROLE);
+        submission.addToParty(DOMIBUS_RED, UNREGISTERED_PARTY_TYPE);
+        submission.setToRole(RESPONDER_ROLE);
+
+        submission.setServiceType(SERVICE_TYPE_TC1);
+        submission.setService(SERVICE_NOPROCESS);
+        submission.setAction(ACTION_TC1LEG1);
+        submission.setAgreementRefType(EMPTY_STR);
+        submission.setAgreementRef(AGREEMENT_REF_A1);
+        submission.setConversationId(conversationId);
+
+        submission.addMessageProperty(PROPERTY_ORIGINAL_SENDER, ORIGINAL_SENDER);
+        submission.addMessageProperty(PROPERTY_FINAL_RECIPIENT, FINAL_RECIPIENT);
+
+        // Transform FSMessage from Submission
+        FSMessageTransformer transformer = new FSMessageTransformer();
+        transformer.transformFromSubmission(submission, null);
+    }
+
     @Test
-    public void testTransformToSubmissionNormalFlow() throws Exception {
+    public void testTransformToSubmission_NormalFlow() throws Exception {
         String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
         UserMessage metadata = FSTestHelper.getUserMessage(this.getClass(), "testTransformToSubmissionNormalFlow_metadata.xml");
 

@@ -28,7 +28,6 @@ public class FSMessageTransformer
     
     private static final String DEFAULT_CONTENT_ID = "cid:message";
     public static final String MIME_TYPE = "MimeType";
-    public static final String CHARSET = "CharacterSet";
 
     private ObjectFactory objectFactory = new ObjectFactory();
 
