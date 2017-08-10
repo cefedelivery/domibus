@@ -1,23 +1,14 @@
 package eu.domibus.plugin.fs.exception;
 
 /**
- * FSMetadataException
+ * FSRuntimeException
  *
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
-public class FSMetadataException extends Exception {
+public class FSRuntimeException extends RuntimeException {
 
     /**
-     * Creates a new <code>FSMetadataException/code>.
-     * @param   message   the detail message. The detail message is saved for
-     *          later retrieval by the {@link #getMessage()} method.
-     */
-    public FSMetadataException(String message) {
-        super(message);
-    }
-
-    /**
-     * Creates a new <code>FSMetadataException</code>.
+     * Creates a new <code>FSRuntimeException</code>.
      *
      * @param  message the detail message (which is saved for later retrieval
      *         by the {@link #getMessage()} method).
@@ -26,7 +17,7 @@ public class FSMetadataException extends Exception {
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public FSMetadataException(String message, Throwable cause) {
+    public FSRuntimeException(String message, Throwable cause) {
         super(message, cause);
     }
 

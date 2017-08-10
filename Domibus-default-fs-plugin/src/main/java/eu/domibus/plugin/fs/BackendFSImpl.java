@@ -3,6 +3,7 @@ package eu.domibus.plugin.fs;
 import java.io.IOException;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.logging.DomibusLogger;
@@ -10,7 +11,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.fs.ebms3.CollaborationInfo;
-import eu.domibus.plugin.fs.ebms3.UserMessage;
+import eu.domibus.plugin.fs.exception.FSRuntimeException;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 
@@ -92,9 +93,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         try {
             fsMessage = downloadMessage(messageId, null);
         } catch (MessageNotFoundException e) {
-            // TODO Check exception handling - throw anything please!
-            LOG.error("An error occurred during message download", e);
-            return;
+            throw new FSRuntimeException("Unable to download message " + messageId, e);
         }
 
         try {
@@ -133,10 +132,16 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         Set<String> domains = fsPluginProperties.getDomains();
         for (String domain : domains) {
             String domainExpression = fsPluginProperties.getExpression(domain);
-            Pattern domainExpressionPattern = Pattern.compile(domainExpression);
-            boolean domainMatches = domainExpressionPattern.matcher(serviceAction).matches();
-            if (domainMatches){
-                return domain;
+            if (StringUtils.isNotEmpty(domainExpression)) {
+                try {
+                    Pattern domainExpressionPattern = Pattern.compile(domainExpression);
+                    boolean domainMatches = domainExpressionPattern.matcher(serviceAction).matches();
+                    if (domainMatches) {
+                        return domain;
+                    }
+                } catch (PatternSyntaxException e) {
+                    LOG.warn("Invalid domain expression for " + domain, e);
+                }
             }
         }
         return null;

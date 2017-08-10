@@ -5,6 +5,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.*;
 import eu.domibus.plugin.fs.exception.FSPayloadException;
+import eu.domibus.plugin.fs.exception.FSRuntimeException;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import org.springframework.stereotype.Component;
@@ -51,8 +52,7 @@ public class FSMessageTransformer
             DataHandler dataHandler = getPayloadFromSubmission(submission);
             return new FSMessage(dataHandler, metadata);
         } catch (FSPayloadException ex) {
-            LOG.error("Could not get the file from submission " + submission.getMessageId(), ex);
-            throw new RuntimeException(ex);
+            throw new FSRuntimeException("Could not get the file from submission " + submission.getMessageId(), ex);
         }
     }
 
