@@ -32,18 +32,48 @@ public class FSFileNameHelper {
         STATE_SUFFIXES = Collections.unmodifiableList(tempStateSuffixes);
     }
 
+    /**
+     * Checks if a given file name has been derived from a {@link eu.domibus.common.MessageStatus}.
+     * In practice checks if the filename is suffixed by a dot and any of the
+     * known {@link eu.domibus.common.MessageStatus}.
+     * @param fileName the file name to test
+     * @return true, if the file name has been derived from a {@link eu.domibus.common.MessageStatus}
+     */
     public static boolean isAnyState(final String fileName) {
         return StringUtils.endsWithAny(fileName, STATE_SUFFIXES.toArray(new String[0]));
     }
     
+    /**
+     * Checks if a given file name has been derived from any message Id.
+     * In practice checks if the filename contains an underscore followed by a
+     * message Id.
+     * @param fileName the file name to test
+     * @return true, if the file name has been derived from a message Id
+     */
     public static boolean isProcessed(final String fileName) {
         return PROCESSED_FILE_PATTERN.matcher(fileName).find();
     }
     
+    /**
+     * Checks if a given file name has been derived from a given message Id.
+     * In practice checks if the filename contains an underscore followed by the
+     * given message Id.
+     * @param fileName the file name to test
+     * @param messageId the message Id to test
+     * @return true, if the file name has been derived from the given message Id
+     */
     public static boolean isMessageRelated(String fileName, String messageId) {
         return fileName.contains(NAME_SEPARATOR + messageId);
     }
     
+    /**
+     * Derives a new file name from the given file name and a message Id.
+     * In practice, for a given file name {@code filename.ext} and message Id
+     * {@code messageId} generates a new file name of the form {@code filename_messageId.ext}.
+     * @param fileName the file name to derive
+     * @param messageId the message Id to use for the derivation
+     * @return a new file name of the form {@code filename_messageId.ext}
+     */
     public static String deriveFileName(final String fileName, final String messageId) {
         int extensionIdx = StringUtils.lastIndexOf(fileName, EXTENSION_SEPARATOR);
         
@@ -57,6 +87,14 @@ public class FSFileNameHelper {
         }
     }
     
+    /**
+     * Derives a new file name from the given file name and a {@link eu.domibus.common.MessageStatus}.
+     * In practice, for a given file name {@code filename.ext} and message status
+     * {@code MESSAGE_STATUS} generates a new file name of the form {@code filename.ext.MESSAGE_STATUS}.
+     * @param fileName the file name to derive
+     * @param status the message status to use for the derivation
+     * @return a new file name of the form {@code filename.ext.MESSAGE_STATUS}
+     */
     public static String deriveFileName(final String fileName, final MessageStatus status) {
         if (isAnyState(fileName)) {
             String strippedFileName = StringUtils.substringBeforeLast(fileName, EXTENSION_SEPARATOR);
