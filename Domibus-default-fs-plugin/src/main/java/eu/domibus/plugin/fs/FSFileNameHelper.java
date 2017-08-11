@@ -32,6 +32,10 @@ public class FSFileNameHelper {
         STATE_SUFFIXES = Collections.unmodifiableList(tempStateSuffixes);
     }
 
+    private FSFileNameHelper() {
+        super();
+    }
+
     /**
      * Checks if a given file name has been derived from a {@link eu.domibus.common.MessageStatus}.
      * In practice checks if the filename is suffixed by a dot and any of the

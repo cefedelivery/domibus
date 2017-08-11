@@ -1,38 +1,28 @@
 package eu.domibus.plugin.fs.worker;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.activation.DataHandler;
-
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.plugin.fs.FSPluginProperties;
-
+import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.plugin.fs.*;
+import eu.domibus.plugin.fs.ebms3.ObjectFactory;
+import eu.domibus.plugin.fs.ebms3.UserMessage;
+import eu.domibus.plugin.fs.exception.FSSetUpException;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.activation.DataHandler;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import eu.domibus.messaging.MessagingProcessingException;
-import eu.domibus.plugin.fs.BackendFSImpl;
-import eu.domibus.plugin.fs.FSFileNameHelper;
-import eu.domibus.plugin.fs.FSFilesManager;
-import eu.domibus.plugin.fs.FSMessage;
-import eu.domibus.plugin.fs.ebms3.ObjectFactory;
-import eu.domibus.plugin.fs.ebms3.UserMessage;
-import eu.domibus.plugin.fs.exception.FSMetadataException;
-import eu.domibus.plugin.fs.exception.FSSetUpException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 
 
@@ -77,13 +67,8 @@ public class FSSendMessagesService {
             LOG.debug(Arrays.toString(contentFiles));
 
             List<FileObject> processableFiles = filterProcessableFiles(contentFiles);
-
             for (FileObject processableFile : processableFiles) {
-                try {
-                    processFile(processableFile);
-                } catch (FSMetadataException | FileSystemException ex) {
-                    LOG.error("Error processing file " + processableFile.getName().getURI(), ex);
-                }
+                processFile(processableFile);
             }
 
             fsFilesManager.closeAll(contentFiles);
@@ -94,27 +79,27 @@ public class FSSendMessagesService {
         }
     }
 
-    private void processFile(FileObject processableFile) throws FileSystemException, FSMetadataException {
+    private void processFile(FileObject processableFile) {
         try (FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, METADATA_FILE_NAME)) {
             if (metadataFile.exists()) {
-                try {
-                    UserMessage metadata = parseMetadata(metadataFile);
-                    LOG.debug("{}: Metadata found and valid", processableFile.getName());
-                    
-                    DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
-                    FSMessage message= new FSMessage(dataHandler, metadata);
-                    String messageId = backendFSPlugin.submit(message);
-                    LOG.debug("{}: Message submitted successfully", processableFile.getName());
-                    
-                    renameProcessedFile(processableFile, messageId);
-                } catch (JAXBException | FileSystemException ex) {
-                    throw new FSMetadataException("Metadata file is not an XML file", ex);
-                } catch (MessagingProcessingException ex) {
-                    LOG.error("Error occurred submitting message to Domibus", ex);
-                }
+                UserMessage metadata = parseMetadata(metadataFile);
+                LOG.debug("{}: Metadata found and valid", processableFile.getName());
+
+                DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
+                FSMessage message= new FSMessage(dataHandler, metadata);
+                String messageId = backendFSPlugin.submit(message);
+                LOG.debug("{}: Message submitted successfully", processableFile.getName());
+
+                renameProcessedFile(processableFile, messageId);
             } else {
-                throw new FSMetadataException("Metadata file is missing");
+                LOG.error("Metadata file is missing for " + processableFile.getName().getURI());
             }
+        } catch (FileSystemException ex) {
+            LOG.error("Error processing file " + processableFile.getName().getURI(), ex);
+        } catch (JAXBException ex) {
+            LOG.error("Metadata file is not an XML file", ex);
+        } catch (MessagingProcessingException ex) {
+            LOG.error("Error occurred submitting message to Domibus", ex);
         }
     }
 
@@ -130,12 +115,10 @@ public class FSSendMessagesService {
         for (FileObject file : files) {
             String baseName = file.getName().getBaseName();
             
-            if (!StringUtils.equals(baseName, METADATA_FILE_NAME)) {
-                if (!FSFileNameHelper.isAnyState(baseName)) {
-                    if (!FSFileNameHelper.isProcessed(baseName)) {
-                        filteredFiles.add(file);
-                    }
-                }
+            if (!StringUtils.equals(baseName, METADATA_FILE_NAME)
+                    && !FSFileNameHelper.isAnyState(baseName)
+                    && !FSFileNameHelper.isProcessed(baseName)) {
+                filteredFiles.add(file);
             }
         }
         

@@ -1,7 +1,5 @@
 package eu.domibus.plugin.fs;
 
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.*;
 import eu.domibus.plugin.fs.exception.FSPayloadException;
@@ -24,8 +22,6 @@ import java.util.Set;
 public class FSMessageTransformer
         implements MessageRetrievalTransformer<FSMessage>, MessageSubmissionTransformer<FSMessage> {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSMessageTransformer.class);
-    
     private static final String DEFAULT_CONTENT_ID = "cid:message";
     private static final String MIME_TYPE = "MimeType";
 

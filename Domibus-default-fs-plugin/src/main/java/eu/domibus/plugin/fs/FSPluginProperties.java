@@ -241,8 +241,7 @@ public class FSPluginProperties {
 
     private String extractDomainName(String propName) {
         String unprefixedProp = StringUtils.removeStart(propName, DOMAIN_PREFIX);
-        String domain = StringUtils.substringBefore(unprefixedProp, ".");
-        return domain;
+        return StringUtils.substringBefore(unprefixedProp, ".");
     }
 
 }

@@ -15,7 +15,11 @@ public class FSMimeTypeHelper {
     
     private static final Tika TIKA = new Tika();
     private static final MimeTypes MIME_TYPES = MimeTypes.getDefaultMimeTypes();
-    
+
+    private FSMimeTypeHelper() {
+        super();
+    }
+
     /**
      * Detects the MIME type of a document with the given file name.
      * @param fileName the file name of the document
