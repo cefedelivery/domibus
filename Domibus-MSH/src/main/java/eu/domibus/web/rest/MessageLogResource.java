@@ -6,10 +6,7 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.MessageLogInfo;
-import eu.domibus.common.model.logging.SignalMessageLog;
-import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -125,17 +122,17 @@ public class MessageLogResource {
         return result;
     }
 
-    private void setSpecificMessageLogInfo(MessageLogRO messageLogRO, MessageLog messageLog) {
-        messageLogRO.setMessageId(messageLog.getMessageId());
-        messageLogRO.setMessageStatus(messageLog.getMessageStatus());
-        messageLogRO.setNotificationStatus(messageLog.getNotificationStatus());
-        messageLogRO.setMshRole(messageLog.getMshRole());
-        messageLogRO.setMessageType(messageLog.getMessageType());
-        messageLogRO.setDeleted(messageLog.getDeleted());
-        messageLogRO.setReceived(messageLog.getReceived());
-        messageLogRO.setSendAttempts(messageLog.getSendAttempts());
-        messageLogRO.setSendAttemptsMax(messageLog.getSendAttemptsMax());
-        messageLogRO.setNextAttempt(messageLog.getNextAttempt());
+    private void setSpecificMessageLogInfo(MessageLogRO messageLogRO, MessageLogInfo messageLogInfo) {
+        messageLogRO.setMessageId(messageLogInfo.getMessageId());
+        messageLogRO.setMessageStatus(messageLogInfo.getMessageStatus());
+        messageLogRO.setNotificationStatus(messageLogInfo.getNotificationStatus());
+        messageLogRO.setMshRole(messageLogInfo.getMshRole());
+        messageLogRO.setMessageType(messageLogInfo.getMessageType());
+        messageLogRO.setDeleted(messageLogInfo.getDeleted());
+        messageLogRO.setReceived(messageLogInfo.getReceived());
+        messageLogRO.setSendAttempts(messageLogInfo.getSendAttempts());
+        messageLogRO.setSendAttemptsMax(messageLogInfo.getSendAttemptsMax());
+        messageLogRO.setNextAttempt(messageLogInfo.getNextAttempt());
     }
 
     private MessageLogRO convertMessageLogInfo(MessageLogInfo messageLogInfo) {
@@ -150,16 +147,16 @@ public class MessageLogResource {
         result.setOriginalSender(messageLogInfo.getOriginalSender());
         result.setFinalRecipient(messageLogInfo.getFinalRecipient());
         result.setRefToMessageId(messageLogInfo.getRefToMessageId());
-        UserMessageLog userMessageLog = messageLogInfo.getUserMessageLog();
-        SignalMessageLog signalMessageLog = messageLogInfo.getSignalMessageLog();
-        if (userMessageLog != null) {
-            setSpecificMessageLogInfo(result, userMessageLog);
-        } else if(signalMessageLog != null) {
-            setSpecificMessageLogInfo(result, signalMessageLog);
-        } else {
-            // it shouldn't enter here because MessageType is USER or SIGNAL
-            LOGGER.error("Message Log Info doesn't contain neither User nor Signal message.");
-        }
+        result.setMessageId(messageLogInfo.getMessageId());
+        result.setMessageStatus(messageLogInfo.getMessageStatus());
+        result.setNotificationStatus(messageLogInfo.getNotificationStatus());
+        result.setMshRole(messageLogInfo.getMshRole());
+        result.setMessageType(messageLogInfo.getMessageType());
+        result.setDeleted(messageLogInfo.getDeleted());
+        result.setReceived(messageLogInfo.getReceived());
+        result.setSendAttempts(messageLogInfo.getSendAttempts());
+        result.setSendAttemptsMax(messageLogInfo.getSendAttemptsMax());
+        result.setNextAttempt(messageLogInfo.getNextAttempt());
         return result;
     }
 }
