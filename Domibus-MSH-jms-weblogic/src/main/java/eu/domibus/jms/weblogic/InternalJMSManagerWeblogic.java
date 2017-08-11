@@ -196,7 +196,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     protected String removeJmsModuleAndServer(String destinationFQName) {
         String destName = StringUtils.substringAfter(destinationFQName, "@");
-        return (destName.equals("")) ? destinationFQName : destName;
+        return (StringUtils.isEmpty(destName)) ? destinationFQName : destName;
     }
 
     protected String getShortDestName(String destinationName) {
@@ -215,7 +215,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     private String removeJmsModule(String destination) {
         String destName = StringUtils.substringAfter(destination, "!");
-        return (destName.equals("")) ? destination : destName;
+        return (StringUtils.isEmpty(destName)) ? destination : destName;
     }
 
     protected Map<String, ObjectName> getQueueMap(MBeanServerConnection mbsc) throws IOException, AttributeNotFoundException, InstanceNotFoundException, MBeanException,
