@@ -158,21 +158,17 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     @Override
     public void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent) {
-        notSupportedYet();
+        LOG.debug("TODO: messageReceiveFailed implementation");
     }
 
     @Override
     public void messageSendFailed(String messageId) {
-        notSupportedYet();
+        LOG.debug("TODO: messageSendFailed implementation");
     }
 
     @Override
     public void messageSendSuccess(String messageId) {
-        notSupportedYet();
-    }
-
-    private void notSupportedYet() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        LOG.debug("TODO: messageSendSuccess implementation");
     }
 
     @Override
