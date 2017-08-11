@@ -101,7 +101,6 @@ public class FSMessageTransformerTest {
         Assert.assertEquals(ACTION_TC1LEG1, collaborationInfo.getAction());
         Assert.assertEquals(EMPTY_STR, collaborationInfo.getAgreementRef().getType());
         Assert.assertEquals(AGREEMENT_REF_A1, collaborationInfo.getAgreementRef().getValue());
-        Assert.assertEquals(conversationId, collaborationInfo.getConversationId());
 
         List<Property> propertyList = userMessage.getMessageProperties().getProperty();
         Assert.assertEquals(2, propertyList.size());
@@ -126,7 +125,6 @@ public class FSMessageTransformerTest {
     public void testTransformFromSubmission_Exception() throws Exception {
         String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
         String conversationId = "ae413adb-920c-4d9c-a5a7-b5b2596eaf1c@domibus.eu";
-        String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 
         // Submission
         Submission submission = new Submission();
