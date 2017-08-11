@@ -25,7 +25,7 @@ public class FSMessageTransformer
     private static final String DEFAULT_CONTENT_ID = "cid:message";
     private static final String MIME_TYPE = "MimeType";
 
-    private ObjectFactory objectFactory = new ObjectFactory();
+    private final ObjectFactory objectFactory = new ObjectFactory();
 
     /**
      * Transforms {@link eu.domibus.plugin.Submission} to {@link FSMessage}
@@ -126,10 +126,6 @@ public class FSMessageTransformer
         submission.setService(service.getValue());
         submission.setServiceType(service.getType());
         submission.setAction(collaborationInfo.getAction());
-        
-        if (collaborationInfo.getConversationId() != null) {
-            submission.setConversationId(collaborationInfo.getConversationId());
-        }
     }
 
     private CollaborationInfo getCollaborationInfoFromSubmission(Submission submission) {
@@ -145,7 +141,6 @@ public class FSMessageTransformer
         collaborationInfo.setAgreementRef(agreementRef);
         collaborationInfo.setService(service);
         collaborationInfo.setAction(submission.getAction());
-        collaborationInfo.setConversationId(submission.getConversationId());
 
         return collaborationInfo;
     }
