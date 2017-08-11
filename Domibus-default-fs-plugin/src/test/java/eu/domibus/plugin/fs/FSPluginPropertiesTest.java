@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.FileInputStream;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -13,13 +12,15 @@ import java.util.Set;
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
 public class FSPluginPropertiesTest {
-    
+
     private static final String DOMAIN1 = "DOMAIN1";
     private static final String DOMAIN2 = "DOMAIN2";
     private static final String NONEXISTENT_DOMAIN = "NONEXISTENT_DOMAIN";
     
     private static final String DEFAULT_LOCATION = "/tmp/fs_plugin_data";
     private static final String DOMAIN1_LOCATION = "/tmp/fs_plugin_data/DOMAIN1";
+    private static final String ODR = "ODR";
+    private static final String BRIS = "BRIS";
 
     private FSPluginProperties fSPluginProperties;
 
@@ -117,10 +118,12 @@ public class FSPluginPropertiesTest {
     }
 
     @Test
-    public void testGetDomains() throws Exception {
+    public void testGetDomains_Unordered() throws Exception {
         Set<String> expected = new HashSet<>();
-        expected.add(DOMAIN1);
         expected.add(DOMAIN2);
+        expected.add(ODR);
+        expected.add(BRIS);
+        expected.add(DOMAIN1);
         Assert.assertEquals(expected, fSPluginProperties.getDomains());
     }
 
