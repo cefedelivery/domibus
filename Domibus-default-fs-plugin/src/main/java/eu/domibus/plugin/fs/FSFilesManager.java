@@ -48,23 +48,22 @@ public class FSFilesManager {
 
         FileSystemManager fsManager = getVFSManager();
         FileObject rootDir = fsManager.resolveFile(location, opts);
+        checkRootDirExists(rootDir);
 
+        return rootDir;
+    }
+
+    private void checkRootDirExists(FileObject rootDir) throws FileSystemException, FSSetUpException {
         if (!rootDir.exists()) {
             throw new FSSetUpException("Root location does not exist: " + rootDir.getName());
-        } else {
-            return rootDir;
         }
     }
 
     public FileObject getEnsureRootLocation(final String location) throws FileSystemException, FSSetUpException {
         FileSystemManager fsManager = getVFSManager();
         FileObject rootDir = fsManager.resolveFile(location);
-
-        if (!rootDir.exists()) {
-            throw new FSSetUpException("Root location does not exist: " + rootDir.getName());
-        } else {
-            return rootDir;
-        }
+        checkRootDirExists(rootDir);
+        return rootDir;
     }
     
     private FileSystemManager getVFSManager() throws FileSystemException {
@@ -73,19 +72,16 @@ public class FSFilesManager {
     
     public FileObject getEnsureChildFolder(FileObject rootDir, String folderName) throws FSSetUpException {
         try {
-            if (!rootDir.exists()) {
-                throw new FSSetUpException("Root location does not exist: " + rootDir.getName());
+            checkRootDirExists(rootDir);
+            FileObject outgoingDir = rootDir.resolveFile(folderName);
+            if (!outgoingDir.exists()) {
+                outgoingDir.createFolder();
             } else {
-                FileObject outgoingDir = rootDir.resolveFile(folderName);
-                if (!outgoingDir.exists()) {
-                    outgoingDir.createFolder();
-                } else {
-                    if (outgoingDir.getType() != FileType.FOLDER) {
-                        throw new FSSetUpException("Child path exists and is not a folder");
-                    }
+                if (outgoingDir.getType() != FileType.FOLDER) {
+                    throw new FSSetUpException("Child path exists and is not a folder");
                 }
-                return outgoingDir;
             }
+            return outgoingDir;
         } catch (FileSystemException ex) {
             throw new FSSetUpException("IO error setting up folders", ex);
         }
