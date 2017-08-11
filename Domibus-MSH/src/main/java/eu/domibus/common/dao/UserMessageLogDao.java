@@ -1,10 +1,13 @@
 package eu.domibus.common.dao;
 
+import com.codahale.metrics.Timer;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogInfoFilter;
+import eu.domibus.ebms3.receiver.MSHWebservice;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
@@ -21,6 +24,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * @author Christian Koch, Stefan Mueller, Federico Martini
@@ -189,7 +194,11 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         TypedQuery<MessageLogInfo> queryParameterized = userMessageLogInfoFilter.applyParameters(typedQuery, filters);
         queryParameterized.setFirstResult(from);
         queryParameterized.setMaxResults(max);
-        return queryParameterized.getResultList();
+        Timer pagingMessages = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pageMessagesQuery"));
+        final Timer.Context pagingMessagesContext = pagingMessages.time();
+        final List<MessageLogInfo> resultList = queryParameterized.getResultList();
+        pagingMessagesContext.close();
+        return resultList;
     }
 
 }
