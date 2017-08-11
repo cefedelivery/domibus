@@ -3,7 +3,6 @@ package eu.domibus.common.services.impl;
 import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.web.controller.AdminGUIController;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -22,7 +21,7 @@ import java.util.Collection;
 @Service
 public class DomibusCacheServiceImpl implements DomibusCacheService {
 
-    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusCacheServiceImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusCacheServiceImpl.class);
     @Autowired
     private CacheManager cacheManager;
 

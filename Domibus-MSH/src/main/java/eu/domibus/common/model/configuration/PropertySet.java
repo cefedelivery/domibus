@@ -23,7 +23,7 @@ public class PropertySet extends AbstractBaseEntity {
 
     @XmlElement(required = true, name = "propertyRef")
     @Transient
-    protected List<PropertyRef> propertyRef;
+    protected List<PropertyRef> propertyRef; //NOSONAR
 
 
     @XmlTransient

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<db:configuration xmlns:db="http://domibus.eu/configuration"
+				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				  xsi:schemaLocation="http://domibus.eu/configuration file:/C:/development/git-repos/domibus/Domibus-MSH/domibus-configuration.xsd" party="blue_gw">
+	<mpcs>
+		<mpc name="defaultMpc"
+			 qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+			 enabled="true"
+			 default="true"
+			 retention_downloaded="4"
+			 retention_undownloaded="60"/>
+	</mpcs>
+	<businessProcesses>
+		<roles>
+			<role name="defaultInitiatorRole"
+				  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
+			<role name="defaultResponderRole"
+				  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
+		</roles>
+		<parties>
+			<partyIdTypes>
+				<partyIdType name="partyTypeUnregistered" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
+				<partyIdType name="partyTypeEmpty" value=""/>
+			</partyIdTypes>
+			<party name="blue_gw" endpoint="http://localhost:8080/domibus/services/msh" allowChunking="false">
+				<identifier partyId="domibus-blue" partyIdType="partyTypeUnregistered"/>
+			</party>
+			<party name="red_gw" endpoint="http://localhost:8180/domibus/services/msh" allowChunking="false">
+				<identifier partyId="domibus-red" partyIdType="partyTypeUnregistered"/>
+			</party>
+		</parties>
+		<meps>
+			<mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
+			<mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
+			<binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+		</meps>
+		<properties>
+			<property name="originalSenderProperty"
+					  key="originalSender"
+					  datatype="string"
+					  required="true"/>
+			<property name="finalRecipientProperty"
+					  key="finalRecipient"
+					  datatype="string"
+					  required="true"/>
+			<propertySet name="ecodexPropertySet">
+				<propertyRef property="finalRecipientProperty"/>
+				<propertyRef property="originalSenderProperty"/>
+			</propertySet>
+		</properties>
+		<payloadProfiles>
+		</payloadProfiles>
+		<securities>
+			<security name="noSecurity"
+					  policy="doNothingPolicy.xml"
+					  signatureMethod="RSA_SHA1" />
+		</securities>
+		<errorHandlings>
+			<errorHandling name="demoErrorHandling"
+						   errorAsResponse="true"
+						   businessErrorNotifyProducer="false"
+						   businessErrorNotifyConsumer="false"
+						   deliveryFailureNotifyProducer="false"/>
+		</errorHandlings>
+		<agreements>
+			<agreement name="agreementEmpty" value="" type=""/>
+		</agreements>
+		<services>
+			<service name="connectivityservice" value="http://ec.europa.eu/e-delivery/services/connectivity-service" type="e-delivery"/>
+		</services>
+		<actions>
+			<action name="submitMessage" value="submitMessage"/>
+		</actions>
+		<as4>
+			<receptionAwareness name="receptionAwareness" retry="1;2;CONSTANT" duplicateDetection="true"/>
+			<reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
+			<reliability name="NOReliability" nonRepudiation="false" replyPattern="response"/>
+		</as4>
+		<legConfigurations>
+			<legConfiguration name="pushConnectivityTestsubmitMessage"
+							  service="connectivityservice"
+							  action="submitMessage"
+							  defaultMpc="defaultMpc"
+							  reliability="NOReliability"
+							  security="noSecurity"
+							  receptionAwareness="receptionAwareness"
+							  propertySet="ecodexPropertySet"
+							  errorHandling="demoErrorHandling"
+							  compressPayloads="false" />
+		</legConfigurations>
+		<process name="tc0Process"
+				 agreement="agreementEmpty"
+				 mep="oneway"
+				 binding="push"
+				 initiatorRole="defaultInitiatorRole"
+				 responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="blue_gw"/>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushConnectivityTestsubmitMessage"/>
+			</legs>
+		</process>
+	</businessProcesses>
+</db:configuration>

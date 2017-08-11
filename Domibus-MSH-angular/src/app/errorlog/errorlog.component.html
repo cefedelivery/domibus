@@ -1,84 +1,120 @@
 ﻿<div class="selectionCriteria">
-  <md-card style="margin:0;padding:10px;">
+  <md-card>
     <md-card-content>
-      <p class="domibusTextHeadingBold">Error Log</p>
+      <h1 id="errorlogheader_id">Error Log</h1>
 
-      <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
-        <md-input-container class="inputField">
-          <input mdInput placeholder="Signal Message Id" name="errorSignalMessageId"
-                 [(ngModel)]="filter.errorSignalMessageId" #errorSignalMessageId="ngModel" id="signalmessageid_id" width="40px">
-        </md-input-container>
-        <md-input-container class="inputField">
-          <input mdInput placeholder="Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId"
-                 #messageInErrorId="ngModel" id="messageid_id">
-        </md-input-container>
-        <md-input-container class="inputField">
-          <input mdInput placeholder="Error detail" name="ErrorDetail" [(ngModel)]="filter.errorDetail"
-                 #errorDetail="ngModel" id="errordetail_id">
-        </md-input-container>
-        <md-select placeholder="AP Role" [(ngModel)]="filter.mshRole" name="mshRole" class="optionField" id="aprole_id">
-          <md-option [value]="''">
-          </md-option>
-          <md-option *ngFor="let role of mshRoles" [value]="role">
-            {{role}}
-          </md-option>
-        </md-select>
-        <md-select placeholder="Error Code" [(ngModel)]="filter.errorCode" name="errorCode" class="optionField" id="errorcode_id">
-          <md-option [value]="''">
-          </md-option>
-          <md-option *ngFor="let code of errorCodes" [value]="code">
-            {{code}}
-          </md-option>
-        </md-select>
-        Error Time Period
-        <md2-datepicker placeholder="From:"
-                        [(ngModel)]="filter.timestampFrom"
-                        name="fromTimestmap"
-                        [type]="'datetime'"
-                        [max]="timestampFromMaxDate"
-                        (change)='onTimestampFromChange($event)'
-                        #timestampControl="ngModel" id="fromtimestamp_id" class="dateTableField"></md2-datepicker>
-        <md2-datepicker placeholder="To:"
-                        [(ngModel)]="filter.timestampTo"
-                        name="toTimestmap"
-                        [min]="timestampToMinDate"
-                        [max]="timestampToMaxDate"
-                        (change)='onTimestampToChange($event)'
-                        [type]="'datetime'"
-                        #timestampControl="ngModel" id="totimestamp_id" class="dateTableField"></md2-datepicker>
-        Notified Time Period
-        <md2-datepicker placeholder="From:"
-                        [(ngModel)]="filter.notifiedFrom"
-                        name="notifiedFrom"
-                        [type]="'datetime'"
-                        [max]="notifiedFromMaxDate"
-                        (change)='onNotifiedFromChange($event)'
-                        #timestampControl="ngModel" id="notifiedfrom_id" class="dateTableField"></md2-datepicker>
-        <md2-datepicker placeholder="To:"
-                        [(ngModel)]="filter.notifiedTo"
-                        name="notifiedTo"
-                        [type]="'datetime'"
-                        [min]="notifiedToMinDate"
-                        [max]="notifiedToMaxDate"
-                        (change)='onNotifiedToChange($event)'
-                        #timestampControl="ngModel" id="notifiedto_id" class="dateTableField"></md2-datepicker>
-        <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
-          <md-icon>search</md-icon>
-          <span>Search</span>
-        </button>
-      </form>
+      <div class="panel">
+        <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
+
+          <md-input-container>
+            <input mdInput placeholder="Signal Message Id" name="errorSignalMessageId"
+                   [(ngModel)]="filter.errorSignalMessageId" #errorSignalMessageId="ngModel" id="signalmessageid_id"
+                   width="40px">
+          </md-input-container>
+
+          <md-input-container>
+            <input mdInput placeholder="Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId"
+                   #messageInErrorId="ngModel" id="messageid_id">
+          </md-input-container>
+
+          <br *ngIf="!advancedSearch">
+
+          <md-input-container *ngIf="advancedSearch">
+            <input mdInput placeholder="Error detail" name="ErrorDetail" [(ngModel)]="filter.errorDetail"
+                   #errorDetail="ngModel" id="errordetail_id">
+          </md-input-container>
+          <md-select placeholder="AP Role" [(ngModel)]="filter.mshRole" name="mshRole" class="optionField"
+                     id="aprole_id"
+                     *ngIf="advancedSearch">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let role of mshRoles" [value]="role">
+              {{role}}
+            </md-option>
+          </md-select>
+
+          <md-select placeholder="Error Code" [(ngModel)]="filter.errorCode" name="errorCode" class="optionField"
+                     id="errorcode_id" *ngIf="advancedSearch">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let code of errorCodes" [value]="code">
+              {{code}}
+            </md-option>
+          </md-select>
+
+          <br *ngIf="advancedSearch">
+
+
+          <md2-datepicker placeholder="Error from:"
+                          [(ngModel)]="filter.timestampFrom"
+                          name="fromTimestmap"
+                          [type]="'datetime'"
+                          [max]="timestampFromMaxDate"
+                          (change)='onTimestampFromChange($event)'
+                          #timestampControl="ngModel" id="fromtimestamp_id"></md2-datepicker>
+          <md2-datepicker placeholder="Error to:"
+                          [(ngModel)]="filter.timestampTo"
+                          name="toTimestmap"
+                          [min]="timestampToMinDate"
+                          [max]="timestampToMaxDate"
+                          (change)='onTimestampToChange($event)'
+                          [type]="'datetime'"
+                          #timestampControl="ngModel" id="totimestamp_id"></md2-datepicker>
+
+          <br *ngIf="advancedSearch">
+
+          <md2-datepicker placeholder="Notified from:"
+                          [(ngModel)]="filter.notifiedFrom"
+                          name="notifiedFrom"
+                          [type]="'datetime'"
+                          [max]="notifiedFromMaxDate"
+                          (change)='onNotifiedFromChange($event)'
+                          #timestampControl="ngModel" id="notifiedfrom_id"
+                          *ngIf="advancedSearch"></md2-datepicker>
+          <md2-datepicker placeholder="Notified to:"
+                          [(ngModel)]="filter.notifiedTo"
+                          name="notifiedTo"
+                          [type]="'datetime'"
+                          [min]="notifiedToMinDate"
+                          [max]="notifiedToMaxDate"
+                          (change)='onNotifiedToChange($event)'
+                          #timestampControl="ngModel" id="notifiedto_id"
+                          *ngIf="advancedSearch"></md2-datepicker>
+
+
+          <div class="searchArea">
+            <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
+              <md-icon>search</md-icon>
+              <span>Search</span>
+            </button>
+            <a href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()" id="advancedlink_id">Advanced</a>
+            <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()" id="basiclink_id">Basic</a>
+          </div>
+        </form>
+      </div>
 
     </md-card-content>
   </md-card>
 </div>
 
-<app-row-limiter [pageSizes]="pageSizes" (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+<div style="display:inline-flex">
+  <div>
+    <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                     (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+  </div>
+  <div>
+    <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                       (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+  </div>
+</div>
+
 
 <ngx-datatable
   id="errorLogTable"
   class="material striped"
   [rows]="rows"
   [columnMode]="'force'"
+  [columns]="columnPicker.selectedColumns"
   [headerHeight]="50"
   [footerHeight]="50"
   [rowHeight]="'auto'"
@@ -88,65 +124,15 @@
   [loadingIndicator]="loading"
   [count]="count"
   [offset]="offset"
-  [limit]="pageSize"
+  [limit]="rowLimiter.pageSize"
   [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
   (page)='onPage($event)'
-  (sort)="onSort($event)">
-  <ngx-datatable-column name="ErrorSignalMessageId">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <ngx-datatable-column name="AP Role" prop="mshRole" [width]="50">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <ngx-datatable-column name="MessageInErrorId">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <ngx-datatable-column name="ErrorCode" [width]="50">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <ngx-datatable-column name="ErrorDetail" [width]="250">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <ngx-datatable-column name="Timestamp" [width]="180">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
-  <ngx-datatable-column name="Notified" [width]="180">
-    <ng-template let-column="column">
-      {{column.name}}
-    </ng-template>
-    <ng-template let-value="value" ngx-datatable-cell-template>
-      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-    </ng-template>
-  </ngx-datatable-column>
+  (sort)="onSort($event)"
+  (activate)="onActivate($event)"
+  (select)="onSelect($event)">
 </ngx-datatable>
+
+<ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+  <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+</ng-template>
 

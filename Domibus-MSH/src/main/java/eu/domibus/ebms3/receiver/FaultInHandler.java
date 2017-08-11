@@ -24,6 +24,7 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 import java.util.Collections;
+import java.util.MissingResourceException;
 import java.util.Set;
 
 /**
@@ -59,6 +60,11 @@ public class FaultInHandler extends AbstractFaultHandler {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean handleFault(final SOAPMessageContext context) {
+
+        if(context == null) {
+            LOG.error("Context is null and shouldn't be");
+            throw new MissingResourceException("Context is null and shouldn't be", SOAPMessageContext.class.getName(), "context");
+        }
 
         final Exception exception = (Exception) context.get(Exception.class.getName());
         final Throwable cause = exception.getCause();
@@ -110,6 +116,11 @@ public class FaultInHandler extends AbstractFaultHandler {
     }
 
     private void processEbMSError(final SOAPMessageContext context, final EbMS3Exception ebMS3Exception) {
+
+        if(ebMS3Exception == null) {
+            LOG.warn("ebMSException is null onm this stage and shouldn't");
+            throw new MissingResourceException("ebMSException is null onm this stage and shouldn't", EbMS3Exception.class.getName(), "ebMS3Exception");
+        }
 
         // at this point an EbMS3Exception is available in any case
         SOAPMessage soapMessageWithEbMS3Error = null;

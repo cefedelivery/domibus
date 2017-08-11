@@ -1,24 +1,57 @@
-<div class="divTable">
-  <div class="divTableBody">
+<div class="selectionCriteria">
+  <md-card>
+    <md-card-content>
+      <h1 id="truststoreheader_id">Truststore</h1>
 
-    <div class="divTableRow">
-      <div class="divTableCell firstColumn"><label for="password">Truststore password</label></div>
-      <div class="divTableCell">
-        <md-input-container>
-          <input mdInput #password type="password" id="password">
-        </md-input-container>
+
+      <div style="display:inline-flex">
+        <div>
+          <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                           (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+        </div>
+        <div>
+          <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                             (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+        </div>
       </div>
-    </div>
 
-    <div class="divTableRow">
-      <div class="divTableCell firstColumn"><label for="truststore">Truststore file</label></div>
-      <div class="divTableCell"><input #fileInput type="file" id="truststore" accept=".jks"></div>
-    </div>
+      <ngx-datatable
+        id="errorLogTable"
+        class="material striped"
+        [rows]="trustStoreEntries"
+        [columnMode]="'force'"
+        [columns]="columnPicker.selectedColumns"
+        [headerHeight]="50"
+        [footerHeight]="50"
+        [rowHeight]="'auto'"
+        [scrollbarH]="true"
+        [loadingIndicator]="loading"
+        [selectionType]="'multi'"
+        [selected]="selectedMessages"
+        [limit]="rowLimiter.pageSize"
+        [sorts]="[{prop: 'alias', dir: 'desc'}]"
+        (activate)="onActivate($event)"
+        (select)="onSelect($event)">
 
-    <div class="divTableRow">
-      <div class="divTableCell firstColumn">
-        <button md-raised-button color="primary" (click)="submit()">Upload</button>
-      </div>
-    </div>
-  </div>
+
+      </ngx-datatable>
+
+      <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+      </ng-template>
+
+      <table class="buttonsRow">
+        <tr>
+          <td>
+            <button md-raised-button color="primary" (click)="openEditTrustStore()" id="uploadbutton_id">
+              <md-icon>file_upload</md-icon>
+              <span>Upload</span>
+            </button>
+          </td>
+        </tr>
+      </table>
+    </md-card-content>
+  </md-card>
 </div>
+
+

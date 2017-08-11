@@ -1,3 +1,14 @@
+Domibus 3.3-FR
+- Fix sendAttempt counter (initial one plus number of retries defined in the pmode)
+- Block the receiving of the message in case the sender's certificate is not valid or revoked.
+    Two more properties were added (for more details check domibus.properties file):
+        o domibus.sender.certificate.validation.onsending=true
+        o domibus.sender.certificate.validation.onreceiving=true
+    Renamed "domibus.senderparty.trust.verification" to "domibus.sender.trust.validation.onreceiving". Default value "false" has not been changed.
+    Renamed "domibus.certificate.validation.enabled" to "domibus.receiver.certificate.validation.onsending". Default value "true" has not been changed.
+- Discard domibus.internal.dispatch.queue from using the DLQ queue.
+- Discard domibus.internal.pull.queue from using the DLQ queue.
+- Possibility to notify the plugins when the message status changes; new method added in the plugin API: eu.domibus.plugin.BackendConnector.messageStatusChanged(eu.domibus.common.MessageStatusChangeEvent)
 Domibus 3.3-RC1
 - Configuration of Domibus is done with domibus.properties instead of externalized spring xml files
 - Add the possibility to pull messages
@@ -20,7 +31,7 @@ Domibus 3.3-RC1
 - Core: during sendMessage operation, Domibus trims the leading and trailing whitespaces in all the request fields.
 - Core: during sendMessage operation, Domibus verifies that, if MessageId and RefToMessageId is specified by backend client, then it should contain only printable ASCII characters.
 - Core: during sendMessage operation, all validations comparisons with the PMode data are case insensitive.
-- Core: during MSH dispatch operation, Domibus verifies the validity of sender's certificate.
+- Core: during MSH dispatch operation, Domibus verifies the validity of sender's certificate. The sender party name needs to be the same as the certificate alias from the keystore.
 - Core: during MSH receive operation, Domibus can verify the trust of the sender if activated.
 - Core: validation on MessageId and RefToMessageId can be by-passed by removing the key "domibus.sendMessage.messageIdPattern" from configuration file.
 - Core: new configuration properties added for ConnectionTimeout and ReceiveTimeout to allow fine tuning of the access points' conduit.
@@ -33,6 +44,7 @@ Domibus 3.3-RC1
 - Core: the core exposes services via the new domibus-ext-services-api module
 - Core: possibility to register message acknowledgments using the Java API and the REST core services
 - Core: possibility to monitor and manage messages using the Java API and the REST core services
+- JMS: In ActiveMQ message redelivery is now configured solely on the broker;The client / connection factory will not try to redeliver anymore.
 Domibus 3.2.5
 - Dynamic discovery: integrate Domibus with OASIS compliant SMP
 - Added new security policy file, eSensPolicy.v2.0_CA.xml to support embedded public certificate

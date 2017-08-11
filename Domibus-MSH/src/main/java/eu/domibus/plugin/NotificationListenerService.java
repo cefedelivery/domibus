@@ -23,10 +23,10 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.common.*;
 import eu.domibus.api.security.AuthRole;
-import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.api.security.AuthUtils;
+import eu.domibus.common.*;
+import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -47,6 +47,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -114,12 +115,29 @@ public class NotificationListenerService implements MessageListener, JmsListener
                     break;
                 case MESSAGE_RECEIVED_FAILURE:
                     doMessageReceiveFailure(message);
-
+                    break;
+                case MESSAGE_STATUS_CHANGE:
+                    doMessageStatusChange(message);
+                    break;
             }
         } catch (JMSException jmsEx) {
             LOG.error("Error getting the property from JMS message", jmsEx);
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Error getting the property from JMS message", jmsEx.getCause());
         }
+    }
+
+    protected void doMessageStatusChange(final Message message) throws JMSException {
+        MessageStatusChangeEvent event = new MessageStatusChangeEvent();
+        final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+        event.setMessageId(messageId);
+
+        final String fromStatus = message.getStringProperty("fromStatus");
+        if (StringUtils.isNotEmpty(fromStatus)) {
+            event.setFromStatus(MessageStatus.valueOf(fromStatus));
+        }
+        event.setToStatus(MessageStatus.valueOf(message.getStringProperty("toStatus")));
+        event.setChangeTimestamp(new Timestamp(message.getLongProperty("changeTimestamp")));
+        backendConnectorDelegate.messageStatusChanged(backendConnector, event);
     }
 
 

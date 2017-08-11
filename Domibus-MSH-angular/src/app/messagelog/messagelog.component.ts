@@ -1,10 +1,13 @@
-import {Component} from "@angular/core";
+import {Component, TemplateRef, ViewChild} from "@angular/core";
 import {Http, URLSearchParams, Response} from "@angular/http";
 import {MessageLogResult} from "./messagelogresult";
 import {Observable} from "rxjs";
 import {AlertService} from "../alert/alert.service";
 import {MessagelogDialogComponent} from "app/messagelog/messagelog-dialog/messagelog-dialog.component";
-import {MdDialog} from "@angular/material";
+import {MdDialog, MdDialogRef} from "@angular/material";
+import {MessagelogDetailsComponent} from "app/messagelog/messagelog-details/messagelog-details.component";
+import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
+import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 
 @Component({
   moduleId: module.id,
@@ -15,21 +18,22 @@ import {MdDialog} from "@angular/material";
 
 export class MessageLogComponent {
 
+  @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('nextAttemptInfoTpl') public nextAttemptInfoTpl: TemplateRef<any>;
+  @ViewChild('nextAttemptInfoWithDateFormatTpl') public nextAttemptInfoWithDateFormatTpl: TemplateRef<any>;
+
+  columnPicker: ColumnPickerBase = new ColumnPickerBase()
+  rowLimiter: RowLimiterBase = new RowLimiterBase()
+
   static readonly RESEND_URL: string = 'rest/message/${messageId}/restore';
   static readonly DOWNLOAD_MESSAGE_URL: string = 'rest/message/${messageId}/download';
   static readonly MESSAGE_LOG_URL: string = 'rest/messagelog';
 
   selected = [];
 
-  dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
-
   timestampFromMaxDate: Date = new Date();
   timestampToMinDate: Date = null;
   timestampToMaxDate: Date = new Date();
-
-  notifiedFromMaxDate: Date = new Date();
-  notifiedToMinDate: Date = null;
-  notifiedToMaxDate: Date = new Date();
 
   filter: any = {};
   loading: boolean = false;
@@ -37,28 +41,101 @@ export class MessageLogComponent {
   count: number = 0;
   offset: number = 0;
   //default value
-  orderBy: string = "messageId";
+  orderBy: string = "received";
   //default value
   asc: boolean = false;
-
-  pageSizes: Array<any> = [
-    {key: '10', value: 10},
-    {key: '25', value: 25},
-    {key: '50', value: 50},
-    {key: '100', value: 100}
-  ];
-  pageSize: number = this.pageSizes[0].value;
 
   mshRoles: Array<String>;
   msgTypes: Array<String>;
   msgStatus: Array<String>;
   notifStatus: Array<String>;
 
+  advancedSearch: boolean;
+
+
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   ngOnInit() {
-    this.page(this.offset, this.pageSize, this.orderBy, this.asc);
+    this.columnPicker.allColumns = [
+      {
+        name: 'Message Id',
+        width: 275
+      },
+      {
+        name: 'From Party Id'
+      },
+      {
+        name: 'To Party Id'
+      },
+      {
+        name: 'Message Status',
+        width: 175
+      },
+      {
+        name: 'Notification Status',
+        width: 175
+      },
+      {
+        cellTemplate: this.rowWithDateFormatTpl,
+        name: 'Received',
+        width: 155
+      },
+      {
+        name: 'AP Role',
+        prop: 'mshRole'
+      },
+      {
+        cellTemplate: this.nextAttemptInfoTpl,
+        name: 'Send Attempts'
+      },
+      {
+        cellTemplate: this.nextAttemptInfoTpl,
+        name: 'Send Attempts Max'
+      },
+      {
+        cellTemplate: this.nextAttemptInfoWithDateFormatTpl,
+        name: 'Next Attempt',
+        width: 155
+      },
+      {
+        name: 'Conversation Id'
+      },
+      {
+        name: 'Message Type',
+        width: 160
+      },
+      {
+        cellTemplate: this.rowWithDateFormatTpl,
+        name: 'Deleted',
+        width: 155
+      },
+      {
+        name: 'Original Sender'
+      },
+      {
+        name: 'Final Recipient'
+      },
+      {
+        name: 'Ref To Message Id'
+      },
+      {
+        name: 'Failed'
+      },
+      {
+        name: 'Restored'
+      }
+
+    ]
+
+    this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
+      return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type"].indexOf(col.name) != -1
+    })
+
+    this.filter.receivedTo = new Date()
+    this.filter.receivedTo.setHours(23, 59, 59, 999)
+
+    this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc)
   }
 
   getMessageLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<MessageLogResult> {
@@ -137,7 +214,7 @@ export class MessageLogComponent {
     this.getMessageLogEntries(offset, pageSize, orderBy, asc).subscribe((result: MessageLogResult) => {
       console.log("messageLog response:" + result);
       this.offset = offset;
-      this.pageSize = pageSize;
+      this.rowLimiter.pageSize = pageSize;
       this.orderBy = orderBy;
       this.asc = asc;
       this.count = result.count;
@@ -184,15 +261,19 @@ export class MessageLogComponent {
     if (event.newValue === 'desc') {
       ascending = false;
     }
-    this.page(this.offset, this.pageSize, event.column.prop, ascending);
+    this.page(this.offset, this.rowLimiter.pageSize, event.column.prop, ascending);
   }
 
   onSelect({selected}) {
-    console.log('Select Event', selected, this.selected);
+    // console.log('Select Event', selected, this.selected);
   }
 
   onActivate(event) {
-    console.log('Activate Event', event);
+    // console.log('Activate Event', event);
+
+    if ("dblclick" === event.type) {
+      this.details(event.row);
+    }
   }
 
   changePageSize(newPageLimit: number) {
@@ -202,7 +283,7 @@ export class MessageLogComponent {
 
   search() {
     console.log("Searching using filter:" + this.filter);
-    this.page(0, this.pageSize, this.orderBy, this.asc);
+    this.page(0, this.rowLimiter.pageSize, this.orderBy, this.asc);
   }
 
   resendDialog() {
@@ -235,14 +316,14 @@ export class MessageLogComponent {
   }
 
   isResendButtonEnabled() {
-    if (this.selected && this.selected[0] && !this.selected[0].deleted && this.selected[0].messageStatus === "SEND_FAILURE")
+    if (this.selected && this.selected.length == 1 && !this.selected[0].deleted && this.selected[0].messageStatus === "SEND_FAILURE")
       return true;
 
     return false;
   }
 
   isDownloadButtonEnabled(): boolean {
-    if (this.selected && this.selected[0] && !this.selected[0].deleted)
+    if (this.selected && this.selected.length == 1 && !this.selected[0].deleted)
       return true;
 
     return false;
@@ -251,6 +332,19 @@ export class MessageLogComponent {
   download() {
     const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace("${messageId}", this.selected[0].messageId);
     this.downloadNative(url);
+  }
+
+  details(selectedRow: any) {
+    let dialogRef: MdDialogRef<MessagelogDetailsComponent> = this.dialog.open(MessagelogDetailsComponent);
+    dialogRef.componentInstance.message = selectedRow;
+    // dialogRef.componentInstance.currentSearchSelectedSource = this.currentSearchSelectedSource;
+    dialogRef.afterClosed().subscribe(result => {
+      //Todo:
+    });
+  }
+
+  toggleAdvancedSearch() {
+    this.advancedSearch = !this.advancedSearch;
   }
 
   private downloadNative(content) {
@@ -270,11 +364,9 @@ export class MessageLogComponent {
     this.timestampFromMaxDate = event.value;
   }
 
-  onNotifiedFromChange(event) {
-    this.notifiedToMinDate = event.value;
-  }
-
-  onNotifiedToChange(event) {
-    this.notifiedFromMaxDate = event.value;
+  private showNextAttemptInfo(row: any): boolean {
+    if (row && (row.messageType === "SIGNAL_MESSAGE" || row.mshRole === "RECEIVING"))
+      return false;
+    return true;
   }
 }

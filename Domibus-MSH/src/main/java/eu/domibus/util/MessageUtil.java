@@ -1,5 +1,7 @@
 package eu.domibus.util;
 
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.messaging.MessagingException;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import org.w3c.dom.Node;
@@ -32,7 +34,7 @@ public class MessageUtil {
         try {
             messaging = getMessaging(request,jaxbContext);
         } catch (SOAPException | JAXBException e) {
-            throw new RuntimeException(e);
+            throw new MessagingException(DomibusCoreErrorCode.DOM_001, "Not possible to getMessage", e);
         }
         return messaging;
     }

@@ -26,7 +26,7 @@ public class Configuration extends AbstractBaseEntity {
     protected BusinessProcesses businessProcesses;
     @XmlElement(required = true, name = "mpcs")
     @Transient
-    private Mpcs mpcsXml;
+    private Mpcs mpcsXml; //NOSONAR
     @XmlTransient
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_CONFIGURATION")

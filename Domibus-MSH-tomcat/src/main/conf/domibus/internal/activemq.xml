@@ -130,13 +130,13 @@
                               sendToDlqIfMaxRetriesExceeded="true">
                 <redeliveryPolicyMap>
                     <redeliveryPolicyMap>
+                        <defaultEntry>
+                            <!-- default policy-->
+                            <redeliveryPolicy maximumRedeliveries="10" redeliveryDelay="300000"/>
+                        </defaultEntry>
                         <redeliveryPolicyEntries>
-                            <redeliveryPolicy queue="sendMessageQueue"
-                                              maximumRedeliveries="0"/>
-                            <redeliveryPolicy queue="pullMessageQueue"
-                                              maximumRedeliveries="0"/>
-                            <redeliveryPolicy queue="*"
-                                              maximumRedeliveries="10" redeliveryDelay="300000"/>
+                            <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0"/>
+                            <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0"/>
                         </redeliveryPolicyEntries>
                     </redeliveryPolicyMap>
                 </redeliveryPolicyMap>
@@ -146,6 +146,8 @@
                 <spring:constructor-arg name="filter" ref="testFilter" />
                 <spring:constructor-arg name="resendDelay" value="10000" />
             </spring:bean-->
+            <discardingDLQBrokerPlugin dropOnly="domibus.internal.dispatch.queue" reportInterval="10000"/>
+            <discardingDLQBrokerPlugin dropOnly="domibus.internal.pull.queue" reportInterval="10000"/>
         </plugins>
     </broker>
 

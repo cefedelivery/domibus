@@ -11,7 +11,7 @@ import { Pipe, PipeTransform } from '@angular/core';
  */
 export class DatePipe implements PipeTransform {
   transform(value: string, type: string = ""): string {
-    if(value != "") {
+    if(value) {
       let d = new Date(value);
 
       let dd = ("0"+d.getDate()).slice(-2); //day

@@ -54,7 +54,7 @@ public class Party extends AbstractBaseEntity {
     @XmlElement(required = true, name = "identifier")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PARTY")
-    protected Set<Identifier> identifiers;
+    protected Set<Identifier> identifiers; //NOSONAR
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME")
     protected String name;

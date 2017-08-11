@@ -39,18 +39,18 @@ public class SignalMessage extends AbstractBaseEntity {
     protected MessageInfo messageInfo;
     @XmlElement(name = "PullRequest")
     @Embedded
-    protected PullRequest pullRequest;
+    protected PullRequest pullRequest; //NOSONAR
     @XmlElement(name = "Receipt")
     @OneToOne(cascade = CascadeType.ALL)
     protected Receipt receipt;
     @XmlElement(name = "Error")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "SIGNALMESSAGE_ID")
-    protected Set<Error> error;
+    protected Set<Error> error; //NOSONAR
     @XmlAnyElement(lax = true)
     @Transient
     //According to how we read the spec those attributes serve no purpose in the AS4 profile, therefore they are discarded
-    protected List<Object> any;
+    protected List<Object> any; //NOSONAR
 
     /**
      * Gets the value of the messageInfo property.

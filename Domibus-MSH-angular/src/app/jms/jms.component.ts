@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {Http, Headers, Response} from "@angular/http";
 import {AlertService} from "../alert/alert.service";
 import {MessagesRequestRO} from "./ro/messages-request-ro";
@@ -6,19 +6,30 @@ import {isNullOrUndefined} from "util";
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {MoveDialogComponent} from "./move-dialog/move-dialog.component";
 import {MessageDialogComponent} from "./message-dialog/message-dialog.component";
+import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
+import {DirtyOperations} from "../common/dirty-operations";
+import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
+import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
+import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'app-jms',
   templateUrl: './jms.component.html',
   styleUrls: ['./jms.component.css']
 })
-export class JmsComponent implements OnInit {
+export class JmsComponent implements OnInit, DirtyOperations {
+
+  columnPicker: ColumnPickerBase = new ColumnPickerBase()
+  rowLimiter: RowLimiterBase = new RowLimiterBase()
 
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
   timestampFromMaxDate: Date = new Date();
   timestampToMinDate: Date = null;
   timestampToMaxDate: Date = new Date();
+
+  @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('rowWithJSONTpl') rowWithJSONTpl: TemplateRef<any>;
 
   queues = [];
 
@@ -41,47 +52,94 @@ export class JmsComponent implements OnInit {
   loading: boolean = false;
 
   rows: Array<any> = [];
-  pageSizes: Array<any> = [
-    {key: '5', value: 5},
-    {key: '10', value: 10},
-    {key: '25', value: 25},
-    {key: '50', value: 50},
-    {key: '100', value: 100}
-  ];
-  pageSize: number = this.pageSizes[0].value;
-
-  request = new MessagesRequestRO()
+  request = new MessagesRequestRO();
   private headers = new Headers({'Content-Type': 'application/json'});
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   ngOnInit() {
-    this.getDestinations();
+
+    this.columnPicker.allColumns = [
+      {
+        name: 'ID',
+        prop: 'id'
+      },
+      {
+        name: 'JMS Type',
+        prop: 'type',
+        width: 80
+      },
+      {
+        cellTemplate: this.rowWithDateFormatTpl,
+        name: 'Time',
+        prop: 'timestamp',
+        width: 80
+      },
+      {
+        name: 'Content',
+        prop: 'content'
+
+      },
+      {
+        cellTemplate: this.rowWithJSONTpl,
+        name: 'Custom prop',
+        prop: 'customProperties',
+        width: 250
+      },
+      {
+        cellTemplate: this.rowWithJSONTpl,
+        name: 'JMS prop',
+        prop: 'jmsproperties',
+        width: 200
+      }
+
+    ]
+
+    this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
+      return ["ID", "Time", "Custom prop", "JMS prop"].indexOf(col.name) != -1
+    })
+
+    // set toDate equals to now
+    this.request.toDate = new Date()
+    this.request.toDate.setHours(23, 59, 59, 999)
+
+    this.getDestinations().subscribe((response: Response) => {
+      this.setDefaultQueue('domibus.DLQ');
+      this.search();
+    });
+
   }
 
-  private getDestinations() {
-    this.http.get("rest/jms/destinations").subscribe(
+  private getDestinations(): Observable<Response> {
+    let observableResponse: Observable<Response> = this.http.get("rest/jms/destinations");
+
+    observableResponse.subscribe(
       (response: Response) => {
         this.queues = [];
         let destinations = response.json().jmsDestinations;
         for (let key in destinations) {
-          this.queues.push(destinations[key])
-          if (key.match('domibus\.DLQ')) {
-            this.selectedSource = destinations[key];
-          }
+          this.queues.push(destinations[key]);
         }
-
-        // console.log(this.queues);
       },
       (error: Response) => {
         this.alertService.error('Could not load queues: ' + error);
       }
     )
+
+    return observableResponse
+  }
+
+  private setDefaultQueue(queueName: string) {
+    this.queues.forEach(queue => {
+      if (queue.name === queueName) {
+        this.selectedSource = queue;
+      }
+    })
   }
 
   changePageSize(newPageSize: number) {
-    this.pageSize = newPageSize;
+    this.rowLimiter.pageSize = newPageSize;
     this.search();
   }
 
@@ -120,8 +178,7 @@ export class JmsComponent implements OnInit {
       selector: this.request.selector,
     }, {headers: this.headers}).subscribe(
       (response: Response) => {
-        let messages = response.json().messages;
-        this.rows = messages;
+        this.rows = response.json().messages;
         this.loading = false;
         //console.log(messages);
       },
@@ -133,8 +190,12 @@ export class JmsComponent implements OnInit {
   }
 
   cancel() {
-    this.search();
-    this.alertService.success("The operation 'message updates cancelled' completed successfully");
+    let dialogRef: MdDialogRef<CancelDialogComponent> = this.dialog.open(CancelDialogComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.search();
+      }
+    });
   }
 
   save() {
@@ -146,11 +207,39 @@ export class JmsComponent implements OnInit {
 
   move() {
     let dialogRef: MdDialogRef<MoveDialogComponent> = this.dialog.open(MoveDialogComponent);
-    dialogRef.componentInstance.queues = this.queues;
+
+    if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
+
+      for (let message of this.selectedMessages) {
+
+        try {
+          let originalQueue = message.customProperties.originalQueue;
+          if (!isNullOrUndefined(originalQueue)) {
+            let queue = this.queues.filter((queue) => queue.name === originalQueue).pop();
+            dialogRef.componentInstance.queues.push(queue);
+            dialogRef.componentInstance.destinationsChoiceDisabled = true;
+            dialogRef.componentInstance.selectedSource = queue;
+            break;
+          }
+        }
+        catch (e) {
+          console.error(e);
+        }
+      }
+
+      if (dialogRef.componentInstance.queues.length == 0) {
+        console.warn("Unable to determine the original queue for the selected messages");
+        dialogRef.componentInstance.queues.push(...this.queues);
+      }
+    } else {
+      dialogRef.componentInstance.queues.push(...this.queues);
+    }
+
+
     dialogRef.afterClosed().subscribe(result => {
       if (!isNullOrUndefined(result) && !isNullOrUndefined(result.destination)) {
         let messageIds = this.selectedMessages.map((message) => message.id);
-        this.serverMove(this.selectedSource.name, result.destination, messageIds);
+        this.serverMove(this.currentSearchSelectedSource.name, result.destination, messageIds);
       }
     });
   }
@@ -168,7 +257,7 @@ export class JmsComponent implements OnInit {
     this.markedForDeletionMessages.push(...this.selectedMessages);
     let newRows = this.rows.filter((element) => {
       return !this.selectedMessages.includes(element);
-    })
+    });
     this.selectedMessages = [];
     this.rows = newRows;
   }
@@ -180,16 +269,18 @@ export class JmsComponent implements OnInit {
       selectedMessages: messageIds,
       action: "MOVE"
     }, {headers: this.headers}).subscribe(
-      (response: Response) => {
+      () => {
         this.alertService.success("The operation 'move messages' completed successfully.");
 
         //refresh destinations
-        this.getDestinations();
+        this.getDestinations().subscribe((response: Response) => {
+          this.setDefaultQueue(this.currentSearchSelectedSource.name);
+        });
 
         //remove the selected rows
         let newRows = this.rows.filter((element) => {
           return !this.selectedMessages.includes(element);
-        })
+        });
         this.selectedMessages = [];
         this.rows = newRows;
       },
@@ -205,7 +296,7 @@ export class JmsComponent implements OnInit {
       selectedMessages: messageIds,
       action: "REMOVE"
     }, {headers: this.headers}).subscribe(
-      (response: Response) => {
+      () => {
         this.alertService.success("The operation 'updates on message(s)' completed successfully.");
         this.getDestinations();
         this.markedForDeletionMessages = [];
@@ -214,6 +305,10 @@ export class JmsComponent implements OnInit {
         this.alertService.error("The operation 'updates on message(s)' could not be completed: " + error);
       }
     )
+  }
+
+  isDirty(): boolean {
+    return !isNullOrUndefined(this.markedForDeletionMessages) && this.markedForDeletionMessages.length > 0;
   }
 
 

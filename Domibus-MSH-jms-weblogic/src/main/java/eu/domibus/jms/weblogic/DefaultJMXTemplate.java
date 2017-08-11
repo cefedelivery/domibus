@@ -1,8 +1,8 @@
 package eu.domibus.jms.weblogic;
 
 import eu.domibus.jms.spi.InternalJMSException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ import java.io.IOException;
 @Component
 public class DefaultJMXTemplate implements JMXTemplate {
 
-    private static final Log LOG = LogFactory.getLog(DefaultJMXTemplate.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DefaultJMXTemplate.class);
 
     @Autowired
     JMXHelper jmxHelper;

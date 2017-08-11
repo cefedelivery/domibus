@@ -162,12 +162,15 @@ public class CryptoService {
         if (crypto != null) {
             return crypto.getKeyStore().getCertificate(alias);
         }
+
         try {
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
             String keyStoreFilename = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.file");
             String keyStorePassword = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.keystore.password");
-            keyStore.load(new FileInputStream(keyStoreFilename), keyStorePassword.toCharArray());
-            return keyStore.getCertificate(alias);
+            try (FileInputStream fileInputStream = new FileInputStream(keyStoreFilename)) {
+                keyStore.load(fileInputStream, keyStorePassword.toCharArray());
+                return keyStore.getCertificate(alias);
+            }
         } catch (Exception ex) {
             throw new KeyStoreException(ex);
         }

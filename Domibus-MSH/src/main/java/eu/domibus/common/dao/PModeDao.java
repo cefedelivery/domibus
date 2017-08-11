@@ -190,8 +190,7 @@ public class PModeDao extends PModeProvider {
                 query.setParameter("SERVICE", value);
             } catch (final IllegalArgumentException e) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SERVICE_INVALID_URI, value);
-                final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Service " + value + " is not a valid URI [CORE] 5.2.2.8", null, e);
-                throw ex;
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Service " + value + " is not a valid URI [CORE]", null, e);
             }
         } else {
             query = this.entityManager.createNamedQuery("Service.findByServiceAndType", String.class);
@@ -219,8 +218,7 @@ public class PModeDao extends PModeProvider {
                         type = "";
                     } catch (final IllegalArgumentException e) {
                         LOG.businessError(DomibusMessageCode.BUS_PARTY_ID_INVALID_URI, partyId.getValue());
-                        final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "PartyId " + partyId.getValue() + " is not a valid URI [CORE] 5.2.2.3", null, e);
-                        throw ex;
+                        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "PartyId " + partyId.getValue() + " is not a valid URI [CORE]", null, e);
                     }
                 }
                 final TypedQuery<Identifier> identifierQuery = this.entityManager.createNamedQuery("Identifier.findByTypeAndPartyId", Identifier.class);

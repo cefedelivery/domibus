@@ -33,6 +33,7 @@ import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.common.validators.ConfigurationValidator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -57,7 +58,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -96,6 +96,9 @@ public abstract class PModeProvider {
     @Autowired
     XMLUtil xmlUtil;
 
+    @Autowired
+    List<ConfigurationValidator> configurationValidators;
+
     public abstract void init();
 
     public abstract void refresh();
@@ -107,7 +110,7 @@ public abstract class PModeProvider {
 
     @Transactional(propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<String> updatePModes(byte[] bytes) throws XmlProcessingException, IOException {
+    public List<String> updatePModes(byte[] bytes) throws XmlProcessingException {
         LOG.debug("Updating the PMode");
 
         //unmarshall the PMode with whitespaces ignored
@@ -120,11 +123,10 @@ public abstract class PModeProvider {
             throw xmlProcessingException;
         }
 
-        List<String> resultMessage = null;
+        List<String> resultMessage = new ArrayList<>();
         //unmarshall the PMode taking into account the whitespaces
         UnmarshallerResult unmarshalledConfiguration = unmarshall(bytes, false);
         if (!unmarshalledConfiguration.isValid()) {
-            resultMessage = new ArrayList<>();
             resultMessage.add("The PMode file is not XSD compliant. It is recommended to correct the issues:");
             resultMessage.addAll(unmarshalledConfiguration.getErrors());
             LOG.warn(StringUtils.join(resultMessage, " "));
@@ -132,6 +134,10 @@ public abstract class PModeProvider {
 
         Configuration configuration = unmarshalledConfiguration.getResult();
         configurationDAO.updateConfiguration(configuration);
+
+        for (ConfigurationValidator validator : configurationValidators) {
+            resultMessage.addAll(validator.validate(configuration));
+        }
 
         //save the raw configuration
         final ConfigurationRaw configurationRaw = new ConfigurationRaw();
@@ -145,6 +151,7 @@ public abstract class PModeProvider {
 
         return resultMessage;
     }
+
 
     protected UnmarshallerResult unmarshall(byte[] bytes, boolean ignoreWhitespaces) throws XmlProcessingException {
         Configuration configuration = null;
@@ -191,7 +198,7 @@ public abstract class PModeProvider {
             LOG.businessInfo(DomibusMessageCode.BUS_LEG_NAME_FOUND, leg, agreementName, senderParty, receiverParty, service, action);
 
             if ((action.equals(Ebms3Constants.TEST_ACTION) && (!service.equals(Ebms3Constants.TEST_SERVICE)))) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Ebms3Constants.TEST_SERVICE + " and ebMS3 Test Action: " + Ebms3Constants.TEST_ACTION + " can only be used together [CORE] 5.2.2.9", userMessage.getMessageInfo().getMessageId(), null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Ebms3Constants.TEST_SERVICE + " and ebMS3 Test Action: " + Ebms3Constants.TEST_ACTION + " can only be used together [CORE]", userMessage.getMessageInfo().getMessageId(), null);
             }
 
             MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(agreementName, senderParty, receiverParty, service, action, leg);

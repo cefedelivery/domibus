@@ -10,10 +10,18 @@ md-sidenav-container {
 }
 
 md-sidenav {
-  width: 300px;
   text-align: center;
   box-shadow: 7px 7px 10px #9B9B9B;
   /*border: dashed red;*/
+}
+
+md-sidenav.menu-expanded {
+  width: 220px;
+
+}
+
+md-sidenav.menu-collapsed {
+  width: 50px;
 }
 
 html, body, material-app, md-sidenav-container, .my-content {
@@ -23,45 +31,62 @@ html, body, material-app, md-sidenav-container, .my-content {
   /*border: dashed red;*/
 }
 
-.sideNavButton {
+.menu-expanded .sideNavButton {
   text-align: left;
   padding-left: 20%;
 }
 
-#topLogo {
+.menu-collapsed .sideNavButton {
+  text-align: center;
+  padding: 0 !important;
+  max-width: 50px !important;
+  min-width: 0px !important;
+}
+
+.menu-collapsed.mat-sidenav {
+  min-width: 1vw !important;
+}
+
+.menu-expanded #topLogo {
   display: flex;
   justify-content: center;
   align-items: center;
-  /*border: solid greenyellow;*/
   padding-top: 35px;
   padding-bottom: 35px
+}
+
+.menu-collapsed #topLogo {
+  display: block;
+  padding-top: 35px;
+  padding-bottom: 35px;
+  padding-left: 0px;
 }
 
 #topLogoText {
   text-align: left;
 }
 
-#bottomLogo {
-  position: absolute;
-  bottom: 0px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-  /*border: solid yellow;*/
-  margin-top: 25px;
-  margin-bottom: 25px;
+#topLogoText h4 {
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 0.6em;
 }
 
-#sandwichMenuHolder {
-  /*width: 100%;*/
-  position: relative;
+#topLogo {
+  height: 90px;
+  vertical-align: middle;
+}
+
+#collapse_id, #expand_id {
+  text-align: center;
+  width: 50px;
   height: 50px;
-  display: block;
-  /*border: solid red;*/
+  min-width: 0
 }
 
-#sandwichMenu {
+.helpMenu {
   float: right;
-  /*border: solid mediumpurple;*/
+  width: 50px;
+  padding-top: 25px;
+  padding-right: 40px;
 }

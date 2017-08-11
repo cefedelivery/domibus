@@ -109,7 +109,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             LOG.info("Submitted message with messageId [" + messageID + "], jmsCorrelationID [" + jmsCorrelationID + "]");
         } catch (Exception e) {
             LOG.error("Exception occurred while receiving message [" + map + "]" , e);
-            throw new RuntimeException("Exception occurred while receiving message [" + map + "]", e);
+            throw new DefaultJmsPluginException("Exception occurred while receiving message [" + map + "]", e);
         }
     }
 
@@ -162,7 +162,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             try {
                 downloadMessage(messageId, mapMessage);
             } catch (final MessageNotFoundException e) {
-                throw new RuntimeException("Unable to create push message", e);
+                throw new DefaultJmsPluginException("Unable to create push message", e);
             }
             mapMessage.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, JMSMessageConstants.MESSAGE_TYPE_INCOMING);
             return mapMessage;

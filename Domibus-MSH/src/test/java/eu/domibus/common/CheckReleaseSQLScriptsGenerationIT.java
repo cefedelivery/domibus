@@ -1,9 +1,9 @@
 package eu.domibus.common;
 
 import eu.domibus.common.util.DomibusPropertiesService;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +26,7 @@ import java.nio.file.Path;
 @RunWith(JUnit4.class)
 public class CheckReleaseSQLScriptsGenerationIT {
 
-    private static final Log LOG = LogFactory.getLog(CheckReleaseSQLScriptsGenerationIT.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CheckReleaseSQLScriptsGenerationIT.class);
 
     private static final String MYSQL_DDL_PREFIX = "mysql5innoDb-";
     private static final String ORACLE_DDL_PREFIX = "oracle10g-";

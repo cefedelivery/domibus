@@ -13,6 +13,7 @@
 
     <artifactId>domibus-default-jms-plugin</artifactId>
     <packaging>jar</packaging>
+    <name>Domibus MSH Default JMS Plugin</name>
 
     <dependencies>
         <dependency>

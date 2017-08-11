@@ -5,46 +5,142 @@
 @import '~@swimlane/ngx-datatable/release/assets/icons.css';
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
-
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
+  font-family: 'Open Sans', sans-serif;
 }
+
+.mat-dialog-title {
+  font-family: 'Open Sans', sans-serif !important;
+}
+
+.mat-button, .mat-raised-button, .mat-icon-button {
+  font-family: 'Open Sans', sans-serif !important;
+  font-weight: bolder !important;
+}
+
 .text-select {
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
   -o-user-select: text;
   user-select: text;
+  word-wrap: break-word;
+}
+
+/* --- HEADING -------------------- */
+/*----------------------------------*/
+h1 {
+  font-size: 48px;
+  margin-top: 0;
+}
+
+h2 {
+  font-size: 36px;
+}
+
+/* --- EC LOGO -------------------- */
+/*----------------------------------*/
+#bottomLogo {
+  display: none;
+}
+
+/* --- SIDEBAR -------------------- */
+/*----------------------------------*/
+md-sidenav[_ngcontent-c0] {
+  box-shadow: 0px 0px 2px #9B9B9B !important;
+}
+
+/* --- MENU ---*/
+.mat-sidenav {
+}
+
+.mat-sidenav button {
+  box-shadow: none;
+  border-radius: 0;
+  line-height: 50px !important;
+  letter-spacing: 1px;
+}
+
+.sideNavButton[_ngcontent-c0] {
+  padding-left: 20px !important;
+}
+
+.mat-sidenav button.cdk-focused {
+  color: #03A9F4;
+}
+
+.mat-sidenav button:hover, .mat-sidenav button.current {
+  color: #03A9F4;
+}
+
+/* --- HAMBURGER MENU -------------------- */
+/*-----------------------------------------*/
+/* --- Hamburger wrapper ---*/
+#sandwichMenuHolder {
+  position: relative;
+  display: block;
+}
+
+/* --- Hamburger button ---*/
+#sandwichMenu {
+  position: absolute;
+  right: 10px;
+  top: 0;
+}
+
+#sandwichMenu .mat-icon-button {
+  height: 40px;
+  width: 40px;
+}
+
+#sandwichMenu .mat-button-wrapper {
+}
+
+#sandwichMenu .mat-icon.material-icons {
+  height: 40px;
+  width: 40px;
+  font-size: 40px;
+  line-height: 1;
+}
+
+#sandwichMenu .material-icons:hover {
+  color: #03A9F4;
+}
+
+/* --- CONTENT -------------------- */
+/*----------------------------------*/
+.mat-sidenav-container {
+  background-color: #F5F5F5;
+  color: rgba(0, 0, 0, .99);
+}
+
+.panel {
+  padding: 20px;
+  background: #FFF;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.24);
+}
+
+md-card {
+  margin: 0;
+  padding: 10px;
+}
+
+.selectionCriteria md-select, md-input-container {
+  margin-right: 2%;
+}
+
+.selectionCriteria md-input-container, md-select, md2-datepicker {
+  width: 30%;
+}
+
+.mat-select-arrow {
+  display:none;
 }
 
 
-.domibusTextRegular {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18pt;
 
-}
 
-.domibusTextSpace {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 15pt;
-}
-
-.domibusTextHeading {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 38pt;
-}
-
-.domibusTextHeadingBold {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 38pt;
-  margin:0;
-  font-weight: bold
-}
-
-.domibusTextSmall {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 13pt;
-}

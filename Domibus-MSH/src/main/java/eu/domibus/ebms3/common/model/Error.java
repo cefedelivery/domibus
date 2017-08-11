@@ -30,7 +30,7 @@ public class Error extends AbstractBaseEntity {
 
     @XmlElement(name = "Description")
     @Embedded
-    protected Description description;
+    protected Description description; //NOSONAR
     @XmlElement(name = "ErrorDetail")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
