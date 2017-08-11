@@ -6,6 +6,7 @@ import eu.domibus.plugin.fs.exception.FSPayloadException;
 import eu.domibus.plugin.fs.exception.FSRuntimeException;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
@@ -61,18 +62,25 @@ public class FSMessageTransformer
     public Submission transformToSubmission(final FSMessage messageIn) {
         UserMessage metadata = messageIn.getMetadata();
         Submission submission = new Submission();
-        
+
         setPartyInfoToSubmission(submission, metadata.getPartyInfo());
         setCollaborationInfoToSubmission(submission, metadata.getCollaborationInfo());
         setMessagePropertiesToSubmission(submission, metadata.getMessageProperties());
-        setPayloadToSubmission(submission, messageIn.getDataHandler());
-        
+        try {
+            setPayloadToSubmission(submission, messageIn.getDataHandler());
+        } catch (FSPayloadException ex) {
+            throw new FSRuntimeException("Could not set payload to Submission", ex);
+        }
         return submission;
     }
 
-    private void setPayloadToSubmission(Submission submission, final DataHandler dataHandler) {
+    private void setPayloadToSubmission(Submission submission, final DataHandler dataHandler) throws FSPayloadException {
         ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(1);
-        payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, dataHandler.getContentType()));
+        String mimeType = FSMimeTypeHelper.getMimeType(dataHandler.getName());
+        if (StringUtils.isEmpty(mimeType)) {
+            throw new FSPayloadException("Could not detect mime type for " + dataHandler.getName());
+        }
+        payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, mimeType));
         
         submission.addPayload(DEFAULT_CONTENT_ID, dataHandler, payloadProperties);
     }
