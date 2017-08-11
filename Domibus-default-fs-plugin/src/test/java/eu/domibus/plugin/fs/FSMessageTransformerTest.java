@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
@@ -36,7 +38,7 @@ public class FSMessageTransformerTest {
     private static final String ACTION_TC1LEG1 = "TC1Leg1";
     private static final String SERVICE_TYPE_TC1 = "tc1";
     private static final String MIME_TYPE = "MimeType";
-    private static final String TEXT_XML = "text/xml";
+    private static final String APPLICATION_XML = "application/xml";
     private static final String AGREEMENT_REF_A1 = "A1";
     private static final String EMPTY_STR = "";
 
@@ -72,8 +74,10 @@ public class FSMessageTransformerTest {
         submission.addMessageProperty(PROPERTY_ORIGINAL_SENDER, ORIGINAL_SENDER);
         submission.addMessageProperty(PROPERTY_FINAL_RECIPIENT, FINAL_RECIPIENT);
 
-        DataHandler payLoadDataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
-        Submission.TypedProperty submissionTypedProperty = new Submission.TypedProperty(MIME_TYPE, TEXT_XML);
+        ByteArrayDataSource dataSource = new ByteArrayDataSource(payloadContent.getBytes(), APPLICATION_XML);
+        dataSource.setName("content.xml");
+        DataHandler payLoadDataHandler = new DataHandler(dataSource);
+        Submission.TypedProperty submissionTypedProperty = new Submission.TypedProperty(MIME_TYPE, APPLICATION_XML);
         Collection<Submission.TypedProperty> listTypedProperty = new ArrayList<>();
         listTypedProperty.add(submissionTypedProperty);
         Submission.Payload submissionPayload = new Submission.Payload(PAYLOAD_ID, payLoadDataHandler, listTypedProperty, false, null, null);
@@ -111,14 +115,9 @@ public class FSMessageTransformerTest {
         Assert.assertEquals(PROPERTY_FINAL_RECIPIENT, property1.getName());
         Assert.assertEquals(FINAL_RECIPIENT, property1.getValue());
 
-        /*
-        MessageInfo messageInfo = userMessage.getMessageInfo();
-        Assert.assertEquals(messageId, messageInfo.getMessageId());
-        */
-
         DataHandler dataHandler = fsMessage.getDataHandler();
-        Assert.assertEquals(TEXT_XML, dataHandler.getContentType());
-        Assert.assertEquals(payloadContent, dataHandler.getContent());
+        Assert.assertEquals(APPLICATION_XML, dataHandler.getContentType());
+        Assert.assertEquals(payloadContent, IOUtils.toString(dataHandler.getInputStream()));
     }
 
     @Test(expected = FSRuntimeException.class)
@@ -153,8 +152,10 @@ public class FSMessageTransformerTest {
     public void testTransformToSubmission_NormalFlow() throws Exception {
         String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
         UserMessage metadata = FSTestHelper.getUserMessage(this.getClass(), "testTransformToSubmissionNormalFlow_metadata.xml");
-
-        DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
+        
+        ByteArrayDataSource dataSource = new ByteArrayDataSource(payloadContent.getBytes(), APPLICATION_XML);
+        dataSource.setName("content.xml");
+        DataHandler dataHandler = new DataHandler(dataSource);
         FSMessage fsMessage = new FSMessage(dataHandler, metadata);
 
         // Transform FSMessage to Submission
@@ -194,11 +195,11 @@ public class FSMessageTransformerTest {
         Submission.Payload submissionPayload = submission.getPayloads().iterator().next();
         Submission.TypedProperty payloadProperty = submissionPayload.getPayloadProperties().iterator().next();
         Assert.assertEquals(MIME_TYPE, payloadProperty.getKey());
-        Assert.assertEquals(TEXT_XML, payloadProperty.getValue());
+        Assert.assertEquals(APPLICATION_XML, payloadProperty.getValue());
 
         DataHandler payloadDatahandler = submissionPayload.getPayloadDatahandler();
-        Assert.assertEquals(TEXT_XML, payloadDatahandler.getContentType());
-        Assert.assertEquals(payloadContent, payloadDatahandler.getContent());
+        Assert.assertEquals(APPLICATION_XML, payloadDatahandler.getContentType());
+        Assert.assertEquals(payloadContent, IOUtils.toString(payloadDatahandler.getInputStream()));
     }
 
 }
