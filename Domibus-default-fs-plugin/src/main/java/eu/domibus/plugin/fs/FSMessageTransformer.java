@@ -27,7 +27,7 @@ public class FSMessageTransformer
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSMessageTransformer.class);
     
     private static final String DEFAULT_CONTENT_ID = "cid:message";
-    public static final String MIME_TYPE = "MimeType";
+    private static final String MIME_TYPE = "MimeType";
 
     private ObjectFactory objectFactory = new ObjectFactory();
 
@@ -44,7 +44,6 @@ public class FSMessageTransformer
         UserMessage metadata = objectFactory.createUserMessage();
         metadata.setPartyInfo(getPartyInfoFromSubmission(submission));
         metadata.setCollaborationInfo(getCollaborationInfoFromSubmission(submission));
-        //metadata.setMessageInfo(getMessageInfoFromSubmission(submission));
         metadata.setMessageProperties(getMessagePropertiesFromSubmission(submission));
 
         try {
@@ -67,15 +66,15 @@ public class FSMessageTransformer
         UserMessage metadata = messageIn.getMetadata();
         Submission submission = new Submission();
         
-        setPartyInfo(submission, metadata.getPartyInfo());
-        setCollaborationInfo(submission, metadata.getCollaborationInfo());
-        setMessageProperties(submission, metadata.getMessageProperties());
-        setPayload(submission, messageIn.getDataHandler());
+        setPartyInfoToSubmission(submission, metadata.getPartyInfo());
+        setCollaborationInfoToSubmission(submission, metadata.getCollaborationInfo());
+        setMessagePropertiesToSubmission(submission, metadata.getMessageProperties());
+        setPayloadToSubmission(submission, messageIn.getDataHandler());
         
         return submission;
     }
 
-    private void setPayload(Submission submission, final DataHandler dataHandler) {
+    private void setPayloadToSubmission(Submission submission, final DataHandler dataHandler) {
         ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(1);
         payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, FSMimeTypeHelper.fixMimeType(dataHandler.getContentType())));
         
@@ -93,7 +92,7 @@ public class FSMessageTransformer
         }
     }
 
-    private void setMessageProperties(Submission submission, MessageProperties messageProperties) {
+    private void setMessagePropertiesToSubmission(Submission submission, MessageProperties messageProperties) {
         for (Property messageProperty : messageProperties.getProperty()) {
             String name = messageProperty.getName();
             String value = messageProperty.getValue();
@@ -120,7 +119,7 @@ public class FSMessageTransformer
         return messageProperties;
     }
 
-    private void setCollaborationInfo(Submission submission, CollaborationInfo collaborationInfo) {
+    private void setCollaborationInfoToSubmission(Submission submission, CollaborationInfo collaborationInfo) {
         AgreementRef agreementRef = collaborationInfo.getAgreementRef();
         Service service = collaborationInfo.getService();
         
@@ -155,15 +154,7 @@ public class FSMessageTransformer
         return collaborationInfo;
     }
 
-    /*
-    private MessageInfo getMessageInfoFromSubmission(Submission submission) {
-        MessageInfo messageInfo = objectFactory.createMessageInfo();
-        messageInfo.setMessageId(submission.getMessageId());
-        return messageInfo;
-    }
-    */
-
-    private void setPartyInfo(Submission submission, PartyInfo partyInfo) {
+    private void setPartyInfoToSubmission(Submission submission, PartyInfo partyInfo) {
         From from = partyInfo.getFrom();
         To to = partyInfo.getTo();
         
