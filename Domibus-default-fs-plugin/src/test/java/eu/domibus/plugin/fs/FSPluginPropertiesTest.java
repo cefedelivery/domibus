@@ -14,8 +14,6 @@ import java.util.Set;
  */
 public class FSPluginPropertiesTest {
     
-    private static final String DEFAULT_PROPERTIES_PATH = "./src/test/resources/fsPlugin.properties";
-    
     private static final String DOMAIN1 = "DOMAIN1";
     private static final String DOMAIN2 = "DOMAIN2";
     private static final String NONEXISTENT_DOMAIN = "NONEXISTENT_DOMAIN";
@@ -29,7 +27,7 @@ public class FSPluginPropertiesTest {
     public void setUp() throws Exception {
         fSPluginProperties = new FSPluginProperties();
         Properties properties = new Properties();
-        properties.load(new FileInputStream(DEFAULT_PROPERTIES_PATH));
+        properties.load(FSTestHelper.getTestResource(this.getClass(), "fsPlugin.properties"));
         fSPluginProperties.setProperties(properties);
     }
 
