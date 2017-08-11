@@ -60,7 +60,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Autowired
     private UserMessageLogDao messageLogDao;
 
-
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
 

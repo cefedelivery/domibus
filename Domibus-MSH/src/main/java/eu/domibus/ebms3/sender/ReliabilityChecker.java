@@ -31,6 +31,7 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.util.Iterator;
+import java.util.Properties;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -58,6 +59,10 @@ public class ReliabilityChecker {
     private UpdateRetryLoggingService updateRetryLoggingService;
     @Autowired
     private ErrorLogDao errorLogDao;
+
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
 
     public CheckResult check(final SOAPMessage request, final SOAPMessage response, final String pmodeKey) throws EbMS3Exception {
 
@@ -177,7 +182,7 @@ public class ReliabilityChecker {
     }
 
     protected String getMessageId(SignalMessage signalMessage) {
-        if(signalMessage == null || signalMessage.getMessageInfo() == null) {
+        if (signalMessage == null || signalMessage.getMessageInfo() == null) {
             return null;
         }
         return signalMessage.getMessageInfo().getMessageId();
@@ -197,6 +202,7 @@ public class ReliabilityChecker {
     public enum CheckResult {
         OK, FAIL, WAITING_FOR_CALLBACK
     }
+
     public void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
         switch (reliabilityCheckSuccessful) {
             case OK:
@@ -211,8 +217,10 @@ public class ReliabilityChecker {
                         assert false;
                 }
                 backendNotificationService.notifyOfSendSuccess(messageId);
-                userMessageLogDao.setAsNotified(messageId);
-                messagingDao.clearPayloadData(messageId);
+                if(isDeletePayloadOnSendSuccessActive()) {
+                    messagingDao.clearPayloadData(messageId);
+                }
+
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS);
                 break;
             case WAITING_FOR_CALLBACK:
@@ -221,6 +229,12 @@ public class ReliabilityChecker {
             case FAIL:
                 updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
         }
+    }
+
+
+    protected boolean isDeletePayloadOnSendSuccessActive() {
+        String deletePayloadOnSendSuccessActive = domibusProperties.getProperty("domibus.sendMessage.success.delete.payload", "true");
+        return Boolean.valueOf(deletePayloadOnSendSuccessActive);
     }
 
     /**

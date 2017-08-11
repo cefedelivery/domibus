@@ -183,10 +183,9 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
     }
 
     public void setAsNotified(String messageId) {
-        Query query = em.createNamedQuery("UserMessageLog.setNotificationStatus");
-        query.setParameter("MESSAGE_ID", messageId);
-        query.setParameter("NOTIFICATION_STATUS", NotificationStatus.NOTIFIED);
-        query.executeUpdate();
+        final UserMessageLog messageLog = findByMessageId(messageId);
+        messageLog.setNotificationStatus(NotificationStatus.NOTIFIED);
+        super.update(messageLog);
     }
 
     public int countAllInfo(String column, boolean asc, HashMap<String, Object> filters) {

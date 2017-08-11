@@ -19,6 +19,7 @@
 
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -48,7 +49,7 @@ public class PropertyValueExchangeInterceptor extends AbstractSoapInterceptor {
 
         final SOAPMessage jaxwsMessage = message.getContent(javax.xml.soap.SOAPMessage.class);
         try {
-            jaxwsMessage.setProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, message.getContextualProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY));
+            jaxwsMessage.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, message.getContextualProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY));
 
         } catch (final SOAPException e) {
             PropertyValueExchangeInterceptor.LOG.error("", e);

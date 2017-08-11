@@ -1,5 +1,6 @@
 package eu.domibus.util;
 
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -54,7 +55,7 @@ public class SoapUtilTest {
         attachment.setContentId("sbdh-order");
         message.addAttachmentPart(attachment);
 
-        message.setProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
+        message.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
         try {
             SOAPHeader soapHeader = message.getSOAPHeader();
         } catch (Exception e) {

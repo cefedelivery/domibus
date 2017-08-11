@@ -5,6 +5,7 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.common.model.MessageInfo;
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -135,7 +136,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
     private String getSenderPartyName(SoapMessage message) {
-        String pmodeKey = (String) message.get(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
+        String pmodeKey = (String) message.get(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
         List<String> contents = StringUtils.getParts(pmodeKey, ":");
         return contents.get(0);
     }

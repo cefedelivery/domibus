@@ -26,6 +26,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,7 @@ import javax.jms.MessageListener;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
+import java.util.Properties;
 
 
 /**
@@ -47,8 +49,6 @@ import java.sql.Timestamp;
 @Service(value = "messageSenderService")
 public class MessageSender implements MessageListener {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageSender.class);
-
-
 
     @Autowired
     private UserMessageService userMessageService;
@@ -83,7 +83,6 @@ public class MessageSender implements MessageListener {
 
     @Autowired
     private MessageAttemptService messageAttemptService;
-
 
     private void sendUserMessage(final String messageId) {
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
@@ -197,7 +196,6 @@ public class MessageSender implements MessageListener {
 
         }
     }
-
 
 
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)

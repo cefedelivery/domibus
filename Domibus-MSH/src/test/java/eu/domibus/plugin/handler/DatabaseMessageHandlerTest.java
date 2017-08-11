@@ -219,13 +219,11 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getReceiverParty(pModeKey);
             result = receiver;
 
-            Configuration conf = new Configuration();
             Party confParty = new Party();
             confParty.setName(GREEN);
-            conf.setParty(confParty);
 
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
+            pModeProvider.getGatewayParty();
+            result = confParty;
 
             Mpc mpc = new Mpc();
             mpc.setName(Ebms3Constants.DEFAULT_MPC);
@@ -289,12 +287,11 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getReceiverParty(pModeKey);
             result = receiver;
 
-            Configuration conf = new Configuration();
             Party confParty = new Party();
             confParty.setName(GREEN);
-            conf.setParty(confParty);
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
+
+            pModeProvider.getGatewayParty();
+            result = confParty;
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             compressionService.handleCompression(userMessage, legConfiguration);
@@ -419,12 +416,11 @@ public class DatabaseMessageHandlerTest {
             result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
 
             // Here the configuration of the access point is supposed to be BLUE!
-            Configuration conf = new Configuration();
             Party confParty = new Party();
             confParty.setName(BLUE);
-            conf.setParty(confParty);
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
+
+            pModeProvider.getGatewayParty();
+            result = confParty;
 
             backendMessageValidator.validateInitiatorParty(withAny(new Party()), withAny(new Party()));
             result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name [" + GREEN + "] does not correspond to the access point's name [" + BLUE + "]", null, null);
@@ -542,12 +538,8 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getReceiverParty(pModeKey);
             result = receiver;
 
-            Configuration conf = new Configuration();
             Party confParty = new Party();
             confParty.setName(GREEN);
-            conf.setParty(confParty);
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             compressionService.handleCompression(userMessage, legConfiguration);
@@ -712,12 +704,11 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getReceiverParty(pModeKey);
             result = receiver;
 
-            Configuration conf = new Configuration();
             Party confParty = new Party();
             confParty.setName(GREEN);
-            conf.setParty(confParty);
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
+
+            pModeProvider.getGatewayParty();
+            result = confParty;
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             compressionService.handleCompression(userMessage, legConfiguration);
@@ -783,13 +774,11 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getReceiverParty(pModeKey);
             result = receiver;
 
-            Configuration conf = new Configuration();
+            pModeProvider.getReceiverParty(pModeKey);
+            result = receiver;
+
             Party confParty = new Party();
             confParty.setName(GREEN);
-            conf.setParty(confParty);
-
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
 
             Mpc mpc = new Mpc();
             mpc.setName(Ebms3Constants.DEFAULT_MPC);

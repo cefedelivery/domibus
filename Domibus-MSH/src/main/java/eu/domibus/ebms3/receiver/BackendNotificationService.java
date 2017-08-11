@@ -7,11 +7,8 @@ import eu.domibus.common.ErrorResult;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
-import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.model.Property;
-import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -19,10 +16,11 @@ import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
-import eu.domibus.plugin.routing.*;
+import eu.domibus.plugin.routing.BackendFilterEntity;
+import eu.domibus.plugin.routing.CriteriaFactory;
+import eu.domibus.plugin.routing.IRoutingCriteria;
+import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.plugin.routing.dao.BackendFilterDao;
-import eu.domibus.plugin.routing.operation.LogicalOperation;
-import eu.domibus.plugin.routing.operation.LogicalOperationFactory;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
@@ -38,10 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.jms.Queue;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -83,7 +78,8 @@ public class BackendNotificationService {
     private ApplicationContext applicationContext;
 
     @Autowired
-    private MessageExchangeService messageExchangeService;
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
 
     @Autowired
     private DomainCoreConverter coreConverter;
@@ -109,6 +105,9 @@ public class BackendNotificationService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void notifyMessageReceivedFailure(final UserMessage userMessage, ErrorResult errorResult) {
+        if (isPluginNotificationDisabled()) {
+            return;
+        }
         final HashMap<String, Object> properties = new HashMap<>();
         if (errorResult.getErrorCode() != null) {
             properties.put(MessageConstants.ERROR_CODE, errorResult.getErrorCode().getErrorCodeName());
@@ -118,6 +117,9 @@ public class BackendNotificationService {
     }
 
     public void notifyMessageReceived(final UserMessage userMessage) {
+        if (isPluginNotificationDisabled()) {
+            return;
+        }
         notifyOfIncoming(userMessage, NotificationType.MESSAGE_RECEIVED, new HashMap<String, Object>());
     }
 
@@ -150,7 +152,7 @@ public class BackendNotificationService {
     }
 
     protected boolean isBackendFilterMatching(BackendFilter filter, Map<String, IRoutingCriteria> criteriaMap, final UserMessage userMessage) {
-        if(filter.getRoutingCriterias() != null) {
+        if (filter.getRoutingCriterias() != null) {
             for (final RoutingCriteria routingCriteriaEntity : filter.getRoutingCriterias()) {
                 final IRoutingCriteria criteria = criteriaMap.get(StringUtils.upperCase(routingCriteriaEntity.getName()));
                 boolean matches = criteria.matches(userMessage, routingCriteriaEntity.getExpression());
@@ -166,8 +168,8 @@ public class BackendNotificationService {
     protected List<BackendFilter> getBackendFilters() {
         List<BackendFilterEntity> backendFilterEntities = backendFilterDao.findAll();
 
-        if(!backendFilterEntities.isEmpty()) {
-            return coreConverter.convert(backendFilterEntities,BackendFilter.class);
+        if (!backendFilterEntities.isEmpty()) {
+            return coreConverter.convert(backendFilterEntities, BackendFilter.class);
         }
 
         List<BackendFilter> backendFilters = routingService.getBackendFilters();
@@ -251,17 +253,29 @@ public class BackendNotificationService {
     }
 
     public void notifyOfSendFailure(final String messageId) {
+        if (isPluginNotificationDisabled()) {
+            return;
+        }
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_FAILURE);
-
+        userMessageLogDao.setAsNotified(messageId);
     }
 
     public void notifyOfSendSuccess(final String messageId) {
+        if (isPluginNotificationDisabled()) {
+            return;
+        }
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_SUCCESS);
+        userMessageLogDao.setAsNotified(messageId);
     }
 
     public List<NotificationListener> getNotificationListenerServices() {
         return notificationListenerServices;
+    }
+
+    protected boolean isPluginNotificationDisabled() {
+        String pluginNotificationEnabled = domibusProperties.getProperty("domibus.plugin.notification.active", "true");
+        return !Boolean.valueOf(pluginNotificationEnabled);
     }
 }

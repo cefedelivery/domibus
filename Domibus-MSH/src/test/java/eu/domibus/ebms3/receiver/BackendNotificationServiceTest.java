@@ -86,6 +86,9 @@ public class BackendNotificationServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
+    @Injectable
+    Properties domibusProperties;
+
     @Test
     public void testValidateSubmissionForUnsupportedNotificationType(@Injectable final Submission submission, @Injectable final UserMessage userMessage) throws Exception {
         final String backendName = "customPlugin";

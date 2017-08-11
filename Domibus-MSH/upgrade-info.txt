@@ -2,7 +2,13 @@ Domibus 3.3 (from 3.3-RC1):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - In the file "\conf\domibus\domibus.properties":
                     o rename the property "com.atomikos.maxPoolSize" to "domibus.jms.XAConnectionFactory.maxPoolSize":
-
+               - Add the following lines to conf/domibus/internal/ehcache.xml
+                          <cache name="dispatchClient"
+                                 maxBytesLocalHeap="5m"
+                                 timeToLiveSeconds="3600"
+                                 overflowToDisk="false">
+                              <sizeOfPolicy maxDepthExceededBehavior="abort"/>
+                          </cache>
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Domibus 3.3-RC1 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"

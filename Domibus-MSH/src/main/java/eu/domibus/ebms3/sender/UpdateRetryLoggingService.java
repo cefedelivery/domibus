@@ -66,7 +66,6 @@ public class UpdateRetryLoggingService {
             if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus())) {
                 LOG.debug("Notifying backend for message failure");
                 backendNotificationService.notifyOfSendFailure(messageId);
-                userMessageLogDao.setAsNotified(messageId);
             }
             userMessageLogDao.setMessageAsSendFailure(messageId);
 

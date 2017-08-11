@@ -117,7 +117,6 @@ public class UpdateRetryLoggingServiceTest {
 
 
         new Verifications() {{
-            messageLogDao.setAsNotified(messageId);
             messageLogDao.setMessageAsSendFailure(messageId);
             messagingDao.clearPayloadData(messageId);
         }};
@@ -240,7 +239,6 @@ public class UpdateRetryLoggingServiceTest {
 
 
         new Verifications() {{
-            messageLogDao.setAsNotified(messageId);
             messageLogDao.setMessageAsSendFailure(messageId);
             messagingDao.clearPayloadData(messageId);
         }};
@@ -284,7 +282,6 @@ public class UpdateRetryLoggingServiceTest {
 
 
         new Verifications() {{
-            messageLogDao.setAsNotified(messageId);
             messageLogDao.setMessageAsSendFailure(messageId);
             messagingDao.clearPayloadData(messageId);
         }};

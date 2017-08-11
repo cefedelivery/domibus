@@ -15,10 +15,7 @@ import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
-import eu.domibus.ebms3.sender.MSHDispatcher;
-import eu.domibus.ebms3.sender.ReliabilityChecker;
-import eu.domibus.ebms3.sender.ResponseHandler;
+import eu.domibus.ebms3.sender.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -161,7 +158,7 @@ public class MSHWebServiceTest {
         final Messaging messaging = createDummyRequestMessaging();
 
         new Expectations(mshWebservice) {{
-            soapRequestMessage.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
+            soapRequestMessage.getProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
             result = pmodeKey;
 
             mshWebservice.getMessaging(withAny(soapRequestMessage));

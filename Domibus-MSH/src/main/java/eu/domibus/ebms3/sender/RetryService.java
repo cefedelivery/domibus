@@ -5,10 +5,8 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -115,7 +113,7 @@ public class RetryService {
 
         if (notify) {
             backendNotificationService.notifyOfSendFailure(messageIdToPurge);
-            userMessageLogDao.setAsNotified(messageIdToPurge);
+
         }
         userMessageLogDao.setMessageAsSendFailure(messageIdToPurge);
 

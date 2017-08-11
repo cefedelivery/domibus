@@ -14,10 +14,7 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
-import eu.domibus.ebms3.sender.MSHDispatcher;
-import eu.domibus.ebms3.sender.ReliabilityChecker;
-import eu.domibus.ebms3.sender.ResponseHandler;
+import eu.domibus.ebms3.sender.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -81,9 +78,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private ResponseHandler responseHandler;
 
     @Autowired
-    private RawEnvelopeLogDao rawEnvelopeLogDao;
-
-    @Autowired
     private ReliabilityChecker reliabilityChecker;
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
@@ -108,7 +102,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             String pmodeKey = null;
             try {
                 //FIXME: use a consistent way of property exchange between JAXWS and CXF message model. This: PropertyExchangeInterceptor
-                pmodeKey = (String) request.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
+                pmodeKey = (String) request.getProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
             } catch (final SOAPException soapEx) {
                 //this error should never occur because pmode handling is done inside the in-interceptorchain
                 LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
@@ -212,7 +206,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
                 PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
                 if (isNonRepudiation(leg)) {
-                    PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_ID, userMessage.getMessageInfo().getMessageId());
+                    PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, userMessage.getMessageInfo().getMessageId());
                 }
                 return soapMessage;
             } else {
