@@ -27,7 +27,7 @@ public class FSPluginPropertiesTest {
     public void setUp() throws Exception {
         fSPluginProperties = new FSPluginProperties();
         Properties properties = new Properties();
-        properties.load(FSTestHelper.getTestResource(this.getClass(), "fsPlugin.properties"));
+        properties.load(FSTestHelper.getTestResource(this.getClass(), "fs-plugin.properties"));
         fSPluginProperties.setProperties(properties);
     }
 

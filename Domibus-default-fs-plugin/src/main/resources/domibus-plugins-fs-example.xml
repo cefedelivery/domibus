@@ -18,7 +18,7 @@
 
     <!-- General File System Plugin properties -->
     <util:properties id="fsPluginProperties" ignore-resource-not-found="true"
-                     location="classpath:fsPlugin.properties,file:///${domibus.config.location}/fsPlugin.properties"/>
+                     location="classpath:fsPlugin.properties,file:///${domibus.config.location}/plugins/config/fs-plugin.properties"/>
     <context:property-placeholder properties-ref="fsPluginProperties" ignore-resource-not-found="true"
                                   ignore-unresolvable="true" />
 
