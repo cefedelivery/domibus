@@ -96,13 +96,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER)) {
             
             String fileName = messageId;
-            try {
-                String mimeType = fsMessage.getDataHandler().getContentType();
-                String extension = FSMimeTypeHelper.getExtension(mimeType);
-                fileName += extension;
-            } catch (MimeTypeException ex) {
-                LOG.warn("Error parsing MIME type", ex);
-            }
+            fileName += getFileNameExtension(fsMessage);
 
             try (FileObject fileObject = incomingFolder.resolveFile(fileName);
                     FileContent fileContent = fileObject.getContent()) {
@@ -111,6 +105,17 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         } catch (IOException | FSSetUpException ex) {
             throw new FSRuntimeException("An error occurred persisting downloaded message " + messageId, ex);
         }
+    }
+
+    private String getFileNameExtension(FSMessage fsMessage) {
+        String extension = "";
+        try {
+            String mimeType = fsMessage.getDataHandler().getContentType();
+            extension = FSMimeTypeHelper.getExtension(mimeType);
+        } catch (MimeTypeException ex) {
+            LOG.warn("Error parsing MIME type", ex);
+        }
+        return extension;
     }
 
     private String resolveDomain(FSMessage fsMessage) {
