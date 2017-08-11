@@ -39,7 +39,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
     
-    private final static Set<MessageStatus> SENDING_MESSAGE_STATUSES = EnumSet.of(
+    private static final Set<MessageStatus> SENDING_MESSAGE_STATUSES = EnumSet.of(
             READY_TO_SEND, SEND_ENQUEUED, SEND_IN_PROGRESS, WAITING_FOR_RECEIPT,
             WAITING_FOR_RETRY, SEND_ATTEMPT_FAILED, ACKNOWLEDGED, ACKNOWLEDGED_WITH_WARNING,
             SEND_FAILURE
