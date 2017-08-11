@@ -1,6 +1,9 @@
 package eu.domibus.plugin.fs;
 
+import static eu.domibus.common.MessageStatus.*;
+
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -35,6 +38,14 @@ import eu.domibus.plugin.fs.exception.FSSetUpException;
 public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
+    
+    private final static Set<MessageStatus> SENDING_MESSAGE_STATUSES = EnumSet.of(
+            READY_TO_SEND, SEND_ENQUEUED, SEND_IN_PROGRESS, WAITING_FOR_RECEIPT,
+            WAITING_FOR_RETRY, SEND_ATTEMPT_FAILED, ACKNOWLEDGED, ACKNOWLEDGED_WITH_WARNING,
+            SEND_FAILURE
+    );
+    
+    // receiving statuses should be REJECTED, RECEIVED_WITH_WARNINGS, DOWNLOADED, DELETED, RECEIVED
 
     @Autowired
     private FSMessageTransformer defaultTransformer;
@@ -153,7 +164,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     @Override
     public void messageSendFailed(String messageId) {
         notSupportedYet();
-        return;
     }
 
     @Override
@@ -169,15 +179,21 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     public void messageStatusChanged(MessageStatusChangeEvent event) {
         LOG.debug("Message {} changed status from {} to {}", event.getMessageId(), event.getFromStatus(), event.getToStatus());
         
-        boolean fileRenamed = renameMessageFile(null, event.getMessageId(), event.getToStatus());
-        if (!fileRenamed) {
-            for (String domain : fsPluginProperties.getDomains()) {
-                fileRenamed = renameMessageFile(domain, event.getMessageId(), event.getToStatus());
-                if (fileRenamed) {
-                    break;
+        if (isSendingEvent(event)) {
+            boolean fileRenamed = renameMessageFile(null, event.getMessageId(), event.getToStatus());
+            if (!fileRenamed) {
+                for (String domain : fsPluginProperties.getDomains()) {
+                    fileRenamed = renameMessageFile(domain, event.getMessageId(), event.getToStatus());
+                    if (fileRenamed) {
+                        break;
+                    }
                 }
             }
         }
+    }
+    
+    private boolean isSendingEvent(MessageStatusChangeEvent event) {
+        return SENDING_MESSAGE_STATUSES.contains(event.getToStatus());
     }
     
     private boolean renameMessageFile(String domain, String messageId, MessageStatus status) {
