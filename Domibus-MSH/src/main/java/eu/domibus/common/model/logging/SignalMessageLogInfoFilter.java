@@ -30,7 +30,7 @@ public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
     }
 
     public String filterSignalMessageLogQuery(String column, boolean asc, HashMap<String, Object> filters) {
-        String query = "select new eu.domibus.common.model.logging.MessageLogInfo(log, partyFrom.value, partyTo.value, propsFrom.value, propsTo.value, info.refToMessageId) from SignalMessageLog log, " +
+        String query = "select new eu.domibus.common.model.logging.MessageLogInfo(log.messageId,log.messageStatus,log.notificationStatus,log.mshRole , log.messageType, log.deleted,log.received,log.sendAttempts, log.sendAttemptsMax,log.nextAttempt,'', partyFrom.value, partyTo.value, propsFrom.value, propsTo.value, info.refToMessageId) from SignalMessageLog log, " +
                 "Messaging messaging inner join messaging.signalMessage signal " +
                 "inner join messaging.userMessage message " +
                 "left join message.messageInfo info " +
