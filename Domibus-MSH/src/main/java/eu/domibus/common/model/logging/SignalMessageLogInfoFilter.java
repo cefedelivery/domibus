@@ -4,7 +4,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.Objects;
 
 /**
  * @author Tiago Miguel
@@ -31,7 +30,7 @@ public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
     }
 
     public String filterSignalMessageLogQuery(String column, boolean asc, HashMap<String, Object> filters) {
-        String query = "select distinct new eu.domibus.common.model.logging.MessageLogInfo(log, partyFrom.value, partyTo.value, propsFrom.value, propsTo.value, info.refToMessageId) from SignalMessageLog log, " +
+        String query = "select new eu.domibus.common.model.logging.MessageLogInfo(log, partyFrom.value, partyTo.value, propsFrom.value, propsTo.value, info.refToMessageId) from SignalMessageLog log, " +
                 "Messaging messaging inner join messaging.signalMessage signal " +
                 "inner join messaging.userMessage message " +
                 "left join message.messageInfo info " +
@@ -39,9 +38,24 @@ public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
                 "left join message.messageProperties.property propsTo " +
                 "left join message.partyInfo.from.partyId partyFrom " +
                 "left join message.partyInfo.to.partyId partyTo " +
-                "where propsFrom.name = 'originalSender'" +
+                "where signal.messageInfo.messageId=log.messageId and  signal.messageInfo.refToMessageId=message.messageInfo.messageId and propsFrom.name = 'originalSender'" +
                 "and propsTo.name = 'finalRecipient' " ;
         StringBuilder result = filterQuery(query, column, asc, filters);
+        return result.toString();
+    }
+
+    public String countSignalMessageLogQuery(boolean asc, HashMap<String, Object> filters) {
+        String query = "select count(message.id) from SignalMessageLog log, " +
+                "Messaging messaging inner join messaging.signalMessage signal " +
+                "inner join messaging.userMessage message " +
+                "left join message.messageInfo info " +
+                "left join message.messageProperties.property propsFrom " +
+                "left join message.messageProperties.property propsTo " +
+                "left join message.partyInfo.from.partyId partyFrom " +
+                "left join message.partyInfo.to.partyId partyTo " +
+                "where signal.messageInfo.messageId=log.messageId and signal.messageInfo.refToMessageId=message.messageInfo.messageId and propsFrom.name = 'originalSender'" +
+                "and propsTo.name = 'finalRecipient' ";
+        StringBuilder result = filterQuery(query, null, asc, filters);
         return result.toString();
     }
 }

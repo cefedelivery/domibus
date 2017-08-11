@@ -16,7 +16,8 @@ class Domibus
     def messageExchange=null
     def context=null
     def log=null
-    def sleepDelay=2000
+	// sleepDelay value is increased from 2000 to 6000 because of pull request take longer ...
+    def sleepDelay=6000
     def sqlBlue=null;
     def sqlRed=null;
 	def sqlGreen=null;
@@ -39,6 +40,7 @@ class Domibus
 	// Connect to a schema
 	def connectTo(String database, String driver, String url, String dbUser, String dbPassword){
 		log.info("Open connection to DB: " + database + " Url: " + url);
+		
 		def sql = null;
 
         try{
@@ -47,17 +49,17 @@ class Domibus
 			}else{
                 sql = Sql.newInstance(url, driver)
 			}
+			log.info "Connection opened with success";
 			return sql;
         }
         catch (SQLException ex){
             assert 0,"SQLException occurred: " + ex;
         }
-
 	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII	
     // Open 3 DB connections
     def openConnection(){
-        log.debug "Open DB connections"
+        //log.debug "Open DB connections"
 		
 		sqlBlue=connectTo(context.expand( '${#Project#databaseBlue}' ),context.expand('${#Project#driverBlue}'),context.expand('${#Project#jdbcUrlBlue}'),context.expand( '${#Project#blueDbUser}' ),context.expand( '${#Project#blueDbPassword}' ));
 		sqlRed=connectTo(context.expand( '${#Project#databaseRed}' ),context.expand('${#Project#driverRed}'),context.expand('${#Project#jdbcUrlRed}'),context.expand( '${#Project#redDbUser}' ),context.expand( '${#Project#redDbPassword}' ));
@@ -132,15 +134,19 @@ class Domibus
 		// Choose 2 Domibus between blue, red and green
 		switch(mapDoms){
 			case 3:
+				//log.info "sqlSender = sqlBlue; sqlReceiver = sqlRed";
 				sqlSender = sqlBlue; sqlReceiver = sqlRed;
 				break;
 			case 5:
+				//log.info "sqlSender = sqlBlue; sqlReceiver = sqlGreen";
 				sqlSender = sqlBlue; sqlReceiver = sqlGreen;
 				break;
 			case 6:
+				//log.info "sqlSender = sqlRed; sqlReceiver = sqlGreen";
 				sqlSender = sqlRed; sqlReceiver = sqlGreen;
 				break;
 			default:
+				//log.info "sqlSender = sqlBlue; sqlReceiver = sqlRed";
 				sqlSender = sqlBlue; sqlReceiver = sqlRed;
 				break;
 		}

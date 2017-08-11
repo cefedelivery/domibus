@@ -27,7 +27,6 @@ public class PModeDao extends PModeProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeDao.class);
 
-
     @Override
     public Party getSenderParty(final String pModeKey) {
 

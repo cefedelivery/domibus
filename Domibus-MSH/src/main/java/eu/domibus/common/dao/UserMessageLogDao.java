@@ -163,10 +163,6 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         }
     }
 
-    public String findEndpointForMessageId(String messageId) {
-        return findByMessageId(messageId).getEndpoint();
-    }
-
     public String findBackendForMessageId(String messageId) {
         TypedQuery<String> query = em.createNamedQuery("UserMessageLog.findBackendForMessage", String.class);
         query.setParameter("MESSAGE_ID", messageId);
@@ -179,8 +175,8 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         super.update(messageLog);
     }
 
-    public int countAllInfo(String column, boolean asc, HashMap<String, Object> filters) {
-        String filteredSignalMessageLogQuery = userMessageLogInfoFilter.countUserMessageLogQuery(column, asc, filters);
+    public int countAllInfo(boolean asc, HashMap<String, Object> filters) {
+        String filteredSignalMessageLogQuery = userMessageLogInfoFilter.countUserMessageLogQuery(asc, filters);
         TypedQuery<Number> countQuery = em.createQuery(filteredSignalMessageLogQuery, Number.class);
         countQuery = userMessageLogInfoFilter.applyParameters(countQuery, filters);
         final Number count = countQuery.getSingleResult();

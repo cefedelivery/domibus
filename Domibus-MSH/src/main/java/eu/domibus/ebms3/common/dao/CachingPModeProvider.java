@@ -24,6 +24,7 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.logging.DomibusLogger;
@@ -53,6 +54,10 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Autowired
     private ProcessPartyExtractorProvider processPartyExtractorProvider;
+    private List<Process> pullProcessesByMessageContext = new ArrayList<>();
+    private List<Process> pullProcessesByInitiator = new ArrayList<>();
+    private List<Process> pullProcessBytMpc = new ArrayList<>();
+
     protected synchronized Configuration getConfiguration() {
         if (this.configuration == null) {
             this.init();
@@ -344,6 +349,31 @@ public class CachingPModeProvider extends PModeProvider {
     public List<String> updatePModes(final byte[] bytes) throws XmlProcessingException {
         List<String> messages = super.updatePModes(bytes);
         this.configuration = null;
+        this.pullProcessBytMpc.clear();
+        this.pullProcessesByInitiator.clear();
+        this.pullProcessesByMessageContext.clear();
         return messages;
     }
+
+    public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
+        if (pullProcessesByMessageContext.isEmpty()) {
+            pullProcessesByMessageContext = super.findPullProcessesByMessageContext(messageExchangeConfiguration);
+        }
+        return pullProcessesByMessageContext;
+    }
+
+    public List<Process> findPullProcessesByInitiator(final Party party) {
+        if (pullProcessesByInitiator.isEmpty()) {
+            pullProcessesByInitiator = super.findPullProcessesByInitiator(party);
+        }
+        return pullProcessesByInitiator;
+    }
+
+    public List<Process> findPullProcessByMpc(final String mpc) {
+        if (pullProcessBytMpc.isEmpty()) {
+            pullProcessBytMpc = super.findPullProcessByMpc(mpc);
+        }
+        return pullProcessBytMpc;
+    }
+
 }

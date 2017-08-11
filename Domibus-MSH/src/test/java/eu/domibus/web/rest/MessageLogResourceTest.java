@@ -72,7 +72,23 @@ public class MessageLogResourceTest {
     public void testUserMessageLog() {
         // Given
         UserMessageLog userMessageLog = (UserMessageLog) createMessageLog(true);
-        final MessageLogInfo messageLogInfo = new MessageLogInfo(userMessageLog , "conversationId", "fromPartyId", "toPartyId", "originalSender", "finalRecipient", "refToMessageId");
+        final MessageLogInfo messageLogInfo = new MessageLogInfo(
+                userMessageLog.getMessageId(),
+                userMessageLog.getMessageStatus(),
+                userMessageLog.getNotificationStatus(),
+                userMessageLog.getMshRole(),
+                userMessageLog.getMessageType(),
+                userMessageLog.getDeleted(),
+                userMessageLog.getReceived(),
+                userMessageLog.getSendAttempts(),
+                userMessageLog.getSendAttemptsMax(),
+                userMessageLog.getNextAttempt(),
+                "conversationId",
+                "fromPartyId",
+                "toPartyId",
+                "originalSender",
+                "finalRecipient",
+                "refToMessageId");
         final List<MessageLogInfo> resultList = new ArrayList<>();
         resultList.add(messageLogInfo);
         new Expectations() {{
@@ -103,7 +119,17 @@ public class MessageLogResourceTest {
     public void testSignalMessageLog() {
         // Given
         SignalMessageLog signalMessageLog = (SignalMessageLog) createMessageLog(false);
-        final MessageLogInfo messageLogInfo = new MessageLogInfo(signalMessageLog, "fromPartyId", "toPartyId", "originalSender", "finalRecipient", "refToMessageId");
+        final MessageLogInfo messageLogInfo = new MessageLogInfo(
+                signalMessageLog.getMessageId(),
+                signalMessageLog.getMessageStatus(),
+                signalMessageLog.getNotificationStatus(),
+                signalMessageLog.getMshRole(),
+                signalMessageLog.getMessageType(),
+                signalMessageLog.getDeleted(),
+                signalMessageLog.getReceived(),
+                signalMessageLog.getSendAttempts(),
+                signalMessageLog.getSendAttemptsMax(),
+                signalMessageLog.getNextAttempt(), "", "fromPartyId", "toPartyId", "originalSender", "finalRecipient", "refToMessageId");
         final ArrayList<MessageLogInfo> resultList = new ArrayList<>();
         resultList.add(messageLogInfo);
         new Expectations() {{
