@@ -59,19 +59,5 @@ public class FSMimeTypeHelperTest {
         
         Assert.assertEquals(".pdf", result);
     }
-
-    @Test
-    public void testFixMimeType() {
-        String result = FSMimeTypeHelper.fixMimeType("application/xml");
-        
-        Assert.assertEquals("text/xml", result);
-    }
-    
-    @Test
-    public void testFixMimeType_Passthrough() {
-        String result = FSMimeTypeHelper.fixMimeType("text/plain");
-        
-        Assert.assertEquals("text/plain", result);
-    }
     
 }

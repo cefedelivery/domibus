@@ -72,7 +72,7 @@ public class FSMessageTransformer
 
     private void setPayloadToSubmission(Submission submission, final DataHandler dataHandler) {
         ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(1);
-        payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, FSMimeTypeHelper.fixMimeType(dataHandler.getContentType())));
+        payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, dataHandler.getContentType()));
         
         submission.addPayload(DEFAULT_CONTENT_ID, dataHandler, payloadProperties);
     }

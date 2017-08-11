@@ -4,7 +4,6 @@ import org.apache.tika.Tika;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
-import org.springframework.http.MediaType;
 
 /**
  * Helper to convert between files, MIME types and extensions
@@ -40,21 +39,6 @@ public class FSMimeTypeHelper {
         MimeType mimeType = MIME_TYPES.forName(mimeString);
 
         return mimeType.getExtension();
-    }
-    
-    /**
-     * Fixes XML MIME type or passes MIME type through. Returns {@code text/xml}
-     * if {@code mimeType} = {@code application/xml} otherwise passes value through.
-     * @param mimeType the MIME type to fix, if needed
-     * @return {@code text/xml} if {@code mimeType} = {@code application/xml},
-     * {@code mimeType} otherwise
-     */
-    public static String fixMimeType(final String mimeType) {
-        if (mimeType.equalsIgnoreCase(MediaType.APPLICATION_XML_VALUE)) {
-            return MediaType.TEXT_XML_VALUE;
-        } else {
-            return mimeType;
-        }
     }
 
 }
