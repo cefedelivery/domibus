@@ -1,7 +1,6 @@
 Domibus 3.3-FR (from 3.3-RC1)
-               - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
+               - Replace the Domibus war and the plugin(s) jar(s) into "\conf\domibus\plugins\lib"
                - In the file "\conf\domibus\domibus.properties":
-                    o rename the property "com.atomikos.maxPoolSize" to "domibus.jms.XAConnectionFactory.maxPoolSize"
                     o rename the property "domibus.senderparty.trust.verification" to "domibus.sender.trust.validation.onreceiving" in your domibus.properties file. If the property is not defined, do nothing. Default value "false" has not been changed.
                     o rename the property "domibus.certificate.validation.enabled" to "domibus.receiver.certificate.validation.onsending" in your domibus.properties file. If the property is not defined, do nothing. Default value "true" has not been changed.
                - Add the following lines to "\conf\domibus\internal\ehcache.xml"
@@ -37,6 +36,15 @@ Domibus 3.3-FR (from 3.3-RC1)
                                      </redeliveryPolicyMap>
                                  </redeliveryPolicyMap>
                              </redeliveryPlugin>
+                    o in file "\conf\domibus\domibus.properties":
+                        - rename the property "com.atomikos.maxPoolSize" to "domibus.jms.XAConnectionFactory.maxPoolSize"
+                        - remove the property "domibus.datasource.xa.testQuery"
+                        - add the property "com.atomikos.icatch.max_timeout=300000"
+                        - add the property "com.atomikos.icatch.max_actives=100"
+                        - add the property "domibus.datasource.minPoolSize=5"
+                        - add the property "domibus.datasource.maxPoolSize=100"
+                        - add the property "domibus.datasource.maxLifetime=60"
+                        - add the property "domibus.datasource.xa.maxLifetime=60"
 Domibus 3.3-RC1 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-rc1-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-rc1-migration.ddl for Oracle)
