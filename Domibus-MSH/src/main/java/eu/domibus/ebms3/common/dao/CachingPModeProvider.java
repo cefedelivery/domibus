@@ -54,8 +54,11 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Autowired
     private ProcessPartyExtractorProvider processPartyExtractorProvider;
+    //pull processes cache.
     private List<Process> pullProcessesByMessageContext = new ArrayList<>();
+
     private List<Process> pullProcessesByInitiator = new ArrayList<>();
+
     private List<Process> pullProcessBytMpc = new ArrayList<>();
 
     protected synchronized Configuration getConfiguration() {
@@ -63,6 +66,11 @@ public class CachingPModeProvider extends PModeProvider {
             this.init();
         }
         return this.configuration;
+    }
+
+    @Override
+    public Party getGatewayParty() {
+        return getConfiguration().getParty();
     }
 
     @Override
@@ -355,23 +363,26 @@ public class CachingPModeProvider extends PModeProvider {
         return messages;
     }
 
+    @Override
     public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
         if (pullProcessesByMessageContext.isEmpty()) {
-            pullProcessesByMessageContext = super.findPullProcessesByMessageContext(messageExchangeConfiguration);
+            pullProcessesByMessageContext = processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
         }
         return pullProcessesByMessageContext;
     }
 
+    @Override
     public List<Process> findPullProcessesByInitiator(final Party party) {
         if (pullProcessesByInitiator.isEmpty()) {
-            pullProcessesByInitiator = super.findPullProcessesByInitiator(party);
+            pullProcessesByInitiator = processDao.findPullProcessesByInitiator(party);
         }
         return pullProcessesByInitiator;
     }
 
+    @Override
     public List<Process> findPullProcessByMpc(final String mpc) {
         if (pullProcessBytMpc.isEmpty()) {
-            pullProcessBytMpc = super.findPullProcessByMpc(mpc);
+            pullProcessBytMpc = processDao.findPullProcessByMpc(mpc);
         }
         return pullProcessBytMpc;
     }

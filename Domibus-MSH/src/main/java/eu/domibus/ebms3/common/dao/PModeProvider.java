@@ -102,7 +102,7 @@ public abstract class PModeProvider {
     List<ConfigurationValidator> configurationValidators;
 
     @Autowired
-    private ProcessDao processDao;
+    protected ProcessDao processDao;
 
     public abstract void init();
 
@@ -240,6 +240,8 @@ public abstract class PModeProvider {
 
     protected abstract String findAgreement(AgreementRef agreementRef) throws EbMS3Exception;
 
+    public abstract Party getGatewayParty();
+
     public abstract Party getSenderParty(String pModeKey);
 
     public abstract Party getReceiverParty(String pModeKey);
@@ -263,14 +265,6 @@ public abstract class PModeProvider {
     public abstract int getRetentionUndownloadedByMpcURI(final String mpcURI);
 
     public abstract Role getBusinessProcessRole(String roleValue);
-
-    public ConfigurationDAO getConfigurationDAO() {
-        return configurationDAO;
-    }
-
-    public void setConfigurationDAO(final ConfigurationDAO configurationDAO) {
-        this.configurationDAO = configurationDAO;
-    }
 
     protected String getSenderPartyNameFromPModeKey(final String pModeKey) {
         return pModeKey.split(":")[0];
@@ -296,16 +290,10 @@ public abstract class PModeProvider {
         return pModeKey.split(":")[5];
     }
 
-    public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
-        return processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
-    }
+    public abstract List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration);
 
-    public List<Process> findPullProcessesByInitiator(final Party party) {
-        return processDao.findPullProcessesByInitiator(party);
-    }
+    public abstract List<Process> findPullProcessesByInitiator(final Party party);
 
-    public List<Process> findPullProcessByMpc(final String mpc) {
-        return processDao.findPullProcessByMpc(mpc);
-    }
+    public abstract List<Process> findPullProcessByMpc(final String mpc);
 
 }

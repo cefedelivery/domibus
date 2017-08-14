@@ -9,6 +9,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
+import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
@@ -57,7 +58,7 @@ public class ResponseHandler {
     private SignalMessageLogDao signalMessageLogDao;
 
     @Autowired
-    private RawEnvelopeLogDao rawEnvelopeLogDao;
+    private NonRepudiationService nonRepudiationService;
 
     @Autowired
     private MessagingDao messagingDao;
@@ -74,17 +75,7 @@ public class ResponseHandler {
         }
 
         final SignalMessage signalMessage = messaging.getSignalMessage();
-
-        try {
-            String rawXMLMessage = SoapUtil.getRawXMLMessage(response);
-            logger.debug("Persist raw XML envelope: " + rawXMLMessage);
-            RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
-            rawEnvelopeLog.setRawXML(rawXMLMessage);
-            rawEnvelopeLog.setSignalMessage(signalMessage);
-            rawEnvelopeLogDao.create(rawEnvelopeLog);
-        } catch (TransformerException e) {
-            logger.warn("Unable to log the raw message XML due to: ", e);
-        }
+        nonRepudiationService.saveResponse(response, signalMessage);
 
         // Stores the signal message
         signalMessageDao.create(signalMessage);

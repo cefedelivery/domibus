@@ -53,6 +53,7 @@ sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-blue.xm
 sed -i -e "s/localhost:8080/domibusblue:8080/g" ./domibus-gw-sample-pmode-red.xml
 sed -i -e "s/localhost:8180/domibusred:8080/g" ./domibus-gw-sample-pmode-red.xml
 
+
 $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:8180 $SOURCE_CODE/../Domibus-MSH-soapui-tests/domibus-gw-sample-pmode-blue.xml
 $SOURCE_CODE/../Domibus-MSH-docker/src/main/docker/uploadPmode.sh localhost:9080 $SOURCE_CODE/../Domibus-MSH-soapui-tests/domibus-gw-sample-pmode-red.xml
 
@@ -67,7 +68,6 @@ sudo wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
     && sudo unzip -o $MYSQL_CONNECTOR.zip
 
 sudo cp $MYSQL_CONNECTOR/$MYSQL_CONNECTOR-bin.jar ./src/main/soapui/lib
-### Comment the line below to disable the soapUI tests for 3.3-rc1 ###
 
 localUrl="localUrl=http://localhost:8180/domibus"
 remoteUrl="remoteUrl=http://localhost:9080/domibus"

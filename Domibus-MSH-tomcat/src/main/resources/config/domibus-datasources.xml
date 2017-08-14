@@ -33,7 +33,7 @@
           init-method="init" destroy-method="close" depends-on="broker">
         <property name="uniqueResourceName" value="domibusJMS-XA"/>
         <property name="xaConnectionFactory" ref="xaJmsConnectionFactory"/>
-        <property name="maxPoolSize" value="${com.atomikos.maxPoolSize}"/>
+        <property name="maxPoolSize" value="${domibus.jms.XAConnectionFactory.maxPoolSize}"/>
     </bean>
 
     <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
@@ -85,15 +85,17 @@
         <property name="maxPoolSize">
             <value>${domibus.datasource.xa.maxPoolSize}</value>
         </property>
-        <property name="testQuery">
-            <value>${domibus.datasource.xa.testQuery}</value>
-        </property>
+        <property name="maxLifetime" value="${domibus.datasource.xa.maxLifetime}"/>
     </bean>
-    <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <bean id="domibusJDBC-nonXADataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
+	   <property name="uniqueResourceName" value="domibusNonXADataSource"/>
 	   <property name="driverClassName" value="${domibus.datasource.driverClassName}"/>
 	   <property name="url" value="${domibus.datasource.url}"/>
-	   <property name="username" value="${domibus.datasource.user}"/>
+	   <property name="user" value="${domibus.datasource.user}"/>
 	   <property name="password" value="${domibus.datasource.password}"/>
+       <property name="minPoolSize" value="${domibus.datasource.minPoolSize}"/>
+       <property name="maxPoolSize" value=" ${domibus.datasource.maxPoolSize}"/>
+       <property name="maxLifetime" value="${domibus.datasource.maxLifetime}"/>
     </bean>
 
      <bean id="jpaProperties" class="eu.domibus.spring.PrefixedProperties">

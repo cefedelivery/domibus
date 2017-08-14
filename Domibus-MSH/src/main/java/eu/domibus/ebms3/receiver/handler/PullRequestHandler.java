@@ -19,10 +19,7 @@ import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.MSHWebservice;
-import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
-import eu.domibus.ebms3.sender.MSHDispatcher;
-import eu.domibus.ebms3.sender.ReliabilityChecker;
-import eu.domibus.ebms3.sender.RetryService;
+import eu.domibus.ebms3.sender.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.DomibusCertificateException;
@@ -119,7 +116,7 @@ public class PullRequestHandler {
                 PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
                 if (pullRequestMatcher.matchReliableCallBack(leg) &&
                         leg.getReliability().isNonRepudiation()) {
-                    PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_ID, messageId);
+                    PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
                 }
                 checkResult = ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
                 return soapMessage;

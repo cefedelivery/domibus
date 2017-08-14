@@ -5,17 +5,20 @@ import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.common.*;
-import eu.domibus.common.dao.*;
+import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.SignalMessageDao;
+import eu.domibus.common.dao.SignalMessageLogDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
-import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -26,7 +29,7 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import eu.domibus.util.MessageUtil;
-import eu.domibus.util.SoapUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.cxf.attachment.AttachmentUtil;
@@ -47,21 +50,22 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.Iterator;
 
 /**
  * @author Thomas Dussart
  * @since 3.3
+ *
  */
 @org.springframework.stereotype.Service
 public class UserMessageHandlerService {
 
     private static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageHandlerService.class);
+
+
+    private byte[] as4ReceiptXslBytes;
 
     @Autowired
     private PModeProvider pModeProvider;
@@ -113,9 +117,10 @@ public class UserMessageHandlerService {
     protected JAXBContext jaxbContext;
 
     @Autowired
-    private RawEnvelopeLogDao rawEnvelopeLogDao;
+    protected NonRepudiationService nonRepudiationService;
 
-    public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging, final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, SOAPException {
+
+    public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging,final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
         userMessageHandlerContext.setLegConfiguration(legConfiguration);
         boolean pingMessage;
@@ -240,16 +245,8 @@ public class UserMessageHandlerService {
                 to.getEndpoint());
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
-        try {
-            String rawXMLMessage = SoapUtil.getRawXMLMessage(request);
-            LOG.debug("Persist raw XML envelope: " + rawXMLMessage);
-            RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
-            rawEnvelopeLog.setRawXML(rawXMLMessage);
-            rawEnvelopeLog.setUserMessage(userMessage);
-            rawEnvelopeLogDao.create(rawEnvelopeLog);
-        } catch (TransformerException e) {
-            LOG.warn("Unable to log the raw message XML due to: ", e);
-        }
+
+        nonRepudiationService.saveRequest(request, userMessage);
 
         return userMessage.getMessageInfo().getMessageId();
     }
@@ -345,7 +342,7 @@ public class UserMessageHandlerService {
             LOG.info("Generating receipt for incoming message");
             try {
                 responseMessage = messageFactory.createMessage();
-                InputStream generateAS4ReceiptStream = this.getClass().getClassLoader().getResourceAsStream(XSLT_GENERATE_AS4_RECEIPT_XSL);
+                InputStream generateAS4ReceiptStream = getAs4ReceiptXslInputStream();
                 Source messageToReceiptTransform = new StreamSource(generateAS4ReceiptStream);
                 final Transformer transformer = this.transformerFactory.newTransformer(messageToReceiptTransform);
                 final Source requestMessage = request.getSOAPPart().getContent();
@@ -359,7 +356,7 @@ public class UserMessageHandlerService {
                 saveResponse(responseMessage);
 
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, legConfiguration.getReliability().isNonRepudiation());
-            } catch (TransformerConfigurationException | SOAPException e) {
+            } catch (TransformerConfigurationException | SOAPException | IOException e) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
                 // this cannot happen
                 assert false;
@@ -411,6 +408,17 @@ public class UserMessageHandlerService {
             LOG.error("Unable to save the SignalMessage due to error: ", ex);
         }
 
+    }
+
+    protected InputStream getAs4ReceiptXslInputStream() throws IOException {
+        return new ByteArrayInputStream(getAs4ReceiptXslBytes());
+    }
+
+    protected byte[] getAs4ReceiptXslBytes() throws IOException {
+        if (as4ReceiptXslBytes == null) {
+            as4ReceiptXslBytes = IOUtils.toByteArray(this.getClass().getClassLoader().getResourceAsStream(XSLT_GENERATE_AS4_RECEIPT_XSL));
+        }
+        return as4ReceiptXslBytes;
     }
 
     public Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
