@@ -56,7 +56,6 @@ public class FSXMLHelper {
     public static Schema loadSchema(InputStream inputStream) throws SAXException {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         StreamSource schemaSource = new StreamSource(inputStream);
-        Schema schema = schemaFactory.newSchema(schemaSource);
-        return schema;
+        return schemaFactory.newSchema(schemaSource);
     }
 }

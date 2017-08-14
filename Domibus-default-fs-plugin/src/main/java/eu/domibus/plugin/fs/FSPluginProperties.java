@@ -239,7 +239,7 @@ public class FSPluginProperties {
             try {
                 result = Integer.valueOf(value);
             } catch (NumberFormatException e) {
-                // noop: result = defaultValue;
+                result = defaultValue;
             }
         }
         return result;
