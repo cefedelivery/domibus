@@ -30,10 +30,7 @@ import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -90,8 +87,13 @@ public class BackendFSImplTest {
 
     @After
     public void tearDown() throws FileSystemException {
+        rootDir.delete();
         rootDir.close();
+
+        incomingFolder.delete();
         incomingFolder.close();
+
+        outgoingFolder.delete();
         outgoingFolder.close();
     }
 
@@ -104,10 +106,12 @@ public class BackendFSImplTest {
         final String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
         final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
         final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
+        final Map<String, DataHandler> dataHandlers = new HashMap<>();
+        dataHandlers.put("cid:message", dataHandler);
 
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
-            result = new FSMessage(Collections.singletonList(dataHandler), userMessage);
+            result = new FSMessage(dataHandlers, userMessage);
 
             fsFilesManager.getEnsureChildFolder(withAny(rootDir), FSFilesManager.INCOMING_FOLDER);
             result = incomingFolder;
@@ -122,6 +126,58 @@ public class BackendFSImplTest {
 
         Assert.assertEquals(messageId + ".xml", fileMessage.getName().getBaseName());
         Assert.assertEquals(payloadContent, IOUtils.toString(fileMessage.getContent().getInputStream()));
+        fileMessage.delete();
+        fileMessage.close();
+    }
+
+    @Test
+    public void testDeliverMessage_MultiplePayloads(@Injectable final FSMessage fsMessage)
+            throws MessageNotFoundException, JAXBException, IOException, FSSetUpException {
+
+        final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
+        final String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
+        final String messageContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGludm9pY2U+aGVsbG88L2ludm9pY2U+";
+        final String invoiceContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+
+        final DataHandler messageHandler = new DataHandler(new ByteArrayDataSource(messageContent.getBytes(), TEXT_XML));
+        final DataHandler invoiceHandler = new DataHandler(new ByteArrayDataSource(invoiceContent.getBytes(), TEXT_XML));
+        final Map<String, DataHandler> dataHandlers = new HashMap<>();
+        dataHandlers.put("cid:message", messageHandler);
+        dataHandlers.put("cid:invoice", invoiceHandler);
+
+        new Expectations(1, backendFS) {{
+            backendFS.downloadMessage(messageId, null);
+            result = new FSMessage(dataHandlers, userMessage);
+
+            fsFilesManager.getEnsureChildFolder(withAny(rootDir), FSFilesManager.INCOMING_FOLDER);
+            result = incomingFolder;
+        }};
+
+        backendFS.deliverMessage(messageId);
+
+        // Assert results
+        FileObject[] files = incomingFolder.findFiles(new FileTypeSelector(FileType.FILE));
+        Arrays.sort(files, new Comparator<FileObject>() {
+            @Override
+            public int compare(FileObject o1, FileObject o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        Assert.assertEquals(2, files.length);
+
+        FileObject fileMessage0 = files[0];
+        Assert.assertEquals("3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu_invoice.xml",
+                fileMessage0.getName().getBaseName());
+        Assert.assertEquals(invoiceContent, IOUtils.toString(fileMessage0.getContent().getInputStream()));
+        fileMessage0.delete();
+        fileMessage0.close();
+
+        FileObject fileMessage1 = files[1];
+        Assert.assertEquals("3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu_message.xml",
+                fileMessage1.getName().getBaseName());
+        Assert.assertEquals(messageContent, IOUtils.toString(fileMessage1.getContent().getInputStream()));
+        fileMessage1.delete();
+        fileMessage1.close();
     }
 
     @Test(expected = FSRuntimeException.class)
@@ -177,7 +233,7 @@ public class BackendFSImplTest {
         }};
         
         backendFS.messageStatusChanged(event);
-        
+
         contentFile.close();
         
         new VerificationsInOrder(1) {{

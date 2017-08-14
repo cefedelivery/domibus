@@ -16,11 +16,7 @@ import javax.activation.DataHandler;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBException;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
+import java.util.*;
 
 
 /**
@@ -32,6 +28,8 @@ public class FSSendMessagesService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSSendMessagesService.class);
     
     private static final String METADATA_FILE_NAME = "metadata.xml";
+
+    private static final String DEFAULT_CONTENT_ID = "cid:message";
 
     @Autowired
     private FSPluginProperties fsPluginProperties;
@@ -83,7 +81,9 @@ public class FSSendMessagesService {
                 LOG.debug("{}: Metadata found and valid", processableFile.getName());
 
                 DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
-                FSMessage message= new FSMessage(Collections.singletonList(dataHandler), metadata);
+                Map<String, DataHandler> dataHandlers = new HashMap<>(1);
+                dataHandlers.put(DEFAULT_CONTENT_ID, dataHandler);
+                FSMessage message= new FSMessage(dataHandlers, metadata);
                 String messageId = backendFSPlugin.submit(message);
                 LOG.debug("{}: Message submitted successfully", processableFile.getName());
 

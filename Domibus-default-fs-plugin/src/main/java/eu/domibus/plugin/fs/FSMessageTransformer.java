@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class is responsible for transformations from {@link FSMessage} to
@@ -23,7 +24,6 @@ import java.util.List;
 public class FSMessageTransformer
         implements MessageRetrievalTransformer<FSMessage>, MessageSubmissionTransformer<FSMessage> {
 
-    private static final String DEFAULT_CONTENT_ID = "cid:message";
     private static final String MIME_TYPE = "MimeType";
 
     private final ObjectFactory objectFactory = new ObjectFactory();
@@ -42,7 +42,7 @@ public class FSMessageTransformer
         metadata.setPartyInfo(getPartyInfoFromSubmission(submission));
         metadata.setCollaborationInfo(getCollaborationInfoFromSubmission(submission));
         metadata.setMessageProperties(getMessagePropertiesFromSubmission(submission));
-        List<DataHandler> dataHandlers = getPayloadsFromSubmission(submission);
+        Map<String, DataHandler> dataHandlers = getPayloadsFromSubmission(submission);
         return new FSMessage(dataHandlers, metadata);
     }
 
@@ -62,28 +62,31 @@ public class FSMessageTransformer
         setCollaborationInfoToSubmission(submission, metadata.getCollaborationInfo());
         setMessagePropertiesToSubmission(submission, metadata.getMessageProperties());
         try {
-            setPayloadToSubmission(submission, messageIn.getDataHandlers().get(0));
+            setPayloadToSubmission(submission, messageIn.getDataHandlers());
         } catch (FSPayloadException ex) {
             throw new FSRuntimeException("Could not set payload to Submission", ex);
         }
         return submission;
     }
 
-    private void setPayloadToSubmission(Submission submission, final DataHandler dataHandler) throws FSPayloadException {
-        ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(1);
-        String mimeType = FSMimeTypeHelper.getMimeType(dataHandler.getName());
-        if (StringUtils.isEmpty(mimeType)) {
-            throw new FSPayloadException("Could not detect mime type for " + dataHandler.getName());
+    private void setPayloadToSubmission(Submission submission, final Map<String, DataHandler> dataHandlers) throws FSPayloadException {
+        for (Map.Entry<String, DataHandler> entry : dataHandlers.entrySet()) {
+            String contentId = entry.getKey();
+            DataHandler dataHandler = entry.getValue();
+            String mimeType = FSMimeTypeHelper.getMimeType(dataHandler.getName());
+            if (StringUtils.isEmpty(mimeType)) {
+                throw new FSPayloadException("Could not detect mime type for " + dataHandler.getName());
+            }
+            ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(1);
+            payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, mimeType));
+            submission.addPayload(contentId, dataHandler, payloadProperties);
         }
-        payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, mimeType));
-        
-        submission.addPayload(DEFAULT_CONTENT_ID, dataHandler, payloadProperties);
     }
 
-    private List<DataHandler> getPayloadsFromSubmission(Submission submission) {
-        List<DataHandler> result = new ArrayList<>(submission.getPayloads().size());
+    private Map<String, DataHandler> getPayloadsFromSubmission(Submission submission) {
+        Map<String, DataHandler> result = new HashMap<>(submission.getPayloads().size());
         for (final Submission.Payload payload : submission.getPayloads()) {
-            result.add(payload.getPayloadDatahandler());
+            result.put(payload.getContentId(), payload.getPayloadDatahandler());
         }
         return result;
     }

@@ -2,7 +2,6 @@ package eu.domibus.plugin.fs;
 
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.*;
-import eu.domibus.plugin.fs.exception.FSRuntimeException;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -11,10 +10,7 @@ import org.junit.Test;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -34,7 +30,7 @@ public class FSMessageTransformerTest {
     private static final String DOMIBUS_RED = "domibus-red";
 
     private static final String SERVICE_NOPROCESS = "bdx:noprocess";
-    private static final String PAYLOAD_ID = "cid:message";
+    private static final String CONTENT_ID = "cid:message";
     private static final String ACTION_TC1LEG1 = "TC1Leg1";
     private static final String SERVICE_TYPE_TC1 = "tc1";
     private static final String MIME_TYPE = "MimeType";
@@ -80,7 +76,7 @@ public class FSMessageTransformerTest {
         Submission.TypedProperty submissionTypedProperty = new Submission.TypedProperty(MIME_TYPE, APPLICATION_XML);
         Collection<Submission.TypedProperty> listTypedProperty = new ArrayList<>();
         listTypedProperty.add(submissionTypedProperty);
-        Submission.Payload submissionPayload = new Submission.Payload(PAYLOAD_ID, payLoadDataHandler, listTypedProperty, false, null, null);
+        Submission.Payload submissionPayload = new Submission.Payload(CONTENT_ID, payLoadDataHandler, listTypedProperty, false, null, null);
         submission.addPayload(submissionPayload);
 
         // Transform FSMessage from Submission
@@ -115,7 +111,7 @@ public class FSMessageTransformerTest {
         Assert.assertEquals(PROPERTY_FINAL_RECIPIENT, property1.getName());
         Assert.assertEquals(FINAL_RECIPIENT, property1.getValue());
 
-        DataHandler dataHandler = fsMessage.getDataHandlers().get(0);
+        DataHandler dataHandler = fsMessage.getDataHandlers().get(CONTENT_ID);
         Assert.assertEquals(APPLICATION_XML, dataHandler.getContentType());
         Assert.assertEquals(payloadContent, IOUtils.toString(dataHandler.getInputStream()));
     }
@@ -128,7 +124,9 @@ public class FSMessageTransformerTest {
         ByteArrayDataSource dataSource = new ByteArrayDataSource(payloadContent.getBytes(), APPLICATION_XML);
         dataSource.setName("content.xml");
         DataHandler dataHandler = new DataHandler(dataSource);
-        FSMessage fsMessage = new FSMessage(Collections.singletonList(dataHandler), metadata);
+        final Map<String, DataHandler> dataHandlers = new HashMap<>();
+        dataHandlers.put("cid:message", dataHandler);
+        FSMessage fsMessage = new FSMessage(dataHandlers, metadata);
 
         // Transform FSMessage to Submission
         FSMessageTransformer transformer = new FSMessageTransformer();

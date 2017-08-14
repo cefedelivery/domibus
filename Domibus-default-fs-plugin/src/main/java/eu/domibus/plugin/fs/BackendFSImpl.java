@@ -5,6 +5,7 @@ import static eu.domibus.common.MessageStatus.*;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -109,11 +110,12 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER)) {
             
-            for (DataHandler dataHandler : fsMessage.getDataHandlers()) {
-                String fileName = messageId;
-                // TODO If the received message contains multiple payloads the convention is messageID_partInfoCid.extension
-                // (where messageID is the identifier of the User Message from Domibus, partInfoCid is the payload CID without the cid:prefix and extension is the file extension).
-                fileName += getFileNameExtension(dataHandler);
+            boolean multiplePayloads = fsMessage.getDataHandlers().size() > 1;
+
+            for (Map.Entry<String, DataHandler> entry : fsMessage.getDataHandlers().entrySet()) {
+                DataHandler dataHandler = entry.getValue();
+                String contentId  = entry.getKey();
+                String fileName = getFileName(multiplePayloads, messageId, contentId, dataHandler);
 
                 try (FileObject fileObject = incomingFolder.resolveFile(fileName);
                      FileContent fileContent = fileObject.getContent()) {
@@ -123,6 +125,15 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         } catch (IOException | FSSetUpException ex) {
             throw new FSRuntimeException("An error occurred persisting downloaded message " + messageId, ex);
         }
+    }
+
+    private String getFileName(boolean multiplePayloads, String messageId, String contentId, DataHandler dataHandler) {
+        String fileName = messageId;
+        if (multiplePayloads) {
+            fileName += "_" + contentId.replaceFirst("cid:", "");
+        }
+        fileName += getFileNameExtension(dataHandler);
+        return fileName;
     }
 
     private String getFileNameExtension(DataHandler dataHandler) {

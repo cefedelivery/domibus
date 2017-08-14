@@ -118,19 +118,20 @@ public class FSSendMessagesServiceTest {
             
             backendFSPlugin.submit(with(new Delegate<FSMessage>() {
                  void delegate(FSMessage message) throws IOException {
-                    Assert.assertNotNull(message);
-                    Assert.assertNotNull(message.getDataHandlers());
-                     Assert.assertNotNull(message.getDataHandlers().get(0));
-                    Assert.assertNotNull(message.getMetadata());
-                    
-                    DataSource dataSource = message.getDataHandlers().get(0).getDataSource();
-                    Assert.assertNotNull(dataSource);
-                    Assert.assertEquals("content.xml", dataSource.getName());
-                    Assert.assertTrue(
-                            IOUtils.contentEquals(dataSource.getInputStream(), contentFile.getContent().getInputStream())
-                    );
-                    
-                    Assert.assertEquals(metadata, message.getMetadata());
+                     Assert.assertNotNull(message);
+                     Assert.assertNotNull(message.getDataHandlers());
+                     DataHandler dataHandler = message.getDataHandlers().get("cid:message");
+                     Assert.assertNotNull(dataHandler);
+                     Assert.assertNotNull(message.getMetadata());
+
+                     DataSource dataSource = dataHandler.getDataSource();
+                     Assert.assertNotNull(dataSource);
+                     Assert.assertEquals("content.xml", dataSource.getName());
+                     Assert.assertTrue(
+                             IOUtils.contentEquals(dataSource.getInputStream(), contentFile.getContent().getInputStream())
+                     );
+
+                     Assert.assertEquals(metadata, message.getMetadata());
                  }
             }));
             result = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
