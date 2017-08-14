@@ -376,7 +376,6 @@ public class UserMessageHandlerServiceTest {
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
             messagingService.storeMessage(messaging);
-            userMessageLogDao.create(withAny(userMessageLog));
         }};
     }
 

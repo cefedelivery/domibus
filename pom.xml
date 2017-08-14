@@ -688,15 +688,6 @@
             </modules>
         </profile>
         <profile>
-            <id>UI</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <modules>
-                <module>Domibus-MSH-angular</module>
-            </modules>
-        </profile>
-        <profile>
             <id>distribution</id>
             <activation>
                 <activeByDefault>true</activeByDefault>

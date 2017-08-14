@@ -1,21 +1,28 @@
 package eu.domibus.ebms3.receiver;
 
-import eu.domibus.common.*;
-import eu.domibus.common.dao.*;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.message.UserMessageException;
+import eu.domibus.api.messaging.MessagingException;
+import eu.domibus.api.reliability.ReliabilityException;
+import eu.domibus.common.ErrorCode;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.Leg;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.PullRequest;
+import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.receiver.handler.PullRequestHandler;
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
-import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
@@ -23,7 +30,6 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.util.SoapUtil;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
@@ -33,13 +39,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.*;
+import javax.xml.transform.TransformerException;
 import javax.xml.ws.*;
-import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.io.IOException;
-import java.util.Date;
 
 /**
  * This method is responsible for the receiving of ebMS3 messages and the sending of signal messages like receipts or ebMS3 errors in return
@@ -126,7 +130,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, userMessageHandlerContext.getMessageId());
                 LOG.info("Ping message " + userMessageHandlerContext.isPingMessage());
-            } catch (TransformerException | SOAPException | IOException e) {
+            } catch (TransformerException | SOAPException | JAXBException | IOException e) {
                 throw new UserMessageException(e);
             } catch (final EbMS3Exception e) {
                 try {

@@ -310,8 +310,8 @@ public class DatabaseMessageHandlerTest {
             confParty.setName(GREEN);
             conf.setParty(confParty);
 
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
+            pModeProvider.getGatewayParty();
+            result = confParty;
 
             Mpc mpc = new Mpc();
             mpc.setName(Ebms3Constants.DEFAULT_MPC);
