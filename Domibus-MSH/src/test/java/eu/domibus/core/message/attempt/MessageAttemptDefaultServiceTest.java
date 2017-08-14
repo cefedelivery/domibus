@@ -64,7 +64,6 @@ public class MessageAttemptDefaultServiceTest {
 
         new Verifications() {{
             messageAttemptDao.create(entity);
-            domainCoreConverter.convert(entity, MessageAttempt.class);
         }};
     }
 }

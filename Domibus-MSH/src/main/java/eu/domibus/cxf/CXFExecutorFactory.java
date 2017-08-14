@@ -15,7 +15,7 @@ public class CXFExecutorFactory {
     @Qualifier("taskExecutor")
     Executor executor;
 
-    public Executor getObject() throws Exception {
+    public Executor getObject() {
         return executor;
     }
 }
