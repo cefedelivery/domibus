@@ -3,6 +3,8 @@ package eu.domibus.common.dao;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
+import eu.domibus.common.model.configuration.Process;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
@@ -26,7 +28,6 @@ import java.util.List;
 public class PModeDao extends PModeProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeDao.class);
-
 
     @Override
     public Party getGatewayParty() {
@@ -336,6 +337,21 @@ public class PModeDao extends PModeProvider {
             LOG.businessError(DomibusMessageCode.BUS_PARTY_ROLE_NOT_FOUND, roleValue);
             return null;
         }
+    }
+
+    @Override
+    public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
+        return processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
+    }
+
+    @Override
+    public List<Process> findPullProcessesByInitiator(final Party party) {
+        return processDao.findPullProcessesByInitiator(party);
+    }
+
+    @Override
+    public List<Process> findPullProcessByMpc(final String mpc) {
+        return processDao.findPullProcessByMpc(mpc);
     }
 
 }
