@@ -6,7 +6,6 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Thomas Dussart
@@ -24,7 +23,14 @@ public interface MessageExchangeService {
      */
     MessageStatus getMessageStatus(final MessageExchangeConfiguration messageExchangeConfiguration);
 
-    @Transactional(readOnly = true)
+    /**
+     * Failed messages have the same final status (SEND_FAILED) being for a pushed or a pulled message.
+     * So when we do restore and resend a message there is the need to know which kind of message it was
+     * originally, in order to restore it properly.
+     *
+     * @param messageId the message id.
+     * @return the status the message should be put back to.
+     */
     MessageStatus retrieveMessageRestoreStatus(String messageId);
 
     /**

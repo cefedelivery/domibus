@@ -112,7 +112,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         return messageStatus;
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public MessageStatus retrieveMessageRestoreStatus(final String messageId) {
