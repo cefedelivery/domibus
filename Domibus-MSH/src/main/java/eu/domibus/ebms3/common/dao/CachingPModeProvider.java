@@ -358,6 +358,7 @@ public class CachingPModeProvider extends PModeProvider {
         return messages;
     }
 
+    @Override
     public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
         if (pullProcessesByMessageContext.isEmpty()) {
             pullProcessesByMessageContext = processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
@@ -365,6 +366,7 @@ public class CachingPModeProvider extends PModeProvider {
         return pullProcessesByMessageContext;
     }
 
+    @Override
     public List<Process> findPullProcessesByInitiator(final Party party) {
         if (pullProcessesByInitiator.isEmpty()) {
             pullProcessesByInitiator = processDao.findPullProcessesByInitiator(party);
@@ -372,6 +374,7 @@ public class CachingPModeProvider extends PModeProvider {
         return pullProcessesByInitiator;
     }
 
+    @Override
     public List<Process> findPullProcessByMpc(final String mpc) {
         if (pullProcessBytMpc.isEmpty()) {
             pullProcessBytMpc = processDao.findPullProcessByMpc(mpc);

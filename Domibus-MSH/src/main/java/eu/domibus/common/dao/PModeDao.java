@@ -333,14 +333,17 @@ public class PModeDao extends PModeProvider {
         }
     }
 
+    @Override
     public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
         return processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
     }
 
+    @Override
     public List<Process> findPullProcessesByInitiator(final Party party) {
         return processDao.findPullProcessesByInitiator(party);
     }
 
+    @Override
     public List<Process> findPullProcessByMpc(final String mpc) {
         return processDao.findPullProcessByMpc(mpc);
     }
