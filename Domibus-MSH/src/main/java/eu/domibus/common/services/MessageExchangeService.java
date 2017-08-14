@@ -6,6 +6,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Thomas Dussart
@@ -22,6 +23,9 @@ public interface MessageExchangeService {
      * @return the status of the message.
      */
     MessageStatus getMessageStatus(final MessageExchangeConfiguration messageExchangeConfiguration);
+
+    @Transactional(readOnly = true)
+    MessageStatus retrieveMessageRestoreStatus(String messageId);
 
     /**
      * Load pmode and find pull process in order to initialize pull request.

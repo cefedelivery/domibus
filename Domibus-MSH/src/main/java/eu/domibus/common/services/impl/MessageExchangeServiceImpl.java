@@ -7,10 +7,12 @@ import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.api.security.ChainCertificateInvalidException;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
@@ -92,6 +94,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Qualifier("domibusProperties")
     private java.util.Properties domibusProperties;
 
+
     /**
      * {@inheritDoc}
      */
@@ -107,6 +110,19 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             LOG.debug("No pull process found for message configuration");
         }
         return messageStatus;
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public MessageStatus retrieveMessageRestoreStatus(final String messageId) {
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        try {
+            MessageExchangeConfiguration userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            return getMessageStatus(userMessageExchangeConfiguration);
+        } catch (EbMS3Exception e) {
+            throw new PModeException(DomibusCoreErrorCode.DOM_001, "Could not get the PMode key for message [" + messageId + "]", e);
+        }
     }
 
 

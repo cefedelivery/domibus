@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.ErrorCode;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.MessagingDao;
@@ -18,6 +19,7 @@ import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.SignalMessage;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.util.PojoInstaciatorUtil;
 import org.apache.commons.lang3.Validate;
@@ -113,6 +115,7 @@ public class MessageExchangeServiceImplTest {
     }
 
 
+
     private MessageStatus getMessageStatus(Process process) throws EbMS3Exception {
         List<Process> processes= Lists.newArrayList();
         processes.add(process);
@@ -186,13 +189,13 @@ public class MessageExchangeServiceImplTest {
     @Test(expected = PModeException.class)
     public void extractProcessMpcWithNoProcess() throws Exception {
         when(pModeProvider.findPullProcessByMpc(eq("qn1"))).thenReturn(new ArrayList<Process>());
-        PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
+        messageExchangeService.extractProcessOnMpc("qn1");
     }
 
     @Test(expected = PModeException.class)
     public void extractProcessMpcWithNoToManyProcess() throws Exception {
         when(pModeProvider.findPullProcessByMpc(eq("qn1"))).thenReturn(Lists.newArrayList(new Process(), new Process()));
-        PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
+        messageExchangeService.extractProcessOnMpc("qn1");
     }
 
     @Test
@@ -233,6 +236,38 @@ public class MessageExchangeServiceImplTest {
         final String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party);
         verify(messageLogService, times(1)).setIntermediaryPullStatus(eq(testMessageId));
         assertEquals(testMessageId, messageId);
+
+    }
+
+    @Test
+    public void testGetMessageStatusWhenNoPullProcessFound() {
+        MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("agr1",
+                "sender",
+                "receiver",
+                "serv1",
+                "action1",
+                "leg1");
+        when(pModeProvider.findPullProcessesByMessageContext(messageExchangeConfiguration)).thenReturn(Lists.<Process>newArrayList());
+        final MessageStatus messageStatus = messageExchangeService.getMessageStatus(messageExchangeConfiguration);
+        assertEquals(MessageStatus.SEND_ENQUEUED, messageStatus);
+
+    }
+
+    @Test
+    public void testRetrieveMessageRestoreStatusWithValidPull() throws EbMS3Exception {
+        MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("agr1",
+                "sender",
+                "receiver",
+                "serv1",
+                "action1",
+                "leg1");
+        UserMessage userMessage = new UserMessage();
+        userMessage.setMpc("mpc123");
+        when(messagingDao.findUserMessageByMessageId("123")).thenReturn(userMessage);
+        when(pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING)).thenReturn(messageExchangeConfiguration);
+        when(pModeProvider.findPullProcessesByMessageContext(messageExchangeConfiguration)).thenReturn(Lists.newArrayList(process));
+        final MessageStatus messageStatus = messageExchangeService.retrieveMessageRestoreStatus("123");
+        assertEquals(MessageStatus.READY_TO_PULL, messageStatus);
 
     }
 
