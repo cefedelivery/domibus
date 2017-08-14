@@ -4,9 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -118,13 +116,20 @@ public class FSPluginPropertiesTest {
     }
 
     @Test
-    public void testGetDomains_Unordered() throws Exception {
-        Set<String> expected = new HashSet<>();
-        expected.add(DOMAIN2);
-        expected.add(ODR);
-        expected.add(BRIS);
-        expected.add(DOMAIN1);
-        Assert.assertEquals(expected, fSPluginProperties.getDomains());
+    public void testGetDomains_Ordered() throws Exception {
+        Assert.assertEquals(DOMAIN1, fSPluginProperties.getDomains().get(0));
+        Assert.assertEquals(DOMAIN2, fSPluginProperties.getDomains().get(1));
+        Assert.assertEquals(ODR, fSPluginProperties.getDomains().get(2));
+        Assert.assertEquals(BRIS, fSPluginProperties.getDomains().get(3));
+    }
+
+    @Test
+    public void testGetDomains_UnOrdered() throws Exception {
+        int unorderedA = fSPluginProperties.getDomains().indexOf("UNORDEREDA");
+        int unorderedB = fSPluginProperties.getDomains().indexOf("UNORDEREDB");
+
+        Assert.assertTrue(unorderedA == 4 || unorderedA == 5);
+        Assert.assertTrue(unorderedB == 4 || unorderedB == 5);
     }
 
 }

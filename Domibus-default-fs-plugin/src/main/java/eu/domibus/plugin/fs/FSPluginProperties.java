@@ -4,9 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.LinkedHashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * File System Plugin Properties
@@ -18,42 +16,44 @@ import java.util.Set;
 @Component
 public class FSPluginProperties {
 
-    private static final String PROPERTY_PREFIX = "fsplugin.messages.";
+    private static final String DOT = ".";
+
+    private static final String PROPERTY_PREFIX = "fsplugin.";
 
     private static final String DOMAIN_PREFIX = "fsplugin.domains.";
     
-    private static final String MESSAGES_SECTION = ".messages.";
+    private static final String LOCATION = "messages.location";
 
-    private static final String LOCATION = "location";
+    private static final String SENT_ACTION = "messages.sent.action";
 
-    private static final String SENT_ACTION = "sent.action";
+    private static final String SENT_PURGE_WORKER_CRONEXPRESSION = "messages.sent.purge.worker.cronExpression";
 
-    private static final String SENT_PURGE_WORKER_CRONEXPRESSION = "sent.purge.worker.cronExpression";
+    private static final String SENT_PURGE_EXPIRED = "messages.sent.purge.expired";
 
-    private static final String SENT_PURGE_EXPIRED = "sent.purge.expired";
+    private static final String FAILED_ACTION = "messages.failed.action";
 
-    private static final String FAILED_ACTION = "failed.action";
+    private static final String FAILED_PURGE_WORKER_CRONEXPRESSION = "messages.failed.purge.worker.cronExpression";
 
-    private static final String FAILED_PURGE_WORKER_CRONEXPRESSION = "failed.purge.worker.cronExpression";
+    private static final String FAILED_PURGE_EXPIRED = "messages.failed.purge.expired";
 
-    private static final String FAILED_PURGE_EXPIRED = "failed.purge.expired";
+    private static final String RECEIVED_PURGE_EXPIRED = "messages.received.purge.expired";
 
-    private static final String RECEIVED_PURGE_EXPIRED = "received.purge.expired";
+    private static final String RECEIVED_PURGE_WORKER_CRONEXPRESSION = "messages.received.purge.worker.cronExpression";
 
-    private static final String RECEIVED_PURGE_WORKER_CRONEXPRESSION = "received.purge.worker.cronExpression";
-
-    private static final String USER = "user";
+    private static final String USER = "messages.user";
 
     // Sonar confuses this constant with an actual password
     @SuppressWarnings("squid:S2068")
-    private static final String PASSWORD = "password";
+    private static final String PASSWORD = "messages.password";
 
-    private static final String EXPRESSION = "expression";
+    private static final String EXPRESSION = "messages.expression";
+
+    private static final String ORDER = "order";
 
     @Resource(name = "fsPluginProperties")
     private Properties properties;
     
-    private Set<String> domains;
+    private List<String> domains;
 
     public static final String ACTION_DELETE = "delete";
 
@@ -62,7 +62,7 @@ public class FSPluginProperties {
     /**
      * @return The available domains set
      */
-    public Set<String> getDomains() {
+    public List<String> getDomains() {
         if (domains == null) {
             domains = readDomains();
         }
@@ -200,6 +200,15 @@ public class FSPluginProperties {
         return getDomainProperty(domain, PASSWORD, null);
     }
 
+    /**
+     * @param domain The domain property qualifier
+     * @return the domain order
+     */
+    public Integer getOrder(String domain) {
+        String value = getDomainProperty(domain, ORDER, null);
+        return getInteger(value, Integer.MAX_VALUE);
+    }
+
     Properties getProperties() {
         return properties;
     }
@@ -217,15 +226,27 @@ public class FSPluginProperties {
     }
 
     private String getDomainProperty(String domain, String propertyName, String defaultValue) {
-        String domainFullPropertyName = DOMAIN_PREFIX + domain + MESSAGES_SECTION + propertyName;
+        String domainFullPropertyName = DOMAIN_PREFIX + domain + DOT + propertyName;
         if (properties.containsKey(domainFullPropertyName)) {
             return properties.getProperty(domainFullPropertyName, defaultValue);
         }
         return properties.getProperty(PROPERTY_PREFIX + propertyName, defaultValue);
     }
 
-    private Set<String> readDomains() {
-        Set<String> tempDomains = new LinkedHashSet<>();
+    private Integer getInteger(String value, Integer defaultValue) {
+        Integer result = defaultValue;
+        if (StringUtils.isNotEmpty(value)) {
+            try {
+                result = Integer.valueOf(value);
+            } catch (NumberFormatException e) {
+                // noop: result = defaultValue;
+            }
+        }
+        return result;
+    }
+
+    private List<String> readDomains() {
+        List<String> tempDomains = new ArrayList<>();
 
         for (String propName : properties.stringPropertyNames()) {
             if (propName.startsWith(DOMAIN_PREFIX)) {
@@ -236,6 +257,14 @@ public class FSPluginProperties {
             }
         }
 
+        Collections.sort(tempDomains, new Comparator<String>() {
+            @Override
+            public int compare(String domain1, String domain2) {
+                Integer domain1Order = getOrder(domain1);
+                Integer domain2Order = getOrder(domain2);
+                return domain1Order - domain2Order;
+            }
+        });
         return tempDomains;
     }
 

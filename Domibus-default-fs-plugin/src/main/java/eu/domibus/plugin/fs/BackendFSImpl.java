@@ -4,6 +4,7 @@ import static eu.domibus.common.MessageStatus.*;
 
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -138,7 +139,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     String resolveDomain(String service, String action) {
         String serviceAction = service + "#" + action;
-        Set<String> domains = fsPluginProperties.getDomains();
+        List<String> domains = fsPluginProperties.getDomains();
         for (String domain : domains) {
             String domainExpression = fsPluginProperties.getExpression(domain);
             if (StringUtils.isNotEmpty(domainExpression)) {

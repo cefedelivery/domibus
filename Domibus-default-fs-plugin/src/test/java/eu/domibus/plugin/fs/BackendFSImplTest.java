@@ -30,9 +30,7 @@ import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -189,7 +187,7 @@ public class BackendFSImplTest {
         String serviceDomain1 = "ODRDocumentInvoiceService123";
         String actionDomain1 = "PrintA";
 
-        final Set<String> domains = new HashSet<>();
+        final List<String> domains = new ArrayList<>();
         domains.add("DOMAIN1");
 
         new Expectations(1, backendFS) {{
@@ -210,7 +208,7 @@ public class BackendFSImplTest {
         String actionDomain2 = "SendEmailAction";
         String actionDomain2a = "ReceiveBillAction";
 
-        final Set<String> domains = new HashSet<>();
+        final List<String> domains = new ArrayList<>();
         domains.add("DOMAIN1");
         domains.add("DOMAIN2");
 
@@ -237,7 +235,7 @@ public class BackendFSImplTest {
         String serviceWithoutMatch = "FSService123";
         String actionWithoutMatch = "SomeAction";
 
-        final Set<String> domains = new HashSet<>();
+        final List<String> domains = new ArrayList<>();
         domains.add("DOMAIN1");
         domains.add("DOMAIN2");
 
@@ -267,7 +265,7 @@ public class BackendFSImplTest {
         String service = "bdx:noprocess";
         String action = "TC1Leg1";
 
-        final Set<String> domains = new HashSet<>();
+        final List<String> domains = new ArrayList<>();
         domains.add("DOMAIN1");
 
         new Expectations(1, backendFS) {{

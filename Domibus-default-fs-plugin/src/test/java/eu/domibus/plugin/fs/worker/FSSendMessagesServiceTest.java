@@ -99,7 +99,7 @@ public class FSSendMessagesServiceTest {
     public void testSendMessages() throws MessagingProcessingException, FileSystemException, FSSetUpException {
         new Expectations(1, instance) {{
             fsPluginProperties.getDomains();
-            result = Collections.emptySet();
+            result = Collections.emptyList();
             
             fsFilesManager.setUpFileSystem(null);
             result = rootDir;
@@ -147,7 +147,7 @@ public class FSSendMessagesServiceTest {
     public void testSendMessages_Domain1_BadConfiguration() throws MessagingProcessingException, FileSystemException, FSSetUpException {
         new Expectations(1, instance) {{
             fsPluginProperties.getDomains();
-            result = Collections.singleton("DOMAIN1");
+            result = Collections.singletonList("DOMAIN1");
 
             fsFilesManager.setUpFileSystem("DOMAIN1");
             result = new FSSetUpException("Test-forced exception");
@@ -165,7 +165,7 @@ public class FSSendMessagesServiceTest {
     public void testSendMessages_MetaDataException() throws MessagingProcessingException, FileSystemException, FSSetUpException {
         new Expectations(1, instance) {{
             fsPluginProperties.getDomains();
-            result = Collections.emptySet();
+            result = Collections.emptyList();
 
             fsFilesManager.setUpFileSystem(null);
             result = rootDir;
