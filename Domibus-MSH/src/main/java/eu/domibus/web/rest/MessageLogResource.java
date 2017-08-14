@@ -6,10 +6,7 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.MessageLogInfo;
-import eu.domibus.common.model.logging.SignalMessageLog;
-import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -69,11 +66,11 @@ public class MessageLogResource {
 
         MessageLogResultRO result = new MessageLogResultRO();
 
+        //TODO why are those filters send back to the GUI??
         HashMap<String, Object> filters = new HashMap<>();
         filters.put("messageId", messageId);
         filters.put("conversationId", conversationId);
         filters.put("mshRole", mshRole);
-        filters.put("messageType", messageType);
         filters.put("messageStatus", messageStatus);
         filters.put("notificationStatus", notificationStatus);
         filters.put("fromPartyId", fromPartyId);
@@ -89,17 +86,20 @@ public class MessageLogResource {
 
         List<MessageLogInfo> resultList = new ArrayList<>();
         if (messageType == MessageType.SIGNAL_MESSAGE) {
-            int numberOfSignalMessageLogs = signalMessageLogDao.countAllInfo(column, asc, filters);
+            int numberOfSignalMessageLogs = signalMessageLogDao.countAllInfo(asc, filters);
             LOGGER.debug("count Signal Messages Logs [{}]", numberOfSignalMessageLogs);
             result.setCount(numberOfSignalMessageLogs);
             resultList = signalMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
 
         } else if (messageType == MessageType.USER_MESSAGE) {
-            int numberOfUserMessageLogs = userMessageLogDao.countAllInfo(column, asc, filters);
+            int numberOfUserMessageLogs = userMessageLogDao.countAllInfo(asc, filters);
             LOGGER.debug("count User Messages Logs [{}]", numberOfUserMessageLogs);
             result.setCount(numberOfUserMessageLogs);
             resultList = userMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
         }
+        //needed here because the info is not needed for the queries but is used by the gui as the filter is returned with
+        //the result. Why??.
+        filters.put("messageType", messageType);
         result.setMessageLogEntries(convertMessageLogInfoList(resultList));
         result.setMshRoles(MSHRole.values());
         result.setMsgTypes(MessageType.values());
@@ -122,19 +122,6 @@ public class MessageLogResource {
         return result;
     }
 
-    private void setSpecificMessageLogInfo(MessageLogRO messageLogRO, MessageLog messageLog) {
-        messageLogRO.setMessageId(messageLog.getMessageId());
-        messageLogRO.setMessageStatus(messageLog.getMessageStatus());
-        messageLogRO.setNotificationStatus(messageLog.getNotificationStatus());
-        messageLogRO.setMshRole(messageLog.getMshRole());
-        messageLogRO.setMessageType(messageLog.getMessageType());
-        messageLogRO.setDeleted(messageLog.getDeleted());
-        messageLogRO.setReceived(messageLog.getReceived());
-        messageLogRO.setSendAttempts(messageLog.getSendAttempts());
-        messageLogRO.setSendAttemptsMax(messageLog.getSendAttemptsMax());
-        messageLogRO.setNextAttempt(messageLog.getNextAttempt());
-    }
-
     private MessageLogRO convertMessageLogInfo(MessageLogInfo messageLogInfo) {
         if(messageLogInfo == null) {
             return null;
@@ -147,16 +134,16 @@ public class MessageLogResource {
         result.setOriginalSender(messageLogInfo.getOriginalSender());
         result.setFinalRecipient(messageLogInfo.getFinalRecipient());
         result.setRefToMessageId(messageLogInfo.getRefToMessageId());
-        UserMessageLog userMessageLog = messageLogInfo.getUserMessageLog();
-        SignalMessageLog signalMessageLog = messageLogInfo.getSignalMessageLog();
-        if (userMessageLog != null) {
-            setSpecificMessageLogInfo(result, userMessageLog);
-        } else if(signalMessageLog != null) {
-            setSpecificMessageLogInfo(result, signalMessageLog);
-        } else {
-            // it shouldn't enter here because MessageType is USER or SIGNAL
-            LOGGER.error("Message Log Info doesn't contain neither User nor Signal message.");
-        }
+        result.setMessageId(messageLogInfo.getMessageId());
+        result.setMessageStatus(messageLogInfo.getMessageStatus());
+        result.setNotificationStatus(messageLogInfo.getNotificationStatus());
+        result.setMshRole(messageLogInfo.getMshRole());
+        result.setMessageType(messageLogInfo.getMessageType());
+        result.setDeleted(messageLogInfo.getDeleted());
+        result.setReceived(messageLogInfo.getReceived());
+        result.setSendAttempts(messageLogInfo.getSendAttempts());
+        result.setSendAttemptsMax(messageLogInfo.getSendAttemptsMax());
+        result.setNextAttempt(messageLogInfo.getNextAttempt());
         return result;
     }
 }

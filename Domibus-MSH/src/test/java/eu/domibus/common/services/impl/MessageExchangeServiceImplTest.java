@@ -9,13 +9,13 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.*;
 public class MessageExchangeServiceImplTest {
 
     @Mock
-    private ProcessDao processDao;
+    private PModeProvider pModeProvider;
     @Mock
     private ConfigurationDAO configurationDao;
     @Mock
@@ -92,7 +92,7 @@ public class MessageExchangeServiceImplTest {
         when(configurationDao.configurationExists()).thenReturn(true);
         when(configurationDao.read()).thenReturn(configuration);
         List<Process> processes = Lists.newArrayList(process);
-        when(processDao.findPullProcessesInitiator(correctParty)).thenReturn(processes);
+        when(pModeProvider.findPullProcessesByInitiator(correctParty)).thenReturn(processes);
     }
 
     private LegConfiguration findLegByName(final String name) {
@@ -117,7 +117,7 @@ public class MessageExchangeServiceImplTest {
         List<Process> processes= Lists.newArrayList();
         processes.add(process);
         MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("agreementName", "senderParty", "receiverParty", "service", "action", "leg");
-        when(processDao.findPullProcessesByMessageContext(messageExchangeConfiguration)).thenReturn(processes);
+        when(pModeProvider.findPullProcessesByMessageContext(messageExchangeConfiguration)).thenReturn(processes);
         return messageExchangeService.getMessageStatus(messageExchangeConfiguration);
     }
 
@@ -129,7 +129,7 @@ public class MessageExchangeServiceImplTest {
         processes.add(process);
         process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:push]");
         processes.add(process);
-        when(processDao.findPullProcessesByMessageContext(messageExchangeConfiguration)).thenReturn(processes);
+        when(pModeProvider.findPullProcessesByMessageContext(messageExchangeConfiguration)).thenReturn(processes);
         messageExchangeService.getMessageStatus(messageExchangeConfiguration);
     }
 
@@ -167,8 +167,8 @@ public class MessageExchangeServiceImplTest {
 
         when(configurationDao.read()).thenReturn(configuration);
         List<Process> processes = Lists.newArrayList(process);
-        when(processDao.findPullProcessesInitiator(correctParty)).thenReturn(processes);
-        when(processDao.findPullProcessesByMessageContext(any(MessageExchangeConfiguration.class))).thenReturn(Lists.newArrayList(process));
+        when(pModeProvider.findPullProcessesByInitiator(correctParty)).thenReturn(processes);
+        when(pModeProvider.findPullProcessesByMessageContext(any(MessageExchangeConfiguration.class))).thenReturn(Lists.newArrayList(process));
         messageExchangeService.initiatePullRequest();
         verify(jmsPullTemplate,times(0)).convertAndSend(any(Destination.class),any(Map.class), any(MessagePostProcessor.class));
     }
@@ -176,7 +176,7 @@ public class MessageExchangeServiceImplTest {
     @Test
     public void extractProcessOnMpc() throws Exception {
         List<Process> processes = Lists.newArrayList(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:pull]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "initiatorParties{[name:resp1]}"));
-        when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(processes);
+        when(pModeProvider.findPullProcessByMpc(eq("qn1"))).thenReturn(processes);
         PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
         assertEquals("resp1", pullContext.getInitiator().getName());
         assertEquals("party1", pullContext.getResponder().getName());
@@ -185,13 +185,13 @@ public class MessageExchangeServiceImplTest {
 
     @Test(expected = PModeException.class)
     public void extractProcessMpcWithNoProcess() throws Exception {
-        when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(new ArrayList<Process>());
+        when(pModeProvider.findPullProcessByMpc(eq("qn1"))).thenReturn(new ArrayList<Process>());
         PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
     }
 
     @Test(expected = PModeException.class)
     public void extractProcessMpcWithNoToManyProcess() throws Exception {
-        when(processDao.findPullProcessBytMpc(eq("qn1"))).thenReturn(Lists.newArrayList(new Process(), new Process()));
+        when(pModeProvider.findPullProcessByMpc(eq("qn1"))).thenReturn(Lists.newArrayList(new Process(), new Process()));
         PullContext pullContext = messageExchangeService.extractProcessOnMpc("qn1");
     }
 
