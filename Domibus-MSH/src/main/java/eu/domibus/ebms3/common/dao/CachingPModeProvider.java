@@ -360,21 +360,21 @@ public class CachingPModeProvider extends PModeProvider {
 
     public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
         if (pullProcessesByMessageContext.isEmpty()) {
-            pullProcessesByMessageContext = super.findPullProcessesByMessageContext(messageExchangeConfiguration);
+            pullProcessesByMessageContext = processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
         }
         return pullProcessesByMessageContext;
     }
 
     public List<Process> findPullProcessesByInitiator(final Party party) {
         if (pullProcessesByInitiator.isEmpty()) {
-            pullProcessesByInitiator = super.findPullProcessesByInitiator(party);
+            pullProcessesByInitiator = processDao.findPullProcessesByInitiator(party);
         }
         return pullProcessesByInitiator;
     }
 
     public List<Process> findPullProcessByMpc(final String mpc) {
         if (pullProcessBytMpc.isEmpty()) {
-            pullProcessBytMpc = super.findPullProcessByMpc(mpc);
+            pullProcessBytMpc = processDao.findPullProcessByMpc(mpc);
         }
         return pullProcessBytMpc;
     }

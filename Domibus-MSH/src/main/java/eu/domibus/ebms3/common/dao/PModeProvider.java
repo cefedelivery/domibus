@@ -102,7 +102,7 @@ public abstract class PModeProvider {
     List<ConfigurationValidator> configurationValidators;
 
     @Autowired
-    private ProcessDao processDao;
+    protected ProcessDao processDao;
 
     public abstract void init();
 
@@ -296,16 +296,10 @@ public abstract class PModeProvider {
         return pModeKey.split(":")[5];
     }
 
-    public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
-        return processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
-    }
+    public abstract List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration);
 
-    public List<Process> findPullProcessesByInitiator(final Party party) {
-        return processDao.findPullProcessesByInitiator(party);
-    }
+    public abstract List<Process> findPullProcessesByInitiator(final Party party);
 
-    public List<Process> findPullProcessByMpc(final String mpc) {
-        return processDao.findPullProcessByMpc(mpc);
-    }
+    public abstract List<Process> findPullProcessByMpc(final String mpc);
 
 }
