@@ -9,6 +9,7 @@ Domibus 3.3-FR
 - Discard domibus.internal.dispatch.queue from using the DLQ queue.
 - Discard domibus.internal.pull.queue from using the DLQ queue.
 - Possibility to notify the plugins when the message status changes; new method added in the plugin API: eu.domibus.plugin.BackendConnector.messageStatusChanged(eu.domibus.common.MessageStatusChangeEvent)
+- Performance improvements
 Domibus 3.3-RC1
 - Configuration of Domibus is done with domibus.properties instead of externalized spring xml files
 - Add the possibility to pull messages

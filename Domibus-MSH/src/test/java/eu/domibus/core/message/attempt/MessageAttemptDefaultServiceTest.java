@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @author Cosmin Baciu
@@ -27,6 +28,9 @@ public class MessageAttemptDefaultServiceTest {
 
     @Injectable
     DomainCoreConverter domainCoreConverter;
+
+    @Injectable
+    Properties domibusProperties;
 
 
     @Test
@@ -47,7 +51,10 @@ public class MessageAttemptDefaultServiceTest {
 
     @Test
     public void testCreate(@Injectable final MessageAttemptEntity entity, @Injectable final MessageAttempt attempt) throws Exception {
-        new Expectations() {{
+        new Expectations(messageAttemptDefaultService) {{
+            messageAttemptDefaultService.isMessageAttemptAuditDisabled();
+            result = false;
+
             domainCoreConverter.convert(attempt, MessageAttemptEntity.class);
             result = entity;
 

@@ -1,6 +1,7 @@
 package eu.domibus.pmode;
 
 import eu.domibus.AbstractIT;
+import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
@@ -41,8 +42,13 @@ public class UploadPModeIT extends AbstractIT {
     private static boolean initialized;
     @Autowired
     PModeResource adminGui;
+
     @Autowired
     PModeProvider pModeProvider;
+
+    @Autowired
+    ConfigurationDAO configurationDAO;
+
     /*@Autowired
     PModeProvider pModeDao;*/
     @Autowired()
@@ -104,7 +110,7 @@ public class UploadPModeIT extends AbstractIT {
     @Transactional(propagation = Propagation.REQUIRED)
     private Configuration testUpdatePModes(final byte[] bytes) throws JAXBException {
         final Configuration configuration = (Configuration) this.jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(bytes));
-        pModeProvider.getConfigurationDAO().updateConfiguration(configuration);
+        configurationDAO.updateConfiguration(configuration);
         return configuration;
     }
 

@@ -69,6 +69,11 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
+    public Party getGatewayParty() {
+        return getConfiguration().getParty();
+    }
+
+    @Override
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
     public void init() {
         if (!this.configurationDAO.configurationExists()) {

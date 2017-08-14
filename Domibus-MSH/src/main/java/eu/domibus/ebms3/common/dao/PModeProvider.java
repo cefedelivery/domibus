@@ -240,6 +240,8 @@ public abstract class PModeProvider {
 
     protected abstract String findAgreement(AgreementRef agreementRef) throws EbMS3Exception;
 
+    public abstract Party getGatewayParty();
+
     public abstract Party getSenderParty(String pModeKey);
 
     public abstract Party getReceiverParty(String pModeKey);
@@ -263,14 +265,6 @@ public abstract class PModeProvider {
     public abstract int getRetentionUndownloadedByMpcURI(final String mpcURI);
 
     public abstract Role getBusinessProcessRole(String roleValue);
-
-    public ConfigurationDAO getConfigurationDAO() {
-        return configurationDAO;
-    }
-
-    public void setConfigurationDAO(final ConfigurationDAO configurationDAO) {
-        this.configurationDAO = configurationDAO;
-    }
 
     protected String getSenderPartyNameFromPModeKey(final String pModeKey) {
         return pModeKey.split(":")[0];

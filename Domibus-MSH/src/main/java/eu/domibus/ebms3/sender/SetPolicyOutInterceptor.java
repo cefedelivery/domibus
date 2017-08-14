@@ -72,7 +72,7 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
         LOG.debug("SetPolicyOutInterceptor");
-        final String pModeKey = (String) message.getContextualProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
+        final String pModeKey = (String) message.getContextualProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
         message.getInterceptorChain().add(new PrepareAttachmentInterceptor());
 
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pModeKey);

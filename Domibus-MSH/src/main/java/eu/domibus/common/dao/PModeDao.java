@@ -30,6 +30,12 @@ public class PModeDao extends PModeProvider {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeDao.class);
 
     @Override
+    public Party getGatewayParty() {
+        //TODO check if it can be optimized
+        return configurationDAO.read().getParty();
+    }
+
+    @Override
     public Party getSenderParty(final String pModeKey) {
 
         String senderPartyName = this.getSenderPartyNameFromPModeKey(pModeKey);

@@ -25,8 +25,8 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.handler.PullRequestHandler;
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
-import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
@@ -174,7 +174,7 @@ public class MSHWebServiceTest {
         final Messaging messaging = createDummyRequestMessaging();
 
         new Expectations(mshWebservice) {{
-            soapRequestMessage.getProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY);
+            soapRequestMessage.getProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
             result = pmodeKey;
 
             mshWebservice.getMessaging(withAny(soapRequestMessage));
