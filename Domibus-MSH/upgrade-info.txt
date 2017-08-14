@@ -4,7 +4,7 @@ Domibus 3.3-FR (from 3.3-RC1)
                     o rename the property "com.atomikos.maxPoolSize" to "domibus.jms.XAConnectionFactory.maxPoolSize"
                     o rename the property "domibus.senderparty.trust.verification" to "domibus.sender.trust.validation.onreceiving" in your domibus.properties file. If the property is not defined, do nothing. Default value "false" has not been changed.
                     o rename the property "domibus.certificate.validation.enabled" to "domibus.receiver.certificate.validation.onsending" in your domibus.properties file. If the property is not defined, do nothing. Default value "true" has not been changed.
-               - Add the following lines to conf/domibus/internal/ehcache.xml
+               - Add the following lines to "\conf\domibus\internal\ehcache.xml"
                      <cache name="dispatchClient"
                             maxBytesLocalHeap="5m"
                             timeToLiveSeconds="3600"
@@ -12,8 +12,8 @@ Domibus 3.3-FR (from 3.3-RC1)
                          <sizeOfPolicy maxDepthExceededBehavior="abort"/>
                      </cache>
                - [Tomcat only]
-                    o in file \conf\domibus\internal\activemq.xml
-                       add the following two entries in the broker/plugins section like described bellow:
+                    o in file "\conf\domibus\internal\activemq.xml"
+                        - add the following two entries in the broker/plugins section like described bellow:
                              <broker>
                                   ......
                                 <plugins>
@@ -22,21 +22,21 @@ Domibus 3.3-FR (from 3.3-RC1)
                                      <discardingDLQBrokerPlugin dropOnly="domibus.internal.pull.queue" reportInterval="10000"/>
                                 </plugins>
                              </broker>
-                     o o in file \conf\domibus\internal\activemq.xml the configuration for the redelivery plugin should now look like the one below:
-                                                     <redeliveryPlugin fallbackToDeadLetter="true" sendToDlqIfMaxRetriesExceeded="true">
-                                                         <redeliveryPolicyMap>
-                                                             <redeliveryPolicyMap>
-                                                                 <defaultEntry>
-                                                                     <!-- default policy-->
-                                                                     <redeliveryPolicy maximumRedeliveries="10" redeliveryDelay="300000"/>
-                                                                 </defaultEntry>
-                                                                 <redeliveryPolicyEntries>
-                                                                     <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0"/>
-                                                                     <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0"/>
-                                                                 </redeliveryPolicyEntries>
-                                                             </redeliveryPolicyMap>
-                                                         </redeliveryPolicyMap>
-                                                     </redeliveryPlugin>
+                        - the configuration for the redelivery plugin should now look like the one below:
+                             <redeliveryPlugin fallbackToDeadLetter="true" sendToDlqIfMaxRetriesExceeded="true">
+                                 <redeliveryPolicyMap>
+                                     <redeliveryPolicyMap>
+                                         <defaultEntry>
+                                             <!-- default policy-->
+                                             <redeliveryPolicy maximumRedeliveries="10" redeliveryDelay="300000"/>
+                                         </defaultEntry>
+                                         <redeliveryPolicyEntries>
+                                             <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0"/>
+                                             <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0"/>
+                                         </redeliveryPolicyEntries>
+                                     </redeliveryPolicyMap>
+                                 </redeliveryPolicyMap>
+                             </redeliveryPlugin>
 Domibus 3.3-RC1 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-rc1-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-rc1-migration.ddl for Oracle)

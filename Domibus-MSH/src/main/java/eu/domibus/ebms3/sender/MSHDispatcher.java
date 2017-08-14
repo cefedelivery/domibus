@@ -19,36 +19,24 @@
 
 package eu.domibus.ebms3.sender;
 
-import com.google.common.base.Strings;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.cxf.configuration.jsse.TLSClientParameters;
-import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
-import org.apache.cxf.endpoint.Client;
-import org.apache.cxf.jaxws.DispatchImpl;
-import org.apache.cxf.transport.http.HTTPConduit;
-import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
-import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import sun.rmi.runtime.Log;
 
-import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.SOAPBinding;
 import java.net.ConnectException;
 import java.util.Properties;
-import java.util.concurrent.Executor;
 
 /**
  * @author Christian Koch, Stefan Mueller
