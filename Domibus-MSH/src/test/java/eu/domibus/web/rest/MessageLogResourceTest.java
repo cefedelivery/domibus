@@ -129,7 +129,13 @@ public class MessageLogResourceTest {
                 signalMessageLog.getReceived(),
                 signalMessageLog.getSendAttempts(),
                 signalMessageLog.getSendAttemptsMax(),
-                signalMessageLog.getNextAttempt(), "", "fromPartyId", "toPartyId", "originalSender", "finalRecipient", "refToMessageId");
+                signalMessageLog.getNextAttempt(),
+                "",
+                "fromPartyId",
+                "toPartyId",
+                "originalSender",
+                "finalRecipient",
+                "refToMessageId");
         final ArrayList<MessageLogInfo> resultList = new ArrayList<>();
         resultList.add(messageLogInfo);
         new Expectations() {{

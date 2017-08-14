@@ -122,19 +122,6 @@ public class MessageLogResource {
         return result;
     }
 
-    private void setSpecificMessageLogInfo(MessageLogRO messageLogRO, MessageLogInfo messageLogInfo) {
-        messageLogRO.setMessageId(messageLogInfo.getMessageId());
-        messageLogRO.setMessageStatus(messageLogInfo.getMessageStatus());
-        messageLogRO.setNotificationStatus(messageLogInfo.getNotificationStatus());
-        messageLogRO.setMshRole(messageLogInfo.getMshRole());
-        messageLogRO.setMessageType(messageLogInfo.getMessageType());
-        messageLogRO.setDeleted(messageLogInfo.getDeleted());
-        messageLogRO.setReceived(messageLogInfo.getReceived());
-        messageLogRO.setSendAttempts(messageLogInfo.getSendAttempts());
-        messageLogRO.setSendAttemptsMax(messageLogInfo.getSendAttemptsMax());
-        messageLogRO.setNextAttempt(messageLogInfo.getNextAttempt());
-    }
-
     private MessageLogRO convertMessageLogInfo(MessageLogInfo messageLogInfo) {
         if(messageLogInfo == null) {
             return null;

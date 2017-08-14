@@ -54,8 +54,11 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Autowired
     private ProcessPartyExtractorProvider processPartyExtractorProvider;
+    //pull processes cache.
     private List<Process> pullProcessesByMessageContext = new ArrayList<>();
+
     private List<Process> pullProcessesByInitiator = new ArrayList<>();
+
     private List<Process> pullProcessBytMpc = new ArrayList<>();
 
     protected synchronized Configuration getConfiguration() {
