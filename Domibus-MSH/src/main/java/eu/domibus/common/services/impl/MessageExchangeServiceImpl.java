@@ -57,6 +57,10 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageExchangeService.class);
 
+    private final static String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.receiver.certificate.validation.onsending";
+
+    private final static String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.sender.certificate.validation.onsending";
+
     @Autowired
     private ConfigurationDAO configurationDAO;
 
@@ -231,8 +235,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        final String domibusReceiverCertificateValidationOnsending = "domibus.receiver.certificate.validation.onsending";
-        if (Boolean.parseBoolean(domibusProperties.getProperty(domibusReceiverCertificateValidationOnsending, "true"))) {
+
+        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             final ChainCertificateInvalidException chainCertificateInvalidException = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]");
             try {
                 boolean certificateChainValid = certificateService.isCertificateChainValid(receiverName);
@@ -252,8 +256,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        final String domibusSenderCertificateValidationOnSending = "domibus.sender.certificate.validation.onsending";
-        if (Boolean.parseBoolean(domibusProperties.getProperty(domibusSenderCertificateValidationOnSending, "true"))) {
+
+        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             final ChainCertificateInvalidException chainCertificateInvalidException = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]");
             try {
                 if (!certificateService.isCertificateChainValid(senderName)) {
