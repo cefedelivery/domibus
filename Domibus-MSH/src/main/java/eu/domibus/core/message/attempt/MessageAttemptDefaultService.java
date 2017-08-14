@@ -37,14 +37,13 @@ public class MessageAttemptDefaultService implements MessageAttemptService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
-    public MessageAttempt create(MessageAttempt attempt) {
+    public void create(MessageAttempt attempt) {
         if(isMessageAttemptAuditDisabled()) {
-            return null;
+            return;
         }
 
         final MessageAttemptEntity entity = domainCoreConverter.convert(attempt, MessageAttemptEntity.class);
         messageAttemptDao.create(entity);
-        return domainCoreConverter.convert(entity, MessageAttempt.class);
     }
 
     protected boolean isMessageAttemptAuditDisabled() {
