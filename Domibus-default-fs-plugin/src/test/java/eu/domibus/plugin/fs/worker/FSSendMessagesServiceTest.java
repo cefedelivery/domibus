@@ -119,10 +119,11 @@ public class FSSendMessagesServiceTest {
             backendFSPlugin.submit(with(new Delegate<FSMessage>() {
                  void delegate(FSMessage message) throws IOException {
                     Assert.assertNotNull(message);
-                    Assert.assertNotNull(message.getDataHandler());
+                    Assert.assertNotNull(message.getDataHandlers());
+                     Assert.assertNotNull(message.getDataHandlers().get(0));
                     Assert.assertNotNull(message.getMetadata());
                     
-                    DataSource dataSource = message.getDataHandler().getDataSource();
+                    DataSource dataSource = message.getDataHandlers().get(0).getDataSource();
                     Assert.assertNotNull(dataSource);
                     Assert.assertEquals("content.xml", dataSource.getName());
                     Assert.assertTrue(

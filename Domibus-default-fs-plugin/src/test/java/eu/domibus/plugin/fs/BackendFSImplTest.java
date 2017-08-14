@@ -30,7 +30,10 @@ import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -104,7 +107,7 @@ public class BackendFSImplTest {
 
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
-            result = new FSMessage(dataHandler, userMessage);
+            result = new FSMessage(Collections.singletonList(dataHandler), userMessage);
 
             fsFilesManager.getEnsureChildFolder(withAny(rootDir), FSFilesManager.INCOMING_FOLDER);
             result = incomingFolder;

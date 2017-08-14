@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.List;
 
 /**
  * This class is responsible for transformations from {@link FSMessage} to
@@ -42,13 +42,8 @@ public class FSMessageTransformer
         metadata.setPartyInfo(getPartyInfoFromSubmission(submission));
         metadata.setCollaborationInfo(getCollaborationInfoFromSubmission(submission));
         metadata.setMessageProperties(getMessagePropertiesFromSubmission(submission));
-
-        try {
-            DataHandler dataHandler = getPayloadFromSubmission(submission);
-            return new FSMessage(dataHandler, metadata);
-        } catch (FSPayloadException ex) {
-            throw new FSRuntimeException("Could not get the file from submission " + submission.getMessageId(), ex);
-        }
+        List<DataHandler> dataHandlers = getPayloadsFromSubmission(submission);
+        return new FSMessage(dataHandlers, metadata);
     }
 
     /**
@@ -67,7 +62,7 @@ public class FSMessageTransformer
         setCollaborationInfoToSubmission(submission, metadata.getCollaborationInfo());
         setMessagePropertiesToSubmission(submission, metadata.getMessageProperties());
         try {
-            setPayloadToSubmission(submission, messageIn.getDataHandler());
+            setPayloadToSubmission(submission, messageIn.getDataHandlers().get(0));
         } catch (FSPayloadException ex) {
             throw new FSRuntimeException("Could not set payload to Submission", ex);
         }
@@ -85,15 +80,12 @@ public class FSMessageTransformer
         submission.addPayload(DEFAULT_CONTENT_ID, dataHandler, payloadProperties);
     }
 
-    private DataHandler getPayloadFromSubmission(Submission submission) throws FSPayloadException {
-        Set<Submission.Payload> payloads = submission.getPayloads();
-        if (payloads.size() == 1) {
-            Submission.Payload payload = payloads.iterator().next();
-
-            return payload.getPayloadDatahandler();
-        } else {
-            throw new FSPayloadException("Payloads size should be 1");
+    private List<DataHandler> getPayloadsFromSubmission(Submission submission) {
+        List<DataHandler> result = new ArrayList<>(submission.getPayloads().size());
+        for (final Submission.Payload payload : submission.getPayloads()) {
+            result.add(payload.getPayloadDatahandler());
         }
+        return result;
     }
 
     private void setMessagePropertiesToSubmission(Submission submission, MessageProperties messageProperties) {

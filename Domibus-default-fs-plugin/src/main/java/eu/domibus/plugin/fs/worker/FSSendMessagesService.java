@@ -17,6 +17,7 @@ import javax.annotation.Resource;
 import javax.xml.bind.JAXBException;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -82,7 +83,7 @@ public class FSSendMessagesService {
                 LOG.debug("{}: Metadata found and valid", processableFile.getName());
 
                 DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
-                FSMessage message= new FSMessage(dataHandler, metadata);
+                FSMessage message= new FSMessage(Collections.singletonList(dataHandler), metadata);
                 String messageId = backendFSPlugin.submit(message);
                 LOG.debug("{}: Message submitted successfully", processableFile.getName());
 

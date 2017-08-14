@@ -3,6 +3,7 @@ package eu.domibus.plugin.fs;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.*;
 import eu.domibus.plugin.fs.exception.FSRuntimeException;
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -12,9 +13,8 @@ import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-
-import org.apache.commons.io.IOUtils;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -115,37 +115,9 @@ public class FSMessageTransformerTest {
         Assert.assertEquals(PROPERTY_FINAL_RECIPIENT, property1.getName());
         Assert.assertEquals(FINAL_RECIPIENT, property1.getValue());
 
-        DataHandler dataHandler = fsMessage.getDataHandler();
+        DataHandler dataHandler = fsMessage.getDataHandlers().get(0);
         Assert.assertEquals(APPLICATION_XML, dataHandler.getContentType());
         Assert.assertEquals(payloadContent, IOUtils.toString(dataHandler.getInputStream()));
-    }
-
-    @Test(expected = FSRuntimeException.class)
-    public void testTransformFromSubmission_Exception() throws Exception {
-        String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
-        String conversationId = "ae413adb-920c-4d9c-a5a7-b5b2596eaf1c@domibus.eu";
-
-        // Submission
-        Submission submission = new Submission();
-        submission.setMessageId(messageId);
-        submission.addFromParty(DOMIBUS_BLUE, UNREGISTERED_PARTY_TYPE);
-        submission.setFromRole(INITIATOR_ROLE);
-        submission.addToParty(DOMIBUS_RED, UNREGISTERED_PARTY_TYPE);
-        submission.setToRole(RESPONDER_ROLE);
-
-        submission.setServiceType(SERVICE_TYPE_TC1);
-        submission.setService(SERVICE_NOPROCESS);
-        submission.setAction(ACTION_TC1LEG1);
-        submission.setAgreementRefType(EMPTY_STR);
-        submission.setAgreementRef(AGREEMENT_REF_A1);
-        submission.setConversationId(conversationId);
-
-        submission.addMessageProperty(PROPERTY_ORIGINAL_SENDER, ORIGINAL_SENDER);
-        submission.addMessageProperty(PROPERTY_FINAL_RECIPIENT, FINAL_RECIPIENT);
-
-        // Transform FSMessage from Submission
-        FSMessageTransformer transformer = new FSMessageTransformer();
-        transformer.transformFromSubmission(submission, null);
     }
 
     @Test
@@ -156,7 +128,7 @@ public class FSMessageTransformerTest {
         ByteArrayDataSource dataSource = new ByteArrayDataSource(payloadContent.getBytes(), APPLICATION_XML);
         dataSource.setName("content.xml");
         DataHandler dataHandler = new DataHandler(dataSource);
-        FSMessage fsMessage = new FSMessage(dataHandler, metadata);
+        FSMessage fsMessage = new FSMessage(Collections.singletonList(dataHandler), metadata);
 
         // Transform FSMessage to Submission
         FSMessageTransformer transformer = new FSMessageTransformer();

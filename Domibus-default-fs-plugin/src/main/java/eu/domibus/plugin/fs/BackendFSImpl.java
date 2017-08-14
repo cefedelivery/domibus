@@ -31,6 +31,8 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.MessageStatusChangeEvent;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 
+import javax.activation.DataHandler;
+
 /**
  * File system backend integration plugin.
  *
@@ -107,22 +109,26 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER)) {
             
-            String fileName = messageId;
-            fileName += getFileNameExtension(fsMessage);
+            for (DataHandler dataHandler : fsMessage.getDataHandlers()) {
+                String fileName = messageId;
+                // TODO If the received message contains multiple payloads the convention is messageID_partInfoCid.extension
+                // (where messageID is the identifier of the User Message from Domibus, partInfoCid is the payload CID without the cid:prefix and extension is the file extension).
+                fileName += getFileNameExtension(dataHandler);
 
-            try (FileObject fileObject = incomingFolder.resolveFile(fileName);
-                    FileContent fileContent = fileObject.getContent()) {
-                fsMessage.getDataHandler().writeTo(fileContent.getOutputStream());
+                try (FileObject fileObject = incomingFolder.resolveFile(fileName);
+                     FileContent fileContent = fileObject.getContent()) {
+                    dataHandler.writeTo(fileContent.getOutputStream());
+                }
             }
         } catch (IOException | FSSetUpException ex) {
             throw new FSRuntimeException("An error occurred persisting downloaded message " + messageId, ex);
         }
     }
 
-    private String getFileNameExtension(FSMessage fsMessage) {
+    private String getFileNameExtension(DataHandler dataHandler) {
         String extension = "";
         try {
-            String mimeType = fsMessage.getDataHandler().getContentType();
+            String mimeType = dataHandler.getContentType();
             extension = FSMimeTypeHelper.getExtension(mimeType);
         } catch (MimeTypeException ex) {
             LOG.warn("Error parsing MIME type", ex);
