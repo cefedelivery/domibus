@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
@@ -112,7 +113,7 @@ public class PullMessageSender {
 
             mshDispatcher.dispatch(acknowlegement,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
 
-        } catch (TransformerException | SOAPException | IOException | JMSException e) {
+        } catch (TransformerException | SOAPException | IOException | JAXBException | JMSException e) {
             LOG.error(e.getMessage(), e);
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Error handling new UserMessage", e);
         } catch (final EbMS3Exception e) {

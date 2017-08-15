@@ -2,6 +2,7 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -33,9 +34,9 @@ public abstract class AbstractLegConfigurationExtractor implements LegConfigurat
         //set the messageId in the MDC context
         LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, getMessageId());
         message.getExchange().put(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY, getMessageId());
-        message.put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
+        message.put(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
         //FIXME: Test!!!!
-        message.getExchange().put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
+        message.getExchange().put(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
     }
 
 

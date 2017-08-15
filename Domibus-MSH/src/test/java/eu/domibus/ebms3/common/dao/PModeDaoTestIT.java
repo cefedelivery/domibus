@@ -5,6 +5,7 @@ import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
 import eu.domibus.common.dao.PModeDao;
+import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
 import eu.domibus.ebms3.common.validators.ConfigurationValidator;
@@ -69,6 +70,11 @@ public class PModeDaoTestIT {
         @Bean
         public EntityManagerFactory entityManagerFactory() {
             return Mockito.mock(EntityManagerFactory.class);
+        }
+
+        @Bean
+        public ProcessDao processDao() {
+            return Mockito.mock(ProcessDao.class);
         }
 
         @Bean

@@ -1,6 +1,5 @@
 package eu.domibus.api.message;
 
-import javax.xml.bind.JAXBException;
 import java.util.Date;
 import java.util.List;
 

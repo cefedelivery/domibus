@@ -4,6 +4,7 @@ import eu.domibus.AbstractIT;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.ebms3.receiver.MessageLegConfigurationFactory;
 import eu.domibus.ebms3.receiver.SetPolicyInInterceptor;
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
@@ -118,7 +119,7 @@ public class ReceiveMessageIT extends AbstractIT {
         String filename = "SOAPMessage.xml";
         String messageId = "359b840b-b215-4c70-89e7-59aa0fe73cec@domibus.eu";
         SOAPMessage soapMessage = createSOAPMessagePolicyInterceptor(filename);
-        soapMessage.setProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
+        soapMessage.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
         AttachmentPart attachment = soapMessage.createAttachmentPart();
         attachment.setContent(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()), "text/xml");
         attachment.setContentId("sbdh-order");
