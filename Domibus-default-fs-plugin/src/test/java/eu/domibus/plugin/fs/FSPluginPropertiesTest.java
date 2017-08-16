@@ -115,7 +115,7 @@ public class FSPluginPropertiesTest {
 
     @Test
     public void testGetExpression_Domain2() throws Exception {
-        Assert.assertEquals("bdx:noprocess#TC1Leg2", fSPluginProperties.getExpression(DOMAIN2));
+        Assert.assertEquals("bdx:noprocess#TC2Leg1", fSPluginProperties.getExpression(DOMAIN2));
     }
 
     @Test
