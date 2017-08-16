@@ -8,6 +8,15 @@ package eu.domibus.plugin.fs.exception;
 public class FSPluginException extends RuntimeException {
 
     /**
+     * Creates a new <code>FSPluginException/code>.
+     * @param   message   the detail message. The detail message is saved for
+     *          later retrieval by the {@link #getMessage()} method.
+     */
+    public FSPluginException(String message) {
+        super(message);
+    }
+
+    /**
      * Creates a new <code>FSPluginException</code>.
      *
      * @param  message the detail message (which is saved for later retrieval

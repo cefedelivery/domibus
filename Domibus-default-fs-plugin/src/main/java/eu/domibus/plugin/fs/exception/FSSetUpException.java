@@ -5,7 +5,7 @@ package eu.domibus.plugin.fs.exception;
  *
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
-public class FSSetUpException extends Exception {
+public class FSSetUpException extends FSPluginException {
 
     /**
      * Creates a new <code>FSSetUpException/code>.

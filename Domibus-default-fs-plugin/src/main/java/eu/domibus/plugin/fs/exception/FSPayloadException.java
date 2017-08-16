@@ -5,7 +5,8 @@ package eu.domibus.plugin.fs.exception;
  *
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
-public class FSPayloadException extends Exception {
+public class FSPayloadException extends FSPluginException {
+
 
     /**
      * Creates a new <code>FSPayloadException/code>.
@@ -15,6 +16,7 @@ public class FSPayloadException extends Exception {
     public FSPayloadException(String message) {
         super(message);
     }
+
 
     /**
      * Creates a new <code>FSPayloadException</code>.
