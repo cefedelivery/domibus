@@ -8,7 +8,9 @@ import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.dao.*;
+import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
@@ -19,7 +21,6 @@ import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -56,24 +57,22 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageExchangeService.class);
 
-    protected static String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING ="domibus.sender.certificate.validation.onsending";
-    protected static String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING ="domibus.receiver.certificate.validation.onsending";
+    private final static String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.receiver.certificate.validation.onsending";
 
-    @Autowired
-    private ProcessDao processDao;
+    private final static String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.sender.certificate.validation.onsending";
+
     @Autowired
     private ConfigurationDAO configurationDAO;
 
-
     @Autowired
     private MessagingDao messagingDao;
+
     @Autowired
     @Qualifier("pullMessageQueue")
     private Queue pullMessageQueue;
+
     @Autowired
     private JmsTemplate jmsPullTemplate;
-    @Autowired
-    private UserMessageLogDao messageLogDao;
 
     @Autowired
     private UserMessageLogService userMessageLogService;
@@ -94,9 +93,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private CertificateService certificateService;
 
     @Autowired
-    private ReliabilityChecker reliabilityChecker;
-
-    @Autowired
     @Qualifier("domibusProperties")
     private java.util.Properties domibusProperties;
 
@@ -107,7 +103,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Transactional(readOnly = true)
     public MessageStatus getMessageStatus(final MessageExchangeConfiguration messageExchangeConfiguration) {
         MessageStatus messageStatus = SEND_ENQUEUED;
-        List<Process> processes = processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
+        List<Process> processes = pModeProvider.findPullProcessesByMessageContext(messageExchangeConfiguration);
         if (!processes.isEmpty()) {
             processValidator.validatePullProcess(Lists.newArrayList(processes));
             messageStatus = READY_TO_PULL;
@@ -129,7 +125,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         }
         Configuration configuration = configurationDAO.read();
         Party initiator = configuration.getParty();
-        List<Process> pullProcesses = processDao.findPullProcessesInitiator(initiator);
+        List<Process> pullProcesses = pModeProvider.findPullProcessesByInitiator(initiator);
         for (Process pullProcess : pullProcesses) {
             try {
                 processValidator.validatePullProcess(Lists.newArrayList(pullProcess));
@@ -196,7 +192,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (!configurationDAO.configurationExists()) {
             throw new PModeException(DomibusCoreErrorCode.DOM_003, "No pmode configuration found");
         }
-        List<Process> processes = processDao.findPullProcessBytMpc(mpcQualifiedName);
+        List<Process> processes = pModeProvider.findPullProcessByMpc(mpcQualifiedName);
         Configuration configuration = configurationDAO.read();
         processValidator.validatePullProcess(processes);
         return new PullContext(processes.get(0), configuration.getParty(), mpcQualifiedName);
@@ -240,15 +236,15 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return;
         }
         if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
-            final ChainCertificateInvalidException chainCertificateInvalidException = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]");
+            String chainExceptionMessage = "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]";
             try {
                 boolean certificateChainValid = certificateService.isCertificateChainValid(receiverName);
                 if (!certificateChainValid) {
-                    throw chainCertificateInvalidException;
+                    throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
                 LOG.info("Receiver certificate exists and is valid [" + receiverName + "]");
             } catch (DomibusCertificateException e) {
-                throw chainCertificateInvalidException;
+                throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage, e);
             }
         }
     }
@@ -260,16 +256,16 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return;
         }
         if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
-            final ChainCertificateInvalidException chainCertificateInvalidException = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]");
+            String chainExceptionMessage = "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]";
             try {
                 if (!certificateService.isCertificateChainValid(senderName)) {
-                    throw chainCertificateInvalidException;
+                    throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
                 LOG.info("Sender certificate exists and is valid [" + senderName + "]");
             } catch (DomibusCertificateException dce) {
                 // Is this an error and we stop the sending or we just log a warning that we were not able to validate the cert?
                 // my opinion is that since the option is enabled, we should validate no matter what => this is an error
-                throw chainCertificateInvalidException;
+                throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage, dce);
             }
         }
     }

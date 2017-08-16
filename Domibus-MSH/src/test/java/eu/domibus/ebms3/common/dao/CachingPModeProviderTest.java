@@ -3,6 +3,7 @@ package eu.domibus.ebms3.common.dao;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
+import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Role;
@@ -72,6 +73,9 @@ public class CachingPModeProviderTest {
 
     @Injectable
     ProcessPartyExtractorProvider processPartyExtractorProvider;
+
+    @Injectable
+    ProcessDao processDao;
 
     @Tested
     CachingPModeProvider cachingPModeProvider;

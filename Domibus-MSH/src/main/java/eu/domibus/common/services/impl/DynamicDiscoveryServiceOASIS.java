@@ -72,8 +72,8 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             LOG.debug("Get the endpoint for " + transportProfileAS4);
             final Endpoint endpoint = sm.getEndpoint(processIdentifier, new TransportProfile(transportProfileAS4));
             if (endpoint == null || endpoint.getAddress() == null || endpoint.getProcessIdentifier() == null) {
-                throw new ConfigurationException("Receiver does not support reception of " + documentId +
-                        " for process " + processId + " using the AS4 Protocol");
+                throw new ConfigurationException("Could not fetch metadata for: " + receiverId + " " + receiverIdType + " " + documentId +
+                        " " + processId + " " + processIdType + " using the AS4 Protocol " + transportProfileAS4);
             }
 
             return new EndpointInfo(endpoint.getAddress(), endpoint.getCertificate());
@@ -89,6 +89,11 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
         }
 
+        final String certRegex = domibusProperties.getProperty(DYNAMIC_DISCOVERY_CERT_REGEX);
+        if(StringUtils.isEmpty(certRegex)) {
+            LOG.debug("The value for property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation is empty.");
+        }
+
         LOG.debug("Load trustore for the smpClient");
         KeyStore truststore = cryptoService.getTrustStore();
         try {
@@ -98,7 +103,8 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
                 return DynamicDiscoveryBuilder.newInstance()
                         .fetcher(new DefaultURLFetcher(defaultProxy))
                         .locator(new DefaultBDXRLocator(smlInfo))
-                        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+                        //.reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, "^.*EHEALTH_SMP.*$")))
+                        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)))
                         .build();
             }
 
@@ -106,7 +112,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             // no proxy is configured
             return DynamicDiscoveryBuilder.newInstance()
                     .locator(new DefaultBDXRLocator(smlInfo))
-                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)))
                     .build();
 
         } catch (TechnicalException exc) {

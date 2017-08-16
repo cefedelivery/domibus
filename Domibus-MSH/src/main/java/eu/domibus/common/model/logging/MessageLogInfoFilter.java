@@ -89,7 +89,7 @@ public class MessageLogInfoFilter {
         return result;
     }
 
-    public TypedQuery<MessageLogInfo> applyParameters(TypedQuery<MessageLogInfo> query, HashMap<String, Object> filters) {
+    public <E> TypedQuery<E> applyParameters(TypedQuery<E> query, HashMap<String, Object> filters) {
         for (Map.Entry<String, Object> filter : filters.entrySet()) {
             if (filter.getValue() != null) {
                 query.setParameter(filter.getKey(), filter.getValue());

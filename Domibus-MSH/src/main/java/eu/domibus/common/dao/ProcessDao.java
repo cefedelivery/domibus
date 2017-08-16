@@ -24,7 +24,7 @@ public interface ProcessDao {
      * @param party the initiator.
      * @return the matching processes.
      */
-    List<Process> findPullProcessesInitiator(final Party party);
+    List<Process> findPullProcessesByInitiator(final Party party);
 
 
     /**
@@ -32,5 +32,5 @@ public interface ProcessDao {
      * @param mpc the message partition channel
      * @return the matching processes.
      */
-    List<Process> findPullProcessBytMpc(String mpc);
+    List<Process> findPullProcessByMpc(final String mpc);
 }
