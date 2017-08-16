@@ -1,14 +1,14 @@
 package eu.domibus.plugin.fs.exception;
 
 /**
- * FSRuntimeException
+ * FSPluginException
  *
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
-public class FSRuntimeException extends RuntimeException {
+public class FSPluginException extends RuntimeException {
 
     /**
-     * Creates a new <code>FSRuntimeException</code>.
+     * Creates a new <code>FSPluginException</code>.
      *
      * @param  message the detail message (which is saved for later retrieval
      *         by the {@link #getMessage()} method).
@@ -17,7 +17,7 @@ public class FSRuntimeException extends RuntimeException {
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public FSRuntimeException(String message, Throwable cause) {
+    public FSPluginException(String message, Throwable cause) {
         super(message, cause);
     }
 

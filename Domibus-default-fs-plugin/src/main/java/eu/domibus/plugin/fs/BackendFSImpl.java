@@ -16,7 +16,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.fs.ebms3.CollaborationInfo;
-import eu.domibus.plugin.fs.exception.FSRuntimeException;
+import eu.domibus.plugin.fs.exception.FSPluginException;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 
@@ -102,7 +102,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         try {
             fsMessage = downloadMessage(messageId, null);
         } catch (MessageNotFoundException e) {
-            throw new FSRuntimeException("Unable to download message " + messageId, e);
+            throw new FSPluginException("Unable to download message " + messageId, e);
         }
 
         // Persist message
@@ -123,7 +123,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 }
             }
         } catch (IOException | FSSetUpException ex) {
-            throw new FSRuntimeException("An error occurred persisting downloaded message " + messageId, ex);
+            throw new FSPluginException("An error occurred persisting downloaded message " + messageId, ex);
         }
     }
 

@@ -3,7 +3,7 @@ package eu.domibus.plugin.fs;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.*;
 import eu.domibus.plugin.fs.exception.FSPayloadException;
-import eu.domibus.plugin.fs.exception.FSRuntimeException;
+import eu.domibus.plugin.fs.exception.FSPluginException;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import org.apache.commons.lang.StringUtils;
@@ -64,7 +64,7 @@ public class FSMessageTransformer
         try {
             setPayloadToSubmission(submission, messageIn.getDataHandlers());
         } catch (FSPayloadException ex) {
-            throw new FSRuntimeException("Could not set payload to Submission", ex);
+            throw new FSPluginException("Could not set payload to Submission", ex);
         }
         return submission;
     }

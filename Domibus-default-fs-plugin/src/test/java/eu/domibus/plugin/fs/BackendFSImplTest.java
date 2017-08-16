@@ -6,7 +6,7 @@ import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.MessageLister;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
-import eu.domibus.plugin.fs.exception.FSRuntimeException;
+import eu.domibus.plugin.fs.exception.FSPluginException;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
@@ -180,7 +180,7 @@ public class BackendFSImplTest {
         fileMessage1.close();
     }
 
-    @Test(expected = FSRuntimeException.class)
+    @Test(expected = FSPluginException.class)
     public void testDeliverMessage_MessageNotFound(@Injectable final FSMessage fsMessage) throws MessageNotFoundException {
 
         final String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
