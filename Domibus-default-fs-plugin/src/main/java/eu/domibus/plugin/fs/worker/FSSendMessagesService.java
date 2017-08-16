@@ -41,8 +41,8 @@ public class FSSendMessagesService {
     private FSFilesManager fsFilesManager;
     
     /**
-     * Triggering the purge means that the message files from the SENT directory 
-     * older than X seconds will be removed
+     * Triggering the send messages means that the message files from the OUT directory
+     * will be processed to be sent
      */
     public void sendMessages() {
         LOG.debug("Sending file system messages...");
