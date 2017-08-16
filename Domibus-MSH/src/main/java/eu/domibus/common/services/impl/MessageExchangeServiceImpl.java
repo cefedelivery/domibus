@@ -235,16 +235,16 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
-            final ChainCertificateInvalidException chainCertificateInvalidException = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]");
+        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+            String chainExceptionMessage = "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]";
             try {
                 boolean certificateChainValid = certificateService.isCertificateChainValid(receiverName);
                 if (!certificateChainValid) {
-                    throw chainCertificateInvalidException;
+                    throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
                 LOG.info("Receiver certificate exists and is valid [" + receiverName + "]");
             } catch (DomibusCertificateException e) {
-                throw chainCertificateInvalidException;
+                throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage, e);
             }
         }
     }
@@ -255,17 +255,17 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
-            final ChainCertificateInvalidException chainCertificateInvalidException = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]");
+        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+            String chainExceptionMessage = "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]";
             try {
                 if (!certificateService.isCertificateChainValid(senderName)) {
-                    throw chainCertificateInvalidException;
+                    throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
                 LOG.info("Sender certificate exists and is valid [" + senderName + "]");
             } catch (DomibusCertificateException dce) {
                 // Is this an error and we stop the sending or we just log a warning that we were not able to validate the cert?
                 // my opinion is that since the option is enabled, we should validate no matter what => this is an error
-                throw chainCertificateInvalidException;
+                throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage, dce);
             }
         }
     }
