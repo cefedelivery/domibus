@@ -41,7 +41,7 @@ public class FSFilesManager {
     private FSPluginProperties fsPluginProperties;
 
     public FileObject getEnsureRootLocation(final String location, final String domain,
-            final String user, final String password) throws FileSystemException, FSSetUpException {
+            final String user, final String password) throws FileSystemException {
         StaticUserAuthenticator auth = new StaticUserAuthenticator(domain, user, password);
         FileSystemOptions opts = new FileSystemOptions();
         DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(opts, auth);
@@ -53,13 +53,13 @@ public class FSFilesManager {
         return rootDir;
     }
 
-    private void checkRootDirExists(FileObject rootDir) throws FileSystemException, FSSetUpException {
+    private void checkRootDirExists(FileObject rootDir) throws FileSystemException {
         if (!rootDir.exists()) {
             throw new FSSetUpException("Root location does not exist: " + rootDir.getName());
         }
     }
 
-    public FileObject getEnsureRootLocation(final String location) throws FileSystemException, FSSetUpException {
+    public FileObject getEnsureRootLocation(final String location) throws FileSystemException {
         FileSystemManager fsManager = getVFSManager();
         FileObject rootDir = fsManager.resolveFile(location);
         checkRootDirExists(rootDir);
@@ -70,7 +70,7 @@ public class FSFilesManager {
         return VFS.getManager();
     }
     
-    public FileObject getEnsureChildFolder(FileObject rootDir, String folderName) throws FSSetUpException {
+    public FileObject getEnsureChildFolder(FileObject rootDir, String folderName) {
         try {
             checkRootDirExists(rootDir);
             FileObject outgoingDir = rootDir.resolveFile(folderName);
@@ -106,7 +106,7 @@ public class FSFilesManager {
         return newFile;
     }
     
-    public FileObject setUpFileSystem(String domain) throws FileSystemException, FSSetUpException {
+    public FileObject setUpFileSystem(String domain) throws FileSystemException {
         // Domain or default location
         String location = fsPluginProperties.getLocation(domain);
         String authDomain = null;

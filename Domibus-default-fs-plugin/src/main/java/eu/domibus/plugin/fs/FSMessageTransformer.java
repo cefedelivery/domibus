@@ -69,7 +69,7 @@ public class FSMessageTransformer
         return submission;
     }
 
-    private void setPayloadToSubmission(Submission submission, final Map<String, DataHandler> dataHandlers) throws FSPayloadException {
+    private void setPayloadToSubmission(Submission submission, final Map<String, DataHandler> dataHandlers) {
         for (Map.Entry<String, DataHandler> entry : dataHandlers.entrySet()) {
             String contentId = entry.getKey();
             DataHandler dataHandler = entry.getValue();
