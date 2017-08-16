@@ -19,7 +19,7 @@ public class FSPurgeSentWorker extends QuartzJobBean {
 
     @Override
     protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
-        purgeSentService.resendFailedFSMessages();
+        purgeSentService.purgeSentFSMessages();
     }
 
 }
