@@ -4,6 +4,7 @@ import static eu.domibus.common.MessageStatus.*;
 
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,6 +60,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     
     @Autowired
     private FSPluginProperties fsPluginProperties;
+    
+    private final Map<String, Pattern> domainPatternCache = new HashMap<>();
 
     /**
      * Creates a new <code>BackendFSImpl</code>.
@@ -158,20 +161,35 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         String serviceAction = service + "#" + action;
         List<String> domains = fsPluginProperties.getDomains();
         for (String domain : domains) {
-            String domainExpression = fsPluginProperties.getExpression(domain);
-            if (StringUtils.isNotEmpty(domainExpression)) {
-                try {
-                    Pattern domainExpressionPattern = Pattern.compile(domainExpression);
-                    boolean domainMatches = domainExpressionPattern.matcher(serviceAction).matches();
-                    if (domainMatches) {
-                        return domain;
-                    }
-                } catch (PatternSyntaxException e) {
-                    LOG.warn("Invalid domain expression for " + domain, e);
+            Pattern domainExpressionPattern = getDomainPattern(domain);
+            if (domainExpressionPattern != null) {
+                boolean domainMatches = domainExpressionPattern.matcher(serviceAction).matches();
+                if (domainMatches) {
+                    return domain;
                 }
             }
         }
         return null;
+    }
+    
+    private Pattern getDomainPattern(String domain) {
+        if (domainPatternCache.containsKey(domain)) {
+            return domainPatternCache.get(domain);
+        } else {
+            String domainExpression = fsPluginProperties.getExpression(domain);
+            Pattern domainExpressionPattern = null;
+            if (StringUtils.isNotEmpty(domainExpression)) {
+                try {
+                    domainExpressionPattern = Pattern.compile(domainExpression);
+                } catch (PatternSyntaxException e) {
+                    LOG.warn("Invalid domain expression for " + domain, e);
+                }
+            }
+
+            // domainExpressionPattern may be null, we should still cache null and return it
+            domainPatternCache.put(domain, domainExpressionPattern);
+            return domainExpressionPattern;
+        }
     }
 
     @Override
