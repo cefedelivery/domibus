@@ -17,7 +17,7 @@ import javax.annotation.PostConstruct;
 @Component
 public class FSPluginTriggerListBoot {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSPurgeSentService.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSPluginTriggerListBoot.class);
 
     @Autowired
     @Qualifier("domibusStandardTriggerList")
