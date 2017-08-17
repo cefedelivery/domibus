@@ -204,7 +204,71 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     @Override
     public void messageSendSuccess(String messageId) {
-        LOG.debug("TODO: messageSendSuccess implementation");
+        LOG.debug("Message {} was successfully sent", messageId);
+
+        // TODO: Check if this should be handled in messageStatusChanged with the appropriate Success Status
+        // Would be good to resolve the domain using service and action
+        // String domain = resolveDomain(service, action);
+
+        boolean messageFound = handleSentMessage(messageId, null);
+        if (!messageFound) {
+            for (String domain : fsPluginProperties.getDomains()) {
+                if (handleSentMessage(messageId, domain)) {
+                    break; // target file found
+                }
+            }
+        }
+    }
+
+    private boolean handleSentMessage(String messageId, String domain) {
+        try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
+             FileObject targetFileMessage = findMessageFile(rootDir, FSFilesManager.OUTGOING_FOLDER, messageId)) {
+
+            if (targetFileMessage != null) {
+                if (fsPluginProperties.isSentActionDelete(domain)) {
+                    // TODO: use fsFilesManager to delete?
+                    targetFileMessage.delete();
+
+                    LOG.debug("Message {} was deleted", messageId);
+                } else if (fsPluginProperties.isSentActionArchive(domain)) {
+                    // Archive
+                    String targetFileMessageURI = targetFileMessage.getParent().getName().getURI();
+                    String sentDirectoryLocation = FSFileNameHelper.deriveSentDirectoryLocation(targetFileMessageURI);
+                    FileObject sentDirectory = fsFilesManager.getEnsureChildFolder(rootDir, sentDirectoryLocation);
+
+                    String baseName = targetFileMessage.getName().getBaseName();
+                    String newName = FSFileNameHelper.stripStatusSuffix(baseName);
+                    FileObject archivedFile = sentDirectory.resolveFile(newName);
+                    // TODO: use fsFilesManager to move?
+                    targetFileMessage.moveTo(archivedFile);
+
+                    LOG.debug("Message {} was archived into {}", messageId, archivedFile.getName().getURI());
+                }
+                return true;
+            } else {
+                LOG.error("The successfully sent file message was not found. " + messageId);
+            }
+        } catch (FileSystemException e) {
+            // throw our exception?
+            LOG.error("Error handling the successfully sent file message " + messageId, e);
+        }
+        return false;
+    }
+
+    private FileObject findMessageFile(FileObject rootDir, String folder, String messageId) throws FileSystemException {
+        FileObject targetFile = null;
+        try (FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, folder)) {
+            FileObject[] files = fsFilesManager.findAllDescendantFiles(outgoingFolder);
+            for (FileObject file : files) {
+                String baseName = file.getName().getBaseName();
+                if (FSFileNameHelper.isMessageRelated(baseName, messageId)) {
+                    targetFile = file;
+                    break;
+                }
+            }
+            fsFilesManager.closeAll(files);
+        }
+        return targetFile;
     }
 
     @Override

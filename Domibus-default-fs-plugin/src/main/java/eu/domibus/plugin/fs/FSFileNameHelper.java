@@ -15,14 +15,14 @@ import eu.domibus.common.MessageStatus;
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
 public class FSFileNameHelper {
-    
+
     private static final String NAME_SEPARATOR = "_";
     private static final String EXTENSION_SEPARATOR = ".";
     private static final String UUID_PATTERN = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
     private static final Pattern PROCESSED_FILE_PATTERN = Pattern.compile(
             NAME_SEPARATOR + UUID_PATTERN + "@.", Pattern.CASE_INSENSITIVE);
     private static final List<String> STATE_SUFFIXES;
-    
+
     static {
         List<String> tempStateSuffixes = new LinkedList<>();
         for (MessageStatus status : MessageStatus.values()) {
@@ -100,12 +100,32 @@ public class FSFileNameHelper {
      * @return a new file name of the form {@code filename.ext.MESSAGE_STATUS}
      */
     public static String deriveFileName(final String fileName, final MessageStatus status) {
+        return stripStatusSuffix(fileName) + EXTENSION_SEPARATOR + status.name();
+    }
+
+    public static String stripStatusSuffix(final String fileName) {
+        String result = fileName;
         if (isAnyState(fileName)) {
-            String strippedFileName = StringUtils.substringBeforeLast(fileName, EXTENSION_SEPARATOR);
-            return strippedFileName + EXTENSION_SEPARATOR + status.name();
-        } else {
-            return fileName + EXTENSION_SEPARATOR + status.name();
+            result = StringUtils.substringBeforeLast(fileName, EXTENSION_SEPARATOR);
         }
+        return result;
+    }
+
+    /**
+     * The files moved to the SENT directory will be moved either directly under the SENT directory, under the same
+     * directory structure as the one it originated from. E.g.: a file originally located in the DOMAIN1/OUT/Invoice
+     * directory will be moved to the DOMAIN1/SENT/Invoice directory after it has been sent.
+     *
+     * The files will be named using the original name the file had when it was first dropped on the file disk and the
+     * message identifier. E.g.: message1_6d38e798-26d7-45a9-9314-3a280cf02c8d.pdf. If a file was located at the root of
+     * the OUT folder, it will be moved at the root of the SENT folder.
+     *
+     * @param fileURI
+     * @return
+     */
+    public static String deriveSentDirectoryLocation(String fileURI) {
+        // TODO make this code smarter
+        return fileURI.replaceFirst(FSFilesManager.OUTGOING_FOLDER, FSFilesManager.SENT_FOLDER);
     }
 
 }

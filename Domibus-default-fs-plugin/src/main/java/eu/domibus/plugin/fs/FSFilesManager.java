@@ -36,6 +36,7 @@ public class FSFilesManager {
 
     public static final String INCOMING_FOLDER = "IN";
     public static final String OUTGOING_FOLDER = "OUT";
+    public static final String SENT_FOLDER = "SENT";
     
     @Autowired
     private FSPluginProperties fsPluginProperties;
