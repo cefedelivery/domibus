@@ -176,7 +176,7 @@ public class MessageSender implements MessageListener {
 
                 }
             } catch (Exception e) {
-                LOG.error("Could not create the message attempt", e);
+                LOG.error("Error in the finally block ", e);
             }
         }
     }
