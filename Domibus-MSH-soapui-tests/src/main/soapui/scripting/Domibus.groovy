@@ -223,14 +223,14 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Wait until status or timer expire
     def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null, int mapDoms = 3){
+        def MAX_WAIT_TIME=60_000; // Maximum time to wait to check the message status. 
+	def STEP_WAIT_TIME=1000; // Time to wait before re-checking the message status.	
         def messageID=null;
-        def waitMax=30_000;
         def numberAttempts=0;
         def maxNumberAttempts=4;
-        def interval=1000;
         def messageStatus="INIT";
         def wait=false;
-		def sqlSender = null; def sqlReceiver = null;
+	def sqlSender = null; def sqlReceiver = null;
 		
         //log.info "waitForStatus params: messageID: " + messageID + " RMSH: " + RMSH + " IDMes: " + IDMes + " bonusTimeForSender: " + bonusTimeForSender + " bonusTimeForReceiver: " + bonusTimeForReceiver
         if(IDMes!=null){
@@ -244,7 +244,7 @@ class Domibus
 		
         if(bonusTimeForSender){
             log.info "Waiting time for Sender extended to 500 seconds"
-            waitMax=500_000
+            MAX_WAIT_TIME=500_000
         }
 
         openConnection();
@@ -265,13 +265,13 @@ class Domibus
 		}
 		
         if(SMSH){
-            while(((messageStatus!=SMSH)&&(waitMax>0))||(wait)){
-                sleep(interval)
-                if(waitMax>0){
-                    waitMax=waitMax-interval
+            while(((messageStatus!=SMSH)&&(MAX_WAIT_TIME>0))||(wait)){
+                sleep(STEP_WAIT_TIME)
+                if(MAX_WAIT_TIME>0){
+                    MAX_WAIT_TIME=MAX_WAIT_TIME-STEP_WAIT_TIME
                 }
                 log.info "maxNumberAttempts-numberAttempts: "+maxNumberAttempts+"-"+numberAttempts
-                log.info "WAIT: "+waitMax
+                log.info "WAIT: "+MAX_WAIT_TIME
                 sqlSender.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
                     messageStatus=it.MESSAGE_STATUS
                     numberAttempts=it.SEND_ATTEMPTS
@@ -286,7 +286,7 @@ class Domibus
                     }
                 }
             }
-            log.info "finished checking sender, messageStatus: " + messageStatus + " waitMax: " + waitMax
+            log.info "finished checking sender, messageStatus: " + messageStatus + " MAX_WAIT_TIME: " + MAX_WAIT_TIME
 
             assert(messageStatus!="INIT"),locateTest(context)+"Error:waitForStatus: Message "+messageID+" is not present in the sender side."
             assert(messageStatus.toLowerCase()==SMSH.toLowerCase()),locateTest(context)+"Error:waitForStatus: Message in the sender side has status "+messageStatus+" instead of "+SMSH+"."
@@ -294,23 +294,23 @@ class Domibus
         if (bonusTimeForReceiver)
         {
             log.info "Waiting time for Receiver extended to 500 seconds"
-            waitMax=500_000
+            MAX_WAIT_TIME=200_000
         }
         else
         {
-            waitMax=10_000
+            MAX_WAIT_TIME=10_000
         }
         messageStatus="INIT"
         if(RMSH){
-            while((messageStatus!=RMSH)&&(waitMax>0)){
-                sleep(interval)
-                waitMax=waitMax-interval
+            while((messageStatus!=RMSH)&&(MAX_WAIT_TIME>0)){
+                sleep(STEP_WAIT_TIME)
+                MAX_WAIT_TIME=MAX_WAIT_TIME-STEP_WAIT_TIME
                 sqlReceiver.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
                     messageStatus=it.MESSAGE_STATUS
                 }
-                log.info "W:" + waitMax + " M:" + messageStatus
+                log.info "W:" + MAX_WAIT_TIME + " M:" + messageStatus
             }
-            log.info "finished checking receiver, messageStatus: " + messageStatus + " waitMax: " + waitMax
+            log.info "finished checking receiver, messageStatus: " + messageStatus + " MAX_WAIT_TIME: " + MAX_WAIT_TIME
             assert(messageStatus!="INIT"),locateTest(context)+"Error:waitForStatus: Message "+messageID+" is not present in the receiver side."
             assert(messageStatus.toLowerCase()==RMSH.toLowerCase()),locateTest(context)+"Error:waitForStatus: Message in the receiver side has status "+messageStatus+" instead of "+RMSH+"."
         }
