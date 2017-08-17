@@ -294,28 +294,17 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     private boolean renameMessageFile(String domain, String messageId, MessageStatus status) {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-                FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
-            
-            FileObject[] files = fsFilesManager.findAllDescendantFiles(outgoingFolder);
-            
-            FileObject targetFile = null;
-            for (FileObject file : files) {
-                String baseName = file.getName().getBaseName();
-                if (FSFileNameHelper.isMessageRelated(baseName, messageId)) {
-                    targetFile = file;
-                    break;
-                }
-            }
+                FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+                FileObject targetFile = findMessageFile(outgoingFolder, messageId)) {
             
             if (targetFile != null) {
                 String baseName = targetFile.getName().getBaseName();
                 String newName = FSFileNameHelper.deriveFileName(baseName, status);
                 fsFilesManager.renameFile(targetFile, newName);
                 
-                fsFilesManager.closeAll(files);
                 return true;
             } else {
-                fsFilesManager.closeAll(files);
+                LOG.error("The message to rename was not found. " + messageId);
             }
         } catch (FileSystemException ex) {
             LOG.error("Error renaming file", ex);
