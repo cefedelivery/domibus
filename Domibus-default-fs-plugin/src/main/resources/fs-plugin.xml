@@ -36,7 +36,7 @@
           c:queue-ref="notifyBackendFSQueue" c:mode="PUSH"
           p:backendConnector-ref="backendFSPlugin"/>
 
-    <!-- quartz job for the retry  -->
+    <!-- quartz job for purging sent messages -->
     <bean id="fsPluginPurgeSentWorkerJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSPurgeSentWorker"/>
@@ -49,6 +49,33 @@
         <property name="cronExpression" value="${fsplugin.messages.sent.purge.worker.cronExpression}"/>
     </bean>
     
+    <!-- quartz job for purging failed messages -->
+    <bean id="fsPluginPurgeFailedWorkerJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSPurgeFailedWorker"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="fsPluginPurgeFailedWorkerTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="fsPluginPurgeFailedWorkerJob"/>
+        <property name="cronExpression" value="${fsplugin.messages.failed.purge.worker.cronExpression}"/>
+    </bean>
+    
+    <!-- quartz job for purging received messages -->
+    <bean id="fsPluginPurgeReceivedWorkerJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSPurgeReceivedWorker"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="fsPluginPurgeReceivedWorkerTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="fsPluginPurgeReceivedWorkerJob"/>
+        <property name="cronExpression" value="${fsplugin.messages.received.purge.worker.cronExpression}"/>
+    </bean>
+    
+    <!-- quartz job for sending messages (from OUT folders) -->
     <bean id="fsPluginSendMessagesWorkerJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSSendMessagesWorker"/>
@@ -66,6 +93,8 @@
         <property name="sourceList">
             <list>
                 <ref bean="fsPluginPurgeSentWorkerTrigger"/>
+                <ref bean="fsPluginPurgeFailedWorkerTrigger"/>
+                <ref bean="fsPluginPurgeReceivedWorkerTrigger"/>
                 <ref bean="fsPluginSendMessagesWorkerTrigger"/>
             </list>
         </property>

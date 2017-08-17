@@ -25,7 +25,7 @@ public class FSPurgeSentWorkerTest {
         purgeSentWorker.executeInternal(context);
 
         new VerificationsInOrder(1){{
-            purgeSentService.purgeSentFSMessages();
+            purgeSentService.purgeMessages();
         }};
     }
 
