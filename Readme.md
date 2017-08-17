@@ -102,7 +102,7 @@ Both documents are available on the [Domibus Release Page](https://ec.europa.eu/
 
 ## License
 
-Domibus is licensed under European Union Public Licence (EUPL) version 1.1.
+Domibus is licensed under European Union Public Licence (EUPL) version 1.2.
 
 [Top](#top)
 
