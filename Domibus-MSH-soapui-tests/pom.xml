@@ -51,7 +51,7 @@
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
                     <testSuite>WS-Auto for Bamboo</testSuite>
-                    <testCase>Dom001-Push-Submit Message-Basic Flow</testCase>
+                    <!--<testCase>Dom001-Push-Submit Message-Basic Flow</testCase>-->
                     <projectProperties>
                         <value>${localUrl}</value>
                         <value>${remoteUrl}</value>
