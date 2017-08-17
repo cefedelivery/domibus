@@ -222,12 +222,12 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     private boolean handleSentMessage(String messageId, String domain) {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-             FileObject targetFileMessage = findMessageFile(rootDir, FSFilesManager.OUTGOING_FOLDER, messageId)) {
+             FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+             FileObject targetFileMessage = findMessageFile(outgoingFolder, messageId)) {
 
             if (targetFileMessage != null) {
                 if (fsPluginProperties.isSentActionDelete(domain)) {
-                    // TODO: use fsFilesManager to delete?
-                    targetFileMessage.delete();
+                    fsFilesManager.deleteFile(targetFileMessage);
 
                     LOG.debug("Message {} was deleted", messageId);
                 } else if (fsPluginProperties.isSentActionArchive(domain)) {
@@ -239,8 +239,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                     String baseName = targetFileMessage.getName().getBaseName();
                     String newName = FSFileNameHelper.stripStatusSuffix(baseName);
                     FileObject archivedFile = sentDirectory.resolveFile(newName);
-                    // TODO: use fsFilesManager to move?
-                    targetFileMessage.moveTo(archivedFile);
+                    fsFilesManager.moveFile(targetFileMessage, archivedFile);
 
                     LOG.debug("Message {} was archived into {}", messageId, archivedFile.getName().getURI());
                 }
@@ -249,16 +248,16 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 LOG.error("The successfully sent file message was not found. " + messageId);
             }
         } catch (FileSystemException e) {
-            // throw our exception?
+            // TODO should we throw our exception here? this only happens if the events are not synchronized
             LOG.error("Error handling the successfully sent file message " + messageId, e);
         }
         return false;
     }
 
-    private FileObject findMessageFile(FileObject rootDir, String folder, String messageId) throws FileSystemException {
-        FileObject targetFile = null;
-        try (FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, folder)) {
-            FileObject[] files = fsFilesManager.findAllDescendantFiles(outgoingFolder);
+    private FileObject findMessageFile(FileObject parentDir, String messageId) throws FileSystemException {
+        FileObject[] files = fsFilesManager.findAllDescendantFiles(parentDir);
+        try {
+            FileObject targetFile = null;
             for (FileObject file : files) {
                 String baseName = file.getName().getBaseName();
                 if (FSFileNameHelper.isMessageRelated(baseName, messageId)) {
@@ -266,9 +265,10 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                     break;
                 }
             }
+            return targetFile;
+        } finally {
             fsFilesManager.closeAll(files);
         }
-        return targetFile;
     }
 
     @Override
@@ -291,7 +291,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     private boolean isSendingEvent(MessageStatusChangeEvent event) {
         return SENDING_MESSAGE_STATUSES.contains(event.getToStatus());
     }
-    
+
     private boolean renameMessageFile(String domain, String messageId, MessageStatus status) {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {

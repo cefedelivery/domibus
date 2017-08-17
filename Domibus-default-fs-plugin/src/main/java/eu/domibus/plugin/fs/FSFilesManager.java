@@ -100,14 +100,18 @@ public class FSFilesManager {
     public FileObject resolveSibling(FileObject file, String siblingName) throws FileSystemException {
         return file.resolveFile(PARENT_RELATIVE_PATH + siblingName);
     }
-    
+
     public FileObject renameFile(FileObject file, String newFileName) throws FileSystemException {
         FileObject newFile = resolveSibling(file, newFileName);
         file.moveTo(newFile);
-        
+
         return newFile;
     }
-    
+
+    public void moveFile(FileObject file, FileObject targetFile) throws FileSystemException {
+        file.moveTo(targetFile);
+    }
+
     public boolean deleteFile(FileObject file) throws FileSystemException {
         return file.delete();
     }
