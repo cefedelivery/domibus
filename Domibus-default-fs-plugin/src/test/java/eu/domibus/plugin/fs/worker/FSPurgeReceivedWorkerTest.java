@@ -12,20 +12,20 @@ import org.quartz.JobExecutionContext;
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
 @RunWith(JMockit.class)
-public class FSPurgeSentWorkerTest {
+public class FSPurgeReceivedWorkerTest {
 
     @Injectable
-    private FSPurgeSentService purgeSentService;
+    private FSPurgeReceivedService purgeReceivedService;
 
     @Tested
-    private FSPurgeSentWorker purgeSentWorker;
+    private FSPurgeReceivedWorker purgeReceivedWorker;
 
     @Test
     public void testExecuteInternal(@Injectable final JobExecutionContext context) throws Exception {
-        purgeSentWorker.executeInternal(context);
+        purgeReceivedWorker.executeInternal(context);
 
         new VerificationsInOrder(1){{
-            purgeSentService.purgeMessages();
+            purgeReceivedService.purgeMessages();
         }};
     }
 

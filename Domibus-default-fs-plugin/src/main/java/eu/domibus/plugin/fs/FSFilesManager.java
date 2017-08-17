@@ -37,7 +37,8 @@ public class FSFilesManager {
     public static final String INCOMING_FOLDER = "IN";
     public static final String OUTGOING_FOLDER = "OUT";
     public static final String SENT_FOLDER = "SENT";
-    
+    public static final String FAILED_FOLDER = "FAILED";
+
     @Autowired
     private FSPluginProperties fsPluginProperties;
 
@@ -107,6 +108,10 @@ public class FSFilesManager {
         return newFile;
     }
     
+    public boolean deleteFile(FileObject file) throws FileSystemException {
+        return file.delete();
+    }
+
     public FileObject setUpFileSystem(String domain) throws FileSystemException {
         // Domain or default location
         String location = fsPluginProperties.getLocation(domain);

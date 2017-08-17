@@ -10,25 +10,25 @@ import eu.domibus.plugin.fs.FSFilesManager;
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
 @Service
-public class FSPurgeSentService extends FSAbstractPurgeService {
+public class FSPurgeFailedService extends FSAbstractPurgeService {
     
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSPurgeSentService.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSPurgeFailedService.class);
     
     @Override
     public void purgeMessages() {
-        LOG.debug("Purging sent file system messages...");
+        LOG.debug("Purging failed file system messages...");
 
         super.purgeMessages();
     }
 
     @Override
     protected String getTargetFolderName() {
-        return FSFilesManager.SENT_FOLDER;
+        return FSFilesManager.FAILED_FOLDER;
     }
 
     @Override
     protected Integer getExpirationLimit(String domain) {
-        return fsPluginProperties.getSentPurgeExpired(domain);
+        return fsPluginProperties.getFailedPurgeExpired(domain);
     }
 
 }

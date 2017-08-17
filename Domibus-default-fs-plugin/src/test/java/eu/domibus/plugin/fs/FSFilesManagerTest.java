@@ -17,7 +17,9 @@ import org.junit.runner.RunWith;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 import mockit.Expectations;
 import mockit.Injectable;
+import mockit.Mocked;
 import mockit.Tested;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 
 /**
@@ -53,6 +55,7 @@ public class FSFilesManagerTest {
         rootDir.resolveFile("file2").createFile();
         rootDir.resolveFile("file3").createFile();
         rootDir.resolveFile("tobemoved").createFolder();
+        rootDir.resolveFile("tobedeleted").createFolder();
     }
     
     @After
@@ -178,6 +181,34 @@ public class FSFilesManagerTest {
         Assert.assertNotNull(result);
         Assert.assertTrue(result.exists());
         Assert.assertEquals("ram:///FSFilesManagerTest", result.getName().getURI());
+    }
+
+    @Test
+    public void testDeleteFile() throws Exception {
+        FileObject file = rootDir.resolveFile("tobedeleted");
+        boolean result = instance.deleteFile(file);
+        
+        Assert.assertTrue(result);
+        Assert.assertFalse(file.exists());
+    }
+
+    @Test
+    public void testCloseAll(@Mocked final FileObject file1,
+            @Mocked final FileObject file2,
+            @Mocked final FileObject file3) throws FileSystemException {
+        
+        new Expectations(1, instance) {{
+            file2.close();
+            result = new FileSystemException("Test-forced exception");
+        }};
+        
+        instance.closeAll(new FileObject[] { file1, file2, file3 });
+        
+        new Verifications(1) {{
+            file1.close();
+            file2.close();
+            file3.close();
+        }};
     }
     
 }
