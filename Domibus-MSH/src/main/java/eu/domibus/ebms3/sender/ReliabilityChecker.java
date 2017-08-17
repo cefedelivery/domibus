@@ -4,7 +4,6 @@ import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.ErrorLogEntry;
@@ -47,9 +46,6 @@ public class ReliabilityChecker {
 
     @Autowired
     private PModeProvider pModeProvider;
-
-    @Autowired
-    private UserMessageLogDao userMessageLogDao;
 
     @Autowired
     private UserMessageLogService userMessageLogService;

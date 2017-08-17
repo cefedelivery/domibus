@@ -12,4 +12,8 @@ public class ChainCertificateInvalidException extends DomibusCoreException {
     public ChainCertificateInvalidException(DomibusCoreErrorCode dce, String message) {
         super(dce, message);
     }
+
+    public ChainCertificateInvalidException(DomibusCoreErrorCode dce, String message, Throwable cause) {
+        super(dce, message, cause);
+    }
 }

@@ -318,9 +318,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             Party to = pModeProvider.getReceiverParty(pModeKey);
             backendMessageValidator.validateParties(from, to);
 
-            Configuration config = pModeProvider.getConfigurationDAO().read();
-            backendMessageValidator.validateInitiatorParty(config.getParty(), from);
-            backendMessageValidator.validateResponderParty(config.getParty(), to);
+            Party gatewayParty = pModeProvider.getGatewayParty();
+            backendMessageValidator.validateInitiatorParty(gatewayParty, from);
+            backendMessageValidator.validateResponderParty(gatewayParty, to);
 
             return to;
         } catch (IllegalArgumentException runTimEx) {

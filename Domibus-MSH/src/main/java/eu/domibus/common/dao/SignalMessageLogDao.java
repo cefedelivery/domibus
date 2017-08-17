@@ -85,12 +85,12 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         return query.getResultList();
     }
 
-    public int countAllInfo(String column, boolean asc, HashMap<String, Object> filters) {
-        String filteredSignalMessageLogQuery = signalMessageLogInfoFilter.filterSignalMessageLogQuery(column, asc, filters);
-        TypedQuery<MessageLogInfo> typedQuery = em.createQuery(filteredSignalMessageLogQuery, MessageLogInfo.class);
-        TypedQuery<MessageLogInfo> queryParameterized = signalMessageLogInfoFilter.applyParameters(typedQuery, filters);
-        List<MessageLogInfo> resultList = queryParameterized.getResultList();
-        return resultList.size();
+    public int countAllInfo(boolean asc, HashMap<String, Object> filters) {
+        String filteredSignalMessageLogQuery = signalMessageLogInfoFilter.countSignalMessageLogQuery(asc, filters);
+        TypedQuery<Number> countQuery = em.createQuery(filteredSignalMessageLogQuery, Number.class);
+        countQuery = signalMessageLogInfoFilter.applyParameters(countQuery, filters);
+        final Number count = countQuery.getSingleResult();
+        return count.intValue();
     }
 
     public List<MessageLogInfo> findAllInfoPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {

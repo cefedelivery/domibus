@@ -43,11 +43,9 @@ public class SetSignatureAlgorithmInInterceptor extends AbstractSoapInterceptor 
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
 
-        final Object signatureAlgorithm = message.getContextualProperty(MSHDispatcher.ASYMMETRIC_SIG_ALGO_PROPERTY);
+        final Object signatureAlgorithm = message.getContextualProperty(DispatchClientDefaultProvider.ASYMMETRIC_SIG_ALGO_PROPERTY);
         if (signatureAlgorithm != null) {
             message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, signatureAlgorithm);
         }
-
-
     }
 }
