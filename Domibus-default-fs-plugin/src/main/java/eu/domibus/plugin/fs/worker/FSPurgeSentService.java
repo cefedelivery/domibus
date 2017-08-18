@@ -22,10 +22,8 @@ public class FSPurgeSentService {
      * Triggering the purge means that the message files from the SENT directory 
      * older than X seconds will be removed
      */
-    public void resendFailedFSMessages() {
+    public void purgeSentFSMessages() {
         LOG.debug("Purging sent file system messages...");
-        LOG.debug("location: {}", fsPluginProperties.getLocation());
-        LOG.debug("location DOMAIN1: {}", fsPluginProperties.getLocation("DOMAIN1"));
     }
 
 }

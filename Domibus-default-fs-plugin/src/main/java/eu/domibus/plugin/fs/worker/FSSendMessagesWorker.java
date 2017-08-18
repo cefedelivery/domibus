@@ -7,19 +7,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
- * Quartz based worker responsible for the periodical execution of the FSPurgeSentService.
+ * Quartz based worker responsible for the periodical execution of the FSSendMessagesService.
  *
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
 @DisallowConcurrentExecution // Only one FSPurgeSentWorker runs at any time on the same node
-public class FSPurgeSentWorker extends QuartzJobBean {
+public class FSSendMessagesWorker extends QuartzJobBean {
 
     @Autowired
-    private FSPurgeSentService purgeSentService;
+    private FSSendMessagesService sendMessagesService;
 
     @Override
     protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
-        purgeSentService.purgeSentFSMessages();
+        sendMessagesService.sendMessages();
     }
 
 }

@@ -3,7 +3,6 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:amq="http://activemq.apache.org/schema/core"
        xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:task="http://www.springframework.org/schema/task"
        xmlns:c="http://www.springframework.org/schema/c"
        xmlns:p="http://www.springframework.org/schema/p"
        xmlns="http://www.springframework.org/schema/beans"
@@ -12,14 +11,14 @@
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://www.springframework.org/schema/util
        http://www.springframework.org/schema/util/spring-util.xsd
-       http://www.springframework.org/schema/task
-       http://www.springframework.org/schema/task/spring-task.xsd
+
+
        http://activemq.apache.org/schema/core
        http://activemq.apache.org/schema/core/activemq-core.xsd">
 
     <!-- General File System Plugin properties -->
     <util:properties id="fsPluginProperties" ignore-resource-not-found="true"
-                     location="classpath:fsPlugin.properties,file:///${domibus.config.location}/fsPlugin.properties"/>
+                     location="classpath:fs-plugin.properties,file:///${domibus.config.location}/plugins/config/fs-plugin.properties"/>
     <context:property-placeholder properties-ref="fsPluginProperties" ignore-resource-not-found="true"
                                   ignore-unresolvable="true" />
 
@@ -49,22 +48,27 @@
         <property name="jobDetail" ref="fsPluginPurgeSentWorkerJob"/>
         <property name="cronExpression" value="${fsplugin.messages.sent.purge.worker.cronExpression}"/>
     </bean>
+    
+    <bean id="fsPluginSendMessagesWorkerJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSSendMessagesWorker"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="fsPluginSendMessagesWorkerTrigger"
+          class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="fsPluginSendMessagesWorkerJob"/>
+        <property name="repeatInterval" value="10000"/>
+    </bean>
 
     <!-- customizable list of triggers to be executed by quartz -->
-    <bean id="fsPluginTriggerList" parent="domibusStandardTriggerList"
-          class="org.springframework.beans.factory.config.ListFactoryBean">
+    <bean id="fsPluginTriggerList" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
-            <list merge="true">
+            <list>
                 <ref bean="fsPluginPurgeSentWorkerTrigger"/>
+                <ref bean="fsPluginSendMessagesWorkerTrigger"/>
             </list>
         </property>
     </bean>
-    
-    <bean id="fsPluginFSObserver"
-          class="eu.domibus.plugin.fs.FSObserver">
-    </bean>
-    
-    <!-- TODO: compare with Quartz-based implementation -->
-    <task:executor id="fsPluginObserverExecutor" queue-capacity="1" />
 
 </beans>
