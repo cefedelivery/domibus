@@ -68,7 +68,7 @@
 			<security name="eDeliveryPolicy" policy="eDeliveryPolicy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
-			<security name="eSensPolicy" policy="eSensPolicy.xml" signatureMethod="RSA_SHA256"/>			
+			<security name="eSensPolicy" policy="eSensPolicy.v2.0.xml" signatureMethod="RSA_SHA256"/>			
 		</securities>
 		<errorHandlings>
 			 <errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="false" businessErrorNotifyConsumer="false" deliveryFailureNotifyProducer="false"/> 
