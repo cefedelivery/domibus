@@ -455,7 +455,7 @@ public class BackendFSImplTest {
             fsPluginProperties.isSentActionArchive(null);
             result = true;
             
-            fsFilesManager.getEnsureChildFolder(rootDir, "ram:///BackendFSImplTest/SENT");
+            fsFilesManager.getEnsureChildFolder(rootDir, "ram:///BackendFSImplTest/SENT/");
             result = sentFolder;
             
         }};

@@ -1,13 +1,13 @@
 package eu.domibus.plugin.fs;
 
+import eu.domibus.common.MessageStatus;
+import org.apache.commons.lang.StringUtils;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
-
-import eu.domibus.common.MessageStatus;
 
 /**
  * Helper to create and recognize derived file names
@@ -18,6 +18,7 @@ public class FSFileNameHelper {
 
     private static final String NAME_SEPARATOR = "_";
     private static final String EXTENSION_SEPARATOR = ".";
+    public static final Pattern OUT_DIRECTORY_PATTERN = Pattern.compile("/" + FSFilesManager.OUTGOING_FOLDER + "(/|$)");
     private static final String UUID_PATTERN = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
     private static final Pattern PROCESSED_FILE_PATTERN = Pattern.compile(
             NAME_SEPARATOR + UUID_PATTERN + "@.", Pattern.CASE_INSENSITIVE);
@@ -120,8 +121,8 @@ public class FSFileNameHelper {
      * @return the derived sent directory location
      */
     public static String deriveSentDirectoryLocation(String fileURI) {
-        // TODO make this code smarter
-        return fileURI.replaceFirst(FSFilesManager.OUTGOING_FOLDER, FSFilesManager.SENT_FOLDER);
+        Matcher matcher = OUT_DIRECTORY_PATTERN.matcher(fileURI);
+        return matcher.replaceFirst("/" + FSFilesManager.SENT_FOLDER + "/");
     }
 
 }
