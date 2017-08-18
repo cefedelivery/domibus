@@ -4,7 +4,6 @@ package eu.domibus.plugin.fs.worker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -17,7 +16,6 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
-import org.apache.commons.vfs2.util.FileObjectDataSource;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,6 +30,7 @@ import eu.domibus.plugin.fs.FSPluginProperties;
 import eu.domibus.plugin.fs.FSTestHelper;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
+import eu.domibus.plugin.fs.vfs.FileObjectDataSource;
 import mockit.integration.junit4.JMockit;
 
 /**

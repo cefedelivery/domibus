@@ -12,7 +12,6 @@ import org.apache.commons.vfs2.FileTypeSelector;
 import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
-import org.apache.commons.vfs2.util.FileObjectDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.domibus.logging.DomibusLogger;
@@ -21,6 +20,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Component;
 
 import eu.domibus.plugin.fs.exception.FSSetUpException;
+import eu.domibus.plugin.fs.vfs.FileObjectDataSource;
 
 /**
  * This class is responsible for performing complex operations using VFS

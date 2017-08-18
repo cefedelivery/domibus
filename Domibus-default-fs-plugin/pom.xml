@@ -120,16 +120,17 @@
             <artifactId>commons-vfs2</artifactId>
             <version>2.1</version>
         </dependency>
-        <dependency>
+        <!--<dependency>-->
             <!--
                 Not available in public repositories
                 Has to be built from SVN tag:
                 http://svn.apache.org/repos/asf/commons/proper/vfs/tags/commons-vfs2-project-2.1
             -->
-            <groupId>org.apache.commons</groupId>
+<!--            <groupId>org.apache.commons</groupId>
             <artifactId>commons-vfs2-sandbox</artifactId>
             <version>2.1</version>
-        </dependency>
+            <scope>runtime</scope>
+        </dependency>-->
         <dependency>
             <groupId>jcifs</groupId>
             <artifactId>jcifs</artifactId>
