@@ -16,8 +16,8 @@ class Domibus
     def messageExchange=null
     def context=null
     def log=null
-	// sleepDelay value is increased from 2000 to 6000 because of pull request take longer ...
-    def sleepDelay=6000
+	// sleepDelay value is increased from 2000 to 20000 because of pull request take longer ...
+    def sleepDelay=20000;
     def sqlBlue=null;
     def sqlRed=null;
 	def sqlGreen=null;
@@ -223,14 +223,14 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Wait until status or timer expire
     def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null, int mapDoms = 3){
-        def MAX_WAIT_TIME=60_000; // Maximum time to wait to check the message status. 
-	def STEP_WAIT_TIME=1000; // Time to wait before re-checking the message status.	
+        def MAX_WAIT_TIME=100_000; // Maximum time to wait to check the message status. 
+		def STEP_WAIT_TIME=1000; // Time to wait before re-checking the message status.	
         def messageID=null;
         def numberAttempts=0;
         def maxNumberAttempts=4;
         def messageStatus="INIT";
         def wait=false;
-	def sqlSender = null; def sqlReceiver = null;
+		def sqlSender = null; def sqlReceiver = null;
 		
         //log.info "waitForStatus params: messageID: " + messageID + " RMSH: " + RMSH + " IDMes: " + IDMes + " bonusTimeForSender: " + bonusTimeForSender + " bonusTimeForReceiver: " + bonusTimeForReceiver
         if(IDMes!=null){
