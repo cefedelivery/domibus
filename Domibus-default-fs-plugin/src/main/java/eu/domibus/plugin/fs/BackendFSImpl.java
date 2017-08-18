@@ -43,11 +43,10 @@ import javax.activation.DataHandler;
 public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
-    
+
     private static final Set<MessageStatus> SENDING_MESSAGE_STATUSES = EnumSet.of(
             READY_TO_SEND, SEND_ENQUEUED, SEND_IN_PROGRESS, WAITING_FOR_RECEIPT,
-            WAITING_FOR_RETRY, SEND_ATTEMPT_FAILED, ACKNOWLEDGED, ACKNOWLEDGED_WITH_WARNING,
-            SEND_FAILURE
+            WAITING_FOR_RETRY, SEND_ATTEMPT_FAILED
     );
 
     private static final Set<MessageStatus> SEND_SUCCESS_MESSAGE_STATUSES = EnumSet.of(
@@ -55,6 +54,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     );
     
     // receiving statuses should be REJECTED, RECEIVED_WITH_WARNINGS, DOWNLOADED, DELETED, RECEIVED
+
+    // failing statuses should be SEND_FAILURE
 
     @Autowired
     private FSMessageTransformer defaultTransformer;
