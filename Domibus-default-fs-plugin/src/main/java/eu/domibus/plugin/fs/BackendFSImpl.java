@@ -267,33 +267,37 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         String messageId = event.getMessageId();
         LOG.debug("Message {} changed status from {} to {}", messageId, event.getFromStatus(), event.getToStatus());
 
-        // Sending
         if (isSendingEvent(event)) {
-            boolean fileRenamed = renameMessageFile(null, messageId, event.getToStatus());
-            if (!fileRenamed) {
-                for (String domain : fsPluginProperties.getDomains()) {
-                    fileRenamed = renameMessageFile(domain, messageId, event.getToStatus());
-                    if (fileRenamed) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Send success
-        if (isSendSuccessEvent(event)) {
-            boolean messageFound = handleSentMessage(messageId, null);
-            if (!messageFound) {
-                for (String domain : fsPluginProperties.getDomains()) {
-                    if (handleSentMessage(messageId, domain)) {
-                        break; // target file found
-                    }
-                }
-            }
+            handleSendingEvent(event, messageId);
+        } else if (isSendSuccessEvent(event)) {
+            handleSendSuccessEvent(messageId);
         }
 
     }
-    
+
+    private void handleSendSuccessEvent(String messageId) {
+        boolean messageFound = handleSentMessage(messageId, null);
+        if (!messageFound) {
+            for (String domain : fsPluginProperties.getDomains()) {
+                if (handleSentMessage(messageId, domain)) {
+                    break; // target file found
+                }
+            }
+        }
+    }
+
+    private void handleSendingEvent(MessageStatusChangeEvent event, String messageId) {
+        boolean fileRenamed = renameMessageFile(null, messageId, event.getToStatus());
+        if (!fileRenamed) {
+            for (String domain : fsPluginProperties.getDomains()) {
+                fileRenamed = renameMessageFile(domain, messageId, event.getToStatus());
+                if (fileRenamed) {
+                    break;
+                }
+            }
+        }
+    }
+
     private boolean isSendingEvent(MessageStatusChangeEvent event) {
         return SENDING_MESSAGE_STATUSES.contains(event.getToStatus());
     }
