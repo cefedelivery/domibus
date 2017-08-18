@@ -49,6 +49,10 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             WAITING_FOR_RETRY, SEND_ATTEMPT_FAILED, ACKNOWLEDGED, ACKNOWLEDGED_WITH_WARNING,
             SEND_FAILURE
     );
+
+    private static final Set<MessageStatus> SEND_SUCCESS_MESSAGE_STATUSES = EnumSet.of(
+            ACKNOWLEDGED, ACKNOWLEDGED_WITH_WARNING
+    );
     
     // receiving statuses should be REJECTED, RECEIVED_WITH_WARNINGS, DOWNLOADED, DELETED, RECEIVED
 
@@ -204,20 +208,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     @Override
     public void messageSendSuccess(String messageId) {
-        LOG.debug("Message {} was successfully sent", messageId);
-
-        // TODO: Check if this should be handled in messageStatusChanged with the appropriate Success Status
-        // Would be good to resolve the domain using service and action
-        // String domain = resolveDomain(service, action);
-
-        boolean messageFound = handleSentMessage(messageId, null);
-        if (!messageFound) {
-            for (String domain : fsPluginProperties.getDomains()) {
-                if (handleSentMessage(messageId, domain)) {
-                    break; // target file found
-                }
-            }
-        }
+        // Implemented in messageStatusChanged
     }
 
     private boolean handleSentMessage(String messageId, String domain) {
@@ -273,23 +264,42 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     @Override
     public void messageStatusChanged(MessageStatusChangeEvent event) {
-        LOG.debug("Message {} changed status from {} to {}", event.getMessageId(), event.getFromStatus(), event.getToStatus());
-        
+        String messageId = event.getMessageId();
+        LOG.debug("Message {} changed status from {} to {}", messageId, event.getFromStatus(), event.getToStatus());
+
+        // Sending
         if (isSendingEvent(event)) {
-            boolean fileRenamed = renameMessageFile(null, event.getMessageId(), event.getToStatus());
+            boolean fileRenamed = renameMessageFile(null, messageId, event.getToStatus());
             if (!fileRenamed) {
                 for (String domain : fsPluginProperties.getDomains()) {
-                    fileRenamed = renameMessageFile(domain, event.getMessageId(), event.getToStatus());
+                    fileRenamed = renameMessageFile(domain, messageId, event.getToStatus());
                     if (fileRenamed) {
                         break;
                     }
                 }
             }
         }
+
+        // Send success
+        if (isSendSuccessEvent(event)) {
+            boolean messageFound = handleSentMessage(messageId, null);
+            if (!messageFound) {
+                for (String domain : fsPluginProperties.getDomains()) {
+                    if (handleSentMessage(messageId, domain)) {
+                        break; // target file found
+                    }
+                }
+            }
+        }
+
     }
     
     private boolean isSendingEvent(MessageStatusChangeEvent event) {
         return SENDING_MESSAGE_STATUSES.contains(event.getToStatus());
+    }
+
+    private boolean isSendSuccessEvent(MessageStatusChangeEvent event) {
+        return SEND_SUCCESS_MESSAGE_STATUSES.contains(event.getToStatus());
     }
 
     private boolean renameMessageFile(String domain, String messageId, MessageStatus status) {

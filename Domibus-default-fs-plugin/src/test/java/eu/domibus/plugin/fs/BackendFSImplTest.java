@@ -344,7 +344,13 @@ public class BackendFSImplTest {
     }
 
     @Test
-    public void testMessageSendSuccess_Delete() throws FileSystemException {
+    public void testMessageStatusChanged_SendSuccessDelete() throws FileSystemException {
+        MessageStatusChangeEvent event = new MessageStatusChangeEvent();
+        event.setMessageId("3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
+        event.setFromStatus(MessageStatus.SEND_ENQUEUED);
+        event.setToStatus(MessageStatus.ACKNOWLEDGED);
+        event.setChangeTimestamp(new Timestamp(new Date().getTime()));
+
         final FileObject contentFile = outgoingFolder.resolveFile("content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml.ACKNOWLEDGED");
         
         new Expectations(1, backendFS) {{
@@ -360,8 +366,8 @@ public class BackendFSImplTest {
             fsPluginProperties.isSentActionDelete(null);
             result = true;
         }};
-        
-        backendFS.messageSendSuccess("3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
+
+        backendFS.messageStatusChanged(event);
 
         contentFile.close();
         
@@ -371,7 +377,13 @@ public class BackendFSImplTest {
     }
 
     @Test
-    public void testMessageSendSuccess_Archive() throws FileSystemException {
+    public void testMessageStatusChanged_SendSuccessArchive() throws FileSystemException {
+        MessageStatusChangeEvent event = new MessageStatusChangeEvent();
+        event.setMessageId("3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
+        event.setFromStatus(MessageStatus.SEND_ENQUEUED);
+        event.setToStatus(MessageStatus.ACKNOWLEDGED);
+        event.setChangeTimestamp(new Timestamp(new Date().getTime()));
+
         final FileObject contentFile = outgoingFolder.resolveFile("content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml.ACKNOWLEDGED");
         
         new Expectations(1, backendFS) {{
@@ -395,7 +407,7 @@ public class BackendFSImplTest {
             
         }};
         
-        backendFS.messageSendSuccess("3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
+        backendFS.messageStatusChanged(event);
 
         contentFile.close();
         
