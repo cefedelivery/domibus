@@ -53,7 +53,7 @@ public class ProcessDaoImpl implements ProcessDao{
      *{@inheritDoc}
      */
     @Override
-    public List<Process> findPullProcessesInitiator(final Party party) {
+    public List<Process> findPullProcessesByInitiator(final Party party) {
         TypedQuery<Process> processQuery= entityManager.createNamedQuery(FIND_PULL_PROCESS_TO_INITIATE,Process.class);
         processQuery.setParameter(MEP_BINDING,BackendConnector.Mode.PULL.getFileMapping());
         processQuery.setParameter(INITIATOR, party);
@@ -65,7 +65,7 @@ public class ProcessDaoImpl implements ProcessDao{
      *{@inheritDoc}
      */
     @Override
-    public List<Process> findPullProcessBytMpc(final String mpc){
+    public List<Process> findPullProcessByMpc(final String mpc) {
         TypedQuery<Process> processQuery= entityManager.createNamedQuery(FIND_PULL_PROCESS_FROM_MPC,Process.class);
         processQuery.setParameter(MEP_BINDING,BackendConnector.Mode.PULL.getFileMapping());
         processQuery.setParameter(MPC_NAME, mpc);

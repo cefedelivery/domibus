@@ -17,6 +17,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -32,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -61,6 +63,9 @@ import java.util.List;
 public class UserMessageHandlerServiceTest {
     @Injectable
     BackendNotificationService backendNotificationService;
+
+    @Injectable
+    protected NonRepudiationService nonRepudiationService;
 
     @Injectable
     MessagingDao messagingDao;
@@ -371,7 +376,6 @@ public class UserMessageHandlerServiceTest {
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
             messagingService.storeMessage(messaging);
-            userMessageLogDao.create(withAny(userMessageLog));
         }};
     }
 

@@ -62,7 +62,7 @@ public class JMSManagerImpl implements JMSManager {
 
     @Override
     public void sendMessageToQueue(JmsMessage message, String destination) {
-        message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, removeJmsModule(destination));
+        message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination);
         InternalJmsMessage internalJmsMessage = jmsMessageMapper.convert(message);
         internalJmsManager.sendMessage(internalJmsMessage, destination);
     }
@@ -70,7 +70,7 @@ public class JMSManagerImpl implements JMSManager {
     @Override
     public void sendMessageToQueue(JmsMessage message, Queue destination) {
         try {
-            message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, removeJmsModule(destination.getQueueName()));
+            message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination.getQueueName());
         } catch (JMSException e) {
             LOG.warn("Could not add the property [" + JmsMessage.PROPERTY_ORIGINAL_QUEUE + "] on the destination", e);
         }
@@ -92,10 +92,5 @@ public class JMSManagerImpl implements JMSManager {
     public JmsMessage consumeMessage(String source, String messageId) {
         InternalJmsMessage internalJmsMessage = internalJmsManager.consumeMessage(source, messageId);
         return jmsMessageMapper.convert(internalJmsMessage);
-    }
-
-    private String removeJmsModule(String destination) {
-        String destName = StringUtils.substringAfter(destination, "!");
-        return (destName.equals("")) ? destination : destName;
     }
 }

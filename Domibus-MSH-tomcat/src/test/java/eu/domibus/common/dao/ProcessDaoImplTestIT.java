@@ -52,7 +52,7 @@ public class ProcessDaoImplTestIT extends AbstractIT{
     public void findPullByInitiator() throws Exception {
         loadBluePullPmodeFile();
         Party party = pModeDao.getReceiverParty(":red_gw");
-        List<Process> pullProcessesByIniator = processDao.findPullProcessesInitiator(party);
+        List<Process> pullProcessesByIniator = processDao.findPullProcessesByInitiator(party);
         assertEquals(1,pullProcessesByIniator.size());
 
         Process process = pullProcessesByIniator.get(0);
@@ -72,7 +72,7 @@ public class ProcessDaoImplTestIT extends AbstractIT{
     @Rollback
     public void findPullProcessFromRequestMpc() throws IOException, XmlProcessingException, URISyntaxException {
         loadBluePullPmodeFile();
-        List<Process> pullProcessFromRequestPartyAndMpc = processDao.findPullProcessBytMpc("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC");
+        List<Process> pullProcessFromRequestPartyAndMpc = processDao.findPullProcessByMpc("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC");
         assertEquals(1,pullProcessFromRequestPartyAndMpc.size());
     }
 

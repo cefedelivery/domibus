@@ -305,7 +305,7 @@
 				<leg name="pushConnectivityTest"/>
 			</legs>
 		</process>	
-		<process name="tc13Process" agreement="agreementEmpty" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+		<process name="tc13Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="red_gw"/>
 			</initiatorParties>
@@ -316,7 +316,7 @@
 				<leg name="pullTestcase13tc13Action"/>
 			</legs>
 		</process>		
-		<process name="tc14Process" agreement="agreementEmpty" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+		<process name="tc14Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="red_gw"/>
 			</initiatorParties>
@@ -327,7 +327,7 @@
 				<leg name="pullTestcase14tc14Action"/>
 			</legs>
 		</process>
-		<process name="tc15Process" agreement="agreementEmpty" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+		<process name="tc15Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="red_gw"/>
 			</initiatorParties>
