@@ -53,7 +53,6 @@
             <xsd:sequence>
                 <xsd:element minOccurs="0" name="bodyload" type="tns:LargePayloadType"/>
                 <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" type="tns:LargePayloadType"/>
-                <xsd:any minOccurs="0"/> <!-- Introduced to support validation and MTOM/XOP -->
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
@@ -124,12 +123,13 @@
         </xsd:complexType>
     </xsd:element>
 
+
     <xsd:complexType name="PayloadType">
-        <xsd:simpleContent>
-            <xsd:extension base="ns1:base64Binary">
-                <xsd:attribute name="payloadId" type="xsd:token" use="required"/>
-            </xsd:extension>
-        </xsd:simpleContent>
+            <xsd:simpleContent>
+                <xsd:extension base="ns1:base64Binary">
+                    <xsd:attribute name="payloadId" type="xsd:token" use="required"/>
+                </xsd:extension>
+            </xsd:simpleContent>
     </xsd:complexType>
 
     <xsd:complexType name="LargePayloadType">
