@@ -240,7 +240,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 LOG.error("The successfully sent file message was not found. " + messageId);
             }
         } catch (FileSystemException e) {
-            // TODO should we throw our exception here? this only happens if the events are not synchronized
             LOG.error("Error handling the successfully sent file message " + messageId, e);
         }
         return false;
