@@ -13,6 +13,7 @@ import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -76,6 +77,10 @@ public class UserMessageDefaultServiceTest {
 
     @Injectable
     PModeServiceHelper pModeServiceHelper;
+
+    @Injectable
+    MessageExchangeService messageExchangeService;
+
 
     @Test
     public void testGetFinalRecipient(@Injectable  final UserMessage userMessage) throws Exception {
@@ -171,13 +176,16 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testRestoreMessage(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testRestorePushedMessage(@Injectable final UserMessageLog userMessageLog) throws Exception {
         final String messageId = "1";
         final Integer newMaxAttempts = 5;
 
         new Expectations(userMessageDefaultService) {{
             userMessageDefaultService.getFailedMessage(messageId);
             result = userMessageLog;
+
+            messageExchangeService.retrieveMessageRestoreStatus(messageId);
+            result = MessageStatus.SEND_ENQUEUED;
 
             userMessageDefaultService.computeNewMaxAttempts(userMessageLog, messageId);
             result = newMaxAttempts;
@@ -195,6 +203,44 @@ public class UserMessageDefaultServiceTest {
 
             userMessageLogDao.update(userMessageLog);
             userMessageDefaultService.scheduleSending(messageId);
+        }};
+    }
+
+    @Test
+    public void testRestorePUlledMessage(@Injectable final UserMessageLog userMessageLog) throws Exception {
+        final String messageId = "1";
+        final Integer newMaxAttempts = 5;
+
+        new Expectations(userMessageDefaultService) {{
+            userMessageDefaultService.getFailedMessage(messageId);
+            result = userMessageLog;
+
+            messageExchangeService.retrieveMessageRestoreStatus(messageId);
+            result = MessageStatus.READY_TO_PULL;
+
+            userMessageDefaultService.computeNewMaxAttempts(userMessageLog, messageId);
+            result = newMaxAttempts;
+
+        }};
+
+        userMessageDefaultService.restoreFailedMessage(messageId);
+
+        new Verifications() {{
+            userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
+            times = 1;
+            userMessageLog.setRestored(withAny(new Date()));
+            times = 1;
+            userMessageLog.setFailed(null);
+            times = 1;
+            userMessageLog.setNextAttempt(withAny(new Date()));
+            times = 1;
+            userMessageLog.setSendAttemptsMax(newMaxAttempts);
+            times = 1;
+
+            userMessageLogDao.update(userMessageLog);
+            times = 1;
+            userMessageDefaultService.scheduleSending(messageId);
+            times = 0;
         }};
     }
 
