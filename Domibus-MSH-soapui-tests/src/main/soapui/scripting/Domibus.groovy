@@ -17,7 +17,7 @@ class Domibus
     def context=null
     def log=null
 	// SLEEP_DELAY value is increased from 2000 to 8000 because of pull request take longer ...
-    def SLEEP_DELAY=8000;
+    def SLEEP_DELAY=20000;
     def sqlBlue=null;
     def sqlRed=null;
 	def sqlGreen=null;
@@ -223,7 +223,7 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Wait until status or timer expire
     def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null, int mapDoms = 3){
-        def MAX_WAIT_TIME=50_000; // Maximum time to wait to check the message status. 
+        def MAX_WAIT_TIME=90_000; // Maximum time to wait to check the message status. 
 		def STEP_WAIT_TIME=1000; // Time to wait before re-checking the message status.	
         def messageID=null;
         def numberAttempts=0;
