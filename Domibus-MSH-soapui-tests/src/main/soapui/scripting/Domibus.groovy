@@ -223,7 +223,7 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Wait until status or timer expire
     def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null, int mapDoms = 3){
-        def MAX_WAIT_TIME=90_000; // Maximum time to wait to check the message status. 
+        def MAX_WAIT_TIME=200_000; // Maximum time to wait to check the message status.
 		def STEP_WAIT_TIME=1000; // Time to wait before re-checking the message status.	
         def messageID=null;
         def numberAttempts=0;
