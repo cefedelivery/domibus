@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @author musatmi
+ * @author idragusa
  * @since 3.3
  */
 public class ValueTypeValidatorTest extends AbstractValidatorTest {
