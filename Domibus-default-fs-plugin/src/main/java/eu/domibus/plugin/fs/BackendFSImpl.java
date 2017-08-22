@@ -52,10 +52,13 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     private static final Set<MessageStatus> SEND_SUCCESS_MESSAGE_STATUSES = EnumSet.of(
             ACKNOWLEDGED, ACKNOWLEDGED_WITH_WARNING
     );
-    
-    // receiving statuses should be REJECTED, RECEIVED_WITH_WARNINGS, DOWNLOADED, DELETED, RECEIVED
 
-    // failing statuses should be SEND_FAILURE
+    // TODO: failing statuses should be SEND_FAILURE, is there any else?
+    private static final Set<MessageStatus> SEND_FAILED_MESSAGE_STATUSES = EnumSet.of(
+            SEND_FAILURE
+    );
+
+    // receiving statuses should be REJECTED, RECEIVED_WITH_WARNINGS, DOWNLOADED, DELETED, RECEIVED
 
     @Autowired
     private FSMessageTransformer defaultTransformer;
@@ -199,17 +202,17 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     @Override
     public void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent) {
-        LOG.debug("TODO: messageReceiveFailed implementation");
+        // No-op
     }
 
     @Override
     public void messageSendFailed(String messageId) {
-        LOG.debug("TODO: messageSendFailed implementation");
+        // Implemented in messageStatusChanged to avoid event collision and use improved API
     }
 
     @Override
     public void messageSendSuccess(String messageId) {
-        // Implemented in messageStatusChanged
+        // Implemented in messageStatusChanged to avoid event collision and use improved API
     }
 
     private boolean handleSentMessage(String messageId, String domain) {
@@ -271,6 +274,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             handleSendingEvent(event, messageId);
         } else if (isSendSuccessEvent(event)) {
             handleSendSuccessEvent(messageId);
+        } else if (isMessageSendFailedEvent(event)) {
+
         }
 
     }
@@ -304,6 +309,10 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     private boolean isSendSuccessEvent(MessageStatusChangeEvent event) {
         return SEND_SUCCESS_MESSAGE_STATUSES.contains(event.getToStatus());
+    }
+
+    private boolean isMessageSendFailedEvent(MessageStatusChangeEvent event) {
+        return SEND_FAILED_MESSAGE_STATUSES.contains(event.getToStatus());
     }
 
     private boolean renameMessageFile(String domain, String messageId, MessageStatus status) {
