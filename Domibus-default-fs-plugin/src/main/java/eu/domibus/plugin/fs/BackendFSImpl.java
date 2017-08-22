@@ -217,7 +217,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     }
 
     private boolean handleSendFailedMessage(String messageId, String domain) {
-        // TODO: If, for any reason, no message identifier was allocated then the file will be moved under its original name. - Cosmin will check
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
              FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
              FileObject targetFileMessage = findMessageFile(outgoingFolder, messageId)) {
