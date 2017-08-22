@@ -38,10 +38,11 @@ public abstract class FSAbstractPurgeService {
     }
 
     private void purgeMessages(String domain) {
+        FileObject[] contentFiles = null;
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject targetFolder = fsFilesManager.getEnsureChildFolder(rootDir, getTargetFolderName())) {
 
-            FileObject[] contentFiles = fsFilesManager.findAllDescendantFiles(targetFolder);
+            contentFiles = fsFilesManager.findAllDescendantFiles(targetFolder);
             LOG.debug(Arrays.toString(contentFiles));
             
             Integer expirationLimit = getExpirationLimit(domain);
@@ -50,11 +51,14 @@ public abstract class FSAbstractPurgeService {
                 checkAndPurge(processableFile, expirationLimit);
             }
 
-            fsFilesManager.closeAll(contentFiles);
         } catch (FileSystemException ex) {
             LOG.error("Error purging messages", ex);
         } catch (FSSetUpException ex) {
             LOG.error("Error setting up folders for domain: " + domain, ex);
+        } finally {
+            if (contentFiles != null) {
+                fsFilesManager.closeAll(contentFiles);
+            }
         }
     }
 
