@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import eu.domibus.common.MessageReceiveFailureEvent;
+import eu.domibus.common.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
@@ -29,8 +29,6 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.tika.mime.MimeTypeException;
 
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.MessageStatusChangeEvent;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 
 import javax.activation.DataHandler;
@@ -219,9 +217,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     }
 
     private boolean handleSendFailedMessage(String messageId, String domain) {
-        // TODO: If, for any reason, no message identifier was allocated then the file will be moved under its original name.
-        // TODO: A file will always be created in the FAILED directory (respecting the original directory structure of the file)
-        // when the message has failed to be sent from C2 to C3 and it will contain the failed reason in plain text.
+        // TODO: If, for any reason, no message identifier was allocated then the file will be moved under its original name. - Cosmin will check
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
              FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
              FileObject targetFileMessage = findMessageFile(outgoingFolder, messageId)) {
@@ -244,6 +240,13 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
                     LOG.debug("Send failed message file [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
                 }
+                // TODO: A file will always be created in the FAILED directory (respecting the original directory structure of the file)
+                // when the message has failed to be sent from C2 to C3 and it will contain the failed reason in plain text.
+                // This error file must contain the reason for the error, the date and time, the number of retries, and the stacktrace.
+                // When possible, hints on how the issue can be solved should be added.
+                List<ErrorResult> errors = super.getErrorsForMessage(messageId);
+                ErrorResult lastError = errors.get(errors.size() - 1);
+                LOG.debug("Error sending message: " + lastError.getErrorDetail());
                 return true;
             } else {
                 LOG.error("The send failed file message file was not found. " + messageId);
