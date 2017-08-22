@@ -6,6 +6,7 @@ import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationType;
+import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.model.logging.MessageLog;
@@ -76,6 +77,9 @@ public class BackendNotificationService {
     @Autowired
     @Qualifier("unknownReceiverQueue")
     private Queue unknownReceiverQueue;
+
+    @Autowired
+    private MessagingDao messagingDao;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -281,6 +285,9 @@ public class BackendNotificationService {
     }
 
     public void notifyOfMessageStatusChange(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {
+        if (isPluginNotificationDisabled()) {
+            return;
+        }
         if (messageLog.getMessageStatus() == newStatus) {
             LOG.debug("Notification not sent: message status has not changed [{}]", newStatus);
             return;
@@ -292,7 +299,19 @@ public class BackendNotificationService {
         }
         properties.put("toStatus", newStatus.toString());
         properties.put("changeTimestamp", changeTimestamp.getTime());
+        enrichWithServiceAndAction(properties, messageLog.getMessageId());
         notify(messageLog.getMessageId(), messageLog.getBackend(), NotificationType.MESSAGE_STATUS_CHANGE, properties);
+    }
+
+    protected void enrichWithServiceAndAction(Map<String, Object> properties, String messageId) {
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        if (userMessage == null) {
+            LOG.debug("Message [{}] does not exist", messageId);
+            return;
+        }
+        properties.put("service", userMessage.getCollaborationInfo().getService().getValue());
+        properties.put("serviceType", userMessage.getCollaborationInfo().getService().getType());
+        properties.put("action", userMessage.getCollaborationInfo().getAction());
     }
 
     public List<NotificationListener> getNotificationListenerServices() {
