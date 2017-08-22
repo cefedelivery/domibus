@@ -8,6 +8,7 @@ import org.springframework.util.StringUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -56,13 +57,13 @@ public class ValueTypeValidator implements ConfigurationValidator {
         for (Agreement agreement : businessProcesses.getAgreements()) {
             if (StringUtils.isEmpty(agreement.getType())) {
                 try {
-                        new URI(agreement.getValue());
-                } catch (URISyntaxException exc) {
+                        URI.create(agreement.getValue());
+                } catch (IllegalArgumentException exc) {
                     issues.add("Agreement type is empty and the agreement value is not an URI for " + agreement.getName());
                 }
             }
         }
 
-        return issues;
+        return Collections.unmodifiableList(issues);
     }
 }
