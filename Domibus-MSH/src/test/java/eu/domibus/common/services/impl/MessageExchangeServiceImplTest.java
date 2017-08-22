@@ -10,7 +10,6 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
@@ -49,17 +48,18 @@ public class MessageExchangeServiceImplTest {
 
     @Mock
     private PModeProvider pModeProvider;
-    @Mock
-    private ConfigurationDAO configurationDao;
-    @Mock
-    private JmsTemplate jmsPullTemplate;
-    @Mock
-    private EbMS3MessageBuilder messageBuilder;
-    @Mock
-    private MessagingDao messagingDao;
 
     @Mock
-    private UserMessageLogDao messageLogDao;
+    private ConfigurationDAO configurationDao;
+
+    @Mock
+    private JmsTemplate jmsPullTemplate;
+
+    @Mock
+    private EbMS3MessageBuilder messageBuilder;
+
+    @Mock
+    private MessagingDao messagingDao;
 
     @Mock
     private UserMessageLogService messageLogService;
@@ -69,10 +69,9 @@ public class MessageExchangeServiceImplTest {
 
     @InjectMocks
     private MessageExchangeServiceImpl messageExchangeService;
+
     private Process process;
 
-
-    private Configuration configuration;
     private Party correctParty;
 
     @Before
@@ -89,10 +88,9 @@ public class MessageExchangeServiceImplTest {
         service.setName("service2");
         findLegByName("leg2").setService(service);
 
-        configuration = new Configuration();
-        configuration.setParty(correctParty);
+        when(pModeProvider.getGatewayParty()).thenReturn(correctParty);
         when(configurationDao.configurationExists()).thenReturn(true);
-        when(configurationDao.read()).thenReturn(configuration);
+        //when(configurationDao.read()).thenReturn(configuration);
         List<Process> processes = Lists.newArrayList(process);
         when(pModeProvider.findPullProcessesByInitiator(correctParty)).thenReturn(processes);
     }
@@ -140,8 +138,7 @@ public class MessageExchangeServiceImplTest {
     public void testInitiatePullRequest() throws Exception {
         ArgumentCaptor<Map> mapArgumentCaptor= ArgumentCaptor.forClass(Map.class);
         messageExchangeService.initiatePullRequest();
-        verify(configurationDao,times(1)).configurationExists();
-        verify(configurationDao,times(1)).read();
+        verify(pModeProvider, times(1)).getGatewayParty();
         verify(jmsPullTemplate,times(2)).convertAndSend(any(Destination.class),mapArgumentCaptor.capture(), any(MessagePostProcessor.class));
         //needed because the set does not return the values always in the same order.
         //@thom this does work on my machine but not on bamboo. Fix this.
@@ -155,10 +152,10 @@ public class MessageExchangeServiceImplTest {
 
     @Test
     public void testInitiatePullRequestWithoutConfiguration() throws Exception {
-        when(configurationDao.configurationExists()).thenReturn(false);
+        when(pModeProvider.getGatewayParty()).thenThrow(new IllegalArgumentException());
         messageExchangeService.initiatePullRequest();
-        verify(configurationDao,times(1)).configurationExists();
-        verify(configurationDao,times(0)).read();
+        verify(pModeProvider, times(1)).getGatewayParty();
+        verify(pModeProvider, times(0)).findPullProcessesByInitiator(any(Party.class));
     }
 
 
@@ -168,7 +165,6 @@ public class MessageExchangeServiceImplTest {
                 new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "An error occurred while processing your request. Please check the message header for more details.", null,null));
         Process process = PojoInstaciatorUtil.instanciate(Process.class, "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}","initiatorParties{[name:initiator]}");
 
-        when(configurationDao.read()).thenReturn(configuration);
         List<Process> processes = Lists.newArrayList(process);
         when(pModeProvider.findPullProcessesByInitiator(correctParty)).thenReturn(processes);
         when(pModeProvider.findPullProcessesByMessageContext(any(MessageExchangeConfiguration.class))).thenReturn(Lists.newArrayList(process));

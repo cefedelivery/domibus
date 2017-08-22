@@ -4,6 +4,7 @@ import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
@@ -45,8 +46,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.UUID;
 import java.util.Properties;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -86,6 +87,9 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Mock
     private DynamicDiscoveryServicePEPPOL dynamicDiscoveryServicePEPPOL;
+
+    @Mock
+    private ProcessDao processDao;
 
     @Mock
     private DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
