@@ -357,8 +357,8 @@ public class CachingPModeProvider extends PModeProvider {
     public List<String> updatePModes(final byte[] bytes) throws XmlProcessingException {
         List<String> messages = super.updatePModes(bytes);
         this.configuration = null;
-        this.pullProcessByMpcCache = null;
-        this.pullProcessesByInitiatorCache = null;
+        this.pullProcessByMpcCache.clear();
+        this.pullProcessesByInitiatorCache.clear();
         return messages;
     }
 
