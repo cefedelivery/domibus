@@ -203,16 +203,19 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     @Override
     public void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent) {
         // No-op
-    }
-
-    @Override
-    public void messageSendFailed(String messageId) {
-        // Implemented in messageStatusChanged to avoid event collision and use improved API
+        // Probably, the AbstractBackendConnector should not throw the UnsupportedOperationException
     }
 
     @Override
     public void messageSendSuccess(String messageId) {
         // Implemented in messageStatusChanged to avoid event collision and use improved API
+        // Probably, the AbstractBackendConnector should not throw the UnsupportedOperationException
+    }
+
+    @Override
+    public void messageSendFailed(String messageId) {
+        // Implemented in messageStatusChanged to avoid event collision and use improved API
+        // Probably, the AbstractBackendConnector should implement a default no-op
     }
 
     private boolean handleSentMessage(String messageId, String domain) {
