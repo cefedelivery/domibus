@@ -12,6 +12,8 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.BackendConnector;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -36,9 +38,14 @@ public class ProcessValidator {
      * @throws PModeException in case of process missconfiguration
      */
 
+    @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = PModeException.class)
     public void validatePullProcess(List<Process> pullProcesses) {
         Set<PullProcessStatus> pullProcessStatuses = verifyPullProcessStatus(pullProcesses);
         if (!uniqueCorrectlyConfiguredPullProcess(pullProcessStatuses)) {
+            LOG.warn("There is a missconfiguration with pull processes:");
+            for (Process process : pullProcesses) {
+                LOG.warn("Procces name:" + process.getName());
+            }
             throw new PModeException(DomibusCoreErrorCode.DOM_003, createWarningMessage(pullProcessStatuses));
         }
     }
@@ -131,7 +138,7 @@ public class ProcessValidator {
         statuses.remove(ONE_MATCHING_PROCESS);
         StringBuilder stringBuilder = new StringBuilder();
         for (PullProcessStatus status : statuses) {
-            stringBuilder.append(errorMessageFactory(status)).append("\n");
+            stringBuilder.append(errorMessageFactory(status));
         }
         return stringBuilder.toString();
     }
