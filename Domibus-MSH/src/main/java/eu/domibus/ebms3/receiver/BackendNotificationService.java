@@ -6,6 +6,7 @@ import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationType;
+import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.model.logging.MessageLog;
@@ -76,6 +77,9 @@ public class BackendNotificationService {
     @Autowired
     @Qualifier("unknownReceiverQueue")
     private Queue unknownReceiverQueue;
+
+    @Autowired
+    private MessagingDao messagingDao;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -281,18 +285,36 @@ public class BackendNotificationService {
     }
 
     public void notifyOfMessageStatusChange(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {
+        if (isPluginNotificationDisabled()) {
+            return;
+        }
         if (messageLog.getMessageStatus() == newStatus) {
             LOG.debug("Notification not sent: message status has not changed [{}]", newStatus);
             return;
         }
         LOG.debug("Notifying about message status change from [{}] to [{}]", messageLog.getMessageStatus(), newStatus);
+
+        final Map<String, Object> messageProperties = getMessageProperties(messageLog, newStatus, changeTimestamp);
+        notify(messageLog.getMessageId(), messageLog.getBackend(), NotificationType.MESSAGE_STATUS_CHANGE, messageProperties);
+    }
+
+    protected Map<String, Object> getMessageProperties(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {
         Map<String, Object> properties = new HashMap<>();
-        if(messageLog.getMessageStatus() != null) {
+        if (messageLog.getMessageStatus() != null) {
             properties.put("fromStatus", messageLog.getMessageStatus().toString());
         }
         properties.put("toStatus", newStatus.toString());
         properties.put("changeTimestamp", changeTimestamp.getTime());
-        notify(messageLog.getMessageId(), messageLog.getBackend(), NotificationType.MESSAGE_STATUS_CHANGE, properties);
+
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageLog.getMessageId());
+        if (userMessage != null) {
+            LOG.debug("Adding the service and action properties for message [{}]", messageLog.getMessageId());
+
+            properties.put("service", userMessage.getCollaborationInfo().getService().getValue());
+            properties.put("serviceType", userMessage.getCollaborationInfo().getService().getType());
+            properties.put("action", userMessage.getCollaborationInfo().getAction());
+        }
+        return properties;
     }
 
     public List<NotificationListener> getNotificationListenerServices() {
