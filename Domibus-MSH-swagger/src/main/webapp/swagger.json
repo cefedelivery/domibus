@@ -1,0 +1,297 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "Domibus REST API documentation",
+    "version" : "v1",
+    "title" : "Domibus REST API documentation",
+    "license" : {
+      "name" : "EUPL 1.2",
+      "url" : "https://joinup.ec.europa.eu/community/eupl/og_page/eupl-text-11-12"
+    }
+  },
+  "host" : "localhost",
+  "basePath" : "/",
+  "schemes" : [ "http" ],
+  "paths" : {
+    "/ext/messages/acknowledgments/delivered" : {
+      "post" : {
+        "summary" : "acknowledgeMessageDelivered",
+        "description" : "",
+        "operationId" : "acknowledgeMessageDelivered",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/MessageAcknowledgementDTO"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/MessageAcknowledgementDTO"
+            }
+          }
+        }
+      }
+    },
+    "/ext/messages/acknowledgments/processed" : {
+      "post" : {
+        "summary" : "acknowledgeMessageProcessed",
+        "description" : "",
+        "operationId" : "acknowledgeMessageProcessed",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/MessageAcknowledgementDTO"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/MessageAcknowledgementDTO"
+            }
+          }
+        }
+      }
+    },
+    "/ext/messages/acknowledgments/{messageId}" : {
+      "get" : {
+        "summary" : "getAcknowledgedMessages",
+        "description" : "",
+        "operationId" : "getAcknowledgedMessages",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string",
+          "pattern" : ".+"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/MessageAcknowledgementDTO"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ext/monitoring/messages/failed" : {
+      "get" : {
+        "summary" : "getFailedMessages",
+        "description" : "",
+        "operationId" : "getFailedMessages",
+        "parameters" : [ {
+          "name" : "finalRecipient",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ext/monitoring/messages/failed/restore" : {
+      "post" : {
+        "summary" : "restoreFailedMessages",
+        "description" : "",
+        "operationId" : "restoreFailedMessages",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/FailedMessagesCriteriaRO"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ext/monitoring/messages/failed/{messageId}" : {
+      "delete" : {
+        "summary" : "deleteFailedMessage",
+        "description" : "",
+        "operationId" : "deleteFailedMessage",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string",
+          "pattern" : ".+"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/ext/monitoring/messages/failed/{messageId}/elapsedtime" : {
+      "get" : {
+        "summary" : "getFailedMessageInterval",
+        "description" : "",
+        "operationId" : "getFailedMessageInterval",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string",
+          "pattern" : ".+"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        }
+      }
+    },
+    "/ext/monitoring/messages/failed/{messageId}/restore" : {
+      "put" : {
+        "summary" : "restoreFailedMessage",
+        "description" : "",
+        "operationId" : "restoreFailedMessage",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string",
+          "pattern" : ".+"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/ext/monitoring/messages/{messageId}/attempts" : {
+      "get" : {
+        "summary" : "getMessageAttempts",
+        "description" : "",
+        "operationId" : "getMessageAttempts",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string",
+          "pattern" : ".+"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/MessageAttemptDTO"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "FailedMessagesCriteriaRO" : {
+      "type" : "object",
+      "properties" : {
+        "fromDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "toDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        }
+      }
+    },
+    "MessageAcknowledgementDTO" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "messageId" : {
+          "type" : "string"
+        },
+        "from" : {
+          "type" : "string"
+        },
+        "to" : {
+          "type" : "string"
+        },
+        "properties" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          }
+        },
+        "acknowledgeDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "createDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "createUser" : {
+          "type" : "string"
+        }
+      }
+    },
+    "MessageAttemptDTO" : {
+      "type" : "object",
+      "properties" : {
+        "messageId" : {
+          "type" : "string"
+        },
+        "startDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "endDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "status" : {
+          "type" : "string",
+          "enum" : [ "SUCCESS", "ERROR" ]
+        },
+        "error" : {
+          "type" : "string"
+        }
+      }
+    }
+  }
+}

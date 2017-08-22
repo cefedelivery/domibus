@@ -3,8 +3,7 @@ package eu.domibus.ext.rest;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;
 import eu.domibus.ext.exceptions.MessageAcknowledgeException;
 import eu.domibus.ext.services.MessageAcknowledgeService;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +27,7 @@ public class MessageAcknowledgementResource {
      * @return The newly created message acknowledgement
      * @throws MessageAcknowledgeException Raised in case an exception occurs while trying to register an acknowledgment
      */
+    @ApiOperation("acknowledgeMessageDelivered")
     @RequestMapping(path = "/delivered", method = RequestMethod.POST)
     public MessageAcknowledgementDTO acknowledgeMessageDelivered(@RequestBody MessageAcknowledgementDTO messageAcknowledgementDTO) throws MessageAcknowledgeException {
         return messageAcknowledgeService.acknowledgeMessageDelivered(messageAcknowledgementDTO.getMessageId(), messageAcknowledgementDTO.getAcknowledgeDate(), messageAcknowledgementDTO.getProperties());
@@ -40,6 +40,7 @@ public class MessageAcknowledgementResource {
      * @return The newly created message acknowledgement
      * @throws MessageAcknowledgeException Raised in case an exception occurs while trying to register an acknowledgment
      */
+    @ApiOperation("acknowledgeMessageProcessed")
     @RequestMapping(path = "/processed", method = RequestMethod.POST)
     public MessageAcknowledgementDTO acknowledgeMessageProcessed(@RequestBody MessageAcknowledgementDTO messageAcknowledgementDTO) throws MessageAcknowledgeException {
         return messageAcknowledgeService.acknowledgeMessageProcessed(messageAcknowledgementDTO.getMessageId(), messageAcknowledgementDTO.getAcknowledgeDate(), messageAcknowledgementDTO.getProperties());
@@ -51,6 +52,7 @@ public class MessageAcknowledgementResource {
      * @param messageId The message id for which message acknowledgments are retrieved
      * @return All acknowledgments registered for a specific message
      */
+    @ApiOperation("getAcknowledgedMessages")
     @RequestMapping(path = "/{messageId:.+}", method = RequestMethod.GET)
     @ResponseBody
     public List<MessageAcknowledgementDTO> getAcknowledgedMessages(@PathVariable(value = "messageId") String messageId) throws MessageAcknowledgeException {
