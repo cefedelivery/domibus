@@ -1,13 +1,13 @@
 package eu.domibus.plugin.fs;
 
+import eu.domibus.common.MessageStatus;
+import org.apache.commons.lang.StringUtils;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
-
-import eu.domibus.common.MessageStatus;
 
 /**
  * Helper to create and recognize derived file names
@@ -15,14 +15,15 @@ import eu.domibus.common.MessageStatus;
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
 public class FSFileNameHelper {
-    
+
     private static final String NAME_SEPARATOR = "_";
     private static final String EXTENSION_SEPARATOR = ".";
+    public static final Pattern OUT_DIRECTORY_PATTERN = Pattern.compile("/" + FSFilesManager.OUTGOING_FOLDER + "(/|$)");
     private static final String UUID_PATTERN = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
     private static final Pattern PROCESSED_FILE_PATTERN = Pattern.compile(
             NAME_SEPARATOR + UUID_PATTERN + "@.", Pattern.CASE_INSENSITIVE);
     private static final List<String> STATE_SUFFIXES;
-    
+
     static {
         List<String> tempStateSuffixes = new LinkedList<>();
         for (MessageStatus status : MessageStatus.values()) {
@@ -100,12 +101,28 @@ public class FSFileNameHelper {
      * @return a new file name of the form {@code filename.ext.MESSAGE_STATUS}
      */
     public static String deriveFileName(final String fileName, final MessageStatus status) {
+        return stripStatusSuffix(fileName) + EXTENSION_SEPARATOR + status.name();
+    }
+
+    public static String stripStatusSuffix(final String fileName) {
+        String result = fileName;
         if (isAnyState(fileName)) {
-            String strippedFileName = StringUtils.substringBeforeLast(fileName, EXTENSION_SEPARATOR);
-            return strippedFileName + EXTENSION_SEPARATOR + status.name();
-        } else {
-            return fileName + EXTENSION_SEPARATOR + status.name();
+            result = StringUtils.substringBeforeLast(fileName, EXTENSION_SEPARATOR);
         }
+        return result;
+    }
+
+    /**
+     * The files moved to the SENT directory will be moved either directly under the SENT directory, under the same
+     * directory structure as the one it originated from. E.g.: a file originally located in the DOMAIN1/OUT/Invoice
+     * directory will be moved to the DOMAIN1/SENT/Invoice directory after it has been sent.
+     *
+     * @param fileURI the file URI
+     * @return the derived sent directory location
+     */
+    public static String deriveSentDirectoryLocation(String fileURI) {
+        Matcher matcher = OUT_DIRECTORY_PATTERN.matcher(fileURI);
+        return matcher.replaceFirst("/" + FSFilesManager.SENT_FOLDER + "/");
     }
 
 }

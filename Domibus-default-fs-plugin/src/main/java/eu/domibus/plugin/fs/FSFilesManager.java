@@ -36,7 +36,9 @@ public class FSFilesManager {
 
     public static final String INCOMING_FOLDER = "IN";
     public static final String OUTGOING_FOLDER = "OUT";
-    
+    public static final String SENT_FOLDER = "SENT";
+    public static final String FAILED_FOLDER = "FAILED";
+
     @Autowired
     private FSPluginProperties fsPluginProperties;
 
@@ -98,14 +100,22 @@ public class FSFilesManager {
     public FileObject resolveSibling(FileObject file, String siblingName) throws FileSystemException {
         return file.resolveFile(PARENT_RELATIVE_PATH + siblingName);
     }
-    
+
     public FileObject renameFile(FileObject file, String newFileName) throws FileSystemException {
         FileObject newFile = resolveSibling(file, newFileName);
         file.moveTo(newFile);
-        
+
         return newFile;
     }
-    
+
+    public void moveFile(FileObject file, FileObject targetFile) throws FileSystemException {
+        file.moveTo(targetFile);
+    }
+
+    public boolean deleteFile(FileObject file) throws FileSystemException {
+        return file.delete();
+    }
+
     public FileObject setUpFileSystem(String domain) throws FileSystemException {
         // Domain or default location
         String location = fsPluginProperties.getLocation(domain);

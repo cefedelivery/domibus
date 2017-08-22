@@ -17,7 +17,9 @@ import org.junit.runner.RunWith;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 import mockit.Expectations;
 import mockit.Injectable;
+import mockit.Mocked;
 import mockit.Tested;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 
 /**
@@ -52,11 +54,16 @@ public class FSFilesManagerTest {
         rootDir.resolveFile("file1").createFile();
         rootDir.resolveFile("file2").createFile();
         rootDir.resolveFile("file3").createFile();
-        rootDir.resolveFile("tobemoved").createFolder();
+        rootDir.resolveFile("toberenamed").createFile();
+        rootDir.resolveFile("tobemoved").createFile();
+        rootDir.resolveFile("tobedeleted").createFile();
+        
+        rootDir.resolveFile("targetfolder1/targetfolder2").createFolder();
     }
     
     @After
     public void tearDown() throws FileSystemException {
+        rootDir.deleteAll();
         rootDir.close();
     }
 
@@ -113,10 +120,13 @@ public class FSFilesManagerTest {
         FileObject[] files = instance.findAllDescendantFiles(rootDir);
         
         Assert.assertNotNull(files);
-        Assert.assertEquals(3, files.length);
+        Assert.assertEquals(6, files.length);
         Assert.assertEquals("ram:///FSFilesManagerTest/file1", files[0].getName().getURI());
         Assert.assertEquals("ram:///FSFilesManagerTest/file2", files[1].getName().getURI());
         Assert.assertEquals("ram:///FSFilesManagerTest/file3", files[2].getName().getURI());
+        Assert.assertEquals("ram:///FSFilesManagerTest/toberenamed", files[3].getName().getURI());
+        Assert.assertEquals("ram:///FSFilesManagerTest/tobemoved", files[4].getName().getURI());
+        Assert.assertEquals("ram:///FSFilesManagerTest/tobedeleted", files[5].getName().getURI());
     }
 
     @Test
@@ -137,11 +147,11 @@ public class FSFilesManagerTest {
 
     @Test
     public void testRenameFile() throws Exception {
-        FileObject file = rootDir.resolveFile("tobemoved");
-        FileObject result = instance.renameFile(file, "moved");
+        FileObject file = rootDir.resolveFile("toberenamed");
+        FileObject result = instance.renameFile(file, "renamed");
         
         Assert.assertNotNull(result);
-        Assert.assertEquals("ram:///FSFilesManagerTest/moved", result.getName().getURI());
+        Assert.assertEquals("ram:///FSFilesManagerTest/renamed", result.getName().getURI());
         Assert.assertTrue(result.exists());
     }
 
@@ -178,6 +188,44 @@ public class FSFilesManagerTest {
         Assert.assertNotNull(result);
         Assert.assertTrue(result.exists());
         Assert.assertEquals("ram:///FSFilesManagerTest", result.getName().getURI());
+    }
+
+    @Test
+    public void testDeleteFile() throws Exception {
+        FileObject file = rootDir.resolveFile("tobedeleted");
+        boolean result = instance.deleteFile(file);
+        
+        Assert.assertTrue(result);
+        Assert.assertFalse(file.exists());
+    }
+
+    @Test
+    public void testCloseAll(@Mocked final FileObject file1,
+            @Mocked final FileObject file2,
+            @Mocked final FileObject file3) throws FileSystemException {
+        
+        new Expectations(1, instance) {{
+            file2.close();
+            result = new FileSystemException("Test-forced exception");
+        }};
+        
+        instance.closeAll(new FileObject[] { file1, file2, file3 });
+        
+        new Verifications(1) {{
+            file1.close();
+            file2.close();
+            file3.close();
+        }};
+    }
+
+    @Test
+    public void testMoveFile() throws Exception {
+        FileObject file = rootDir.resolveFile("tobemoved");
+        FileObject targetFile = rootDir.resolveFile("targetfolder1/targetfolder2/moved");
+        
+        instance.moveFile(file, targetFile);
+        
+        Assert.assertTrue(targetFile.exists());
     }
     
 }

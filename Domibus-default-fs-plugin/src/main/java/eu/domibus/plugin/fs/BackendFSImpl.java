@@ -43,14 +43,19 @@ import javax.activation.DataHandler;
 public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
-    
+
     private static final Set<MessageStatus> SENDING_MESSAGE_STATUSES = EnumSet.of(
             READY_TO_SEND, SEND_ENQUEUED, SEND_IN_PROGRESS, WAITING_FOR_RECEIPT,
-            WAITING_FOR_RETRY, SEND_ATTEMPT_FAILED, ACKNOWLEDGED, ACKNOWLEDGED_WITH_WARNING,
-            SEND_FAILURE
+            WAITING_FOR_RETRY, SEND_ATTEMPT_FAILED
+    );
+
+    private static final Set<MessageStatus> SEND_SUCCESS_MESSAGE_STATUSES = EnumSet.of(
+            ACKNOWLEDGED, ACKNOWLEDGED_WITH_WARNING
     );
     
     // receiving statuses should be REJECTED, RECEIVED_WITH_WARNINGS, DOWNLOADED, DELETED, RECEIVED
+
+    // failing statuses should be SEND_FAILURE
 
     @Autowired
     private FSMessageTransformer defaultTransformer;
@@ -98,7 +103,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     @Override
     public void deliverMessage(String messageId) {
-        LOG.debug("Delivering File System Message {}", messageId);
+        LOG.debug("Delivering File System Message [{}]", messageId);
         FSMessage fsMessage;
 
         // Download message
@@ -204,36 +209,45 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     @Override
     public void messageSendSuccess(String messageId) {
-        LOG.debug("TODO: messageSendSuccess implementation");
+        // Implemented in messageStatusChanged
     }
 
-    @Override
-    public void messageStatusChanged(MessageStatusChangeEvent event) {
-        LOG.debug("Message {} changed status from {} to {}", event.getMessageId(), event.getFromStatus(), event.getToStatus());
-        
-        if (isSendingEvent(event)) {
-            boolean fileRenamed = renameMessageFile(null, event.getMessageId(), event.getToStatus());
-            if (!fileRenamed) {
-                for (String domain : fsPluginProperties.getDomains()) {
-                    fileRenamed = renameMessageFile(domain, event.getMessageId(), event.getToStatus());
-                    if (fileRenamed) {
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    
-    private boolean isSendingEvent(MessageStatusChangeEvent event) {
-        return SENDING_MESSAGE_STATUSES.contains(event.getToStatus());
-    }
-    
-    private boolean renameMessageFile(String domain, String messageId, MessageStatus status) {
+    private boolean handleSentMessage(String messageId, String domain) {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-                FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
-            
-            FileObject[] files = fsFilesManager.findAllDescendantFiles(outgoingFolder);
-            
+             FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+             FileObject targetFileMessage = findMessageFile(outgoingFolder, messageId)) {
+
+            if (targetFileMessage != null) {
+                if (fsPluginProperties.isSentActionDelete(domain)) {
+                    fsFilesManager.deleteFile(targetFileMessage);
+
+                    LOG.debug("Message [{}] was deleted", messageId);
+                } else if (fsPluginProperties.isSentActionArchive(domain)) {
+                    // Archive
+                    String targetFileMessageURI = targetFileMessage.getParent().getName().getURI();
+                    String sentDirectoryLocation = FSFileNameHelper.deriveSentDirectoryLocation(targetFileMessageURI);
+                    FileObject sentDirectory = fsFilesManager.getEnsureChildFolder(rootDir, sentDirectoryLocation);
+
+                    String baseName = targetFileMessage.getName().getBaseName();
+                    String newName = FSFileNameHelper.stripStatusSuffix(baseName);
+                    FileObject archivedFile = sentDirectory.resolveFile(newName);
+                    fsFilesManager.moveFile(targetFileMessage, archivedFile);
+
+                    LOG.debug("Message [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
+                }
+                return true;
+            } else {
+                LOG.error("The successfully sent file message was not found. " + messageId);
+            }
+        } catch (FileSystemException e) {
+            LOG.error("Error handling the successfully sent file message " + messageId, e);
+        }
+        return false;
+    }
+
+    private FileObject findMessageFile(FileObject parentDir, String messageId) throws FileSystemException {
+        FileObject[] files = fsFilesManager.findAllDescendantFiles(parentDir);
+        try {
             FileObject targetFile = null;
             for (FileObject file : files) {
                 String baseName = file.getName().getBaseName();
@@ -242,16 +256,69 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                     break;
                 }
             }
+            return targetFile;
+        } finally {
+            fsFilesManager.closeAll(files);
+        }
+    }
+
+    @Override
+    public void messageStatusChanged(MessageStatusChangeEvent event) {
+        String messageId = event.getMessageId();
+        LOG.debug("Message [{}] changed status from [{}] to [{}]", messageId, event.getFromStatus(), event.getToStatus());
+
+        if (isSendingEvent(event)) {
+            handleSendingEvent(event, messageId);
+        } else if (isSendSuccessEvent(event)) {
+            handleSendSuccessEvent(messageId);
+        }
+
+    }
+
+    private void handleSendSuccessEvent(String messageId) {
+        boolean messageFound = handleSentMessage(messageId, null);
+        if (!messageFound) {
+            for (String domain : fsPluginProperties.getDomains()) {
+                if (handleSentMessage(messageId, domain)) {
+                    break; // target file found
+                }
+            }
+        }
+    }
+
+    private void handleSendingEvent(MessageStatusChangeEvent event, String messageId) {
+        boolean fileRenamed = renameMessageFile(null, messageId, event.getToStatus());
+        if (!fileRenamed) {
+            for (String domain : fsPluginProperties.getDomains()) {
+                fileRenamed = renameMessageFile(domain, messageId, event.getToStatus());
+                if (fileRenamed) {
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean isSendingEvent(MessageStatusChangeEvent event) {
+        return SENDING_MESSAGE_STATUSES.contains(event.getToStatus());
+    }
+
+    private boolean isSendSuccessEvent(MessageStatusChangeEvent event) {
+        return SEND_SUCCESS_MESSAGE_STATUSES.contains(event.getToStatus());
+    }
+
+    private boolean renameMessageFile(String domain, String messageId, MessageStatus status) {
+        try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
+                FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+                FileObject targetFile = findMessageFile(outgoingFolder, messageId)) {
             
             if (targetFile != null) {
                 String baseName = targetFile.getName().getBaseName();
                 String newName = FSFileNameHelper.deriveFileName(baseName, status);
                 fsFilesManager.renameFile(targetFile, newName);
                 
-                fsFilesManager.closeAll(files);
                 return true;
             } else {
-                fsFilesManager.closeAll(files);
+                LOG.error("The message to rename was not found. " + messageId);
             }
         } catch (FileSystemException ex) {
             LOG.error("Error renaming file", ex);

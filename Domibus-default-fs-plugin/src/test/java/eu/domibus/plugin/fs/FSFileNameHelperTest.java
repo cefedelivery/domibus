@@ -137,5 +137,33 @@ public class FSFileNameHelperTest {
 
         Assert.assertEquals("invoice_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.pdf.SEND_ENQUEUED", result);
     }
+
+    @Test
+    public void testDeriveSentDirectoryLocation() {
+        String result = FSFileNameHelper.deriveSentDirectoryLocation("smb://example.org/fs_plugin_data/OUT");
+
+        Assert.assertEquals("smb://example.org/fs_plugin_data/SENT/", result);
+    }
+
+    @Test
+    public void testDeriveSentDirectoryLocation_Domain1() {
+        String result = FSFileNameHelper.deriveSentDirectoryLocation("smb://example.org/fs_plugin_data/DOMAIN1/OUT/Invoice");
+
+        Assert.assertEquals("smb://example.org/fs_plugin_data/DOMAIN1/SENT/Invoice", result);
+    }
+
+    @Test
+    public void testDeriveSentDirectoryLocation_Domain1Out() {
+        String result = FSFileNameHelper.deriveSentDirectoryLocation("smb://example.org/fs_plugin_data/DOMAIN1/OUT/OUTGOING");
+
+        Assert.assertEquals("smb://example.org/fs_plugin_data/DOMAIN1/SENT/OUTGOING", result);
+    }
+
+    @Test
+    public void testDeriveSentDirectoryLocation_OutDomain() {
+        String result = FSFileNameHelper.deriveSentDirectoryLocation("smb://example.org/fs_plugin_data/OUTDOMAIN/OUT/OUTGOING");
+
+        Assert.assertEquals("smb://example.org/fs_plugin_data/OUTDOMAIN/SENT/OUTGOING", result);
+    }
     
 }

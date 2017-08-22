@@ -55,10 +55,11 @@ public class FSSendMessagesService {
     }
     
     private void sendMessages(String domain) {
+        FileObject[] contentFiles = null;
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
             
-            FileObject[] contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
+            contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
             LOG.debug(Arrays.toString(contentFiles));
 
             List<FileObject> processableFiles = filterProcessableFiles(contentFiles);
@@ -66,11 +67,14 @@ public class FSSendMessagesService {
                 processFile(processableFile);
             }
 
-            fsFilesManager.closeAll(contentFiles);
         } catch (FileSystemException ex) {
             LOG.error("Error sending messages", ex);
         } catch (FSSetUpException ex) {
             LOG.error("Error setting up folders for domain: " + domain, ex);
+        } finally {
+            if (contentFiles != null) {
+                fsFilesManager.closeAll(contentFiles);
+            }
         }
     }
 
@@ -78,14 +82,14 @@ public class FSSendMessagesService {
         try (FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, METADATA_FILE_NAME)) {
             if (metadataFile.exists()) {
                 UserMessage metadata = parseMetadata(metadataFile);
-                LOG.debug("{}: Metadata found and valid", processableFile.getName());
+                LOG.debug("[{}]: Metadata found and valid", processableFile.getName());
 
                 DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
                 Map<String, DataHandler> dataHandlers = new HashMap<>(1);
                 dataHandlers.put(DEFAULT_CONTENT_ID, dataHandler);
                 FSMessage message= new FSMessage(dataHandlers, metadata);
                 String messageId = backendFSPlugin.submit(message);
-                LOG.debug("{}: Message submitted successfully", processableFile.getName());
+                LOG.debug("[{}]: Message submitted successfully", processableFile.getName());
 
                 renameProcessedFile(processableFile, messageId);
             } else {

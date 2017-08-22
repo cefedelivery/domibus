@@ -9,47 +9,41 @@ import javax.activation.DataSource;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 
+import eu.domibus.plugin.fs.exception.FSPluginException;
+
 /**
  *
  * @author @author FERNANDES Henrique, GONCALVES Bruno
  */
-public class FileObjectDataSource implements DataSource
-{
+public class FileObjectDataSource implements DataSource {
+
     private final FileObject file;
 
-    public FileObjectDataSource(final FileObject file)
-    {
+    public FileObjectDataSource(final FileObject file) {
         this.file = file;
     }
 
     @Override
-    public InputStream getInputStream() throws IOException
-    {
+    public InputStream getInputStream() throws IOException {
         return file.getContent().getInputStream();
     }
 
     @Override
-    public OutputStream getOutputStream() throws IOException
-    {
+    public OutputStream getOutputStream() throws IOException {
         return file.getContent().getOutputStream();
     }
 
     @Override
-    public String getContentType()
-    {
-        try
-        {
+    public String getContentType() {
+        try {
             return file.getContent().getContentInfo().getContentType();
-        }
-        catch (final FileSystemException e)
-        {
-            throw new RuntimeException(e);
+        } catch (final FileSystemException e) {
+            throw new FSPluginException("Could not retrieve content type from FileObject", e);
         }
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return file.getName().getBaseName();
     }
 }

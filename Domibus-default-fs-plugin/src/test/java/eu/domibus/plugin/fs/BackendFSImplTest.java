@@ -12,6 +12,7 @@ import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
+import mockit.Delegate;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -69,6 +70,8 @@ public class BackendFSImplTest {
     private FileObject incomingFolder;
     
     private FileObject outgoingFolder;
+    
+    private FileObject sentFolder;
 
     @Before
     public void setUp() throws org.apache.commons.vfs2.FileSystemException {
@@ -83,18 +86,19 @@ public class BackendFSImplTest {
         
         outgoingFolder = rootDir.resolveFile(FSFilesManager.OUTGOING_FOLDER);
         outgoingFolder.createFolder();
+        
+        sentFolder = rootDir.resolveFile(FSFilesManager.SENT_FOLDER);
+        sentFolder.createFolder();
     }
 
     @After
     public void tearDown() throws FileSystemException {
-        rootDir.delete();
-        rootDir.close();
-
-        incomingFolder.delete();
         incomingFolder.close();
-
-        outgoingFolder.delete();
         outgoingFolder.close();
+        sentFolder.close();
+        
+        rootDir.deleteAll();
+        rootDir.close();
     }
 
 
@@ -112,8 +116,11 @@ public class BackendFSImplTest {
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
             result = new FSMessage(dataHandlers, userMessage);
-
-            fsFilesManager.getEnsureChildFolder(withAny(rootDir), FSFilesManager.INCOMING_FOLDER);
+            
+            fsFilesManager.setUpFileSystem(null);
+            result = rootDir;
+            
+            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
             result = incomingFolder;
         }};
 
@@ -148,8 +155,11 @@ public class BackendFSImplTest {
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
             result = new FSMessage(dataHandlers, userMessage);
-
-            fsFilesManager.getEnsureChildFolder(withAny(rootDir), FSFilesManager.INCOMING_FOLDER);
+            
+            fsFilesManager.setUpFileSystem(null);
+            result = rootDir;
+            
+            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
             result = incomingFolder;
         }};
 
@@ -188,6 +198,53 @@ public class BackendFSImplTest {
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
             result = new MessageNotFoundException("message not found");
+        }};
+
+        backendFS.deliverMessage(messageId);
+    }
+    
+    @Test(expected = FSPluginException.class)
+    public void testDeliverMessage_FSSetUpException(@Injectable final FSMessage fsMessage)
+            throws MessageNotFoundException, JAXBException, IOException, FSSetUpException {
+
+        final String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
+        final String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+        final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
+        final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
+        final Map<String, DataHandler> dataHandlers = new HashMap<>();
+        dataHandlers.put("cid:message", dataHandler);
+
+        new Expectations(1, backendFS) {{
+            backendFS.downloadMessage(messageId, null);
+            result = new FSMessage(dataHandlers, userMessage);
+
+            fsFilesManager.setUpFileSystem(null);
+            result = new FSSetUpException("Test-forced exception");
+        }};
+
+        backendFS.deliverMessage(messageId);
+    }
+    
+    @Test(expected = FSPluginException.class)
+    public void testDeliverMessage_IOException(@Injectable final FSMessage fsMessage)
+            throws MessageNotFoundException, JAXBException, IOException, FSSetUpException {
+
+        final String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
+        // the null causes an IOException
+        final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource((byte[])null, TEXT_XML));
+        final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
+        final Map<String, DataHandler> dataHandlers = new HashMap<>();
+        dataHandlers.put("cid:message", dataHandler);
+
+        new Expectations(1, backendFS) {{
+            backendFS.downloadMessage(messageId, null);
+            result = new FSMessage(dataHandlers, userMessage);
+            
+            fsFilesManager.setUpFileSystem(null);
+            result = rootDir;
+            
+            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
+            result = incomingFolder;
         }};
 
         backendFS.deliverMessage(messageId);
@@ -337,6 +394,84 @@ public class BackendFSImplTest {
 
         String result = backendFS.resolveDomain(service, action);
         Assert.assertEquals("DOMAIN1", result);
+    }
+
+    @Test
+    public void testMessageStatusChanged_SendSuccessDelete() throws FileSystemException {
+        MessageStatusChangeEvent event = new MessageStatusChangeEvent();
+        event.setMessageId("3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
+        event.setFromStatus(MessageStatus.SEND_ENQUEUED);
+        event.setToStatus(MessageStatus.ACKNOWLEDGED);
+        event.setChangeTimestamp(new Timestamp(new Date().getTime()));
+
+        final FileObject contentFile = outgoingFolder.resolveFile("content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml.ACKNOWLEDGED");
+        
+        new Expectations(1, backendFS) {{
+            fsFilesManager.setUpFileSystem(null);
+            result = rootDir;
+            
+            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+            result = outgoingFolder;
+            
+            fsFilesManager.findAllDescendantFiles(outgoingFolder);
+            result = new FileObject[] { contentFile };
+            
+            fsPluginProperties.isSentActionDelete(null);
+            result = true;
+        }};
+
+        backendFS.messageStatusChanged(event);
+
+        contentFile.close();
+        
+        new VerificationsInOrder(1) {{
+            fsFilesManager.deleteFile(contentFile);
+        }};
+    }
+
+    @Test
+    public void testMessageStatusChanged_SendSuccessArchive() throws FileSystemException {
+        MessageStatusChangeEvent event = new MessageStatusChangeEvent();
+        event.setMessageId("3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
+        event.setFromStatus(MessageStatus.SEND_ENQUEUED);
+        event.setToStatus(MessageStatus.ACKNOWLEDGED);
+        event.setChangeTimestamp(new Timestamp(new Date().getTime()));
+
+        final FileObject contentFile = outgoingFolder.resolveFile("content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml.ACKNOWLEDGED");
+        
+        new Expectations(1, backendFS) {{
+            fsFilesManager.setUpFileSystem(null);
+            result = rootDir;
+            
+            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+            result = outgoingFolder;
+            
+            fsFilesManager.findAllDescendantFiles(outgoingFolder);
+            result = new FileObject[] { contentFile };
+            
+            fsPluginProperties.isSentActionDelete(null);
+            result = false;
+            
+            fsPluginProperties.isSentActionArchive(null);
+            result = true;
+            
+            fsFilesManager.getEnsureChildFolder(rootDir, "ram:///BackendFSImplTest/SENT/");
+            result = sentFolder;
+            
+        }};
+        
+        backendFS.messageStatusChanged(event);
+
+        contentFile.close();
+        
+        new VerificationsInOrder(1) {{
+            fsFilesManager.moveFile(contentFile, with(new Delegate<FileObject>() {
+              void delegate(FileObject file) throws IOException {
+                     Assert.assertNotNull(file);
+                     Assert.assertEquals("ram:///BackendFSImplTest/SENT/content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml", file.getName().getURI());
+                 }  
+            }));
+        }};
     }
 
 }

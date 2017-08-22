@@ -218,11 +218,27 @@ public class FSPluginProperties {
     }
 
     /**
-     * @param domain The domain expression property qualifier
+     * @param domain The domain property qualifier
      * @return the regex expression used to determine the domain location
      */
     public String getExpression(String domain) {
         return getDomainProperty(domain, EXPRESSION, null);
+    }
+
+    /**
+     * @param domain The domain property qualifier
+     * @return True if the sent messages action is "archive"
+     */
+    public boolean isSentActionArchive(String domain) {
+        return ACTION_ARCHIVE.equals(getSentAction(domain));
+    }
+
+    /**
+     * @param domain The domain property qualifier
+     * @return True if the sent messages action is "delete"
+     */
+    public boolean isSentActionDelete(String domain) {
+        return ACTION_DELETE.equals(getSentAction(domain));
     }
 
     private String getDomainProperty(String domain, String propertyName, String defaultValue) {
