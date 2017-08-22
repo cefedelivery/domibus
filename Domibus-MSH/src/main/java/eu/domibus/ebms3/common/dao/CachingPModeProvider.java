@@ -1,6 +1,7 @@
 
 package eu.domibus.ebms3.common.dao;
 
+import com.google.common.collect.Lists;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -368,12 +369,17 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     public List<Process> findPullProcessesByInitiator(final Party party) {
+        if (pullProcessByMpcCache == null) {
+            return Lists.newArrayList();
+        }
         return pullProcessesByInitiatorCache.get(party);
     }
 
     @Override
     public List<Process> findPullProcessByMpc(final String mpc) {
+        if (pullProcessByMpcCache == null) {
+            return Lists.newArrayList();
+        }
         return pullProcessByMpcCache.get(mpc);
     }
-
 }
