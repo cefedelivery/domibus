@@ -1,0 +1,49 @@
+{
+    "businessProcesses": {
+      "partyIdTypes": [
+        {
+          "name": "partyTypeUrn"
+        }
+      ],
+      "parties": [
+        {
+            "name": "red_gw",
+            "identifiers": [
+              {
+              "partyId": "domibus-red this %  is not an #accepted URI #format"
+            }]
+        },
+        {
+          "name": "blue_gw",
+          "identifiers": [
+            {
+              "partyId": "domibus-blue"
+            }]
+        }
+      ],
+      "services": [
+        {
+            "name": "testService1",
+            "value": "bdx:noprocess this %  is not an #accepted URI #format"
+        },
+        {
+            "name": "testService2",
+            "value": "bdx:noprocess"
+        }
+      ],
+      "agreements": [
+          {
+            "name": "agreement1",
+            "value": "A1tc1 this %  is not an #accepted URI #format"
+          },
+          {
+            "name": "agreement2",
+            "value": "A2tc1 this %  is not an #accepted URI #format"
+          },
+          {
+            "name": "agreement3",
+            "value": "A3"
+          }
+        ]
+   }
+}

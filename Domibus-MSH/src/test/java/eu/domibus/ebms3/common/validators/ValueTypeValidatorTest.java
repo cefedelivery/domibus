@@ -19,17 +19,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @author musatmi
+ * @author idragusa
  * @since 3.3
  */
-public class RolesValidatorTest extends AbstractValidatorTest {
+public class ValueTypeValidatorTest extends AbstractValidatorTest {
 
-    private RolesValidator validator = new RolesValidator();
+    private ValueTypeValidator validator = new ValueTypeValidator();
+
     @Test
     public void validate() throws Exception {
-        Configuration configuration = newConfiguration("RolesConfiguration.json");
+        Configuration configuration = newConfiguration("ValueTypeConfiguration.json");
         final List<String> results = validator.validate(configuration);
-        assertTrue(results.size() == 1);
-        assertEquals(results.get(0), "For business process TestProcess the initiator role and the responder role are identical (eCODEXRole)");
+        assertTrue(results.size() == 4);
+        assertTrue(results.contains("PartyIdType is empty and the partyId is not an URI for red_gw"));
+        assertTrue(results.contains("Service type is empty and the service value is not an URI for testService1"));
+        assertTrue(results.contains("Agreement type is empty and the agreement value is not an URI for agreement2"));
+        assertTrue(results.contains("Agreement type is empty and the agreement value is not an URI for agreement1"));
     }
 }
