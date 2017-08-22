@@ -1,4 +1,5 @@
 Domibus 3.3-FR
+- Additional validation on pMode upload: when @type is missing or is empty, the value of PartyId, Service and AgreementRef, must be an URI (relative URIs accepted).
 - Use optional regex validation for dynamic discovery certificate. New property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation.
 - Fix sendAttempt counter (initial one plus number of retries defined in the pmode)
 - Block the receiving of the message in case the sender's certificate is not valid or revoked.
