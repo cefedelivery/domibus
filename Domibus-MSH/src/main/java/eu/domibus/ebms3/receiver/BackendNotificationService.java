@@ -293,25 +293,28 @@ public class BackendNotificationService {
             return;
         }
         LOG.debug("Notifying about message status change from [{}] to [{}]", messageLog.getMessageStatus(), newStatus);
+
+        final Map<String, Object> messageProperties = getMessageProperties(messageLog, newStatus, changeTimestamp);
+        notify(messageLog.getMessageId(), messageLog.getBackend(), NotificationType.MESSAGE_STATUS_CHANGE, messageProperties);
+    }
+
+    protected Map<String, Object> getMessageProperties(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {
         Map<String, Object> properties = new HashMap<>();
-        if(messageLog.getMessageStatus() != null) {
+        if (messageLog.getMessageStatus() != null) {
             properties.put("fromStatus", messageLog.getMessageStatus().toString());
         }
         properties.put("toStatus", newStatus.toString());
         properties.put("changeTimestamp", changeTimestamp.getTime());
-        enrichWithServiceAndAction(properties, messageLog.getMessageId());
-        notify(messageLog.getMessageId(), messageLog.getBackend(), NotificationType.MESSAGE_STATUS_CHANGE, properties);
-    }
 
-    protected void enrichWithServiceAndAction(Map<String, Object> properties, String messageId) {
-        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
-        if (userMessage == null) {
-            LOG.debug("Message [{}] does not exist", messageId);
-            return;
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageLog.getMessageId());
+        if (userMessage != null) {
+            LOG.debug("Adding the service and action properties for message [{}]", messageLog.getMessageId());
+
+            properties.put("service", userMessage.getCollaborationInfo().getService().getValue());
+            properties.put("serviceType", userMessage.getCollaborationInfo().getService().getType());
+            properties.put("action", userMessage.getCollaborationInfo().getAction());
         }
-        properties.put("service", userMessage.getCollaborationInfo().getService().getValue());
-        properties.put("serviceType", userMessage.getCollaborationInfo().getService().getType());
-        properties.put("action", userMessage.getCollaborationInfo().getAction());
+        return properties;
     }
 
     public List<NotificationListener> getNotificationListenerServices() {
