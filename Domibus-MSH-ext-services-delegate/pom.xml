@@ -41,7 +41,7 @@
                                 </license>
                             </info>
 
-                            <swaggerDirectory>../Domibus-MSH-swagger/src/main/webapp/</swaggerDirectory>
+                            <swaggerDirectory>${project.parent.basedir}/Domibus-MSH-swagger/src/main/webapp/</swaggerDirectory>
 
                         </apiSource>
                     </apiSources>
