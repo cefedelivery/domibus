@@ -218,6 +218,42 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         // Probably, the AbstractBackendConnector should implement a default no-op
     }
 
+    private boolean handleSendFailedMessage(String messageId, String domain) {
+        // TODO: If, for any reason, no message identifier was allocated then the file will be moved under its original name.
+        // TODO: A file will always be created in the FAILED directory (respecting the original directory structure of the file)
+        // when the message has failed to be sent from C2 to C3 and it will contain the failed reason in plain text.
+        try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
+             FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+             FileObject targetFileMessage = findMessageFile(outgoingFolder, messageId)) {
+
+            if (targetFileMessage != null) {
+                if (fsPluginProperties.isFailedActionDelete(domain)) {
+                    fsFilesManager.deleteFile(targetFileMessage);
+
+                    LOG.debug("Send failed message file [{}] was deleted", messageId);
+                } else if (fsPluginProperties.isFailedActionArchive(domain)) {
+                    // Archive
+                    String targetFileMessageURI = targetFileMessage.getParent().getName().getURI();
+                    String failedDirectoryLocation = FSFileNameHelper.deriveFailedDirectoryLocation(targetFileMessageURI);
+                    FileObject failedDirectory = fsFilesManager.getEnsureChildFolder(rootDir, failedDirectoryLocation);
+
+                    String baseName = targetFileMessage.getName().getBaseName();
+                    String newName = FSFileNameHelper.stripStatusSuffix(baseName);
+                    FileObject archivedFile = failedDirectory.resolveFile(newName);
+                    fsFilesManager.moveFile(targetFileMessage, archivedFile);
+
+                    LOG.debug("Send failed message file [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
+                }
+                return true;
+            } else {
+                LOG.error("The send failed file message file was not found. " + messageId);
+            }
+        } catch (FileSystemException e) {
+            LOG.error("Error handling the send failed message file " + messageId, e);
+        }
+        return false;
+    }
+
     private boolean handleSentMessage(String messageId, String domain) {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
              FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
@@ -227,7 +263,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 if (fsPluginProperties.isSentActionDelete(domain)) {
                     fsFilesManager.deleteFile(targetFileMessage);
 
-                    LOG.debug("Message [{}] was deleted", messageId);
+                    LOG.debug("Successfully sent message file [{}] was deleted", messageId);
                 } else if (fsPluginProperties.isSentActionArchive(domain)) {
                     // Archive
                     String targetFileMessageURI = targetFileMessage.getParent().getName().getURI();
@@ -239,14 +275,14 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                     FileObject archivedFile = sentDirectory.resolveFile(newName);
                     fsFilesManager.moveFile(targetFileMessage, archivedFile);
 
-                    LOG.debug("Message [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
+                    LOG.debug("Successfully sent message file [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
                 }
                 return true;
             } else {
-                LOG.error("The successfully sent file message was not found. " + messageId);
+                LOG.error("The successfully sent message file was not found. " + messageId);
             }
         } catch (FileSystemException e) {
-            LOG.error("Error handling the successfully sent file message " + messageId, e);
+            LOG.error("Error handling the successfully sent message file " + messageId, e);
         }
         return false;
     }
@@ -278,9 +314,20 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         } else if (isSendSuccessEvent(event)) {
             handleSendSuccessEvent(messageId);
         } else if (isMessageSendFailedEvent(event)) {
-
+            handleSendFailedEvent(messageId);
         }
 
+    }
+
+    private void handleSendFailedEvent(String messageId) {
+        boolean messageFound = handleSendFailedMessage(messageId, null);
+        if (!messageFound) {
+            for (String domain : fsPluginProperties.getDomains()) {
+                if (handleSendFailedMessage(messageId, domain)) {
+                    break; // target file found
+                }
+            }
+        }
     }
 
     private void handleSendSuccessEvent(String messageId) {

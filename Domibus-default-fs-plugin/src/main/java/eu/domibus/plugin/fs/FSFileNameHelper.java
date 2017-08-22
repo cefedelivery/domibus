@@ -121,8 +121,25 @@ public class FSFileNameHelper {
      * @return the derived sent directory location
      */
     public static String deriveSentDirectoryLocation(String fileURI) {
+        return deriveDirectoryLocation(fileURI, FSFilesManager.SENT_FOLDER);
+    }
+
+    /**
+     * The files moved to the FAILED directory (if property fsplugin.messages.failed.action=archive) will be moved
+     * either directly under the FAILED under the same directory structure as the one it originated from. E.g.: a file
+     * originally located in the DOMAIN1/OUT/Invoice directory will be moved to the DOMAIN1/FAILED/Invoice directory
+     * after it has been sent.
+     *
+     * @param fileURI the file URI
+     * @return the derived failed directory location
+     */
+    public static String deriveFailedDirectoryLocation(String fileURI) {
+        return deriveDirectoryLocation(fileURI, FSFilesManager.FAILED_FOLDER);
+    }
+
+    private static String deriveDirectoryLocation(String fileURI, String destFolder) {
         Matcher matcher = OUT_DIRECTORY_PATTERN.matcher(fileURI);
-        return matcher.replaceFirst("/" + FSFilesManager.SENT_FOLDER + "/");
+        return matcher.replaceFirst("/" + destFolder + "/");
     }
 
 }
