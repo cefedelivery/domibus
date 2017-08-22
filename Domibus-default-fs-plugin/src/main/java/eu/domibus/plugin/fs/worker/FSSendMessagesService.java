@@ -82,14 +82,14 @@ public class FSSendMessagesService {
         try (FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, METADATA_FILE_NAME)) {
             if (metadataFile.exists()) {
                 UserMessage metadata = parseMetadata(metadataFile);
-                LOG.debug("{}: Metadata found and valid", processableFile.getName());
+                LOG.debug("[{}]: Metadata found and valid", processableFile.getName());
 
                 DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
                 Map<String, DataHandler> dataHandlers = new HashMap<>(1);
                 dataHandlers.put(DEFAULT_CONTENT_ID, dataHandler);
                 FSMessage message= new FSMessage(dataHandlers, metadata);
                 String messageId = backendFSPlugin.submit(message);
-                LOG.debug("{}: Message submitted successfully", processableFile.getName());
+                LOG.debug("[{}]: Message submitted successfully", processableFile.getName());
 
                 renameProcessedFile(processableFile, messageId);
             } else {

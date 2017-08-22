@@ -67,10 +67,10 @@ public abstract class FSAbstractPurgeService {
     private void checkAndPurge(FileObject file, Integer expirationLimit) {
         try {
             if (isFileOlder(file, expirationLimit)) {
-                LOG.debug("File {} is too old. Deleting", file.getName());
+                LOG.debug("File [{}] is too old. Deleting", file.getName());
                 fsFilesManager.deleteFile(file);
             } else {
-                LOG.debug("File {} is young enough. Keeping it", file.getName());
+                LOG.debug("File [{}] is young enough. Keeping it", file.getName());
             }
         } catch (FileSystemException ex) {
             LOG.error("Error processing file " + file.getName().getURI(), ex);

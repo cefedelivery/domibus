@@ -103,7 +103,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     @Override
     public void deliverMessage(String messageId) {
-        LOG.debug("Delivering File System Message {}", messageId);
+        LOG.debug("Delivering File System Message [{}]", messageId);
         FSMessage fsMessage;
 
         // Download message
@@ -221,7 +221,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 if (fsPluginProperties.isSentActionDelete(domain)) {
                     fsFilesManager.deleteFile(targetFileMessage);
 
-                    LOG.debug("Message {} was deleted", messageId);
+                    LOG.debug("Message [{}] was deleted", messageId);
                 } else if (fsPluginProperties.isSentActionArchive(domain)) {
                     // Archive
                     String targetFileMessageURI = targetFileMessage.getParent().getName().getURI();
@@ -233,7 +233,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                     FileObject archivedFile = sentDirectory.resolveFile(newName);
                     fsFilesManager.moveFile(targetFileMessage, archivedFile);
 
-                    LOG.debug("Message {} was archived into {}", messageId, archivedFile.getName().getURI());
+                    LOG.debug("Message [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
                 }
                 return true;
             } else {
@@ -265,7 +265,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     @Override
     public void messageStatusChanged(MessageStatusChangeEvent event) {
         String messageId = event.getMessageId();
-        LOG.debug("Message {} changed status from {} to {}", messageId, event.getFromStatus(), event.getToStatus());
+        LOG.debug("Message [{}] changed status from [{}] to [{}]", messageId, event.getFromStatus(), event.getToStatus());
 
         if (isSendingEvent(event)) {
             handleSendingEvent(event, messageId);
