@@ -5,6 +5,7 @@ import eu.domibus.ext.exceptions.MessageMonitorException;
 import eu.domibus.ext.services.MessageMonitorService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ public class MessageMonitoringResource {
     @Autowired
     MessageMonitorService messageMonitorService;
 
+    @ApiOperation("getFailedMessages")
     @RequestMapping(path = "/failed", method = RequestMethod.GET)
     public List<String> getFailedMessages(@RequestParam(value = "finalRecipient", required = false) String finalRecipient) throws MessageMonitorException {
         if (StringUtils.isNotEmpty(finalRecipient)) {
@@ -33,26 +35,32 @@ public class MessageMonitoringResource {
         }
     }
 
+    @ApiOperation("getFailedMessageInterval")
     @RequestMapping(path = "/failed/{messageId:.+}/elapsedtime", method = RequestMethod.GET)
     public Long getFailedMessageInterval(@PathVariable(value = "messageId") String messageId) throws MessageMonitorException {
         return messageMonitorService.getFailedMessageInterval(messageId);
     }
 
+    @ApiOperation("restoreFailedMessage")
     @RequestMapping(path = "/failed/{messageId:.+}/restore", method = RequestMethod.PUT)
     public void restoreFailedMessage(@PathVariable(value = "messageId") String messageId) throws MessageMonitorException {
         messageMonitorService.restoreFailedMessage(messageId);
     }
 
+    @ApiOperation("restoreFailedMessages")
     @RequestMapping(path = "/failed/restore", method = RequestMethod.POST)
     public List<String> restoreFailedMessages(@RequestBody FailedMessagesCriteriaRO failedMessagesCriteriaRO) throws MessageMonitorException {
         return messageMonitorService.restoreFailedMessagesDuringPeriod(failedMessagesCriteriaRO.getFromDate(), failedMessagesCriteriaRO.getToDate());
     }
 
+    @ApiOperation("deleteFailedMessage")
+    @ResponseBody
     @RequestMapping(path = "/failed/{messageId:.+}", method = RequestMethod.DELETE)
     public void deleteFailedMessage(@PathVariable(value = "messageId") String messageId) throws MessageMonitorException {
         messageMonitorService.deleteFailedMessage(messageId);
     }
 
+    @ApiOperation(value = "getMessageAttempts", response = MessageAttemptDTO.class, responseContainer = "List")
     @RequestMapping(path = "/{messageId:.+}/attempts", method = RequestMethod.GET)
     public List<MessageAttemptDTO> getMessageAttempts(@PathVariable(value = "messageId") String messageId) throws MessageMonitorException {
         return messageMonitorService.getAttemptsHistory(messageId);
