@@ -228,12 +228,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
                 // Create error file
                 List<ErrorResult> errors = super.getErrorsForMessage(messageId);
-                if (!errors.isEmpty()) {
-                    ErrorResult lastError = errors.get(errors.size() - 1);
-                    fsFilesManager.createErrorFile(targetFileMessage, failedDirectory, lastError);
-                } else {
-                    LOG.error("Error list should not be empty.");
-                }
+                fsFilesManager.createErrorFile(targetFileMessage, failedDirectory, errors);
 
                 if (fsPluginProperties.isFailedActionDelete(domain)) {
                     // Delete

@@ -26,6 +26,7 @@ import eu.domibus.plugin.fs.vfs.FileObjectDataSource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.List;
 
 /**
  * This class is responsible for performing complex operations using VFS
@@ -38,6 +39,7 @@ public class FSFilesManager {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSFilesManager.class);
     
     private static final String PARENT_RELATIVE_PATH = "../";
+    private static final String _ERROR = ".error";
 
     public static final String INCOMING_FOLDER = "IN";
     public static final String OUTGOING_FOLDER = "OUT";
@@ -150,27 +152,52 @@ public class FSFilesManager {
     }
 
     /**
-     * TODO: When the message has failed to be sent from C2 to C3 and it will contain the failed reason in plain text.
+     * When the message has failed to be sent from C2 to C3 and it will contain the failed reason in plain text.
      * This error file must contain the reason for the error, the date and time, the number of retries, and the stacktrace.
      * When possible, hints on how the issue can be solved should be added.
      *
-     * @param targetFileMessage
+     * @param messageFile
      * @param failedDirectory
-     * @param error
+     * @param errors
      */
-    public void createErrorFile(FileObject targetFileMessage, FileObject failedDirectory, ErrorResult error)
+    public void createErrorFile(FileObject messageFile, FileObject failedDirectory, List<ErrorResult> errors)
             throws IOException {
-        LOG.warn("Error sending message: " + error.getErrorDetail());
-        String baseName = targetFileMessage.getName().getBaseName();
-        String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + ".error";
+        if (!errors.isEmpty()) {
+            ErrorResult lastError = errors.get(errors.size() - 1);
+            LOG.warn("Error sending message: " + lastError.getErrorDetail());
+            String baseName = messageFile.getName().getBaseName();
+            String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + _ERROR;
 
-        try (FileObject errorFile = failedDirectory.resolveFile(errorFileName);
-             OutputStream errorFileOS = errorFile.getContent().getOutputStream();
-             OutputStreamWriter errorFileOSW = new OutputStreamWriter(errorFileOS)) {
+            try (FileObject errorFile = failedDirectory.resolveFile(errorFileName);
+                 OutputStream errorFileOS = errorFile.getContent().getOutputStream();
+                 OutputStreamWriter errorFileOSW = new OutputStreamWriter(errorFileOS)) {
 
-            errorFile.createFile();
-            errorFileOSW.write(error.getErrorDetail());
+                errorFile.createFile();
+                errorFileOSW.write(String.valueOf(getErrorFileContent(lastError)));
+            }
         }
+    }
+
+    /**
+     * error file must contain
+     * the reason for the error,
+     * the date and time,
+     * the number of retries,
+     * and the stacktrace.
+     *
+     * When possible, hints on how the issue can be solved should be added.
+     *
+     * @param errorResult
+     * @throws IOException
+     */
+    private StringBuilder getErrorFileContent(ErrorResult errorResult)
+            throws IOException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("reason: ").append(errorResult.getErrorDetail());
+        sb.append("dateTime: ").append(errorResult.getTimestamp().toString());
+        sb.append("retriesNumber: ").append("more than 9");
+        sb.append("stackTrace: ").append("a pretty stack...");
+        return sb;
     }
 
 }
