@@ -119,6 +119,9 @@ public class NotificationListenerService implements MessageListener, JmsListener
         }
         event.setToStatus(MessageStatus.valueOf(message.getStringProperty("toStatus")));
         event.setChangeTimestamp(new Timestamp(message.getLongProperty("changeTimestamp")));
+        event.addProperty("service", message.getStringProperty("service"));
+        event.addProperty("serviceType", message.getStringProperty("serviceType"));
+        event.addProperty("action", message.getStringProperty("action"));
         backendConnectorDelegate.messageStatusChanged(backendConnector, event);
     }
 

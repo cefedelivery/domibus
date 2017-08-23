@@ -4,6 +4,9 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Cosmin Baciu
@@ -15,6 +18,8 @@ public class MessageStatusChangeEvent implements Serializable {
     protected MessageStatus fromStatus;
     protected MessageStatus toStatus;
     protected Timestamp changeTimestamp;
+
+    protected Map<String, Object> properties = new HashMap<>();
 
     public String getMessageId() {
         return messageId;
@@ -46,6 +51,14 @@ public class MessageStatusChangeEvent implements Serializable {
 
     public void setChangeTimestamp(Timestamp changeTimestamp) {
         this.changeTimestamp = changeTimestamp;
+    }
+
+    public void addProperty(String key, Object value) {
+        properties.put(key, value);
+    }
+
+    public Map<String, Object> getProperties() {
+        return Collections.unmodifiableMap(properties);
     }
 
     @Override

@@ -708,5 +708,11 @@
                 <module>Domibus-MSH-distribution</module>
             </modules>
         </profile>
+        <profile>
+            <id>documentation</id>
+            <modules>
+                <module>Domibus-MSH-swagger</module>
+            </modules>
+        </profile>
     </profiles>
 </project>
