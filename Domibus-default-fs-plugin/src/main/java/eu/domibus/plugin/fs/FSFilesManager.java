@@ -158,11 +158,8 @@ public class FSFilesManager {
      * @param errorFileName
      * @param failedDirectory
      * @param errors
-     * @param retriesNumber
-     * @param exception
      */
-    public void createErrorFile(String errorFileName, FileObject failedDirectory, List<ErrorResult> errors,
-                                int retriesNumber, Throwable exception) throws IOException {
+    public void createErrorFile(String errorFileName, FileObject failedDirectory, List<ErrorResult> errors) throws IOException {
         if (!errors.isEmpty()) {
             ErrorResult lastError = errors.get(errors.size() - 1);
             LOG.warn("Error sending message: " + lastError.getErrorDetail());
@@ -172,7 +169,7 @@ public class FSFilesManager {
                  OutputStreamWriter errorFileOSW = new OutputStreamWriter(errorFileOS)) {
 
                 errorFile.createFile();
-                errorFileOSW.write(String.valueOf(getErrorFileContent(lastError, retriesNumber, exception)));
+                errorFileOSW.write(String.valueOf(getErrorFileContent(lastError)));
             }
         }
     }
@@ -182,21 +179,14 @@ public class FSFilesManager {
      * When possible, hints on how the issue can be solved should be added.
      *
      * @param errorResult
-     * @param retriesNumber
-     * @param exception
      * @throws IOException
      */
-    private StringBuilder getErrorFileContent(ErrorResult errorResult, int retriesNumber, Throwable exception)
-            throws IOException {
+    private StringBuilder getErrorFileContent(ErrorResult errorResult) throws IOException {
         StringBuilder sb = new StringBuilder();
         sb.append("reason: ").append(errorResult.getErrorDetail()).append(LS);
+        // TODO: Check ws or jms - we should do the same
         sb.append("dateTime: ").append(errorResult.getTimestamp().toString()).append(LS);
-        sb.append("retriesNumber: ").append(retriesNumber).append(LS);
-        if (exception != null) {
-            sb.append("stackTrace: ").append(exception.getStackTrace()).append(LS);
-            sb.append("hint: ").append(exception.getMessage()).append(LS);
-        }
-        // TODO: No error code needed? Or other info?
+        // TODO: Add other info
         return sb;
     }
 

@@ -53,7 +53,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             ACKNOWLEDGED, ACKNOWLEDGED_WITH_WARNING
     );
 
-    // TODO: failing statuses should be SEND_FAILURE, is there any else?
     private static final Set<MessageStatus> SEND_FAILED_MESSAGE_STATUSES = EnumSet.of(
             SEND_FAILURE
     );
@@ -246,12 +245,9 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                     }
                 } finally {
                     // Create error file
+                    // TODO: check why the file is not created in the domain scenario
                     List<ErrorResult> errors = super.getErrorsForMessage(messageId);
-                    // TODO: where to get retriesNumber?
-                    int retriesNumber = Integer.MAX_VALUE;
-                    // TODO: where to get exception stackTrace and message?
-                    Throwable exception = null;
-                    fsFilesManager.createErrorFile(errorFileName, failedDirectory, errors, retriesNumber, exception);
+                    fsFilesManager.createErrorFile(errorFileName, failedDirectory, errors);
                 }
                 return true;
             } else {
