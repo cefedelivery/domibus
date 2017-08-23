@@ -37,9 +37,9 @@ import java.util.List;
 public class FSFilesManager {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSFilesManager.class);
-    
+
+    private static final String LS = System.lineSeparator();
     private static final String PARENT_RELATIVE_PATH = "../";
-    private static final String _ERROR = ".error";
 
     public static final String INCOMING_FOLDER = "IN";
     public static final String OUTGOING_FOLDER = "OUT";
@@ -155,48 +155,48 @@ public class FSFilesManager {
      * When the message has failed to be sent from C2 to C3 and it will contain the failed reason in plain text.
      * This error file must contain the reason for the error, the date and time, the number of retries, and the stacktrace.
      * When possible, hints on how the issue can be solved should be added.
-     *
-     * @param messageFile
+     * @param errorFileName
      * @param failedDirectory
      * @param errors
+     * @param retriesNumber
+     * @param exception
      */
-    public void createErrorFile(FileObject messageFile, FileObject failedDirectory, List<ErrorResult> errors)
-            throws IOException {
+    public void createErrorFile(String errorFileName, FileObject failedDirectory, List<ErrorResult> errors,
+                                int retriesNumber, Throwable exception) throws IOException {
         if (!errors.isEmpty()) {
             ErrorResult lastError = errors.get(errors.size() - 1);
             LOG.warn("Error sending message: " + lastError.getErrorDetail());
-            String baseName = messageFile.getName().getBaseName();
-            String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + _ERROR;
 
             try (FileObject errorFile = failedDirectory.resolveFile(errorFileName);
                  OutputStream errorFileOS = errorFile.getContent().getOutputStream();
                  OutputStreamWriter errorFileOSW = new OutputStreamWriter(errorFileOS)) {
 
                 errorFile.createFile();
-                errorFileOSW.write(String.valueOf(getErrorFileContent(lastError)));
+                errorFileOSW.write(String.valueOf(getErrorFileContent(lastError, retriesNumber, exception)));
             }
         }
     }
 
     /**
-     * error file must contain
-     * the reason for the error,
-     * the date and time,
-     * the number of retries,
-     * and the stacktrace.
-     *
+     * Error file must contain the reason for the error, the date and time, the number of retries, and the stacktrace.
      * When possible, hints on how the issue can be solved should be added.
      *
      * @param errorResult
+     * @param retriesNumber
+     * @param exception
      * @throws IOException
      */
-    private StringBuilder getErrorFileContent(ErrorResult errorResult)
+    private StringBuilder getErrorFileContent(ErrorResult errorResult, int retriesNumber, Throwable exception)
             throws IOException {
         StringBuilder sb = new StringBuilder();
-        sb.append("reason: ").append(errorResult.getErrorDetail());
-        sb.append("dateTime: ").append(errorResult.getTimestamp().toString());
-        sb.append("retriesNumber: ").append("more than 9");
-        sb.append("stackTrace: ").append("a pretty stack...");
+        sb.append("reason: ").append(errorResult.getErrorDetail()).append(LS);
+        sb.append("dateTime: ").append(errorResult.getTimestamp().toString()).append(LS);
+        sb.append("retriesNumber: ").append(retriesNumber).append(LS);
+        if (exception != null) {
+            sb.append("stackTrace: ").append(exception.getStackTrace()).append(LS);
+            sb.append("hint: ").append(exception.getMessage()).append(LS);
+        }
+        // TODO: No error code needed? Or other info?
         return sb;
     }
 

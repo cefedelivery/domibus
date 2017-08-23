@@ -42,6 +42,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
 
+    private static final String _ERROR = ".error";
+
     private static final Set<MessageStatus> SENDING_MESSAGE_STATUSES = EnumSet.of(
             READY_TO_SEND, SEND_ENQUEUED, SEND_IN_PROGRESS, WAITING_FOR_RECEIPT,
             WAITING_FOR_RETRY, SEND_ATTEMPT_FAILED
@@ -222,25 +224,34 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
              FileObject targetFileMessage = findMessageFile(outgoingFolder, messageId)) {
 
             if (targetFileMessage != null) {
+                // TODO: Derive error filename
+                String baseName = targetFileMessage.getName().getBaseName();
+                String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + _ERROR;
+
                 String targetFileMessageURI = targetFileMessage.getParent().getName().getURI();
                 String failedDirectoryLocation = FSFileNameHelper.deriveFailedDirectoryLocation(targetFileMessageURI);
                 FileObject failedDirectory = fsFilesManager.getEnsureChildFolder(rootDir, failedDirectoryLocation);
 
-                // Create error file
-                List<ErrorResult> errors = super.getErrorsForMessage(messageId);
-                fsFilesManager.createErrorFile(targetFileMessage, failedDirectory, errors);
-
-                if (fsPluginProperties.isFailedActionDelete(domain)) {
-                    // Delete
-                    fsFilesManager.deleteFile(targetFileMessage);
-                    LOG.debug("Send failed message file [{}] was deleted", messageId);
-                } else if (fsPluginProperties.isFailedActionArchive(domain)) {
-                    // Archive
-                    String baseName = targetFileMessage.getName().getBaseName();
-                    String newName = FSFileNameHelper.stripStatusSuffix(baseName);
-                    FileObject archivedFile = failedDirectory.resolveFile(newName);
-                    fsFilesManager.moveFile(targetFileMessage, archivedFile);
-                    LOG.debug("Send failed message file [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
+                try {
+                    if (fsPluginProperties.isFailedActionDelete(domain)) {
+                        // Delete
+                        fsFilesManager.deleteFile(targetFileMessage);
+                        LOG.debug("Send failed message file [{}] was deleted", messageId);
+                    } else if (fsPluginProperties.isFailedActionArchive(domain)) {
+                        // Archive
+                        String archivedFileName = FSFileNameHelper.stripStatusSuffix(baseName);
+                        FileObject archivedFile = failedDirectory.resolveFile(archivedFileName);
+                        fsFilesManager.moveFile(targetFileMessage, archivedFile);
+                        LOG.debug("Send failed message file [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
+                    }
+                } finally {
+                    // Create error file
+                    List<ErrorResult> errors = super.getErrorsForMessage(messageId);
+                    // TODO: where to get retriesNumber?
+                    int retriesNumber = Integer.MAX_VALUE;
+                    // TODO: where to get exception stackTrace and message?
+                    Throwable exception = null;
+                    fsFilesManager.createErrorFile(errorFileName, failedDirectory, errors, retriesNumber, exception);
                 }
                 return true;
             } else {
