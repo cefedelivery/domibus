@@ -6,10 +6,10 @@ import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationType;
+import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -40,10 +40,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.jms.Queue;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -82,10 +79,14 @@ public class BackendNotificationService {
     private Queue unknownReceiverQueue;
 
     @Autowired
+    private MessagingDao messagingDao;
+
+    @Autowired
     private ApplicationContext applicationContext;
 
     @Autowired
-    private MessageExchangeService messageExchangeService;
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
 
     @Autowired
     private DomainCoreConverter coreConverter;
@@ -111,6 +112,9 @@ public class BackendNotificationService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void notifyMessageReceivedFailure(final UserMessage userMessage, ErrorResult errorResult) {
+        if (isPluginNotificationDisabled()) {
+            return;
+        }
         final HashMap<String, Object> properties = new HashMap<>();
         if (errorResult.getErrorCode() != null) {
             properties.put(MessageConstants.ERROR_CODE, errorResult.getErrorCode().getErrorCodeName());
@@ -120,6 +124,9 @@ public class BackendNotificationService {
     }
 
     public void notifyMessageReceived(final BackendFilter matchingBackendFilter, final UserMessage userMessage) {
+        if (isPluginNotificationDisabled()) {
+            return;
+        }
         notifyOfIncoming(matchingBackendFilter, userMessage, NotificationType.MESSAGE_RECEIVED, new HashMap<String, Object>());
     }
 
@@ -260,32 +267,62 @@ public class BackendNotificationService {
     }
 
     public void notifyOfSendFailure(final String messageId) {
+        if (isPluginNotificationDisabled()) {
+            return;
+        }
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_FAILURE);
-
+        userMessageLogDao.setAsNotified(messageId);
     }
 
     public void notifyOfSendSuccess(final String messageId) {
+        if (isPluginNotificationDisabled()) {
+            return;
+        }
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_SUCCESS);
+        userMessageLogDao.setAsNotified(messageId);
     }
 
     public void notifyOfMessageStatusChange(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {
+        if (isPluginNotificationDisabled()) {
+            return;
+        }
         if (messageLog.getMessageStatus() == newStatus) {
             LOG.debug("Notification not sent: message status has not changed [{}]", newStatus);
             return;
         }
         LOG.debug("Notifying about message status change from [{}] to [{}]", messageLog.getMessageStatus(), newStatus);
+
+        final Map<String, Object> messageProperties = getMessageProperties(messageLog, newStatus, changeTimestamp);
+        notify(messageLog.getMessageId(), messageLog.getBackend(), NotificationType.MESSAGE_STATUS_CHANGE, messageProperties);
+    }
+
+    protected Map<String, Object> getMessageProperties(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {
         Map<String, Object> properties = new HashMap<>();
-        if(messageLog.getMessageStatus() != null) {
+        if (messageLog.getMessageStatus() != null) {
             properties.put("fromStatus", messageLog.getMessageStatus().toString());
         }
         properties.put("toStatus", newStatus.toString());
         properties.put("changeTimestamp", changeTimestamp.getTime());
-        notify(messageLog.getMessageId(), messageLog.getBackend(), NotificationType.MESSAGE_STATUS_CHANGE, properties);
+
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageLog.getMessageId());
+        if (userMessage != null) {
+            LOG.debug("Adding the service and action properties for message [{}]", messageLog.getMessageId());
+
+            properties.put("service", userMessage.getCollaborationInfo().getService().getValue());
+            properties.put("serviceType", userMessage.getCollaborationInfo().getService().getType());
+            properties.put("action", userMessage.getCollaborationInfo().getAction());
+        }
+        return properties;
     }
 
     public List<NotificationListener> getNotificationListenerServices() {
         return notificationListenerServices;
+    }
+
+    protected boolean isPluginNotificationDisabled() {
+        String pluginNotificationEnabled = domibusProperties.getProperty("domibus.plugin.notification.active", "true");
+        return !Boolean.valueOf(pluginNotificationEnabled);
     }
 }

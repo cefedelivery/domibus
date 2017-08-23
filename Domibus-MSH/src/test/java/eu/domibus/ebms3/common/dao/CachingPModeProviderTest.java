@@ -1,10 +1,16 @@
 package eu.domibus.ebms3.common.dao;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
+import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.configuration.Role;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.validators.ConfigurationValidator;
@@ -13,6 +19,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,6 +36,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Arun Raj
@@ -40,6 +48,7 @@ public class CachingPModeProviderTest {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CachingPModeProviderTest.class);
 
     private static final String VALID_PMODE_CONFIG_URI = "samplePModes/domibus-configuration-valid.xml";
+    private static final String PULL_PMODE_CONFIG_URI = "samplePModes/domibus-pmode-with-pull-processes.xml";
     private static final String DEFAULT_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMpc";
     private static final String ANOTHER_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/anotherMpc";
     private static final String DEFAULTMPC = "defaultMpc";
@@ -72,6 +81,9 @@ public class CachingPModeProviderTest {
 
     @Injectable
     ProcessPartyExtractorProvider processPartyExtractorProvider;
+
+    @Injectable
+    ProcessDao processDao;
 
     @Tested
     CachingPModeProvider cachingPModeProvider;
@@ -235,5 +247,79 @@ public class CachingPModeProviderTest {
 
         Role role = cachingPModeProvider.getBusinessProcessRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator123");
         Assert.assertNull(role);
+    }
+
+    @Test
+    public void testRetrievePullProcessBasedOnInitiator() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        configuration = loadSamplePModeConfiguration(PULL_PMODE_CONFIG_URI);
+        final Set<Party> parties = configuration.getBusinessProcesses().getParties();
+        final Party red_gw = getPartyByName(parties, "red_gw");
+        final Party blue_gw = getPartyByName(parties, "blue_gw");
+        final Set<Process> processes = configuration.getBusinessProcesses().getProcesses();
+        final Collection<Process> filter = Collections2.filter(processes, new Predicate<Process>() {
+            @Override
+            public boolean apply(Process process) {
+                return process.getInitiatorParties().contains(red_gw) && "pull".equals(process.getMepBinding().getName());
+            }
+        });
+        new Expectations() {{
+            configurationDAO.configurationExists();
+            result = true;
+            configurationDAO.readEager();
+            result = configuration;
+            processDao.findPullProcessesByInitiator(red_gw);
+            result = Lists.newArrayList(filter);
+            processDao.findPullProcessesByInitiator(blue_gw);
+            result = Lists.newArrayList();
+        }};
+        cachingPModeProvider.init();
+        List<Process> pullProcessesByInitiator = cachingPModeProvider.findPullProcessesByInitiator(red_gw);
+        Assert.assertEquals(5, pullProcessesByInitiator.size());
+        pullProcessesByInitiator = cachingPModeProvider.findPullProcessesByInitiator(blue_gw);
+        Assert.assertEquals(0, pullProcessesByInitiator.size());
+        new Verifications() {{
+            processDao.findPullProcessesByInitiator(red_gw);
+            times = 1;
+            processDao.findPullProcessesByInitiator(blue_gw);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void testRetrievePullProcessBasedOnMpc() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        configuration = loadSamplePModeConfiguration(PULL_PMODE_CONFIG_URI);
+        final String mpcName = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCOne";
+        final String emptyMpc = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCTwo";
+        new Expectations() {{
+            configurationDAO.configurationExists();
+            result = true;
+            configurationDAO.readEager();
+            result = configuration;
+            processDao.findPullProcessByMpc(mpcName);
+            result = Lists.newArrayList(new Process());
+            processDao.findPullProcessByMpc(emptyMpc);
+            result = Lists.newArrayList();
+        }};
+        cachingPModeProvider.init();
+        List<Process> pullProcessesByMpc = cachingPModeProvider.findPullProcessByMpc(mpcName);
+        Assert.assertEquals(1, pullProcessesByMpc.size());
+        pullProcessesByMpc = cachingPModeProvider.findPullProcessByMpc(emptyMpc);
+        Assert.assertEquals(0, pullProcessesByMpc.size());
+        new Verifications() {{
+            processDao.findPullProcessByMpc(mpcName);
+            times = 1;
+            processDao.findPullProcessByMpc(emptyMpc);
+            times = 1;
+        }};
+    }
+
+    private Party getPartyByName(Set<Party> parties, final String partyName) {
+        final Collection<Party> filter = Collections2.filter(parties, new Predicate<Party>() {
+            @Override
+            public boolean apply(Party party) {
+                return partyName.equals(party.getName());
+            }
+        });
+        return Lists.newArrayList(filter).get(0);
     }
 }

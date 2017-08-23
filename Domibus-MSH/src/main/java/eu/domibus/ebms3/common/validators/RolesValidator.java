@@ -10,6 +10,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -36,7 +37,7 @@ public class RolesValidator implements ConfigurationValidator {
             }
         }
 
-        return issues;
+        return Collections.unmodifiableList(issues);
     }
 
 

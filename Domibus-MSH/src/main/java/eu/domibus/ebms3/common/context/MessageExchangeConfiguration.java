@@ -60,7 +60,19 @@ public class MessageExchangeConfiguration {
         return reversePmodeKey;
     }
 
-
+    @Override
+    public String toString() {
+        return "MessageExchangeConfiguration{" +
+                "agreementName='" + agreementName + '\'' +
+                ", senderParty='" + senderParty + '\'' +
+                ", receiverParty='" + receiverParty + '\'' +
+                ", service='" + service + '\'' +
+                ", action='" + action + '\'' +
+                ", leg='" + leg + '\'' +
+                ", pmodeKey='" + pmodeKey + '\'' +
+                ", reversePmodeKey='" + reversePmodeKey + '\'' +
+                '}';
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -1,21 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
 
 package eu.domibus.ebms3.common.dao;
 
@@ -26,8 +8,10 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
+import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
+import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
@@ -98,6 +82,9 @@ public abstract class PModeProvider {
 
     @Autowired
     List<ConfigurationValidator> configurationValidators;
+
+    @Autowired
+    protected ProcessDao processDao;
 
     public abstract void init();
 
@@ -235,6 +222,8 @@ public abstract class PModeProvider {
 
     protected abstract String findAgreement(AgreementRef agreementRef) throws EbMS3Exception;
 
+    public abstract Party getGatewayParty();
+
     public abstract Party getSenderParty(String pModeKey);
 
     public abstract Party getReceiverParty(String pModeKey);
@@ -259,14 +248,6 @@ public abstract class PModeProvider {
 
     public abstract Role getBusinessProcessRole(String roleValue);
 
-    public ConfigurationDAO getConfigurationDAO() {
-        return configurationDAO;
-    }
-
-    public void setConfigurationDAO(final ConfigurationDAO configurationDAO) {
-        this.configurationDAO = configurationDAO;
-    }
-
     protected String getSenderPartyNameFromPModeKey(final String pModeKey) {
         return pModeKey.split(":")[0];
     }
@@ -290,5 +271,11 @@ public abstract class PModeProvider {
     protected String getLegConfigurationNameFromPModeKey(final String pModeKey) {
         return pModeKey.split(":")[5];
     }
+
+    public abstract List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration);
+
+    public abstract List<Process> findPullProcessesByInitiator(final Party party);
+
+    public abstract List<Process> findPullProcessByMpc(final String mpc);
 
 }

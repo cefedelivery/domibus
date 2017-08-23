@@ -16,7 +16,8 @@ class Domibus
     def messageExchange=null
     def context=null
     def log=null
-    def sleepDelay=2000
+	// SLEEP_DELAY value is increased from 2000 to 8000 because of pull request take longer ...
+    def SLEEP_DELAY=20000;
     def sqlBlue=null;
     def sqlRed=null;
 	def sqlGreen=null;
@@ -39,6 +40,7 @@ class Domibus
 	// Connect to a schema
 	def connectTo(String database, String driver, String url, String dbUser, String dbPassword){
 		log.info("Open connection to DB: " + database + " Url: " + url);
+		
 		def sql = null;
 
         try{
@@ -47,17 +49,17 @@ class Domibus
 			}else{
                 sql = Sql.newInstance(url, driver)
 			}
+			log.info "Connection opened with success";
 			return sql;
         }
         catch (SQLException ex){
             assert 0,"SQLException occurred: " + ex;
         }
-
 	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII	
     // Open 3 DB connections
     def openConnection(){
-        log.debug "Open DB connections"
+        //log.debug "Open DB connections"
 		
 		sqlBlue=connectTo(context.expand( '${#Project#databaseBlue}' ),context.expand('${#Project#driverBlue}'),context.expand('${#Project#jdbcUrlBlue}'),context.expand( '${#Project#blueDbUser}' ),context.expand( '${#Project#blueDbPassword}' ));
 		sqlRed=connectTo(context.expand( '${#Project#databaseRed}' ),context.expand('${#Project#driverRed}'),context.expand('${#Project#jdbcUrlRed}'),context.expand( '${#Project#redDbUser}' ),context.expand( '${#Project#redDbPassword}' ));
@@ -119,7 +121,7 @@ class Domibus
     def verifyMessagePresence(int presence1,int presence2, String IDMes=null, int mapDoms = 3){
         def messageID=null;
 		def sqlSender = null; def sqlReceiver = null;
-        sleep(sleepDelay);
+        sleep(SLEEP_DELAY);
 		
         if(IDMes!=null){
             messageID=IDMes
@@ -132,15 +134,19 @@ class Domibus
 		// Choose 2 Domibus between blue, red and green
 		switch(mapDoms){
 			case 3:
+				//log.info "sqlSender = sqlBlue; sqlReceiver = sqlRed";
 				sqlSender = sqlBlue; sqlReceiver = sqlRed;
 				break;
 			case 5:
+				//log.info "sqlSender = sqlBlue; sqlReceiver = sqlGreen";
 				sqlSender = sqlBlue; sqlReceiver = sqlGreen;
 				break;
 			case 6:
+				//log.info "sqlSender = sqlRed; sqlReceiver = sqlGreen";
 				sqlSender = sqlRed; sqlReceiver = sqlGreen;
 				break;
 			default:
+				//log.info "sqlSender = sqlBlue; sqlReceiver = sqlRed";
 				sqlSender = sqlBlue; sqlReceiver = sqlRed;
 				break;
 		}
@@ -159,7 +165,7 @@ class Domibus
 
         // Receiver DB
         total=0
-        sleep(sleepDelay)
+        sleep(SLEEP_DELAY)
         sqlReceiver.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
             total=it.lignes
         }
@@ -175,7 +181,7 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Verification of message unicity
     def verifyMessageUnicity(String IDMes=null, int mapDoms = 3){
-        sleep(sleepDelay);
+        sleep(SLEEP_DELAY);
         def messageID;
         def total=0;
 		def sqlSender = null; def sqlReceiver = null;
@@ -207,7 +213,7 @@ class Domibus
             total=it.lignes
         }
         assert(total==1),locateTest(context)+"Error:verifyMessageUnicity: Message found "+total+" times in sender side."
-        sleep(sleepDelay)
+        sleep(SLEEP_DELAY)
         sqlReceiver.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
             total=it.lignes
         }
@@ -217,11 +223,11 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Wait until status or timer expire
     def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null, int mapDoms = 3){
+        def MAX_WAIT_TIME=200_000; // Maximum time to wait to check the message status.
+		def STEP_WAIT_TIME=1000; // Time to wait before re-checking the message status.	
         def messageID=null;
-        def waitMax=30_000;
         def numberAttempts=0;
         def maxNumberAttempts=4;
-        def interval=1000;
         def messageStatus="INIT";
         def wait=false;
 		def sqlSender = null; def sqlReceiver = null;
@@ -238,7 +244,7 @@ class Domibus
 		
         if(bonusTimeForSender){
             log.info "Waiting time for Sender extended to 500 seconds"
-            waitMax=500_000
+            MAX_WAIT_TIME=500_000
         }
 
         openConnection();
@@ -259,13 +265,13 @@ class Domibus
 		}
 		
         if(SMSH){
-            while(((messageStatus!=SMSH)&&(waitMax>0))||(wait)){
-                sleep(interval)
-                if(waitMax>0){
-                    waitMax=waitMax-interval
+            while(((messageStatus!=SMSH)&&(MAX_WAIT_TIME>0))||(wait)){
+                sleep(STEP_WAIT_TIME)
+                if(MAX_WAIT_TIME>0){
+                    MAX_WAIT_TIME=MAX_WAIT_TIME-STEP_WAIT_TIME
                 }
                 log.info "maxNumberAttempts-numberAttempts: "+maxNumberAttempts+"-"+numberAttempts
-                log.info "WAIT: "+waitMax
+                log.info "WAIT: "+MAX_WAIT_TIME
                 sqlSender.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
                     messageStatus=it.MESSAGE_STATUS
                     numberAttempts=it.SEND_ATTEMPTS
@@ -280,7 +286,7 @@ class Domibus
                     }
                 }
             }
-            log.info "finished checking sender, messageStatus: " + messageStatus + " waitMax: " + waitMax
+            log.info "finished checking sender, messageStatus: " + messageStatus + " MAX_WAIT_TIME: " + MAX_WAIT_TIME
 
             assert(messageStatus!="INIT"),locateTest(context)+"Error:waitForStatus: Message "+messageID+" is not present in the sender side."
             assert(messageStatus.toLowerCase()==SMSH.toLowerCase()),locateTest(context)+"Error:waitForStatus: Message in the sender side has status "+messageStatus+" instead of "+SMSH+"."
@@ -288,23 +294,23 @@ class Domibus
         if (bonusTimeForReceiver)
         {
             log.info "Waiting time for Receiver extended to 500 seconds"
-            waitMax=500_000
+            MAX_WAIT_TIME=200_000
         }
         else
         {
-            waitMax=10_000
+            MAX_WAIT_TIME=10_000
         }
         messageStatus="INIT"
         if(RMSH){
-            while((messageStatus!=RMSH)&&(waitMax>0)){
-                sleep(interval)
-                waitMax=waitMax-interval
+            while((messageStatus!=RMSH)&&(MAX_WAIT_TIME>0)){
+                sleep(STEP_WAIT_TIME)
+                MAX_WAIT_TIME=MAX_WAIT_TIME-STEP_WAIT_TIME
                 sqlReceiver.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
                     messageStatus=it.MESSAGE_STATUS
                 }
-                log.info "W:" + waitMax + " M:" + messageStatus
+                log.info "W:" + MAX_WAIT_TIME + " M:" + messageStatus
             }
-            log.info "finished checking receiver, messageStatus: " + messageStatus + " waitMax: " + waitMax
+            log.info "finished checking receiver, messageStatus: " + messageStatus + " MAX_WAIT_TIME: " + MAX_WAIT_TIME
             assert(messageStatus!="INIT"),locateTest(context)+"Error:waitForStatus: Message "+messageID+" is not present in the receiver side."
             assert(messageStatus.toLowerCase()==RMSH.toLowerCase()),locateTest(context)+"Error:waitForStatus: Message in the receiver side has status "+messageStatus+" instead of "+RMSH+"."
         }

@@ -36,6 +36,7 @@ import javax.jms.MessageListener;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
+import java.util.Properties;
 
 
 /**
@@ -158,23 +159,26 @@ public class MessageSender implements MessageListener {
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
         } catch (Throwable e) {
+            LOG.error("Error sending message [{}]", messageId, e);
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
         } finally {
-            if (abortSending) {
-                LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
-                retryService.purgeTimedoutMessage(messageId);
-            } else {
-                reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
-                try {
+            try {
+                if (abortSending) {
+                    LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
+                    retryService.purgeTimedoutMessage(messageId);
+                } else {
+                    reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+
                     attempt.setError(attemptError);
                     attempt.setStatus(attemptStatus);
                     attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
                     messageAttemptService.create(attempt);
-                } catch (Exception e) {
-                    LOG.error("Could not create the message attempt", e);
+
                 }
+            } catch (Exception e) {
+                LOG.error("Error in the finally block ", e);
             }
         }
     }

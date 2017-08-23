@@ -1,4 +1,6 @@
 Domibus 3.3-FR
+- Additional validation on pMode upload: when @type is missing or is empty, the value of PartyId, Service and AgreementRef, must be an URI (relative URIs accepted).
+- Use optional regex validation for dynamic discovery certificate. New property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation.
 - Fix sendAttempt counter (initial one plus number of retries defined in the pmode)
 - Block the receiving of the message in case the sender's certificate is not valid or revoked.
     Two more properties were added (for more details check domibus.properties file):
@@ -10,6 +12,7 @@ Domibus 3.3-FR
 - Discard domibus.internal.pull.queue from using the DLQ queue.
 - Possibility to notify the plugins when the message status changes; new method added in the plugin API: eu.domibus.plugin.BackendConnector.messageStatusChanged(eu.domibus.common.MessageStatusChangeEvent)
 - Included the payload location as a property of the JMS Message
+- Performance improvements
 Domibus 3.3-RC1
 - Configuration of Domibus is done with domibus.properties instead of externalized spring xml files
 - Add the possibility to pull messages

@@ -84,7 +84,6 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                         assert false;
                 }
                 backendNotificationService.notifyOfSendSuccess(messageId);
-                userMessageLogDao.setAsNotified(messageId);
                 messagingDao.clearPayloadData(messageId);
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS);
                 break;

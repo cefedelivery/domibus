@@ -17,10 +17,7 @@ import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.MessageTestUtility;
-import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
-import eu.domibus.ebms3.sender.MSHDispatcher;
-import eu.domibus.ebms3.sender.ReliabilityChecker;
-import eu.domibus.ebms3.sender.RetryService;
+import eu.domibus.ebms3.sender.*;
 import eu.domibus.pki.DomibusCertificateException;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -145,7 +142,7 @@ public class PullRequestHandlerImplTest {
             PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
             times = 1;
 
-            PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_ID, messageId);
+            PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
             times = 1;
 
             messageBuilder.buildSOAPMessage(userMessage, legConfiguration);

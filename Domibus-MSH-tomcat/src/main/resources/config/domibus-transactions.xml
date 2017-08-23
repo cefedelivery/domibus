@@ -1,21 +1,4 @@
-<!--
-  ~ Copyright 2015 e-CODEX Project
-  ~
-  ~ Licensed under the EUPL, Version 1.1 or – as soon they
-  ~ will be approved by the European Commission - subsequent
-  ~ versions of the EUPL (the "Licence");
-  ~ You may not use this work except in compliance with the
-  ~ Licence.
-  ~ You may obtain a copy of the Licence at:
-  ~ http://ec.europa.eu/idabc/eupl5
-  ~ Unless required by applicable law or agreed to in
-  ~ writing, software distributed under the Licence is
-  ~ distributed on an "AS IS" basis,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  ~ express or implied.
-  ~ See the Licence for the specific language governing
-  ~ permissions and limitations under the Licence.
-  -->
+
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns="http://www.springframework.org/schema/beans"
@@ -37,6 +20,8 @@
                 <prop key="com.atomikos.icatch.log_base_dir">${domibus.work.location:${domibus.config.location}}/work/transactions/${domibus.node.id}/log</prop-->
                 <prop key="com.atomikos.icatch.force_shutdown_on_vm_exit">true</prop>
                 <prop key="com.atomikos.icatch.default_jta_timeout">${com.atomikos.icatch.default_jta_timeout}</prop>
+                <prop key="com.atomikos.icatch.max_timeout">${com.atomikos.icatch.max_timeout}</prop>
+                <prop key="com.atomikos.icatch.max_actives">${com.atomikos.icatch.max_actives}</prop>
             </props>
         </constructor-arg>
     </bean>
