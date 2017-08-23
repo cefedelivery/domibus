@@ -3,6 +3,7 @@ package eu.domibus.plugin;
 
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.springframework.util.StringUtils;
 
 import javax.activation.DataHandler;
@@ -612,7 +613,6 @@ public class Submission {
         private final String contentId;
         private final Description description;
         private final DataHandler payloadDatahandler;
-
         private final Collection<TypedProperty> payloadProperties;
         private final boolean inBody;
 
@@ -623,11 +623,12 @@ public class Submission {
             this.payloadProperties = payloadProperties;
             this.inBody = inBody;
 
-            if("".equals(schemaLocation)) {
+            String tSchemaLocation = schemaLocation;
+            if("".equals(tSchemaLocation)) {
                 LOG.debug("schema location is empty. replacing with null");
-                schemaLocation = null;
+                tSchemaLocation = null;
             }
-            this.schemaLocation = schemaLocation;
+            this.schemaLocation = tSchemaLocation;
         }
 
         public String getContentId() {
@@ -709,14 +710,14 @@ public class Submission {
             return result;
         }
 
+
         @Override
         public String toString() {
-            final StringBuffer sb = new StringBuffer("TypedProperty{");
-            sb.append("key='").append(key).append('\'');
-            sb.append(", value='").append(value).append('\'');
-            sb.append(", type='").append(type).append('\'');
-            sb.append('}');
-            return sb.toString();
+            return new ToStringBuilder(this)
+                    .append("key", key)
+                    .append("value", value)
+                    .append("type", type)
+                    .toString();
         }
 
         public String getKey() {
@@ -741,11 +742,12 @@ public class Submission {
                 throw new IllegalArgumentException("description must not be empty");
             }
 
-            if(lang == null) {
+            Locale tLang = lang;
+            if(tLang == null) {
                 LOG.warn("no locale for description set. setting to JVM value: " + Locale.getDefault().getLanguage());
-                lang = Locale.getDefault();
+                tLang = Locale.getDefault();
             }
-            this.lang = lang;
+            this.lang = tLang;
             this.value = description;
         }
 
