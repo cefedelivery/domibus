@@ -2,6 +2,7 @@ package eu.domibus.plugin.fs;
 
 import javax.activation.DataHandler;
 
+import eu.domibus.common.ErrorResult;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
@@ -142,6 +143,20 @@ public class FSFilesManager {
                 LOG.warn("Error closing file", ex);
             }
         }
+    }
+
+    /**
+     * TODO: When the message has failed to be sent from C2 to C3 and it will contain the failed reason in plain text.
+     * This error file must contain the reason for the error, the date and time, the number of retries, and the stacktrace.
+     * When possible, hints on how the issue can be solved should be added.
+     *
+     * @param targetFileMessage
+     * @param failedDirectory
+     * @param error
+     */
+    public void createErrorFile(FileObject targetFileMessage, FileObject failedDirectory, ErrorResult error) {
+        LOG.warn("Error sending message: " + error.getErrorDetail());
+
     }
 
 }

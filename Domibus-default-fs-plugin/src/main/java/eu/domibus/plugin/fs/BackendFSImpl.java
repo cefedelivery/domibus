@@ -222,30 +222,26 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
              FileObject targetFileMessage = findMessageFile(outgoingFolder, messageId)) {
 
             if (targetFileMessage != null) {
-                if (fsPluginProperties.isFailedActionDelete(domain)) {
-                    fsFilesManager.deleteFile(targetFileMessage);
+                String targetFileMessageURI = targetFileMessage.getParent().getName().getURI();
+                String failedDirectoryLocation = FSFileNameHelper.deriveFailedDirectoryLocation(targetFileMessageURI);
+                FileObject failedDirectory = fsFilesManager.getEnsureChildFolder(rootDir, failedDirectoryLocation);
 
+                if (fsPluginProperties.isFailedActionDelete(domain)) {
+                    // Delete
+                    fsFilesManager.deleteFile(targetFileMessage);
                     LOG.debug("Send failed message file [{}] was deleted", messageId);
                 } else if (fsPluginProperties.isFailedActionArchive(domain)) {
                     // Archive
-                    String targetFileMessageURI = targetFileMessage.getParent().getName().getURI();
-                    String failedDirectoryLocation = FSFileNameHelper.deriveFailedDirectoryLocation(targetFileMessageURI);
-                    FileObject failedDirectory = fsFilesManager.getEnsureChildFolder(rootDir, failedDirectoryLocation);
-
                     String baseName = targetFileMessage.getName().getBaseName();
                     String newName = FSFileNameHelper.stripStatusSuffix(baseName);
                     FileObject archivedFile = failedDirectory.resolveFile(newName);
                     fsFilesManager.moveFile(targetFileMessage, archivedFile);
-
                     LOG.debug("Send failed message file [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
                 }
-                // TODO: A file will always be created in the FAILED directory (respecting the original directory structure of the file)
-                // when the message has failed to be sent from C2 to C3 and it will contain the failed reason in plain text.
-                // This error file must contain the reason for the error, the date and time, the number of retries, and the stacktrace.
-                // When possible, hints on how the issue can be solved should be added.
+                // Create error file
                 List<ErrorResult> errors = super.getErrorsForMessage(messageId);
                 ErrorResult lastError = errors.get(errors.size() - 1);
-                LOG.debug("Error sending message: " + lastError.getErrorDetail());
+                fsFilesManager.createErrorFile(targetFileMessage, failedDirectory, lastError);
                 return true;
             } else {
                 LOG.error("The send failed file message file was not found. " + messageId);
