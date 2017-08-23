@@ -7,11 +7,14 @@ import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.api.security.ChainCertificateInvalidException;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
-import eu.domibus.common.model.configuration.*;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.configuration.Identifier;
+import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
@@ -61,8 +64,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     private final static String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.sender.certificate.validation.onsending";
 
-    @Autowired
-    private ConfigurationDAO configurationDAO;
 
     @Autowired
     private MessagingDao messagingDao;
@@ -96,6 +97,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Qualifier("domibusProperties")
     private java.util.Properties domibusProperties;
 
+
     /**
      * {@inheritDoc}
      */
@@ -113,6 +115,21 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         return messageStatus;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public MessageStatus retrieveMessageRestoreStatus(final String messageId) {
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        try {
+            MessageExchangeConfiguration userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            return getMessageStatus(userMessageExchangeConfiguration);
+        } catch (EbMS3Exception e) {
+            throw new PModeException(DomibusCoreErrorCode.DOM_001, "Could not get the PMode key for message [" + messageId + "]", e);
+        }
+    }
+
 
     /**
      * {@inheritDoc}
@@ -120,12 +137,15 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional
     public void initiatePullRequest() {
-        if (!configurationDAO.configurationExists()) {
+        Party initiator;
+        try {
+            initiator = pModeProvider.getGatewayParty();
+        } catch (IllegalArgumentException e) {
+            LOG.trace("A configuration problem occured while initiating the pull request. Probably no configuration is loaded");
             return;
         }
-        Configuration configuration = configurationDAO.read();
-        Party initiator = configuration.getParty();
         List<Process> pullProcesses = pModeProvider.findPullProcessesByInitiator(initiator);
+        LOG.debug("Initiating pull requests:");
         for (Process pullProcess : pullProcesses) {
             try {
                 processValidator.validatePullProcess(Lists.newArrayList(pullProcess));
@@ -142,7 +162,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                                 legConfiguration.getService().getName(),
                                 legConfiguration.getAction().getName(),
                                 legConfiguration.getName());
-
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(messageExchangeConfiguration.toString());
+                        }
                         final Map<String, String> map = Maps.newHashMap();
                         map.put(MPC, mpcQualifiedName);
                         map.put(PMODE_KEY, messageExchangeConfiguration.getReversePmodeKey());
@@ -189,13 +211,14 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
      */
     @Override
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
-        if (!configurationDAO.configurationExists()) {
+        try {
+            final Party gatewayParty = pModeProvider.getGatewayParty();
+            List<Process> processes = pModeProvider.findPullProcessByMpc(mpcQualifiedName);
+            processValidator.validatePullProcess(processes);
+            return new PullContext(processes.get(0), gatewayParty, mpcQualifiedName);
+        } catch (IllegalArgumentException e) {
             throw new PModeException(DomibusCoreErrorCode.DOM_003, "No pmode configuration found");
         }
-        List<Process> processes = pModeProvider.findPullProcessByMpc(mpcQualifiedName);
-        Configuration configuration = configurationDAO.read();
-        processValidator.validatePullProcess(processes);
-        return new PullContext(processes.get(0), configuration.getParty(), mpcQualifiedName);
     }
 
 

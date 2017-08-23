@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="blue_gw">
+    <mpcs>
+        <mpc name="defaultMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+             enabled="true" default="true" retention_downloaded="0" retention_undownloaded="600"/>
+        <mpc name="defaultMpcWS"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCWS" enabled="true"
+             default="true" retention_downloaded="0" retention_undownloaded="3600"/>
+        <mpc name="defaultMpcWSDom109"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCWSDOM109"
+             enabled="true" default="true" retention_downloaded="6" retention_undownloaded="3"/>
+        <mpc name="defaultMpcWSDom123"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCWSDOM123"
+             enabled="true" default="true" retention_downloaded="12" retention_undownloaded="14"/>
+        <mpc name="defaultMpcJMS"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCJMS" enabled="true"
+             default="true" retention_downloaded="4" retention_undownloaded="3600"/>
+        <mpc name="brisMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMPC"
+             enabled="true" default="true" retention_downloaded="0" retention_undownloaded="2"/>
+        <mpc name="defaultMpcOne"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCOne" enabled="true"
+             default="true" retention_downloaded="10" retention_undownloaded="600"/>
+        <mpc name="defaultMpcTwo"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCTwo" enabled="true"
+             default="true" retention_downloaded="15" retention_undownloaded="600"/>
+        <mpc name="defaultMpcThree"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCThree"
+             enabled="true" default="true" retention_downloaded="0" retention_undownloaded="600"/>
+        <mpc name="defaultMpcFour"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCFour" enabled="true"
+             default="true" retention_downloaded="2" retention_undownloaded="600"/>
+        <mpc name="defaultMpcFive"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCFive" enabled="true"
+             default="true" retention_downloaded="5" retention_undownloaded="600"/>
+    </mpcs>
+    <businessProcesses>
+        <roles>
+            <role name="defaultInitiatorRole"
+                  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
+            <role name="defaultResponderRole"
+                  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
+            <role name="defaultInitiatorRoleEmpty" value=" "/>
+            <role name="defaultResponderRoleEmpty" value=" "/>
+        </roles>
+        <parties>
+            <partyIdTypes>
+                <partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
+                <partyIdType name="partyTypeEmpty" value=""/>
+            </partyIdTypes>
+            <party name="red_gw" endpoint="http://localhost:8180/domibus/services/msh" allowChunking="false">
+                <identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="blue_gw" endpoint="http://localhost:8080/domibus/services/msh" allowChunking="false">
+                <identifier partyId="domibus-blue" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="white_gw" endpoint="http://localhost:8080/domibus/services/msh" allowChunking="false">
+                <identifier partyId="domibus-white" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="black_gw" endpoint="http://localhost:8180/domibus/services/msh" allowChunking="false">
+                <identifier partyId="domibus-black" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="green_gw" endpoint="http://localhost:8280/domibus/services/msh" allowChunking="false">
+                <identifier partyId="domibus-green" partyIdType="partyTypeUrn"/>
+            </party>
+        </parties>
+        <meps>
+            <mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
+            <mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
+            <binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+            <binding name="pull" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull"/>
+            <binding name="pushAndPush"
+                     value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
+        </meps>
+        <properties>
+            <property name="originalSenderProperty" key="originalSender" datatype="string" required="true"/>
+            <property name="finalRecipientProperty" key="finalRecipient" datatype="string" required="true"/>
+            <propertySet name="ecodexPropertySet">
+                <propertyRef property="finalRecipientProperty"/>
+                <propertyRef property="originalSenderProperty"/>
+            </propertySet>
+        </properties>
+        <payloadProfiles>
+            <payload name="businessContentPayload" cid="cid:message" required="true" mimeType="text/xml"/>
+            <payload name="businessContentAttachment" cid="cid:attachment" required="false" mimeType="application/pdf"/>
+            <payloadProfile name="MessageProfile" maxSize="40894464">
+                <attachment name="businessContentPayload"/>
+                <attachment name="businessContentAttachment"/>
+            </payloadProfile>
+        </payloadProfiles>
+        <securities>
+            <security name="eDeliveryPolicy" policy="eDeliveryPolicy.xml" signatureMethod="RSA_SHA256"/>
+            <security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
+            <security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
+            <security name="eSensPolicy" policy="eSensPolicy.v2.0.xml" signatureMethod="RSA_SHA256"/>
+        </securities>
+        <errorHandlings>
+            <errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="false"
+                           businessErrorNotifyConsumer="false" deliveryFailureNotifyProducer="false"/>
+            <!-- <errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="true" businessErrorNotifyConsumer="true" deliveryFailureNotifyProducer="true"/> -->
+        </errorHandlings>
+        <agreements>
+            <agreement name="agreementEmpty" value="" type=""/>
+            <agreement name="agreementDummy" value="DummyAgr" type="DUM"/>
+            <agreement name="agreement1" value="A1" type=""/>
+            <agreement name="agreement2" value="A2" type=""/>
+            <agreement name="agreement3" value="A3" type=""/>
+            <agreement name="agreementForDomJMS020" value="agreementForDomJMS020Value" type=""/>
+            <agreement name="agreementForDomJMS023" value="agreementForDomJMS023Value" type="random"/>
+        </agreements>
+        <services>
+            <service name="testService1" value="bdx:noprocess" type="tc1"/>
+            <service name="testService2" value="bdx:noprocess" type="tc2"/>
+            <service name="testService3" value="bdx:noprocess" type="tc3"/>
+            <service name="testService4" value="bdx:noprocess" type="tc4"/>
+            <service name="testService5" value="bdx:noprocess" type="tc5"/>
+            <service name="testService7" value="bdx:noprocess" type="tc7"/>
+            <service name="testService8" value="bdx:noprocess" type="tc8"/>
+            <service name="testService9" value="bdx:noprocess" type="tc9"/>
+            <service name="testService10" value="bdx:noprocess" type="tc10"/>
+            <service name="testService11" value="bdx:noprocess" type="tc11"/>
+            <service name="testService12" value="bdx:noprocess" type="tc12"/>
+            <service name="testService13" value="bdx:noprocess" type="tc13"/>
+            <service name="testService14" value="bdx:noprocess" type="tc14"/>
+            <service name="testService15" value="bdx:noprocess" type="tc15"/>
+            <service name="testService16" value="bdx:noprocess" type="tc16"/>
+            <service name="testService17" value="bdx:noprocess" type="tc17"/>
+            <service name="connectivityservice" value="http://ec.europa.eu/e-delivery/services/connectivity-service"
+                     type="edelivery"/>
+        </services>
+        <actions>
+            <action name="tc1Action" value="TC1Leg1"/>
+            <action name="tc2Action" value="TC2Leg1"/>
+            <action name="tc3Action" value="TC3Leg1"/>
+            <action name="tc4Action" value="TC4Leg1"/>
+            <action name="tc5Action" value="TC5Leg1"/>
+            <action name="tc7Action" value="TC7Leg1"/>
+            <action name="tc8Action" value="TC8Leg1"/>
+            <action name="tc9Action" value="TC9Leg1"/>
+            <action name="tc10Action" value="TC10Leg1"/>
+            <action name="tc11Action" value="TC11Leg1"/>
+            <action name="tc12Action" value="TC12Leg1"/>
+            <action name="tc13Action" value="TC13Leg1"/>
+            <action name="tc14Action" value="TC14Leg1"/>
+            <action name="tc15Action" value="TC15Leg1"/>
+            <action name="tc16Action" value="TC16Leg1"/>
+            <action name="tc17Action" value="TC17Leg1"/>
+            <action name="submitMessage" value="submitMessage"/>
+        </actions>
+        <as4>
+            <receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
+            <reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
+            <reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
+        </as4>
+        <legConfigurations>
+            <legConfiguration name="pushTestcase1tc1Action" service="testService1" action="tc1Action"
+                              defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pushTestcase2tc1Action" service="testService2" action="tc2Action"
+                              defaultMpc="defaultMpc" reliability="noReliability" security="noSigNoEnc"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="false"/>
+            <legConfiguration name="pushTestcase3tc1Action" service="testService3" action="tc3Action"
+                              defaultMpc="defaultMpc" reliability="AS4Reliability" security="signOnly"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pushTestcase4tc1Action" service="testService4" action="tc4Action"
+                              defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pushTestcase5tc1Action" service="testService5" action="tc5Action"
+                              defaultMpc="brisMpc" reliability="AS4Reliability" security="eDeliveryPolicy"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pushTestcase7tc7Action" service="testService7" action="tc7Action"
+                              defaultMpc="defaultMpc" reliability="AS4Reliability" security="eSensPolicy"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pushTestcase8tc8Action" service="testService8" action="tc8Action"
+                              defaultMpc="defaultMpcJMS" reliability="AS4Reliability" security="eDeliveryPolicy"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pushTestcase9tc9Action" service="testService9" action="tc9Action"
+                              defaultMpc="defaultMpcJMS" reliability="AS4Reliability" security="eDeliveryPolicy"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pushTestcase10tc10Action" service="testService10" action="tc10Action"
+                              defaultMpc="defaultMpcJMS" reliability="AS4Reliability" security="eDeliveryPolicy"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pushTestcase11tc11Action" service="testService11" action="tc11Action"
+                              defaultMpc="defaultMpcWSDom109" reliability="AS4Reliability" security="eDeliveryPolicy"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pushTestcase12tc12Action" service="testService12" action="tc12Action"
+                              defaultMpc="defaultMpcWSDom123" reliability="AS4Reliability" security="eDeliveryPolicy"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pushConnectivityTest" service="connectivityservice" action="submitMessage"
+                              defaultMpc="defaultMpc" reliability="noReliability" security="noSigNoEnc"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="false"/>
+            <legConfiguration name="pullTestcase13tc13Action" service="testService13" action="tc13Action"
+                              defaultMpc="defaultMpcOne" reliability="AS4Reliability" security="eDeliveryPolicy"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pullTestcase14tc14Action" service="testService14" action="tc14Action"
+                              defaultMpc="defaultMpcTwo" reliability="AS4Reliability" security="eSensPolicy"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pullTestcase15tc15Action" service="testService15" action="tc15Action"
+                              defaultMpc="defaultMpcThree" reliability="AS4Reliability" security="eSensPolicy"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pullTestcase16tc16Action" service="testService16" action="tc16Action"
+                              defaultMpc="defaultMpcFour" reliability="AS4Reliability" security="signOnly"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pullTestcase17tc17Action" service="testService17" action="tc17Action"
+                              defaultMpc="defaultMpcFive" reliability="noReliability" security="noSigNoEnc"
+                              receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="false"/>
+        </legConfigurations>
+        <process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push"
+                 initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+                <initiatorParty name="black_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="white_gw"/>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase1tc1Action"/>
+            </legs>
+        </process>
+        <process name="tc2Process" agreement="agreementEmpty" mep="oneway" binding="push"
+                 initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+                <initiatorParty name="black_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="white_gw"/>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase2tc1Action"/>
+            </legs>
+        </process>
+        <process name="tc3Process" agreement="agreementEmpty" mep="oneway" binding="push"
+                 initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+                <initiatorParty name="black_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="white_gw"/>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase3tc1Action"/>
+            </legs>
+        </process>
+        <process name="tc4Process" agreement="agreementDummy" mep="oneway" binding="push"
+                 initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+                <initiatorParty name="black_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="white_gw"/>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase4tc1Action"/>
+            </legs>
+        </process>
+        <process name="tc5Process" agreement="agreementEmpty" mep="oneway" binding="push"
+                 initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="green_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+                <responderParty name="green_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase5tc1Action"/>
+            </legs>
+        </process>
+        <process name="tc7Process" agreement="agreementEmpty" mep="oneway" binding="push"
+                 initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+                <initiatorParty name="black_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="white_gw"/>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase7tc7Action"/>
+            </legs>
+        </process>
+        <process name="tc8Process" agreement="agreementForDomJMS020" mep="oneway" binding="push"
+                 initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase8tc8Action"/>
+            </legs>
+        </process>
+        <process name="tc9Process" agreement="agreementForDomJMS023" mep="oneway" binding="push"
+                 initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase9tc9Action"/>
+            </legs>
+        </process>
+        <process name="tc10Process" agreement="agreementEmpty" mep="oneway" binding="push"
+                 initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase10tc10Action"/>
+            </legs>
+        </process>
+        <process name="tc11Process" agreement="agreementEmpty" mep="oneway" binding="push"
+                 initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase11tc11Action"/>
+            </legs>
+        </process>
+        <process name="tc12Process" agreement="agreementEmpty" mep="oneway" binding="push"
+                 initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase12tc12Action"/>
+            </legs>
+        </process>
+        <process name="tc0Process" agreement="agreementEmpty" mep="oneway" binding="push"
+                 initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="blue_gw"/>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+                <responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushConnectivityTest"/>
+            </legs>
+        </process>
+        <process name="tc13Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pullTestcase13tc13Action"/>
+            </legs>
+        </process>
+        <process name="tc14Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pullTestcase14tc14Action"/>
+            </legs>
+        </process>
+        <process name="tc15Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pullTestcase15tc15Action"/>
+            </legs>
+        </process>
+        <process name="tc16Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pullTestcase16tc16Action"/>
+            </legs>
+        </process>
+        <process name="tc17Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="red_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="blue_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pullTestcase17tc17Action"/>
+            </legs>
+        </process>
+    </businessProcesses>
+</db:configuration>

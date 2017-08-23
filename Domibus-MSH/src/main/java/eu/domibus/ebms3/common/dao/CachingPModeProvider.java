@@ -1,24 +1,7 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
 
 package eu.domibus.ebms3.common.dao;
 
+import com.google.common.collect.Lists;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -37,9 +20,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -55,11 +36,11 @@ public class CachingPModeProvider extends PModeProvider {
     @Autowired
     private ProcessPartyExtractorProvider processPartyExtractorProvider;
     //pull processes cache.
-    private List<Process> pullProcessesByMessageContext = new ArrayList<>();
+    private Map<Party, List<Process>> pullProcessesByInitiatorCache = new HashMap<>();
 
-    private List<Process> pullProcessesByInitiator = new ArrayList<>();
+    private Map<String, List<Process>> pullProcessByMpcCache = new HashMap<>();
 
-    private List<Process> pullProcessBytMpc = new ArrayList<>();
+
 
     protected synchronized Configuration getConfiguration() {
         if (this.configuration == null) {
@@ -80,6 +61,25 @@ public class CachingPModeProvider extends PModeProvider {
             throw new IllegalStateException("No processing modes found. To exchange messages, upload configuration file through the web gui.");
         }
         this.configuration = this.configurationDAO.readEager();
+        initPullProcessesCache();
+    }
+
+    private void initPullProcessesCache() {
+        final Set<Mpc> mpcs = this.configuration.getMpcs();
+        for (Mpc mpc : mpcs) {
+            final String qualifiedName = mpc.getQualifiedName();
+            final List<Process> pullProcessByMpc = processDao.findPullProcessByMpc(qualifiedName);
+            pullProcessByMpcCache.put(qualifiedName, pullProcessByMpc);
+        }
+        final Set<Process> processes = this.configuration.getBusinessProcesses().getProcesses();
+        Set<Party> initiators = new HashSet<>();
+        for (Process process : processes) {
+            initiators.addAll(process.getInitiatorParties());
+        }
+        for (Party initiator : initiators) {
+            final List<Process> pullProcessesByInitiator = processDao.findPullProcessesByInitiator(initiator);
+            pullProcessesByInitiatorCache.put(initiator, pullProcessesByInitiator);
+        }
     }
 
 
@@ -357,34 +357,29 @@ public class CachingPModeProvider extends PModeProvider {
     public List<String> updatePModes(final byte[] bytes) throws XmlProcessingException {
         List<String> messages = super.updatePModes(bytes);
         this.configuration = null;
-        this.pullProcessBytMpc.clear();
-        this.pullProcessesByInitiator.clear();
-        this.pullProcessesByMessageContext.clear();
+        this.pullProcessByMpcCache.clear();
+        this.pullProcessesByInitiatorCache.clear();
         return messages;
     }
 
     @Override
     public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
-        if (pullProcessesByMessageContext.isEmpty()) {
-            pullProcessesByMessageContext = processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
-        }
-        return pullProcessesByMessageContext;
+        return processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
     }
 
     @Override
     public List<Process> findPullProcessesByInitiator(final Party party) {
-        if (pullProcessesByInitiator.isEmpty()) {
-            pullProcessesByInitiator = processDao.findPullProcessesByInitiator(party);
+        if (pullProcessByMpcCache == null) {
+            return Lists.newArrayList();
         }
-        return pullProcessesByInitiator;
+        return pullProcessesByInitiatorCache.get(party);
     }
 
     @Override
     public List<Process> findPullProcessByMpc(final String mpc) {
-        if (pullProcessBytMpc.isEmpty()) {
-            pullProcessBytMpc = processDao.findPullProcessByMpc(mpc);
+        if (pullProcessByMpcCache == null) {
+            return Lists.newArrayList();
         }
-        return pullProcessBytMpc;
+        return pullProcessByMpcCache.get(mpc);
     }
-
 }
