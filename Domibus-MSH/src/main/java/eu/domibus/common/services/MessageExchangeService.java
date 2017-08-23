@@ -24,6 +24,16 @@ public interface MessageExchangeService {
     MessageStatus getMessageStatus(final MessageExchangeConfiguration messageExchangeConfiguration);
 
     /**
+     * Failed messages have the same final status (SEND_FAILED) being for a pushed or a pulled message.
+     * So when we do restore and resend a message there is the need to know which kind of message it was
+     * originally, in order to restore it properly.
+     *
+     * @param messageId the message id.
+     * @return the status the message should be put back to.
+     */
+    MessageStatus retrieveMessageRestoreStatus(String messageId);
+
+    /**
      * Load pmode and find pull process in order to initialize pull request.
      */
     void initiatePullRequest();

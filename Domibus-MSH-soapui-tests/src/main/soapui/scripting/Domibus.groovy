@@ -16,8 +16,8 @@ class Domibus
     def messageExchange=null
     def context=null
     def log=null
-	// sleepDelay value is increased from 2000 to 6000 because of pull request take longer ...
-    def sleepDelay=6000
+	// SLEEP_DELAY value is increased from 2000 to 8000 because of pull request take longer ...
+    def SLEEP_DELAY=20000;
     def sqlBlue=null;
     def sqlRed=null;
 	def sqlGreen=null;
@@ -121,7 +121,7 @@ class Domibus
     def verifyMessagePresence(int presence1,int presence2, String IDMes=null, int mapDoms = 3){
         def messageID=null;
 		def sqlSender = null; def sqlReceiver = null;
-        sleep(sleepDelay);
+        sleep(SLEEP_DELAY);
 		
         if(IDMes!=null){
             messageID=IDMes
@@ -165,7 +165,7 @@ class Domibus
 
         // Receiver DB
         total=0
-        sleep(sleepDelay)
+        sleep(SLEEP_DELAY)
         sqlReceiver.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
             total=it.lignes
         }
@@ -181,7 +181,7 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Verification of message unicity
     def verifyMessageUnicity(String IDMes=null, int mapDoms = 3){
-        sleep(sleepDelay);
+        sleep(SLEEP_DELAY);
         def messageID;
         def total=0;
 		def sqlSender = null; def sqlReceiver = null;
@@ -213,7 +213,7 @@ class Domibus
             total=it.lignes
         }
         assert(total==1),locateTest(context)+"Error:verifyMessageUnicity: Message found "+total+" times in sender side."
-        sleep(sleepDelay)
+        sleep(SLEEP_DELAY)
         sqlReceiver.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
             total=it.lignes
         }
@@ -223,14 +223,14 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Wait until status or timer expire
     def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null, int mapDoms = 3){
-        def MAX_WAIT_TIME=60_000; // Maximum time to wait to check the message status. 
-	def STEP_WAIT_TIME=1000; // Time to wait before re-checking the message status.	
+        def MAX_WAIT_TIME=200_000; // Maximum time to wait to check the message status.
+		def STEP_WAIT_TIME=1000; // Time to wait before re-checking the message status.	
         def messageID=null;
         def numberAttempts=0;
         def maxNumberAttempts=4;
         def messageStatus="INIT";
         def wait=false;
-	def sqlSender = null; def sqlReceiver = null;
+		def sqlSender = null; def sqlReceiver = null;
 		
         //log.info "waitForStatus params: messageID: " + messageID + " RMSH: " + RMSH + " IDMes: " + IDMes + " bonusTimeForSender: " + bonusTimeForSender + " bonusTimeForReceiver: " + bonusTimeForReceiver
         if(IDMes!=null){
