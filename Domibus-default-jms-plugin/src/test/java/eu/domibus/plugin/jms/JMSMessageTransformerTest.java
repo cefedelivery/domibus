@@ -74,7 +74,7 @@ public class JMSMessageTransformerTest {
         submissionObj.setAgreementRef("12345");
         submissionObj.setRefToMessageId("123456");
 
-        boolean putAttachmentsInQueue = Boolean.parseBoolean(properties.getProperty(PUT_ATTACHMENT_IN_QUEUE));
+        boolean putAttachmentsInQueue = Boolean.parseBoolean(properties.getProperty(PUT_ATTACHMENT_IN_QUEUE, "true"));
 
         String strPayLoad1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
         DataHandler payLoadDataHandler;
@@ -116,7 +116,7 @@ public class JMSMessageTransformerTest {
         Assert.assertEquals("123456", messageMap.getStringProperty(REF_TO_MESSAGE_ID));
         if(!putAttachmentsInQueue) {
             File file = new File(FILENAME_TEST);
-            Assert.assertEquals(file.getAbsolutePath(), messageMap.getStringProperty(PAYLOAD_1_FILENAME));
+            Assert.assertEquals(file.getName(), messageMap.getStringProperty(PAYLOAD_1_FILENAME));
         }
     }
 
