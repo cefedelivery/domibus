@@ -152,19 +152,7 @@ public class JMSMessageTransformer
                     messageOut.setBytes(propPayload, IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
                 } else {
                     LOG.debug("putAttachmentsInQueue is false");
-                    // TODO: like the findMime
                     messageOut.setStringProperty(payFileNameProp, findFilename(p.getPayloadProperties()));
-
-                    //messageOut.setStringProperty(payFileNameProp, p.getPayloadDatahandler().getDataSource().getName());
-                    /*DataSource dataSource = p.getPayloadDatahandler().getDataSource();
-                    if(dataSource instanceof FileDataSource) {
-                        LOG.debug("Payload File location will be added as property");
-                        FileDataSource fileDataSource = (FileDataSource) dataSource;
-                        messageOut.setStringProperty(payFileNameProp, fileDataSource.getFile().getAbsolutePath());
-                    } else {
-                        LOG.warn("Payload File location will not be added as property since domibus.attachment.storage.location is not configured");
-                        messageOut.setBytes(propPayload, IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
-                    }*/
                 }
             }
             messageOut.setStringProperty(payMimeTypeProp, findMime(p.getPayloadProperties()));
