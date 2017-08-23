@@ -226,6 +226,15 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 String failedDirectoryLocation = FSFileNameHelper.deriveFailedDirectoryLocation(targetFileMessageURI);
                 FileObject failedDirectory = fsFilesManager.getEnsureChildFolder(rootDir, failedDirectoryLocation);
 
+                // Create error file
+                List<ErrorResult> errors = super.getErrorsForMessage(messageId);
+                if (!errors.isEmpty()) {
+                    ErrorResult lastError = errors.get(errors.size() - 1);
+                    fsFilesManager.createErrorFile(targetFileMessage, failedDirectory, lastError);
+                } else {
+                    LOG.error("Error list should not be empty.");
+                }
+
                 if (fsPluginProperties.isFailedActionDelete(domain)) {
                     // Delete
                     fsFilesManager.deleteFile(targetFileMessage);
@@ -238,15 +247,11 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                     fsFilesManager.moveFile(targetFileMessage, archivedFile);
                     LOG.debug("Send failed message file [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
                 }
-                // Create error file
-                List<ErrorResult> errors = super.getErrorsForMessage(messageId);
-                ErrorResult lastError = errors.get(errors.size() - 1);
-                fsFilesManager.createErrorFile(targetFileMessage, failedDirectory, lastError);
                 return true;
             } else {
                 LOG.error("The send failed file message file was not found. " + messageId);
             }
-        } catch (FileSystemException e) {
+        } catch (IOException e){
             LOG.error("Error handling the send failed message file " + messageId, e);
         }
         return false;
@@ -259,8 +264,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
             if (targetFileMessage != null) {
                 if (fsPluginProperties.isSentActionDelete(domain)) {
+                    //Delete
                     fsFilesManager.deleteFile(targetFileMessage);
-
                     LOG.debug("Successfully sent message file [{}] was deleted", messageId);
                 } else if (fsPluginProperties.isSentActionArchive(domain)) {
                     // Archive

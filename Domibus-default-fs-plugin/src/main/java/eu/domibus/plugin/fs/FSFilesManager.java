@@ -23,6 +23,10 @@ import org.springframework.stereotype.Component;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 import eu.domibus.plugin.fs.vfs.FileObjectDataSource;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+
 /**
  * This class is responsible for performing complex operations using VFS
  *
@@ -154,9 +158,19 @@ public class FSFilesManager {
      * @param failedDirectory
      * @param error
      */
-    public void createErrorFile(FileObject targetFileMessage, FileObject failedDirectory, ErrorResult error) {
+    public void createErrorFile(FileObject targetFileMessage, FileObject failedDirectory, ErrorResult error)
+            throws IOException {
         LOG.warn("Error sending message: " + error.getErrorDetail());
+        String baseName = targetFileMessage.getName().getBaseName();
+        String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + ".error";
 
+        try (FileObject errorFile = failedDirectory.resolveFile(errorFileName);
+             OutputStream errorFileOS = errorFile.getContent().getOutputStream();
+             OutputStreamWriter errorFileOSW = new OutputStreamWriter(errorFileOS)) {
+
+            errorFile.createFile();
+            errorFileOSW.write(error.getErrorDetail());
+        }
     }
 
 }
