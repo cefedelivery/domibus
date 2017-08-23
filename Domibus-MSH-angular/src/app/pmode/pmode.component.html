@@ -1,14 +1,14 @@
-﻿<div class="selectionCriteria">
+﻿<h1 id="pmodeheader_id">PMode</h1>
+<div class="selectionCriteria">
   <md-card>
     <md-card-content>
-      <h1 id="pmodeheader_id">PMode</h1>
       <div class="textarea" *ngIf="pModeExists">
         <textarea id="pmodetextarea_id" class="textarea" disabled>{{pModeContents}}</textarea>
       </div>
       <div class="pModeInfo" *ngIf="!pModeExists">
         <span>No PMode uploaded yet</span>
       </div>
-      <table class="buttonsRow">
+      <table class="group-action-button">
         <tr>
           <td>
             <button md-raised-button color="primary" (click)="upload()" id="uploadbutton_id">
