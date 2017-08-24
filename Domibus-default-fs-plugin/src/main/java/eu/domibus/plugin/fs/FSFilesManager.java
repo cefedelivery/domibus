@@ -2,6 +2,7 @@ package eu.domibus.plugin.fs;
 
 import javax.activation.DataHandler;
 
+import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileObject;
@@ -164,15 +165,16 @@ public class FSFilesManager {
              OutputStream errorFileOS = errorFile.getContent().getOutputStream();
              OutputStreamWriter errorFileOSW = new OutputStreamWriter(errorFileOS)) {
 
+            // Always create the error file
             errorFile.createFile();
             if (!errors.isEmpty()) {
                 ErrorResult lastError = errors.get(errors.size() - 1);
                 errorFileOSW.write(String.valueOf(getErrorFileContent(lastError)));
             } else {
                 // This might occur when the destination host is unreachable
-                String msg = String.format("Error detail information is not available for [%s]", errorFileName);
+                String msg = "Error detail information is not available";
                 errorFileOSW.write(msg);
-                LOG.error(msg);
+                LOG.error(String.format("%s for [%s]", msg, errorFileName));
             }
         }
     }
@@ -186,10 +188,15 @@ public class FSFilesManager {
      */
     private StringBuilder getErrorFileContent(ErrorResult errorResult) throws IOException {
         StringBuilder sb = new StringBuilder();
-        sb.append("reason: ").append(errorResult.getErrorDetail()).append(LS);
-        // TODO: Check ws or jms - we should do the same
-        sb.append("dateTime: ").append(errorResult.getTimestamp().toString()).append(LS);
-        // TODO: Add other info
+        ErrorCode errorCode = errorResult.getErrorCode();
+        if (errorCode != null) {
+            sb.append("errorCode: ").append(errorCode.getErrorCodeName()).append(LS);
+        }
+        sb.append("errorDetail: ").append(errorResult.getErrorDetail()).append(LS);
+        sb.append("messageInErrorId: ").append(errorResult.getMessageInErrorId()).append(LS);
+        sb.append("mshRole: ").append(errorResult.getMshRole()).append(LS);
+        sb.append("notified: ").append(errorResult.getNotified()).append(LS);
+        sb.append("timestamp: ").append(errorResult.getTimestamp()).append(LS);
         return sb;
     }
 
