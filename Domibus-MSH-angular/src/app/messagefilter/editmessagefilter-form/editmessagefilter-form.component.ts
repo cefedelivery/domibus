@@ -4,18 +4,21 @@ import {MD_DIALOG_DATA, MdDialogRef} from "@angular/material";
 import {BackendFilterEntry} from "../backendfilterentry";
 import {isNullOrUndefined} from "util";
 
+let NEW_MODE = 'New Message Filter';
+let EDIT_MODE = 'Message Filter Edit';
+
 @Component({
   selector: 'editmessagefilter-form',
   templateUrl: 'editmessagefilter-form.component.html'
 })
 export class EditMessageFilterComponent {
 
-  submitted = false;
   plugin: string;
   from: string;
   to: string;
   service: string;
   action: string;
+  formTitle: string = EDIT_MODE;
 
   backendFilterNames : Array<String> = [];
 
@@ -25,6 +28,7 @@ export class EditMessageFilterComponent {
               @Inject(MD_DIALOG_DATA) public data: any,
               fb: FormBuilder) {
     if(isNullOrUndefined(data.edit)) {
+      this.formTitle = NEW_MODE;
       this.backendFilterNames = data.backendFilterNames;
       this.plugin = this.backendFilterNames[0].toString();
       this.from = '';
