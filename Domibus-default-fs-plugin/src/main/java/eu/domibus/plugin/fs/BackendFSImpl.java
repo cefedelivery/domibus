@@ -223,7 +223,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
              FileObject targetFileMessage = findMessageFile(outgoingFolder, messageId)) {
 
             if (targetFileMessage != null) {
-                // TODO: Derive error filename
                 String baseName = targetFileMessage.getName().getBaseName();
                 String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + _ERROR;
 
@@ -245,7 +244,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                     }
                 } finally {
                     // Create error file
-                    // TODO: check why the file is not created in the domain scenario
                     List<ErrorResult> errors = super.getErrorsForMessage(messageId);
                     fsFilesManager.createErrorFile(errorFileName, failedDirectory, errors);
                 }

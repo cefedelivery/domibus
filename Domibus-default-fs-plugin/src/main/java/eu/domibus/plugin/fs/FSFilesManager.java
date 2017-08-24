@@ -160,16 +160,19 @@ public class FSFilesManager {
      * @param errors
      */
     public void createErrorFile(String errorFileName, FileObject failedDirectory, List<ErrorResult> errors) throws IOException {
-        if (!errors.isEmpty()) {
-            ErrorResult lastError = errors.get(errors.size() - 1);
-            LOG.warn("Error sending message: " + lastError.getErrorDetail());
+        try (FileObject errorFile = failedDirectory.resolveFile(errorFileName);
+             OutputStream errorFileOS = errorFile.getContent().getOutputStream();
+             OutputStreamWriter errorFileOSW = new OutputStreamWriter(errorFileOS)) {
 
-            try (FileObject errorFile = failedDirectory.resolveFile(errorFileName);
-                 OutputStream errorFileOS = errorFile.getContent().getOutputStream();
-                 OutputStreamWriter errorFileOSW = new OutputStreamWriter(errorFileOS)) {
-
-                errorFile.createFile();
+            errorFile.createFile();
+            if (!errors.isEmpty()) {
+                ErrorResult lastError = errors.get(errors.size() - 1);
                 errorFileOSW.write(String.valueOf(getErrorFileContent(lastError)));
+            } else {
+                // This might occur when the destination host is unreachable
+                String msg = String.format("Error detail information is not available for [%s]", errorFileName);
+                errorFileOSW.write(msg);
+                LOG.error(msg);
             }
         }
     }
