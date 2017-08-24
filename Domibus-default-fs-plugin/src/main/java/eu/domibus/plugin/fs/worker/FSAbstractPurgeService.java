@@ -66,7 +66,7 @@ public abstract class FSAbstractPurgeService {
 
     private void checkAndPurge(FileObject file, Integer expirationLimit) {
         try {
-            if (isFileOlder(file, expirationLimit)) {
+            if (expirationLimit != null && isFileOlder(file, expirationLimit)) {
                 LOG.debug("File [{}] is too old. Deleting", file.getName());
                 fsFilesManager.deleteFile(file);
             } else {
