@@ -167,6 +167,7 @@ public class MessageSender implements MessageListener {
             try {
                 if (abortSending) {
                     LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
+                    //TODO add a new status SEND_ABORT to the CheckResult enum and move this into the  reliabilityService.handleReliability
                     retryService.purgeTimedoutMessage(messageId);
                 } else {
                     reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
