@@ -1,16 +1,5 @@
 package eu.domibus.plugin.fs;
 
-import static eu.domibus.common.MessageStatus.*;
-
-import java.io.IOException;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
 import eu.domibus.common.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -18,20 +7,23 @@ import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.fs.ebms3.CollaborationInfo;
 import eu.domibus.plugin.fs.exception.FSPluginException;
+import eu.domibus.plugin.fs.exception.FSSetUpException;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.tika.mime.MimeTypeException;
-
-import eu.domibus.plugin.fs.exception.FSSetUpException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.activation.DataHandler;
+import java.io.IOException;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import static eu.domibus.common.MessageStatus.*;
 
 /**
  * File system backend integration plugin.
@@ -42,7 +34,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
 
-    private static final String _ERROR = ".error";
+    private static final String LS = System.lineSeparator();
+    private static final String ERROR_EXTENSION = ".error";
 
     private static final Set<MessageStatus> SENDING_MESSAGE_STATUSES = EnumSet.of(
             READY_TO_SEND, SEND_ENQUEUED, SEND_IN_PROGRESS, WAITING_FOR_RECEIPT,
@@ -224,7 +217,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
             if (targetFileMessage != null) {
                 String baseName = targetFileMessage.getName().getBaseName();
-                String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + _ERROR;
+                String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + ERROR_EXTENSION;
 
                 String targetFileMessageURI = targetFileMessage.getParent().getName().getURI();
                 String failedDirectoryLocation = FSFileNameHelper.deriveFailedDirectoryLocation(targetFileMessageURI);
@@ -244,8 +237,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                     }
                 } finally {
                     // Create error file
-                    List<ErrorResult> errors = super.getErrorsForMessage(messageId);
-                    fsFilesManager.createErrorFile(errorFileName, failedDirectory, errors);
+                    createErrorFile(messageId, errorFileName, failedDirectory);
                 }
                 return true;
             } else {
@@ -255,6 +247,41 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             LOG.error("Error handling the send failed message file " + messageId, e);
         }
         return false;
+    }
+
+    private void createErrorFile(String messageId, String errorFileName, FileObject failedDirectory) throws IOException {
+        List<ErrorResult> errors = super.getErrorsForMessage(messageId);
+        String content;
+        if (!errors.isEmpty()) {
+            ErrorResult lastError = errors.get(errors.size() - 1);
+            content = String.valueOf(getErrorFileContent(lastError));
+        } else {
+            // This might occur when the destination host is unreachable
+            content = "Error detail information is not available";
+            LOG.error(String.format("%s for [%s]", content, errorFileName));
+        }
+        fsFilesManager.createFile(failedDirectory, errorFileName, content);
+    }
+
+    /**
+     * Error file must contain the reason for the error, the date and time, the number of retries, and the stacktrace.
+     * When possible, hints on how the issue can be solved should be added.
+     *
+     * @param errorResult
+     * @throws IOException
+     */
+    private StringBuilder getErrorFileContent(ErrorResult errorResult) {
+        StringBuilder sb = new StringBuilder();
+        ErrorCode errorCode = errorResult.getErrorCode();
+        if (errorCode != null) {
+            sb.append("errorCode: ").append(errorCode.getErrorCodeName()).append(LS);
+        }
+        sb.append("errorDetail: ").append(errorResult.getErrorDetail()).append(LS);
+        sb.append("messageInErrorId: ").append(errorResult.getMessageInErrorId()).append(LS);
+        sb.append("mshRole: ").append(errorResult.getMshRole()).append(LS);
+        sb.append("notified: ").append(errorResult.getNotified()).append(LS);
+        sb.append("timestamp: ").append(errorResult.getTimestamp()).append(LS);
+        return sb;
     }
 
     private boolean handleSentMessage(String messageId, String domain) {
