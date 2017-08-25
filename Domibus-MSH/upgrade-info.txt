@@ -58,6 +58,10 @@ Domibus 3.3-FR (from 3.3-RC1)
                         - add the property "domibus.datasource.maxPoolSize=100"
                         - add the property "domibus.datasource.maxLifetime=60"
                         - add the property "domibus.datasource.xa.maxLifetime=60"
+               - [WebLogic only]
+                    o modify the following parameters for the queue DomibusSendMessageQueue(jms/domibus.internal.dispatch.queue):
+                        - Set "Expiration Policy" to "Discard"
+                        - Set "Error Destination" to "None"
 Domibus 3.3-RC1 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-rc1-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-rc1-migration.ddl for Oracle)
