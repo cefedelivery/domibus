@@ -4,6 +4,8 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.MessageType;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.util.Date;
 
@@ -197,7 +199,7 @@ public class MessageLogInfo {
 
         MessageLogInfo that = (MessageLogInfo) o;
 
-        return new org.apache.commons.lang3.builder.EqualsBuilder()
+        return new EqualsBuilder()
                 .append(sendAttempts, that.sendAttempts)
                 .append(sendAttemptsMax, that.sendAttemptsMax)
                 .append(conversationId, that.conversationId)
@@ -221,7 +223,7 @@ public class MessageLogInfo {
 
     @Override
     public int hashCode() {
-        return new org.apache.commons.lang3.builder.HashCodeBuilder(17, 37)
+        return new HashCodeBuilder(17, 37)
                 .append(conversationId)
                 .append(fromPartyId)
                 .append(toPartyId)
