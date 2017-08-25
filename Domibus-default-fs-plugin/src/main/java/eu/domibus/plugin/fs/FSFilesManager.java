@@ -139,7 +139,7 @@ public class FSFilesManager {
     }
 
     /**
-     * Creates a file in the directory with the given file name anc content.
+     * Creates a file in the directory with the given file name and content.
      *
      * @param directory base directory
      * @param fileName file name
