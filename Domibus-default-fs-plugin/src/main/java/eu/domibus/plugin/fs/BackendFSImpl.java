@@ -210,7 +210,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         // Probably, the AbstractBackendConnector should implement a default no-op
     }
 
-    private boolean handleSendFailedMessage(String messageId, String domain) {
+    private void handleSendFailedMessage(String domain, String messageId) {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
              FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
              FileObject targetFileMessage = findMessageFile(outgoingFolder, messageId)) {
@@ -239,14 +239,12 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                     // Create error file
                     createErrorFile(messageId, errorFileName, failedDirectory);
                 }
-                return true;
             } else {
-                LOG.error("The send failed file message file was not found. " + messageId);
+                LOG.error("The send failed message file [{}] was not found in domain [{}]", messageId, domain);
             }
         } catch (IOException e){
             LOG.error("Error handling the send failed message file " + messageId, e);
         }
-        return false;
     }
 
     private void createErrorFile(String messageId, String errorFileName, FileObject failedDirectory) throws IOException {
@@ -277,7 +275,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         return sb;
     }
 
-    private boolean handleSentMessage(String messageId, String domain) {
+    private void handleSentMessage(String domain, String messageId) {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
              FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
              FileObject targetFileMessage = findMessageFile(outgoingFolder, messageId)) {
@@ -300,14 +298,12 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
                     LOG.debug("Successfully sent message file [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
                 }
-                return true;
             } else {
-                LOG.error("The successfully sent message file was not found. " + messageId);
+                LOG.error("The successfully sent message file [{}] was not found in domain [{}]", messageId, domain);
             }
         } catch (FileSystemException e) {
-            LOG.error("Error handling the successfully sent message file " + messageId, e);
+            LOG.error("Error handling the successfully sent message file [" + messageId + "]", e);
         }
-        return false;
     }
 
     private FileObject findMessageFile(FileObject parentDir, String messageId) throws FileSystemException {
@@ -330,49 +326,20 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     @Override
     public void messageStatusChanged(MessageStatusChangeEvent event) {
         String messageId = event.getMessageId();
-        LOG.debug("Message [{}] changed status from [{}] to [{}]", messageId, event.getFromStatus(), event.getToStatus());
+        Map<String, Object> properties = event.getProperties();
+        String service = (String) properties.get("service");
+        String action = (String) properties.get("action");
+        String domain = resolveDomain(service, action);
+
+        LOG.debug("Message [{}] changed status from [{}] to [{}] in domain [{}]",
+                messageId, event.getFromStatus(), event.getToStatus(), domain);
 
         if (isSendingEvent(event)) {
-            handleSendingEvent(event, messageId);
+            renameMessageFile(domain, messageId, event.getToStatus());
         } else if (isSendSuccessEvent(event)) {
-            handleSendSuccessEvent(messageId);
+            handleSentMessage(domain, messageId);
         } else if (isSendFailedEvent(event)) {
-            handleSendFailedEvent(messageId);
-        }
-
-    }
-
-    private void handleSendFailedEvent(String messageId) {
-        boolean messageFound = handleSendFailedMessage(messageId, null);
-        if (!messageFound) {
-            for (String domain : fsPluginProperties.getDomains()) {
-                if (handleSendFailedMessage(messageId, domain)) {
-                    break; // target file found
-                }
-            }
-        }
-    }
-
-    private void handleSendSuccessEvent(String messageId) {
-        boolean messageFound = handleSentMessage(messageId, null);
-        if (!messageFound) {
-            for (String domain : fsPluginProperties.getDomains()) {
-                if (handleSentMessage(messageId, domain)) {
-                    break; // target file found
-                }
-            }
-        }
-    }
-
-    private void handleSendingEvent(MessageStatusChangeEvent event, String messageId) {
-        boolean fileRenamed = renameMessageFile(null, messageId, event.getToStatus());
-        if (!fileRenamed) {
-            for (String domain : fsPluginProperties.getDomains()) {
-                fileRenamed = renameMessageFile(domain, messageId, event.getToStatus());
-                if (fileRenamed) {
-                    break;
-                }
-            }
+            handleSendFailedMessage(domain, messageId);
         }
     }
 
@@ -388,7 +355,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         return SEND_FAILED_MESSAGE_STATUSES.contains(event.getToStatus());
     }
 
-    private boolean renameMessageFile(String domain, String messageId, MessageStatus status) {
+    private void renameMessageFile(String domain, String messageId, MessageStatus status) {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
                 FileObject targetFile = findMessageFile(outgoingFolder, messageId)) {
@@ -397,18 +364,14 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 String baseName = targetFile.getName().getBaseName();
                 String newName = FSFileNameHelper.deriveFileName(baseName, status);
                 fsFilesManager.renameFile(targetFile, newName);
-                
-                return true;
             } else {
-                LOG.error("The message to rename was not found. " + messageId);
+                LOG.error("The message to rename [{}] was not found in domain [{}]", messageId, domain);
             }
         } catch (FileSystemException ex) {
             LOG.error("Error renaming file", ex);
         } catch (FSSetUpException ex) {
-            LOG.error("Error setting up folders for domain: " + domain, ex);
+            LOG.error("Error setting up folders for domain [" + domain + "]", ex);
         }
-        
-        return false;
     }
 
 }
