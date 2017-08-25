@@ -27,7 +27,7 @@ public class SmbFileProvider
             UserAuthenticationData.USERNAME, UserAuthenticationData.PASSWORD, UserAuthenticationData.DOMAIN
         };
 
-    static final Collection<Capability> capabilities =
+    static final Collection<Capability> CAPABILITIES =
         Collections.unmodifiableCollection(Arrays.asList(new Capability[]
             {
                 Capability.CREATE,
@@ -52,6 +52,10 @@ public class SmbFileProvider
 
     /**
      * Creates the filesystem.
+     * @param name The name of the root file of the file system to create.
+     * @param fileSystemOptions The FileSystem options.
+     * @return The FileSystem.
+     * @throws FileSystemException if an error occurs.
      */
     @Override
     protected FileSystem doCreateFileSystem(final FileName name, final FileSystemOptions fileSystemOptions)
@@ -63,7 +67,7 @@ public class SmbFileProvider
     @Override
     public Collection<Capability> getCapabilities()
     {
-        return capabilities;
+        return CAPABILITIES;
     }
 
     static UserAuthenticationData.Type[] getAuthenticatorTypes() {

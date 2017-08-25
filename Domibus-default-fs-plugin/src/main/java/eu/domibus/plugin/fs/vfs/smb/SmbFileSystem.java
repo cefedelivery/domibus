@@ -40,6 +40,6 @@ public class SmbFileSystem
     @Override
     protected void addCapabilities(final Collection<Capability> caps)
     {
-        caps.addAll(SmbFileProvider.capabilities);
+        caps.addAll(SmbFileProvider.CAPABILITIES);
     }
 }
