@@ -139,13 +139,11 @@ public class FSFilesManager {
     }
 
     /**
-     * When the message has failed to be sent from C2 to C3 and it will contain the failed reason in plain text.
-     * This error file must contain the reason for the error, the date and time, the number of retries, and the stacktrace.
-     * When possible, hints on how the issue can be solved should be added.
+     * Creates a file in the directory with the given file name anc content.
      *
-     * @param fileName
-     * @param directory
-     * @param fileContent
+     * @param directory base directory
+     * @param fileName file name
+     * @param fileContent content
      */
     public void createFile(FileObject directory, String fileName, String fileContent) throws IOException {
         try (FileObject errorFile = directory.resolveFile(fileName);

@@ -263,13 +263,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         fsFilesManager.createFile(failedDirectory, errorFileName, content);
     }
 
-    /**
-     * Error file must contain the reason for the error, the date and time, the number of retries, and the stacktrace.
-     * When possible, hints on how the issue can be solved should be added.
-     *
-     * @param errorResult
-     * @throws IOException
-     */
     private StringBuilder getErrorFileContent(ErrorResult errorResult) {
         StringBuilder sb = new StringBuilder();
         ErrorCode errorCode = errorResult.getErrorCode();
@@ -343,7 +336,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             handleSendingEvent(event, messageId);
         } else if (isSendSuccessEvent(event)) {
             handleSendSuccessEvent(messageId);
-        } else if (isMessageSendFailedEvent(event)) {
+        } else if (isSendFailedEvent(event)) {
             handleSendFailedEvent(messageId);
         }
 
@@ -391,7 +384,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         return SEND_SUCCESS_MESSAGE_STATUSES.contains(event.getToStatus());
     }
 
-    private boolean isMessageSendFailedEvent(MessageStatusChangeEvent event) {
+    private boolean isSendFailedEvent(MessageStatusChangeEvent event) {
         return SEND_FAILED_MESSAGE_STATUSES.contains(event.getToStatus());
     }
 
