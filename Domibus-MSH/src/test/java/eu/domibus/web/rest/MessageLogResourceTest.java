@@ -88,7 +88,9 @@ public class MessageLogResourceTest {
                 "toPartyId",
                 "originalSender",
                 "finalRecipient",
-                "refToMessageId");
+                "refToMessageId",
+                userMessageLog.getFailed(),
+                userMessageLog.getRestored());
         final List<MessageLogInfo> resultList = new ArrayList<>();
         resultList.add(messageLogInfo);
         new Expectations() {{
@@ -135,7 +137,9 @@ public class MessageLogResourceTest {
                 "toPartyId",
                 "originalSender",
                 "finalRecipient",
-                "refToMessageId");
+                "refToMessageId",
+                signalMessageLog.getFailed(),
+                signalMessageLog.getRestored());
         final ArrayList<MessageLogInfo> resultList = new ArrayList<>();
         resultList.add(messageLogInfo);
         new Expectations() {{

@@ -2,7 +2,7 @@ package eu.domibus.common.model.logging;
 
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Tiago Miguel
@@ -11,7 +11,7 @@ import java.util.HashMap;
 @Service(value = "userMessageLogInfoFilter")
 public class UserMessageLogInfoFilter extends MessageLogInfoFilter {
 
-    private final static String QUERY_BODY = " from UserMessageLog log, " +
+    private static final String QUERY_BODY = " from UserMessageLog log, " +
             "UserMessage message " +
             "left join log.messageInfo info " +
             "left join message.messageProperties.property propsFrom " +
@@ -21,7 +21,7 @@ public class UserMessageLogInfoFilter extends MessageLogInfoFilter {
             "where message.messageInfo = info and propsFrom.name = 'originalSender'" +
             "and propsTo.name = 'finalRecipient'";
 
-    public String filterUserMessageLogQuery(String column, boolean asc, HashMap<String, Object> filters) {
+    public String filterUserMessageLogQuery(String column, boolean asc, Map<String, Object> filters) {
         String query = "select new eu.domibus.common.model.logging.MessageLogInfo(" +
                 "log.messageId," +
                 "log.messageStatus," +
@@ -38,12 +38,15 @@ public class UserMessageLogInfoFilter extends MessageLogInfoFilter {
                 "partyTo.value," +
                 "propsFrom.value," +
                 "propsTo.value," +
-                "info.refToMessageId)" + QUERY_BODY;
+                "info.refToMessageId," +
+                "log.failed," +
+                "log.restored" +
+                ")" + QUERY_BODY;
         StringBuilder result = filterQuery(query, column, asc, filters);
         return result.toString();
     }
 
-    public String countUserMessageLogQuery(boolean asc, HashMap<String, Object> filters) {
+    public String countUserMessageLogQuery(boolean asc, Map<String, Object> filters) {
         String query = "select count(message.id)" + QUERY_BODY;
 
         StringBuilder result = filterQuery(query, null, asc, filters);
