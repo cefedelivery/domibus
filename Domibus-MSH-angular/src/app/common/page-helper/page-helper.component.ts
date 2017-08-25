@@ -35,7 +35,6 @@ export class PageHelperComponent implements OnInit {
         let page = this.helpPages.get(event.url);
         if (isNullOrUndefined(page)) {
           this.activateHelp = false;
-          return;
         } else {
           this.activateHelp = true;
           this.pageName = page.toString();
