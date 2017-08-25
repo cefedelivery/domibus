@@ -1,5 +1,5 @@
 import {Component, TemplateRef, ViewChild} from "@angular/core";
-import {Http, URLSearchParams, Response} from "@angular/http";
+import {Http, Response, URLSearchParams} from "@angular/http";
 import {MessageLogResult} from "./messagelogresult";
 import {Observable} from "rxjs";
 import {AlertService} from "../alert/alert.service";
@@ -131,9 +131,6 @@ export class MessageLogComponent {
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type"].indexOf(col.name) != -1
     })
-
-    this.filter.receivedTo = new Date()
-    this.filter.receivedTo.setHours(23, 59, 59, 999)
 
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc)
   }

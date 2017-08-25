@@ -16,8 +16,21 @@
             <input mdInput placeholder="Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId"
                    #messageInErrorId="ngModel" id="messageid_id">
           </md-input-container>
-
-          <br *ngIf="!advancedSearch">
+          <md2-datepicker placeholder="Error from:"
+                          [(ngModel)]="filter.timestampFrom"
+                          name="fromTimestmap"
+                          [type]="'datetime'"
+                          [max]="timestampFromMaxDate"
+                          (change)='onTimestampFromChange($event)'
+                          #timestampControl="ngModel" id="fromtimestamp_id"></md2-datepicker>
+          <md2-datepicker placeholder="Error to:"
+                          [(ngModel)]="filter.timestampTo"
+                          name="toTimestmap"
+                          [min]="timestampToMinDate"
+                          [max]="timestampToMaxDate"
+                          (change)='onTimestampToChange($event)'
+                          [type]="'datetime'"
+                          #timestampControl="ngModel" id="totimestamp_id"></md2-datepicker>
 
           <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Error detail" name="ErrorDetail" [(ngModel)]="filter.errorDetail"
@@ -42,26 +55,6 @@
             </md-option>
           </md-select>
 
-          <br *ngIf="advancedSearch">
-
-
-          <md2-datepicker placeholder="Error from:"
-                          [(ngModel)]="filter.timestampFrom"
-                          name="fromTimestmap"
-                          [type]="'datetime'"
-                          [max]="timestampFromMaxDate"
-                          (change)='onTimestampFromChange($event)'
-                          #timestampControl="ngModel" id="fromtimestamp_id"></md2-datepicker>
-          <md2-datepicker placeholder="Error to:"
-                          [(ngModel)]="filter.timestampTo"
-                          name="toTimestmap"
-                          [min]="timestampToMinDate"
-                          [max]="timestampToMaxDate"
-                          (change)='onTimestampToChange($event)'
-                          [type]="'datetime'"
-                          #timestampControl="ngModel" id="totimestamp_id"></md2-datepicker>
-
-          <br *ngIf="advancedSearch">
 
           <md2-datepicker placeholder="Notified from:"
                           [(ngModel)]="filter.notifiedFrom"

@@ -11,13 +11,26 @@
             <input mdInput placeholder="Message Id" name="messageId" [(ngModel)]="filter.messageId"
                    #messageId="ngModel" id="messageid_id">
           </md-input-container>
+          <md-select placeholder="Message Status" [(ngModel)]="filter.messageStatus" name="messageStatus"
+                     id="messagestatus_id">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let mstatus of msgStatus" [value]="mstatus">
+              {{mstatus}}
+            </md-option>
+          </md-select>
+          <md-input-container class="inputFieldParties">
+            <input mdInput placeholder="From Party Id" name="fromPartyId" [(ngModel)]="filter.fromPartyId"
+                   #fromPartyId="ngModel" id="frompartyid_id">
+          </md-input-container>
+          <md-input-container class="inputFieldParties">
+            <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId"
+                   #toPartyId="ngModel" id="topartyid_id">
+          </md-input-container>
           <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Conversation Id" name="conversationId" [(ngModel)]="filter.conversationId"
                    #conversationId="ngModel" id="conversationid_id">
           </md-input-container>
-
-          <br *ngIf="advancedSearch">
-
           <md-select placeholder="AP Role" name="mshRole" [(ngModel)]="filter.mshRole" id="aprole_id"
                      *ngIf="advancedSearch">
             <md-option [value]="''">
@@ -32,14 +45,6 @@
               {{type}}
             </md-option>
           </md-select>
-          <md-select placeholder="Message Status" [(ngModel)]="filter.messageStatus" name="messageStatus"
-                     id="messagestatus_id">
-            <md-option [value]="''">
-            </md-option>
-            <md-option *ngFor="let mstatus of msgStatus" [value]="mstatus">
-              {{mstatus}}
-            </md-option>
-          </md-select>
           <md-select placeholder="Notification Status" [(ngModel)]="filter.notificationStatus" class="optionField"
                      name="notificationStatus" id="notificationstatus_id" *ngIf="advancedSearch">
             <md-option [value]="''">
@@ -48,14 +53,6 @@
               {{nstatus}}
             </md-option>
           </md-select>
-          <md-input-container class="inputFieldParties">
-            <input mdInput placeholder="From Party Id" name="fromPartyId" [(ngModel)]="filter.fromPartyId"
-                   #fromPartyId="ngModel" id="frompartyid_id">
-          </md-input-container>
-          <md-input-container class="inputFieldParties">
-            <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId"
-                   #toPartyId="ngModel" id="topartyid_id">
-          </md-input-container>
           <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Reference Message Id" name="refToMessageId" [(ngModel)]="filter.refToMessageId"
                    #refToMessageId="ngModel" id="referencemessageid_id">
