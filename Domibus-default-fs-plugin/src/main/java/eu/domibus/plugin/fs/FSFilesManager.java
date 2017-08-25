@@ -143,15 +143,15 @@ public class FSFilesManager {
      *
      * @param directory base directory
      * @param fileName file name
-     * @param fileContent content
+     * @param content content
      */
-    public void createFile(FileObject directory, String fileName, String fileContent) throws IOException {
-        try (FileObject errorFile = directory.resolveFile(fileName);
-             OutputStream errorFileOS = errorFile.getContent().getOutputStream();
-             OutputStreamWriter errorFileOSW = new OutputStreamWriter(errorFileOS)) {
+    public void createFile(FileObject directory, String fileName, String content) throws IOException {
+        try (FileObject file = directory.resolveFile(fileName);
+             OutputStream fileOS = file.getContent().getOutputStream();
+             OutputStreamWriter fileOSW = new OutputStreamWriter(fileOS)) {
 
-            errorFile.createFile();
-            errorFileOSW.write(fileContent);
+            file.createFile();
+            fileOSW.write(content);
         }
     }
 

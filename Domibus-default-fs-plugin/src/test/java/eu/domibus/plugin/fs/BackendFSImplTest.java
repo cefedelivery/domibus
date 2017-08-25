@@ -1,7 +1,6 @@
 package eu.domibus.plugin.fs;
 
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.MessageStatusChangeEvent;
+import eu.domibus.common.*;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.MessageLister;
 import eu.domibus.plugin.Submission;
@@ -556,6 +555,50 @@ public class BackendFSImplTest {
                     Assert.assertEquals("ram:///BackendFSImplTest/FAILED/content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml", file.getName().getURI());
                 }
             }));
+        }};
+    }
+
+    @Test
+    public void testMessageStatusChanged_SendFailedErrorFile() throws IOException {
+        MessageStatusChangeEvent event = new MessageStatusChangeEvent();
+        event.setMessageId("3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
+        event.setFromStatus(MessageStatus.SEND_ENQUEUED);
+        event.setToStatus(MessageStatus.SEND_FAILURE);
+        event.setChangeTimestamp(new Timestamp(new Date().getTime()));
+
+        final FileObject contentFile = outgoingFolder.resolveFile("content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml.SEND_ENQUEUED");
+
+        final List<ErrorResult> errorList = new ArrayList<>();
+        ErrorResultImpl errorResult = new ErrorResultImpl();
+        errorResult.setErrorCode(ErrorCode.EBMS_0001);
+        errorList.add(errorResult);
+
+        new Expectations(1, backendFS) {{
+            fsFilesManager.setUpFileSystem(null);
+            result = rootDir;
+
+            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+            result = outgoingFolder;
+
+            fsFilesManager.findAllDescendantFiles(outgoingFolder);
+            result = new FileObject[] { contentFile };
+
+            fsPluginProperties.isFailedActionDelete(null);
+            result = true;
+
+            fsFilesManager.getEnsureChildFolder(rootDir, "ram:///BackendFSImplTest/FAILED/");
+            result = failedFolder;
+
+            backendFS.getErrorsForMessage("3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
+            result = errorList;
+        }};
+
+        backendFS.messageStatusChanged(event);
+
+        contentFile.close();
+
+        new VerificationsInOrder(1) {{
+            fsFilesManager.deleteFile(contentFile);
         }};
     }
 
