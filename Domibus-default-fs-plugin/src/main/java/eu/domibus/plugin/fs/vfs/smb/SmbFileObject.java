@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 
 import org.apache.commons.vfs2.FileName;
+import org.apache.commons.vfs2.FileNotFoundException;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
@@ -224,9 +225,13 @@ public class SmbFileObject
         }
         catch (final SmbException e)
         {
-            if (e.getErrorCode() == SmbException.ERRbadfile)
+            // See https://msdn.microsoft.com/en-us/library/ee441884.aspx
+            // In particular, information for ERRbadfile
+            if (e.getNtStatus() == SmbException.NT_STATUS_NO_SUCH_FILE
+                    || e.getNtStatus() == SmbException.NT_STATUS_NO_SUCH_DEVICE
+                    || e.getNtStatus() == SmbException.NT_STATUS_OBJECT_NAME_NOT_FOUND)
             {
-                throw new org.apache.commons.vfs2.FileNotFoundException(getName());
+                throw new FileNotFoundException(getName());
             }
             else if (file.isDirectory())
             {
