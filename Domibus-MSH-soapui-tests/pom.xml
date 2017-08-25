@@ -51,7 +51,7 @@
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
                     <testSuite>WS-Auto for Bamboo</testSuite>
-                    <testCase>Dom001-Push-Submit Message-Basic Flow</testCase>
+                    <!--<testCase>Dom141-Pull-Submit Message-Basic Flow</testCase>-->
                     <projectProperties>
                         <value>${localUrl}</value>
                         <value>${remoteUrl}</value>
@@ -88,7 +88,7 @@
                         </property>
                     </soapuiProperties>
                     <testFailIgnore>false</testFailIgnore>
-                    <projectFile>${soapui.root.folder}/AS4-domibus-WS-soapui-project.xml</projectFile>
+                    <projectFile>${soapui.root.folder}/AS4-domibus-WS-soapui-project-pushONLY.xml</projectFile>
                 </configuration>
 
                 <dependencies>

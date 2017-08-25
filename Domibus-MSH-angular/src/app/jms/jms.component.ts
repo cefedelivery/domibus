@@ -105,7 +105,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.request.toDate.setHours(23, 59, 59, 999)
 
     this.getDestinations().subscribe((response: Response) => {
-      this.setDefaultQueue('domibus.DLQ');
+      this.setDefaultQueue('[d|D]omibus.?DLQ');
       this.search();
     });
 
@@ -132,7 +132,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
   private setDefaultQueue(queueName: string) {
     this.queues.forEach(queue => {
-      if (queue.name === queueName) {
+      if (queue.name.match(queueName)) {
         this.selectedSource = queue;
       }
     })
