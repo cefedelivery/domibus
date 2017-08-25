@@ -1,5 +1,7 @@
 package eu.domibus.plugin.fs.vfs.smb;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.vfs2.FileName;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
@@ -129,4 +131,33 @@ public class SmbFileName extends GenericFileName
     {
         return domain;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        SmbFileName smbFileName = (SmbFileName) o;
+
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(share, smbFileName.share)
+                .append(domain, smbFileName.domain)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(share)
+                .append(domain)
+                .toHashCode();
+    }
+    
 }

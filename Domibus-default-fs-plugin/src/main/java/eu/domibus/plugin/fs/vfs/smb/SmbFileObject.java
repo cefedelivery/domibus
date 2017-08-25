@@ -28,14 +28,12 @@ import jcifs.smb.SmbFileOutputStream;
 public class SmbFileObject
     extends AbstractFileObject<SmbFileSystem>
 {
-    // private final String fileName;
     private SmbFile file;
 
     protected SmbFileObject(final AbstractFileName name,
                             final SmbFileSystem fileSystem) throws FileSystemException
     {
         super(name, fileSystem);
-        // this.fileName = UriParser.decode(name.getURI());
     }
 
     /**
@@ -91,7 +89,7 @@ public class SmbFileObject
 
             // if auth == null SmbFile uses default credentials
             // ("jcifs.smb.client.domain", "?"), ("jcifs.smb.client.username", "GUEST"),
-            // ("jcifs.smb.client.password", BLANK);
+            // ("jcifs.smb.client.password", BLANK)
             // ANONYMOUS=("","","")
             createdFile = new SmbFile(path, auth);
 
