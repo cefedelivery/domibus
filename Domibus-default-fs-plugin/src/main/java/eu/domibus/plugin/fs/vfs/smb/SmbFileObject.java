@@ -40,6 +40,7 @@ public class SmbFileObject
 
     /**
      * Attaches this file object to its file resource.
+     * @throws Exception if an error occurs.
      */
     @Override
     protected void doAttach() throws Exception
@@ -66,7 +67,7 @@ public class SmbFileObject
         final String path = smbFileName.getUriWithoutAuth();
 
         UserAuthenticationData authData = null;
-        SmbFile file;
+        SmbFile createdFile;
         try
         {
             authData = UserAuthenticatorUtils.authenticate(
@@ -92,13 +93,13 @@ public class SmbFileObject
             // ("jcifs.smb.client.domain", "?"), ("jcifs.smb.client.username", "GUEST"),
             // ("jcifs.smb.client.password", BLANK);
             // ANONYMOUS=("","","")
-            file = new SmbFile(path, auth);
+            createdFile = new SmbFile(path, auth);
 
-            if (file.isDirectory() && !file.toString().endsWith("/"))
+            if (createdFile.isDirectory() && !createdFile.toString().endsWith("/"))
             {
-                file = new SmbFile(path + "/", auth);
+                createdFile = new SmbFile(path + "/", auth);
             }
-            return file;
+            return createdFile;
         }
         finally
         {
@@ -109,6 +110,8 @@ public class SmbFileObject
     /**
      * Determines the type of the file, returns null if the file does not
      * exist.
+     * @return the type of the file.
+     * @throws Exception if an error occurs.
      */
     @Override
     protected FileType doGetType() throws Exception
@@ -132,6 +135,9 @@ public class SmbFileObject
     /**
      * Lists the children of the file.  Is only called if {@link #doGetType}
      * returns {@link FileType#FOLDER}.
+     * @return a possible empty String array if the file is a directory or null or an exception if the
+     * file is not a directory or can't be read.
+     * @throws Exception if an error occurs.
      */
     @Override
     protected String[] doListChildren() throws Exception
@@ -147,6 +153,8 @@ public class SmbFileObject
 
     /**
      * Determines if this file is hidden.
+     * @return true if the file is hidden, false otherwise.
+     * @throws Exception if an error occurs.
      */
     @Override
     protected boolean doIsHidden() throws Exception
@@ -156,6 +164,7 @@ public class SmbFileObject
 
     /**
      * Deletes the file.
+     * @throws Exception if an error occurs
      */
     @Override
     protected void doDelete() throws Exception
@@ -171,6 +180,7 @@ public class SmbFileObject
 
     /**
      * Creates this file as a folder.
+     * @throws Exception if an error occurs.
      */
     @Override
     protected void doCreateFolder() throws Exception
@@ -181,6 +191,8 @@ public class SmbFileObject
 
     /**
      * Returns the size of the file content (in bytes).
+     * @return The size of the file in bytes.
+     * @throws Exception if an error occurs.
      */
     @Override
     protected long doGetContentSize() throws Exception
@@ -190,6 +202,8 @@ public class SmbFileObject
 
     /**
      * Returns the last modified time of this file.
+     * @return The last modification time.
+     * @throws Exception if an error occurs.
      */
     @Override
     protected long doGetLastModifiedTime()
@@ -200,6 +214,8 @@ public class SmbFileObject
 
     /**
      * Creates an input stream to read the file content from.
+     * @return An InputStream to read the file content.
+     * @throws Exception if an error occurs.
      */
     @Override
     protected InputStream doGetInputStream() throws Exception
@@ -225,6 +241,9 @@ public class SmbFileObject
 
     /**
      * Creates an output stream to write the file content to.
+     * @param bAppend true if the file should be appended to, false if it should be overwritten.
+     * @return An OutputStream to write to the file.
+     * @throws Exception if an error occurs.
      */
     @Override
     protected OutputStream doGetOutputStream(final boolean bAppend) throws Exception

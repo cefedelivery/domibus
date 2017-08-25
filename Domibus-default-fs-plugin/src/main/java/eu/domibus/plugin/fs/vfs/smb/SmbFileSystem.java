@@ -24,6 +24,9 @@ public class SmbFileSystem
 
     /**
      * Creates a file object.
+     * @param name name referencing the new file.
+     * @return new created FileObject.
+     * @throws FileSystemException if an error occurs.
      */
     @Override
     protected FileObject createFile(final AbstractFileName name) throws FileSystemException
