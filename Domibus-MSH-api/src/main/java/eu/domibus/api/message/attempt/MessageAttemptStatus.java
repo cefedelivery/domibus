@@ -7,5 +7,6 @@ package eu.domibus.api.message.attempt;
  */
 public enum MessageAttemptStatus {
     SUCCESS,
+    ABORT,
     ERROR;
 }

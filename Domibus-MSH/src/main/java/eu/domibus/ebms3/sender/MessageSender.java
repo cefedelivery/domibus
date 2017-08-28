@@ -7,7 +7,9 @@ import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -36,7 +38,8 @@ import javax.jms.MessageListener;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
-import java.util.Properties;
+import java.util.EnumSet;
+import java.util.Set;
 
 
 /**
@@ -48,6 +51,8 @@ import java.util.Properties;
 @Service(value = "messageSenderService")
 public class MessageSender implements MessageListener {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageSender.class);
+
+    private static final Set<MessageStatus> ALLOWED_STATUSES_FOR_SENDING = EnumSet.of(MessageStatus.SEND_ENQUEUED, MessageStatus.WAITING_FOR_RETRY);
 
     @Autowired
     private UserMessageService userMessageService;
@@ -86,8 +91,18 @@ public class MessageSender implements MessageListener {
     @Autowired
     private ReliabilityService reliabilityService;
 
+    @Autowired
+    UserMessageLogDao userMessageLogDao;
+
 
     private void sendUserMessage(final String messageId) {
+        final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
+        if (!ALLOWED_STATUSES_FOR_SENDING.contains(messageStatus)) {
+            LOG.warn("Message [{}] has a status [{}] which is not allowed for sending. Only the statuses [{}] are allowed", messageId, messageStatus, ALLOWED_STATUSES_FOR_SENDING);
+            return;
+        }
+
+
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
 
         MessageAttempt attempt = new MessageAttempt();
@@ -131,6 +146,8 @@ public class MessageSender implements MessageListener {
                 messageExchangeService.verifyReceiverCerficate(legConfiguration, receiverParty.getName());
                 messageExchangeService.verifySenderCertificate(legConfiguration, sendingParty.getName());
             } catch (ChainCertificateInvalidException ccie) {
+                attemptError = ccie.getMessage();
+                attemptStatus = MessageAttemptStatus.ABORT;
                 // this flag is used in the finally clause
                 abortSending = true;
                 return;
@@ -167,17 +184,14 @@ public class MessageSender implements MessageListener {
             try {
                 if (abortSending) {
                     LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
-                    //TODO add a new status SEND_ABORT to the CheckResult enum and move this into the  reliabilityService.handleReliability
                     retryService.purgeTimedoutMessage(messageId);
                 } else {
                     reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
-
-                    attempt.setError(attemptError);
-                    attempt.setStatus(attemptStatus);
-                    attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
-                    messageAttemptService.create(attempt);
-
                 }
+                attempt.setError(attemptError);
+                attempt.setStatus(attemptStatus);
+                attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
+                messageAttemptService.create(attempt);
             } catch (Exception e) {
                 LOG.error("Error in the finally block ", e);
             }

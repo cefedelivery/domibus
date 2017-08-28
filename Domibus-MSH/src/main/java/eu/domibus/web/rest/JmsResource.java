@@ -1,6 +1,8 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -17,6 +19,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RestController
 @RequestMapping(value = "/rest/jms")
 public class JmsResource {
+
+    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(JmsResource.class);
 
     @Autowired
     JMSManager jmsManager;
@@ -52,6 +56,7 @@ public class JmsResource {
                 jmsManager.deleteMessages(request.getSource(), ids);
             }
         } catch (RuntimeException e) {
+            LOGGER.error("Error performing action [" + request.getAction() + "]", e);
             response.setOutcome(e.getMessage());
             return ResponseEntity.badRequest()
                     .contentType(MediaType.parseMediaType("application/json"))
