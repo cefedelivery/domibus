@@ -22,6 +22,8 @@ import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 
+import java.io.IOException;
+
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
@@ -57,7 +59,7 @@ public class FSFilesManagerTest {
         rootDir.resolveFile("toberenamed").createFile();
         rootDir.resolveFile("tobemoved").createFile();
         rootDir.resolveFile("tobedeleted").createFile();
-        
+
         rootDir.resolveFile("targetfolder1/targetfolder2").createFolder();
     }
     
@@ -226,6 +228,21 @@ public class FSFilesManagerTest {
         instance.moveFile(file, targetFile);
         
         Assert.assertTrue(targetFile.exists());
+    }
+
+    @Test
+    public void testCreateFile() throws Exception {
+        try {
+            instance.createFile(rootDir,  "tobecreated", "withcontent");
+        } catch (FileSystemException e) {
+            if ("File closed.".equals(e.getMessage())) {
+                // unit test workaround, file is being closed twice
+            } else {
+                Assert.fail();
+            }
+        }
+
+        Assert.assertTrue(rootDir.resolveFile("tobecreated").exists());
     }
     
 }
