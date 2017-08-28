@@ -52,7 +52,7 @@ public class SmbFileNameParser extends URLFileNameParser
         final String share = UriParser.extractFirstElement(name);
         if (share == null || share.length() == 0)
         {
-            throw new FileSystemException("vfs.provider.smb/missing-share-name.error", filename);
+            throw new FileSystemException("eu.domibus.plugin.fs.vfs.provider.smb/missing-share-name.error", filename);
         }
 
         // Normalise the path.  Do this after extracting the share name,

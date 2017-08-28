@@ -128,7 +128,7 @@ public class SmbFileObject
             return FileType.FILE;
         }
 
-        throw new FileSystemException("vfs.provider.smb/get-type.error", getName());
+        throw new FileSystemException("eu.domibus.plugin.fs.vfs.provider.smb/get-type.error", getName());
     }
 
     /**
