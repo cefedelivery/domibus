@@ -109,7 +109,7 @@ public class PullRequestHandler {
             UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
             leg = pullContext.filterLegOnMpc();
             try {
-                messageExchangeService.verifyReceiverCerficate(leg, pullContext.getInitiator().getName());
+                messageExchangeService.verifyReceiverCertificate(leg, pullContext.getInitiator().getName());
                 messageExchangeService.verifySenderCertificate(leg, pullContext.getResponder().getName());
                 leg = pullContext.filterLegOnMpc();
                 soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
