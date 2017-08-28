@@ -144,6 +144,8 @@ public class MessageLogResource {
         result.setSendAttempts(messageLogInfo.getSendAttempts());
         result.setSendAttemptsMax(messageLogInfo.getSendAttemptsMax());
         result.setNextAttempt(messageLogInfo.getNextAttempt());
+        result.setFailed(messageLogInfo.getFailed());
+        result.setRestored(messageLogInfo.getRestored());
         return result;
     }
 }

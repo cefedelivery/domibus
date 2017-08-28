@@ -73,8 +73,6 @@
         <constructor-arg ref="cxf"/>
     </bean>
 
-    <bean id="cxfExecutorFactory" class="eu.domibus.cxf.CXFExecutorFactory"/>
-
     <!--MSH Webservice endpoint-->
     <jaxws:endpoint id="msh" address="/msh">
         <jaxws:implementor>
@@ -112,10 +110,7 @@
             <bean class="eu.domibus.ebms3.receiver.FaultInHandler"/>
         </jaxws:handlers>
         <jaxws:executor>
-            <bean id="cxfExecutor"  class="java.util.concurrent.Executor"
-                  factory-method="getObject"
-                  factory-bean="cxfExecutorFactory">
-            </bean>
+            <ref bean="taskExecutor"/>
         </jaxws:executor>
 
     </jaxws:endpoint>

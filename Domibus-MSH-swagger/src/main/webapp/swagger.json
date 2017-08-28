@@ -9,8 +9,7 @@
       "url" : "https://joinup.ec.europa.eu/community/eupl/og_page/eupl-text-11-12"
     }
   },
-  "host" : "localhost",
-  "basePath" : "/",
+  "host" : "localhost:8091",
   "schemes" : [ "http" ],
   "paths" : {
     "/ext/messages/acknowledgments/delivered" : {
@@ -33,7 +32,10 @@
               "$ref" : "#/definitions/MessageAcknowledgementDTO"
             }
           }
-        }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
       }
     },
     "/ext/messages/acknowledgments/processed" : {
@@ -56,7 +58,10 @@
               "$ref" : "#/definitions/MessageAcknowledgementDTO"
             }
           }
-        }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
       }
     },
     "/ext/messages/acknowledgments/{messageId}" : {
@@ -81,7 +86,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
       }
     },
     "/ext/monitoring/messages/failed" : {
@@ -105,7 +113,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
       }
     },
     "/ext/monitoring/messages/failed/restore" : {
@@ -131,7 +142,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
       }
     },
     "/ext/monitoring/messages/failed/{messageId}" : {
@@ -150,7 +164,10 @@
           "default" : {
             "description" : "successful operation"
           }
-        }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
       }
     },
     "/ext/monitoring/messages/failed/{messageId}/elapsedtime" : {
@@ -173,7 +190,10 @@
               "format" : "int64"
             }
           }
-        }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
       }
     },
     "/ext/monitoring/messages/failed/{messageId}/restore" : {
@@ -192,7 +212,10 @@
           "default" : {
             "description" : "successful operation"
           }
-        }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
       }
     },
     "/ext/monitoring/messages/{messageId}/attempts" : {
@@ -217,8 +240,16 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
       }
+    }
+  },
+  "securityDefinitions" : {
+    "basic_auth" : {
+      "type" : "basic"
     }
   },
   "definitions" : {

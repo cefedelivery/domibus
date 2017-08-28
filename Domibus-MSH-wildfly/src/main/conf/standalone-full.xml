@@ -387,7 +387,6 @@
                         <message-counter-history-day-limit>10</message-counter-history-day-limit>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusSendMessageQueue">
-                        <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
                         <redelivery-delay>1000</redelivery-delay>
                         <max-delivery-attempts>1</max-delivery-attempts>

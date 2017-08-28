@@ -126,13 +126,42 @@ export class MessageFilterComponent implements DirtyOperations{
           routingCriterias.push(new RoutingCriteriaEntry(0, 'service', formRef.componentInstance.service));
         }
         let backendEntry = new BackendFilterEntry(0, this.rowNumber + 1, formRef.componentInstance.plugin, routingCriterias, false);
-        this.rows.push(backendEntry);
-
-        this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
-        this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+        if (this.findRowsIndex(backendEntry) == -1) {
+          this.rows.push(backendEntry);
+          this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
+          this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+        } else {
+          this.alertService.error("Impossible to insert a duplicate entry");
+        }
       }
     });
+  }
 
+  private findRowsIndex(backendEntry: BackendFilterEntry): number {
+    for(let i = 0; i < this.rows.length; i++) {
+      let currentRow = this.rows[i];
+      if(currentRow.backendName === backendEntry.backendName && this.compareRoutingCriterias(backendEntry.routingCriterias, currentRow.routingCriterias)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  private compareRoutingCriterias(criteriasA: RoutingCriteriaEntry[], criteriasB: RoutingCriteriaEntry[]): boolean {
+    let result: boolean = true;
+    for(let entry of criteriasA) {
+      result = result && this.findRoutingCriteria(entry, criteriasB);
+    }
+    return result;
+}
+
+  private findRoutingCriteria(toFind: RoutingCriteriaEntry, routingCriterias: RoutingCriteriaEntry[]): boolean {
+    for(let entry of routingCriterias) {
+      if(entry.name === toFind.name && entry.expression === toFind.expression) {
+        return true;
+      }
+    }
+    return toFind.expression === '' && routingCriterias.length == 0;
   }
 
   buttonEdit() {

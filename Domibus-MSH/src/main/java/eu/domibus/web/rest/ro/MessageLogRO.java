@@ -30,6 +30,8 @@ public class MessageLogRO implements Serializable {
     private String originalSender;
     private String finalRecipient;
     private String refToMessageId;
+    private Date failed;
+    private Date restored;
 
     public String getMessageId() {
         return messageId;
@@ -157,5 +159,21 @@ public class MessageLogRO implements Serializable {
 
     public void setRefToMessageId(String refToMessageId) {
         this.refToMessageId = refToMessageId;
+    }
+
+    public Date getFailed() {
+        return failed;
+    }
+
+    public void setFailed(Date failed) {
+        this.failed = failed;
+    }
+
+    public Date getRestored() {
+        return restored;
+    }
+
+    public void setRestored(Date restored) {
+        this.restored = restored;
     }
 }
