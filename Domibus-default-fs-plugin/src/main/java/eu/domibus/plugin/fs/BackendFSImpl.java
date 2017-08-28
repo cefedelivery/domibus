@@ -243,7 +243,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 LOG.error("The send failed message file [{}] was not found in domain [{}]", messageId, domain);
             }
         } catch (IOException e){
-            LOG.error("Error handling the send failed message file " + messageId, e);
+            throw new FSPluginException("Error handling the send failed message file " + messageId, e);
         }
     }
 
