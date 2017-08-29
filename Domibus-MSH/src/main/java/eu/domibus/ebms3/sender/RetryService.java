@@ -141,5 +141,15 @@ public class RetryService {
         }
     }
 
+    /**
+     * Notifies send failure, updates the message status and deletes the payload (if required) for messages that failed to be sent and expired
+     * Note: This method creates a new transaction
+     *
+     * @param messageIdToPurge is the messageId of the expired message
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void purgeTimedoutMessageInANewTransaction(final String messageIdToPurge) {
+        purgeTimedoutMessage(messageIdToPurge);
+    }
 
 }

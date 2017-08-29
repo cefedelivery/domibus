@@ -253,7 +253,7 @@ public class PullRequestHandlerImplTest {
         final String messageId = "whatEverID";
         new Expectations() {{
 
-            messageExchangeService.verifyReceiverCerficate(legConfiguration, pullContext.getInitiator().getName());
+            messageExchangeService.verifyReceiverCertificate(legConfiguration, pullContext.getInitiator().getName());
             result = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "invalid certificate");
 
 
