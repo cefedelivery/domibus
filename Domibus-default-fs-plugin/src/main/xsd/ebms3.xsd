@@ -7,7 +7,7 @@
             targetNamespace="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"
             elementFormDefault="qualified" attributeFormDefault="unqualified">
 
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/03/xml.xsd"/>
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd" />
 
     <xsd:annotation>
         <xsd:appinfo>Schema for metadata file of the FS plugin</xsd:appinfo>

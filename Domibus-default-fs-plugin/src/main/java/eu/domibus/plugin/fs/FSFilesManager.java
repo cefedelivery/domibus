@@ -1,26 +1,20 @@
 package eu.domibus.plugin.fs;
 
-import javax.activation.DataHandler;
-
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.plugin.fs.exception.FSSetUpException;
+import eu.domibus.plugin.fs.vfs.FileObjectDataSource;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileSystemManager;
-import org.apache.commons.vfs2.FileSystemOptions;
-import org.apache.commons.vfs2.FileType;
-import org.apache.commons.vfs2.FileTypeSelector;
-import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
-
 import org.springframework.stereotype.Component;
 
-import eu.domibus.plugin.fs.exception.FSSetUpException;
-import eu.domibus.plugin.fs.vfs.FileObjectDataSource;
+import javax.activation.DataHandler;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 /**
  * This class is responsible for performing complex operations using VFS
@@ -31,7 +25,7 @@ import eu.domibus.plugin.fs.vfs.FileObjectDataSource;
 public class FSFilesManager {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSFilesManager.class);
-    
+
     private static final String PARENT_RELATIVE_PATH = "../";
 
     public static final String INCOMING_FOLDER = "IN";
@@ -141,6 +135,23 @@ public class FSFilesManager {
                 // just log in case there's an underlying problem
                 LOG.warn("Error closing file", ex);
             }
+        }
+    }
+
+    /**
+     * Creates a file in the directory with the given file name and content.
+     *
+     * @param directory base directory
+     * @param fileName file name
+     * @param content content
+     */
+    public void createFile(FileObject directory, String fileName, String content) throws IOException {
+        try (FileObject file = directory.resolveFile(fileName);
+             OutputStream fileOS = file.getContent().getOutputStream();
+             OutputStreamWriter fileOSW = new OutputStreamWriter(fileOS)) {
+
+            file.createFile();
+            fileOSW.write(content);
         }
     }
 

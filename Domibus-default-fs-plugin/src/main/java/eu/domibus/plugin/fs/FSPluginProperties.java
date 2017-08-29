@@ -241,6 +241,22 @@ public class FSPluginProperties {
         return ACTION_DELETE.equals(getSentAction(domain));
     }
 
+    /**
+     * @param domain The domain property qualifier
+     * @return True if the send failed messages action is "archive"
+     */
+    public boolean isFailedActionArchive(String domain) {
+        return ACTION_ARCHIVE.equals(getFailedAction(domain));
+    }
+
+    /**
+     * @param domain The domain property qualifier
+     * @return True if the send failed messages action is "delete"
+     */
+    public boolean isFailedActionDelete(String domain) {
+        return ACTION_DELETE.equals(getFailedAction(domain));
+    }
+
     private String getDomainProperty(String domain, String propertyName, String defaultValue) {
         String domainFullPropertyName = DOMAIN_PREFIX + domain + DOT + propertyName;
         if (properties.containsKey(domainFullPropertyName)) {
