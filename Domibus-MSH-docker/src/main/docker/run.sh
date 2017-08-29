@@ -79,4 +79,4 @@ cd $SOURCE_CODE/../Domibus-MSH-selenium/webDrivers
 chmod +x geckodriver
 
 cd $SOURCE_CODE/../Domibus-MSH-selenium
-mvn test
+xvfb-run mvn test
