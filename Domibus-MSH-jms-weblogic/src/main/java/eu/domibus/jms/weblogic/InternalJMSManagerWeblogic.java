@@ -440,7 +440,8 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     @Override
     public List<InternalJmsMessage> browseMessages(String source) {
         List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
-        List<InternalJMSDestination> destinations = getInternalJMSDestinations(removeJmsModule(source));
+        final String sourceWithoutJMSModule = removeJmsModule(source);
+        List<InternalJMSDestination> destinations = getInternalJMSDestinations(sourceWithoutJMSModule);
         for (InternalJMSDestination destination : destinations) {
             String destinationType = destination.getType();
             if (QUEUE.equals(destinationType)) {
@@ -558,7 +559,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
      * Implements the consume operation.
      * The message is browsed, deleted and returned to caller.
      *
-     * @param source name of the JMS queue
+     * @param source          name of the JMS queue
      * @param customMessageId ID of the message present in the custom properties.
      * @return
      */
