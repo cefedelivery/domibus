@@ -219,7 +219,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 String baseName = targetFileMessage.getName().getBaseName();
                 String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + ERROR_EXTENSION;
 
-                String targetFileMessageURI = targetFileMessage.getParent().getName().getURI();
+                String targetFileMessageURI = targetFileMessage.getParent().getName().getPath();
                 String failedDirectoryLocation = FSFileNameHelper.deriveFailedDirectoryLocation(targetFileMessageURI);
                 FileObject failedDirectory = fsFilesManager.getEnsureChildFolder(rootDir, failedDirectoryLocation);
 
@@ -287,7 +287,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                     LOG.debug("Successfully sent message file [{}] was deleted", messageId);
                 } else if (fsPluginProperties.isSentActionArchive(domain)) {
                     // Archive
-                    String targetFileMessageURI = targetFileMessage.getParent().getName().getURI();
+                    String targetFileMessageURI = targetFileMessage.getParent().getName().getPath();
                     String sentDirectoryLocation = FSFileNameHelper.deriveSentDirectoryLocation(targetFileMessageURI);
                     FileObject sentDirectory = fsFilesManager.getEnsureChildFolder(rootDir, sentDirectoryLocation);
 
