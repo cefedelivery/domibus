@@ -22,7 +22,9 @@ public class ErrorServiceImpl implements ErrorService {
 
     /**
      * {@inheritDoc}
+     *
      */
+    //@TODO change the ErrorLogEntry to an ErrorLogEntry from the api. Not possible right now because of MSHRole enumeration not accessible from Domibus-MSH-api
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void createErrorLog(ErrorLogEntry errorLogEntry) {
