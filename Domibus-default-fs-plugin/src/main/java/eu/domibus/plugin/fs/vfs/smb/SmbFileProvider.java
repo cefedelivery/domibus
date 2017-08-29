@@ -23,43 +23,44 @@ import org.apache.commons.vfs2.provider.FileProvider;
 
 /**
  * A provider for SMB (Samba, Windows share) file systems.
+ *
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
 public class SmbFileProvider
-    extends AbstractOriginatingFileProvider
-    implements FileProvider
-{
-    /** Authentication data supported by this provider. */
-    private static final UserAuthenticationData.Type[] AUTHENTICATOR_TYPES = new UserAuthenticationData.Type[]
-        {
-            UserAuthenticationData.USERNAME, UserAuthenticationData.PASSWORD, UserAuthenticationData.DOMAIN
-        };
+        extends AbstractOriginatingFileProvider
+        implements FileProvider {
 
-    static final Collection<Capability> CAPABILITIES =
-        Collections.unmodifiableCollection(Arrays.asList(new Capability[]
-            {
-                Capability.CREATE,
-                Capability.DELETE,
-                Capability.RENAME,
-                Capability.GET_TYPE,
-                Capability.GET_LAST_MODIFIED,
-                Capability.SET_LAST_MODIFIED_FILE,
-                Capability.SET_LAST_MODIFIED_FOLDER,
-                Capability.LIST_CHILDREN,
-                Capability.READ_CONTENT,
-                Capability.URI,
-                Capability.WRITE_CONTENT,
-                Capability.APPEND_CONTENT
-            }));
+    /**
+     * Authentication data supported by this provider.
+     */
+    private static final UserAuthenticationData.Type[] AUTHENTICATOR_TYPES = new UserAuthenticationData.Type[]{
+        UserAuthenticationData.USERNAME, UserAuthenticationData.PASSWORD, UserAuthenticationData.DOMAIN
+    };
 
-    public SmbFileProvider()
-    {
+    static final Collection<Capability> CAPABILITIES
+            = Collections.unmodifiableCollection(Arrays.asList(new Capability[]{
+        Capability.CREATE,
+        Capability.DELETE,
+        Capability.RENAME,
+        Capability.GET_TYPE,
+        Capability.GET_LAST_MODIFIED,
+        Capability.SET_LAST_MODIFIED_FILE,
+        Capability.SET_LAST_MODIFIED_FOLDER,
+        Capability.LIST_CHILDREN,
+        Capability.READ_CONTENT,
+        Capability.URI,
+        Capability.WRITE_CONTENT,
+        Capability.APPEND_CONTENT
+    }));
+
+    public SmbFileProvider() {
         super();
         setFileNameParser(SmbFileNameParser.getInstance());
     }
 
     /**
      * Creates the filesystem.
+     *
      * @param name The name of the root file of the file system to create.
      * @param fileSystemOptions The FileSystem options.
      * @return The FileSystem.
@@ -67,14 +68,12 @@ public class SmbFileProvider
      */
     @Override
     protected FileSystem doCreateFileSystem(final FileName name, final FileSystemOptions fileSystemOptions)
-        throws FileSystemException
-    {
+            throws FileSystemException {
         return new SmbFileSystem(name, fileSystemOptions);
     }
 
     @Override
-    public Collection<Capability> getCapabilities()
-    {
+    public Collection<Capability> getCapabilities() {
         return CAPABILITIES;
     }
 

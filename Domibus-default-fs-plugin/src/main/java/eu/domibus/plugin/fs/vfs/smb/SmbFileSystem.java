@@ -20,25 +20,24 @@ import org.apache.commons.vfs2.provider.AbstractFileSystem;
 
 /**
  * An SMB file system.
+ *
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
-public class SmbFileSystem
-    extends AbstractFileSystem
-{
-    protected SmbFileSystem(final FileName rootName, final FileSystemOptions fileSystemOptions)
-    {
+public class SmbFileSystem extends AbstractFileSystem {
+
+    protected SmbFileSystem(final FileName rootName, final FileSystemOptions fileSystemOptions) {
         super(rootName, null, fileSystemOptions);
     }
 
     /**
      * Creates a file object.
+     *
      * @param name name referencing the new file.
      * @return new created FileObject.
      * @throws FileSystemException if an error occurs.
      */
     @Override
-    protected FileObject createFile(final AbstractFileName name) throws FileSystemException
-    {
+    protected FileObject createFile(final AbstractFileName name) throws FileSystemException {
         return new SmbFileObject(name, this);
     }
 
@@ -46,8 +45,7 @@ public class SmbFileSystem
      * Returns the capabilities of this file system.
      */
     @Override
-    protected void addCapabilities(final Collection<Capability> caps)
-    {
+    protected void addCapabilities(final Collection<Capability> caps) {
         caps.addAll(SmbFileProvider.CAPABILITIES);
     }
 }
