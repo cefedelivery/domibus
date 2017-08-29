@@ -14,7 +14,6 @@ import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
@@ -90,12 +89,12 @@ public class RetryService {
             return result;
         }
         LOG.debug("Messages to be retried [{}]", messageIdsToSend);
-        final List<String> queuedMessages = getQueuedMessages(messageIdsToSend);
-        return (List<String>) CollectionUtils.removeAll(messageIdsToSend, queuedMessages);
-
+        final List<String> queuedMessages = getQueuedMessages();
+        messageIdsToSend.removeAll(queuedMessages);
+        return messageIdsToSend;
     }
 
-    protected List<String> getQueuedMessages(final List<String> messageIdsToSend) {
+    protected List<String> getQueuedMessages() {
         List<String> result = new ArrayList<>();
         try {
             final List<JmsMessage> jmsMessages = jmsManager.browseMessages(dispatchQueue.getQueueName());
