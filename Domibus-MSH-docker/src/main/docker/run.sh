@@ -75,6 +75,8 @@ jdbcUrlBlue="jdbcUrlBlue=jdbc:mysql://127.0.0.1:3304/domibus"
 jdbcUrlRed="jdbcUrlRed=jdbc:mysql://127.0.0.1:3302/domibus"
 
 #mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test -DlocalUrl="$localUrl" -DremoteUrl="$remoteUrl" -DjdbcUrlBlue="$jdbcUrlBlue" -DjdbcUrlRed="$jdbcUrlRed"
+cd $SOURCE_CODE/../Domibus-MSH-selenium/webDrivers
+chmod +x geckodriver
 
 cd $SOURCE_CODE/../Domibus-MSH-selenium
 mvn test
