@@ -38,7 +38,8 @@ import javax.jms.MessageListener;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
-import java.util.Properties;
+import java.util.EnumSet;
+import java.util.Set;
 
 
 /**
