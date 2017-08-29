@@ -36,7 +36,6 @@ import javax.jms.MessageListener;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
-import java.util.Properties;
 
 
 /**
@@ -128,7 +127,7 @@ public class MessageSender implements MessageListener {
             Validate.notNull(receiverParty, "Responder party was not found");
 
             try {
-                messageExchangeService.verifyReceiverCerficate(legConfiguration, receiverParty.getName());
+                messageExchangeService.verifyReceiverCertificate(legConfiguration, receiverParty.getName());
                 messageExchangeService.verifySenderCertificate(legConfiguration, sendingParty.getName());
             } catch (ChainCertificateInvalidException ccie) {
                 // this flag is used in the finally clause
@@ -168,7 +167,7 @@ public class MessageSender implements MessageListener {
                 if (abortSending) {
                     LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
                     //TODO add a new status SEND_ABORT to the CheckResult enum and move this into the  reliabilityService.handleReliability
-                    retryService.purgeTimedoutMessage(messageId);
+                    retryService.purgeTimedoutMessageInANewTransaction(messageId);
                 } else {
                     reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
 
