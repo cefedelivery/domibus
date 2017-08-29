@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" ignored="0" total="1" passed="1">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Default suite" duration-ms="56365" started-at="2017-08-15T15:41:21Z" finished-at="2017-08-15T15:42:18Z">
+    <groups>
+    </groups>
+    <test name="Default test" duration-ms="56365" started-at="2017-08-15T15:41:21Z" finished-at="2017-08-15T15:42:18Z">
+      <class name="com.DomibusGUI.TestDomibus">
+        <test-method status="PASS" signature="reportConfigure()[pri:0, instance:com.DomibusGUI.TestDomibus@3327bd23]" name="reportConfigure" is-config="true" duration-ms="329" started-at="2017-08-15T21:11:21Z" finished-at="2017-08-15T21:11:22Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- reportConfigure -->
+        <test-method status="PASS" signature="tc_001()[pri:1, instance:com.DomibusGUI.TestDomibus@3327bd23]" name="tc_001" duration-ms="55465" started-at="2017-08-15T21:11:22Z" finished-at="2017-08-15T21:12:17Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- tc_001 -->
+        <test-method status="PASS" signature="getResult(org.testng.ITestResult)[pri:0, instance:com.DomibusGUI.TestDomibus@3327bd23]" name="getResult" is-config="true" duration-ms="10" started-at="2017-08-15T21:12:17Z" finished-at="2017-08-15T21:12:17Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[TestResult name=tc_001 status=SUCCESS method=TestDomibus.tc_001()[pri:1, instance:com.DomibusGUI.TestDomibus@3327bd23] output={null}]]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- getResult -->
+        <test-method status="PASS" signature="endTest()[pri:0, instance:com.DomibusGUI.TestDomibus@3327bd23]" name="endTest" is-config="true" duration-ms="531" started-at="2017-08-15T21:12:17Z" finished-at="2017-08-15T21:12:18Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- endTest -->
+      </class> <!-- com.DomibusGUI.TestDomibus -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>

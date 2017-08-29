@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="GUI testsuite">
+<test name="GUI test1">
+<classes>
+<class name="com.DomibusGUI.TestDomibus"/>
+</classes>
+</test>
+</suite>
