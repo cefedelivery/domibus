@@ -21,9 +21,9 @@ $input-app-theme: mat-light-theme($input-app-primary, $input-app-accent);
 // that you are using.
 @include angular-material-theme($input-app-theme);
 
-$datatable_background_color_hover: map-get($mat-grey, 300);
-$datatable_background_color_focus: map-get($mat-grey, 100);
-$datatable_background_color_active: map-get($mat-grey, 300);
+$datatable_background_color_hover: map-get($mat-grey, 600);
+$datatable_background_color_focus: map-get($mat-grey, 600);
+$datatable_background_color_active: map-get($mat-grey, 600);
 
 .ngx-datatable.material.cell-selection .datatable-body-cell.active,
 .ngx-datatable.material.cell-selection .datatable-body-cell.active .datatable-row-group {
@@ -48,7 +48,7 @@ $datatable_background_color_active: map-get($mat-grey, 300);
 .ngx-datatable.material.multi-selection .datatable-body-row.active .datatable-row-group, .ngx-datatable.material.multi-click-selection .datatable-body-row.active,
 .ngx-datatable.material.multi-click-selection .datatable-body-row.active .datatable-row-group {
   background-color: $datatable_background_color_active;
-  color: #0d0d0d;
+  color: #FFF;
 }
 
 .ngx-datatable.material.single-selection .datatable-body-row.active:hover,
@@ -56,7 +56,7 @@ $datatable_background_color_active: map-get($mat-grey, 300);
 .ngx-datatable.material.multi-selection .datatable-body-row.active:hover .datatable-row-group, .ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover,
 .ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover .datatable-row-group {
   background-color: $datatable_background_color_hover;
-  color: #0d0d0d;
+  color: #FFF;
 }
 
 .ngx-datatable.material.single-selection .datatable-body-row.active:focus,
@@ -79,9 +79,6 @@ $datatable_background_color_active: map-get($mat-grey, 300);
     vertical-align: bottom;
     margin-left: 10px;
     color: #03A9F4;
-  }
-  .mat-raised-button.mat-primary {
-    background-color: #03A9F4;
   }
 }
 

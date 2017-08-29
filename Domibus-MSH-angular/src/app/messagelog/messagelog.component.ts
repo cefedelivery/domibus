@@ -136,10 +136,7 @@ export class MessageLogComponent {
       return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type"].indexOf(col.name) != -1
     });
 
-    this.filter.receivedTo = new Date();
-    this.filter.receivedTo.setHours(23, 59, 59, 999);
-
-    this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
+    this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc)
   }
 
   getMessageLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<MessageLogResult> {

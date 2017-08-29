@@ -41,8 +41,3 @@ label:hover, label:active, input:hover + label, input:active + label {
 .firstColumn {
   width: 20%;
 }
-
-.buttonsRow {
-  padding-top: 10px;
-  width: 100%;
-}

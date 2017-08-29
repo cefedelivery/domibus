@@ -4,9 +4,7 @@
     <div id="topLogo">
       <img src="assets/images/Domibus_logo_icon.svg" [attr.height]="fullMenu ? '74px' : '40px'" [attr.width]="fullMenu ? '74px' : '40px'"/>
       <div id="topLogoText" *ngIf="fullMenu">
-        <h4>Domibus</h4>
-        <h4>Administration</h4>
-        <h4>Console</h4>
+        <h1>Domibus <span>Administration <br>Console</span></h1>
       </div>
     </div>
 
@@ -41,8 +39,7 @@
       <span *ngIf="fullMenu">Users</span>
     </button>
 
-    <div
-      style="position:fixed; width:100%; height:50px;bottom:0px;justify-content: center;text-align: left">
+    <div class="collapse-button">
       <button *ngIf="fullMenu" md-raised-button id="expand_id" (click)="toggleMenu()">
         <md-icon>chevron_left
         </md-icon>
@@ -69,13 +66,15 @@
     </div>
 
   </md-sidenav>
-  <div class="helpMenu">
-    <page-helper></page-helper>
-  </div>
+
   <!-- primary content -->
   <div id=".my-content">
     <alert></alert>
+
     <div id="sandwichMenuHolder">
+      <div class="helpMenu">
+        <page-helper></page-helper>
+      </div>
       <div id="sandwichMenu">
         <button md-icon-button [md-menu-trigger-for]="settingsMenu" id="settingsmenu_id">
           <md-icon>menu</md-icon>

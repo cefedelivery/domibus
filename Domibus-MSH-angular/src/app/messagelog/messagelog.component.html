@@ -1,8 +1,9 @@
+<h1 id="messagesheader_id">Messages</h1>
+
 <div class="selectionCriteria">
   <md-card>
 
     <md-card-content>
-      <h1 id="messagesheader_id">Messages</h1>
 
       <div class="panel">
         <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
@@ -10,13 +11,26 @@
             <input mdInput placeholder="Message Id" name="messageId" [(ngModel)]="filter.messageId"
                    #messageId="ngModel" id="messageid_id">
           </md-input-container>
+          <md-select placeholder="Message Status" [(ngModel)]="filter.messageStatus" name="messageStatus"
+                     id="messagestatus_id">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let mstatus of msgStatus" [value]="mstatus">
+              {{mstatus}}
+            </md-option>
+          </md-select>
+          <md-input-container class="inputFieldParties">
+            <input mdInput placeholder="From Party Id" name="fromPartyId" [(ngModel)]="filter.fromPartyId"
+                   #fromPartyId="ngModel" id="frompartyid_id">
+          </md-input-container>
+          <md-input-container class="inputFieldParties">
+            <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId"
+                   #toPartyId="ngModel" id="topartyid_id">
+          </md-input-container>
           <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Conversation Id" name="conversationId" [(ngModel)]="filter.conversationId"
                    #conversationId="ngModel" id="conversationid_id">
           </md-input-container>
-
-          <br *ngIf="advancedSearch">
-
           <md-select placeholder="AP Role" name="mshRole" [(ngModel)]="filter.mshRole" id="aprole_id"
                      *ngIf="advancedSearch">
             <md-option [value]="''">
@@ -31,14 +45,6 @@
               {{type}}
             </md-option>
           </md-select>
-          <md-select placeholder="Message Status" [(ngModel)]="filter.messageStatus" name="messageStatus"
-                     id="messagestatus_id">
-            <md-option [value]="''">
-            </md-option>
-            <md-option *ngFor="let mstatus of msgStatus" [value]="mstatus">
-              {{mstatus}}
-            </md-option>
-          </md-select>
           <md-select placeholder="Notification Status" [(ngModel)]="filter.notificationStatus" class="optionField"
                      name="notificationStatus" id="notificationstatus_id" *ngIf="advancedSearch">
             <md-option [value]="''">
@@ -47,14 +53,6 @@
               {{nstatus}}
             </md-option>
           </md-select>
-          <md-input-container class="inputFieldParties">
-            <input mdInput placeholder="From Party Id" name="fromPartyId" [(ngModel)]="filter.fromPartyId"
-                   #fromPartyId="ngModel" id="frompartyid_id">
-          </md-input-container>
-          <md-input-container class="inputFieldParties">
-            <input mdInput placeholder="To Party Id" name="toPartyId" [(ngModel)]="filter.toPartyId"
-                   #toPartyId="ngModel" id="topartyid_id">
-          </md-input-container>
           <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Reference Message Id" name="refToMessageId" [(ngModel)]="filter.refToMessageId"
                    #refToMessageId="ngModel" id="referencemessageid_id">
@@ -100,64 +98,66 @@
   </md-card>
 </div>
 
-<div style="display:inline-flex">
-  <div>
-    <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
-                     (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+<div class="panel">
+  <div class="group-filter-button">
+    <span class="row-button">
+      <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                       (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+    </span>
+    <span class="column-filter-button">
+      <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                         (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+    </span>
   </div>
-  <div>
-    <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
-                       (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
-  </div>
-</div>
 
-<ngx-datatable
-  id="messageLogTable"
-  class="material striped"
-  [rows]="rows"
-  [columns]="columnPicker.selectedColumns"
-  [columnMode]="'force'"
-  [headerHeight]="50"
-  [footerHeight]="50"
-  [rowHeight]="'auto'"
-  [scrollbarH]="true"
-  [externalPaging]="true"
-  [externalSorting]="true"
-  [loadingIndicator]="loading"
-  [count]="count"
-  [offset]="offset"
-  [limit]="rowLimiter.pageSize"
-  [sorts]="[{prop: 'received', dir: 'desc'}]"
-  (page)='onPage($event)'
-  (sort)="onSort($event)"
-  [selected]="selected"
-  [selectionType]="'multi'"
-  (activate)="onActivate($event)"
-  (select)="onSelect($event)">
+  <ngx-datatable
+    id="messageLogTable"
+    class="material striped"
+    [rows]="rows"
+    [columns]="columnPicker.selectedColumns"
+    [columnMode]="'force'"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    [rowHeight]="'auto'"
+    [scrollbarH]="true"
+    [externalPaging]="true"
+    [externalSorting]="true"
+    [loadingIndicator]="loading"
+    [count]="count"
+    [offset]="offset"
+    [limit]="rowLimiter.pageSize"
+    [sorts]="[{prop: 'received', dir: 'desc'}]"
+    (page)='onPage($event)'
+    (sort)="onSort($event)"
+    [selected]="selected"
+    [selectionType]="'multi'"
+    (activate)="onActivate($event)"
+    (select)="onSelect($event)">
 </ngx-datatable>
 
-<ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-  <span class="text-select">{{value| domibusDate: dateFormat}}</span>
+  <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+    <span class="text-select">{{value| domibusDate: dateFormat}}</span>
 </ng-template>
 
-<ng-template #nextAttemptInfoTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-  <span class="text-select">{{showNextAttemptInfo(row) ? value : ''}}</span>
+  <ng-template #nextAttemptInfoTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+    <span class="text-select">{{showNextAttemptInfo(row) ? value : ''}}</span>
 </ng-template>
 
-<ng-template #nextAttemptInfoWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-  <span class="text-select">{{showNextAttemptInfo(row) ? (value | domibusDate: dateFormat): ''}}</span>
+  <ng-template #nextAttemptInfoWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+    <span class="text-select">{{showNextAttemptInfo(row) ? (value | domibusDate: dateFormat): ''}}</span>
 </ng-template>
 
 
-<div class="group-btn">
-  <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()"
-          id="downloadbutton_id">
-    <md-icon>file_download</md-icon>
-    <span>Download</span>
-  </button>
-  <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()"
-          id="resendbutton_id">
-    <md-icon>send</md-icon>
-    <span>Resend</span>
-  </button>
+  <div class="group-action-button">
+    <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()"
+            id="downloadbutton_id">
+      <md-icon>file_download</md-icon>
+      <span>Download</span>
+    </button>
+    <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()"
+            id="resendbutton_id">
+      <md-icon>send</md-icon>
+      <span>Resend</span>
+    </button>
+</div>
 </div>
