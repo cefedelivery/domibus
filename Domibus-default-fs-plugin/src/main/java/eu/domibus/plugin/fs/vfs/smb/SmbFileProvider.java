@@ -1,3 +1,11 @@
+/*
+ * This product includes software developed at
+ * The Apache Software Foundation (http://www.apache.org/).
+ *
+ * The following software was modified for this product:
+ *     Apache Commons VFS (Sandbox)
+ *     Copyright 2002-2016 The Apache Software Foundation
+ */
 package eu.domibus.plugin.fs.vfs.smb;
 
 import java.util.Arrays;
