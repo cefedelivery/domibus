@@ -58,11 +58,11 @@ import static eu.domibus.common.services.impl.PullContext.*;
 @Service
 public class MessageExchangeServiceImpl implements MessageExchangeService {
 
-    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageExchangeService.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageExchangeService.class);
 
-    private final static String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.receiver.certificate.validation.onsending";
+    private static final String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.receiver.certificate.validation.onsending";
 
-    private final static String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.sender.certificate.validation.onsending";
+    private static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.sender.certificate.validation.onsending";
 
 
     @Autowired
@@ -253,7 +253,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
 
     @Override
-    public void verifyReceiverCerficate(final LegConfiguration legConfiguration, String receiverName) {
+    public void verifyReceiverCertificate(final LegConfiguration legConfiguration, String receiverName) {
         Policy policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
