@@ -459,7 +459,7 @@ public class BackendFSImplTest {
             fsPluginProperties.isSentActionArchive(null);
             result = true;
             
-            fsFilesManager.getEnsureChildFolder(rootDir, "ram:///BackendFSImplTest/SENT/");
+            fsFilesManager.getEnsureChildFolder(rootDir, "/BackendFSImplTest/SENT/");
             result = sentFolder;
             
         }};
@@ -501,7 +501,7 @@ public class BackendFSImplTest {
             fsPluginProperties.isFailedActionDelete(null);
             result = true;
 
-            fsFilesManager.getEnsureChildFolder(rootDir, "ram:///BackendFSImplTest/FAILED/");
+            fsFilesManager.getEnsureChildFolder(rootDir, "/BackendFSImplTest/FAILED/");
             result = failedFolder;
         }};
 
@@ -540,7 +540,7 @@ public class BackendFSImplTest {
             fsPluginProperties.isFailedActionArchive(null);
             result = true;
 
-            fsFilesManager.getEnsureChildFolder(rootDir, "ram:///BackendFSImplTest/FAILED/");
+            fsFilesManager.getEnsureChildFolder(rootDir, "/BackendFSImplTest/FAILED/");
             result = failedFolder;
         }};
 
@@ -586,7 +586,7 @@ public class BackendFSImplTest {
             fsPluginProperties.isFailedActionDelete(null);
             result = true;
 
-            fsFilesManager.getEnsureChildFolder(rootDir, "ram:///BackendFSImplTest/FAILED/");
+            fsFilesManager.getEnsureChildFolder(rootDir, "/BackendFSImplTest/FAILED/");
             result = failedFolder;
 
             backendFS.getErrorsForMessage("3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
