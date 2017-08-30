@@ -25,7 +25,7 @@ export class PageHelperComponent implements OnInit {
     this.helpPages.set("/login", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Login");
     this.helpPages.set("/messagefilter", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "MessageFilter");
     this.helpPages.set("/truststore", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Truststore");
-    this.helpPages.set("/pmode", MAIN_HELP_PAGE+ + VERSION_SPECIFIC_PAGE + "PMode");
+    this.helpPages.set("/pmode", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "PMode");
     this.helpPages.set("/errorlog", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "ErrorLog");
     this.helpPages.set("/jms", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "JMSMonitoring");
     this.helpPages.set("/user", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Users");
