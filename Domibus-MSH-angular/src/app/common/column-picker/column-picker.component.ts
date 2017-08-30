@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 
 @Component({
   selector: 'app-column-picker',
@@ -26,7 +26,6 @@ export class ColumnPickerComponent implements OnInit {
 
   toggleColumnSelection() {
     this.columnSelection = !this.columnSelection
-    return false
   }
 
   toggle(col) {
