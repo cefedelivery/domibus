@@ -4,7 +4,7 @@
     <md-card-content>
       <div class="divTableRow">
         <div class="divTableCell">
-          <input #fileInput type="file" id="pmode" accept=".xml">
+          <input #fileInput type="file" id="pmode" accept=".xml" (change)="checkFile()">
         </div>
         <div class="divTableCell">
         </div>
@@ -16,7 +16,7 @@
 <table class="buttonsRow">
   <tr>
     <td>
-      <button id="okbuttonupload_id" md-raised-button color="primary" (click)="submit()" style="margin-top:10px">
+      <button id="okbuttonupload_id" md-raised-button color="primary" (click)="submit()" style="margin-top:10px" [disabled]="!enableSubmit">
         <md-icon>check_circle</md-icon>
         <span>OK</span>
       </button>
