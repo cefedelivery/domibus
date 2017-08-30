@@ -2,7 +2,6 @@ package eu.domibus.common.model.logging;
 
 import javax.persistence.TypedQuery;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -11,70 +10,72 @@ import java.util.Map;
  */
 public class MessageLogInfoFilter {
 
+    private static final String LOG_MESSAGE_ID = "log.messageId";
+    private static final String LOG_MSH_ROLE = "log.mshRole";
+    private static final String LOG_MESSAGE_TYPE = "log.messageType";
+    private static final String LOG_MESSAGE_STATUS = "log.messageStatus";
+    private static final String LOG_NOTIFICATION_STATUS = "log.notificationStatus";
+    private static final String LOG_DELETED = "log.deleted";
+    private static final String LOG_RECEIVED = "log.received";
+    private static final String LOG_SEND_ATTEMPTS = "log.sendAttempts";
+    private static final String LOG_SEND_ATTEMPTS_MAX = "log.sendAttemptsMax";
+    private static final String LOG_NEXT_ATTEMPT = "log.nextAttempt";
+    private static final String PARTY_FROM_VALUE = "partyFrom.value";
+    private static final String PARTY_TO_VALUE = "partyTo.value";
+    private static final String INFO_REF_TO_MESSAGE_ID = "info.refToMessageId";
+    private static final String PROPS_FROM_VALUE = "propsFrom.value";
+    private static final String PROPS_TO_VALUE = "propsTo.value";
+    private static final String MESSAGE_COLLABORATION_INFO_CONVERSATION_ID = "message.collaborationInfo.conversationId";
+    private static final String LOG_FAILED = "log.failed";
+    private static final String LOG_RESTORED = "log.restored";
+
     protected String getHQLKey(String originalColumn) {
         switch(originalColumn) {
             case "messageId":
-                return "log.messageId";
+                return LOG_MESSAGE_ID;
             case "mshRole":
-                return "log.mshRole";
+                return LOG_MSH_ROLE;
             case "messageType":
-                return "log.messageType";
+                return LOG_MESSAGE_TYPE;
             case "messageStatus":
-                return "log.messageStatus";
+                return LOG_MESSAGE_STATUS;
             case "notificationStatus":
-                return "log.notificationStatus";
+                return LOG_NOTIFICATION_STATUS;
             case "deleted":
-                return "log.deleted";
+                return LOG_DELETED;
             case "received":
-                return "log.received";
+                return LOG_RECEIVED;
             case "sendAttempts":
-                return "log.sendAttempts";
+                return LOG_SEND_ATTEMPTS;
             case "sendAttemptsMax":
-                return "log.sendAttemptsMax";
+                return LOG_SEND_ATTEMPTS_MAX;
             case "nextAttempt":
-                return "log.nextAttempt";
+                return LOG_NEXT_ATTEMPT;
             case "fromPartyId":
-                return "partyFrom.value";
+                return PARTY_FROM_VALUE;
             case "toPartyId":
-                return "partyTo.value";
+                return PARTY_TO_VALUE;
             case "refToMessageId":
-                return "info.refToMessageId";
+                return INFO_REF_TO_MESSAGE_ID;
             case "originalSender":
-                return "propsFrom.value";
+                return PROPS_FROM_VALUE;
             case "finalRecipient":
-                return "propsTo.value";
+                return PROPS_TO_VALUE;
             case "conversationId":
-                return "message.collaborationInfo.conversationId";
+                return MESSAGE_COLLABORATION_INFO_CONVERSATION_ID;
+            case "failed":
+                return LOG_FAILED;
+            case "restored":
+                return LOG_RESTORED;
             default:
                 return "";
         }
     }
 
-    protected StringBuilder filterQuery(String query, String column, boolean asc, HashMap<String, Object> filters) {
+    protected StringBuilder filterQuery(String query, String column, boolean asc, Map<String, Object> filters) {
         StringBuilder result = new StringBuilder(query);
         for (Map.Entry<String, Object> filter : filters.entrySet()) {
-            if (filter.getValue() != null) {
-                result.append(" and ");
-                if (!(filter.getValue() instanceof Date)) {
-                    if (!(filter.getValue().toString().isEmpty())) {
-                        String tableName = getHQLKey(filter.getKey());
-                        result.append(tableName).append(" = :").append(filter.getKey());
-                    }
-                } else {
-                    if (!(filter.getValue().toString().isEmpty())) {
-                        switch (filter.getKey()) {
-                            case "":
-                                break;
-                            case "receivedFrom":
-                                result.append("log.received").append(" >= :").append(filter.getKey());
-                                break;
-                            case "receivedTo":
-                                result.append("log.received").append(" <= :").append(filter.getKey());
-                                break;
-                        }
-                    }
-                }
-            }
+            handleFilter(result, filter);
         }
 
         if (column != null) {
@@ -89,7 +90,28 @@ public class MessageLogInfoFilter {
         return result;
     }
 
-    public <E> TypedQuery<E> applyParameters(TypedQuery<E> query, HashMap<String, Object> filters) {
+    private void handleFilter(StringBuilder result, Map.Entry<String, Object> filter) {
+        if (filter.getValue() != null) {
+            result.append(" and ");
+            if (!(filter.getValue() instanceof Date)) {
+                if (!(filter.getValue().toString().isEmpty())) {
+                    String tableName = getHQLKey(filter.getKey());
+                    result.append(tableName).append(" = :").append(filter.getKey());
+                }
+            } else {
+                if (!(filter.getValue().toString().isEmpty())) {
+                    String s = filter.getKey();
+                    if (s.equals("receivedFrom")) {
+                        result.append(LOG_RECEIVED).append(" >= :").append(filter.getKey());
+                    } else if (s.equals("receivedTo")) {
+                        result.append(LOG_RECEIVED).append(" <= :").append(filter.getKey());
+                    }
+                }
+            }
+        }
+    }
+
+    public <E> TypedQuery<E> applyParameters(TypedQuery<E> query, Map<String, Object> filters) {
         for (Map.Entry<String, Object> filter : filters.entrySet()) {
             if (filter.getValue() != null) {
                 query.setParameter(filter.getKey(), filter.getValue());

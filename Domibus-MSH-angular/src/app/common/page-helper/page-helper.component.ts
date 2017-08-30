@@ -1,7 +1,7 @@
 import {Component, OnInit} from "@angular/core";
 import {MdDialog} from "@angular/material";
-import {HelpDialogComponent} from "./help-dialog/help-dialog.component";
 import {NavigationStart, Router} from "@angular/router";
+import {isNullOrUndefined} from "util";
 
 @Component({
   selector: 'page-helper',
@@ -10,32 +10,34 @@ import {NavigationStart, Router} from "@angular/router";
 })
 export class PageHelperComponent implements OnInit {
 
-  pageName: String;
+  pageName: string;
   helpPages: Map<String, String> = new Map<String, String>();
   activateHelp: boolean = false;
 
   constructor(public dialog: MdDialog, private router: Router) {
-    this.pageName = 'truststore';
   }
 
   ngOnInit() {
-    this.helpPages.set("/", "messagelog");
-    this.helpPages.set("/messagefilter", "messagefilter");
-    this.helpPages.set("/truststore", "truststore");
-    this.helpPages.set("/pmode", "pmode");
-    this.helpPages.set("/errorlog", "errorlog");
-    this.helpPages.set("/jms", "jms");
-    this.helpPages.set("/user", "user");
+    let MAIN_HELP_PAGE = "https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus+3.3+Admin+Console+Help";
+    let VERSION_SPECIFIC_PAGE = "#Domibus3.3AdminConsoleHelp-";
+
+    this.helpPages.set("/", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Messages");
+    this.helpPages.set("/login", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Login");
+    this.helpPages.set("/messagefilter", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "MessageFilter");
+    this.helpPages.set("/truststore", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Truststore");
+    this.helpPages.set("/pmode", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "PMode");
+    this.helpPages.set("/errorlog", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "ErrorLog");
+    this.helpPages.set("/jms", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "JMSMonitoring");
+    this.helpPages.set("/user", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Users");
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         console.log("Navigation change [" + event.url + "]");
-        let pageName: String = this.helpPages.get(event.url);
-        if (!pageName) {
+        let page = this.helpPages.get(event.url);
+        if (isNullOrUndefined(page)) {
           this.activateHelp = false;
-        }
-        else {
+        } else {
           this.activateHelp = true;
-          this.pageName = pageName;
+          this.pageName = page.toString();
         }
       }
     });
@@ -43,7 +45,7 @@ export class PageHelperComponent implements OnInit {
 
 
   openHelpDialog() {
-    this.dialog.open(HelpDialogComponent, {data: {pageName: this.pageName}});
+    window.open(this.pageName, "_blank");
   }
 
 }

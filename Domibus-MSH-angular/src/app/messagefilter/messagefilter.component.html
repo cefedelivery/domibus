@@ -1,105 +1,113 @@
+<h1 id="messagefilterheader_id">Message Filter</h1>
 <div class="selectionCriteria">
-  <md-card>
-    <md-card-content>
-      <h1 id="messagefilterheader_id">Message Filter</h1>
-      <form name="messageFilterForm" #messageFilterForm="ngForm">
-        <ngx-datatable
-          #mydatatable
-          class="material striped"
-          [columnMode]="'force'"
-          [headerHeight]="50"
-          [footerHeight]="50"
-          [rowHeight]="'auto'"
-          [rows]="rows"
-          [selected]="selected"
-          [selectionType]="'multi'"
-          (select)='onSelect($event)'
-          id="messageFilterTable">
-          <ngx-datatable-column name="Plugin" prop="backendName" [sortable]="false">
-            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+  <div class="panel">
+    <md-card>
+      <md-card-content>
+        <form name="messageFilterForm" #messageFilterForm="ngForm">
+          <ngx-datatable
+            #mydatatable
+            class="material striped"
+            [columnMode]="'force'"
+            [headerHeight]="50"
+            [footerHeight]="50"
+            [rowHeight]="'auto'"
+            [rows]="rows"
+            [selected]="selected"
+            [selectionType]="'multi'"
+            (select)='onSelect($event)'
+            id="messageFilterTable">
+            <ngx-datatable-column name="Plugin" prop="backendName" [sortable]="false">
+              <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
                 {{value}}
               </span>
-            </ng-template>
-          </ngx-datatable-column>
-          <ngx-datatable-column name="From" prop="from.expression" [sortable]="false">
-            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column name="From" prop="from.expression" [sortable]="false">
+              <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
                 {{value}}
               </span>
-            </ng-template>
-          </ngx-datatable-column>
-          <ngx-datatable-column name="To" prop="to.expression" [sortable]="false">
-            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column name="To" prop="to.expression" [sortable]="false">
+              <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
                 {{value}}
               </span>
-            </ng-template>
-          </ngx-datatable-column>
-          <ngx-datatable-column name="Action" prop="action.expression" [sortable]="false">
-            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column name="Action" prop="action.expression" [sortable]="false">
+              <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span class="clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
                 {{value}}
               </span>
-            </ng-template>
-          </ngx-datatable-column>
-          <ngx-datatable-column name="Service" prop="service.expression" [sortable]="false">
-            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column name="Service" prop="service.expression" [sortable]="false">
+              <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
                 {{value}}
               </span>
-            </ng-template>
-          </ngx-datatable-column>
-          <ngx-datatable-column name="Persisted" prop="persisted" [sortable]="false">
-            <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <input autofocus type="checkbox" [checked]="value" disabled (dblclick)="buttonEdit()"/>
-            </ng-template>
-          </ngx-datatable-column>
-        </ngx-datatable>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column name="Persisted" prop="persisted" [sortable]="false">
+              <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+                <input autofocus type="checkbox" [checked]="value" disabled (dblclick)="buttonEdit()"/>
+              </ng-template>
+            </ngx-datatable-column>
+          </ngx-datatable>
 
-        <table class="buttonsMoveRow">
-          <tr>
-            <td>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableMoveUp" (click)="buttonMoveUp()" id="moveupbutton_id">
-                <md-icon>arrow_drop_up</md-icon>
-                <span>Move Up</span>
-              </button>
-            </td>
-            <td>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableMoveDown" (click)="buttonMoveDown()" id="movedownbutton_id">
-                <md-icon>arrow_drop_down</md-icon>
-                <span>Move Down</span>
-              </button>
-            </td>
-          </tr>
-        </table>
-        <table class="buttonsRow">
-          <tr>
-            <td>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableCancel" (click)="cancelDialog()" id="cancelbutton_id">
-                <md-icon>cancel</md-icon>
-                <span>Cancel</span>
-              </button>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableSave" (click)="saveDialog()" id="savebutton_id">
-                <md-icon>save</md-icon>
-                <span>Save</span>
-              </button>
-              <button md-raised-button color="primary" type="button" (click)="buttonNew()" id="newbutton_id">
-                <md-icon>add</md-icon>
-                <span>New</span>
-              </button>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableEdit" (click)="buttonEdit()" id="editbutton_id">
-                <md-icon>edit</md-icon>
-                <span>Edit</span>
-              </button>
-              <button md-raised-button color="primary" type="button" [disabled]="!enableDelete" (click)="buttonDelete()" id="deletebutton_id">
-                <md-icon>delete</md-icon>
-                <span>Delete</span>
-              </button>
-            </td>
-          </tr>
-        </table>
-      </form>
-    </md-card-content>
-  </md-card>
+          <table class="group-action-button">
+            <tr>
+              <td>
+                <button md-raised-button color="primary" type="button" [disabled]="!enableMoveUp"
+                        (click)="buttonMoveUp()" id="moveupbutton_id">
+                  <md-icon>arrow_drop_up</md-icon>
+                  <span>Move Up</span>
+                </button>
+              </td>
+              <td>
+                <button md-raised-button color="primary" type="button" [disabled]="!enableMoveDown"
+                        (click)="buttonMoveDown()" id="movedownbutton_id">
+                  <md-icon>arrow_drop_down</md-icon>
+                  <span>Move Down</span>
+                </button>
+              </td>
+            </tr>
+          </table>
+          <table class="group-action-button">
+            <tr>
+              <td>
+                <button md-raised-button color="primary" type="button" [disabled]="!enableCancel"
+                        (click)="cancelDialog()" id="cancelbutton_id">
+                  <md-icon>cancel</md-icon>
+                  <span>Cancel</span>
+                </button>
+                <button md-raised-button color="primary" type="button" [disabled]="!enableSave" (click)="saveDialog()"
+                        id="savebutton_id">
+                  <md-icon>save</md-icon>
+                  <span>Save</span>
+                </button>
+                <button md-raised-button color="primary" type="button" (click)="buttonNew()" id="newbutton_id">
+                  <md-icon>add</md-icon>
+                  <span>New</span>
+                </button>
+                <button md-raised-button color="primary" type="button" [disabled]="!enableEdit" (click)="buttonEdit()"
+                        id="editbutton_id">
+                  <md-icon>edit</md-icon>
+                  <span>Edit</span>
+                </button>
+                <button md-raised-button color="primary" type="button" [disabled]="!enableDelete"
+                        (click)="buttonDelete()" id="deletebutton_id">
+                  <md-icon>delete</md-icon>
+                  <span>Delete</span>
+                </button>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </md-card-content>
+    </md-card>
+  </div>
 </div>

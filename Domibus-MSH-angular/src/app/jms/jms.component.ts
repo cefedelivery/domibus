@@ -105,7 +105,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.request.toDate.setHours(23, 59, 59, 999)
 
     this.getDestinations().subscribe((response: Response) => {
-      this.setDefaultQueue('[d|D]omibus.?DLQ');
+      this.setDefaultQueue('.*?[d|D]omibus.?DLQ');
       this.search();
     });
 

@@ -18,7 +18,6 @@ import {isNullOrUndefined} from "util";
 
 export class PModeComponent {
   private ERROR_PMODE_EMPTY = "As PMode is empty, no file was downloaded.";
-  private selectedOption: string;
   private url = "rest/pmode";
 
   public pModeExists = false;
@@ -48,8 +47,7 @@ export class PModeComponent {
 
   upload() {
     let dialogRef = this.dialog.open(PmodeUploadComponent);
-    dialogRef.afterClosed().subscribe(result => {
-      this.selectedOption = result;
+    dialogRef.componentInstance.onPModeUploaded.subscribe(result => {
       this.checkPmodeActive();
     });
   }

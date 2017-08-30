@@ -88,7 +88,7 @@
                         </property>
                     </soapuiProperties>
                     <testFailIgnore>false</testFailIgnore>
-                    <projectFile>${soapui.root.folder}/AS4-domibus-WS-soapui-project-pushONLY.xml</projectFile>
+                    <projectFile>${soapui.root.folder}/AS4-domibus-WS-soapui-project.xml</projectFile>
                 </configuration>
 
                 <dependencies>

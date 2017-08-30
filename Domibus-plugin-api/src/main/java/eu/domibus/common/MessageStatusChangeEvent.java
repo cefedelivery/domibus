@@ -19,7 +19,7 @@ public class MessageStatusChangeEvent implements Serializable {
     protected MessageStatus toStatus;
     protected Timestamp changeTimestamp;
 
-    protected Map<String, Object> properties = new HashMap<>();
+    protected Map<String, Object> properties = new HashMap<>(); //NOSONAR
 
     public String getMessageId() {
         return messageId;

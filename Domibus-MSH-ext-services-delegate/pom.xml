@@ -18,7 +18,54 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>com.github.kongchen</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>3.1.5</version>
+
+                <configuration>
+
+                    <apiSources>
+                        <apiSource>
+                            <springmvc>true</springmvc>
+                            <locations>eu.domibus.ext.rest</locations>
+                            <schemes>http</schemes>
+                            <host>localhost:8091</host>
+                            <info>
+                                <title>Domibus REST API documentation</title>
+                                <version>v1</version>
+                                <description>Domibus REST API documentation</description>
+
+                                <license>
+                                    <url>https://joinup.ec.europa.eu/community/eupl/og_page/eupl-text-11-12</url>
+                                    <name>EUPL 1.2</name>
+                                </license>
+                            </info>
+
+                            <securityDefinitions>
+                                <securityDefinition>
+                                    <json>/securityDefinitions.json</json>
+                                </securityDefinition>
+                            </securityDefinitions>
+
+                            <swaggerDirectory>${project.parent.basedir}/Domibus-MSH-swagger/src/main/webapp/
+                            </swaggerDirectory>
+
+                        </apiSource>
+                    </apiSources>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
+
     </build>
 
     <dependencies>
@@ -150,5 +197,20 @@
             <scope>test</scope>
         </dependency>
         <!-- End Test dependencies -->
+
+        <!--Swagger-->
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+            <scope>provided</scope>
+            <version>1.5.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>jsr311-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--End Swagger-->
     </dependencies>
 </project>

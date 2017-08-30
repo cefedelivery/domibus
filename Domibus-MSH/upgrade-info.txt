@@ -1,5 +1,18 @@
 Domibus 3.3-FR (from 3.3-RC1)
                - Replace the Domibus war and the plugin(s) jar(s) into "\conf\domibus\plugins\lib"
+               - If the JMS plugin is used, in the file "\conf\domibus\jms-plugin.xml" add the taskExecutor property:
+                    <bean id="backendJmsListenerContainerFactory"
+                              class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+                              ......
+                              <property name="taskExecutor" ref="taskExecutor"/>
+                              ......
+                    </bean>
+               - In case of a custom plugin, modify all the JMS listeners in order to use the default taskExecutor. Eg(see the instructions for upgrading the JMS plugin and the below example):
+                    <bean id="dispatchContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+                              ......
+                              <property name="taskExecutor" ref="taskExecutor"/>
+                              ......
+                    </bean>
                - In the file "\conf\domibus\domibus.properties":
                     o rename the property "domibus.senderparty.trust.verification" to "domibus.sender.trust.validation.onreceiving" in your domibus.properties file. If the property is not defined, do nothing. Default value "false" has not been changed.
                     o rename the property "domibus.certificate.validation.enabled" to "domibus.receiver.certificate.validation.onsending" in your domibus.properties file. If the property is not defined, do nothing. Default value "true" has not been changed.
@@ -45,6 +58,20 @@ Domibus 3.3-FR (from 3.3-RC1)
                         - add the property "domibus.datasource.maxPoolSize=100"
                         - add the property "domibus.datasource.maxLifetime=60"
                         - add the property "domibus.datasource.xa.maxLifetime=60"
+               - [WebLogic only]
+                    o modify the following parameters for the queue DomibusSendMessageQueue(jms/domibus.internal.dispatch.queue):
+                        - Set "Expiration Policy" to "Discard"
+                        - Set "Error Destination" to "None"
+                - [WildFly only]
+                   o in file "cef_edelivery_path\domibus\standalone\configuration\standalone-full.xml":
+                       - remove the "dead-letter-address" setting from the "address-setting" configuration of the "jms.queue.DomibusSendMessageQueue"; after the modification will be done the
+                       "jms.queue.DomibusSendMessageQueue" will look like below:
+
+                         <address-setting match="jms.queue.DomibusSendMessageQueue">
+                            <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                            <redelivery-delay>1000</redelivery-delay>
+                            <max-delivery-attempts>1</max-delivery-attempts>
+                        </address-setting>
 Domibus 3.3-RC1 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-rc1-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-rc1-migration.ddl for Oracle)

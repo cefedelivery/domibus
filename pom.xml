@@ -102,6 +102,12 @@
         <repository>
             <id>cefdigital-snapshots</id>
             <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
@@ -146,6 +152,11 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
@@ -707,6 +718,12 @@
             </activation>
             <modules>
                 <module>Domibus-MSH-distribution</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>documentation</id>
+            <modules>
+                <module>Domibus-MSH-swagger</module>
             </modules>
         </profile>
     </profiles>

@@ -85,11 +85,6 @@ export class ErrorLogComponent {
 
     ]
 
-    this.filter.timestampTo = new Date()
-    this.filter.timestampTo.setHours(23, 59, 59, 999)
-
-    this.filter.notifiedTo = new Date()
-    this.filter.notifiedTo.setHours(23, 59, 59, 999)
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ["Message Id", "Error Code", "Timestamp"].indexOf(col.name) != -1

@@ -27,12 +27,10 @@ class SignalMessageCreator implements MessageCreator {
     public Message createMessage(Session session) throws JMSException {
         Message message = session.createMapMessage();
         String messageType;
-        switch (this.notificationType) {
-            case MESSAGE_SEND_SUCCESS:
-                messageType = JMSMessageConstants.MESSAGE_TYPE_SEND_SUCCESS;
-                break;
-            default:
-                throw new JMSException("unknown NotificationType: " + notificationType.name());
+        if (this.notificationType == NotificationType.MESSAGE_SEND_SUCCESS) {
+            messageType = JMSMessageConstants.MESSAGE_TYPE_SEND_SUCCESS;
+        } else {
+            throw new JMSException("unknown NotificationType: " + notificationType.name());
         }
         message.setStringProperty(JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, messageType);
         message.setStringProperty(MESSAGE_ID, messageId);
