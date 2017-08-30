@@ -98,12 +98,22 @@ public class FSFilesManager {
     public FileObject renameFile(FileObject file, String newFileName) throws FileSystemException {
         FileObject newFile = resolveSibling(file, newFileName);
         file.moveTo(newFile);
+        
+        try (FileContent fileContent = newFile.getContent()) {
+            long currentTimeMillis = System.currentTimeMillis();
+            fileContent.setLastModifiedTime(currentTimeMillis);
+        }
 
         return newFile;
     }
 
     public void moveFile(FileObject file, FileObject targetFile) throws FileSystemException {
         file.moveTo(targetFile);
+        
+        try (FileContent fileContent = targetFile.getContent()) {
+            long currentTimeMillis = System.currentTimeMillis();
+            fileContent.setLastModifiedTime(currentTimeMillis);
+        }
     }
 
     public boolean deleteFile(FileObject file) throws FileSystemException {
@@ -144,6 +154,7 @@ public class FSFilesManager {
      * @param directory base directory
      * @param fileName file name
      * @param content content
+     * @throws java.io.IOException
      */
     public void createFile(FileObject directory, String fileName, String content) throws IOException {
         try (FileObject file = directory.resolveFile(fileName);

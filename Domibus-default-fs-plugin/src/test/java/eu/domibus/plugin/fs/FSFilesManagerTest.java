@@ -22,8 +22,6 @@ import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 
-import java.io.IOException;
-
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
@@ -57,7 +55,9 @@ public class FSFilesManagerTest {
         rootDir.resolveFile("file2").createFile();
         rootDir.resolveFile("file3").createFile();
         rootDir.resolveFile("toberenamed").createFile();
+        rootDir.resolveFile("toberenamed").getContent().setLastModifiedTime(0);
         rootDir.resolveFile("tobemoved").createFile();
+        rootDir.resolveFile("toberenamed").getContent().setLastModifiedTime(0);
         rootDir.resolveFile("tobedeleted").createFile();
 
         rootDir.resolveFile("targetfolder1/targetfolder2").createFolder();
@@ -150,11 +150,16 @@ public class FSFilesManagerTest {
     @Test
     public void testRenameFile() throws Exception {
         FileObject file = rootDir.resolveFile("toberenamed");
+        
+        long beforeMillis = System.currentTimeMillis();
         FileObject result = instance.renameFile(file, "renamed");
+        long afterMillis = System.currentTimeMillis();
         
         Assert.assertNotNull(result);
         Assert.assertEquals("ram:///FSFilesManagerTest/renamed", result.getName().getURI());
         Assert.assertTrue(result.exists());
+        Assert.assertTrue(result.getContent().getLastModifiedTime() >= beforeMillis);
+        Assert.assertTrue(result.getContent().getLastModifiedTime() <= afterMillis);
     }
 
     // This test fails with a temporary filesystem
@@ -225,9 +230,13 @@ public class FSFilesManagerTest {
         FileObject file = rootDir.resolveFile("tobemoved");
         FileObject targetFile = rootDir.resolveFile("targetfolder1/targetfolder2/moved");
         
+        long beforeMillis = System.currentTimeMillis();
         instance.moveFile(file, targetFile);
+        long afterMillis = System.currentTimeMillis();
         
         Assert.assertTrue(targetFile.exists());
+        Assert.assertTrue(targetFile.getContent().getLastModifiedTime() >= beforeMillis);
+        Assert.assertTrue(targetFile.getContent().getLastModifiedTime() <= afterMillis);
     }
 
     @Test
