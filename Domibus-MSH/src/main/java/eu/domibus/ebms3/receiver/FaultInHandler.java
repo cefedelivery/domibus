@@ -32,6 +32,7 @@ import java.util.Set;
  *
  * @author Christian Koch, Stefan Mueller
  */
+@Transactional(propagation = Propagation.SUPPORTS)
 public class FaultInHandler extends AbstractFaultHandler {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FaultInHandler.class);
 
@@ -58,7 +59,6 @@ public class FaultInHandler extends AbstractFaultHandler {
      * thrown during the processing of incoming ebMS3 messages
      */
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
     public boolean handleFault(final SOAPMessageContext context) {
 
         if(context == null) {
@@ -139,7 +139,6 @@ public class FaultInHandler extends AbstractFaultHandler {
     }
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
     public void close(final MessageContext context) {
 
     }
