@@ -43,7 +43,6 @@ public class FaultInHandler extends AbstractFaultHandler {
     private ErrorService errorService;
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
     public Set<QName> getHeaders() {
         return Collections.emptySet();
     }
