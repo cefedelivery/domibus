@@ -317,11 +317,7 @@
         },
         "status" : {
           "type" : "string",
-          "enum": [
-            "SUCCESS",
-            "ABORT",
-            "ERROR"
-          ]
+          "enum" : [ "SUCCESS", "ABORT", "ERROR" ]
         },
         "error" : {
           "type" : "string"
