@@ -27,7 +27,7 @@
     [limit]="rowLimiter.pageSize"
     [selectionType]="'multi'"
     (select)='onSelect($event)'>
-</ngx-datatable>
+  </ngx-datatable>
 
   <ng-template #editableTpl let-value="value" let-row="row" ngx-datatable-cell-template>
           <span (dblclick)="buttonEdit()"
@@ -35,18 +35,40 @@
                 style="word-wrap: break-word">
             {{value}}
           </span>
-</ng-template>
+  </ng-template>
 
   <ng-template #passwordTpl let-value="value" let-row="row" ngx-datatable-cell-template>
           <span (dblclick)="buttonEdit()"
                 class="password-field" class="clickAble">
             ******
           </span>
-</ng-template>
+  </ng-template>
 
   <ng-template #checkBoxTpl let-row="row" ngx-datatable-cell-template>
     <input type="checkbox" [checked]="row['active']" disabled>
-</ng-template>
+  </ng-template>
+
+  <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>
+    <button md-icon-button [md-menu-trigger-for]="actionsMenu" id="actionsmenu_id">
+      <md-icon>list</md-icon>
+    </button>
+  </ng-template>
+
+  <md-menu x-position="before" #actionsMenu="mdMenu">
+    <div>
+      <button id="userEditButtonMenu" md-menu-item (click)="buttonEdit()" color="primary" [disabled]="!enableEdit">
+        <md-icon>edit</md-icon>
+        <span>Edit</span>
+      </button>
+    </div>
+    <div>
+      <button id="userDeleteButtonMenu" md-menu-item (click)="buttonDelete()" color="primary"
+              [disabled]="!enableDelete">
+        <md-icon>delete</md-icon>
+        <span>Delete</span>
+      </button>
+    </div>
+  </md-menu>
 
 
   <table class="group-action-button">
@@ -76,5 +98,5 @@
         </button>
       </td>
     </tr>
-</table>
+  </table>
 </div>

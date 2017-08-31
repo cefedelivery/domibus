@@ -187,7 +187,8 @@ export class MessageFilterComponent implements DirtyOperations{
           routingCriterias.push(new RoutingCriteriaEntry(0, 'service', formRef.componentInstance.service));
         }
         let backendEntry = new BackendFilterEntry(0, this.rowNumber + 1, formRef.componentInstance.plugin, routingCriterias, false);
-        if (this.findRowsIndex(backendEntry) == -1) {
+        let backendEntryPos = this.findRowsIndex(backendEntry);
+        if (backendEntryPos == -1) {
           this.updateSelectedPlugin(formRef.componentInstance.plugin);
           this.updateSelectedFrom(formRef.componentInstance.from);
           this.updateSelectedTo(formRef.componentInstance.to);
@@ -197,7 +198,9 @@ export class MessageFilterComponent implements DirtyOperations{
           this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
           this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
         } else {
-          this.alertService.error("Impossible to insert a duplicate entry");
+          if(this.findRowsIndex(backendEntry) != this.rowNumber) {
+            this.alertService.error("Impossible to insert a duplicate entry");
+          }
         }
       }
     });

@@ -21,6 +21,7 @@ export class MessageLogComponent {
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
   @ViewChild('nextAttemptInfoTpl') public nextAttemptInfoTpl: TemplateRef<any>;
   @ViewChild('nextAttemptInfoWithDateFormatTpl') public nextAttemptInfoWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
@@ -128,12 +129,17 @@ export class MessageLogComponent {
         cellTemplate: this.rowWithDateFormatTpl,
         name: 'Restored',
         width: 155
+      },
+      {
+        cellTemplate: this.rowActions,
+        name: 'Actions',
+        width:50
       }
 
     ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type"].indexOf(col.name) != -1
+      return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type", "Actions"].indexOf(col.name) != -1
     });
 
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc)
