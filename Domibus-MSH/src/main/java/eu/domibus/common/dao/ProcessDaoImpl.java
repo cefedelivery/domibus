@@ -39,9 +39,6 @@ public class ProcessDaoImpl implements ProcessDao{
     @Override
     public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
         TypedQuery<Process> processQuery = entityManager.createNamedQuery(RETRIEVE_PULL_PROCESS_FROM_MESSAGE_CONTEXT, Process.class);
-        processQuery.setParameter(ACTION, messageExchangeConfiguration.getAction());
-        processQuery.setParameter(SERVICE, messageExchangeConfiguration.getService());
-        processQuery.setParameter(AGREEMENT, messageExchangeConfiguration.getAgreementName());
         processQuery.setParameter(LEG, messageExchangeConfiguration.getLeg());
         processQuery.setParameter(RESPONDER_NAME, messageExchangeConfiguration.getSenderParty());
         processQuery.setParameter(INITIATOR_NAME, messageExchangeConfiguration.getReceiverParty());
