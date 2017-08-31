@@ -30,7 +30,6 @@
                             <springmvc>true</springmvc>
                             <locations>eu.domibus.ext.rest</locations>
                             <schemes>http</schemes>
-                            <host>localhost:8091</host>
                             <info>
                                 <title>Domibus REST API documentation</title>
                                 <version>v1</version>
