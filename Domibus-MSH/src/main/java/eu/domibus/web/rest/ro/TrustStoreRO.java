@@ -1,4 +1,4 @@
-package eu.domibus.web.rest;
+package eu.domibus.web.rest.ro;
 
 import java.util.Date;
 
@@ -6,8 +6,8 @@ import java.util.Date;
  * @author Thomas Dussart
  * @since 3.3
  */
+public class TrustStoreRO {
 
-public class TrustStoreRo {
     private String name;
     private String subject;
     private String issuer;
