@@ -21,9 +21,7 @@ import static eu.domibus.common.model.configuration.Process.*;
 @Entity
 @Table(name = "TB_PROCESS")
 @NamedQueries({
-        @NamedQuery(name = RETRIEVE_PULL_PROCESS_FROM_MESSAGE_CONTEXT, query = "SELECT p FROM Process as p left join p.agreement as a left join p.legs as l left join p.initiatorParties init left join p.responderParties resp  where p.mepBinding.name=:mepBinding and l.action.name=:action and l.service.name=:service and (a is null  or a.name=:agreement) and l.name=:leg and init.name=:initiatorName and resp.name=:responderName"),
-        //@thom this is the place to swith initiator and responder.
-        //@question please clarify where the MHS initiator and responder are set in the pmode file in case of a pull.
+        @NamedQuery(name = RETRIEVE_PULL_PROCESS_FROM_MESSAGE_CONTEXT, query = "SELECT p FROM Process as p left join p.legs as l left join p.initiatorParties init left join p.responderParties resp  where p.mepBinding.name=:mepBinding and l.name=:leg and init.name=:initiatorName and resp.name=:responderName"),
         @NamedQuery(name = FIND_PULL_PROCESS_TO_INITIATE, query = "SELECT p FROM Process as p join p.initiatorParties as resp WHERE p.mepBinding.name=:mepBinding and resp in(:initiator)"),
         @NamedQuery(name = FIND_PULL_PROCESS_FROM_INITIATOR_AND_MPC, query = "SELECT p FROM Process as p left join p.legs as l left join p.initiatorParties init where p.mepBinding.name=:mepBinding and l.defaultMpc.qualifiedName=:mpcName and init.name=:initiator"),
         @NamedQuery(name = FIND_PULL_PROCESS_FROM_MPC, query = "SELECT p FROM Process as p left join p.legs as l where p.mepBinding.name=:mepBinding and l.defaultMpc.qualifiedName=:mpcName")})
