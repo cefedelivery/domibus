@@ -10,11 +10,12 @@ import java.util.Map;
 public class InternalJMSDestination {
 
     public final static String QUEUE_TYPE = "Queue";
-    public final static String TOPIC_TYPE = "Topic"; 
+    public final static String TOPIC_TYPE = "Topic";
 
     protected Map<String, Object> properties = new HashMap<>();
 
     protected String name;
+    protected String fullyQualifiedName;
     protected boolean isInternal;
     protected String type;
     protected long numberOfMessages;
@@ -69,5 +70,13 @@ public class InternalJMSDestination {
 
     public void setInternal(boolean internal) {
         isInternal = internal;
+    }
+
+    public String getFullyQualifiedName() {
+        return fullyQualifiedName;
+    }
+
+    public void setFullyQualifiedName(String fullyQualifiedName) {
+        this.fullyQualifiedName = fullyQualifiedName;
     }
 }
