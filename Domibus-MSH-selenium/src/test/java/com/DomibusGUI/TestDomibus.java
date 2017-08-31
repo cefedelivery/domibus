@@ -53,7 +53,7 @@ public class TestDomibus {
 	BrowserSelect bw = new BrowserSelect();
 	Screenshot ss = new Screenshot(driver, extent, test);
 	PropertyFileRead p = new PropertyFileRead();
-	int i = 0, j = 1;
+	int i = 00, j = 1;
 	Boolean LSucc = false;
 
 	// HTML Report configuration
@@ -77,10 +77,8 @@ public class TestDomibus {
 			i = 01;
 			j = 1;
 			test = extent.startTest("Verifying the TestCase TC_00" + i);
-			System.out.println("After test initilaize with testcase");
 			driver = bw.startBrowser(p.Read("browser"), p.Read("url"));
-			System.out.println("After browser select");
-
+			
 			/**
 			 * object declaration for PageObject classes
 			 */
@@ -113,10 +111,374 @@ public class TestDomibus {
 		driver.quit();
 	}
 
+		// <<<<<<<<<<<<< Test case 002 start here>>>>>>>>>>>>>>>>>>>>>>
+
+	@Test(priority = 2) // Starting of test
+	public void tc_002() throws Throwable {
+		DOMConfigurator.configure("log4j.xml");
+		try {
+			i = 02;
+			j = 1;
+			test = extent.startTest("Verifying the TestCase TC_00" + i);
+			System.out.println("Test case TC_002 Started");
+			driver = bw.startBrowser(p.Read("browser"), p.Read("url"));
+			
+			/**
+			 * object declaration for PageObject classes
+			 */
+			LoginPage lp = new LoginPage(driver, extent, test);
+			MessagesFilterPage mf = new MessagesFilterPage(driver, extent, test);
 	
+			Log.startTestCase("Testcase TC_" + i);
+			Log.info("Login Screen Test starts");
+
+			if (lp.userLoginPage(i, p.Read("Username"), p.Read("Password"))) {
+				Log.info("Login success");
+				Log.info("MessageFilter page Test starts");
+				mf.messagesFilterPageTest(i);
+
+			} else {
+				System.out.println("Login failed not executing and continue");
+				Log.info("Login credentials are not correct");
+				driver.quit();
+			}
+		} catch (Exception e) {
+			System.out.println("Exception in the test case is " + e.getMessage());
+			Log.info("Exception in the test case is " + e.getMessage());
+			test.log(LogStatus.ERROR, e);
+		}
+		try {
+			LogoutPage lo = new LogoutPage(driver);
+			lo.logOutTest();
+			Log.endTestCase("Testcase End");
+		} catch (Exception e) {
+			Log.info("Exception in logout " + e);
+		}
+		driver.quit();
+	}
+
+		// <<<<<<<<<<<<< Test case 003 start here>>>>>>>>>>>>>>>>>>>>>>
+
+	@Test(priority = 3) // Starting of test
+	public void tc_003() throws Throwable {
+		DOMConfigurator.configure("log4j.xml");
+		try {
+			i = 03;
+			j = 1;
+			test = extent.startTest("Verifying the TestCase TC_00" + i);
+			System.out.println("Test case TC_003 Started");
+			driver = bw.startBrowser(p.Read("browser"), p.Read("url"));
+			
+			/**
+			 * object declaration for PageObject classes
+			 */
+			LoginPage lp = new LoginPage(driver, extent, test);
+			UserManagementPage um = new UserManagementPage(driver, extent, test);
 	
+			Log.startTestCase("Testcase TC_" + i);
+			Log.info("Login Screen Test starts");
+
+			if (lp.userLoginPage(i, p.Read("Username"), p.Read("Password"))) {
+				Log.info("Login success");
+				Log.info("UserManagement page Test starts");
+				um.userManagementPageTest(i);
+
+			} else {
+				System.out.println("Login failed not executing and continue");
+				Log.info("Login credentials are not correct");
+				driver.quit();
+			}
+		} catch (Exception e) {
+			System.out.println("Exception in the test case is " + e.getMessage());
+			Log.info("Exception in the test case is " + e.getMessage());
+			test.log(LogStatus.ERROR, e);
+		}
+		try {
+			LogoutPage lo = new LogoutPage(driver);
+			lo.logOutTest();
+			Log.endTestCase("Testcase End");
+		} catch (Exception e) {
+			Log.info("Exception in logout " + e);
+		}
+		driver.quit();
+	}
+	
+		// <<<<<<<<<<<<< Test case 004 start here>>>>>>>>>>>>>>>>>>>>>>
+
+	@Test(priority = 4) // Starting of test
+	public void tc_004() throws Throwable {
+		DOMConfigurator.configure("log4j.xml");
+		try {
+			i = 04;
+			j = 1;
+			test = extent.startTest("Verifying the TestCase TC_00" + i);
+			System.out.println("Test case TC_004 Started");
+			driver = bw.startBrowser(p.Read("browser"), p.Read("url"));
+			
+			/**
+			 * object declaration for PageObject classes
+			 */
+			LoginPage lp = new LoginPage(driver, extent, test);
+			MessagesPage mp = new MessagesPage(driver, extent, test);
+	
+			Log.startTestCase("Testcase TC_" + i);
+			Log.info("Login Screen Test starts");
+
+			if (lp.userLoginPage(i, p.Read("Username"), p.Read("Password"))) {
+				Log.info("Login success");
+				Log.info("Message page Resend Test starts");
+				mp.messagesPageResentTest(i, p.ReadW("MessageID1"));
+
+			} else {
+				System.out.println("Login failed not executing and continue");
+				Log.info("Login credentials are not correct");
+				driver.quit();
+			}
+		} catch (Exception e) {
+			System.out.println("Exception in the test case is " + e.getMessage());
+			Log.info("Exception in the test case is " + e.getMessage());
+			test.log(LogStatus.ERROR, e);
+		}
+		try {
+			LogoutPage lo = new LogoutPage(driver);
+			lo.logOutTest();
+			Log.endTestCase("Testcase End");
+		} catch (Exception e) {
+			Log.info("Exception in logout " + e);
+		}
+		driver.quit();
+	}
+	
+			// <<<<<<<<<<<<< Test case 005 start here>>>>>>>>>>>>>>>>>>>>>>
+
+	@Test(priority = 5) // Starting of test
+	public void tc_005() throws Throwable {
+		DOMConfigurator.configure("log4j.xml");
+		try {
+			i = 05;
+			j = 1;
+			test = extent.startTest("Verifying the TestCase TC_00" + i);
+			System.out.println("Test case TC_005 Started");
+			driver = bw.startBrowser(p.Read("browser"), p.Read("url"));
+			
+			/**
+			 * object declaration for PageObject classes
+			 */
+			LoginPage lp = new LoginPage(driver, extent, test);
+			MessagesPage mp = new MessagesPage(driver, extent, test);
+	
+			Log.startTestCase("Testcase TC_" + i);
+			Log.info("Login Screen Test starts");
+
+			if (lp.userLoginPage(i, p.Read("Username"), p.Read("Password"))) {
+				Log.info("Login success");
+				Log.info("Message page Download Test starts");
+				mp.messagesPageDownloadTest(i, p.ReadW("MessageID1"));
+
+			} else {
+				System.out.println("Login failed not executing and continue");
+				Log.info("Login credentials are not correct");
+				driver.quit();
+			}
+		} catch (Exception e) {
+			System.out.println("Exception in the test case is " + e.getMessage());
+			Log.info("Exception in the test case is " + e.getMessage());
+			test.log(LogStatus.ERROR, e);
+		}
+		try {
+			LogoutPage lo = new LogoutPage(driver);
+			lo.logOutTest();
+			Log.endTestCase("Testcase End");
+		} catch (Exception e) {
+			Log.info("Exception in logout " + e);
+		}
+		driver.quit();
+	}
+	
+			// <<<<<<<<<<<<< Test case 006 start here>>>>>>>>>>>>>>>>>>>>>>
+
+	@Test(priority = 6) // Starting of test
+	public void tc_006() throws Throwable {
+		DOMConfigurator.configure("log4j.xml");
+		try {
+			i = 06;
+			j = 1;
+			test = extent.startTest("Verifying the TestCase TC_00" + i);
+			System.out.println("Test case TC_006 Started");
+			driver = bw.startBrowser(p.Read("browser"), p.Read("url"));
+			
+			/**
+			 * object declaration for PageObject classes
+			 */
+			LoginPage lp = new LoginPage(driver, extent, test);
+			PModePage pm = new PModePage(driver, extent, test);
+	
+			Log.startTestCase("Testcase TC_" + i);
+			Log.info("Login Screen Test starts");
+
+			if (lp.userLoginPage(i, p.Read("Username"), p.Read("Password"))) {
+				Log.info("Login success");
+				Log.info("PMode page Test starts");
+				pm.pModePageTest(i);
+
+			} else {
+				System.out.println("Login failed not executing and continue");
+				Log.info("Login credentials are not correct");
+				driver.quit();
+			}
+		} catch (Exception e) {
+			System.out.println("Exception in the test case is " + e.getMessage());
+			Log.info("Exception in the test case is " + e.getMessage());
+			test.log(LogStatus.ERROR, e);
+		}
+		try {
+			LogoutPage lo = new LogoutPage(driver);
+			lo.logOutTest();
+			Log.endTestCase("Testcase End");
+		} catch (Exception e) {
+			Log.info("Exception in logout " + e);
+		}
+		driver.quit();
+	}
 		
+					// <<<<<<<<<<<<< Test case 007 start here>>>>>>>>>>>>>>>>>>>>>>
+
+	@Test(priority = 7) // Starting of test
+	public void tc_007() throws Throwable {
+		DOMConfigurator.configure("log4j.xml");
+		try {
+			i = 07;
+			j = 1;
+			test = extent.startTest("Verifying the TestCase TC_00" + i);
+			System.out.println("Test case TC_007 Started");
+			driver = bw.startBrowser(p.Read("browser"), p.Read("url"));
+			
+			/**
+			 * object declaration for PageObject classes
+			 */
+			LoginPage lp = new LoginPage(driver, extent, test);
+			TruststorePage ts = new TruststorePage(driver, extent, test);
+	
+			Log.startTestCase("Testcase TC_" + i);
+			Log.info("Login Screen Test starts");
+
+			if (lp.userLoginPage(i, p.Read("Username"), p.Read("Password"))) {
+				Log.info("Login success");
+				Log.info("Truststore page Test starts");
+				ts.trustStorePageTest(i);
+
+			} else {
+				System.out.println("Login failed not executing and continue");
+				Log.info("Login credentials are not correct");
+				driver.quit();
+			}
+		} catch (Exception e) {
+			System.out.println("Exception in the test case is " + e.getMessage());
+			Log.info("Exception in the test case is " + e.getMessage());
+			test.log(LogStatus.ERROR, e);
+		}
+		try {
+			LogoutPage lo = new LogoutPage(driver);
+			lo.logOutTest();
+			Log.endTestCase("Testcase End");
+		} catch (Exception e) {
+			Log.info("Exception in logout " + e);
+		}
+		driver.quit();
+	}
 		
+							// <<<<<<<<<<<<< Test case 008 start here>>>>>>>>>>>>>>>>>>>>>>
+
+	@Test(priority = 8) // Starting of test
+	public void tc_008() throws Throwable {
+		DOMConfigurator.configure("log4j.xml");
+		try {
+			i = 8;
+			j = 1;
+			test = extent.startTest("Verifying the TestCase TC_00" + i);
+			System.out.println("Test case TC_008 Started");
+			driver = bw.startBrowser(p.Read("browser"), p.Read("url"));
+			
+			/**
+			 * object declaration for PageObject classes
+			 */
+			LoginPage lp = new LoginPage(driver, extent, test);
+			ErrorLogPage ep = new ErrorLogPage(driver, extent, test);
+	
+			Log.startTestCase("Testcase TC_" + i);
+			Log.info("Login Screen Test starts");
+
+			if (lp.userLoginPage(i, p.Read("Username"), p.Read("Password"))) {
+				Log.info("Login success");
+				Log.info("ErrorLog page Test starts");
+				ep.errorLogPageTest(i);
+
+			} else {
+				System.out.println("Login failed not executing and continue");
+				Log.info("Login credentials are not correct");
+				driver.quit();
+			}
+		} catch (Exception e) {
+			System.out.println("Exception in the test case is " + e.getMessage());
+			Log.info("Exception in the test case is " + e.getMessage());
+			test.log(LogStatus.ERROR, e);
+		}
+		try {
+			LogoutPage lo = new LogoutPage(driver);
+			lo.logOutTest();
+			Log.endTestCase("Testcase End");
+		} catch (Exception e) {
+			Log.info("Exception in logout " + e);
+		}
+		driver.quit();
+	}
+	
+								// <<<<<<<<<<<<< Test case 009 start here>>>>>>>>>>>>>>>>>>>>>>
+
+	@Test(priority = 9) // Starting of test
+	public void tc_009() throws Throwable {
+		DOMConfigurator.configure("log4j.xml");
+		try {
+			i = 9;
+			j = 1;
+			test = extent.startTest("Verifying the TestCase TC_00" + i);
+			System.out.println("Test case TC_008 Started");
+			driver = bw.startBrowser(p.Read("browser"), p.Read("url"));
+			
+			/**
+			 * object declaration for PageObject classes
+			 */
+			LoginPage lp = new LoginPage(driver, extent, test);
+			JMSMonitoringPage jm = new JMSMonitoringPage(driver, extent, test);
+	
+			Log.startTestCase("Testcase TC_" + i);
+			Log.info("Login Screen Test starts");
+
+			if (lp.userLoginPage(i, p.Read("Username"), p.Read("Password"))) {
+				Log.info("Login success");
+				Log.info("JMS monitor page Test starts");
+				jm.JMSMonitoringPageTest(i);
+
+			} else {
+				System.out.println("Login failed not executing and continue");
+				Log.info("Login credentials are not correct");
+				driver.quit();
+			}
+		} catch (Exception e) {
+			System.out.println("Exception in the test case is " + e.getMessage());
+			Log.info("Exception in the test case is " + e.getMessage());
+			test.log(LogStatus.ERROR, e);
+		}
+		try {
+			LogoutPage lo = new LogoutPage(driver);
+			lo.logOutTest();
+			Log.endTestCase("Testcase End");
+		} catch (Exception e) {
+			Log.info("Exception in logout " + e);
+		}
+		driver.quit();
+	}
+	
 	@AfterMethod
 	public void getResult(ITestResult result) throws IOException {
 		if (result.getStatus() == ITestResult.FAILURE) {
