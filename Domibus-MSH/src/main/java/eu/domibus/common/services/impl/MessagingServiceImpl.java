@@ -95,6 +95,7 @@ public class MessagingServiceImpl implements MessagingService {
             fileOutputStream = new GZIPOutputStream(fileOutputStream);
         }
         final long total = IOUtils.copyLarge(is, fileOutputStream);
+        fileOutputStream.flush();
         IOUtils.closeQuietly(fileOutputStream);
         LOG.debug("Done writing file [{}]. Written [{}] bytes.", file.getName(), total);
     }
