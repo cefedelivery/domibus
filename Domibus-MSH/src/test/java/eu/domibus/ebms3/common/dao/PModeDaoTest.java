@@ -26,6 +26,7 @@ import java.util.List;
  */
 @RunWith(JMockit.class)
 public class PModeDaoTest {
+    //Test class used to increase access privilege of findLegName in order to test the method.
     class PmodeTest extends PModeDao {
         public String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
             return super.findLegName(agreementName, senderParty, receiverParty, service, action);
