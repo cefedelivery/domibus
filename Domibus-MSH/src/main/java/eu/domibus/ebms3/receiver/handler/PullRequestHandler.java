@@ -18,7 +18,6 @@ import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.ebms3.receiver.MSHWebservice;
 import eu.domibus.ebms3.sender.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -40,7 +39,7 @@ import java.sql.Timestamp;
 @Component
 public class PullRequestHandler {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHWebservice.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PullRequestHandler.class);
 
     @Autowired
     private MessagingDao messagingDao;
