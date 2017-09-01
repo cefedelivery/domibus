@@ -27,6 +27,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   @ViewChild('passwordTpl') passwordTpl: TemplateRef<any>;
   @ViewChild('editableTpl') editableTpl: TemplateRef<any>;
   @ViewChild('checkBoxTpl') checkBoxTpl: TemplateRef<any>;
+  @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
@@ -85,12 +86,16 @@ export class UserComponent implements OnInit, DirtyOperations {
         cellTemplate: this.checkBoxTpl,
         name: 'Active',
         canAutoResize: true
+      },
+      {
+        cellTemplate: this.rowActions,
+        name: 'Actions'
       }
 
     ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ["Username", "Role", "Password"].indexOf(col.name) != -1
+      return ["Username", "Role", "Password", "Actions"].indexOf(col.name) != -1
     });
 
     this.getUsers();
