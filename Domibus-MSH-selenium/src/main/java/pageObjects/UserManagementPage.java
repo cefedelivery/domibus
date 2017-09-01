@@ -37,8 +37,8 @@ public class UserManagementPage {
 	By username = By.xpath("//*[@id='username_id']");
 	By email = By.xpath("//*[@id='email_id']");
 	By roles = By.xpath("//*[@id='roles_id']");
-	By Role_A = By.xpath("//md2-option[contains(text(),'ROLE_ADMIN')]");
-	By Role_U = By.xpath("//md2-option[contains(text(),'ROLE_USER')]");
+	By Role_A = By.xpath(".//md2-option[contains(text(),'ROLE_ADMIN')]");
+	By Role_U = By.xpath(".//md2-option[contains(text(),'ROLE_USER')]");
 	By password = By.xpath("//*[@id='password_id']");
 	By conPassword = By.xpath("//*[@id='confirmation_id']");
 	By eOK = By.xpath("//*[@id='editbuttonok_id']");
@@ -123,6 +123,7 @@ public class UserManagementPage {
 				driver.findElement(Role_U).click();
 			}
 			if (roleU.contains("ROLE_ADMIN,ROLE_USER")) {
+				Thread.sleep(2000);
 				driver.findElement(Role_A).click();
 				driver.findElement(Role_U).click();
 				Thread.sleep(2000);
