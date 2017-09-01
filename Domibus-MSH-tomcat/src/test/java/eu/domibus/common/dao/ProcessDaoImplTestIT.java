@@ -5,6 +5,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.messaging.XmlProcessingException;
+import eu.domibus.plugin.BackendConnector;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class ProcessDaoImplTestIT extends AbstractIT{
         assertEquals(1,processesForMessageContext.size());
         Process process = processesForMessageContext.get(0);
         assertNull(process.getAgreement());
-        assertEquals("pull", process.getMepBinding().getName());
+        assertEquals(BackendConnector.Mode.PULL.getFileMapping(), process.getMepBinding().getValue());
         assertEquals("oneway",process.getMep().getName());
     }
 
@@ -52,12 +53,12 @@ public class ProcessDaoImplTestIT extends AbstractIT{
     public void findPullByInitiator() throws Exception {
         loadBluePullPmodeFile();
         Party party = pModeDao.getReceiverParty(":red_gw");
-        List<Process> pullProcessesByIniator = processDao.findPullProcessesByInitiator(party);
-        assertEquals(1,pullProcessesByIniator.size());
+        List<Process> pullProcessesByInitiator = processDao.findPullProcessesByInitiator(party);
+        assertEquals(1, pullProcessesByInitiator.size());
 
-        Process process = pullProcessesByIniator.get(0);
+        Process process = pullProcessesByInitiator.get(0);
         assertNull(process.getAgreement());
-        assertEquals("pull",process.getMepBinding().getName());
+        assertEquals(BackendConnector.Mode.PULL.getFileMapping(), process.getMepBinding().getValue());
         assertEquals("oneway",process.getMep().getName());
     }
 
@@ -74,6 +75,16 @@ public class ProcessDaoImplTestIT extends AbstractIT{
         loadBluePullPmodeFile();
         List<Process> pullProcessFromRequestPartyAndMpc = processDao.findPullProcessByMpc("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC");
         assertEquals(1,pullProcessFromRequestPartyAndMpc.size());
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    public void testFindPullProcessByLegName() throws XmlProcessingException, IOException, URISyntaxException {
+        loadBluePullPmodeFile();
+        final List<Process> pullLeg2 = processDao.findPullProcessByLegName("pullLeg2");
+        assertEquals(1, pullLeg2.size());
+        assertEquals("pullProcess", pullLeg2.get(0).getName());
     }
 
 
