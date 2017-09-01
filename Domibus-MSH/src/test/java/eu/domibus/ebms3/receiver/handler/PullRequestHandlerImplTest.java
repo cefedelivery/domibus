@@ -260,7 +260,7 @@ public class PullRequestHandlerImplTest {
         }};
         pullRequestHandler.handleRequest(messageId, pullContext);
         new Verifications() {{
-            retryService.purgeTimedoutMessage(messageId);
+            retryService.purgeTimedoutMessageInANewTransaction(messageId);
             times = 1;
             messageBuilder.buildSOAPFaultMessage(withAny(new Error()));
             times = 0;

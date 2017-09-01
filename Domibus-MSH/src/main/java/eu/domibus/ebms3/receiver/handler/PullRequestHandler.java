@@ -150,7 +150,7 @@ public class PullRequestHandler {
             if (abortSending) {
                 LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
                 LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
-                retryService.purgeTimedoutMessage(messageId);
+                retryService.purgeTimedoutMessageInANewTransaction(messageId);
             } else {
                 reliabilityService.handleReliability(messageId, checkResult, null, leg);
                 try {
