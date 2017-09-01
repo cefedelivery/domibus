@@ -120,7 +120,9 @@ public class MessagesFilterPage {
 	}
 
 	public void edit(String pulginEdit, String efrom, String eto, String eAction, String eService) throws Exception {
+		try{
 
+		Log.info("Inside the edit plugin function");
 		if (pulginEdit.contains("backendWebservice")) {
 			driver.findElement(By.xpath("//*[@id='messageFilterTable']//*[contains(text(),'backendWebservice')]"))
 					.click();
@@ -139,9 +141,16 @@ public class MessagesFilterPage {
 		System.out.println("Cancel button clicked");
 
 		Thread.sleep(5000);
+		}catch(Exception e){
+			System.out.println("error in del"+e);
+		}
+
 	}
 
 	public void delete(String del) throws Exception {
+		try{
+		Log.info("Inside the delete plugin function");
+
 		if (del.contains("backendWebservice")) {
 			driver.findElement(By.xpath("//*[@id='messageFilterTable']//*[contains(text(),'backendWebservice')]"))
 					.click();
@@ -154,7 +163,9 @@ public class MessagesFilterPage {
 		driver.findElement(save).click();
 		driver.findElement(sYes).click();
 		Thread.sleep(1000);
-
+		}catch(Exception e){
+			System.out.println("error in del"+e);
+		}
 	}
 
 	/**
@@ -168,7 +179,9 @@ public class MessagesFilterPage {
 		Log.info("Inside the MessagesFilter screen page");
 
 		clickMessageFilterTab();
+		Thread.sleep(2000);
 		delete(p.Read("Delete"));
+		Thread.sleep(2000);
 		edit(p.Read("PluginEdit"), p.Read("eFrom"), p.Read("eTo"), p.Read("eAction"), p.Read("eService"));
 
 		ss.screenshot(i, "MessageFilterScreen", true);
