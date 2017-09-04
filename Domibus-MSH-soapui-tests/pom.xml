@@ -50,7 +50,7 @@
                     <outputFolder>${project.build.directory}/surefire-reports</outputFolder>
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
-                    <testSuite>WS-Auto for Bamboo</testSuite>
+                    <testSuite>GUITest</testSuite>
                     <!--<testCase>Dom141-Pull-Submit Message-Basic Flow</testCase>-->
                     <projectProperties>
                         <value>${localUrl}</value>
@@ -88,7 +88,7 @@
                         </property>
                     </soapuiProperties>
                     <testFailIgnore>false</testFailIgnore>
-                    <projectFile>${soapui.root.folder}/AS4-domibus-WS-soapui-project.xml</projectFile>
+                    <projectFile>${soapui.root.folder}/AS4-domibus-GUI.xml</projectFile>
                 </configuration>
 
                 <dependencies>
