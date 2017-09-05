@@ -95,7 +95,7 @@ public class PullRequestHandlerImplTest {
         new Verifications() {{
             eu.domibus.ebms3.common.model.Error error;
             messageBuilder.buildSOAPFaultMessage(error = withCapture());
-            error.equals(ebMS3Exception.getFaultInfo());
+            error.equals(ebMS3Exception.getFaultInfoError());
             times = 1;
 
             reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);

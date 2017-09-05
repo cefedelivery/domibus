@@ -124,7 +124,7 @@ public class FaultInHandler extends AbstractFaultHandler {
         // at this point an EbMS3Exception is available in any case
         SOAPMessage soapMessageWithEbMS3Error = null;
         try {
-            soapMessageWithEbMS3Error = this.messageBuilder.buildSOAPFaultMessage(ebMS3Exception.getFaultInfo());
+            soapMessageWithEbMS3Error = this.messageBuilder.buildSOAPFaultMessage(ebMS3Exception.getFaultInfoError());
         } catch (final EbMS3Exception e) {
             errorService.createErrorLog(new ErrorLogEntry(e));
         }

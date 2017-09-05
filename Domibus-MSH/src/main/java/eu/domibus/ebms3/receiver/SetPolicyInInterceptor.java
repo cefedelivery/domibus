@@ -22,6 +22,7 @@ import org.apache.cxf.interceptor.AttachmentInInterceptor;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Attachment;
 import org.apache.cxf.phase.Phase;
+import org.apache.cxf.service.model.BindingOperationInfo;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.policy.PolicyInInterceptor;
@@ -37,7 +38,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -107,33 +110,42 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             messaging=soapService.getMessage(message);
             LegConfigurationExtractor legConfigurationExtractor = messageLegConfigurationFactory.extractMessageConfiguration(message, messaging);
             if(legConfigurationExtractor ==null)return;
-
             final LegConfiguration legConfiguration= legConfigurationExtractor.extractMessageConfiguration();
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();
             final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));
             LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
-
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want
-            message.getExchange().put(PolicyConstants.POLICY_OVERRIDE, policy);
-            message.put(PolicyConstants.POLICY_OVERRIDE, policy);
             message.getInterceptorChain().add(new SetPolicyInInterceptor.CheckEBMSHeaderInterceptor());
             message.getInterceptorChain().add(new SetPolicyInInterceptor.SOAPMessageBuilderInterceptor());
+            message.getExchange().put(PolicyConstants.POLICY_OVERRIDE, policy);
+            message.put(PolicyConstants.POLICY_OVERRIDE, policy);
             final String securityAlgorithm = legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
             message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
             message.getExchange().put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
             LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_ALGORITHM_INCOMING_USE, securityAlgorithm);
 
         } catch (EbMS3Exception e) {
+            setBindingOperation(message);
             SetPolicyInInterceptor.LOG.debug("", e); // Those errors are expected (no PMode found, therefore DEBUG)
             throw new Fault(e);
         } catch (IOException | ParserConfigurationException | SAXException | JAXBException e) {
+            setBindingOperation(message);
             LOG.businessError(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_NOT_FOUND, e, policyName); // Those errors are not expected
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messageId : "unknown", e);
             ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ex);
         }
 
+    }
+
+    //this is a hack to avoid a nullpointer in @see WebFaultOutInterceptor.
+    //I suppose the bindingOperation is set after the execution of this interceptor and is empty in case of error.
+    private void setBindingOperation(SoapMessage message) {
+        final Collection<BindingOperationInfo> operations = message.getExchange().getEndpoint().getEndpointInfo().getBinding().getOperations();
+        for (BindingOperationInfo operation : operations) {
+            message.getExchange().put(BindingOperationInfo.class, operation);
+        }
     }
 
 
@@ -172,8 +184,6 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             final SOAPMessage result = message.getContent(SOAPMessage.class);
             try {
                 SAAJInInterceptor.replaceHeaders(result, message);
-
-
                 result.removeAllAttachments();
                 final Collection<Attachment> atts = message.getAttachments();
                 if (atts != null) {
