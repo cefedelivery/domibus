@@ -118,8 +118,8 @@ public class EbMS3Exception extends Exception {
 
     //this is a hack to avoid a classCastException in @see WebFaultOutInterceptor
     public Source getFaultInfo() {
-        Document document = new DOMDocument("test");
-        final Element firstElement = document.createElement("firstElement");
+        Document document = new DOMDocument("Empty document");
+        final Element firstElement = document.createElement("Empty child");
         document.appendChild(firstElement);
         return new DOMSource(document);
     }
