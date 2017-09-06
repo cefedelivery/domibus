@@ -53,9 +53,6 @@
         <jaxws:outFaultInterceptors>
             <ref bean="clearAuthenticationMDCInterceptor"/>
         </jaxws:outFaultInterceptors>
-        <jaxws:executor>
-            <ref bean="taskExecutor"/>
-        </jaxws:executor>
     </jaxws:endpoint>
 
 </beans>

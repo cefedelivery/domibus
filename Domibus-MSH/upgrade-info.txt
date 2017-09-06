@@ -1,18 +1,5 @@
 Domibus 3.3-FR (from 3.3-RC1)
                - Replace the Domibus war and the plugin(s) jar(s) into "\conf\domibus\plugins\lib"
-               - If the JMS plugin is used, in the file "\conf\domibus\jms-plugin.xml" add the taskExecutor property:
-                    <bean id="backendJmsListenerContainerFactory"
-                              class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
-                              ......
-                              <property name="taskExecutor" ref="taskExecutor"/>
-                              ......
-                    </bean>
-               - In case of a custom plugin, modify all the JMS listeners in order to use the default taskExecutor. Eg(see the instructions for upgrading the JMS plugin and the below example):
-                    <bean id="dispatchContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
-                              ......
-                              <property name="taskExecutor" ref="taskExecutor"/>
-                              ......
-                    </bean>
                - In the file "\conf\domibus\domibus.properties":
                     o rename the property "domibus.senderparty.trust.verification" to "domibus.sender.trust.validation.onreceiving" in your domibus.properties file. If the property is not defined, do nothing. Default value "false" has not been changed.
                     o rename the property "domibus.certificate.validation.enabled" to "domibus.receiver.certificate.validation.onsending" in your domibus.properties file. If the property is not defined, do nothing. Default value "true" has not been changed.
