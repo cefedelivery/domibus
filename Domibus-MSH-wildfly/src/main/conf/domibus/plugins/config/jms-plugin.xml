@@ -47,7 +47,6 @@
 		<property name="concurrency" value="1-1"/>
 		<property name="sessionTransacted" value="true"/>
 		<property name="sessionAcknowledgeMode" value="0"/>
-		<property name="taskExecutor" ref="taskExecutor"/>
 	</bean>
 
 	<bean id="pluginToBackendQueue" class="org.springframework.jndi.JndiObjectFactoryBean">

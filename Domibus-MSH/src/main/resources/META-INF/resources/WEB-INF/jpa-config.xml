@@ -15,7 +15,6 @@
         <property name="concurrency" value="${domibus.dispatcher.concurency}"/>
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
-        <property name="taskExecutor" ref="taskExecutor"/>
     </bean>
 
 
@@ -29,7 +28,6 @@
         <property name="sessionAcknowledgeMode" value="0"/>
         <property name="pubSubDomain" value="true"/>
         <property name="subscriptionDurable" value="false"/>
-        <property name="taskExecutor" ref="taskExecutor"/>
     </bean>
 
     <bean id="jmsTemplateDispatch"
