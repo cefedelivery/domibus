@@ -5,7 +5,12 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.ebms3.common.model.Description;
 import eu.domibus.ebms3.common.model.Error;
 import org.apache.commons.lang.StringUtils;
+import org.dom4j.dom.DOMDocument;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.ws.WebFault;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -111,7 +116,15 @@ public class EbMS3Exception extends Exception {
         return this.ebMS3ErrorCode.getCategory().name();
     }
 
-    public Error getFaultInfo() {
+    //this is a hack to avoid a classCastException in @see WebFaultOutInterceptor
+    public Source getFaultInfo() {
+        Document document = new DOMDocument("Empty document");
+        final Element firstElement = document.createElement("Empty child");
+        document.appendChild(firstElement);
+        return new DOMSource(document);
+    }
+
+    public Error getFaultInfoError() {
 
         final Error ebMS3Error = new Error();
 

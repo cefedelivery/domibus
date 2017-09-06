@@ -8,6 +8,7 @@ import java.util.List;
  * Created by musatmi on 15/05/2017.
  */
 public class MessagesResponseRO {
+
     private List<JmsMessage> messages;
 
     public List<JmsMessage> getMessages() {

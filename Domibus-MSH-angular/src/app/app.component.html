@@ -1,48 +1,56 @@
 <md-sidenav-container>
-  <md-sidenav mode="side" opened="true">
+  <md-sidenav mode="side" opened="true" ngClass="{{menuClass}}">
     <!-- sidenav content -->
     <div id="topLogo">
-      <div style="border: blue">
-        <img src="assets/images/Domibus_logo_icon.svg" height="74px" width="74px"/>
-      </div>
-      <div id="topLogoText">
-        <p class="domibusTextSmall ">Domibus
-          <br class="domibusTextSmall"><b>Administration</b>
-          <br class="domibusTextSmall"><b>Console</b>
-        </p>
+      <img src="assets/images/Domibus_logo_icon.svg" [attr.height]="fullMenu ? '74px' : '40px'" [attr.width]="fullMenu ? '74px' : '40px'"/>
+      <div id="topLogoText" *ngIf="fullMenu">
+        <h1>Domibus <span>Administration <br>Console</span></h1>
       </div>
     </div>
 
     <button md-raised-button class="sideNavButton" [routerLink]="['/']" id="messages_id">
-      <md-icon>message</md-icon>
-      <span>Messages</span>
+      <md-icon md-tooltip="Messages" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">message</md-icon>
+      <span *ngIf="fullMenu">Messages</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/messagefilter']" id="messagefilter_id">
-      <md-icon>filter_list</md-icon>
-      <span>Message Filter</span>
+    <button md-raised-button class="sideNavButton" [routerLink]="['/messagefilter']" *ngIf="hasAdmin()"
+            id="messagefilter_id">
+      <md-icon md-tooltip="Message Filter" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">filter_list
+      </md-icon>
+      <span *ngIf="fullMenu">Message Filter</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/errorlog']" id="errorlog_id">
-      <md-icon>sms_failed</md-icon>
-      <span>Error Log</span>
+      <md-icon md-tooltip="Error Log" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">sms_failed</md-icon>
+      <span *ngIf="fullMenu">Error Log</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="hasAdmin()" id="pmode_id">
-      <md-icon>description</md-icon>
-      <span>PMode</span>
+      <md-icon md-tooltip="PMode" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">description</md-icon>
+      <span *ngIf="fullMenu">PMode</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/jms']" *ngIf="hasAdmin()" id="jmsmonitoring_id">
-      <md-icon>computer</md-icon>
-      <span>JMS Monitoring</span>
+      <md-icon md-tooltip="JMS Monitoring" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">computer</md-icon>
+      <span *ngIf="fullMenu">JMS Monitoring</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="hasAdmin()" id="truststore_id">
-      <md-icon>vpn_key</md-icon>
-      <span>Truststore</span>
+      <md-icon md-tooltip="Truststore" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">vpn_key</md-icon>
+      <span *ngIf="fullMenu">Truststore</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/user']" *ngIf="hasAdmin()" id="user_id">
-      <md-icon>person</md-icon>
-      <span>Users</span>
+      <md-icon md-tooltip="Users" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">people</md-icon>
+      <span *ngIf="fullMenu">Users</span>
     </button>
 
-    <div id="bottomLogo">
+    <div class="collapse-button">
+      <button *ngIf="fullMenu" md-raised-button id="expand_id" (click)="toggleMenu()">
+        <md-icon>chevron_left
+        </md-icon>
+      </button>
+
+      <button *ngIf="!fullMenu" md-raised-button id="collapse_id" (click)="toggleMenu()">
+        <md-icon>chevron_right</md-icon>
+      </button>
+    </div>
+
+    <div id="bottomLogo" *ngIf="fullMenu">
       <div>
         <img src="assets/images/EC+Logo2.png"/>
       </div>
@@ -62,16 +70,41 @@
   <!-- primary content -->
   <div id=".my-content">
     <alert></alert>
+
     <div id="sandwichMenuHolder">
+      <div class="helpMenu">
+        <page-helper></page-helper>
+      </div>
       <div id="sandwichMenu">
-        <button md-icon-button [md-menu-trigger-for]="settingsMenu">
+        <button md-icon-button [md-menu-trigger-for]="settingsMenu" id="settingsmenu_id">
           <md-icon>menu</md-icon>
         </button>
+
         <md-menu x-position="before" #settingsMenu="mdMenu">
-          <button md-menu-item (click)="logout($event)">
-            <md-icon>power_settings_new</md-icon>
-            <span>Logout</span>
-          </button>
+
+          <div *ngIf="currentUser">
+
+            <button md-menu-item disabled="true" id="currentuser_id">
+              <md-icon>person</md-icon>
+              <span>{{currentUser}}</span>
+            </button>
+
+            <hr/>
+
+            <button md-menu-item (click)="logout($event)" id="logout_id">
+              <md-icon>power_settings_new</md-icon>
+              <span>Logout</span>
+            </button>
+
+          </div>
+
+          <div *ngIf="!currentUser" style="text-align: center; vertical-align: middle;margin: 2px;">
+            <button md-menu-item disabled="true">
+              <md-icon>person_outline</md-icon>
+              <span>Not logged in</span>
+            </button>
+          </div>
+
         </md-menu>
       </div>
     </div>

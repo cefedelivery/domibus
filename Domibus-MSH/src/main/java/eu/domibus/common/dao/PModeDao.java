@@ -3,6 +3,8 @@ package eu.domibus.common.dao;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
+import eu.domibus.common.model.configuration.Process;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
@@ -27,6 +29,11 @@ public class PModeDao extends PModeProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeDao.class);
 
+    @Override
+    public Party getGatewayParty() {
+        //TODO check if it can be optimized
+        return configurationDAO.read().getParty();
+    }
 
     @Override
     public Party getSenderParty(final String pModeKey) {
@@ -93,6 +100,29 @@ public class PModeDao extends PModeProvider {
     }
 
     protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
+        try {
+            //this is the normal call for a push.
+            return findLegNameMepBindingAgnostic(agreementName, senderParty, receiverParty, service, action);
+        } catch (EbMS3Exception e) {
+            //Here we invert the parties to find leg configured for a pull.
+            try {
+                String legNameInPullProcess = findLegNameMepBindingAgnostic(agreementName, receiverParty, senderParty, service, action);
+                //then we verify that the leg is indeed in a pull process.
+                final List<Process> resultList = processDao.findPullProcessByLegName(legNameInPullProcess);
+                //if not pull process found then this is a miss configuration.
+                if (resultList.isEmpty()) {
+                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
+                }
+                return legNameInPullProcess;
+            } catch (EbMS3Exception e1) {
+                LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, e, agreementName, senderParty, receiverParty, service, action);
+                throw e1;
+            }
+        }
+
+    }
+
+    public String findLegNameMepBindingAgnostic(String agreementName, String senderParty, String receiverParty, String service, String action) throws EbMS3Exception {
         LOG.debug("Finding leg name using agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]",
                 agreementName, senderParty, receiverParty, service, action);
         String namedQuery;
@@ -136,7 +166,6 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, e, agreementName, senderParty, receiverParty, service, action);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
         }
     }
@@ -184,8 +213,7 @@ public class PModeDao extends PModeProvider {
                 query.setParameter("SERVICE", value);
             } catch (final IllegalArgumentException e) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SERVICE_INVALID_URI, value);
-                final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Service " + value + " is not a valid URI [CORE] 5.2.2.8", null, e);
-                throw ex;
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Service " + value + " is not a valid URI [CORE]", null, e);
             }
         } else {
             query = this.entityManager.createNamedQuery("Service.findByServiceAndType", String.class);
@@ -213,8 +241,7 @@ public class PModeDao extends PModeProvider {
                         type = "";
                     } catch (final IllegalArgumentException e) {
                         LOG.businessError(DomibusMessageCode.BUS_PARTY_ID_INVALID_URI, partyId.getValue());
-                        final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "PartyId " + partyId.getValue() + " is not a valid URI [CORE] 5.2.2.3", null, e);
-                        throw ex;
+                        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "PartyId " + partyId.getValue() + " is not a valid URI [CORE]", null, e);
                     }
                 }
                 final TypedQuery<Identifier> identifierQuery = this.entityManager.createNamedQuery("Identifier.findByTypeAndPartyId", Identifier.class);
@@ -332,6 +359,21 @@ public class PModeDao extends PModeProvider {
             LOG.businessError(DomibusMessageCode.BUS_PARTY_ROLE_NOT_FOUND, roleValue);
             return null;
         }
+    }
+
+    @Override
+    public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
+        return processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
+    }
+
+    @Override
+    public List<Process> findPullProcessesByInitiator(final Party party) {
+        return processDao.findPullProcessesByInitiator(party);
+    }
+
+    @Override
+    public List<Process> findPullProcessByMpc(final String mpc) {
+        return processDao.findPullProcessByMpc(mpc);
     }
 
 }

@@ -18,10 +18,10 @@ import {isNullOrUndefined} from "util";
 
 export class PModeComponent {
   private ERROR_PMODE_EMPTY = "As PMode is empty, no file was downloaded.";
-  private selectedOption: string;
   private url = "rest/pmode";
 
-  private pModeExists = false;
+  public pModeExists = false;
+  private pModeContents: string = '';
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
@@ -37,6 +37,7 @@ export class PModeComponent {
         const HTTP_OK = 200;
         if(res.status == HTTP_OK) {
           this.pModeExists = true;
+          this.pModeContents = res.text();
         }
       }, err => {
         this.pModeExists = false;
@@ -46,8 +47,7 @@ export class PModeComponent {
 
   upload() {
     let dialogRef = this.dialog.open(PmodeUploadComponent);
-    dialogRef.afterClosed().subscribe(result => {
-      this.selectedOption = result;
+    dialogRef.componentInstance.onPModeUploaded.subscribe(result => {
       this.checkPmodeActive();
     });
   }

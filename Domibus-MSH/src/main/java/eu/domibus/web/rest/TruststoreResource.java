@@ -1,21 +1,27 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.common.services.DomibusCacheService;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.pki.CertificateService;
+import eu.domibus.web.rest.ro.TrustStoreRO;
 import eu.domibus.wss4j.common.crypto.CryptoService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 /**
  * @author Mircea Musat
  * @since 3.3
  */
 @RestController
+@RequestMapping(value = "/rest/truststore")
 public class TruststoreResource {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TruststoreResource.class);
@@ -26,7 +32,13 @@ public class TruststoreResource {
     @Autowired
     private DomibusCacheService domibusCacheService;
 
-    @RequestMapping(value = "/rest/truststore", method = RequestMethod.POST)
+    @Autowired
+    private CertificateService certificateService;
+
+    @Autowired
+    private DomainCoreConverter domainConverter;
+
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
     public ResponseEntity<String> uploadTruststoreFile(@RequestPart("truststore") MultipartFile truststore, @RequestParam("password") String password) {
 
         if (!truststore.isEmpty()) {
@@ -43,4 +55,10 @@ public class TruststoreResource {
             return ResponseEntity.badRequest().body("Failed to upload the truststore file since it was empty.");
         }
     }
+
+    @RequestMapping(value = {"/list"}, method = GET)
+    public List<TrustStoreRO> trustStoreEntries() {
+        return domainConverter.convert(certificateService.getTrustStoreEntries(), TrustStoreRO.class);
+    }
+
 }

@@ -280,7 +280,7 @@
 
     <changeSet id="EDELIVERY-1812" author="TiagoMiguel">
         <sql dbms="mysql">
-            SET @OLD_SQL_SAFE_UPDATES=@SQL_SAFE_UPDATES;
+            SET @OLD_SQL_SAFE_UPDATES = @@SQL_SAFE_UPDATES;
             SET SQL_SAFE_UPDATES = 0;
             UPDATE TB_ROUTING_CRITERIA SET NAME = 'service' WHERE UPPER(NAME) = 'SEVICE';
             SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
@@ -289,4 +289,5 @@
             UPDATE TB_ROUTING_CRITERIA SET NAME = 'SERVICE' WHERE UPPER(NAME) = 'SEVICE';
         </sql>
     </changeSet>
+
 </databaseChangeLog>

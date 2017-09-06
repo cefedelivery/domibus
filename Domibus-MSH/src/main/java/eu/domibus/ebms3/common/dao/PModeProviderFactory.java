@@ -12,12 +12,11 @@ import org.springframework.beans.factory.FactoryBean;
 public class PModeProviderFactory  {
 
     private static final String CACHING_IMPLEMENATION = "CachingPModeProvider";
-    private static final String PMODE_DAO = "PModeDao";
     private static final String DYNAMIC_DISCOVERY = "DynamicDiscoveryPModeProvider";
 
     private String implementation;
 
-    public PModeProvider getObject() throws Exception {
+    public PModeProvider getObject() {
         if(StringUtils.equals(CACHING_IMPLEMENATION, implementation)) {
             return new CachingPModeProvider();
         } else if(StringUtils.equals(DYNAMIC_DISCOVERY, implementation)) {

@@ -1,36 +1,44 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+
 import java.util.Map;
 
-import static eu.domibus.common.services.impl.PullContext.MPC;
-import static eu.domibus.common.services.impl.PullContext.NOTIFY_BUSINNES_ON_ERROR;
+import static eu.domibus.common.services.impl.PullContext.*;
 
 /**
  * @author Thomas Dussart
  * @since 3.3
  */
 
-public class TestResult {
+class TestResult {
     private final String mpc;
     private final String pMode;
     private final String notifyBusiness;
     private TestResult next;
+    private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(TestResult.class);
 
-    public TestResult(String mpc, String pMode, String notifyBusiness) {
+    TestResult(String mpc, String pMode, String notifyBusiness) {
         this.mpc = mpc;
         this.pMode = pMode;
         this.notifyBusiness = notifyBusiness;
     }
 
-    public TestResult chain(TestResult result) {
+    void chain(TestResult result) {
         next = result;
-        return next;
     }
 
-    public boolean testSucced(Map allValue) {
-        boolean success = mpc.equals(allValue.get(MPC)) &&
-                pMode.equals(allValue.get(PullContext.PMODE_KEY)) &&
-                notifyBusiness.equals(allValue.get(NOTIFY_BUSINNES_ON_ERROR));
+    boolean testSucced(Map allValue) {
+        Object compareMpc = allValue.get(MPC);
+        Object compareNotify = allValue.get(NOTIFY_BUSINNES_ON_ERROR);
+        Object comparePmode = allValue.get(PMODE_KEY);
+        boolean success = mpc.equals(compareMpc) &&
+                pMode.equals(comparePmode) &&
+                notifyBusiness.equals(compareNotify);
+        LOG.info("Comparing " + compareMpc + " " + mpc + " " + comparePmode + " " + pMode + " " + compareNotify + " " + notifyBusiness);
+        LOG.info("succes " + success);
+
         if (!success) {
             if(next==null){
                 return false;

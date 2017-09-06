@@ -22,7 +22,7 @@ public class TestResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestResource.class);
 
     @RequestMapping(value = "testPost", method = RequestMethod.POST)
-    public UserRO testPost(@RequestBody LoginRO loginRO, HttpServletRequest request) throws Exception {
+    public UserRO testPost(@RequestBody LoginRO loginRO, HttpServletRequest request) {
         LOGGER.info("-------------Testing post", loginRO);
         final UserRO userRO = new UserRO();
         userRO.setUsername("testPost");
@@ -30,7 +30,7 @@ public class TestResource {
     }
 
     @RequestMapping(value = "testGet", method = RequestMethod.GET)
-    public UserRO testGet() throws Exception {
+    public UserRO testGet() {
         LOGGER.info("-------------Testing get");
         final UserRO userRO = new UserRO();
         userRO.setUsername("testGet");

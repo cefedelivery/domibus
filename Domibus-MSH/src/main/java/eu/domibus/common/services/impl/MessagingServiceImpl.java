@@ -94,9 +94,10 @@ public class MessagingServiceImpl implements MessagingService {
         if (isCompressed) {
             fileOutputStream = new GZIPOutputStream(fileOutputStream);
         }
-        IOUtils.copy(is, fileOutputStream);
+        final long total = IOUtils.copyLarge(is, fileOutputStream);
         fileOutputStream.flush();
-        fileOutputStream.close();
+        IOUtils.closeQuietly(fileOutputStream);
+        LOG.debug("Done writing file [{}]. Written [{}] bytes.", file.getName(), total);
     }
 
     protected byte[] compress(byte[] binaryData) throws IOException{

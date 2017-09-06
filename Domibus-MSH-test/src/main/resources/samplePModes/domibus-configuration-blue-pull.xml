@@ -94,10 +94,12 @@
         </agreements>
         <services>
             <service name="testService1" value="bdx:noprocess" type="tc1"/>
+            <service name="pullService" value="pullService" type="tc1"/>
         </services>
         <actions>
             <action name="tc1Action" value="TC1Leg1"/>
             <action name="tc2Action" value="TC2Leg1"/>
+            <action name="pullAction" value="pullAction"/>
         </actions>
         <as4>
             <receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
@@ -175,7 +177,6 @@
                  responderRole="defaultResponderRole">
             <initiatorParties>
                 <initiatorParty name="red_gw"/>
-                <initiatorParty name="blue_gw"/>
             </initiatorParties>
             <responderParties>
                 <responderParty name="blue_gw"/>

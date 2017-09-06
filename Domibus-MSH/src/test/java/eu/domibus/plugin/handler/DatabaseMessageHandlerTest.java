@@ -1,7 +1,10 @@
 package eu.domibus.plugin.handler;
 
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
@@ -30,6 +33,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.DuplicateMessageException;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.messaging.PModeMismatchException;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import mockit.Expectations;
@@ -98,6 +102,9 @@ public class DatabaseMessageHandlerTest {
 
     @Injectable
     private UserMessageLogDao userMessageLogDao;
+
+    @Injectable
+    private UserMessageLogService userMessageLogService;
 
     @Injectable
     private SignalMessageLogDao signalMessageLogDao;
@@ -207,7 +214,11 @@ public class DatabaseMessageHandlerTest {
             String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");
+            MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");
+            result = messageExchangeConfiguration;
+
+            messageExchangeService.getMessageStatus(messageExchangeConfiguration);
+            result = MessageStatus.SEND_ENQUEUED;
 
             Party sender = new Party();
             sender.setName(GREEN);
@@ -219,13 +230,11 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getReceiverParty(pModeKey);
             result = receiver;
 
-            Configuration conf = new Configuration();
             Party confParty = new Party();
             confParty.setName(GREEN);
-            conf.setParty(confParty);
 
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
+            pModeProvider.getGatewayParty();
+            result = confParty;
 
             Mpc mpc = new Mpc();
             mpc.setName(Ebms3Constants.DEFAULT_MPC);
@@ -243,7 +252,7 @@ public class DatabaseMessageHandlerTest {
             result = true;
         }};
 
-        String messageId = dmh.submit(messageData, BACKEND);
+        final String messageId = dmh.submit(messageData, BACKEND);
         assertEquals(messageId, MESS_ID);
 
         new Verifications() {{
@@ -254,7 +263,90 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()));
-            userMessageLogDao.create(withAny(new UserMessageLog()));
+            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
+            userMessageService.scheduleSending(MESS_ID);
+        }};
+
+    }
+
+    @Test
+    public void testSubmitPullMessageGreen2RedOk(@Injectable final Submission messageData) throws Exception {
+        new Expectations() {{
+
+            authUtils.getOriginalUserFromSecurityContext();
+            result = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
+
+            UserMessage userMessage = createUserMessage();
+            transformer.transformFromSubmission(messageData);
+            result = userMessage;
+
+            messageIdGenerator.generateMessageId();
+            result = MESS_ID;
+
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            result = MessageStatus.NOT_FOUND;
+
+            String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
+
+            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");
+            result = messageExchangeConfiguration;
+
+            messageExchangeService.getMessageStatus(messageExchangeConfiguration);
+            result = MessageStatus.READY_TO_PULL;
+
+            Party sender = new Party();
+            sender.setName(GREEN);
+            pModeProvider.getSenderParty(pModeKey);
+            result = sender;
+
+            Party receiver = new Party();
+            receiver.setName(RED);
+            pModeProvider.getReceiverParty(pModeKey);
+            result = receiver;
+
+            Configuration conf = new Configuration();
+            Party confParty = new Party();
+            confParty.setName(GREEN);
+            conf.setParty(confParty);
+
+            pModeProvider.getGatewayParty();
+            result = confParty;
+
+            Mpc mpc = new Mpc();
+            mpc.setName(Ebms3Constants.DEFAULT_MPC);
+
+            LegConfiguration legConfiguration = new LegConfiguration();
+            final Map<Party, Mpc> mpcMap = new HashMap<>();
+            mpcMap.put(receiver, mpc);
+            legConfiguration.setDefaultMpc(mpc);
+            legConfiguration.setErrorHandling(new ErrorHandling());
+
+            pModeProvider.getLegConfiguration(pModeKey);
+            result = legConfiguration;
+
+            compressionService.handleCompression(userMessage, legConfiguration);
+            result = true;
+        }};
+
+        final String messageId = dmh.submit(messageData, BACKEND);
+        assertEquals(messageId, MESS_ID);
+
+        new Verifications() {{
+            authUtils.getOriginalUserFromSecurityContext();
+            messageIdGenerator.generateMessageId();
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
+            pModeProvider.getLegConfiguration(anyString);
+            UserMessage message;
+            compressionService.handleCompression(message = withCapture(), withAny(new LegConfiguration()));
+            assertEquals("TC2Leg1", message.getCollaborationInfo().getAction());
+            assertEquals("bdx:noprocess", message.getCollaborationInfo().getService().getValue());
+            messagingService.storeMessage(withAny(new Messaging()));
+            UserMessageLog userMessageLog;
+            userMessageLogService.save(messageId, MessageStatus.READY_TO_PULL.toString(), anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
+            userMessageService.scheduleSending(MESS_ID);
+            times = 0;
         }};
 
     }
@@ -289,19 +381,18 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getReceiverParty(pModeKey);
             result = receiver;
 
-            Configuration conf = new Configuration();
             Party confParty = new Party();
             confParty.setName(GREEN);
-            conf.setParty(confParty);
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
+
+            pModeProvider.getGatewayParty();
+            result = confParty;
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             compressionService.handleCompression(userMessage, legConfiguration);
             result = true;
         }};
 
-        String messageId = dmh.submit(messageData, BACKEND);
+        final String messageId = dmh.submit(messageData, BACKEND);
         assertEquals(messageId, MESS_ID);
 
         new Verifications() {{
@@ -312,7 +403,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()));
-            userMessageLogDao.create(withAny(new UserMessageLog()));
+            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
         }};
 
     }
@@ -419,12 +510,11 @@ public class DatabaseMessageHandlerTest {
             result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
 
             // Here the configuration of the access point is supposed to be BLUE!
-            Configuration conf = new Configuration();
             Party confParty = new Party();
             confParty.setName(BLUE);
-            conf.setParty(confParty);
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
+
+            pModeProvider.getGatewayParty();
+            result = confParty;
 
             backendMessageValidator.validateInitiatorParty(withAny(new Party()), withAny(new Party()));
             result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name [" + GREEN + "] does not correspond to the access point's name [" + BLUE + "]", null, null);
@@ -538,12 +628,8 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getReceiverParty(pModeKey);
             result = receiver;
 
-            Configuration conf = new Configuration();
             Party confParty = new Party();
             confParty.setName(GREEN);
-            conf.setParty(confParty);
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             compressionService.handleCompression(userMessage, legConfiguration);
@@ -613,6 +699,53 @@ public class DatabaseMessageHandlerTest {
             messagingService.storeMessage(withAny(new Messaging()));
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
+            times = 0;
+        }};
+    }
+
+    @Test
+    public void testSubmitPullMessagePModeNOk(@Injectable final Submission messageData) throws Exception {
+        new Expectations() {{
+
+            UserMessage userMessage = createUserMessage();
+            transformer.transformFromSubmission(messageData);
+            result = userMessage;
+
+            messageIdGenerator.generateMessageId();
+            result = MESS_ID;
+
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            result = MessageStatus.NOT_FOUND;
+
+            String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
+            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");
+            result = messageExchangeConfiguration;
+            ;
+
+            messageExchangeService.getMessageStatus(messageExchangeConfiguration);
+            result = new PModeException(DomibusCoreErrorCode.DOM_003, "invalid pullprocess configuration");
+        }};
+
+        try {
+            dmh.submit(messageData, BACKEND);
+            Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
+        } catch (PModeMismatchException mpEx) {
+            LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
+            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
+            assert (mpEx.getMessage().contains("invalid pullprocess configuration"));
+        }
+
+        new Verifications() {{
+            authUtils.getOriginalUserFromSecurityContext();
+            messageIdGenerator.generateMessageId();
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
+            pModeProvider.getLegConfiguration(anyString);
+            messagingService.storeMessage(withAny(new Messaging()));
+            userMessageLogDao.create(withAny(new UserMessageLog()));
+            times = 0;
+            userMessageService.scheduleSending(MESS_ID);
             times = 0;
         }};
     }
@@ -708,12 +841,11 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getReceiverParty(pModeKey);
             result = receiver;
 
-            Configuration conf = new Configuration();
             Party confParty = new Party();
             confParty.setName(GREEN);
-            conf.setParty(confParty);
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
+
+            pModeProvider.getGatewayParty();
+            result = confParty;
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             compressionService.handleCompression(userMessage, legConfiguration);
@@ -779,13 +911,11 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getReceiverParty(pModeKey);
             result = receiver;
 
-            Configuration conf = new Configuration();
+            pModeProvider.getReceiverParty(pModeKey);
+            result = receiver;
+
             Party confParty = new Party();
             confParty.setName(GREEN);
-            conf.setParty(confParty);
-
-            pModeProvider.getConfigurationDAO().read();
-            result = conf;
 
             Mpc mpc = new Mpc();
             mpc.setName(Ebms3Constants.DEFAULT_MPC);
@@ -802,9 +932,8 @@ public class DatabaseMessageHandlerTest {
             compressionService.handleCompression(userMessage, legConfiguration);
             result = true;
 
-            messageExchangeService.upgradeMessageExchangeStatus(messageExchangeConfiguration);
-            messageExchangeConfiguration.updateStatus(MessageStatus.READY_TO_PULL);
-            result= messageExchangeConfiguration;
+            messageExchangeService.getMessageStatus(messageExchangeConfiguration);
+            result = MessageStatus.READY_TO_PULL;
 
         }};
 
@@ -861,12 +990,12 @@ public class DatabaseMessageHandlerTest {
         new Verifications() {{
             authUtils.hasUserOrAdminRole();
             userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
-            userMessageLogDao.setMessageAsDownloaded(anyString);
+            userMessageLogService.setMessageAsDownloaded(anyString);
             pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc());
             messagingDao.clearPayloadData(anyString);
             signalMessageDao.findSignalMessagesByRefMessageId(MESS_ID);
-            userMessageLogDao.setMessageAsDeleted(anyString);
-            signalMessageLogDao.setMessageAsDeleted(anyString);
+            userMessageLogService.setMessageAsDeleted(anyString);
+            userMessageLogService.setMessageAsDeleted(anyString);
         }};
 
     }
@@ -908,15 +1037,15 @@ public class DatabaseMessageHandlerTest {
         new Verifications() {{
             authUtils.hasUserOrAdminRole();
             userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
-            userMessageLogDao.setMessageAsDownloaded(anyString);
+            userMessageLogService.setMessageAsDownloaded(anyString);
             pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc());
             messagingDao.clearPayloadData(anyString);
             times = 0;
             signalMessageDao.findSignalMessagesByRefMessageId(MESS_ID);
             times = 0;
-            userMessageLogDao.setMessageAsDeleted(anyString);
+            userMessageLogService.setMessageAsDeleted(anyString);
             times = 0;
-            signalMessageLogDao.setMessageAsDeleted(anyString);
+            userMessageLogService.setMessageAsDeleted(anyString);
             times = 0;
         }};
 

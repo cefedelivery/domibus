@@ -125,12 +125,16 @@
 
         <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_USER_ROLES" constraintName="FK_USER_ROLES_ROLE" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER"/>
     </changeSet>
-    
-    <changeSet author="TiagoMiguel" id="DropColumn_BackendFilter">
+
+    <changeSet author="musatmi " id="changelog-ws-plugin-auth-drop-trigger" dbms="oracle">
+        <comment>Drop the trigger_auth trigger.</comment>
         <sql>
-            ALTER TABLE TB_BACKEND_FILTER DROP COLUMN CRITERIA_OPERATOR;
+            BEGIN
+            FOR i IN (SELECT null FROM user_triggers WHERE trigger_name = 'TRIGGER_AUTH') LOOP
+            EXECUTE IMMEDIATE 'DROP TRIGGER TRIGGER_AUTH';
+            END LOOP;
+            END;
         </sql>
     </changeSet>
-
 
 </databaseChangeLog>

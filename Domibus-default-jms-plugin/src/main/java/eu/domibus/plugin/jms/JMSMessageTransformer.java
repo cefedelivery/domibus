@@ -1,21 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -26,12 +8,12 @@
 package eu.domibus.plugin.jms;
 
 
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import org.apache.commons.io.IOUtils;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 
 import javax.activation.DataHandler;
 import javax.activation.URLDataSource;
@@ -126,59 +108,77 @@ public class JMSMessageTransformer
             messageOut.setStringProperty(REF_TO_MESSAGE_ID, submission.getRefToMessageId());
 
             int counter = 1;
-            for (final Submission.Payload p : submission.getPayloads()){
-                if (p.isInBody()){
+            for (final Submission.Payload p : submission.getPayloads()) {
+                if (p.isInBody()) {
                     counter = 2;
                     break;
                 }
             }
 
+            final boolean putAttachmentsInQueue = Boolean.parseBoolean(properties.getProperty(PUT_ATTACHMENTS_IN_QUEUE, "true"));
             for (final Submission.Payload p : submission.getPayloads()) {
-
-                if (p.isInBody()) {
-                    if(p.getPayloadDatahandler() != null) {
-                        messageOut.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
-                    }
-
-                    messageOut.setStringProperty(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, 1), findMime(p.getPayloadProperties()));
-                    messageOut.setStringProperty(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, 1), p.getContentId());
-                    if (p.getDescription() != null) {
-                        messageOut.setStringProperty(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, 1), p.getDescription().getValue());
-                    }
-                } else {
-                    final String payContID = String.valueOf(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, counter));
-                    final String payDescrip = String.valueOf(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, counter));
-                    final String propPayload = String.valueOf(MessageFormat.format(PAYLOAD_NAME_FORMAT, counter));
-                    final String payMimeTypeProp = String.valueOf(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, counter));
-                    if(p.getPayloadDatahandler() != null ) {
-                        messageOut.setBytes(propPayload, IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
-                    }
-                    messageOut.setStringProperty(payMimeTypeProp, findMime(p.getPayloadProperties()));
-                    messageOut.setStringProperty(payContID, p.getContentId());
-
-                    if (p.getDescription() != null) {
-                        messageOut.setStringProperty(payDescrip, p.getDescription().getValue());
-                    }
-                    counter++;
-                }
+                transformFromSubmissionHandlePayload(messageOut, putAttachmentsInQueue, counter, p);
+                counter++;
             }
             messageOut.setIntProperty(TOTAL_NUMBER_OF_PAYLOADS, submission.getPayloads().size());
         } catch (final JMSException | IOException ex) {
             LOG.error("Error while filling the MapMessage", ex);
-            throw new RuntimeException(ex);
+            throw new DefaultJmsPluginException(ex);
         }
 
         return messageOut;
     }
 
-    private String findMime(Collection<Submission.TypedProperty> props) {
+    private void transformFromSubmissionHandlePayload(MapMessage messageOut, boolean putAttachmentsInQueue, int counter, Submission.Payload p) throws JMSException, IOException {
+        if (p.isInBody()) {
+            if(p.getPayloadDatahandler() != null) {
+                messageOut.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
+            }
+
+            messageOut.setStringProperty(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, 1), findMime(p.getPayloadProperties()));
+            messageOut.setStringProperty(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, 1), p.getContentId());
+            if (p.getDescription() != null) {
+                messageOut.setStringProperty(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, 1), p.getDescription().getValue());
+            }
+        } else {
+            final String payContID = String.valueOf(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, counter));
+            final String payDescrip = String.valueOf(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, counter));
+            final String propPayload = String.valueOf(MessageFormat.format(PAYLOAD_NAME_FORMAT, counter));
+            final String payMimeTypeProp = String.valueOf(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, counter));
+            final String payFileNameProp = String.valueOf(MessageFormat.format(PAYLOAD_FILE_NAME_FORMAT, counter));
+            if(p.getPayloadDatahandler() != null ) {
+                if (putAttachmentsInQueue) {
+                    LOG.debug("putAttachmentsInQueue is true");
+                    messageOut.setBytes(propPayload, IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
+                } else {
+                    LOG.debug("putAttachmentsInQueue is false");
+                    messageOut.setStringProperty(payFileNameProp, findFilename(p.getPayloadProperties()));
+                }
+            }
+            messageOut.setStringProperty(payMimeTypeProp, findMime(p.getPayloadProperties()));
+            messageOut.setStringProperty(payContID, p.getContentId());
+
+            if (p.getDescription() != null) {
+                messageOut.setStringProperty(payDescrip, p.getDescription().getValue());
+            }
+        }
+    }
+
+    private String findElement(String element, Collection<Submission.TypedProperty> props) {
         for (Submission.TypedProperty prop : props) {
-//            if (MIME_TYPE.equals(prop.getKey()) && !hasLength(prop.getType())) {
-            if (MIME_TYPE.equals(prop.getKey()) && isEmpty(trim(prop.getType()))) {
+            if (element.equals(prop.getKey()) && isEmpty(trim(prop.getType()))) {
                 return prop.getValue();
             }
         }
         return null;
+    }
+
+    private String findMime(Collection<Submission.TypedProperty> props) {
+        return findElement(MIME_TYPE, props);
+    }
+
+    private String findFilename(Collection<Submission.TypedProperty> props) {
+        return findElement(PAYLOAD_FILENAME, props);
     }
 
     /**
@@ -189,40 +189,18 @@ public class JMSMessageTransformer
      */
     @Override
     public Submission transformToSubmission(final MapMessage messageIn) {
-
         final Submission target = new Submission();
-
         try {
-
             target.setMessageId(trim(messageIn.getStringProperty(MESSAGE_ID)));
 
-            String fromPartyID = trim(messageIn.getStringProperty(FROM_PARTY_ID));
-            if (isEmpty(fromPartyID)) {
-                fromPartyID = properties.getProperty(FROM_PARTY_ID);
-            }
-
-            String fromPartyType = trim(messageIn.getStringProperty(FROM_PARTY_TYPE));
-            if (isEmpty(fromPartyType)) {
-                fromPartyType = properties.getProperty(FROM_PARTY_TYPE);
-            }
-            target.addFromParty(fromPartyID, fromPartyType);
-
+            setTargetFromPartyIdAndFromPartyType(messageIn, target);
 
             target.setFromRole(trim(messageIn.getStringProperty(FROM_ROLE)));
             if (isEmpty(target.getFromRole())) {
                 target.setFromRole(properties.getProperty(FROM_ROLE));
             }
 
-            String toPartyID = trim(messageIn.getStringProperty(TO_PARTY_ID));
-            if (isEmpty(toPartyID)) {
-                toPartyID = properties.getProperty(TO_PARTY_ID);
-            }
-
-            String toPartyType = trim(messageIn.getStringProperty(TO_PARTY_TYPE));
-            if (isEmpty(toPartyType)) {
-                toPartyType = properties.getProperty(TO_PARTY_TYPE);
-            }
-            target.addToParty(toPartyID, toPartyType);
+            setTargetToPartyIdAndToPartyType(messageIn, target);
 
             target.setToRole(trim(messageIn.getStringProperty(TO_ROLE)));
             if (isEmpty(target.getToRole())) {
@@ -248,7 +226,6 @@ public class JMSMessageTransformer
             if (isEmpty(target.getAgreementRef())) {
                 target.setAgreementRef(properties.getProperty(AGREEMENT_REF));
             }
-
 
             target.setConversationId(trim(messageIn.getStringProperty(CONVERSATION_ID)));
 
@@ -285,54 +262,88 @@ public class JMSMessageTransformer
                 }
             }
 
-
             for (int i = 1; i <= numPayloads; i++) {
-                final String propPayload = String.valueOf(MessageFormat.format(PAYLOAD_NAME_FORMAT, i));
-
-//                final String bodyloadFileName = BODYLOAD_FILE_NAME_FORMAT;
-                final String contentId;
-                final String mimeType;
-                String description = null;
-                final String payMimeTypeProp = String.valueOf(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, i));
-                mimeType = trim(messageIn.getStringProperty(payMimeTypeProp));
-                final String payDescrip = String.valueOf(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, i));
-                if (messageIn.getStringProperty(payDescrip) != null) {
-                    description = trim(messageIn.getStringProperty(payDescrip));
-                }
-                final String payContID = String.valueOf(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, i));
-                contentId = trim(messageIn.getStringProperty(payContID));
-                final Collection<Submission.TypedProperty> partProperties = new ArrayList<>();
-                if (mimeType != null && !mimeType.trim().equals("")) {
-                    partProperties.add(new Submission.TypedProperty(MIME_TYPE, mimeType));
-                }
-                DataHandler payloadDataHandler = null;
-                try {
-                    payloadDataHandler = new DataHandler(new ByteArrayDataSource(messageIn.getBytes(propPayload), mimeType));
-                } catch (JMSException jmsEx) {
-                    LOG.debug("no payload data as byte[] available, trying payload via URL", jmsEx);
-                    try {
-                        payloadDataHandler = new DataHandler(new URLDataSource(new URL(messageIn.getString(propPayload))));
-                    } catch (MalformedURLException e) {
-                        throw new IllegalArgumentException(propPayload + " neither available as byte[] or URL, aborting transformation");
-                    }
-                }
-                boolean inBody = (i == 1 && "true".equalsIgnoreCase(bodyloadEnabled));
-
-                String descriptionLanguage = trim(properties.getProperty(DESCRIPTION_LANGUAGE));
-                Locale descriptionLocale = Locale.getDefault();
-                if (!isEmpty(descriptionLanguage)) {
-                    try {
-                        descriptionLocale = new Locale(descriptionLanguage);
-                    } catch (RuntimeException rEx) {
-                        LOG.warn(DESCRIPTION_LANGUAGE + " could not be parsed. Using JVM locale", rEx);
-                    }
-                }
-                target.addPayload(contentId, payloadDataHandler, partProperties, inBody, new Submission.Description(descriptionLocale, description), null);
+                transformToSubmissionHandlePayload(messageIn, target, bodyloadEnabled, i);
             }
         } catch (final JMSException ex) {
             LOG.error("Error while getting properties from MapMessage", ex);
-            throw new RuntimeException(ex);
+            throw new DefaultJmsPluginException(ex);
         }
         return target;
+    }
+
+    private void setTargetToPartyIdAndToPartyType(MapMessage messageIn, Submission target) throws JMSException {
+        String toPartyID = trim(messageIn.getStringProperty(TO_PARTY_ID));
+        if (isEmpty(toPartyID)) {
+            toPartyID = properties.getProperty(TO_PARTY_ID);
+        }
+
+        String toPartyType = trim(messageIn.getStringProperty(TO_PARTY_TYPE));
+        if (isEmpty(toPartyType)) {
+            toPartyType = properties.getProperty(TO_PARTY_TYPE);
+        }
+        target.addToParty(toPartyID, toPartyType);
+    }
+
+    private void setTargetFromPartyIdAndFromPartyType(MapMessage messageIn, Submission target) throws JMSException {
+        String fromPartyID = trim(messageIn.getStringProperty(FROM_PARTY_ID));
+        if (isEmpty(fromPartyID)) {
+            fromPartyID = properties.getProperty(FROM_PARTY_ID);
+        }
+
+        String fromPartyType = trim(messageIn.getStringProperty(FROM_PARTY_TYPE));
+        if (isEmpty(fromPartyType)) {
+            fromPartyType = properties.getProperty(FROM_PARTY_TYPE);
+        }
+        target.addFromParty(fromPartyID, fromPartyType);
+    }
+
+    private void transformToSubmissionHandlePayload(MapMessage messageIn, Submission target, String bodyloadEnabled, int i) throws JMSException {
+        final String propPayload = String.valueOf(MessageFormat.format(PAYLOAD_NAME_FORMAT, i));
+
+        final String contentId;
+        final String mimeType;
+        final String fileName;
+        String description = null;
+        final String payMimeTypeProp = String.valueOf(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, i));
+        mimeType = trim(messageIn.getStringProperty(payMimeTypeProp));
+        final String payFileNameProp = String.valueOf(MessageFormat.format(PAYLOAD_FILE_NAME_FORMAT, i));
+        fileName = trim(messageIn.getStringProperty(payFileNameProp));
+        final String payDescrip = String.valueOf(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, i));
+        if (messageIn.getStringProperty(payDescrip) != null) {
+            description = trim(messageIn.getStringProperty(payDescrip));
+        }
+        final String payContID = String.valueOf(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, i));
+        contentId = trim(messageIn.getStringProperty(payContID));
+        final Collection<Submission.TypedProperty> partProperties = new ArrayList<>();
+        if (mimeType != null && !mimeType.trim().equals("")) {
+            partProperties.add(new Submission.TypedProperty(MIME_TYPE, mimeType));
+        }
+        if (fileName != null && !fileName.trim().equals("")) {
+            partProperties.add(new Submission.TypedProperty(PAYLOAD_FILENAME, fileName));
+        }
+        DataHandler payloadDataHandler = null;
+        try {
+            payloadDataHandler = new DataHandler(new ByteArrayDataSource(messageIn.getBytes(propPayload), mimeType));
+        } catch (JMSException jmsEx) {
+            LOG.debug("no payload data as byte[] available, trying payload via URL", jmsEx);
+            try {
+                payloadDataHandler = new DataHandler(new URLDataSource(new URL(messageIn.getString(propPayload))));
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException(propPayload + " neither available as byte[] or URL, aborting transformation");
+            }
+        }
+        boolean inBody = (i == 1 && "true".equalsIgnoreCase(bodyloadEnabled));
+
+        String descriptionLanguage = trim(properties.getProperty(DESCRIPTION_LANGUAGE));
+        Locale descriptionLocale = Locale.getDefault();
+        if (!isEmpty(descriptionLanguage)) {
+            try {
+                descriptionLocale = new Locale(descriptionLanguage);
+            } catch (RuntimeException rEx) {
+                LOG.warn(DESCRIPTION_LANGUAGE + " could not be parsed. Using JVM locale", rEx);
+            }
+        }
+        target.addPayload(contentId, payloadDataHandler, partProperties, inBody, new Submission.Description(descriptionLocale, description), null);
     }
 }

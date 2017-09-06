@@ -1,8 +1,12 @@
-﻿import {Component} from "@angular/core";
+﻿import {Component, TemplateRef, ViewChild} from "@angular/core";
 import {Observable} from "rxjs";
 import {Http, Response, URLSearchParams} from "@angular/http";
 import {ErrorLogResult} from "./errorlogresult";
 import {AlertService} from "../alert/alert.service";
+import {ErrorlogDetailsComponent} from "app/errorlog/errorlog-details/errorlog-details.component";
+import {MdDialog, MdDialogRef} from "@angular/material";
+import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
+import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 
 @Component({
   moduleId: module.id,
@@ -12,7 +16,13 @@ import {AlertService} from "../alert/alert.service";
 })
 
 export class ErrorLogComponent {
+
+  columnPicker: ColumnPickerBase = new ColumnPickerBase()
+  rowLimiter: RowLimiterBase = new RowLimiterBase()
+
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
+
+  @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
 
   timestampFromMaxDate: Date = new Date();
   timestampToMinDate: Date = null;
@@ -32,22 +42,55 @@ export class ErrorLogComponent {
   //default value
   asc: boolean = false;
 
-  pageSizes: Array<any> = [
-    {key: '10', value: 10},
-    {key: '25', value: 25},
-    {key: '50', value: 50},
-    {key: '100', value: 100}
-  ];
-  pageSize: number = this.pageSizes[0].value;
-
   mshRoles: Array<String>;
   errorCodes: Array<String>;
 
-  constructor(private http: Http, private alertService: AlertService) {
+  advancedSearch: boolean;
+
+  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   ngOnInit() {
-    this.page(this.offset, this.pageSize, this.orderBy, this.asc);
+    this.columnPicker.allColumns = [
+      {
+        name: "Signal Message Id",
+        prop: "errorSignalMessageId"
+      },
+      {
+        name: "AP Role",
+        prop: "mshRole",
+        width: 50
+      },
+      {
+        name: 'Message Id',
+        prop: "messageInErrorId",
+      },
+      {
+        name: 'Error Code',
+        width: 50
+      },
+      {
+        name: 'Error Detail',
+        width: 350
+      },
+      {
+        cellTemplate: this.rowWithDateFormatTpl,
+        name: 'Timestamp',
+        width: 180
+      },
+      {
+        cellTemplate: this.rowWithDateFormatTpl,
+        name: 'Notified'
+      }
+
+    ]
+
+
+    this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
+      return ["Message Id", "Error Code", "Timestamp"].indexOf(col.name) != -1
+    })
+
+    this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
   }
 
   getErrorLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<ErrorLogResult> {
@@ -102,7 +145,7 @@ export class ErrorLogComponent {
     this.getErrorLogEntries(offset, pageSize, orderBy, asc).subscribe((result: ErrorLogResult) => {
       console.log("errorLog response:" + result);
       this.offset = offset;
-      this.pageSize = pageSize;
+      this.rowLimiter.pageSize = pageSize;
       this.orderBy = orderBy;
       this.asc = asc;
       this.count = result.count;
@@ -155,7 +198,7 @@ export class ErrorLogComponent {
     if (event.newValue === 'desc') {
       ascending = false;
     }
-    this.page(this.offset, this.pageSize, event.column.prop, ascending);
+    this.page(this.offset, this.rowLimiter.pageSize, event.column.prop, ascending);
   }
 
   changePageSize(newPageLimit: number) {
@@ -165,7 +208,7 @@ export class ErrorLogComponent {
 
   search() {
     console.log("Searching using filter:" + this.filter);
-    this.page(0, this.pageSize, this.orderBy, this.asc);
+    this.page(0, this.rowLimiter.pageSize, this.orderBy, this.asc);
   }
 
   onTimestampFromChange(event) {
@@ -182,6 +225,32 @@ export class ErrorLogComponent {
 
   onNotifiedToChange(event) {
     this.notifiedFromMaxDate = event.value;
+  }
+
+  toggleAdvancedSearch(): boolean {
+    this.advancedSearch = !this.advancedSearch;
+    return false;//to prevent default navigation
+  }
+
+  onSelect({selected}) {
+    // console.log('Select Event', selected, this.selected);
+  }
+
+  onActivate(event) {
+    // console.log('Activate Event', event);
+
+    if ("dblclick" === event.type) {
+      this.details(event.row);
+    }
+  }
+
+  details(selectedRow: any) {
+    let dialogRef: MdDialogRef<ErrorlogDetailsComponent> = this.dialog.open(ErrorlogDetailsComponent);
+    dialogRef.componentInstance.message = selectedRow;
+    // dialogRef.componentInstance.currentSearchSelectedSource = this.currentSearchSelectedSource;
+    dialogRef.afterClosed().subscribe(result => {
+      //Todo:
+    });
   }
 
 }

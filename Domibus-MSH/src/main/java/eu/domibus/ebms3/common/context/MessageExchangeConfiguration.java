@@ -1,7 +1,5 @@
 package eu.domibus.ebms3.common.context;
 
-import eu.domibus.common.MessageStatus;
-
 /**
  * @author Thomas Dussart
  * @since 3.3
@@ -18,7 +16,6 @@ public class MessageExchangeConfiguration {
     private final String pmodeKey;
     private final String reversePmodeKey;
     final static String SEPARATOR=":";
-    private MessageStatus messageStatus;
 
     public MessageExchangeConfiguration(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action, final String leg) {
         this.agreementName = agreementName;
@@ -63,12 +60,18 @@ public class MessageExchangeConfiguration {
         return reversePmodeKey;
     }
 
-    public void updateStatus(MessageStatus messageStatus){
-        this.messageStatus=messageStatus;
-    }
-
-    public MessageStatus getMessageStatus() {
-        return messageStatus;
+    @Override
+    public String toString() {
+        return "MessageExchangeConfiguration{" +
+                "agreementName='" + agreementName + '\'' +
+                ", senderParty='" + senderParty + '\'' +
+                ", receiverParty='" + receiverParty + '\'' +
+                ", service='" + service + '\'' +
+                ", action='" + action + '\'' +
+                ", leg='" + leg + '\'' +
+                ", pmodeKey='" + pmodeKey + '\'' +
+                ", reversePmodeKey='" + reversePmodeKey + '\'' +
+                '}';
     }
 
     @Override

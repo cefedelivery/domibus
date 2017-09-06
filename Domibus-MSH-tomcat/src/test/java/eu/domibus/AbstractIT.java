@@ -2,12 +2,22 @@ package eu.domibus;
 
 import eu.domibus.common.NotificationType;
 import eu.domibus.configuration.Storage;
-import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.cxf.Bus;
+import org.apache.cxf.binding.soap.SoapMessage;
+import org.apache.cxf.bus.extension.ExtensionManagerBus;
+import org.apache.cxf.bus.managers.PhaseManagerImpl;
+import org.apache.cxf.interceptor.InterceptorChain;
+import org.apache.cxf.message.ExchangeImpl;
+import org.apache.cxf.message.MessageImpl;
+import org.apache.cxf.phase.PhaseInterceptorChain;
+import org.apache.cxf.ws.policy.PolicyBuilder;
+import org.apache.cxf.ws.policy.PolicyBuilderImpl;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -282,13 +292,29 @@ public abstract class AbstractIT {
         attachment.setContentId("sbdh-order");
         message.addAttachmentPart(attachment);
 
-        message.setProperty(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
+        message.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
         try {
             SOAPHeader soapHeader = message.getSOAPHeader();
         } catch (Exception e) {
             LOG.error("Could not get SOAPHeader", e);
         }
         return message;
+    }
+
+    protected SoapMessage createSoapMessage(String dataset) {
+        InputStream is = getClass().getClassLoader().getResourceAsStream("dataset/as4/" + dataset);
+
+        SoapMessage sm = new SoapMessage(new MessageImpl());
+        sm.setContent(InputStream.class, is);
+        InterceptorChain ic = new PhaseInterceptorChain((new PhaseManagerImpl()).getOutPhases());
+        sm.setInterceptorChain(ic);
+        ExchangeImpl exchange = new ExchangeImpl();
+        Bus bus = new ExtensionManagerBus();
+        bus.setExtension(new PolicyBuilderImpl(bus), PolicyBuilder.class);
+        exchange.put(Bus.class, bus);
+        sm.setExchange(exchange);
+
+        return sm;
     }
 
 }

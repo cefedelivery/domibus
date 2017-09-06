@@ -1,14 +1,17 @@
 package eu.domibus.web.rest.ro;
 
 import eu.domibus.api.routing.RoutingCriteria;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author Tiago Miguel
  * @since 3.3
  */
-public class MessageFilterRO {
+public class MessageFilterRO implements Serializable {
 
     private int entityId;
 
@@ -58,5 +61,33 @@ public class MessageFilterRO {
 
     public void setPersisted(boolean isPersisted) {
         this.isPersisted = isPersisted;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MessageFilterRO that = (MessageFilterRO) o;
+
+        return new EqualsBuilder()
+                .append(entityId, that.entityId)
+                .append(index, that.index)
+                .append(isPersisted, that.isPersisted)
+                .append(routingCriterias, that.routingCriterias)
+                .append(backendName, that.backendName)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(entityId)
+                .append(index)
+                .append(routingCriterias)
+                .append(backendName)
+                .append(isPersisted)
+                .toHashCode();
     }
 }

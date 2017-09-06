@@ -1,16 +1,20 @@
 package eu.domibus.plugin.handler;
 
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
-import eu.domibus.common.model.configuration.*;
+import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Mpc;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
@@ -21,16 +25,11 @@ import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.common.model.ObjectFactory;
-import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
-import eu.domibus.messaging.DuplicateMessageException;
-import eu.domibus.messaging.MessageConstants;
-import eu.domibus.messaging.MessageNotFoundException;
-import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.messaging.*;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import org.apache.commons.lang.StringUtils;
@@ -76,6 +75,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
+
+    @Autowired
+    private UserMessageLogService userMessageLogService;
 
     @Autowired
     private SignalMessageLogDao signalMessageLogDao;
@@ -132,9 +134,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
         }
 
-        userMessageLogDao.setMessageAsDownloaded(messageId);
+        userMessageLogService.setMessageAsDownloaded(messageId);
         // Deleting the message and signal message if the retention download is zero and the payload is not stored on the file system.
-        if (0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc()) && !userMessage.isPayloadOnFileSystem()) {
+        if (userMessage != null && 0 == pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc()) && !userMessage.isPayloadOnFileSystem()) {
             messagingDao.clearPayloadData(messageId);
             List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
             if (!signalMessages.isEmpty()) {
@@ -143,12 +145,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 }
             }
             // Sets the message log status to DELETED
-            userMessageLogDao.setMessageAsDeleted(messageId);
+            userMessageLogService.setMessageAsDeleted(messageId);
             // Sets the log status to deleted also for the signal messages (if present).
             List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
             if (!signalMessageIds.isEmpty()) {
                 for (String signalMessageId : signalMessageIds) {
-                    signalMessageLogDao.setMessageAsDeleted(signalMessageId);
+                    userMessageLogService.setMessageAsDeleted(signalMessageId);
                 }
             }
         }
@@ -190,7 +192,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     }
 
     protected MessageStatus convertMessageStatus(MessageStatus messageStatus) {
-        if(MessageStatus.DOWNLOADED == messageStatus) {
+        if (MessageStatus.DOWNLOADED == messageStatus) {
             LOG.warn("Using deprecated method that converts DOWNLOADED status to RECEIVED");
             //convert the DOWNLOADED status to RECEIVED to assure backwards compatibility
             messageStatus = eu.domibus.common.MessageStatus.RECEIVED;
@@ -232,6 +234,11 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
         UserMessage userMessage = transformer.transformFromSubmission(messageData);
+
+        if(userMessage == null) {
+            LOG.warn("UserMessage is null");
+            throw new MessageNotFoundException("UserMessage is null");
+        }
 
         validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
 
@@ -282,24 +289,14 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
             }
-            messageExchangeService.upgradeMessageExchangeStatus(userMessageExchangeConfiguration);
-            if(MessageStatus.READY_TO_PULL!= userMessageExchangeConfiguration.getMessageStatus()) {
+            MessageStatus messageStatus = messageExchangeService.getMessageStatus(userMessageExchangeConfiguration);
+            if (MessageStatus.READY_TO_PULL != messageStatus) {
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
             }
 
-            // Builds the user message log
-            UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
-                    .setMessageId(userMessage.getMessageInfo().getMessageId())
-                    .setMessageStatus(userMessageExchangeConfiguration.getMessageStatus())
-                    .setMshRole(MSHRole.SENDING)
-                    .setNotificationStatus(getNotificationStatus(legConfiguration))
-                    .setMpc(message.getUserMessage().getMpc())
-                    .setSendAttemptsMax(getMaxAttempts(legConfiguration))
-                    .setBackendName(backendName)
-                    .setEndpoint(to.getEndpoint());
+            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint());
 
-            userMessageLogDao.create(umlBuilder.build());
             LOG.info("Message submitted");
             return userMessage.getMessageInfo().getMessageId();
 
@@ -307,7 +304,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", ebms3Ex);
             errorLogDao.create(new ErrorLogEntry(ebms3Ex));
             throw MessagingExceptionFactory.transform(ebms3Ex);
+        } catch (PModeException p) {
+            LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]" + p.getMessage());
+            errorLogDao.create(new ErrorLogEntry(MSHRole.SENDING, userMessage.getMessageInfo().getMessageId(), ErrorCode.EBMS_0010, p.getMessage()));
+            throw new PModeMismatchException(p.getMessage(), p);
         }
+
     }
 
     private Party messageValidations(UserMessage userMessage, String pModeKey, String backendName) throws EbMS3Exception, MessagingProcessingException {
@@ -316,9 +318,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             Party to = pModeProvider.getReceiverParty(pModeKey);
             backendMessageValidator.validateParties(from, to);
 
-            Configuration config = pModeProvider.getConfigurationDAO().read();
-            backendMessageValidator.validateInitiatorParty(config.getParty(), from);
-            backendMessageValidator.validateResponderParty(config.getParty(), to);
+            Party gatewayParty = pModeProvider.getGatewayParty();
+            backendMessageValidator.validateInitiatorParty(gatewayParty, from);
+            backendMessageValidator.validateResponderParty(gatewayParty, to);
 
             return to;
         } catch (IllegalArgumentException runTimEx) {
@@ -332,7 +334,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     }
 
     private int getMaxAttempts(LegConfiguration legConfiguration) {
-        return legConfiguration.getReceptionAwareness() == null ? 1 : legConfiguration.getReceptionAwareness().getRetryCount();
+        return ( legConfiguration.getReceptionAwareness() == null ? 1 : legConfiguration.getReceptionAwareness().getRetryCount() ) + 1; // counting retries after the first send attempt
     }
 
     private void fillMpc(UserMessage userMessage, LegConfiguration legConfiguration, Party to) {

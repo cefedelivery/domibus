@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -41,14 +40,6 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
 
     public List<String> findRetryMessages() {
         TypedQuery<String> query = this.em.createNamedQuery("UserMessageLog.findRetryMessages", String.class);
-
-        return query.getResultList();
-    }
-
-
-    //@thom add test and doc
-    public List<String> findReadyToPullMessages() {
-        TypedQuery<String> query = this.em.createNamedQuery("UserMessageLog.findReadyToPullMessages", String.class);
 
         return query.getResultList();
     }
@@ -172,10 +163,6 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         }
     }
 
-    public String findEndpointForMessageId(String messageId) {
-        return findByMessageId(messageId).getEndpoint();
-    }
-
     public String findBackendForMessageId(String messageId) {
         TypedQuery<String> query = em.createNamedQuery("UserMessageLog.findBackendForMessage", String.class);
         query.setParameter("MESSAGE_ID", messageId);
@@ -183,18 +170,17 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
     }
 
     public void setAsNotified(String messageId) {
-        Query query = em.createNamedQuery("UserMessageLog.setNotificationStatus");
-        query.setParameter("MESSAGE_ID", messageId);
-        query.setParameter("NOTIFICATION_STATUS", NotificationStatus.NOTIFIED);
-        query.executeUpdate();
+        final UserMessageLog messageLog = findByMessageId(messageId);
+        messageLog.setNotificationStatus(NotificationStatus.NOTIFIED);
+        super.update(messageLog);
     }
 
-    public int countAllInfo(String column, boolean asc, HashMap<String, Object> filters) {
-        String filteredSignalMessageLogQuery = userMessageLogInfoFilter.filterUserMessageLogQuery(column, asc, filters);
-        TypedQuery<MessageLogInfo> typedQuery = em.createQuery(filteredSignalMessageLogQuery, MessageLogInfo.class);
-        TypedQuery<MessageLogInfo> queryParameterized = userMessageLogInfoFilter.applyParameters(typedQuery, filters);
-        List<MessageLogInfo> resultList = queryParameterized.getResultList();
-        return resultList.size();
+    public int countAllInfo(boolean asc, HashMap<String, Object> filters) {
+        String filteredSignalMessageLogQuery = userMessageLogInfoFilter.countUserMessageLogQuery(asc, filters);
+        TypedQuery<Number> countQuery = em.createQuery(filteredSignalMessageLogQuery, Number.class);
+        countQuery = userMessageLogInfoFilter.applyParameters(countQuery, filters);
+        final Number count = countQuery.getSingleResult();
+        return count.intValue();
     }
 
     public List<MessageLogInfo> findAllInfoPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {

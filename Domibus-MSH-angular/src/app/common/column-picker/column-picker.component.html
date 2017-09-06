@@ -1,0 +1,25 @@
+<div style="margin-bottom:10px">
+  <a class="domibusLink hide-show-column" href="#" *ngIf="!columnSelection" (click)="toggleColumnSelection()"
+     id="columnslinkoff_id" click-stop-propagation>Show
+    columns</a>
+  <a class="domibusLink hide-show-column" href="#" *ngIf="columnSelection" (click)="toggleColumnSelection()"
+     id="columnslinkon_id" click-stop-propagation>Hide
+    columns</a>
+</div>
+
+<div *ngIf="columnSelection" style="margin-bottom: 10px;">
+  <div *ngFor='let col of allColumns' style="display: inline-block;margin:5px;">
+    <input
+      type='checkbox'
+      [id]="col.name"
+      (click)='toggle(col)'
+      [checked]='isChecked(col)'
+    />
+    <label [attr.for]="col.name">{{col.name}}</label>
+  </div>
+  <div class="all-none-selection">
+    <a href="#" class="domibusLink" id="all_id" (click)="selectAllColumns()" click-stop-propagation>All</a>
+    <a href="#" class="domibusLink" id="none_id" (click)="selectNoColumns()" click-stop-propagation>None</a>
+  </div>
+</div>
+

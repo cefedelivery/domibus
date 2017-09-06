@@ -1,13 +1,13 @@
 package eu.domibus.ebms3.common.model;
 
+import eu.domibus.common.AutoCloseFileDataSource;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 
 import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
 import javax.mail.util.ByteArrayDataSource;
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -39,15 +39,15 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
 
     @XmlElement(name = "Schema")
     @Embedded
-    protected Schema schema;
+    protected Schema schema; //NOSONAR
 
     @XmlElement(name = "Description")
     @Embedded
-    protected Description description;
+    protected Description description; //NOSONAR
 
     @XmlElement(name = "PartProperties")
     @Embedded
-    protected PartProperties partProperties;
+    protected PartProperties partProperties; //NOSONAR
 
     @XmlAttribute(name = "href")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -70,7 +70,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
     protected boolean inBody;
     @Transient
     @XmlTransient
-    protected DataHandler payloadDatahandler;
+    protected DataHandler payloadDatahandler; //NOSONAR
     @Column(name = "MIME")
     @XmlTransient
     private String mime;
@@ -119,7 +119,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
     private void loadBinaray() {
         if (fileName != null) { /* Create payload data handler from File */
             LOG.debug("LoadBinary from file: " + fileName);
-            payloadDatahandler = new DataHandler(new FileDataSource(fileName));
+            payloadDatahandler = new DataHandler(new AutoCloseFileDataSource(fileName));
             return;
         }
         /* Create payload data handler from binaryData (byte[]) */
@@ -281,7 +281,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
                 .appendSuper(super.equals(o))
                 .append(schema, partInfo.schema)
                 .append(description, partInfo.description)
-                .append(partProperties, partInfo.partProperties)
+                //.append(partProperties, partInfo.partProperties)
                 .append(href, partInfo.href)
                 .isEquals();
     }
@@ -292,7 +292,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
                 .appendSuper(super.hashCode())
                 .append(schema)
                 .append(description)
-                .append(partProperties)
+                // .append(partProperties)
                 .append(href)
                 .toHashCode();
     }

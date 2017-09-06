@@ -16,8 +16,6 @@ import java.util.Locale;
 @org.springframework.stereotype.Service
 public class SubmissionAS4Transformer {
 
-    public static final String DESCRIPTION_PROPERTY_NAME = "description";
-
     @Autowired
     private MessageIdGenerator messageIdGenerator;
 
@@ -108,10 +106,6 @@ public class SubmissionAS4Transformer {
             partInfo.setInBody(payload.isInBody());
             partInfo.setPayloadDatahandler(payload.getPayloadDatahandler());
             partInfo.setHref(payload.getContentId());
-           /* final Schema schema = new Schema();
-            schema.setLocation(payload.getSchemaLocation());
-            partInfo.setSchema(schema);*/
-            boolean descriptionPropertyExists = false;
             final PartProperties partProperties = new PartProperties();
             for (final Submission.TypedProperty entry : payload.getPayloadProperties()) {
                 final Property property = new Property();
@@ -140,6 +134,10 @@ public class SubmissionAS4Transformer {
     public Submission transformFromMessaging(final UserMessage messaging) {
         final Submission result = new Submission();
 
+        if(messaging == null) {
+            return result;
+        }
+
         final CollaborationInfo collaborationInfo = messaging.getCollaborationInfo();
         result.setAction(collaborationInfo.getAction());
         result.setService(messaging.getCollaborationInfo().getService().getValue());
@@ -155,21 +153,7 @@ public class SubmissionAS4Transformer {
 
         if (messaging.getPayloadInfo() != null) {
             for (final PartInfo partInfo : messaging.getPayloadInfo().getPartInfo()) {
-                String mime = "";
-                final Collection<Submission.TypedProperty> properties = new ArrayList<>();
-                if (partInfo.getPartProperties() != null) {
-                    for (final Property property : partInfo.getPartProperties().getProperties()) {
-                        properties.add(new Submission.TypedProperty(property.getName(), property.getValue(), property.getType()));
-                        if (property.getName().equals(Property.MIME_TYPE)) {
-                            mime = property.getValue();
-                        }
-                    }
-                }
-                Submission.Description description = null;
-                if(partInfo.getDescription() != null){
-                    description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), partInfo.getDescription().getValue());
-                }
-                result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), description, (partInfo.getSchema() != null ? partInfo.getSchema().getLocation() : null));
+                addPayload(result, partInfo);
             }
         }
         result.setFromRole(messaging.getPartyInfo().getFrom().getRole());
@@ -189,6 +173,23 @@ public class SubmissionAS4Transformer {
             }
         }
         return result;
+    }
+
+    private void addPayload(Submission result, PartInfo partInfo) {
+        final Collection<Submission.TypedProperty> properties = new ArrayList<>();
+        if (partInfo.getPartProperties() != null) {
+            for (final Property property : partInfo.getPartProperties().getProperties()) {
+                properties.add(new Submission.TypedProperty(property.getName(), property.getValue(), property.getType()));
+            }
+        }
+        if (partInfo.getFileName() != null) {
+            properties.add(new Submission.TypedProperty("FileName", partInfo.getFileName(), ""));
+        }
+        Submission.Description description = null;
+        if(partInfo.getDescription() != null){
+            description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), partInfo.getDescription().getValue());
+        }
+        result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), description, (partInfo.getSchema() != null ? partInfo.getSchema().getLocation() : null));
     }
 
     private String generateConversationId() {

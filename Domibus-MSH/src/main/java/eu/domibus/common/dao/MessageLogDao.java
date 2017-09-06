@@ -3,17 +3,12 @@ package eu.domibus.common.dao;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.sql.Timestamp;
@@ -29,37 +24,10 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageLog.class);
 
     public MessageLogDao(final Class<F> type) {
-
         super(type);
     }
 
-    public void setMessageAsDeleted(String messageId) {
-        setMessageStatus(messageId, MessageStatus.DELETED);
-    }
-
-    public void setMessageAsDownloaded(String messageId) {
-        setMessageStatus(messageId, MessageStatus.DOWNLOADED);
-    }
-
-    public void setMessageAsAcknowledged(String messageId) {
-        setMessageStatus(messageId, MessageStatus.ACKNOWLEDGED);
-    }
-
-    public void setMessageAsAckWithWarnings(String messageId) {
-        setMessageStatus(messageId, MessageStatus.ACKNOWLEDGED_WITH_WARNING);
-    }
-
-    public void setMessageAsWaitingForReceipt(String messageId) {
-        setMessageStatus(messageId, MessageStatus.WAITING_FOR_RECEIPT);
-    }
-
-    public void setMessageAsSendFailure(String messageId) {
-        setMessageStatus(messageId, MessageStatus.SEND_FAILURE);
-    }
-
-    private void setMessageStatus(String messageId, MessageStatus messageStatus) {
-
-        MessageLog messageLog = findByMessageId(messageId);
+    public void setMessageStatus(MessageLog messageLog, MessageStatus messageStatus) {
         messageLog.setMessageStatus(messageStatus);
 
         switch (messageStatus) {
@@ -78,11 +46,6 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         }
         super.update(messageLog);
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_STATUS_UPDATE, messageStatus);
-    }
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void setIntermediaryPullStatus(String messageId){
-        MessageStatus beingPulled = MessageStatus.BEING_PULLED;
-        setMessageStatus(messageId, beingPulled);
     }
 
     public MessageStatus getMessageStatus(String messageId) {

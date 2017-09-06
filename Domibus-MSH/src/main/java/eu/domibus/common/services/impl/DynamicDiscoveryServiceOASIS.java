@@ -3,6 +3,8 @@ package eu.domibus.common.services.impl;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
@@ -15,8 +17,6 @@ import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.*;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
 @Qualifier("dynamicDiscoveryServiceOASIS")
 public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
-    private static final Log LOG = LogFactory.getLog(DynamicDiscoveryServiceOASIS.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryServiceOASIS.class);
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^(?<scheme>.+?)::(?<value>.+)$");
 
     @Resource(name = "domibusProperties")
@@ -72,8 +72,8 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             LOG.debug("Get the endpoint for " + transportProfileAS4);
             final Endpoint endpoint = sm.getEndpoint(processIdentifier, new TransportProfile(transportProfileAS4));
             if (endpoint == null || endpoint.getAddress() == null || endpoint.getProcessIdentifier() == null) {
-                throw new ConfigurationException("Receiver does not support reception of " + documentId +
-                        " for process " + processId + " using the AS4 Protocol");
+                throw new ConfigurationException("Could not fetch metadata for: " + receiverId + " " + receiverIdType + " " + documentId +
+                        " " + processId + " " + processIdType + " using the AS4 Protocol " + transportProfileAS4);
             }
 
             return new EndpointInfo(endpoint.getAddress(), endpoint.getCertificate());
@@ -89,6 +89,11 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
         }
 
+        final String certRegex = domibusProperties.getProperty(DYNAMIC_DISCOVERY_CERT_REGEX);
+        if(StringUtils.isEmpty(certRegex)) {
+            LOG.debug("The value for property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation is empty.");
+        }
+
         LOG.debug("Load trustore for the smpClient");
         KeyStore truststore = cryptoService.getTrustStore();
         try {
@@ -98,7 +103,8 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
                 return DynamicDiscoveryBuilder.newInstance()
                         .fetcher(new DefaultURLFetcher(defaultProxy))
                         .locator(new DefaultBDXRLocator(smlInfo))
-                        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+                        //.reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, "^.*EHEALTH_SMP.*$")))
+                        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)))
                         .build();
             }
 
@@ -106,7 +112,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             // no proxy is configured
             return DynamicDiscoveryBuilder.newInstance()
                     .locator(new DefaultBDXRLocator(smlInfo))
-                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)))
                     .build();
 
         } catch (TechnicalException exc) {

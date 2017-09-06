@@ -1,27 +1,3 @@
-.selectionCriteria {
-  margin-top:5px;
-}
-
-.inputField {
-  width:350px;
-}
-
-.filterTable {
-  width:100%;
-}
-
-.dateTableField {
-  width:30%;
-}
-
-.dateTimeTitle {
-  width:100px;
-  text-align:right;
-}
-:before {
-  content: "\200D";
-  display:inline;
-}
 .clickAble {
   display:inline-block;
   width: 100%;

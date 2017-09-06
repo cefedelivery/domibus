@@ -1,5 +1,11 @@
-.pmodes-text-area {
-  min-width: 100%;
-  max-width: 100%;
-  min-height: 450px;
+.textarea {
+  margin: 0;
+  padding: 0;
+  height: 39vw;
+  width: 100%;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.pModeInfo {
+  font-size: 110%;
 }

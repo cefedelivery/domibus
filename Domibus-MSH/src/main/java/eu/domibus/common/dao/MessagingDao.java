@@ -74,7 +74,9 @@ public class MessagingDao extends BasicDao<Messaging> {
 
         for (PartInfo result : results) {
             if (hasLength(result.getFileName())) {
-                new File(result.getFileName()).delete();
+                if (!new File(result.getFileName()).delete()) {
+                    LOG.warn("Problem deleting payload data files");
+                }
             } else {
                 databasePayloads.add(result);
             }
@@ -89,7 +91,7 @@ public class MessagingDao extends BasicDao<Messaging> {
 
     /**
      * Retrieves messages based STATUS and TO fields. The return is ordered by received date.
-     * @param partyId the party to which this message should be delivered.
+     * @param partyIdentifier the party to which this message should be delivered.
      * @param messageStatus the status of the message.
      * @param mpc
      * @return a list of class containing the date and the messageId.

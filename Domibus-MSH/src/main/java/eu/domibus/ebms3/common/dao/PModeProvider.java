@@ -1,21 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
 
 package eu.domibus.ebms3.common.dao;
 
@@ -26,8 +8,10 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
+import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
+import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
@@ -58,7 +42,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -100,6 +83,9 @@ public abstract class PModeProvider {
     @Autowired
     List<ConfigurationValidator> configurationValidators;
 
+    @Autowired
+    protected ProcessDao processDao;
+
     public abstract void init();
 
     public abstract void refresh();
@@ -111,7 +97,7 @@ public abstract class PModeProvider {
 
     @Transactional(propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<String> updatePModes(byte[] bytes) throws XmlProcessingException, IOException {
+    public List<String> updatePModes(byte[] bytes) throws XmlProcessingException {
         LOG.debug("Updating the PMode");
 
         //unmarshall the PMode with whitespaces ignored
@@ -124,11 +110,10 @@ public abstract class PModeProvider {
             throw xmlProcessingException;
         }
 
-        List<String> resultMessage = null;
+        List<String> resultMessage = new ArrayList<>();
         //unmarshall the PMode taking into account the whitespaces
         UnmarshallerResult unmarshalledConfiguration = unmarshall(bytes, false);
         if (!unmarshalledConfiguration.isValid()) {
-            resultMessage = new ArrayList<>();
             resultMessage.add("The PMode file is not XSD compliant. It is recommended to correct the issues:");
             resultMessage.addAll(unmarshalledConfiguration.getErrors());
             LOG.warn(StringUtils.join(resultMessage, " "));
@@ -200,7 +185,7 @@ public abstract class PModeProvider {
             LOG.businessInfo(DomibusMessageCode.BUS_LEG_NAME_FOUND, leg, agreementName, senderParty, receiverParty, service, action);
 
             if ((action.equals(Ebms3Constants.TEST_ACTION) && (!service.equals(Ebms3Constants.TEST_SERVICE)))) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Ebms3Constants.TEST_SERVICE + " and ebMS3 Test Action: " + Ebms3Constants.TEST_ACTION + " can only be used together [CORE] 5.2.2.9", userMessage.getMessageInfo().getMessageId(), null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Ebms3Constants.TEST_SERVICE + " and ebMS3 Test Action: " + Ebms3Constants.TEST_ACTION + " can only be used together [CORE]", userMessage.getMessageInfo().getMessageId(), null);
             }
 
             MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(agreementName, senderParty, receiverParty, service, action, leg);
@@ -237,6 +222,8 @@ public abstract class PModeProvider {
 
     protected abstract String findAgreement(AgreementRef agreementRef) throws EbMS3Exception;
 
+    public abstract Party getGatewayParty();
+
     public abstract Party getSenderParty(String pModeKey);
 
     public abstract Party getReceiverParty(String pModeKey);
@@ -261,14 +248,6 @@ public abstract class PModeProvider {
 
     public abstract Role getBusinessProcessRole(String roleValue);
 
-    public ConfigurationDAO getConfigurationDAO() {
-        return configurationDAO;
-    }
-
-    public void setConfigurationDAO(final ConfigurationDAO configurationDAO) {
-        this.configurationDAO = configurationDAO;
-    }
-
     protected String getSenderPartyNameFromPModeKey(final String pModeKey) {
         return pModeKey.split(":")[0];
     }
@@ -292,5 +271,11 @@ public abstract class PModeProvider {
     protected String getLegConfigurationNameFromPModeKey(final String pModeKey) {
         return pModeKey.split(":")[5];
     }
+
+    public abstract List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration);
+
+    public abstract List<Process> findPullProcessesByInitiator(final Party party);
+
+    public abstract List<Process> findPullProcessByMpc(final String mpc);
 
 }

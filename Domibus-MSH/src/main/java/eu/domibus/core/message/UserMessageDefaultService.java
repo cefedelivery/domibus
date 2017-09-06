@@ -5,6 +5,7 @@ import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
@@ -15,8 +16,8 @@ import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
-import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -32,11 +33,7 @@ import org.springframework.stereotype.Service;
 
 import javax.jms.JMSException;
 import javax.jms.Queue;
-import javax.transaction.Transactional;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import java.io.ByteArrayOutputStream;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -61,6 +58,9 @@ public class UserMessageDefaultService implements UserMessageService {
     private MessagingDao messagingDao;
 
     @Autowired
+    private UserMessageLogService userMessageLogService;
+
+    @Autowired
     private UserMessageServiceHelper userMessageServiceHelper;
 
     @Autowired
@@ -81,6 +81,8 @@ public class UserMessageDefaultService implements UserMessageService {
     @Autowired
     PModeServiceHelper pModeServiceHelper;
 
+    @Autowired
+    private MessageExchangeService messageExchangeService;
 
     @Override
     public String getFinalRecipient(String messageId) {
@@ -118,7 +120,9 @@ public class UserMessageDefaultService implements UserMessageService {
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Could not restore message [" + messageId + "]. Message status is [" + MessageStatus.DELETED + "]");
         }
 
-        userMessageLog.setMessageStatus(MessageStatus.SEND_ENQUEUED);
+        final MessageStatus newMessageStatus = messageExchangeService.retrieveMessageRestoreStatus(messageId);
+        backendNotificationService.notifyOfMessageStatusChange(userMessageLog, newMessageStatus, new Timestamp(System.currentTimeMillis()));
+        userMessageLog.setMessageStatus(newMessageStatus);
         final Date currentDate = new Date();
         userMessageLog.setRestored(currentDate);
         userMessageLog.setFailed(null);
@@ -130,7 +134,9 @@ public class UserMessageDefaultService implements UserMessageService {
 
         userMessageLogDao.update(userMessageLog);
 
-        scheduleSending(messageId);
+        if (MessageStatus.READY_TO_PULL != newMessageStatus) {
+            scheduleSending(messageId);
+        }
     }
 
     protected Integer getMaxAttemptsConfiguration(final String messageId) {
@@ -230,7 +236,7 @@ public class UserMessageDefaultService implements UserMessageService {
             }
         }
         messagingDao.clearPayloadData(messageId);
-        userMessageLogDao.setMessageAsDeleted(messageId);
+        userMessageLogService.setMessageAsDeleted(messageId);
         handleSignalMessageDelete(messageId);
     }
 
@@ -244,7 +250,7 @@ public class UserMessageDefaultService implements UserMessageService {
         List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
         if (!signalMessageIds.isEmpty()) {
             for (String signalMessageId : signalMessageIds) {
-                signalMessageLogDao.setMessageAsDeleted(signalMessageId);
+                userMessageLogService.setMessageAsDeleted(signalMessageId);
             }
         }
     }

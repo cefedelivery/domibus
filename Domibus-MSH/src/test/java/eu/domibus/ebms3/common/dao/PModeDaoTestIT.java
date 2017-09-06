@@ -5,8 +5,10 @@ import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
 import eu.domibus.common.dao.PModeDao;
+import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
+import eu.domibus.ebms3.common.validators.ConfigurationValidator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
@@ -30,6 +32,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -70,6 +73,11 @@ public class PModeDaoTestIT {
         }
 
         @Bean
+        public ProcessDao processDao() {
+            return Mockito.mock(ProcessDao.class);
+        }
+
+        @Bean
         public JAXBContext jaxbContextConfig() throws JAXBException {
             return JAXBContext.newInstance("eu.domibus.common.model.configuration");
         }
@@ -78,6 +86,16 @@ public class PModeDaoTestIT {
         @Qualifier("jmsTemplateCommand")
         public JmsOperations jmsOperations() throws JAXBException {
             return Mockito.mock(JmsOperations.class);
+        }
+
+        @Bean
+        public ConfigurationValidator validator() {
+            return new ConfigurationValidator() {
+                @Override
+                public List<String> validate(Configuration configuration) {
+                    return Collections.emptyList();
+                }
+            };
         }
 
         @Bean
@@ -143,7 +161,6 @@ public class PModeDaoTestIT {
     }
 
 
-
     @Test
     public void testUpdatePModeWithValidPmode() throws Exception {
         InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-valid.xml");
@@ -152,7 +169,7 @@ public class PModeDaoTestIT {
 
         List<String> updatePmodeMessage = pModeDao.updatePModes(pModeBytes);
         //there are no warnings
-        assertNull(updatePmodeMessage);
+        assertTrue(updatePmodeMessage.isEmpty());
 
         ArgumentCaptor<Configuration> parameter = ArgumentCaptor.forClass(Configuration.class);
         Mockito.verify(configurationDAO).updateConfiguration(parameter.capture());

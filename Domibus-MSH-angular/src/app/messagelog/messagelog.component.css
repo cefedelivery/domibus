@@ -1,40 +1,15 @@
-.selectionCriteria {
-  margin-top:5px;
+/* --- Select ---*/
+.mat-select{
+  padding:20px 0;
 }
 
-.inputField {
-  width:33%;
+/* --- Button  ---*/
+.group-btn {
+   margin-top:20px;
+ }
+
+#hiddenButtonId {
+  position: fixed;
 }
 
-.inputFieldParties {
-  width:15%;
-}
 
-.optionField {
-  width:15%;
-}
-
-.dateField {
-  width:15%;
-}
-
-.filterTable {
-  width:100%;
-}
-
-.filterTable td {
-  width :33%
-}
-
-.dateTableField {
-  width:30%;
-}
-
-.filterTable td {
-  width :33%
-}
-
-.dateTimeTitle {
-  width:100px;
-  text-align:right;
-}

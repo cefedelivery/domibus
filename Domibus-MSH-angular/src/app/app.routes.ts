@@ -9,15 +9,31 @@ import {MessageLogComponent} from "./messagelog/messagelog.component";
 import {UserComponent} from "./user/user.component"
 import {TruststoreComponent} from "app/truststore/truststore.component";
 import {JmsComponent} from "./jms/jms.component";
+import {DirtyGuard} from "./common/dirty.guard";
 
 const appRoutes: Routes = [
   {path: '', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
   {path: 'pmode', component: PModeComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
-  {path: 'jms', component: JmsComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
-  {path: 'messagefilter', component: MessageFilterComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
+  {
+    path: 'jms',
+    component: JmsComponent,
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canDeactivate: [DirtyGuard]
+  },
+  {
+    path: 'messagefilter',
+    component: MessageFilterComponent,
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canDeactivate: [DirtyGuard]
+  },
   {path: 'truststore', component: TruststoreComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: 'messagelog', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
-  {path: 'user', component: UserComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
+  {
+    path: 'user',
+    component: UserComponent,
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canDeactivate: [DirtyGuard]
+  },
   {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard]},
   {path: 'login', component: LoginComponent},
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},

@@ -1,30 +1,29 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.jms.DomibusJMSException;
+import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.model.logging.RawEnvelopeDto;
-import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.core.BrowserCallback;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.jms.*;
-import java.util.Enumeration;
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -58,10 +57,13 @@ public class RetryService {
     private UserMessageLogDao userMessageLogDao;
 
     @Autowired
+    private UserMessageLogService userMessageLogService;
+
+    @Autowired
     private MessagingDao messagingDao;
 
     @Autowired
-    private MessageExchangeService messageExchangeService;
+    private JMSManager jmsManager;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {
@@ -70,36 +72,51 @@ public class RetryService {
             purgeTimedoutMessage(messageIdToPurge);
         }
         LOG.debug(messageIdsToPurge.size() + " messages to purge found");
-        final List<String> messageIdsToSend = userMessageLogDao.findRetryMessages();
-        if (!messageIdsToSend.isEmpty()) {
-            jmsOperations.browse(dispatchQueue, new BrowserCallback<Void>() {
-                @Override
-                public Void doInJms(final Session session, final QueueBrowser browser) throws JMSException {
-                    final Enumeration browserEnumeration = browser.getEnumeration();
-                    while (browserEnumeration.hasMoreElements()) {
-                        messageIdsToSend.remove(((Message) browserEnumeration.nextElement()).getStringProperty(MessageConstants.MESSAGE_ID));
-                    }
-                    return null;
-                }
-            });
-            for (final String messageId : messageIdsToSend) {
-                userMessageService.scheduleSending(messageId);
-            }
+
+        final List<String> messagesNotAlreadyQueued = getMessagesNotAlreadyQueued();
+        for (final String messageId : messagesNotAlreadyQueued) {
+            userMessageService.scheduleSending(messageId);
         }
+
         resetUnAcknowledgedPullMessage();
     }
 
-    //@thom test this
-    private void resetUnAcknowledgedPullMessage(){
-        List<String> timedoutPullMessages = userMessageLogDao.findTimedoutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
-        for (String timedOutPullMessage : timedoutPullMessages) {
-            UserMessageLog timedOutUserMessageLog = userMessageLogDao.findByMessageId(timedOutPullMessage);
-            timedOutUserMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
-            messageExchangeService.removeRawMessageIssuedByPullRequest(timedOutUserMessageLog.getMessageId());
-            userMessageLogDao.update(timedOutUserMessageLog);
+    protected List<String> getMessagesNotAlreadyQueued() {
+        List<String> result = new ArrayList<>();
+
+        final List<String> messageIdsToSend = userMessageLogDao.findRetryMessages();
+        if (messageIdsToSend.isEmpty()) {
+            return result;
+        }
+        LOG.debug("Messages to be retried [{}]", messageIdsToSend);
+        final List<String> queuedMessages = getQueuedMessages();
+        messageIdsToSend.removeAll(queuedMessages);
+        return messageIdsToSend;
+    }
+
+    protected List<String> getQueuedMessages() {
+        List<String> result = new ArrayList<>();
+        try {
+            final List<JmsMessage> jmsMessages = jmsManager.browseMessages(dispatchQueue.getQueueName());
+            if (jmsMessages == null) {
+                return result;
+            }
+            for (JmsMessage jmsMessage : jmsMessages) {
+                result.add(jmsMessage.getStringProperty(MessageConstants.MESSAGE_ID));
+            }
+            return result;
+        } catch (JMSException e) {
+            throw new DomibusJMSException(e);
         }
     }
 
+    //@thom test this
+    private void resetUnAcknowledgedPullMessage() {
+        List<String> timedoutPullMessages = userMessageLogDao.findTimedoutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
+        for (final String timedoutPullMessage : timedoutPullMessages) {
+            purgeTimedoutMessage(timedoutPullMessage);
+        }
+    }
 
 
     /**
@@ -115,13 +132,24 @@ public class RetryService {
 
         if (notify) {
             backendNotificationService.notifyOfSendFailure(messageIdToPurge);
-            userMessageLogDao.setAsNotified(messageIdToPurge);
+
         }
-        userMessageLogDao.setMessageAsSendFailure(messageIdToPurge);
+        userMessageLogService.setMessageAsSendFailure(messageIdToPurge);
 
         if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
             messagingDao.clearPayloadData(messageIdToPurge);
         }
+    }
+
+    /**
+     * Notifies send failure, updates the message status and deletes the payload (if required) for messages that failed to be sent and expired
+     * Note: This method creates a new transaction
+     *
+     * @param messageIdToPurge is the messageId of the expired message
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void purgeTimedoutMessageInANewTransaction(final String messageIdToPurge) {
+        purgeTimedoutMessage(messageIdToPurge);
     }
 
 }

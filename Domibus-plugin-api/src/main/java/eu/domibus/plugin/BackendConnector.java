@@ -1,27 +1,10 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
 
 package eu.domibus.plugin;
 
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.MessageStatusChangeEvent;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
@@ -141,6 +124,12 @@ public interface BackendConnector<U, T> {
     void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent);
 
     /**
+     * This method gets called when the status of a User Message changes
+     * @param event event containing details about the message status change event
+     */
+    void messageStatusChanged(MessageStatusChangeEvent event);
+
+    /**
      * This method gets called when an outgoing message associated with a Mode.PUSH plugin and an associated
      * PMode[1].errorHandling.Report.ProcessErrorNotifyProducer=true has finally failed to be delivered. The error details
      * are provided by #getErrorsForMessage. This is only called for messages that have no rerty attempts left.
@@ -164,11 +153,11 @@ public interface BackendConnector<U, T> {
         /**
          * Messages and notifications are actively pushed to the backend application (i.e. via a JMS queue)
          */
-        PUSH("push"),
+        PUSH("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"),
         /**
          * Messages and notifications are actively pulled by the backend application (i.e. via a webservice)
          */
-        PULL("pull");
+        PULL("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull");
 
         private final String fileMapping;
         Mode(String fileMapping) {

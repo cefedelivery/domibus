@@ -1,21 +1,4 @@
-<!--
-  ~ Copyright 2015 e-CODEX Project
-  ~
-  ~ Licensed under the EUPL, Version 1.1 or – as soon they
-  ~ will be approved by the European Commission - subsequent
-  ~ versions of the EUPL (the "Licence");
-  ~ You may not use this work except in compliance with the
-  ~ Licence.
-  ~ You may obtain a copy of the Licence at:
-  ~ http://ec.europa.eu/idabc/eupl5
-  ~ Unless required by applicable law or agreed to in
-  ~ writing, software distributed under the Licence is
-  ~ distributed on an "AS IS" basis,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  ~ express or implied.
-  ~ See the Licence for the specific language governing
-  ~ permissions and limitations under the Licence.
-  -->
+
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:amq="http://activemq.apache.org/schema/core"
@@ -33,7 +16,7 @@
           init-method="init" destroy-method="close" depends-on="broker">
         <property name="uniqueResourceName" value="domibusJMS-XA"/>
         <property name="xaConnectionFactory" ref="xaJmsConnectionFactory"/>
-        <property name="maxPoolSize" value="${com.atomikos.maxPoolSize}"/>
+        <property name="maxPoolSize" value="${domibus.jms.XAConnectionFactory.maxPoolSize}"/>
     </bean>
 
     <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
@@ -41,9 +24,14 @@
                              brokerURL="${activeMQ.transportConnector.uri}"
                              userName="${activeMQ.username}" password="${activeMQ.password}">
         <!-- do not remove this! otherwise the redeliveryPolicy configured in activemq.xml will be ignored -->
-        <amq:redeliveryPolicy>
-            <amq:redeliveryPolicy />
-        </amq:redeliveryPolicy>
+        <amq:redeliveryPolicyMap>
+            <amq:redeliveryPolicyMap><!-- Don't know why a double nesting -->
+                <amq:defaultEntry>
+                    <!-- default policy-->
+                    <amq:redeliveryPolicy maximumRedeliveries="0"/>
+                </amq:defaultEntry>
+            </amq:redeliveryPolicyMap>
+        </amq:redeliveryPolicyMap>
     </amq:xaConnectionFactory>
 
 
@@ -80,15 +68,17 @@
         <property name="maxPoolSize">
             <value>${domibus.datasource.xa.maxPoolSize}</value>
         </property>
-        <property name="testQuery">
-            <value>${domibus.datasource.xa.testQuery}</value>
-        </property>
+        <property name="maxLifetime" value="${domibus.datasource.xa.maxLifetime}"/>
     </bean>
-    <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <bean id="domibusJDBC-nonXADataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
+	   <property name="uniqueResourceName" value="domibusNonXADataSource"/>
 	   <property name="driverClassName" value="${domibus.datasource.driverClassName}"/>
 	   <property name="url" value="${domibus.datasource.url}"/>
-	   <property name="username" value="${domibus.datasource.user}"/>
+	   <property name="user" value="${domibus.datasource.user}"/>
 	   <property name="password" value="${domibus.datasource.password}"/>
+       <property name="minPoolSize" value="${domibus.datasource.minPoolSize}"/>
+       <property name="maxPoolSize" value=" ${domibus.datasource.maxPoolSize}"/>
+       <property name="maxLifetime" value="${domibus.datasource.maxLifetime}"/>
     </bean>
 
      <bean id="jpaProperties" class="eu.domibus.spring.PrefixedProperties">

@@ -1,24 +1,7 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
 
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
@@ -61,6 +44,9 @@ public class UpdateRetryLoggingServiceTest {
     private UserMessageLogDao messageLogDao;
 
     @Injectable
+    private UserMessageLogService messageLogService;
+
+    @Injectable
     private MessagingDao messagingDao;
 
     private LegConfiguration legConfiguration = new LegConfiguration();
@@ -99,7 +85,7 @@ public class UpdateRetryLoggingServiceTest {
         final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
         final UserMessageLog userMessageLog = new UserMessageLog();
-        userMessageLog.setSendAttempts(3);
+        userMessageLog.setSendAttempts(2);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(receivedTime));
         userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
@@ -113,12 +99,12 @@ public class UpdateRetryLoggingServiceTest {
         }};
 
 
-        updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
+        assertEquals(3, userMessageLog.getSendAttempts());
 
         new Verifications() {{
-            messageLogDao.setAsNotified(messageId);
-            messageLogDao.setMessageAsSendFailure(messageId);
+            messageLogService.setMessageAsSendFailure(messageId);
             messagingDao.clearPayloadData(messageId);
         }};
 
@@ -143,7 +129,7 @@ public class UpdateRetryLoggingServiceTest {
         final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
         final UserMessageLog userMessageLog = new UserMessageLog();
-        userMessageLog.setSendAttempts(3);
+        userMessageLog.setSendAttempts(2);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(receivedTime));
         userMessageLog.setNotificationStatus(NotificationStatus.NOT_REQUIRED);
@@ -156,11 +142,11 @@ public class UpdateRetryLoggingServiceTest {
             result = userMessageLog;
         }};
 
-        updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
         new Verifications() {{
             messagingDao.clearPayloadData(messageId);
-            messageLogDao.setMessageAsSendFailure(messageId);
+            messageLogService.setMessageAsSendFailure(messageId);
             messageLogDao.setAsNotified(messageId); times = 0;
         }};
 
@@ -184,7 +170,7 @@ public class UpdateRetryLoggingServiceTest {
         final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
         final UserMessageLog userMessageLog = new UserMessageLog();
-        userMessageLog.setSendAttempts(3);
+        userMessageLog.setSendAttempts(2);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(receivedTime));
         userMessageLog.setNotificationStatus(NotificationStatus.NOT_REQUIRED);
@@ -194,11 +180,11 @@ public class UpdateRetryLoggingServiceTest {
             result = userMessageLog;
         }};
 
-        updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
         new Verifications() {{
             messagingDao.clearPayloadData(messageId); times = 0;
-            messageLogDao.setMessageAsSendFailure(messageId);
+            messageLogService.setMessageAsSendFailure(messageId);
             messageLogDao.setAsNotified(messageId); times = 0;
         }};
 
@@ -236,12 +222,11 @@ public class UpdateRetryLoggingServiceTest {
         }};
 
 
-        updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
 
         new Verifications() {{
-            messageLogDao.setAsNotified(messageId);
-            messageLogDao.setMessageAsSendFailure(messageId);
+            messageLogService.setMessageAsSendFailure(messageId);
             messagingDao.clearPayloadData(messageId);
         }};
 
@@ -280,12 +265,11 @@ public class UpdateRetryLoggingServiceTest {
         }};
 
 
-        updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
 
         new Verifications() {{
-            messageLogDao.setAsNotified(messageId);
-            messageLogDao.setMessageAsSendFailure(messageId);
+            messageLogService.setMessageAsSendFailure(messageId);
             messagingDao.clearPayloadData(messageId);
         }};
 
@@ -319,7 +303,7 @@ public class UpdateRetryLoggingServiceTest {
         }};
 
 
-        updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
 
         assertEquals(MessageStatus.WAITING_FOR_RETRY, userMessageLog.getMessageStatus());
