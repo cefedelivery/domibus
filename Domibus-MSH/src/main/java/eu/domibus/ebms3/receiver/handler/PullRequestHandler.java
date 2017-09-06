@@ -82,12 +82,12 @@ public class PullRequestHandler {
         EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0006, "There is no message available for\n" +
                 "pulling from this MPC at this moment.", null, null);
         final SignalMessage signalMessage = new SignalMessage();
-        signalMessage.getError().add(ebMS3Exception.getFaultInfo());
+        signalMessage.getError().add(ebMS3Exception.getFaultInfoError());
         try {
             return messageBuilder.buildSOAPMessage(signalMessage, null);
         } catch (EbMS3Exception e) {
             try {
-                return messageBuilder.buildSOAPFaultMessage(e.getFaultInfo());
+                return messageBuilder.buildSOAPFaultMessage(e.getFaultInfoError());
             } catch (EbMS3Exception e1) {
                 throw new WebServiceException(e1);
             }
@@ -137,7 +137,7 @@ public class PullRequestHandler {
             attemptStatus = MessageAttemptStatus.ERROR;
             reliabilityChecker.handleEbms3Exception(e, messageId);
             try {
-                soapMessage = messageBuilder.buildSOAPFaultMessage(e.getFaultInfo());
+                soapMessage = messageBuilder.buildSOAPFaultMessage(e.getFaultInfoError());
             } catch (EbMS3Exception e1) {
                 throw new WebServiceException(e1);
             }
