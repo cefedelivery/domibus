@@ -1,18 +1,8 @@
 package eu.domibus.ebms3.common.validators;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.KeyDeserializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.common.model.configuration.Party;
-import org.apache.commons.io.IOUtils;
-import org.junit.Before;
 import org.junit.Test;
-import org.springframework.core.io.ClassPathResource;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
