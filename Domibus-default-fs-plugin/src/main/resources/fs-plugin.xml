@@ -85,7 +85,7 @@
     <bean id="fsPluginSendMessagesWorkerTrigger"
           class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
         <property name="jobDetail" ref="fsPluginSendMessagesWorkerJob"/>
-        <property name="repeatInterval" value="10000"/>
+        <property name="repeatInterval" value="${fsplugin.messages.send.worker.repeatInterval}"/>
     </bean>
 
     <!-- customizable list of triggers to be executed by quartz -->
