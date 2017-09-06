@@ -59,8 +59,9 @@ import {EditUserComponent} from "app/user/edituser-form/edituser-form.component"
 import {SaveDialogComponent} from "./common/save-dialog/save-dialog.component";
 import {TruststoreDialogComponent} from "./truststore/truststore-dialog/truststore-dialog.component";
 import {TrustStoreUploadComponent} from "./truststore/truststore-upload/truststore-upload.component";
-import { ColumnPickerComponent } from './common/column-picker/column-picker.component';
+import {ColumnPickerComponent} from "./common/column-picker/column-picker.component";
 import {PageHelperComponent} from "./common/page-helper/page-helper.component";
+import {SharedModule} from "./common/module/SharedModule";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -134,7 +135,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     routing,
     ReactiveFormsModule,
     Md2Module,
-    Md2SelectModule
+    Md2SelectModule,
+    SharedModule
   ],
   providers: [
     AuthenticatedGuard,

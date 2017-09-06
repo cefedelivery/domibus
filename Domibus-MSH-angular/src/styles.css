@@ -253,10 +253,14 @@ md-card {
   padding-top: 20px;
 }
 
-.column-filter-button a {
+.column-filter-button a.hide-show-column {
   position: absolute;
   top: 30px;
   right: 0;
+}
+
+.all-none-selection {
+  padding-left: 10px;
 }
 
 /* --- GROUP BUTTON ACTION ---*/

@@ -133,19 +133,42 @@
     [selectionType]="'multi'"
     (activate)="onActivate($event)"
     (select)="onSelect($event)">
-</ngx-datatable>
+  </ngx-datatable>
 
   <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
     <span class="text-select">{{value| domibusDate: dateFormat}}</span>
-</ng-template>
+  </ng-template>
 
   <ng-template #nextAttemptInfoTpl let-row="row" let-value="value" ngx-datatable-cell-template>
     <span class="text-select">{{showNextAttemptInfo(row) ? value : ''}}</span>
-</ng-template>
+  </ng-template>
 
   <ng-template #nextAttemptInfoWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
     <span class="text-select">{{showNextAttemptInfo(row) ? (value | domibusDate: dateFormat): ''}}</span>
-</ng-template>
+  </ng-template>
+
+  <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>
+    <button md-icon-button [md-menu-trigger-for]="actionsMenu" id="actionsmenu_id">
+      <md-icon>list</md-icon>
+    </button>
+  </ng-template>
+
+  <md-menu x-position="before" #actionsMenu="mdMenu">
+    <div>
+      <button md-menu-item color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()"
+              id="downloadbuttonMenu">
+        <md-icon>file_download</md-icon>
+        <span>Download</span>
+      </button>
+    </div>
+    <div>
+      <button md-menu-item color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()"
+              id="resendbuttonMenu">
+        <md-icon>send</md-icon>
+        <span>Resend</span>
+      </button>
+    </div>
+  </md-menu>
 
 
   <div class="group-action-button">
@@ -159,5 +182,5 @@
       <md-icon>send</md-icon>
       <span>Resend</span>
     </button>
-</div>
+  </div>
 </div>

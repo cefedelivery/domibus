@@ -2,9 +2,9 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
+import eu.domibus.common.services.ErrorService;
 import eu.domibus.ebms3.common.handler.AbstractFaultHandler;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.pmode.exception.NoMatchingPModeFoundException;
@@ -32,6 +32,7 @@ import java.util.Set;
  *
  * @author Christian Koch, Stefan Mueller
  */
+@Transactional(propagation = Propagation.SUPPORTS)
 public class FaultInHandler extends AbstractFaultHandler {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FaultInHandler.class);
 
@@ -39,8 +40,7 @@ public class FaultInHandler extends AbstractFaultHandler {
     private EbMS3MessageBuilder messageBuilder;
 
     @Autowired
-    private ErrorLogDao errorLogDao;
-
+    private ErrorService errorService;
 
     @Override
     public Set<QName> getHeaders() {
@@ -53,12 +53,11 @@ public class FaultInHandler extends AbstractFaultHandler {
         return true;
     }
 
-    @Override
     /**
      * The {@code handleFault} method is responsible for handling and conversion of exceptions
      * thrown during the processing of incoming ebMS3 messages
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
     public boolean handleFault(final SOAPMessageContext context) {
 
         if(context == null) {
@@ -125,9 +124,9 @@ public class FaultInHandler extends AbstractFaultHandler {
         // at this point an EbMS3Exception is available in any case
         SOAPMessage soapMessageWithEbMS3Error = null;
         try {
-            soapMessageWithEbMS3Error = this.messageBuilder.buildSOAPFaultMessage(ebMS3Exception.getFaultInfo());
+            soapMessageWithEbMS3Error = this.messageBuilder.buildSOAPFaultMessage(ebMS3Exception.getFaultInfoError());
         } catch (final EbMS3Exception e) {
-            this.errorLogDao.create(new ErrorLogEntry(e));
+            errorService.createErrorLog(new ErrorLogEntry(e));
         }
         context.setMessage(soapMessageWithEbMS3Error);
 
@@ -135,7 +134,7 @@ public class FaultInHandler extends AbstractFaultHandler {
 
         LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIVE_FAILED, ebMS3Exception, messaging.getSignalMessage().getMessageInfo().getMessageId());
 
-        this.errorLogDao.create(ErrorLogEntry.parse(messaging, MSHRole.RECEIVING));
+        errorService.createErrorLog(ErrorLogEntry.parse(messaging, MSHRole.RECEIVING));
     }
 
     @Override

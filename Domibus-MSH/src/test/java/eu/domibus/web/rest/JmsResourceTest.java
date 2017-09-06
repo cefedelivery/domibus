@@ -42,7 +42,8 @@ public class JmsResourceTest {
         }};
 
         // When
-        DestinationsResponseRO destinations = jmsResource.destinations();
+        ResponseEntity<DestinationsResponseRO> responseEntity = jmsResource.destinations();
+        DestinationsResponseRO destinations = responseEntity.getBody();
 
         // Then
         Assert.assertNotNull(destinations);
@@ -71,11 +72,11 @@ public class JmsResourceTest {
         }};
 
         // When
-        MessagesResponseRO messages = jmsResource.messages(requestRO);
+        ResponseEntity<MessagesResponseRO> messages = jmsResource.messages(requestRO);
 
         // Then
         Assert.assertNotNull(messages);
-        Assert.assertEquals(jmsMessageList, messages.getMessages());
+        Assert.assertEquals(jmsMessageList, messages.getBody().getMessages());
     }
 
     @Test

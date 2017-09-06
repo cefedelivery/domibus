@@ -74,6 +74,5 @@
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
         <property name="destinationResolver" ref="internalDestinationResolver"/>
-        <property name="taskExecutor" ref="taskExecutor"/>
     </bean>
 </beans>

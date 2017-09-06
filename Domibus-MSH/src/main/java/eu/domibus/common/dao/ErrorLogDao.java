@@ -2,6 +2,8 @@
 package eu.domibus.common.dao;
 
 import eu.domibus.common.model.logging.ErrorLogEntry;
+import eu.domibus.common.util.ErrorLogEntryTruncateUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,10 @@ import java.util.*;
  * @author Christian Koch, Stefan Mueller
  */
 public class ErrorLogDao extends BasicDao<ErrorLogEntry> {
+
+
+    @Autowired
+    private ErrorLogEntryTruncateUtil errorLogEntryTruncateUtil;
 
     public ErrorLogDao() {
         super(ErrorLogEntry.class);
@@ -125,5 +131,10 @@ public class ErrorLogDao extends BasicDao<ErrorLogEntry> {
         return query.getSingleResult();
     }
 
+    @Override
+    public void create(ErrorLogEntry errorLogEntry) {
+        errorLogEntryTruncateUtil.truncate(errorLogEntry);
+        super.create(errorLogEntry);
+    }
 
 }

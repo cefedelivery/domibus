@@ -1,13 +1,13 @@
 package eu.domibus.common.exception;
 
 import eu.domibus.common.ErrorCode;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by muellers on 4/20/16.
@@ -51,7 +51,7 @@ public class EbMS3ExceptionTest {
     @Test
     public void getFaultInfo_ErrorDetail_CharacterLimitReached() {
         ebMS3Exception.setErrorDetail(ERROR_DETAIL_256CHARS);
-        assertEquals(ebMS3Exception.getErrorDetail().length(), ebMS3Exception.getFaultInfo().getErrorDetail().length());
+        assertEquals(ebMS3Exception.getErrorDetail().length(), ebMS3Exception.getFaultInfoError().getErrorDetail().length());
     }
 
 }

@@ -19,8 +19,8 @@ import {Observable} from "rxjs/Observable";
 })
 export class JmsComponent implements OnInit, DirtyOperations {
 
-  columnPicker: ColumnPickerBase = new ColumnPickerBase()
-  rowLimiter: RowLimiterBase = new RowLimiterBase()
+  columnPicker: ColumnPickerBase = new ColumnPickerBase();
+  rowLimiter: RowLimiterBase = new RowLimiterBase();
 
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
@@ -30,6 +30,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
   @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
   @ViewChild('rowWithJSONTpl') rowWithJSONTpl: TemplateRef<any>;
+  @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
   queues = [];
 
@@ -92,17 +93,21 @@ export class JmsComponent implements OnInit, DirtyOperations {
         name: 'JMS prop',
         prop: 'jmsproperties',
         width: 200
+      },
+      {
+        cellTemplate: this.rowActions,
+        name: 'Actions'
       }
 
-    ]
+    ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ["ID", "Time", "Custom prop", "JMS prop"].indexOf(col.name) != -1
-    })
+      return ["ID", "Time", "Custom prop", "JMS prop", "Actions"].indexOf(col.name) != -1
+    });
 
     // set toDate equals to now
-    this.request.toDate = new Date()
-    this.request.toDate.setHours(23, 59, 59, 999)
+    this.request.toDate = new Date();
+    this.request.toDate.setHours(23, 59, 59, 999);
 
     this.getDestinations().subscribe((response: Response) => {
       this.setDefaultQueue('.*?[d|D]omibus.?DLQ');
@@ -125,7 +130,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
       (error: Response) => {
         this.alertService.error('Could not load queues: ' + error);
       }
-    )
+    );
 
     return observableResponse
   }
