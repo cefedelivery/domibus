@@ -18,11 +18,15 @@ import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.binding.soap.interceptor.MustUnderstandInterceptor;
 import org.apache.cxf.binding.soap.saaj.SAAJInInterceptor;
 import org.apache.cxf.common.util.StringUtils;
+import org.apache.cxf.endpoint.Endpoint;
 import org.apache.cxf.interceptor.AttachmentInInterceptor;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Attachment;
+import org.apache.cxf.message.Exchange;
 import org.apache.cxf.phase.Phase;
+import org.apache.cxf.service.model.BindingInfo;
 import org.apache.cxf.service.model.BindingOperationInfo;
+import org.apache.cxf.service.model.EndpointInfo;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.policy.PolicyInInterceptor;
@@ -143,9 +147,28 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     //this is a hack to avoid a nullpointer in @see WebFaultOutInterceptor.
     //I suppose the bindingOperation is set after the execution of this interceptor and is empty in case of error.
     private void setBindingOperation(SoapMessage message) {
-        final Collection<BindingOperationInfo> operations = message.getExchange().getEndpoint().getEndpointInfo().getBinding().getOperations();
+        final Exchange exchange = message.getExchange();
+        if (exchange == null) {
+            return;
+        }
+        final Endpoint endpoint = exchange.getEndpoint();
+        if (endpoint == null) {
+            return;
+        }
+        final EndpointInfo endpointInfo = endpoint.getEndpointInfo();
+        if (endpointInfo == null) {
+            return;
+        }
+        final BindingInfo binding = endpointInfo.getBinding();
+        if (binding == null) {
+            return;
+        }
+        final Collection<BindingOperationInfo> operations = binding.getOperations();
+        if (operations == null) {
+            return;
+        }
         for (BindingOperationInfo operation : operations) {
-            message.getExchange().put(BindingOperationInfo.class, operation);
+            exchange.put(BindingOperationInfo.class, operation);
         }
     }
 
