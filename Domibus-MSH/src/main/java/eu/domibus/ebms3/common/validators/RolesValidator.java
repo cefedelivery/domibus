@@ -23,8 +23,6 @@ import eu.domibus.common.model.configuration.BusinessProcesses;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.configuration.Role;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -34,8 +32,6 @@ import java.util.List;
 @Component
 @Order(1)
 public class RolesValidator implements ConfigurationValidator {
-
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RolesValidator.class);
 
     @Override
     public List<String> validate(Configuration configuration) {
@@ -47,7 +43,10 @@ public class RolesValidator implements ConfigurationValidator {
             final Role initiatorRole = process.getInitiatorRole();
             final Role responderRole = process.getResponderRole();
             if (initiatorRole.equals(responderRole)) {
-                issues.add("For business process " + process.getName() + " the initiator role and the responder role are identical (" + initiatorRole.getName() + ")");
+                issues.add("For the business process [" + process.getName() + "], the initiator role name and the responder role name are identical [" + initiatorRole.getName() + "]");
+            }
+            if (initiatorRole.getValue().equals(responderRole.getValue())) {
+                issues.add("For the business process [" + process.getName() + "], the initiator role value and the responder role value are identical [" + initiatorRole.getValue() + "]");
             }
         }
 
