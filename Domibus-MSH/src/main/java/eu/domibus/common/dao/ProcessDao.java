@@ -33,4 +33,12 @@ public interface ProcessDao {
      * @return the matching processes.
      */
     List<Process> findPullProcessByMpc(final String mpc);
+
+    /**
+     * Returns a list of pullProcess based on a leg name.
+     *
+     * @param legName the name of the leg to be included in the process.
+     * @return the matching processes.
+     */
+    List<Process> findPullProcessByLegName(String legName);
 }

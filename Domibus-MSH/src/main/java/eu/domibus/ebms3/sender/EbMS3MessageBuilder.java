@@ -14,6 +14,8 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -62,6 +64,7 @@ public class EbMS3MessageBuilder {
     }
 
     //TODO: If Leg is used in future releases we have to update this method
+    @Transactional(propagation = Propagation.SUPPORTS)
     public SOAPMessage buildSOAPFaultMessage(final Error ebMS3error) throws EbMS3Exception {
         final SignalMessage signalMessage = new SignalMessage();
         signalMessage.getError().add(ebMS3error);

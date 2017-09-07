@@ -56,7 +56,45 @@
                 <input autofocus type="checkbox" [checked]="value" disabled (dblclick)="buttonEdit()"/>
               </ng-template>
             </ngx-datatable-column>
+            <ngx-datatable-column name="Actions" prop="actions" [sortable]="false">
+              <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+                <button md-icon-button [md-menu-trigger-for]="actionsMenu" id="actionsmenu_id">
+                  <md-icon>list</md-icon>
+                </button>
+              </ng-template>
+            </ngx-datatable-column>
           </ngx-datatable>
+
+          <md-menu x-position="before" #actionsMenu="mdMenu">
+            <div>
+              <button md-menu-item color="primary" type="button" [disabled]="!enableMoveUp"
+                      (click)="buttonMoveUp()" id="moveupbutton1_id">
+                <md-icon>arrow_drop_up</md-icon>
+                <span>Move Up</span>
+              </button>
+            </div>
+            <div>
+              <button md-menu-item color="primary" type="button" [disabled]="!enableMoveDown"
+                      (click)="buttonMoveDown()" id="movedownbutton1_id">
+                <md-icon>arrow_drop_down</md-icon>
+                <span>Move Down</span>
+              </button>
+            </div>
+            <div>
+              <button md-menu-item color="primary" type="button" [disabled]="!enableEdit" (click)="buttonEdit()"
+                      id="editbutton1_id">
+                <md-icon>edit</md-icon>
+                <span>Edit</span>
+              </button>
+            </div>
+            <div>
+              <button md-menu-item color="primary" type="button" [disabled]="!enableDelete"
+                      (click)="buttonDelete()" id="deletebutton1_id">
+                <md-icon>delete</md-icon>
+                <span>Delete</span>
+              </button>
+            </div>
+          </md-menu>
 
           <table class="group-action-button">
             <tr>

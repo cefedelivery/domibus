@@ -10,7 +10,6 @@
                             http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
                             http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
-    <!-- Uncomment this in case of a clustered environment -->
      <jee:jndi-lookup id="notifyBackendWebServiceQueue"
                      jndi-name="jms/domibus.notification.webservice"
                      cache="true"
@@ -53,9 +52,6 @@
         <jaxws:outFaultInterceptors>
             <ref bean="clearAuthenticationMDCInterceptor"/>
         </jaxws:outFaultInterceptors>
-        <jaxws:executor>
-            <ref bean="taskExecutor"/>
-        </jaxws:executor>
     </jaxws:endpoint>
 
 </beans>

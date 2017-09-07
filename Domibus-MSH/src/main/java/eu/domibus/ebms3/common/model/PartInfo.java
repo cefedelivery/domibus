@@ -1,13 +1,13 @@
 package eu.domibus.ebms3.common.model;
 
+import eu.domibus.common.AutoCloseFileDataSource;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 
 import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
 import javax.mail.util.ByteArrayDataSource;
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -119,7 +119,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
     private void loadBinaray() {
         if (fileName != null) { /* Create payload data handler from File */
             LOG.debug("LoadBinary from file: " + fileName);
-            payloadDatahandler = new DataHandler(new FileDataSource(fileName));
+            payloadDatahandler = new DataHandler(new AutoCloseFileDataSource(fileName));
             return;
         }
         /* Create payload data handler from binaryData (byte[]) */

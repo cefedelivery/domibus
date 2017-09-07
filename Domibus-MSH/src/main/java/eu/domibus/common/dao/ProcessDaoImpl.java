@@ -21,9 +21,6 @@ import static eu.domibus.common.model.configuration.Process.*;
 @Repository
 public class ProcessDaoImpl implements ProcessDao{
 
-    private final static String ACTION = "action";
-    private final static String SERVICE = "service";
-    private final static String AGREEMENT = "agreement";
     private final static String LEG = "leg";
     private final static String INITIATOR_NAME = "initiatorName";
     private final static String RESPONDER_NAME = "responderName";
@@ -39,9 +36,6 @@ public class ProcessDaoImpl implements ProcessDao{
     @Override
     public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
         TypedQuery<Process> processQuery = entityManager.createNamedQuery(RETRIEVE_PULL_PROCESS_FROM_MESSAGE_CONTEXT, Process.class);
-        processQuery.setParameter(ACTION, messageExchangeConfiguration.getAction());
-        processQuery.setParameter(SERVICE, messageExchangeConfiguration.getService());
-        processQuery.setParameter(AGREEMENT, messageExchangeConfiguration.getAgreementName());
         processQuery.setParameter(LEG, messageExchangeConfiguration.getLeg());
         processQuery.setParameter(RESPONDER_NAME, messageExchangeConfiguration.getSenderParty());
         processQuery.setParameter(INITIATOR_NAME, messageExchangeConfiguration.getReceiverParty());
@@ -69,6 +63,17 @@ public class ProcessDaoImpl implements ProcessDao{
         TypedQuery<Process> processQuery= entityManager.createNamedQuery(FIND_PULL_PROCESS_FROM_MPC,Process.class);
         processQuery.setParameter(MEP_BINDING,BackendConnector.Mode.PULL.getFileMapping());
         processQuery.setParameter(MPC_NAME, mpc);
+        return processQuery.getResultList();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Process> findPullProcessByLegName(final String legName) {
+        final TypedQuery<Process> processQuery = this.entityManager.createNamedQuery(Process.FIND_PULL_PROCESS_FROM_LEG_NAME, Process.class);
+        processQuery.setParameter("legName", legName);
+        processQuery.setParameter("mepBinding", BackendConnector.Mode.PULL.getFileMapping());
         return processQuery.getResultList();
     }
 

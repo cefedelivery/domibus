@@ -17,11 +17,11 @@ import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 })
 export class TruststoreComponent implements OnInit {
 
-  columnPicker: ColumnPickerBase = new ColumnPickerBase()
+  columnPicker: ColumnPickerBase = new ColumnPickerBase();
 
-  rowLimiter: RowLimiterBase = new RowLimiterBase()
+  rowLimiter: RowLimiterBase = new RowLimiterBase();
 
-  @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>
+  @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
 
   trustStoreEntries: Array<TrustStoreEntry> = [];
   selectedMessages: Array<any> = [];
@@ -59,11 +59,11 @@ export class TruststoreComponent implements OnInit {
         prop: 'validUntil',
       }
 
-    ]
+    ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ["Name", "Subject", "Issuer", "Valid from", "Valid until"].indexOf(col.name) != -1
-    })
+    });
     this.getTrustStoreEntries();
   }
 
@@ -98,7 +98,7 @@ export class TruststoreComponent implements OnInit {
 
   openEditTrustStore() {
     let dialogRef: MdDialogRef<TrustStoreUploadComponent> = this.dialog.open(TrustStoreUploadComponent);
-    dialogRef.afterClosed().subscribe(updated => {
+    dialogRef.componentInstance.onTruststoreUploaded.subscribe(updated => {
       if (updated == true) {
         this.getTrustStoreEntries();
       }

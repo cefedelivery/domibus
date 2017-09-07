@@ -18,7 +18,6 @@ import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.ebms3.receiver.MSHWebservice;
 import eu.domibus.ebms3.sender.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -40,7 +39,7 @@ import java.sql.Timestamp;
 @Component
 public class PullRequestHandler {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHWebservice.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PullRequestHandler.class);
 
     @Autowired
     private MessagingDao messagingDao;
@@ -83,12 +82,12 @@ public class PullRequestHandler {
         EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0006, "There is no message available for\n" +
                 "pulling from this MPC at this moment.", null, null);
         final SignalMessage signalMessage = new SignalMessage();
-        signalMessage.getError().add(ebMS3Exception.getFaultInfo());
+        signalMessage.getError().add(ebMS3Exception.getFaultInfoError());
         try {
             return messageBuilder.buildSOAPMessage(signalMessage, null);
         } catch (EbMS3Exception e) {
             try {
-                return messageBuilder.buildSOAPFaultMessage(e.getFaultInfo());
+                return messageBuilder.buildSOAPFaultMessage(e.getFaultInfoError());
             } catch (EbMS3Exception e1) {
                 throw new WebServiceException(e1);
             }
@@ -138,7 +137,7 @@ public class PullRequestHandler {
             attemptStatus = MessageAttemptStatus.ERROR;
             reliabilityChecker.handleEbms3Exception(e, messageId);
             try {
-                soapMessage = messageBuilder.buildSOAPFaultMessage(e.getFaultInfo());
+                soapMessage = messageBuilder.buildSOAPFaultMessage(e.getFaultInfoError());
             } catch (EbMS3Exception e1) {
                 throw new WebServiceException(e1);
             }
@@ -150,7 +149,7 @@ public class PullRequestHandler {
             if (abortSending) {
                 LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
                 LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
-                retryService.purgeTimedoutMessage(messageId);
+                retryService.purgeTimedoutMessageInANewTransaction(messageId);
             } else {
                 reliabilityService.handleReliability(messageId, checkResult, null, leg);
                 try {

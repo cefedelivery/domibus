@@ -96,13 +96,13 @@
         </jaxws:inInterceptors>
 
         <jaxws:outInterceptors>
-            <bean class="org.apache.cxf.jaxws.handler.SetCodeValueFaultOutInterceptor"/>
             <ref bean="clearMDCInterceptor"/>
            <ref bean="setPolicyOutInterceptorServer"/>
            <ref bean="saveRawPulledMessageInterceptor"/>
         </jaxws:outInterceptors>
 
         <jaxws:outFaultInterceptors>
+            <bean class="org.apache.cxf.jaxws.handler.SetCodeValueFaultOutInterceptor"/>
             <ref bean="clearMDCInterceptor"/>
         </jaxws:outFaultInterceptors>
 

@@ -5,6 +5,7 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
+import eu.domibus.web.rest.ro.TrustStoreRO;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -56,8 +57,8 @@ public class TruststoreResource {
     }
 
     @RequestMapping(value = {"/list"}, method = GET)
-    public List<TrustStoreRo> trustStoreEntries() {
-        return domainConverter.convert(certificateService.getTrustStoreEntries(), TrustStoreRo.class);
+    public List<TrustStoreRO> trustStoreEntries() {
+        return domainConverter.convert(certificateService.getTrustStoreEntries(), TrustStoreRO.class);
     }
 
 }
