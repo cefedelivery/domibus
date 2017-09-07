@@ -133,7 +133,7 @@ export class MessageLogComponent {
       {
         cellTemplate: this.rowActions,
         name: 'Actions',
-        width:50
+        width: 60
       }
 
     ];
@@ -322,11 +322,19 @@ export class MessageLogComponent {
     });
   }
 
+  isResendButtonEnabledAction(row): boolean {
+    return !row.deleted && row.messageStatus === "SEND_FAILURE";
+  }
+
   isResendButtonEnabled() {
     if (this.selected && this.selected.length == 1 && !this.selected[0].deleted && this.selected[0].messageStatus === "SEND_FAILURE")
       return true;
 
     return false;
+  }
+
+  isDownloadButtonEnabledAction(row): boolean {
+    return !row.deleted;
   }
 
   isDownloadButtonEnabled(): boolean {
@@ -336,9 +344,17 @@ export class MessageLogComponent {
     return false;
   }
 
-  download() {
-    const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace("${messageId}", this.selected[0].messageId);
+  private downloadMessage(messageId) {
+    const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace("${messageId}", messageId);
     this.downloadNative(url);
+  }
+
+  downloadAction(row) {
+    this.downloadMessage(row.messageId);
+  }
+
+  download() {
+    this.downloadMessage(this.selected[0].messageId);
   }
 
   details(selectedRow: any) {

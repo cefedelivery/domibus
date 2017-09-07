@@ -96,7 +96,8 @@ export class JmsComponent implements OnInit, DirtyOperations {
       },
       {
         cellTemplate: this.rowActions,
-        name: 'Actions'
+        name: 'Actions',
+        width: 60
       }
 
     ];
@@ -256,6 +257,15 @@ export class JmsComponent implements OnInit, DirtyOperations {
     dialogRef.afterClosed().subscribe(result => {
       //Todo:
     });
+  }
+
+  deleteAction(row) {
+    this.markedForDeletionMessages.push(row);
+    let newRows = this.rows.filter((element) => {
+      return row !== element;
+    });
+    this.selectedMessages = [];
+    this.rows = newRows;
   }
 
   delete() {
