@@ -20,7 +20,7 @@
     "/ext/messages/acknowledgments/delivered" : {
       "post" : {
         "tags" : [ "acknowledgement" ],
-        "summary" : "Message delivered acknowledgement",
+        "summary" : "Create a message delivered acknowledgement",
         "description" : "Acknowledges that a message has been delivered to the backend",
         "operationId" : "acknowledgeMessageDelivered",
         "parameters" : [ {
@@ -47,7 +47,7 @@
     "/ext/messages/acknowledgments/processed" : {
       "post" : {
         "tags" : [ "acknowledgement" ],
-        "summary" : "Message processed acknowledgement",
+        "summary" : "Create a message processed acknowledgement",
         "description" : "Acknowledges that a message has been processed by the backend",
         "operationId" : "acknowledgeMessageProcessed",
         "parameters" : [ {
