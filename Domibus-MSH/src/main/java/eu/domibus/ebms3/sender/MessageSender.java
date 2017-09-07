@@ -146,6 +146,7 @@ public class MessageSender implements MessageListener {
                 messageExchangeService.verifyReceiverCertificate(legConfiguration, receiverParty.getName());
                 messageExchangeService.verifySenderCertificate(legConfiguration, sendingParty.getName());
             } catch (ChainCertificateInvalidException ccie) {
+                LOG.error("Certificate validation error", ccie);
                 attemptError = ccie.getMessage();
                 attemptStatus = MessageAttemptStatus.ABORT;
                 // this flag is used in the finally clause
