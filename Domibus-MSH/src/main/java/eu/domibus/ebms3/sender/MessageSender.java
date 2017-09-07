@@ -176,11 +176,12 @@ public class MessageSender implements MessageListener {
             reliabilityChecker.handleEbms3Exception(e, messageId);
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
-        } catch (Exception ex) {
-            LOG.error("Error sending message [{}]", messageId, ex);
-            attemptError = ex.getMessage();
+        } catch (Throwable t) {
+            // Catching Throwable is done on purpose in order to even catch out of memory exceptions in case large files are sent.
+            LOG.error("Error sending message [{}]", messageId, t);
+            attemptError = t.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
-            throw ex;
+            throw t;
         } finally {
             try {
                 if (abortSending) {
