@@ -56,7 +56,6 @@
                                     <json>/securityDefinitions.json</json>
                                 </securityDefinition>
                             </securityDefinitions>
-
                             <swaggerDirectory>${project.basedir}/src/main/webapp/</swaggerDirectory>
                         </apiSource>
                     </apiSources>

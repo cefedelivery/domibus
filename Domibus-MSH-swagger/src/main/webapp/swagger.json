@@ -28,7 +28,7 @@
           "name" : "body",
           "required" : false,
           "schema" : {
-            "$ref" : "#/definitions/MessageAcknowledgementDTO"
+            "$ref" : "#/definitions/MessageAcknowledgementRequestDTO"
           }
         } ],
         "responses" : {
@@ -55,7 +55,7 @@
           "name" : "body",
           "required" : false,
           "schema" : {
-            "$ref" : "#/definitions/MessageAcknowledgementDTO"
+            "$ref" : "#/definitions/MessageAcknowledgementRequestDTO"
           }
         } ],
         "responses" : {
@@ -312,6 +312,24 @@
         },
         "createUser" : {
           "type" : "string"
+        }
+      }
+    },
+    "MessageAcknowledgementRequestDTO" : {
+      "type" : "object",
+      "properties" : {
+        "messageId" : {
+          "type" : "string"
+        },
+        "acknowledgeDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "properties" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          }
         }
       }
     },
