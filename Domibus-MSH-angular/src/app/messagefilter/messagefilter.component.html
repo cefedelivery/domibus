@@ -18,42 +18,42 @@
             id="messageFilterTable">
             <ngx-datatable-column name="Plugin" prop="backendName" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
+              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()" id="pluginRow{{row.$$index}}_id">
                 {{value}}
               </span>
               </ng-template>
             </ngx-datatable-column>
             <ngx-datatable-column name="From" prop="from.expression" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
+              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()" id="fromRow{{row.$$index}}_id">
                 {{value}}
               </span>
               </ng-template>
             </ngx-datatable-column>
             <ngx-datatable-column name="To" prop="to.expression" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
+              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()" id="toRow{{row.$$index}}_id">
                 {{value}}
               </span>
               </ng-template>
             </ngx-datatable-column>
             <ngx-datatable-column name="Action" prop="action.expression" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
+              <span class="clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()" id="actionRow{{row.$$index}}_id">
                 {{value}}
               </span>
               </ng-template>
             </ngx-datatable-column>
             <ngx-datatable-column name="Service" prop="service.expression" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
+              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()" id="serviceRow{{row.$$index}}_id">
                 {{value}}
               </span>
               </ng-template>
             </ngx-datatable-column>
             <ngx-datatable-column name="Persisted" prop="persisted" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-                <input autofocus type="checkbox" [checked]="value" disabled (dblclick)="buttonEdit()"/>
+                <input autofocus type="checkbox" [checked]="value" disabled (dblclick)="buttonEdit()" id="persistedRow{{row.$$index}}_id"/>
               </ng-template>
             </ngx-datatable-column>
             <ngx-datatable-column name="Actions" prop="actions" [sortable]="false">

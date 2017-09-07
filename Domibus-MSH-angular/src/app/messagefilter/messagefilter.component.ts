@@ -383,6 +383,9 @@ export class MessageFilterComponent implements DirtyOperations {
 
   buttonMoveUpAction(row) {
     this.moveUpInternal(row.$$index);
+    setTimeout(() => {
+      document.getElementById('pluginRow'+(row.$$index)+'_id').click();
+    }, 50);
   }
 
   buttonMoveUp() {
@@ -412,6 +415,9 @@ export class MessageFilterComponent implements DirtyOperations {
 
   buttonMoveDownAction(row) {
     this.moveDownInternal(row.$$index);
+    setTimeout(() => {
+      document.getElementById('pluginRow'+(row.$$index)+'_id').click();
+    }, 50);
   }
 
   buttonMoveDown() {
