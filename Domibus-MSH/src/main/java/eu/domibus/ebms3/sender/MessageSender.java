@@ -177,7 +177,7 @@ public class MessageSender implements MessageListener {
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
         } catch (Throwable t) {
-            // Catching Throwable is done on purpose in order to even catch out of memory exceptions in case large files are sent.
+            //NOSONAR: Catching Throwable is done on purpose in order to even catch out of memory exceptions in case large files are sent.
             LOG.error("Error sending message [{}]", messageId, t);
             attemptError = t.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
