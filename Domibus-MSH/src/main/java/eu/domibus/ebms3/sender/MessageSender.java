@@ -145,8 +145,9 @@ public class MessageSender implements MessageListener {
             try {
                 messageExchangeService.verifyReceiverCertificate(legConfiguration, receiverParty.getName());
                 messageExchangeService.verifySenderCertificate(legConfiguration, sendingParty.getName());
-            } catch (ChainCertificateInvalidException ccie) {
-                attemptError = ccie.getMessage();
+            } catch (ChainCertificateInvalidException cciEx) {
+                LOG.securityError(DomibusMessageCode.SEC_INVALID_X509CERTIFICATE, cciEx, null);
+                attemptError = cciEx.getMessage();
                 attemptStatus = MessageAttemptStatus.ABORT;
                 // this flag is used in the finally clause
                 abortSending = true;
@@ -175,11 +176,11 @@ public class MessageSender implements MessageListener {
             reliabilityChecker.handleEbms3Exception(e, messageId);
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
-        } catch (Throwable e) {
-            LOG.error("Error sending message [{}]", messageId, e);
-            attemptError = e.getMessage();
+        } catch (Exception ex) {
+            LOG.error("Error sending message [{}]", messageId, ex);
+            attemptError = ex.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
-            throw e;
+            throw ex;
         } finally {
             try {
                 if (abortSending) {
@@ -192,8 +193,8 @@ public class MessageSender implements MessageListener {
                 attempt.setStatus(attemptStatus);
                 attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
                 messageAttemptService.create(attempt);
-            } catch (Exception e) {
-                LOG.error("Error in the finally block ", e);
+            } catch (Exception ex) {
+                LOG.error("Finally: ", ex);
             }
         }
     }
