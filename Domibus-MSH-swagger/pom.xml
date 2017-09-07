@@ -11,18 +11,65 @@
         <version>3.3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>domibus-docs</artifactId>
+    <artifactId>domibus-swagger</artifactId>
     <packaging>war</packaging>
     <name>Domibus MSH REST API documentation</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-ext-services-delegate</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.1.0</version>
+            </plugin>
+            <plugin>
+                <groupId>com.github.kongchen</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>3.1.5</version>
                 <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <apiSources>
+                        <apiSource>
+                            <springmvc>true</springmvc>
+                            <locations>eu.domibus.ext.rest</locations>
+                            <schemes>http,https</schemes>
+                            <basePath>/domibus</basePath>
+                            <info>
+                                <title>Domibus REST API documentation</title>
+                                <version>v1</version>
+                                <description>Domibus REST API documentation</description>
+
+                                <license>
+                                    <url>https://joinup.ec.europa.eu/community/eupl/og_page/eupl-text-11-12</url>
+                                    <name>EUPL 1.2</name>
+                                </license>
+                            </info>
+                            <securityDefinitions>
+                                <securityDefinition>
+                                    <json>/securityDefinitions.json</json>
+                                </securityDefinition>
+                            </securityDefinitions>
+
+                            <swaggerDirectory>${project.basedir}/src/main/webapp/</swaggerDirectory>
+                        </apiSource>
+                    </apiSources>
                 </configuration>
+
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

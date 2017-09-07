@@ -9,8 +9,8 @@
       "url" : "https://joinup.ec.europa.eu/community/eupl/og_page/eupl-text-11-12"
     }
   },
-  "host" : "localhost:8091",
-  "schemes" : [ "http" ],
+  "basePath" : "/domibus",
+  "schemes" : [ "http", "https" ],
   "paths" : {
     "/ext/messages/acknowledgments/delivered" : {
       "post" : {
@@ -248,7 +248,7 @@
     }
   },
   "securityDefinitions" : {
-    "basic_auth" : {
+    "basicAuth" : {
       "type" : "basic"
     }
   },
