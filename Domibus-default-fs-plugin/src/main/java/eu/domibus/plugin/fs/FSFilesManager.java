@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
+import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,7 @@ public class FSFilesManager {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSFilesManager.class);
 
+    private static final String FTP_PREFIX = "ftp:";
     private static final String PARENT_RELATIVE_PATH = "../";
 
     public static final String INCOMING_FOLDER = "IN";
@@ -41,6 +43,18 @@ public class FSFilesManager {
         StaticUserAuthenticator auth = new StaticUserAuthenticator(domain, user, password);
         FileSystemOptions opts = new FileSystemOptions();
         DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(opts, auth);
+        
+        /*
+         * This is a workaround for a VFS issue regarding FTP servers on Linux.
+         * See https://issues.apache.org/jira/browse/VFS-620
+         * Disabling this property forces usage of paths starting at the root
+         * of the filesystem which sidesteps the problem.
+         * We apply only to FTP URLs since the property applies to SFTP too but
+         * that protocol works as intended.
+         */
+        if (location.startsWith(FTP_PREFIX)) {
+            FtpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts, false);
+        }
 
         FileSystemManager fsManager = getVFSManager();
         FileObject rootDir = fsManager.resolveFile(location, opts);
@@ -99,10 +113,7 @@ public class FSFilesManager {
         FileObject newFile = resolveSibling(file, newFileName);
         file.moveTo(newFile);
         
-        try (FileContent fileContent = newFile.getContent()) {
-            long currentTimeMillis = System.currentTimeMillis();
-            fileContent.setLastModifiedTime(currentTimeMillis);
-        }
+        forceLastModifiedTimeIfSupported(newFile);
 
         return newFile;
     }
@@ -110,9 +121,15 @@ public class FSFilesManager {
     public void moveFile(FileObject file, FileObject targetFile) throws FileSystemException {
         file.moveTo(targetFile);
         
-        try (FileContent fileContent = targetFile.getContent()) {
-            long currentTimeMillis = System.currentTimeMillis();
-            fileContent.setLastModifiedTime(currentTimeMillis);
+        forceLastModifiedTimeIfSupported(targetFile);
+    }
+
+    private void forceLastModifiedTimeIfSupported(FileObject file) throws FileSystemException {
+        if (file.getFileSystem().hasCapability(Capability.SET_LAST_MODIFIED_FILE)) {
+            try (FileContent fileContent = file.getContent()) {
+                long currentTimeMillis = System.currentTimeMillis();
+                fileContent.setLastModifiedTime(currentTimeMillis);
+            }
         }
     }
 
@@ -160,8 +177,7 @@ public class FSFilesManager {
         try (FileObject file = directory.resolveFile(fileName);
              OutputStream fileOS = file.getContent().getOutputStream();
              OutputStreamWriter fileOSW = new OutputStreamWriter(fileOS)) {
-
-            file.createFile();
+            
             fileOSW.write(content);
         }
     }
