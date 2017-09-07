@@ -19,7 +19,7 @@ import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
   styleUrls: ['./messagefilter.component.css']
 })
 
-export class MessageFilterComponent implements DirtyOperations{
+export class MessageFilterComponent implements DirtyOperations {
 
   rows = [];
   selected = [];
@@ -138,9 +138,9 @@ export class MessageFilterComponent implements DirtyOperations{
   }
 
   private findRowsIndex(backendEntry: BackendFilterEntry): number {
-    for(let i = 0; i < this.rows.length; i++) {
+    for (let i = 0; i < this.rows.length; i++) {
       let currentRow = this.rows[i];
-      if(currentRow.backendName === backendEntry.backendName && this.compareRoutingCriterias(backendEntry.routingCriterias, currentRow.routingCriterias)) {
+      if (currentRow.backendName === backendEntry.backendName && this.compareRoutingCriterias(backendEntry.routingCriterias, currentRow.routingCriterias)) {
         return i;
       }
     }
@@ -149,26 +149,26 @@ export class MessageFilterComponent implements DirtyOperations{
 
   private compareRoutingCriterias(criteriasA: RoutingCriteriaEntry[], criteriasB: RoutingCriteriaEntry[]): boolean {
     let result: boolean = true;
-    for(let entry of criteriasA) {
+    for (let entry of criteriasA) {
       result = result && this.findRoutingCriteria(entry, criteriasB);
     }
     return result;
-}
+  }
 
   private findRoutingCriteria(toFind: RoutingCriteriaEntry, routingCriterias: RoutingCriteriaEntry[]): boolean {
-    for(let entry of routingCriterias) {
-      if(entry.name === toFind.name && entry.expression === toFind.expression) {
+    for (let entry of routingCriterias) {
+      if (entry.name === toFind.name && entry.expression === toFind.expression) {
         return true;
       }
     }
     return toFind.expression === '' && routingCriterias.length == 0;
   }
 
-  buttonEdit() {
+  buttonEditAction(row) {
     let formRef: MdDialogRef<EditMessageFilterComponent> = this.dialog.open(EditMessageFilterComponent, {
       data: {
         backendFilterNames: this.backendFilterNames,
-        edit: this.selected[0]
+        edit: row
       }
     });
     formRef.afterClosed().subscribe(result => {
@@ -198,7 +198,7 @@ export class MessageFilterComponent implements DirtyOperations{
           this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
           this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
         } else {
-          if(this.findRowsIndex(backendEntry) != this.rowNumber) {
+          if (this.findRowsIndex(backendEntry) != this.rowNumber) {
             this.alertService.error("Impossible to insert a duplicate entry");
           }
         }
@@ -319,15 +319,29 @@ export class MessageFilterComponent implements DirtyOperations{
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-          this.disableSelectionAndButtons();
-          this.http.put('rest/messagefilters', JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
-            this.alertService.success("The operation 'update message filters' completed successfully.", false);
-            this.getBackendFiltersInfo();
-          }, err => {
-            this.alertService.error("The operation 'update message filters' not completed successfully.", false);
-          });
+        this.disableSelectionAndButtons();
+        this.http.put('rest/messagefilters', JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
+          this.alertService.success("The operation 'update message filters' completed successfully.", false);
+          this.getBackendFiltersInfo();
+        }, err => {
+          this.alertService.error("The operation 'update message filters' not completed successfully.", false);
+        });
       }
     });
+  }
+
+  buttonDeleteAction(row) {
+    this.enableCancel = true;
+    this.enableSave = true;
+    this.enableDelete = false;
+    this.enableEdit = false;
+
+    this.enableMoveUp = false;
+    this.enableMoveDown = false;
+
+    this.rows.splice(row.index, 1);
+
+    this.selected = [];
   }
 
   buttonDelete() {
@@ -347,19 +361,19 @@ export class MessageFilterComponent implements DirtyOperations{
     this.selected = [];
   }
 
-  buttonMoveUp() {
-    if (this.rowNumber < 1) {
+  private moveUpInternal(rowNumber) {
+    if (rowNumber < 1) {
       return;
     }
     let array = this.rows.slice();
-    let move = array[this.rowNumber];
-    array[this.rowNumber] = array[this.rowNumber - 1];
-    array[this.rowNumber - 1] = move;
+    let move = array[rowNumber];
+    array[rowNumber] = array[rowNumber - 1];
+    array[rowNumber - 1] = move;
 
     this.rows = array.slice();
     this.rowNumber--;
 
-    if (this.rowNumber == 0) {
+    if (rowNumber == 0) {
       this.enableMoveUp = false;
     }
     this.enableMoveDown = true;
@@ -367,25 +381,47 @@ export class MessageFilterComponent implements DirtyOperations{
     this.enableCancel = true;
   }
 
-  buttonMoveDown() {
-    if (this.rowNumber > this.rows.length - 1) {
+  buttonMoveUpAction(row) {
+    this.moveUpInternal(row.$$index);
+    setTimeout(() => {
+      document.getElementById('pluginRow'+(row.$$index)+'_id').click();
+    }, 50);
+  }
+
+  buttonMoveUp() {
+    this.moveUpInternal(this.rowNumber);
+  }
+
+  private moveDownInternal(rowNumber) {
+    if (rowNumber > this.rows.length - 1) {
       return;
     }
 
     let array = this.rows.slice();
-    let move = array[this.rowNumber];
-    array[this.rowNumber] = array[this.rowNumber + 1];
-    array[this.rowNumber + 1] = move;
+    let move = array[rowNumber];
+    array[rowNumber] = array[rowNumber + 1];
+    array[rowNumber + 1] = move;
 
     this.rows = array.slice();
     this.rowNumber++;
 
-    if (this.rowNumber == this.rows.length - 1) {
+    if (rowNumber == this.rows.length - 1) {
       this.enableMoveDown = false;
     }
     this.enableMoveUp = true;
     this.enableSave = true;
     this.enableCancel = true;
+  }
+
+  buttonMoveDownAction(row) {
+    this.moveDownInternal(row.$$index);
+    setTimeout(() => {
+      document.getElementById('pluginRow'+(row.$$index)+'_id').click();
+    }, 50);
+  }
+
+  buttonMoveDown() {
+    this.moveDownInternal(this.rowNumber);
   }
 
   onSelect({selected}) {
@@ -415,5 +451,4 @@ export class MessageFilterComponent implements DirtyOperations{
   isDirty(): boolean {
     return this.enableCancel;
   }
-
 }

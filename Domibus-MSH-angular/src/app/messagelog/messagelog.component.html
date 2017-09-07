@@ -148,28 +148,15 @@
   </ng-template>
 
   <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>
-    <button md-icon-button [md-menu-trigger-for]="actionsMenu" id="actionsmenu_id">
-      <md-icon>list</md-icon>
+    <button md-icon-button color="primary" [disabled]="!isDownloadButtonEnabledAction(row)"
+            (click)="downloadAction(row)" id="downloadButtonRow{{row.$$index}}_id" tooltip="Download">
+      <md-icon>file_download</md-icon>
+    </button>
+    <button md-icon-button color="primary" [disabled]="!isResendButtonEnabledAction(row)" (click)="resendDialog()"
+            id="resendButtonRow{{row.$$index}}_id" tooltip="Resend">
+      <md-icon>send</md-icon>
     </button>
   </ng-template>
-
-  <md-menu x-position="before" #actionsMenu="mdMenu">
-    <div>
-      <button md-menu-item color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()"
-              id="downloadbuttonMenu">
-        <md-icon>file_download</md-icon>
-        <span>Download</span>
-      </button>
-    </div>
-    <div>
-      <button md-menu-item color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()"
-              id="resendbuttonMenu">
-        <md-icon>send</md-icon>
-        <span>Resend</span>
-      </button>
-    </div>
-  </md-menu>
-
 
   <div class="group-action-button">
     <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()"
