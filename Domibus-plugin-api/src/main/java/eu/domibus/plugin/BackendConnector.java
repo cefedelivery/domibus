@@ -153,11 +153,11 @@ public interface BackendConnector<U, T> {
         /**
          * Messages and notifications are actively pushed to the backend application (i.e. via a JMS queue)
          */
-        PUSH("push"),
+        PUSH("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"),
         /**
          * Messages and notifications are actively pulled by the backend application (i.e. via a webservice)
          */
-        PULL("pull");
+        PULL("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull");
 
         private final String fileMapping;
         Mode(String fileMapping) {

@@ -46,6 +46,9 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
     private static final String PROPERTY_JNDI_NAME = "Jndi";
+    private static final String JMS_TYPE = "JMSType";
+    private static final String FAILED_TO_BUILD_JMS_DEST_MAP = "Failed to build JMS destination map";
+
 
     protected Map<String, ObjectName> queueMap;
 
@@ -92,10 +95,15 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         LOG.debug("JMS Destination " + jmsDestination);
                         InternalJMSDestination destination = new InternalJMSDestination();
                         String destinationFQName = (String) mbsc.getAttribute(jmsDestination, "Name");
-                        String destinationName = getShortDestName(destinationFQName);
-                        destination.setName(destinationFQName);
+                        // The name must be the queueName in a single server or serverName@queueName in a cluster.
+                        String destName = getShortDestName(destinationFQName);
+                        destination.setName(destName);
+                        destination.setFullyQualifiedName(destinationFQName);
 
-                        ObjectName configQueue = getQueueMap(mbsc).get(destinationName);
+                        if (destName.contains("@")) {
+                            destName = StringUtils.substringAfter(destName, "@");
+                        }
+                        ObjectName configQueue = getQueueMap(mbsc).get(destName);
                         if (configQueue != null) {
                             destination.setType(QUEUE);
                             destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
@@ -103,7 +111,6 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                             destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
                             destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
                         }
-
                         destination.setNumberOfMessages(getMessagesTotalCount(mbsc, jmsDestination));
                         destinationMap.put(removeJmsModuleAndServer(destinationFQName), destination);
                     }
@@ -111,7 +118,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             }
             return destinationMap;
         } catch (Exception e) {
-            throw new InternalJMSException("Failed to build JMS destination map", e);
+            throw new InternalJMSException(FAILED_TO_BUILD_JMS_DEST_MAP, e);
         }
     }
 
@@ -163,7 +170,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             }
             return destinationMap;
         } catch (Exception e) {
-            throw new InternalJMSException("Failed to build JMS destination map", e);
+            throw new InternalJMSException(FAILED_TO_BUILD_JMS_DEST_MAP, e);
         }
 
     }
@@ -202,13 +209,13 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     protected String getShortDestName(String destinationName) {
         String result = destinationName;
         if (result.contains("!")) {
-            result = result.substring(result.lastIndexOf("!") + 1);
+            result = result.substring(result.lastIndexOf('!') + 1);
         }
         if (result.contains(".")) {
-            result = result.substring(result.lastIndexOf(".") + 1);
+            result = result.substring(result.lastIndexOf('.') + 1);
         }
         if (result.contains("@")) {
-            result = result.substring(result.lastIndexOf("@") + 1);
+            result = StringUtils.substringAfter(destinationName, "@");
         }
         return result;
     }
@@ -342,7 +349,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             if (selector == null) {
                 selector = "true";
             }
-            Integer timeout = new Integer(0);
+            Integer timeout = 0;
             Integer stateMask = new Integer( // Show messages in destination in all possible states
                     MessageInfo.STATE_VISIBLE | // Visible and available for consumption
                             MessageInfo.STATE_DELAYED | // Pending delayed delivery
@@ -440,11 +447,12 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     @Override
     public List<InternalJmsMessage> browseMessages(String source) {
         List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
-        List<InternalJMSDestination> destinations = getInternalJMSDestinations(removeJmsModule(source));
+        final String sourceWithoutJMSModule = removeJmsModule(source);
+        List<InternalJMSDestination> destinations = getInternalJMSDestinations(sourceWithoutJMSModule);
         for (InternalJMSDestination destination : destinations) {
             String destinationType = destination.getType();
             if (QUEUE.equals(destinationType)) {
-                Map<String, Object> criteria = new HashMap<String, Object>();
+                Map<String, Object> criteria = new HashMap<>();
                 String selector = jmsSelectorUtil.getSelector(criteria);
                 try {
                     ObjectName jmsDestination = destination.getProperty(PROPERTY_OBJECT_NAME);
@@ -476,9 +484,9 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         InternalJMSDestination destination = getInternalJMSDestination(removeJmsModule(source));
         String destinationType = destination.getType();
         if (QUEUE.equals(destinationType)) {
-            Map<String, Object> criteria = new HashMap<String, Object>();
+            Map<String, Object> criteria = new HashMap<>();
             if (jmsType != null) {
-                criteria.put("JMSType", jmsType);
+                criteria.put(JMS_TYPE, jmsType);
             }
             if (fromDate != null) {
                 criteria.put("JMSTimestamp_from", fromDate.getTime());
@@ -515,8 +523,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     protected Integer doDeleteMessages(MBeanServerConnection mbsc, ObjectName destination, String selector) {
         try {
-            Integer deleted = (Integer) mbsc.invoke(destination, "deleteMessages", new Object[]{selector}, new String[]{String.class.getName()});
-            return deleted;
+            return (Integer) mbsc.invoke(destination, "deleteMessages", new Object[]{selector}, new String[]{String.class.getName()});
         } catch (Exception e) {
             throw new InternalJMSException("Failed to build JMS destination map", e);
         }
@@ -546,9 +553,8 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     protected Integer doMoveMessages(MBeanServerConnection mbsc, ObjectName to, ObjectName from, String selector) {
         try {
             CompositeData toDestinationInfo = (CompositeData) mbsc.getAttribute(to, "DestinationInfo");
-            Integer moved = (Integer) mbsc.invoke(from, "moveMessages", new Object[]{selector, toDestinationInfo}, new String[]{String.class.getName(),
+            return (Integer) mbsc.invoke(from, "moveMessages", new Object[]{selector, toDestinationInfo}, new String[]{String.class.getName(),
                     CompositeData.class.getName()});
-            return moved;
         } catch (Exception e) {
             throw new InternalJMSException("Error moving messages", e);
         }
@@ -558,7 +564,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
      * Implements the consume operation.
      * The message is browsed, deleted and returned to caller.
      *
-     * @param source name of the JMS queue
+     * @param source          name of the JMS queue
      * @param customMessageId ID of the message present in the custom properties.
      * @return
      */
@@ -589,7 +595,6 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         InternalJmsMessage message = new InternalJmsMessage();
         String xmlMessage = String.valueOf(messageData.get("MessageXMLText"));
         Document xmlDocument = parseXML(xmlMessage);
-        String ns = "http://www.bea.com/WLS/JMS/Message";
         Element root = xmlDocument.getDocumentElement();
         Element header = getChildElement(root, "Header");
         Element jmsMessageId = getChildElement(header, "JMSMessageID");
@@ -600,11 +605,11 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         String timestamp = jmsTimestamp.getTextContent();
         message.setTimestamp(new Date(Long.parseLong(timestamp)));
         message.getProperties().put("JMSTimestamp", timestamp);
-        Element jmsType = getChildElement(header, "JMSType");
+        Element jmsType = getChildElement(header, JMS_TYPE);
         if (jmsType != null) {
             String type = jmsType.getTextContent();
             message.setType(type);
-            message.getProperties().put("JMSType", type);
+            message.getProperties().put(JMS_TYPE, type);
         }
         Element propertiesRoot = getChildElement(header, "Properties");
         List<Element> properties = getChildElements(propertiesRoot, "property");
@@ -640,7 +645,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                 if (localName == null) {
                     localName = child.getNodeName();
                     if (localName != null && localName.contains(":")) {
-                        localName = localName.substring(localName.indexOf(":") + 1);
+                        localName = localName.substring(localName.indexOf(':') + 1);
                     }
                 }
                 if (StringUtils.equals(localName, name)) {
@@ -652,7 +657,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     }
 
     protected List<Element> getChildElements(Element parent, String name) {
-        List<Element> childElements = new ArrayList<Element>();
+        List<Element> childElements = new ArrayList<>();
         for (int i = 0; i < parent.getChildNodes().getLength(); i++) {
             if (parent.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE) {
                 Element child = (Element) parent.getChildNodes().item(i);
@@ -660,7 +665,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                 if (localName == null) {
                     localName = child.getNodeName();
                     if (localName != null && localName.contains(":")) {
-                        localName = localName.substring(localName.indexOf(":") + 1);
+                        localName = localName.substring(localName.indexOf(':') + 1);
                     }
                 }
                 if (StringUtils.equals(localName, name)) {
@@ -674,8 +679,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     protected Element getFirstChildElement(Element parent) {
         for (int i = 0; i < parent.getChildNodes().getLength(); i++) {
             if (parent.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE) {
-                Element child = (Element) parent.getChildNodes().item(i);
-                return child;
+                return (Element) parent.getChildNodes().item(i);
             }
         }
         return null;

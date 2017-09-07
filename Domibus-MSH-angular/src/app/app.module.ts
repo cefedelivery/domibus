@@ -1,5 +1,5 @@
 import {BrowserModule} from "@angular/platform-browser";
-import {NgModule, ViewContainerRef} from "@angular/core";
+import {NgModule} from "@angular/core";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {Http, HttpModule, RequestOptions, XHRBackend} from "@angular/http";
 import {
@@ -59,16 +59,9 @@ import {EditUserComponent} from "app/user/edituser-form/edituser-form.component"
 import {SaveDialogComponent} from "./common/save-dialog/save-dialog.component";
 import {TruststoreDialogComponent} from "./truststore/truststore-dialog/truststore-dialog.component";
 import {TrustStoreUploadComponent} from "./truststore/truststore-upload/truststore-upload.component";
-import { ColumnPickerComponent } from './common/column-picker/column-picker.component';
+import {ColumnPickerComponent} from "./common/column-picker/column-picker.component";
 import {PageHelperComponent} from "./common/page-helper/page-helper.component";
-import {HelpDialogComponent} from "./common/page-helper/help-dialog/help-dialog.component";
-import {PmodeHelpComponent} from "./pmode/pmode-help/pmode-help.component";
-import {JmsHelpComponent} from "./jms/jms-help/jms-help.component";
-import {TruststoreHelpComponent} from "./truststore/truststore-help/truststore-help.component";
-import {ErrorlogHelpComponent} from "./errorlog/errorlog-help/errorlog-help.component";
-import {MessagelogHelpComponent} from "./messagelog/messagelog-help/messagelog-help.component";
-import {MessagefilterHelpComponent} from "./messagefilter/messagefilter-help/messagefilter-help.component";
-import {UserHelpComponent} from "./user/user-help/user-help.component";
+import {SharedModule} from "./common/module/SharedModule";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -106,15 +99,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TrustStoreUploadComponent,
     ColumnPickerComponent,
     TrustStoreUploadComponent,
-    PageHelperComponent,
-    HelpDialogComponent,
-    PmodeHelpComponent,
-    JmsHelpComponent,
-    TruststoreHelpComponent,
-    ErrorlogHelpComponent,
-    MessagelogHelpComponent,
-    MessagefilterHelpComponent,
-    UserHelpComponent
+    PageHelperComponent
   ],
   entryComponents: [
     AppComponent,
@@ -130,8 +115,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     ErrorlogDetailsComponent,
     EditUserComponent,
     TruststoreDialogComponent,
-    TrustStoreUploadComponent,
-    HelpDialogComponent
+    TrustStoreUploadComponent
   ],
   imports: [
     BrowserModule,
@@ -151,7 +135,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     routing,
     ReactiveFormsModule,
     Md2Module,
-    Md2SelectModule
+    Md2SelectModule,
+    SharedModule
   ],
   providers: [
     AuthenticatedGuard,

@@ -50,7 +50,6 @@
         <jaxws:outFaultInterceptors>
             <ref bean="clearAuthenticationMDCInterceptor"/>
         </jaxws:outFaultInterceptors>
-
     </jaxws:endpoint>
     <!-- Example ends here -->
 

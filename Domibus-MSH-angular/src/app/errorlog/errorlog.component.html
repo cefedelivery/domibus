@@ -1,7 +1,7 @@
-﻿<div class="selectionCriteria">
+﻿<h1 id="errorlogheader_id">Error Log</h1>
+<div class="selectionCriteria">
   <md-card>
     <md-card-content>
-      <h1 id="errorlogheader_id">Error Log</h1>
 
       <div class="panel">
         <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
@@ -16,8 +16,21 @@
             <input mdInput placeholder="Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId"
                    #messageInErrorId="ngModel" id="messageid_id">
           </md-input-container>
-
-          <br *ngIf="!advancedSearch">
+          <md2-datepicker placeholder="Error from:"
+                          [(ngModel)]="filter.timestampFrom"
+                          name="fromTimestmap"
+                          [type]="'datetime'"
+                          [max]="timestampFromMaxDate"
+                          (change)='onTimestampFromChange($event)'
+                          #timestampControl="ngModel" id="fromtimestamp_id"></md2-datepicker>
+          <md2-datepicker placeholder="Error to:"
+                          [(ngModel)]="filter.timestampTo"
+                          name="toTimestmap"
+                          [min]="timestampToMinDate"
+                          [max]="timestampToMaxDate"
+                          (change)='onTimestampToChange($event)'
+                          [type]="'datetime'"
+                          #timestampControl="ngModel" id="totimestamp_id"></md2-datepicker>
 
           <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Error detail" name="ErrorDetail" [(ngModel)]="filter.errorDetail"
@@ -42,26 +55,6 @@
             </md-option>
           </md-select>
 
-          <br *ngIf="advancedSearch">
-
-
-          <md2-datepicker placeholder="Error from:"
-                          [(ngModel)]="filter.timestampFrom"
-                          name="fromTimestmap"
-                          [type]="'datetime'"
-                          [max]="timestampFromMaxDate"
-                          (change)='onTimestampFromChange($event)'
-                          #timestampControl="ngModel" id="fromtimestamp_id"></md2-datepicker>
-          <md2-datepicker placeholder="Error to:"
-                          [(ngModel)]="filter.timestampTo"
-                          name="toTimestmap"
-                          [min]="timestampToMinDate"
-                          [max]="timestampToMaxDate"
-                          (change)='onTimestampToChange($event)'
-                          [type]="'datetime'"
-                          #timestampControl="ngModel" id="totimestamp_id"></md2-datepicker>
-
-          <br *ngIf="advancedSearch">
 
           <md2-datepicker placeholder="Notified from:"
                           [(ngModel)]="filter.notifiedFrom"
@@ -97,42 +90,43 @@
   </md-card>
 </div>
 
-<div style="display:inline-flex">
-  <div>
-    <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
-                     (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+<div class="panel">
+  <div class="group-filter-button">
+    <span class="row-button">
+      <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                       (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+    </span>
+    <span class="column-filter-button">
+      <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                         (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+    </span>
   </div>
-  <div>
-    <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
-                       (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
-  </div>
-</div>
 
 
-<ngx-datatable
-  id="errorLogTable"
-  class="material striped"
-  [rows]="rows"
-  [columnMode]="'force'"
-  [columns]="columnPicker.selectedColumns"
-  [headerHeight]="50"
-  [footerHeight]="50"
-  [rowHeight]="'auto'"
-  [scrollbarH]="true"
-  [externalPaging]="true"
-  [externalSorting]="true"
-  [loadingIndicator]="loading"
-  [count]="count"
-  [offset]="offset"
-  [limit]="rowLimiter.pageSize"
-  [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
-  (page)='onPage($event)'
-  (sort)="onSort($event)"
-  (activate)="onActivate($event)"
-  (select)="onSelect($event)">
+  <ngx-datatable
+    id="errorLogTable"
+    class="material striped"
+    [rows]="rows"
+    [columnMode]="'force'"
+    [columns]="columnPicker.selectedColumns"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    [rowHeight]="'auto'"
+    [scrollbarH]="true"
+    [externalPaging]="true"
+    [externalSorting]="true"
+    [loadingIndicator]="loading"
+    [count]="count"
+    [offset]="offset"
+    [limit]="rowLimiter.pageSize"
+    [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
+    (page)='onPage($event)'
+    (sort)="onSort($event)"
+    (activate)="onActivate($event)"
+    (select)="onSelect($event)">
 </ngx-datatable>
 
-<ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-  <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-</ng-template>
-
+  <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+    <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+  </ng-template>
+</div>

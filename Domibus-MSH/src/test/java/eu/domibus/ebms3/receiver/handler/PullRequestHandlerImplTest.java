@@ -95,7 +95,7 @@ public class PullRequestHandlerImplTest {
         new Verifications() {{
             eu.domibus.ebms3.common.model.Error error;
             messageBuilder.buildSOAPFaultMessage(error = withCapture());
-            error.equals(ebMS3Exception.getFaultInfo());
+            error.equals(ebMS3Exception.getFaultInfoError());
             times = 1;
 
             reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
@@ -253,14 +253,14 @@ public class PullRequestHandlerImplTest {
         final String messageId = "whatEverID";
         new Expectations() {{
 
-            messageExchangeService.verifyReceiverCerficate(legConfiguration, pullContext.getInitiator().getName());
+            messageExchangeService.verifyReceiverCertificate(legConfiguration, pullContext.getInitiator().getName());
             result = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "invalid certificate");
 
 
         }};
         pullRequestHandler.handleRequest(messageId, pullContext);
         new Verifications() {{
-            retryService.purgeTimedoutMessage(messageId);
+            retryService.purgeTimedoutMessageInANewTransaction(messageId);
             times = 1;
             messageBuilder.buildSOAPFaultMessage(withAny(new Error()));
             times = 0;

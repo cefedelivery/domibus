@@ -126,13 +126,42 @@ export class MessageFilterComponent implements DirtyOperations{
           routingCriterias.push(new RoutingCriteriaEntry(0, 'service', formRef.componentInstance.service));
         }
         let backendEntry = new BackendFilterEntry(0, this.rowNumber + 1, formRef.componentInstance.plugin, routingCriterias, false);
-        this.rows.push(backendEntry);
-
-        this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
-        this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+        if (this.findRowsIndex(backendEntry) == -1) {
+          this.rows.push(backendEntry);
+          this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
+          this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+        } else {
+          this.alertService.error("Impossible to insert a duplicate entry");
+        }
       }
     });
+  }
 
+  private findRowsIndex(backendEntry: BackendFilterEntry): number {
+    for(let i = 0; i < this.rows.length; i++) {
+      let currentRow = this.rows[i];
+      if(currentRow.backendName === backendEntry.backendName && this.compareRoutingCriterias(backendEntry.routingCriterias, currentRow.routingCriterias)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  private compareRoutingCriterias(criteriasA: RoutingCriteriaEntry[], criteriasB: RoutingCriteriaEntry[]): boolean {
+    let result: boolean = true;
+    for(let entry of criteriasA) {
+      result = result && this.findRoutingCriteria(entry, criteriasB);
+    }
+    return result;
+}
+
+  private findRoutingCriteria(toFind: RoutingCriteriaEntry, routingCriterias: RoutingCriteriaEntry[]): boolean {
+    for(let entry of routingCriterias) {
+      if(entry.name === toFind.name && entry.expression === toFind.expression) {
+        return true;
+      }
+    }
+    return toFind.expression === '' && routingCriterias.length == 0;
   }
 
   buttonEdit() {
@@ -144,14 +173,35 @@ export class MessageFilterComponent implements DirtyOperations{
     });
     formRef.afterClosed().subscribe(result => {
       if (result == true) {
-        this.updateSelectedPlugin(formRef.componentInstance.plugin);
-        this.updateSelectedFrom(formRef.componentInstance.from);
-        this.updateSelectedTo(formRef.componentInstance.to);
-        this.updateSelectedAction(formRef.componentInstance.action);
-        this.updateSelectedService(formRef.componentInstance.service);
+        let routingCriterias: Array<RoutingCriteriaEntry> = [];
+        if (!isNullOrUndefined(formRef.componentInstance.from)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0, 'from', formRef.componentInstance.from));
+        }
+        if (!isNullOrUndefined(formRef.componentInstance.to)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0, 'to', formRef.componentInstance.to));
+        }
+        if (!isNullOrUndefined(formRef.componentInstance.action)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0, 'action', formRef.componentInstance.action));
+        }
+        if (!isNullOrUndefined(formRef.componentInstance.service)) {
+          routingCriterias.push(new RoutingCriteriaEntry(0, 'service', formRef.componentInstance.service));
+        }
+        let backendEntry = new BackendFilterEntry(0, this.rowNumber + 1, formRef.componentInstance.plugin, routingCriterias, false);
+        let backendEntryPos = this.findRowsIndex(backendEntry);
+        if (backendEntryPos == -1) {
+          this.updateSelectedPlugin(formRef.componentInstance.plugin);
+          this.updateSelectedFrom(formRef.componentInstance.from);
+          this.updateSelectedTo(formRef.componentInstance.to);
+          this.updateSelectedAction(formRef.componentInstance.action);
+          this.updateSelectedService(formRef.componentInstance.service);
 
-        this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
-        this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+          this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
+          this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+        } else {
+          if(this.findRowsIndex(backendEntry) != this.rowNumber) {
+            this.alertService.error("Impossible to insert a duplicate entry");
+          }
+        }
       }
     });
   }

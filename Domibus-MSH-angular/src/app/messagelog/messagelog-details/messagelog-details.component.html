@@ -55,11 +55,11 @@
       </md-input-container>
 
       <md-input-container style="width:100%">
-        <input mdInput placeholder="Failed" value="{{message.failed}}" readonly/>
+        <input mdInput placeholder="Failed" value="{{message.failed | domibusDate: dateFormat}}" readonly/>
       </md-input-container>
 
       <md-input-container style="width:100%">
-        <input mdInput placeholder="Restored" value="{{message.restored}}" readonly/>
+        <input mdInput placeholder="Restored" value="{{message.restored | domibusDate: dateFormat}}" readonly/>
       </md-input-container>
 
       <md-input-container style="width:100%">

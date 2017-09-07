@@ -22,14 +22,15 @@
                 <groupId>com.github.kongchen</groupId>
                 <artifactId>swagger-maven-plugin</artifactId>
                 <version>3.1.5</version>
+
                 <configuration>
+
                     <apiSources>
                         <apiSource>
                             <springmvc>true</springmvc>
                             <locations>eu.domibus.ext.rest</locations>
                             <schemes>http</schemes>
-                            <host>localhost</host>
-                            <basePath>/</basePath>
+                            <host>localhost:8091</host>
                             <info>
                                 <title>Domibus REST API documentation</title>
                                 <version>v1</version>
@@ -41,11 +42,19 @@
                                 </license>
                             </info>
 
-                            <swaggerDirectory>${project.parent.basedir}/Domibus-MSH-swagger/src/main/webapp/</swaggerDirectory>
+                            <securityDefinitions>
+                                <securityDefinition>
+                                    <json>/securityDefinitions.json</json>
+                                </securityDefinition>
+                            </securityDefinitions>
+
+                            <swaggerDirectory>${project.parent.basedir}/Domibus-MSH-swagger/src/main/webapp/
+                            </swaggerDirectory>
 
                         </apiSource>
                     </apiSources>
                 </configuration>
+
                 <executions>
                     <execution>
                         <phase>compile</phase>

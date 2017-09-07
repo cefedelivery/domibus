@@ -9,9 +9,9 @@ import java.util.Map;
  * // TODO Documentation
  *
  * @author Cosmin Baciu
- * @since 3.2
  * @see JmsMessage
  * @see JMSDestination
+ * @since 3.2
  */
 public interface JMSManager {
 
@@ -23,7 +23,7 @@ public interface JMSManager {
     Map<String, JMSDestination> getDestinations();
 
     /**
-     * Finds a JMS message in a source.
+     * Retrieves the JMS message having a specific id  from the provided source.
      *
      * @param source    a JMS source
      * @param messageId JMS message's identifier

@@ -21,9 +21,10 @@ export class MessageLogComponent {
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
   @ViewChild('nextAttemptInfoTpl') public nextAttemptInfoTpl: TemplateRef<any>;
   @ViewChild('nextAttemptInfoWithDateFormatTpl') public nextAttemptInfoWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
-  columnPicker: ColumnPickerBase = new ColumnPickerBase()
-  rowLimiter: RowLimiterBase = new RowLimiterBase()
+  columnPicker: ColumnPickerBase = new ColumnPickerBase();
+  rowLimiter: RowLimiterBase = new RowLimiterBase();
 
   static readonly RESEND_URL: string = 'rest/message/${messageId}/restore';
   static readonly DOWNLOAD_MESSAGE_URL: string = 'rest/message/${messageId}/download';
@@ -120,20 +121,26 @@ export class MessageLogComponent {
         name: 'Ref To Message Id'
       },
       {
-        name: 'Failed'
+        cellTemplate: this.rowWithDateFormatTpl,
+        name: 'Failed',
+        width: 155
       },
       {
-        name: 'Restored'
+        cellTemplate: this.rowWithDateFormatTpl,
+        name: 'Restored',
+        width: 155
+      },
+      {
+        cellTemplate: this.rowActions,
+        name: 'Actions',
+        width:50
       }
 
-    ]
+    ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type"].indexOf(col.name) != -1
-    })
-
-    this.filter.receivedTo = new Date()
-    this.filter.receivedTo.setHours(23, 59, 59, 999)
+      return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type", "Actions"].indexOf(col.name) != -1
+    });
 
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc)
   }
@@ -348,7 +355,7 @@ export class MessageLogComponent {
   }
 
   private downloadNative(content) {
-    var element = document.createElement('a');
+    let element = document.createElement('a');
     element.setAttribute('href', content);
     element.style.display = 'none';
     document.body.appendChild(element);

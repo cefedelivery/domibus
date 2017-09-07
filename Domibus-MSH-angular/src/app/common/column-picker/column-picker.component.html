@@ -1,6 +1,10 @@
 <div style="margin-bottom:10px">
-  <a class="domibusLink" href="#" *ngIf="!columnSelection" (click)="toggleColumnSelection()" id="columnslinkoff_id">Columns</a>
-  <a class="domibusLink" href="#" *ngIf="columnSelection" (click)="toggleColumnSelection()" id="columnslinkon_id">Columns</a>
+  <a class="domibusLink hide-show-column" href="#" *ngIf="!columnSelection" (click)="toggleColumnSelection()"
+     id="columnslinkoff_id" click-stop-propagation>Show
+    columns</a>
+  <a class="domibusLink hide-show-column" href="#" *ngIf="columnSelection" (click)="toggleColumnSelection()"
+     id="columnslinkon_id" click-stop-propagation>Hide
+    columns</a>
 </div>
 
 <div *ngIf="columnSelection" style="margin-bottom: 10px;">
@@ -13,13 +17,9 @@
     />
     <label [attr.for]="col.name">{{col.name}}</label>
   </div>
-  <button md-raised-button color="primary" (click)="selectAllColumns()" id="all_button_id">
-    <md-icon>check_box</md-icon>
-    <span>All</span>
-  </button>
-  <button md-raised-button color="primary" (click)="selectNoColumns()" id="none_button_id">
-    <md-icon>check_box_outline_blank</md-icon>
-    <span>None</span>
-  </button>
+  <div class="all-none-selection">
+    <a href="#" class="domibusLink" id="all_id" (click)="selectAllColumns()" click-stop-propagation>All</a>
+    <a href="#" class="domibusLink" id="none_id" (click)="selectNoColumns()" click-stop-propagation>None</a>
+  </div>
 </div>
 

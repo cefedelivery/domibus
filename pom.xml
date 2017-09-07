@@ -30,6 +30,7 @@
         <aspectj.version>1.8.9</aspectj.version>
         <slf4j.version>1.7.21</slf4j.version>
         <logback.version>1.1.8</logback.version>
+        <logback.elasticsearch.appender.version>1.6</logback.elasticsearch.appender.version>
         <httpclient.version>4.5.2</httpclient.version>
         <commons-configuration.version>1.10</commons-configuration.version>
         <commons-lang.version>2.6</commons-lang.version>
@@ -102,6 +103,12 @@
         <repository>
             <id>cefdigital-snapshots</id>
             <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
@@ -150,6 +157,11 @@
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-ext</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
@@ -157,6 +169,11 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.internetitem</groupId>
+                <artifactId>logback-elasticsearch-appender</artifactId>
+                <version>${logback.elasticsearch.appender.version}</version>
             </dependency>
             <!-- End SL4J + Logback -->
 

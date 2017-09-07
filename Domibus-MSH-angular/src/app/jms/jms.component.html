@@ -1,7 +1,7 @@
+<h1 id="jmsmonitoringheader_id">JMS Monitoring</h1>
 <div class="selectionCriteria">
   <md-card>
     <md-card-content>
-      <h1 id="jmsmonitoringheader_id">JMS Monitoring</h1>
       <div class="panel">
 
         <md-select class="searchField" placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector"
@@ -49,65 +49,89 @@
   </md-card>
 </div>
 
-<div style="display:inline-flex">
-  <div>
+<div class="panel">
+  <div class="group-filter-button">
+    <span class="row-button">
     <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
                      (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
-  </div>
-  <div>
+    </span>
+    <span class="column-filter-button">
     <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
                        (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+    </span>
   </div>
+
+  <ngx-datatable
+    id="errorLogTable"
+    class="material striped"
+    [rows]="rows"
+    [columns]="columnPicker.selectedColumns"
+    [columnMode]="'force'"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    [rowHeight]="'auto'"
+    [scrollbarH]="true"
+    [loadingIndicator]="loading"
+    [selectionType]="'multi'"
+    [selected]="selectedMessages"
+    [limit]="rowLimiter.pageSize"
+    [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
+    (activate)="onActivate($event)"
+    (select)="onSelect($event)">
+  </ngx-datatable>
+
+  <ng-template #rowWithJSONTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+    {{value | json}}
+  </ng-template>
+
+  <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+    <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+  </ng-template>
+
+  <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>
+    <button md-icon-button [md-menu-trigger-for]="actionsMenu" id="actionsmenu_id">
+      <md-icon>list</md-icon>
+    </button>
+  </ng-template>
+
+  <md-menu x-position="before" #actionsMenu="mdMenu">
+    <div>
+      <button id="jmsMoveButtonMenu" md-menu-item color="primary" (click)="move()"
+              [disabled]="selectedMessages.length == 0">
+        <md-icon>move_to_inbox</md-icon>
+        <span>Move</span>
+      </button>
+    </div>
+    <div>
+      <button id="jmsDeleteButtonMenu" md-menu-item color="primary" (click)="delete()"
+              [disabled]="selectedMessages.length == 0">
+        <md-icon>delete</md-icon>
+        <span>Delete</span>
+      </button>
+    </div>
+  </md-menu>
+
+  <div class="group-action-button">
+    <button id="jmsCancelButton" md-raised-button color="primary" (click)="cancel()"
+            [disabled]="markedForDeletionMessages.length == 0">
+      <md-icon>cancel</md-icon>
+      <span>Cancel</span>
+    </button>
+    <button id="jmsSaveButton" md-raised-button color="primary" (click)="save()"
+            [disabled]="markedForDeletionMessages.length == 0">
+      <md-icon>save</md-icon>
+      <span>Save</span>
+    </button>
+    <button id="jmsMoveButton" md-raised-button color="primary" (click)="move()"
+            [disabled]="selectedMessages.length == 0">
+      <md-icon>move_to_inbox</md-icon>
+      <span>Move</span>
+    </button>
+    <button id="jmsDeleteButton" md-raised-button color="primary" (click)="delete()"
+            [disabled]="selectedMessages.length == 0">
+      <md-icon>delete</md-icon>
+      <span>Delete</span>
+    </button>
+  </div>
+
 </div>
-
-
-<ngx-datatable
-  id="errorLogTable"
-  class="material striped"
-  [rows]="rows"
-  [columns]="columnPicker.selectedColumns"
-  [columnMode]="'force'"
-  [headerHeight]="50"
-  [footerHeight]="50"
-  [rowHeight]="'auto'"
-  [scrollbarH]="true"
-  [loadingIndicator]="loading"
-  [selectionType]="'multi'"
-  [selected]="selectedMessages"
-  [limit]="rowLimiter.pageSize"
-  [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
-  (activate)="onActivate($event)"
-  (select)="onSelect($event)">
-</ngx-datatable>
-
-<ng-template #rowWithJSONTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-  {{value | json}}
-</ng-template>
-
-<ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-  <span class="text-select">{{value | domibusDate: dateFormat}}</span>
-</ng-template>
-
-<div style="margin-top: 10px">
-  <button id="jmsCancelButton" md-raised-button color="primary" (click)="cancel()"
-          [disabled]="markedForDeletionMessages.length == 0">
-    <md-icon>cancel</md-icon>
-    <span>Cancel</span>
-  </button>
-  <button id="jmsSaveButton" md-raised-button color="primary" (click)="save()"
-          [disabled]="markedForDeletionMessages.length == 0">
-    <md-icon>save</md-icon>
-    <span>Save</span>
-  </button>
-  <button id="jmsMoveButton" md-raised-button color="primary" (click)="move()"
-          [disabled]="selectedMessages.length == 0">
-    <md-icon>move_to_inbox</md-icon>
-    <span>Move</span>
-  </button>
-  <button id="jmsDeleteButton" md-raised-button color="primary" (click)="delete()"
-          [disabled]="selectedMessages.length == 0">
-    <md-icon>delete</md-icon>
-    <span>Delete</span>
-  </button>
-</div>
-
