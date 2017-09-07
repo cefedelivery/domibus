@@ -22,26 +22,28 @@ public class MessageAcknowledgementResource {
     MessageAcknowledgeService messageAcknowledgeService;
 
     /**
-     * Registers a message delivered acknowledgment for a specific message using the provided properties
+     * Acknowledges that a message has been delivered to the backend
      *
      * @param messageAcknowledgementDTO the details of the message delivered acknowledgement to be created
      * @return The newly created message acknowledgement
      * @throws MessageAcknowledgeException Raised in case an exception occurs while trying to register an acknowledgment
      */
-    @ApiOperation(value = "acknowledgeMessageDelivered", authorizations = @Authorization(value = "basicAuth"))
+    @ApiOperation(value = "Create a message delivered acknowledgement", notes = "Acknowledges that a message has been delivered to the backend",
+            authorizations = @Authorization(value = "basicAuth"), tags = "acknowledgement")
     @RequestMapping(path = "/delivered", method = RequestMethod.POST)
     public MessageAcknowledgementDTO acknowledgeMessageDelivered(@RequestBody MessageAcknowledgementDTO messageAcknowledgementDTO) throws MessageAcknowledgeException {
         return messageAcknowledgeService.acknowledgeMessageDelivered(messageAcknowledgementDTO.getMessageId(), messageAcknowledgementDTO.getAcknowledgeDate(), messageAcknowledgementDTO.getProperties());
     }
 
     /**
-     * Registers a message delivered acknowledgment for a specific message using the provided properties
+     * Acknowledges that a message has been processed by the backend
      *
      * @param messageAcknowledgementDTO the details of the message delivered acknowledgement to be created
      * @return The newly created message acknowledgement
      * @throws MessageAcknowledgeException Raised in case an exception occurs while trying to register an acknowledgment
      */
-    @ApiOperation(value = "acknowledgeMessageProcessed", authorizations = @Authorization(value = "basicAuth"))
+    @ApiOperation(value = "Create a message processed acknowledgement", notes = "Acknowledges that a message has been processed by the backend",
+            authorizations = @Authorization(value = "basicAuth"), tags = "acknowledgement")
     @RequestMapping(path = "/processed", method = RequestMethod.POST)
     public MessageAcknowledgementDTO acknowledgeMessageProcessed(@RequestBody MessageAcknowledgementDTO messageAcknowledgementDTO) throws MessageAcknowledgeException {
         return messageAcknowledgeService.acknowledgeMessageProcessed(messageAcknowledgementDTO.getMessageId(), messageAcknowledgementDTO.getAcknowledgeDate(), messageAcknowledgementDTO.getProperties());
@@ -53,7 +55,8 @@ public class MessageAcknowledgementResource {
      * @param messageId The message id for which message acknowledgments are retrieved
      * @return All acknowledgments registered for a specific message
      */
-    @ApiOperation(value = "getAcknowledgedMessages", authorizations = @Authorization(value = "basicAuth"))
+    @ApiOperation(value = "Get acknowledgements", notes = "Gets all acknowledgments associated to a message id",
+            authorizations = @Authorization(value = "basicAuth"), tags = "acknowledgement")
     @RequestMapping(path = "/{messageId:.+}", method = RequestMethod.GET)
     @ResponseBody
     public List<MessageAcknowledgementDTO> getAcknowledgedMessages(@PathVariable(value = "messageId") String messageId) throws MessageAcknowledgeException {

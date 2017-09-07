@@ -10,12 +10,18 @@
     }
   },
   "basePath" : "/domibus",
+  "tags" : [ {
+    "name" : "acknowledgement"
+  }, {
+    "name" : "monitoring"
+  } ],
   "schemes" : [ "http", "https" ],
   "paths" : {
     "/ext/messages/acknowledgments/delivered" : {
       "post" : {
-        "summary" : "acknowledgeMessageDelivered",
-        "description" : "",
+        "tags" : [ "acknowledgement" ],
+        "summary" : "Message delivered acknowledgement",
+        "description" : "Acknowledges that a message has been delivered to the backend",
         "operationId" : "acknowledgeMessageDelivered",
         "parameters" : [ {
           "in" : "body",
@@ -40,8 +46,9 @@
     },
     "/ext/messages/acknowledgments/processed" : {
       "post" : {
-        "summary" : "acknowledgeMessageProcessed",
-        "description" : "",
+        "tags" : [ "acknowledgement" ],
+        "summary" : "Message processed acknowledgement",
+        "description" : "Acknowledges that a message has been processed by the backend",
         "operationId" : "acknowledgeMessageProcessed",
         "parameters" : [ {
           "in" : "body",
@@ -66,8 +73,9 @@
     },
     "/ext/messages/acknowledgments/{messageId}" : {
       "get" : {
-        "summary" : "getAcknowledgedMessages",
-        "description" : "",
+        "tags" : [ "acknowledgement" ],
+        "summary" : "Get acknowledgements",
+        "description" : "Gets all acknowledgments associated to a message id",
         "operationId" : "getAcknowledgedMessages",
         "parameters" : [ {
           "name" : "messageId",
@@ -94,8 +102,9 @@
     },
     "/ext/monitoring/messages/failed" : {
       "get" : {
-        "summary" : "getFailedMessages",
-        "description" : "",
+        "tags" : [ "monitoring" ],
+        "summary" : "Get failed messages",
+        "description" : "Retrieve all the messages with the specified finalRecipient(if provided) that are currently in a SEND_FAILURE status",
         "operationId" : "getFailedMessages",
         "parameters" : [ {
           "name" : "finalRecipient",
@@ -121,8 +130,9 @@
     },
     "/ext/monitoring/messages/failed/restore" : {
       "post" : {
-        "summary" : "restoreFailedMessages",
-        "description" : "",
+        "tags" : [ "monitoring" ],
+        "summary" : "Resend all messages with SEND_FAILURE status within a certain time interval",
+        "description" : "Resend all messages with SEND_FAILURE status within a certain time interval",
         "operationId" : "restoreFailedMessages",
         "parameters" : [ {
           "in" : "body",
@@ -150,8 +160,9 @@
     },
     "/ext/monitoring/messages/failed/{messageId}" : {
       "delete" : {
-        "summary" : "deleteFailedMessage",
-        "description" : "",
+        "tags" : [ "monitoring" ],
+        "summary" : "Delete failed message payload",
+        "description" : "Delete the payload of a message which has a SEND_FAILURE status",
         "operationId" : "deleteFailedMessage",
         "parameters" : [ {
           "name" : "messageId",
@@ -172,8 +183,9 @@
     },
     "/ext/monitoring/messages/failed/{messageId}/elapsedtime" : {
       "get" : {
-        "summary" : "getFailedMessageInterval",
-        "description" : "",
+        "tags" : [ "monitoring" ],
+        "summary" : "Get failed message elapsed time",
+        "description" : "Retrieve the time that a message has been in a SEND_FAILURE status",
         "operationId" : "getFailedMessageInterval",
         "parameters" : [ {
           "name" : "messageId",
@@ -198,8 +210,9 @@
     },
     "/ext/monitoring/messages/failed/{messageId}/restore" : {
       "put" : {
-        "summary" : "restoreFailedMessage",
-        "description" : "",
+        "tags" : [ "monitoring" ],
+        "summary" : "Resend failed message",
+        "description" : "Resend a message which has a SEND_FAILURE status",
         "operationId" : "restoreFailedMessage",
         "parameters" : [ {
           "name" : "messageId",
@@ -220,8 +233,9 @@
     },
     "/ext/monitoring/messages/{messageId}/attempts" : {
       "get" : {
-        "summary" : "getMessageAttempts",
-        "description" : "",
+        "tags" : [ "monitoring" ],
+        "summary" : "Get message attempts",
+        "description" : "Retrieve the history of the delivery attempts for a certain message",
         "operationId" : "getMessageAttempts",
         "parameters" : [ {
           "name" : "messageId",
