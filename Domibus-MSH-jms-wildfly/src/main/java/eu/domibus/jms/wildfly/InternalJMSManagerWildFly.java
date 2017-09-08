@@ -352,7 +352,8 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     public InternalJmsMessage consumeMessage(String source, String customMessageId) {
 
         InternalJmsMessage intJmsMsg = null;
-        String selector = "MESSAGE_ID='" + customMessageId + "'";
+        String selector = "MESSAGE_ID='" + customMessageId + "' AND NOTIFICATION_TYPE ='MESSAGE_RECEIVED'";
+
         try {
             List<InternalJmsMessage> messages = getMessagesFromDestination(source, selector);
             if (!messages.isEmpty()) {
