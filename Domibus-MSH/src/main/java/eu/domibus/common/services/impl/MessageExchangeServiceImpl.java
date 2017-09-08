@@ -29,6 +29,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,6 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
+import java.security.KeyStoreException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +66,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private static final String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.receiver.certificate.validation.onsending";
 
     private static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.sender.certificate.validation.onsending";
-
 
     @Autowired
     private MessagingDao messagingDao;
@@ -92,6 +94,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     @Autowired
     private CertificateService certificateService;
+
+    @Autowired
+    private CryptoService cryptoService;
 
     @Autowired
     @Qualifier("domibusProperties")
@@ -281,14 +286,18 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             String chainExceptionMessage = "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]";
             try {
-                if (!certificateService.isCertificateChainValid(senderName)) {
+                X509Certificate certificate = (X509Certificate) cryptoService.getCertificateFromKeystore(senderName);
+                if (certificate == null) {
+                    throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: sender[" + senderName + "] certificate not found in Keystore");
+                }
+                if (!certificateService.isCertificateValid(certificate)) {
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
                 LOG.info("Sender certificate exists and is valid [" + senderName + "]");
-            } catch (DomibusCertificateException dce) {
+            } catch (DomibusCertificateException | KeyStoreException ex) {
                 // Is this an error and we stop the sending or we just log a warning that we were not able to validate the cert?
                 // my opinion is that since the option is enabled, we should validate no matter what => this is an error
-                throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage, dce);
+                throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage, ex);
             }
         }
     }

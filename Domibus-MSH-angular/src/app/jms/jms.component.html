@@ -89,27 +89,14 @@
   </ng-template>
 
   <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>
-    <button md-icon-button [md-menu-trigger-for]="actionsMenu" id="actionsmenu_id">
-      <md-icon>list</md-icon>
+    <button id="jmsMoveButtonRow{{row.$$index}}_id" md-icon-button color="primary" (click)="move()" tooltip="Move">
+      <md-icon>move_to_inbox</md-icon>
+    </button>
+    <button id="jmsDeleteButtonRow{{row.$$index}}_id" md-icon-button color="primary" (click)="deleteAction(row)"
+            tooltip="Delete">
+      <md-icon>delete</md-icon>
     </button>
   </ng-template>
-
-  <md-menu x-position="before" #actionsMenu="mdMenu">
-    <div>
-      <button id="jmsMoveButtonMenu" md-menu-item color="primary" (click)="move()"
-              [disabled]="selectedMessages.length == 0">
-        <md-icon>move_to_inbox</md-icon>
-        <span>Move</span>
-      </button>
-    </div>
-    <div>
-      <button id="jmsDeleteButtonMenu" md-menu-item color="primary" (click)="delete()"
-              [disabled]="selectedMessages.length == 0">
-        <md-icon>delete</md-icon>
-        <span>Delete</span>
-      </button>
-    </div>
-  </md-menu>
 
   <div class="group-action-button">
     <button id="jmsCancelButton" md-raised-button color="primary" (click)="cancel()"
