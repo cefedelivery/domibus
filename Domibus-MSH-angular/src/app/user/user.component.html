@@ -49,27 +49,15 @@
   </ng-template>
 
   <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>
-    <button md-icon-button [md-menu-trigger-for]="actionsMenu" id="actionsmenu_id">
-      <md-icon>list</md-icon>
+    <button id="userEditButtonRow{{row.$$index}}_id" md-icon-button (click)="buttonEditAction(row.$$index)"
+            color="primary" tooltip="Edit">
+      <md-icon>edit</md-icon>
+    </button>
+    <button id="userDeleteButtonRow{{row.$$index}}_id" md-icon-button (click)="buttonDeleteAction(row)" color="primary"
+            tooltip="Delete">
+      <md-icon>delete</md-icon>
     </button>
   </ng-template>
-
-  <md-menu x-position="before" #actionsMenu="mdMenu">
-    <div>
-      <button id="userEditButtonMenu" md-menu-item (click)="buttonEdit()" color="primary" [disabled]="!enableEdit">
-        <md-icon>edit</md-icon>
-        <span>Edit</span>
-      </button>
-    </div>
-    <div>
-      <button id="userDeleteButtonMenu" md-menu-item (click)="buttonDelete()" color="primary"
-              [disabled]="!enableDelete">
-        <md-icon>delete</md-icon>
-        <span>Delete</span>
-      </button>
-    </div>
-  </md-menu>
-
 
   <table class="group-action-button">
     <tr>

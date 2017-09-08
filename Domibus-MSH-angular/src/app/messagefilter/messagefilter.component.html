@@ -18,83 +18,66 @@
             id="messageFilterTable">
             <ngx-datatable-column name="Plugin" prop="backendName" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
+              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()" id="pluginRow{{row.$$index}}_id">
                 {{value}}
               </span>
               </ng-template>
             </ngx-datatable-column>
             <ngx-datatable-column name="From" prop="from.expression" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
+              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()" id="fromRow{{row.$$index}}_id">
                 {{value}}
               </span>
               </ng-template>
             </ngx-datatable-column>
             <ngx-datatable-column name="To" prop="to.expression" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
+              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()" id="toRow{{row.$$index}}_id">
                 {{value}}
               </span>
               </ng-template>
             </ngx-datatable-column>
             <ngx-datatable-column name="Action" prop="action.expression" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
+              <span class="clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()" id="actionRow{{row.$$index}}_id">
                 {{value}}
               </span>
               </ng-template>
             </ngx-datatable-column>
             <ngx-datatable-column name="Service" prop="service.expression" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()">
+              <span class="justified, clickable" style="word-wrap: break-word" (dblclick)="buttonEdit()" id="serviceRow{{row.$$index}}_id">
                 {{value}}
               </span>
               </ng-template>
             </ngx-datatable-column>
             <ngx-datatable-column name="Persisted" prop="persisted" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-                <input autofocus type="checkbox" [checked]="value" disabled (dblclick)="buttonEdit()"/>
+                <input autofocus type="checkbox" [checked]="value" disabled (dblclick)="buttonEdit()" id="persistedRow{{row.$$index}}_id"/>
               </ng-template>
             </ngx-datatable-column>
             <ngx-datatable-column name="Actions" prop="actions" [sortable]="false">
               <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-                <button md-icon-button [md-menu-trigger-for]="actionsMenu" id="actionsmenu_id">
-                  <md-icon>list</md-icon>
+                <button md-icon-button color="primary" type="button" [disabled]="row.$$index===0"
+                        (click)="buttonMoveUpAction(row)" id="moveUpButtonRow{{row.$$index}}_id" tooltip="Move Up">
+                  <md-icon>arrow_drop_up</md-icon>
+                </button>
+                <button md-icon-button color="primary" type="button" [disabled]="row.$$index===rows.length - 1"
+                        (click)="buttonMoveDownAction(row)" id="moveDownButtonRow{{row.$$index}}_id"
+                        tooltip="Move Down">
+                  <md-icon>arrow_drop_down</md-icon>
+                </button>
+                <button md-icon-button color="primary" type="button" (click)="buttonEditAction(row)"
+                        id="editButtonRow{{row.$$index}}_id" tooltip="Edit">
+                  <md-icon>edit</md-icon>
+                </button>
+                <button md-icon-button color="primary" type="button" (click)="buttonDeleteAction(row)"
+                        id="deleteButtonRow{{row.$$index}}_id" tooltip="Delete">
+                  <md-icon>delete</md-icon>
                 </button>
               </ng-template>
             </ngx-datatable-column>
           </ngx-datatable>
-
-          <md-menu x-position="before" #actionsMenu="mdMenu">
-            <div>
-              <button md-menu-item color="primary" type="button" [disabled]="!enableMoveUp"
-                      (click)="buttonMoveUp()" id="moveupbutton1_id">
-                <md-icon>arrow_drop_up</md-icon>
-                <span>Move Up</span>
-              </button>
-            </div>
-            <div>
-              <button md-menu-item color="primary" type="button" [disabled]="!enableMoveDown"
-                      (click)="buttonMoveDown()" id="movedownbutton1_id">
-                <md-icon>arrow_drop_down</md-icon>
-                <span>Move Down</span>
-              </button>
-            </div>
-            <div>
-              <button md-menu-item color="primary" type="button" [disabled]="!enableEdit" (click)="buttonEdit()"
-                      id="editbutton1_id">
-                <md-icon>edit</md-icon>
-                <span>Edit</span>
-              </button>
-            </div>
-            <div>
-              <button md-menu-item color="primary" type="button" [disabled]="!enableDelete"
-                      (click)="buttonDelete()" id="deletebutton1_id">
-                <md-icon>delete</md-icon>
-                <span>Delete</span>
-              </button>
-            </div>
-          </md-menu>
 
           <table class="group-action-button">
             <tr>
@@ -131,7 +114,8 @@
                   <md-icon>add</md-icon>
                   <span>New</span>
                 </button>
-                <button md-raised-button color="primary" type="button" [disabled]="!enableEdit" (click)="buttonEdit()"
+                <button md-raised-button color="primary" type="button" [disabled]="!enableEdit"
+                        (click)="buttonEditAction(this.selected[0])"
                         id="editbutton_id">
                   <md-icon>edit</md-icon>
                   <span>Edit</span>

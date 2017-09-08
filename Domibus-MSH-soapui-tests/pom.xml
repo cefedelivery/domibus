@@ -55,16 +55,16 @@
                     <projectProperties>
                         <value>${localUrl}</value>
                         <value>${remoteUrl}</value>
-                        <value>driverBlue=com.mysql.jdbc.Driver</value>
-                        <value>driverRed=com.mysql.jdbc.Driver</value>
+                        <value>driverBlue=${driverBlue}</value>
+                        <value>driverRed=${driverRed}</value>
                         <value>${jdbcUrlBlue}</value>
                         <value>${jdbcUrlRed}</value>
-                        <value>databaseBlue=mysql</value>
-                        <value>databaseRed=mysql</value>
-                        <value>blueDbUser=root</value>
-                        <value>blueDbPassword=123456</value>
-                        <value>redDbUser=root</value>
-                        <value>redDbPassword=123456</value>
+                        <value>databaseBlue=${databaseBlue}</value>
+                        <value>databaseRed=${databaseRed}</value>
+                        <value>blueDbUser=${blueDbUser}</value>
+                        <value>blueDbPassword=${blueDbPassword}</value>
+                        <value>redDbUser=${redDbUser}</value>
+                        <value>redDbPassword=${redDbPassword}</value>
                         <value>updateReport=false</value>
                         <value>thirdGateway=false</value>
                         <value>pdfAttachment=${projectDir}\\resources\\fileSmall.pdf</value>

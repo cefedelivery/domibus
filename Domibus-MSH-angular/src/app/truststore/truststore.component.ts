@@ -99,9 +99,7 @@ export class TruststoreComponent implements OnInit {
   openEditTrustStore() {
     let dialogRef: MdDialogRef<TrustStoreUploadComponent> = this.dialog.open(TrustStoreUploadComponent);
     dialogRef.componentInstance.onTruststoreUploaded.subscribe(updated => {
-      if (updated == true) {
         this.getTrustStoreEntries();
-      }
     });
   }
 }

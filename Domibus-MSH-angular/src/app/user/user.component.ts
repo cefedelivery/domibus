@@ -89,7 +89,9 @@ export class UserComponent implements OnInit, DirtyOperations {
       },
       {
         cellTemplate: this.rowActions,
-        name: 'Actions'
+        name: 'Actions',
+        width: 60,
+        canAutoResize: true
       }
 
     ];
@@ -172,10 +174,14 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonEdit() {
+    this.buttonEditAction(this.rowNumber);
+  }
+
+  buttonEditAction(rowNumber) {
     let formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
       data: {
         edit: true,
-        user: this.users[this.rowNumber],
+        user: this.users[rowNumber],
         userroles: this.userRoles
       }
     });
@@ -217,20 +223,37 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonDelete() {
-    this.enableCancel = true;
-    this.enableSave = true;
-    this.enableDelete = false;
-    this.enableEdit = false;
-
     if(this.isLoggedInUserSelected(this.selected)) {
       this.alertService.error("You cannot delete the logged in user: " + this.securityService.getCurrentUser().username);
       return;
     }
 
+    this.enableCancel = true;
+    this.enableSave = true;
+    this.enableDelete = false;
+    this.enableEdit = false;
+
     // we need to use the old for loop approach to don't mess with the entries on the top before
     for (let i = this.selected.length - 1; i >= 0; i--) {
       this.users.splice(this.selected[i].$$index, 1);
     }
+
+    this.selected = [];
+  }
+
+  buttonDeleteAction(row) {
+    if(this.securityService.getCurrentUser().username === row.userName) {
+      this.alertService.error("You cannot delete the logged in user: " + this.securityService.getCurrentUser().username);
+      return;
+    }
+
+    this.enableCancel = true;
+    this.enableSave = true;
+    this.enableDelete = false;
+    this.enableEdit = false;
+
+    // we need to use the old for loop approach to don't mess with the entries on the top before
+    this.users.splice(row.$$index, 1);
 
     this.selected = [];
   }
