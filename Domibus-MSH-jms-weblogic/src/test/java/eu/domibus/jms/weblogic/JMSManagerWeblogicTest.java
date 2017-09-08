@@ -403,7 +403,7 @@ public class JMSManagerWeblogicTest {
 
         final String sourceQueue = "sourceQueue";
         final String customMessageId = "ID1";
-        final String selector = "MESSAGE_ID='" + customMessageId + "'";
+        final String selector = "MESSAGE_ID = '" + customMessageId + "' AND NOTIFICATION_TYPE ='MESSAGE_RECEIVED'";
 
         new Expectations(jmsManagerWeblogic) {{
             jmsManagerWeblogic.getInternalJMSDestinations(sourceQueue);
