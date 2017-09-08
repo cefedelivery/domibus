@@ -62,7 +62,7 @@ public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
         super.prepareSendMessage("validAS4Response.xml");
         SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
 
-        TimeUnit.SECONDS.sleep(4);
+        TimeUnit.SECONDS.sleep(7);
 
         Assert.assertNotNull(response);
 
