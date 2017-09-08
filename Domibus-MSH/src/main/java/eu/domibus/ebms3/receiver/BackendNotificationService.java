@@ -17,6 +17,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
+import eu.domibus.plugin.BackendConnector;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.routing.BackendFilterEntity;
@@ -258,11 +259,16 @@ public class BackendNotificationService {
             LOG.warn("No notification listeners found for backend [" + backendName + "]");
             return;
         }
+        if(NotificationType.MESSAGE_STATUS_CHANGE == notificationType && BackendConnector.Mode.PULL == notificationListener.getMode()) {
+            LOG.debug("No plugin notification sent for message [{}]. Notification type [{}] suppressed for mode [{}]", messageId, NotificationType.MESSAGE_STATUS_CHANGE, BackendConnector.Mode.PULL);
+            return;
+        }
+
         if (properties != null) {
             String finalRecipient = (String) properties.get(MessageConstants.FINAL_RECIPIENT);
-            LOG.info("Notifying backend [{}] for message [{}] with notificationType [{}] and finalRecipient [{}]", backendName, messageId, notificationType, finalRecipient);
+            LOG.info("Notifying plugin [{}] for message [{}] with notificationType [{}] and finalRecipient [{}]", backendName, messageId, notificationType, finalRecipient);
         }
-        LOG.info("Notifying backend [{}] for message [{}] with notificationType [{}]", backendName, messageId, notificationType);
+        LOG.info("Notifying plugin [{}] for message [{}] with notificationType [{}]", backendName, messageId, notificationType);
         jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, properties).createMessage(), notificationListener.getBackendNotificationQueue());
     }
 
