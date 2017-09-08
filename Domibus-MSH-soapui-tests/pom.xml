@@ -67,7 +67,6 @@
                         <value>redDbPassword=${redDbPassword}</value>
                         <value>updateReport=false</value>
                         <value>thirdGateway=false</value>
-                        <value>pdfAttachment=${projectDir}\\resources\\fileSmall.pdf</value>
                     </projectProperties>
                     <soapuiProperties>
                         <property>
