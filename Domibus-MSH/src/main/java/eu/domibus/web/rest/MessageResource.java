@@ -87,13 +87,13 @@ public class MessageResource {
         return messageConverterService.getAsByteArray(message);
     }
 
-    private Map<String, byte[]> getMessageWithAttachments(UserMessage userMessage) {
+    private Map<String, byte[]> getMessageWithAttachments(UserMessage userMessage) throws IOException {
 
         Map<String, byte[]> ret = new HashMap<>();
 
         final Set<PartInfo> partInfo = userMessage.getPayloadInfo().getPartInfo();
         for (PartInfo info : partInfo) {
-            ret.put(info.getHref().replace("cid:",""), info.getBinaryData());
+            ret.put(info.getHref().replace("cid:",""), IOUtils.toByteArray(info.getPayloadDatahandler().getInputStream()));
         }
 
         ret.put("message.xml", getMessage(userMessage));
