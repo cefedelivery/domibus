@@ -7,7 +7,9 @@ import javax.jms.Queue;
  * @author Christian Koch, Stefan Mueller
  */
 public interface NotificationListener {
-    public String getBackendName();
+    String getBackendName();
 
-    public Queue getBackendNotificationQueue();
+    Queue getBackendNotificationQueue();
+
+    BackendConnector.Mode getMode();
 }
