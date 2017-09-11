@@ -59,12 +59,12 @@
                         <value>driverRed=${driverRed}</value>
                         <value>${jdbcUrlBlue}</value>
                         <value>${jdbcUrlRed}</value>
-                        <value>databaseBlue=${databaseBlue}</value>
-                        <value>databaseRed=${databaseRed}</value>
-                        <value>blueDbUser=${blueDbUser}</value>
-                        <value>blueDbPassword=${blueDbPassword}</value>
-                        <value>redDbUser=${redDbUser}</value>
-                        <value>redDbPassword=${redDbPassword}</value>
+                        <value>${databaseBlue}</value>
+                        <value>${databaseRed}</value>
+                        <value>${blueDbUser}</value>
+                        <value>${blueDbPassword}</value>
+                        <value>${redDbUser}</value>
+                        <value>${redDbPassword}</value>
                         <value>updateReport=false</value>
                         <value>thirdGateway=false</value>
                     </projectProperties>
