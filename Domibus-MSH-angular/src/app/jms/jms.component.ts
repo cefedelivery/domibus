@@ -1,4 +1,4 @@
-import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {Component, EventEmitter, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {Http, Headers, Response} from "@angular/http";
 import {AlertService} from "../alert/alert.service";
 import {MessagesRequestRO} from "./ro/messages-request-ro";
@@ -28,6 +28,9 @@ export class JmsComponent implements OnInit, DirtyOperations {
   timestampToMinDate: Date = null;
   timestampToMaxDate: Date = new Date();
 
+  defaultQueueSet = new EventEmitter(false);
+  queuesInfoGot = new EventEmitter(false);
+
   @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
   @ViewChild('rowWithJSONTpl') rowWithJSONTpl: TemplateRef<any>;
   @ViewChild('rowActions') rowActions: TemplateRef<any>;
@@ -44,6 +47,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     //whenever selectedSource is set the request.source is also set
     this._selectedSource = value;
     this.request.source = value.name;
+    this.defaultQueueSet.emit();
   }
 
   currentSearchSelectedSource;
@@ -110,8 +114,13 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.request.toDate = new Date();
     this.request.toDate.setHours(23, 59, 59, 999);
 
-    this.getDestinations().subscribe((response: Response) => {
+    //this.getDestinations().subscribe((response: Response) => {
+    this.getDestinations();
+    this.queuesInfoGot.subscribe(result => {
       this.setDefaultQueue('.*?[d|D]omibus.?DLQ');
+    });
+
+    this.defaultQueueSet.subscribe(result => {
       this.search();
     });
 
@@ -120,6 +129,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
   private getDestinations(): Observable<Response> {
     let observableResponse: Observable<Response> = this.http.get("rest/jms/destinations");
 
+
     observableResponse.subscribe(
       (response: Response) => {
         this.queues = [];
@@ -127,6 +137,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
         for (let key in destinations) {
           this.queues.push(destinations[key]);
         }
+        this.queuesInfoGot.emit();
       },
       (error: Response) => {
         this.alertService.error('Could not load queues: ' + error);
@@ -141,7 +152,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
       if (queue.name.match(queueName)) {
         this.selectedSource = queue;
       }
-    })
+    });
   }
 
   changePageSize(newPageSize: number) {
