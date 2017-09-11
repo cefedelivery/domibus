@@ -24,7 +24,7 @@ public class DefaultBackendConnectorDelegate implements BackendConnectorDelegate
     @Override
     public void messageStatusChanged(BackendConnector backendConnector, MessageStatusChangeEvent event) {
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Notifying connector about status change event [{}]", event);
+            LOG.debug("Notifying connector [{}] about status change event [{}]", backendConnector.getName(), event);
         }
         backendConnector.messageStatusChanged(event);
     }

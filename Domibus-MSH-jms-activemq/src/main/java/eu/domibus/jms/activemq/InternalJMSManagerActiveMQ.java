@@ -260,7 +260,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     @Override
     public InternalJmsMessage consumeMessage(String source, String customMessageId) {
 
-        String selector = "MESSAGE_ID='" + customMessageId + "'";
+        String selector = "MESSAGE_ID='" + customMessageId + "' AND NOTIFICATION_TYPE ='MESSAGE_RECEIVED'";
 
         InternalJmsMessage intJmsMsg = null;
         try {

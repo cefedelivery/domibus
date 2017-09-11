@@ -275,4 +275,9 @@ public class NotificationListenerService implements MessageListener, JmsListener
     protected String getQueueName(Queue queue) throws JMSException {
         return queue.getQueueName();
     }
+
+    @Override
+    public BackendConnector.Mode getMode() {
+        return this.mode;
+    }
 }
