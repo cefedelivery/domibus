@@ -18,8 +18,8 @@ export class PageHelperComponent implements OnInit {
   }
 
   ngOnInit() {
-    let MAIN_HELP_PAGE = "https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus+3.3+Admin+Console+Help";
-    let VERSION_SPECIFIC_PAGE = "#Domibus3.3AdminConsoleHelp-";
+    let MAIN_HELP_PAGE = "https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus+v3.3+Admin+Console+Help";
+    let VERSION_SPECIFIC_PAGE = "#Domibusv3.3AdminConsoleHelp-";
 
     this.helpPages.set("/", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Messages");
     this.helpPages.set("/login", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Login");
