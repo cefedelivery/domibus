@@ -55,8 +55,8 @@
                     <projectProperties>
                         <value>${localUrl}</value>
                         <value>${remoteUrl}</value>
-                        <value>driverBlue=${driverBlue}</value>
-                        <value>driverRed=${driverRed}</value>
+                        <value>${driverBlue}</value>
+                        <value>${driverRed}</value>
                         <value>${jdbcUrlBlue}</value>
                         <value>${jdbcUrlRed}</value>
                         <value>${databaseBlue}</value>
