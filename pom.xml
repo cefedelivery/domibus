@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>eu.domibus</groupId>
+    <groupId>eu.domibus.fsplugin</groupId>
     <artifactId>domibus</artifactId>
     <version>3.3-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -116,7 +116,7 @@
         <dependencies>
             <!-- Domibus modules -->
             <dependency>
-                <groupId>eu.domibus</groupId>
+                <groupId>eu.domibus.fsplugin</groupId>
                 <artifactId>domibus-logging</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -714,6 +714,7 @@
                 <module>Domibus-ws-stubs</module>
                 <module>Domibus-default-ws-plugin</module>
                 <module>Domibus-default-jms-plugin</module>
+                <module>Domibus-default-fs-plugin</module>
             </modules>
         </profile>
         <profile>
