@@ -36,6 +36,8 @@ Domibus 3.3-FR (from 3.3-RC1)
                                      </redeliveryPolicyMap>
                                  </redeliveryPolicyMap>
                              </redeliveryPlugin>
+                        - in case the default File System Plugin is used the following queue should be added:
+                             <queue id="filesystemBackendNotificationQueue" physicalName="domibus.notification.filesystem"/>
                     o in file "\conf\domibus\domibus.properties":
                         - rename the property "com.atomikos.maxPoolSize" to "domibus.jms.XAConnectionFactory.maxPoolSize"
                         - remove the property "domibus.datasource.xa.testQuery"

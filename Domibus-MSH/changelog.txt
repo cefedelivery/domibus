@@ -13,6 +13,7 @@ Domibus 3.3-FR
 - Possibility to notify the plugins when the message status changes; new method added in the plugin API: eu.domibus.plugin.BackendConnector.messageStatusChanged(eu.domibus.common.MessageStatusChangeEvent)
 - Included the payload location as a property of the JMS Message
 - Performance improvements
+- New default plugin added: File System Plugin
 Domibus 3.3-RC1
 - Configuration of Domibus is done with domibus.properties instead of externalized spring xml files
 - Add the possibility to pull messages
