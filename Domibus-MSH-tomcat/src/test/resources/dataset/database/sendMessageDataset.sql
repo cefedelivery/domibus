@@ -11,7 +11,7 @@ INSERT INTO "TB_AGREEMENT" VALUES (1,'agreement1110','','EDELIVERY-1110',1);
 
 INSERT INTO "TB_PARTY" VALUES (1,'http://fmstest.flame.co.za:8080/AS4','flame',NULL,NULL,1);
 INSERT INTO "TB_PARTY" VALUES (2,'http://5.153.46.53:29001/AS4','ibmgw',NULL,NULL,1);
-INSERT INTO "TB_PARTY" VALUES (3,'http://localhost:8090/domibus/services/msh','red_gw',NULL,NULL,1);
+INSERT INTO "TB_PARTY" VALUES (3,'http://localhost:8892/domibus/services/msh','red_gw',NULL,NULL,1);
 INSERT INTO "TB_PARTY" VALUES (4,'http://msh.holodeck-b2b.org:8080/msh','holodeck',NULL,NULL,1);
 INSERT INTO "TB_PARTY" VALUES (5,'http://test.edelivery.it.nrw.de/domibus-msh','domibus_de',NULL,NULL,1);
 INSERT INTO "TB_PARTY" VALUES (6,'http://localhost:8080/domibus/services/msh','blue_gw',NULL,NULL,1);
