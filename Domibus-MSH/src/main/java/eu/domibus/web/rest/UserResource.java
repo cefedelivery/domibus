@@ -45,7 +45,7 @@ public class UserResource {
      */
     @RequestMapping(value = {"/users"}, method = RequestMethod.GET)
     public List<UserResponseRO> users() {
-        LOG.debug("Retrieving usersRo !");
+        LOG.debug("Retrieving users");
         List<User> users = userService.findUsers();
         return prepareResponse(users);
     }
@@ -58,7 +58,7 @@ public class UserResource {
     }
 
     private void updateUserRoles(List<UserResponseRO> userROS) {
-        for(UserResponseRO userRo: userROS) {
+        for (UserResponseRO userRo : userROS) {
             if (Objects.equals(userRo.getStatus(), UserState.NEW.name()) || Objects.equals(userRo.getStatus(), UserState.UPDATED.name())) {
                 List<String> auths = Arrays.asList(userRo.getRoles().split(","));
                 userRo.setAuthorities(auths);
@@ -69,7 +69,7 @@ public class UserResource {
 
     @RequestMapping(value = {"/save"}, method = RequestMethod.POST)
     public void save(@RequestBody List<UserResponseRO> usersRo) {
-        LOG.debug("Saving "+ usersRo.size()+"");
+        LOG.debug("Saving " + usersRo.size() + "");
         List<eu.domibus.api.user.User> users = domainConverter.convert(usersRo, eu.domibus.api.user.User.class);
         userService.saveUsers(users);
     }
@@ -78,7 +78,7 @@ public class UserResource {
     public List<String> userRoles() {
         List<String> result = new ArrayList<>();
         List<UserRole> userRoles = userService.findUserRoles();
-        for(UserRole userRole : userRoles) {
+        for (UserRole userRole : userRoles) {
             result.add(userRole.getRole());
         }
         return result;
@@ -87,6 +87,7 @@ public class UserResource {
 
     /**
      * convert user to userresponsero.
+     *
      * @param users
      * @return a list of
      */
@@ -96,7 +97,7 @@ public class UserResource {
             userResponseRO.setStatus("PERSISTED");
             userResponseRO.updateRolesField();
         }
-        return  userResponseROS;
+        return userResponseROS;
 
     }
 
