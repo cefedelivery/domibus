@@ -286,6 +286,22 @@ public class CachingPModeProviderTest {
     }
 
     @Test
+    public void testRetrievePullProcessBasedOnPartyNotInInitiator() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        configuration = loadSamplePModeConfiguration(PULL_PMODE_CONFIG_URI);
+        final Set<Party> parties = configuration.getBusinessProcesses().getParties();
+        final Party white_gw = getPartyByName(parties, "white_gw");
+        new Expectations() {{
+            configurationDAO.configurationExists();
+            result = true;
+            configurationDAO.readEager();
+            result = configuration;
+        }};
+        cachingPModeProvider.init();
+        List<Process> pullProcessesByInitiator = cachingPModeProvider.findPullProcessesByInitiator(white_gw);
+        Assert.assertNotNull(pullProcessesByInitiator);
+    }
+
+    @Test
     public void testRetrievePullProcessBasedOnMpc() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
         configuration = loadSamplePModeConfiguration(PULL_PMODE_CONFIG_URI);
         final String mpcName = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCOne";
@@ -312,6 +328,7 @@ public class CachingPModeProviderTest {
             times = 1;
         }};
     }
+
 
     private Party getPartyByName(Set<Party> parties, final String partyName) {
         final Collection<Party> filter = Collections2.filter(parties, new Predicate<Party>() {
