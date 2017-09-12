@@ -20,6 +20,9 @@ export class EditUserComponent {
   active = true;
   roles = [];
 
+  public emailPattern = "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}";
+  public passwordPattern = "^(?=.*[A-Z])(?=.*[ !#$%&'()*+,-./:;<=>?@\\[^_`{|}~\\\]\"])(?=.*[0-9])(?=.*[a-z]).{8,32}$";
+
   editMode: boolean;
 
   userForm: FormGroup;
