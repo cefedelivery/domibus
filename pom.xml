@@ -53,6 +53,7 @@
         <sonar.exclusions>
             **/target/**,
             **/Domibus-MSH-angular/node_modules/**,
+            **/Domibus-MSH-swagger/src/**,
             **/web.xml,
             **/common/model/configuration/**
         </sonar.exclusions>
