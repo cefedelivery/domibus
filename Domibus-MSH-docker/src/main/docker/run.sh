@@ -74,5 +74,16 @@ remoteUrl="remoteUrl=http://localhost:9080/domibus"
 jdbcUrlBlue="jdbcUrlBlue=jdbc:mysql://127.0.0.1:3304/domibus"
 jdbcUrlRed="jdbcUrlRed=jdbc:mysql://127.0.0.1:3302/domibus"
 
-mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test -DlocalUrl="$localUrl" -DremoteUrl="$remoteUrl" -DjdbcUrlBlue="$jdbcUrlBlue" -DjdbcUrlRed="$jdbcUrlRed"
+driverBlue="com.mysql.jdbc.Driver"
+driverRed="com.mysql.jdbc.Driver"
+databaseBlue="mysql"
+databaseRed="mysql"
+blueDbUser="root"
+blueDbPassword="123456"
+redDbUser="root"
+redDbPassword="123456"
 
+
+#mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test -DlocalUrl="$localUrl" -DremoteUrl="$remoteUrl" -DjdbcUrlBlue="$jdbcUrlBlue" -DjdbcUrlRed="$jdbcUrlRed"
+
+mvn com.smartbear.soapui:soapui-pro-maven-plugin:5.1.2:test -DlocalUrl="$localUrl" -DremoteUrl="$remoteUrl" -DjdbcUrlBlue="$jdbcUrlBlue" -DjdbcUrlRed="$jdbcUrlRed" -DdriverBlue="$driverBlue" -DdriverRed="$driverRed" -DdatabaseBlue="$databaseBlue" -DdatabaseRed="$databaseRed" -DblueDbUser="$blueDbUser" -DblueDbPassword="$blueDbPassword" -DredDbUser="$redDbUser" -DredDbPassword="$redDbPassword"
