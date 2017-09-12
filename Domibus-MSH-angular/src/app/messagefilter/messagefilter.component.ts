@@ -113,16 +113,16 @@ export class MessageFilterComponent implements DirtyOperations {
     formRef.afterClosed().subscribe(result => {
       if (result == true) {
         let routingCriterias: Array<RoutingCriteriaEntry> = [];
-        if (!isNullOrUndefined(formRef.componentInstance.from)) {
+        if (!isNullOrUndefined(formRef.componentInstance.from) && formRef.componentInstance.from != "") {
           routingCriterias.push(new RoutingCriteriaEntry(0, 'from', formRef.componentInstance.from));
         }
-        if (!isNullOrUndefined(formRef.componentInstance.to)) {
+        if (!isNullOrUndefined(formRef.componentInstance.to) && formRef.componentInstance.to != "") {
           routingCriterias.push(new RoutingCriteriaEntry(0, 'to', formRef.componentInstance.to));
         }
-        if (!isNullOrUndefined(formRef.componentInstance.action)) {
+        if (!isNullOrUndefined(formRef.componentInstance.action) && formRef.componentInstance.action != "") {
           routingCriterias.push(new RoutingCriteriaEntry(0, 'action', formRef.componentInstance.action));
         }
-        if (!isNullOrUndefined(formRef.componentInstance.service)) {
+        if (!isNullOrUndefined(formRef.componentInstance.service) && formRef.componentInstance.service != "") {
           routingCriterias.push(new RoutingCriteriaEntry(0, 'service', formRef.componentInstance.service));
         }
         let backendEntry = new BackendFilterEntry(0, this.rowNumber + 1, formRef.componentInstance.plugin, routingCriterias, false);
@@ -339,7 +339,7 @@ export class MessageFilterComponent implements DirtyOperations {
     this.enableMoveUp = false;
     this.enableMoveDown = false;
 
-    this.rows.splice(row.index, 1);
+    this.rows.splice(row.$$index, 1);
 
     this.selected = [];
   }
@@ -355,7 +355,7 @@ export class MessageFilterComponent implements DirtyOperations {
 
     // we need to use the old for loop approach to don't mess with the entries on the top before
     for (let i = this.selected.length - 1; i >= 0; i--) {
-      this.rows.splice(this.selected[i].index, 1);
+      this.rows.splice(this.selected[i].$$index, 1);
     }
 
     this.selected = [];

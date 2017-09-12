@@ -6,6 +6,8 @@ import eu.domibus.core.message.MessageConverterService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -16,10 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +31,8 @@ import java.util.zip.ZipOutputStream;
 @RestController
 @RequestMapping(value = "/rest/message/")
 public class MessageResource {
+
+    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(MessageResource.class);
 
     @Autowired
     UserMessageService userMessageService;
@@ -52,11 +53,15 @@ public class MessageResource {
     public ResponseEntity<ByteArrayResource> download(@PathVariable(value = "messageId") String messageId) {
 
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
-        final byte[] content = getMessage(userMessage);
+        final InputStream content = getMessage(userMessage);
 
         ByteArrayResource resource = new ByteArrayResource(new byte[0]);
         if (content != null) {
-            resource = new ByteArrayResource(content);
+            try {
+                resource = new ByteArrayResource(IOUtils.toByteArray(content));
+            } catch (IOException e) {
+                LOGGER.error("Error getting input stream for message [{}]", messageId);
+            }
         }
 
         return ResponseEntity.ok()
@@ -69,7 +74,7 @@ public class MessageResource {
     public ResponseEntity<ByteArrayResource> zipFiles(@PathVariable(value = "messageId") String messageId) throws IOException {
 
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
-        final Map<String, byte[]> message = getMessageWithAttachments(userMessage);
+        final Map<String, InputStream> message = getMessageWithAttachments(userMessage);
         byte[] zip = zip(message);
 
         return ResponseEntity.ok()
@@ -79,21 +84,25 @@ public class MessageResource {
 
     }
 
-    public byte[] getMessage(UserMessage userMessage) {
+    public InputStream getMessage(UserMessage userMessage) {
 
         Messaging message = new Messaging();
         message.setUserMessage(userMessage);
 
-        return messageConverterService.getAsByteArray(message);
+        return new ByteArrayInputStream(messageConverterService.getAsByteArray(message));
     }
 
-    private Map<String, byte[]> getMessageWithAttachments(UserMessage userMessage) {
+    private Map<String, InputStream> getMessageWithAttachments(UserMessage userMessage) {
 
-        Map<String, byte[]> ret = new HashMap<>();
+        Map<String, InputStream> ret = new HashMap<>();
 
         final Set<PartInfo> partInfo = userMessage.getPayloadInfo().getPartInfo();
         for (PartInfo info : partInfo) {
-            ret.put(info.getHref().replace("cid:",""), info.getBinaryData());
+            try {
+                ret.put(info.getHref().replace("cid:", ""), info.getPayloadDatahandler().getInputStream());
+            } catch (IOException e) {
+                LOGGER.error("Error getting input stream for attachment [{}]", info.getHref());
+            }
         }
 
         ret.put("message.xml", getMessage(userMessage));
@@ -102,16 +111,16 @@ public class MessageResource {
         return ret;
     }
 
-    private byte[] zip(Map<String, byte[]> message) throws IOException {
-        //creating byteArray stream, make it bufforable and passing this buffor to ZipOutputStream
+    private byte[] zip(Map<String, InputStream> message) throws IOException {
+        //creating byteArray stream, make it bufferable and passing this buffer to ZipOutputStream
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(byteArrayOutputStream);
              ZipOutputStream zipOutputStream = new ZipOutputStream(bufferedOutputStream)) {
 
-            for (Map.Entry<String, byte[]> entry : message.entrySet()) {
+            for (Map.Entry<String, InputStream> entry : message.entrySet()) {
                 zipOutputStream.putNextEntry(new ZipEntry(entry.getKey()));
 
-                IOUtils.copy(new ByteArrayInputStream(entry.getValue()), zipOutputStream);
+                IOUtils.copy(entry.getValue(), zipOutputStream);
 
                 zipOutputStream.closeEntry();
             }
