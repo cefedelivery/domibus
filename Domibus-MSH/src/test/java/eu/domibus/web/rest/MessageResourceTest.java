@@ -16,6 +16,8 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import javax.activation.DataHandler;
+import javax.mail.util.ByteArrayDataSource;
 import java.io.IOException;
 
 /**
@@ -53,6 +55,7 @@ public class MessageResourceTest {
         partInfo.setHref("href");
         byte[] byteA = new byte[]{1,0,1};
         partInfo.setBinaryData(byteA);
+        partInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(byteA, "text/xml")));
         payloadInfo.getPartInfo().add(partInfo);
         userMessage.setPayloadInfo(payloadInfo);
         return userMessage;

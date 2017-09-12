@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>eu.domibus</groupId>
+        <groupId>eu.domibus.fsplugin</groupId>
         <artifactId>domibus</artifactId>
         <version>3.3-SNAPSHOT</version>
     </parent>
@@ -45,7 +45,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>eu.domibus</groupId>
+            <groupId>eu.domibus.fsplugin</groupId>
             <artifactId>domibus-logging</artifactId>
         </dependency>
         <dependency>

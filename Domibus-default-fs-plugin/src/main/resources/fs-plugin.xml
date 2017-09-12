@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd
+
+
+       http://activemq.apache.org/schema/core
+       http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <!-- General File System Plugin properties -->
+    <util:properties id="fsPluginProperties" ignore-resource-not-found="true"
+                     location="classpath:fs-plugin.properties,file:///${domibus.config.location}/plugins/config/fs-plugin.properties"/>
+    <context:property-placeholder properties-ref="fsPluginProperties" ignore-resource-not-found="true"
+                                  ignore-unresolvable="true" />
+
+    <amq:queue id="notifyBackendFSQueue"
+               physicalName="domibus.notification.filesystem"/>
+
+    <bean id="backendFSPlugin"
+          class="eu.domibus.plugin.fs.BackendFSImpl">
+        <constructor-arg value="backendFSPlugin"/>
+        <property name="lister" ref="fsPluginNotificationListenerService"/>
+    </bean>
+
+    <bean id="fsPluginNotificationListenerService"
+          class="eu.domibus.plugin.NotificationListenerService"
+          c:queue-ref="notifyBackendFSQueue" c:mode="PUSH"
+          p:backendConnector-ref="backendFSPlugin"/>
+
+    <!-- quartz job for purging sent messages -->
+    <bean id="fsPluginPurgeSentWorkerJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSPurgeSentWorker"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="fsPluginPurgeSentWorkerTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="fsPluginPurgeSentWorkerJob"/>
+        <property name="cronExpression" value="${fsplugin.messages.sent.purge.worker.cronExpression}"/>
+    </bean>
+    
+    <!-- quartz job for purging failed messages -->
+    <bean id="fsPluginPurgeFailedWorkerJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSPurgeFailedWorker"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="fsPluginPurgeFailedWorkerTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="fsPluginPurgeFailedWorkerJob"/>
+        <property name="cronExpression" value="${fsplugin.messages.failed.purge.worker.cronExpression}"/>
+    </bean>
+    
+    <!-- quartz job for purging received messages -->
+    <bean id="fsPluginPurgeReceivedWorkerJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSPurgeReceivedWorker"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="fsPluginPurgeReceivedWorkerTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="fsPluginPurgeReceivedWorkerJob"/>
+        <property name="cronExpression" value="${fsplugin.messages.received.purge.worker.cronExpression}"/>
+    </bean>
+    
+    <!-- quartz job for sending messages (from OUT folders) -->
+    <bean id="fsPluginSendMessagesWorkerJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.plugin.fs.worker.FSSendMessagesWorker"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="fsPluginSendMessagesWorkerTrigger"
+          class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="fsPluginSendMessagesWorkerJob"/>
+        <property name="repeatInterval" value="${fsplugin.messages.send.worker.repeatInterval}"/>
+    </bean>
+
+    <!-- customizable list of triggers to be executed by quartz -->
+    <bean id="fsPluginTriggerList" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list>
+                <ref bean="fsPluginPurgeSentWorkerTrigger"/>
+                <ref bean="fsPluginPurgeFailedWorkerTrigger"/>
+                <ref bean="fsPluginPurgeReceivedWorkerTrigger"/>
+                <ref bean="fsPluginSendMessagesWorkerTrigger"/>
+            </list>
+        </property>
+    </bean>
+
+</beans>
