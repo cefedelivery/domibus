@@ -369,17 +369,19 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     public List<Process> findPullProcessesByInitiator(final Party party) {
-        if (pullProcessByMpcCache == null) {
+        final List<Process> processes = pullProcessesByInitiatorCache.get(party);
+        if (processes == null) {
             return Lists.newArrayList();
         }
-        return pullProcessesByInitiatorCache.get(party);
+        return processes;
     }
 
     @Override
     public List<Process> findPullProcessByMpc(final String mpc) {
-        if (pullProcessByMpcCache == null) {
+        List<Process> processes = pullProcessByMpcCache.get(mpc);
+        if (processes == null) {
             return Lists.newArrayList();
         }
-        return pullProcessByMpcCache.get(mpc);
+        return processes;
     }
 }
