@@ -10,6 +10,7 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ByteArrayResource;
@@ -79,6 +80,7 @@ public class MessageResourceTest {
     }
 
     @Test
+    @Ignore
     public void testZipFiles() {
         // Given
         new Expectations() {{
