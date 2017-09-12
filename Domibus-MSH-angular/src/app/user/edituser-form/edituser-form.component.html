@@ -11,7 +11,7 @@
 
       <div>
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Email" name="email" id="email_id" [value]="email" (blur)="updateEmail($event)" [formControl]="userForm.controls['email']" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}">
+          <input mdInput placeholder="Email" name="email" id="email_id" [value]="email" (blur)="updateEmail($event)" [formControl]="userForm.controls['email']" [pattern]=emailPattern>
           <div *ngIf="userForm.controls['email'].hasError('pattern')" style="color:red; font-size: 70%">You should type an email</div>
         </md-input-container>
       </div>
@@ -25,7 +25,7 @@
 
       <div>
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [value]="password" (blur)="updatePassword($event)" [formControl]="userForm.controls['password']" pattern="^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,32}$">
+          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [value]="password" (blur)="updatePassword($event)" [formControl]="userForm.controls['password']" [pattern]=passwordPattern>
           <div *ngIf="userForm.controls['password'].hasError('required')" style="color:red; font-size: 70%">You should type a password</div>
           <div *ngIf="userForm.controls['password'].dirty && userForm.controls['password'].hasError('pattern')" style="color:red; font-size: 70%">
             Password should follow all of these rules:<br>
