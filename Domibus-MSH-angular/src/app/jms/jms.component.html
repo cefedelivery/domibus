@@ -5,7 +5,7 @@
       <div class="panel">
 
         <md-select class="searchField" placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector"
-                   id="jmsQueueSelector">
+                   id="jmsQueueSelector" style="width: 45%">
           <md-option *ngFor="let queue of queues" [value]="queue" style="width:100%">
             {{queue.internal ? "[internal]" :""}} {{queue.name}} ({{queue.numberOfMessages}})
           </md-option>

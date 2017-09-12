@@ -22,10 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * @Author Cosmin Baciu
@@ -77,12 +74,13 @@ public class CertificateServiceImpl implements CertificateService {
 
     protected X509Certificate[] getCertificateChain(KeyStore trustStore, String alias) throws KeyStoreException {
         //TODO get the certificate chain manually based on the issued by info from the original certificate
-        X509Certificate[] certificateChain = (X509Certificate[]) trustStore.getCertificateChain(alias);
+        final Certificate[] certificateChain = trustStore.getCertificateChain(alias);
         if (certificateChain == null) {
             X509Certificate certificate = (X509Certificate) trustStore.getCertificate(alias);
-            certificateChain = new X509Certificate[]{certificate};
+            return new X509Certificate[]{certificate};
         }
-        return certificateChain;
+        return Arrays.copyOf(certificateChain, certificateChain.length, X509Certificate[].class);
+
     }
 
     @Override
