@@ -12,6 +12,7 @@
     </parent>
     <artifactId>domibus-default-fs-plugin</artifactId>
     <packaging>jar</packaging>
+    <name>Domibus MSH Default FS Plugin</name>
 
     <dependencies>
         <dependency>
