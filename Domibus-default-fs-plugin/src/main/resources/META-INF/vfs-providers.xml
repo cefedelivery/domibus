@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<providers>
+
+	<provider class-name="eu.domibus.plugin.fs.vfs.smb.SmbFileProvider">
+		<scheme name="smb"/>
+		<if-available class-name="jcifs.smb.SmbFile"/>
+	</provider>
+
+</providers>
