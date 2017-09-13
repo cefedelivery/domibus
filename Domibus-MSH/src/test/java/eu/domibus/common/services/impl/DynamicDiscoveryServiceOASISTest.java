@@ -154,7 +154,7 @@ public class DynamicDiscoveryServiceOASISTest {
     * This is not a unit tests but the code is useful to test real SMP entries.
      */
     @Test
-    @Ignore
+    //@Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
             domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
@@ -170,8 +170,10 @@ public class DynamicDiscoveryServiceOASISTest {
         }};
 
         //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("urn:romania:ncpb", "ehealth-actorid-qns", "ehealth-resid-qns::urn::epsos##services:extended:epsos::107aa", "urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
-        EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0007:9340033829test2", "ehealth-actorid-qns", "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
+        //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0007:9340033829test2", "ehealth-actorid-qns", "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
+        EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0007:9340033829dev1", "ehealth-actorid-qns", "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:www.cenbii.eu:transaction:biitrns010:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.2", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
         System.out.println(endpointInfo.getAddress());
+        System.out.println(endpointInfo.getCertificate());
         Assert.assertNotNull(endpointInfo);
         Assert.assertEquals("http://40.118.20.112:8995/domibus/services/msh", endpointInfo.getAddress());
     }

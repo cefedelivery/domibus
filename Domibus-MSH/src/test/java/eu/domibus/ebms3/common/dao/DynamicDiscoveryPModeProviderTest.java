@@ -186,6 +186,21 @@ public class DynamicDiscoveryPModeProviderTest {
         assertTrue(dynamicDiscoveryPModeProvider.getConfiguration().getBusinessProcesses().getParties().contains(expectedParty));
     }
 
+    @Test(expected = EbMS3Exception.class)
+    public void testDoDynamicDiscoveryOnSenderNullCertificate() throws Exception {
+        Configuration testData = initializeConfiguration(DYNAMIC_DISCOVERY_ENABLED);
+        doReturn(true).when(configurationDAO).configurationExists();
+        doReturn(testData).when(configurationDAO).readEager();
+        dynamicDiscoveryPModeProvider.init();
+
+        EndpointInfo testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, null, ALIAS_CN_AVAILABLE);
+        doReturn(testDataEndpoint).when(dynamicDiscoveryServiceOASIS).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        doReturn(null).when(cryptoService).getTrustStore();
+        doReturn(true).when(cryptoService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
+        UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
+        dynamicDiscoveryPModeProvider.doDynamicDiscovery(userMessage, MSHRole.SENDING);
+    }
+
     @Test
     public void testDoDynamicDiscoveryOnReceiver() throws Exception {
         Configuration testData = initializeConfiguration(DYNAMIC_DISCOVERY_ENABLED);
