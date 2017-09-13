@@ -107,7 +107,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
-        verifyTrustoreUpdate(message);
+        verifyTrustStoreUpdate(message);
         final String httpMethod = (String) message.get("org.apache.cxf.request.method");
         //TODO add the below logic to a separate interceptor
         if(org.apache.commons.lang.StringUtils.containsIgnoreCase(httpMethod, "GET")) {
@@ -161,7 +161,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
      *
      * @param message the incoming message. Used to retrieve the end point.
      */
-    private void verifyTrustoreUpdate(final SoapMessage message) {
+    private void verifyTrustStoreUpdate(final SoapMessage message) {
         final Merlin tmpTrustore = cryptoService.getCrypto();
         if (trustoreCrypto == null) {
             synchronized (emptyTruststoreLock) {

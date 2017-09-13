@@ -5,7 +5,6 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.io.FileUtils;
-import org.apache.wss4j.common.crypto.CryptoFactory;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,7 +19,10 @@ import javax.annotation.Resource;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -94,15 +96,35 @@ public class CryptoService {
 
     private void initTrustStore() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, WSSecurityException {
 
-        final KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        if (trustStore == null) {
+            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        }
         String trustStoreFilename = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
         String trustStorePassword = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password");
-        ks.load(new FileInputStream(trustStoreFilename), trustStorePassword.toCharArray());
-        trustStore = ks;
+        loadTrustore(trustStoreFilename, trustStorePassword);
+        /*trustStore.load(new FileInputStream(trustStoreFilename), trustStorePassword.toCharArray());*/
+        /*if(trustStore==null) {
+            trustStore = ks;
+            return;
+        }
+        final Enumeration<String> currentCustorEntryKeys = trustStore.aliases();
+        while (currentCustorEntryKeys.hasMoreElements()){
+            trustStore.deleteEntry(currentCustorEntryKeys.nextElement());
+        }
+        trustStore.load();
+        final Enumeration<String> newTrustoreEntryKeys = ks.aliases();
+        while (newTrustoreEntryKeys.hasMoreElements()){
+            final String newTrustoreEntryKey = newTrustoreEntryKeys.nextElement();
+            trustStore.setCertificateEntry(newTrustoreEntryKey,newTrustoreEntryKeys);
+        }
         LOG.info("TrustStore successfully loaded");
         crypto = (Merlin) CryptoFactory.getInstance(trustStoreProperties);
-        crypto.setTrustStore(trustStore);
+        crypto.setTrustStore(trustStore);*/
 
+    }
+
+    protected void loadTrustore(String trustStoreFilename, String password) throws IOException, CertificateException, NoSuchAlgorithmException {
+        trustStore.load(new FileInputStream(trustStoreFilename), password.toCharArray());
     }
 
     public void refreshTrustStore() {
@@ -135,13 +157,17 @@ public class CryptoService {
         }
         LOG.debug("Replacing the existing truststore file [" + truststoreFileValue + "] with the provided one");
 
-        KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
+        loadTrustore(truststoreFileValue, password);
+        FileOutputStream fileOutputStream = new FileOutputStream(truststoreFile);
+        trustStore.store(fileOutputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
+
+       /* KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
         ts.load(new ByteArrayInputStream(store), password.toCharArray());
         FileOutputStream fileOutputStream = new FileOutputStream(truststoreFile);
         ts.store(fileOutputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
         fileOutputStream.flush();
         fileOutputStream.close();
-        trustStore = ts;
+        trustStore = ts;*/
         updateTrustStore();
 
     }
