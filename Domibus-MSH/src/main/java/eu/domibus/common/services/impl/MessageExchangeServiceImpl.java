@@ -145,7 +145,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         Party initiator;
         try {
             initiator = pModeProvider.getGatewayParty();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalStateException e) {
             LOG.trace("A configuration problem occured while initiating the pull request. Probably no configuration is loaded");
             return;
         }

@@ -11,6 +11,8 @@ import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.wss4j.common.crypto.CryptoService;
+import eu.domibus.wss4j.common.crypto.Merlin;
 import org.apache.cxf.attachment.AttachmentDataSource;
 import org.apache.cxf.binding.soap.HeaderUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -67,11 +69,19 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     @Autowired
     private SoapService soapService;
 
+    @Autowired
+    private CryptoService cryptoService;
+
     private MessageLegConfigurationFactory messageLegConfigurationFactory;
+
+    private Merlin trustoreCrypto;
+
+    private Object emptyTruststoreLock = new Object();
 
     public SetPolicyInInterceptor() {
         this(Phase.RECEIVE);
     }
+
 
     protected SetPolicyInInterceptor(String phase) {
         super(phase);
@@ -97,6 +107,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
+        verifyTrustoreUpdate(message);
         final String httpMethod = (String) message.get("org.apache.cxf.request.method");
         //TODO add the below logic to a separate interceptor
         if(org.apache.commons.lang.StringUtils.containsIgnoreCase(httpMethod, "GET")) {
@@ -111,6 +122,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         String messageId = null;
 
         try {
+
             messaging=soapService.getMessage(message);
             LegConfigurationExtractor legConfigurationExtractor = messageLegConfigurationFactory.extractMessageConfiguration(message, messaging);
             if(legConfigurationExtractor ==null)return;
@@ -132,7 +144,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
         } catch (EbMS3Exception e) {
             setBindingOperation(message);
-            SetPolicyInInterceptor.LOG.debug("", e); // Those errors are expected (no PMode found, therefore DEBUG)
+            SetPolicyInInterceptor.LOG.info("", e); // Those errors are expected (no PMode found, therefore DEBUG)
             throw new Fault(e);
         } catch (IOException | ParserConfigurationException | SAXException | JAXBException e) {
             setBindingOperation(message);
@@ -144,8 +156,36 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
     }
 
+    /**
+     * When the trustore is updated from the admin console, the endpoint ENCRYPT_CRYPTO property needs to be updated.
+     *
+     * @param message the incoming message. Used to retrieve the end point.
+     */
+    private void verifyTrustoreUpdate(final SoapMessage message) {
+        final Merlin tmpTrustore = cryptoService.getCrypto();
+        if (trustoreCrypto == null) {
+            synchronized (emptyTruststoreLock) {
+                if (trustoreCrypto == null) {
+                    trustoreCrypto = tmpTrustore;
+                }
+            }
+            return;
+        }
+        if (!trustoreCrypto.equals(tmpTrustore)) {
+            synchronized (trustoreCrypto) {
+                if (!trustoreCrypto.equals(tmpTrustore)) {
+                    trustoreCrypto = tmpTrustore;
+                    message.getExchange().getEndpoint().getEndpointInfo().setProperty(SecurityConstants.ENCRYPT_CRYPTO, null);
+                    LOG.info("TrustStore update detected, adapting endpoint truststore");
+                }
+            }
+        }
+    }
+
+
     //this is a hack to avoid a nullpointer in @see WebFaultOutInterceptor.
     //I suppose the bindingOperation is set after the execution of this interceptor and is empty in case of error.
+
     private void setBindingOperation(SoapMessage message) {
         final Exchange exchange = message.getExchange();
         if (exchange == null) {

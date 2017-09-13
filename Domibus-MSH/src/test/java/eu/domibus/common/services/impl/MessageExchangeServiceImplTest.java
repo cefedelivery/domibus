@@ -152,7 +152,7 @@ public class MessageExchangeServiceImplTest {
 
     @Test
     public void testInitiatePullRequestWithoutConfiguration() throws Exception {
-        when(pModeProvider.getGatewayParty()).thenThrow(new IllegalArgumentException());
+        when(pModeProvider.getGatewayParty()).thenThrow(new IllegalStateException());
         messageExchangeService.initiatePullRequest();
         verify(pModeProvider, times(1)).getGatewayParty();
         verify(pModeProvider, times(0)).findPullProcessesByInitiator(any(Party.class));

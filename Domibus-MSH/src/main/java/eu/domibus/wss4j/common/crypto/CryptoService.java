@@ -2,9 +2,11 @@ package eu.domibus.wss4j.common.crypto;
 
 import eu.domibus.clustering.Command;
 import eu.domibus.common.exception.ConfigurationException;
-import org.apache.commons.io.FileUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.io.FileUtils;
+import org.apache.wss4j.common.crypto.CryptoFactory;
+import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
@@ -53,7 +55,7 @@ public class CryptoService {
         if (trustStore == null) {
             try {
                 initTrustStore();
-            } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+            } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | WSSecurityException e) {
                 LOG.error("Error while initializing trustStore", e);
             }
         }
@@ -90,7 +92,7 @@ public class CryptoService {
         }
     }
 
-    private void initTrustStore() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+    private void initTrustStore() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, WSSecurityException {
 
         final KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         String trustStoreFilename = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
@@ -98,27 +100,22 @@ public class CryptoService {
         ks.load(new FileInputStream(trustStoreFilename), trustStorePassword.toCharArray());
         trustStore = ks;
         LOG.info("TrustStore successfully loaded");
+        crypto = (Merlin) CryptoFactory.getInstance(trustStoreProperties);
+        crypto.setTrustStore(trustStore);
+
     }
 
     public void refreshTrustStore() {
         try {
             initTrustStore();
             // After startup and before the first message is sent the crypto is not initialized yet, so there is no need to refresh the trustStore in it!
-            if (crypto != null) {
-                crypto.setTrustStore(trustStore);
-            }
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException ex) {
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | WSSecurityException ex) {
             if (LOG.isDebugEnabled()) {
                 LOG.warn("Failed to reload certificates due to: " + ex);
             } else {
                 LOG.warn("Failed to reload certificates due to: " + ex.getCause());
             }
         }
-    }
-
-    // Saves the reference to the Merlin object in order to be able to refresh it afterwards whenever is needed!
-    void setCrypto(Merlin crypto) {
-        this.crypto = crypto;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -159,7 +156,7 @@ public class CryptoService {
     }
 
     public Certificate getCertificateFromKeystore(String alias) throws KeyStoreException {
-        if (crypto != null) {
+        if (crypto != null && crypto.getKeyStore() != null) {
             return crypto.getKeyStore().getCertificate(alias);
         }
 
@@ -169,6 +166,9 @@ public class CryptoService {
             String keyStorePassword = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.keystore.password");
             try (FileInputStream fileInputStream = new FileInputStream(keyStoreFilename)) {
                 keyStore.load(fileInputStream, keyStorePassword.toCharArray());
+                if (crypto != null) {
+                    crypto.setKeyStore(keyStore);
+                }
                 return keyStore.getCertificate(alias);
             }
         } catch (Exception ex) {
@@ -184,4 +184,7 @@ public class CryptoService {
         this.keystoreProperties = keystoreProperties;
     }
 
+    public Merlin getCrypto() {
+        return crypto;
+    }
 }
