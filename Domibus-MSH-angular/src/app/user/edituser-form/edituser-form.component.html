@@ -1,10 +1,10 @@
 <div style="width: 700px">
-  <p class="domibusTextSmall" style="margin:0;font-weight: bold">User Edit</p>
-  <form [formGroup]="userForm">
+  <p class="domibusTextSmall" style="margin:0;font-weight: bold">{{formTitle}}</p>
+  <form [formGroup]="userForm" (submit)="submitForm()">
     <md-card>
       <div>
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Username" name="username" id="username_id" [value]="userName" (blur)="updateUserName($event)" [disabled]="editMode">
+          <input mdInput placeholder="Username" name="username" id="username_id" [value]="userName" (blur)="updateUserName($event)" [formControl]="userForm.controls['userName']" required>
           <div *ngIf="userForm.controls['userName'].hasError('required')" style="color:red; font-size: 70%">You should type an username</div>
         </md-input-container>
       </div>
@@ -20,7 +20,7 @@
         <md2-select mdInput placeholder="Roles" id="roles_id" multiple [style.width]="'100%'" [formControl]="userForm.controls['roles']" [(ngModel)]="roles" required>
           <md2-option *ngFor="let item of existingRoles" [value]="item">{{item}}</md2-option>
         </md2-select>
-        <div *ngIf="userForm.controls['roles'].hasError('required')" style="color:red; font-size: 70%">You need to chose at least one role for this user</div>
+        <div *ngIf="userForm.controls['roles'].hasError('required')" style="color:red; font-size: 70%">You need to choose at least one role for this user</div>
       </div>
 
       <div>

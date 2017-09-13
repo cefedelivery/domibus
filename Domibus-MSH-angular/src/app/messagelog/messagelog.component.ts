@@ -104,7 +104,7 @@ export class MessageLogComponent {
       },
       {
         name: 'Message Type',
-        width: 160
+        width: 130
       },
       {
         cellTemplate: this.rowWithDateFormatTpl,
@@ -133,7 +133,7 @@ export class MessageLogComponent {
       {
         cellTemplate: this.rowActions,
         name: 'Actions',
-        width: 60
+        width: 80
       }
 
     ];
