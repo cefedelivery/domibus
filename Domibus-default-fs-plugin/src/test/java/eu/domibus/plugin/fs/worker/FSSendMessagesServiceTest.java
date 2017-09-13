@@ -29,6 +29,7 @@ import eu.domibus.plugin.fs.FSMessage;
 import eu.domibus.plugin.fs.FSPluginProperties;
 import eu.domibus.plugin.fs.FSTestHelper;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
+import eu.domibus.plugin.fs.exception.FSPluginException;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 import eu.domibus.plugin.fs.vfs.FileObjectDataSource;
 import mockit.integration.junit4.JMockit;
@@ -187,6 +188,51 @@ public class FSSendMessagesServiceTest {
             backendFSPlugin.submit(withAny(new FSMessage(null, null)));
             maxTimes = 0;
         }};
+    }
+    
+    @Test(expected = FSPluginException.class)
+    public void testSendMessages_RenameException() throws MessagingProcessingException, FileSystemException, FSSetUpException {
+        new Expectations(1, instance) {{
+            fsFilesManager.setUpFileSystem(null);
+            result = rootDir;
+            
+            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+            result = outgoingFolder;
+            
+            fsFilesManager.findAllDescendantFiles(outgoingFolder);
+            result = new FileObject[] { metadataFile, contentFile };
+            
+            fsFilesManager.resolveSibling(contentFile, "metadata.xml");
+            result = metadataFile;
+            
+            fsFilesManager.getDataHandler(contentFile);
+            result = new DataHandler(new FileObjectDataSource(contentFile));
+            
+            backendFSPlugin.submit(with(new Delegate<FSMessage>() {
+                 void delegate(FSMessage message) throws IOException {
+                     Assert.assertNotNull(message);
+                     Assert.assertNotNull(message.getDataHandlers());
+                     DataHandler dataHandler = message.getDataHandlers().get("cid:message");
+                     Assert.assertNotNull(dataHandler);
+                     Assert.assertNotNull(message.getMetadata());
+
+                     DataSource dataSource = dataHandler.getDataSource();
+                     Assert.assertNotNull(dataSource);
+                     Assert.assertEquals("content.xml", dataSource.getName());
+                     Assert.assertTrue(
+                             IOUtils.contentEquals(dataSource.getInputStream(), contentFile.getContent().getInputStream())
+                     );
+
+                     Assert.assertEquals(metadata, message.getMetadata());
+                 }
+            }));
+            result = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
+            
+            fsFilesManager.renameFile(contentFile, "content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml");
+            result = new FileSystemException("Test-forced exception");
+        }};
+        
+        instance.sendMessages();
     }
     
 }
