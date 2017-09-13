@@ -1,6 +1,8 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.logging.DomibusLogger;
@@ -55,7 +57,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
     public EndpointInfo lookupInformation(final String receiverId, final String receiverIdType,
                                           final String documentId, final String processId,
-                                          final String processIdType) {
+                                          final String processIdType) throws EbMS3Exception {
 
         LOG.info("[OASIS SMP] Do the lookup by: " + receiverId + " " + receiverIdType + " " + documentId +
                 " " + processId + " " + processIdType);
@@ -120,10 +122,14 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
         }
     }
 
-    protected DocumentIdentifier createDocumentIdentifier(String documentId) {
-        String scheme = extract(documentId, "scheme");
-        String value = extract(documentId, "value");
-        return new DocumentIdentifier(value, scheme);
+    protected DocumentIdentifier createDocumentIdentifier(String documentId) throws EbMS3Exception {
+        try {
+            String scheme = extract(documentId, "scheme");
+            String value = extract(documentId, "value");
+            return new DocumentIdentifier(value, scheme);
+        } catch (IllegalStateException ise) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Could not extract @scheme and @value from " + documentId, null, ise);
+        }
     }
 
     protected String extract(String doubleColonDelimitedId, String groupName) {
