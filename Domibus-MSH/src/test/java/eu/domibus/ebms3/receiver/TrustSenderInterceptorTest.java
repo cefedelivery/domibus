@@ -2,7 +2,6 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.PKIUtil;
-import eu.domibus.wss4j.common.crypto.CryptoService;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -31,9 +30,6 @@ public class TrustSenderInterceptorTest {
 
     @Injectable
     CertificateService certificateService;
-
-    @Injectable
-    CryptoService cryptoService;
 
     @Tested
     TrustSenderInterceptor trustSenderInterceptor;

@@ -19,10 +19,7 @@ import javax.annotation.Resource;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -51,12 +48,13 @@ public class CryptoService {
 
     private KeyStore trustStore;
 
-    private Merlin crypto;
+    private KeyStore keyStore;
 
     public synchronized KeyStore getTrustStore() {
         if (trustStore == null) {
             try {
-                initTrustStore();
+                trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                loadTrustStore();
             } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | WSSecurityException e) {
                 LOG.error("Error while initializing trustStore", e);
             }
@@ -73,7 +71,7 @@ public class CryptoService {
      * @return {@value true} if added, else {@value false}
      */
     public boolean addCertificate(final X509Certificate certificate, final String alias, final boolean overwrite) {
-        boolean containsAlias = false;
+        boolean containsAlias;
         try {
             containsAlias = getTrustStore().containsAlias(alias);
         } catch (final KeyStoreException e) {
@@ -87,49 +85,22 @@ public class CryptoService {
                 getTrustStore().deleteEntry(alias);
             }
             getTrustStore().setCertificateEntry(alias, certificate);
-
             return true;
         } catch (final KeyStoreException e) {
             throw new ConfigurationException(e);
         }
     }
 
-    private void initTrustStore() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, WSSecurityException {
-
-        if (trustStore == null) {
-            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        }
+    private void loadTrustStore() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, WSSecurityException {
+        LOG.info("Initiating truststore");
         String trustStoreFilename = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
         String trustStorePassword = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password");
-        loadTrustore(trustStoreFilename, trustStorePassword);
-        /*trustStore.load(new FileInputStream(trustStoreFilename), trustStorePassword.toCharArray());*/
-        /*if(trustStore==null) {
-            trustStore = ks;
-            return;
-        }
-        final Enumeration<String> currentCustorEntryKeys = trustStore.aliases();
-        while (currentCustorEntryKeys.hasMoreElements()){
-            trustStore.deleteEntry(currentCustorEntryKeys.nextElement());
-        }
-        trustStore.load();
-        final Enumeration<String> newTrustoreEntryKeys = ks.aliases();
-        while (newTrustoreEntryKeys.hasMoreElements()){
-            final String newTrustoreEntryKey = newTrustoreEntryKeys.nextElement();
-            trustStore.setCertificateEntry(newTrustoreEntryKey,newTrustoreEntryKeys);
-        }
-        LOG.info("TrustStore successfully loaded");
-        crypto = (Merlin) CryptoFactory.getInstance(trustStoreProperties);
-        crypto.setTrustStore(trustStore);*/
-
-    }
-
-    protected void loadTrustore(String trustStoreFilename, String password) throws IOException, CertificateException, NoSuchAlgorithmException {
-        trustStore.load(new FileInputStream(trustStoreFilename), password.toCharArray());
+        trustStore.load(new FileInputStream(trustStoreFilename), trustStorePassword.toCharArray());
     }
 
     public void refreshTrustStore() {
         try {
-            initTrustStore();
+            loadTrustStore();
             // After startup and before the first message is sent the crypto is not initialized yet, so there is no need to refresh the trustStore in it!
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | WSSecurityException ex) {
             if (LOG.isDebugEnabled()) {
@@ -149,27 +120,22 @@ public class CryptoService {
     @Transactional(propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void replaceTruststore(byte[] store, String password) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
-        String truststoreFileValue = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
-        File truststoreFile = new File(truststoreFileValue);
-        if (!truststoreFile.getParentFile().exists()) {
-            LOG.debug("Creating directory [" + truststoreFile.getParentFile() + "]");
-            FileUtils.forceMkdir(truststoreFile.getParentFile());
+        if (trustStore == null) {
+            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
         }
-        LOG.debug("Replacing the existing truststore file [" + truststoreFileValue + "] with the provided one");
+        String trustStoreFileValue = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
+        File trustStoreFile = new File(trustStoreFileValue);
+        if (!trustStoreFile.getParentFile().exists()) {
+            LOG.debug("Creating directory [" + trustStoreFile.getParentFile() + "]");
+            FileUtils.forceMkdir(trustStoreFile.getParentFile());
+        }
 
-        loadTrustore(truststoreFileValue, password);
-        FileOutputStream fileOutputStream = new FileOutputStream(truststoreFile);
-        trustStore.store(fileOutputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
-
-       /* KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
-        ts.load(new ByteArrayInputStream(store), password.toCharArray());
-        FileOutputStream fileOutputStream = new FileOutputStream(truststoreFile);
-        ts.store(fileOutputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
-        fileOutputStream.flush();
-        fileOutputStream.close();
-        trustStore = ts;*/
+        LOG.debug("Replacing the existing truststore file [" + trustStoreFileValue + "] with the provided one");
+        try (ByteArrayInputStream newTrustStoreBytes = new ByteArrayInputStream(store); FileOutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
+            trustStore.load(newTrustStoreBytes, password.toCharArray());
+            trustStore.store(fileOutputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
+        }
         updateTrustStore();
-
     }
 
     class ReloadTrustStoreMessageCreator implements MessageCreator {
@@ -182,21 +148,16 @@ public class CryptoService {
     }
 
     public Certificate getCertificateFromKeystore(String alias) throws KeyStoreException {
-        if (crypto != null && crypto.getKeyStore() != null) {
-            return crypto.getKeyStore().getCertificate(alias);
-        }
-
         try {
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            String keyStoreFilename = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.file");
-            String keyStorePassword = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.keystore.password");
-            try (FileInputStream fileInputStream = new FileInputStream(keyStoreFilename)) {
-                keyStore.load(fileInputStream, keyStorePassword.toCharArray());
-                if (crypto != null) {
-                    crypto.setKeyStore(keyStore);
+            if (keyStore == null) {
+                keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                String keyStoreFilename = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.file");
+                String keyStorePassword = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.keystore.password");
+                try (FileInputStream fileInputStream = new FileInputStream(keyStoreFilename)) {
+                    keyStore.load(fileInputStream, keyStorePassword.toCharArray());
                 }
-                return keyStore.getCertificate(alias);
             }
+            return keyStore.getCertificate(alias);
         } catch (Exception ex) {
             throw new KeyStoreException(ex);
         }
@@ -210,7 +171,4 @@ public class CryptoService {
         this.keystoreProperties = keystoreProperties;
     }
 
-    public Merlin getCrypto() {
-        return crypto;
-    }
 }

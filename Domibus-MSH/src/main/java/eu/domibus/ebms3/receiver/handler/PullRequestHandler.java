@@ -132,6 +132,7 @@ public class PullRequestHandler {
 
         } catch (ChainCertificateInvalidException e) {
             abortSending = true;
+            LOG.warn(e.getMessage());
         } catch (EbMS3Exception e) {
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;

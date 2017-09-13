@@ -10,7 +10,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
-import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.cxf.binding.soap.SoapFault;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.SoapVersion;
@@ -75,8 +74,6 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     @Autowired
     private CertificateService certificateService;
 
-    @Autowired
-    private CryptoService cryptoService;
 
     public TrustSenderInterceptor() {
         super(false);
@@ -199,14 +196,8 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         try {
             requestData.setMsgContext(msg);
             decodeAlgorithmSuite(requestData);
-
-            Crypto secCrypto = cryptoService.getCrypto();
-            if (secCrypto == null) {
-                secCrypto = CryptoFactory.getInstance(securityEncryptionProp);
-            }
-
+            Crypto secCrypto = CryptoFactory.getInstance(securityEncryptionProp);
             requestData.setDecCrypto(secCrypto);
-
             // extract certificate from KeyInfo
             X509Certificate cert = getCertificateFromKeyInfo(requestData, getSecurityHeader(msg));
 
