@@ -5,6 +5,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.fs.*;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
+import eu.domibus.plugin.fs.exception.FSPluginException;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileObject;
@@ -104,10 +105,14 @@ public class FSSendMessagesService {
         }
     }
 
-    private void renameProcessedFile(FileObject processableFile, String messageId) throws FileSystemException {
+    private void renameProcessedFile(FileObject processableFile, String messageId) {
         String newFileName = FSFileNameHelper.deriveFileName(processableFile.getName().getBaseName(), messageId);
         
-        fsFilesManager.renameFile(processableFile, newFileName);
+        try {
+            fsFilesManager.renameFile(processableFile, newFileName);
+        } catch(FileSystemException ex) {
+            throw new FSPluginException("Error renaming file [" + processableFile.getName().getURI() + "] to [" + newFileName + "]", ex);
+        }
     }
 
     private List<FileObject> filterProcessableFiles(FileObject[] files) {
