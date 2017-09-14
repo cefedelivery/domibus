@@ -29,7 +29,6 @@ import eu.domibus.plugin.fs.FSMessage;
 import eu.domibus.plugin.fs.FSPluginProperties;
 import eu.domibus.plugin.fs.FSTestHelper;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
-import eu.domibus.plugin.fs.exception.FSPluginException;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 import eu.domibus.plugin.fs.vfs.FileObjectDataSource;
 import mockit.integration.junit4.JMockit;
@@ -51,6 +50,10 @@ public class FSSendMessagesServiceTest {
     
     @Injectable
     private FSFilesManager fsFilesManager;
+    
+    @Tested
+    @Injectable
+    private FSProcessFileService fsProcessFileService;
     
     private FileObject rootDir;
     private FileObject outgoingFolder;
@@ -190,9 +193,12 @@ public class FSSendMessagesServiceTest {
         }};
     }
     
-    @Test(expected = FSPluginException.class)
+    @Test
     public void testSendMessages_RenameException() throws MessagingProcessingException, FileSystemException, FSSetUpException {
         new Expectations(1, instance) {{
+            fsPluginProperties.getDomains();
+            result = Collections.emptyList();
+            
             fsFilesManager.setUpFileSystem(null);
             result = rootDir;
             
