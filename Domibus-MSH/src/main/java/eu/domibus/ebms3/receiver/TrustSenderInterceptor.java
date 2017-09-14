@@ -6,7 +6,6 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
-import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -59,8 +58,8 @@ import java.util.Properties;
 public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     protected static final String DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING = "domibus.sender.trust.validation.onreceiving";
-    protected static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING = "domibus.sender.certificate.validation.onreceiving";
 
+    protected static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING = "domibus.sender.certificate.validation.onreceiving";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TrustSenderInterceptor.class);
 
@@ -78,7 +77,6 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     public TrustSenderInterceptor() {
         super(false);
     }
-
 
     public void setSecurityEncryptionProp(Properties securityEncryptionProp) {
         this.securityEncryptionProp = securityEncryptionProp;
@@ -196,10 +194,8 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         try {
             requestData.setMsgContext(msg);
             decodeAlgorithmSuite(requestData);
-
             Crypto secCrypto = CryptoFactory.getInstance(securityEncryptionProp);
             requestData.setDecCrypto(secCrypto);
-
             // extract certificate from KeyInfo
             X509Certificate cert = getCertificateFromKeyInfo(requestData, getSecurityHeader(msg));
 

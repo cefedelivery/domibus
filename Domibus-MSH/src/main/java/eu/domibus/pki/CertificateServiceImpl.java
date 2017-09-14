@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
@@ -45,6 +46,7 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Cacheable(value = "certValidationByAlias", key = "#alias")
     @Override
+    @Transactional(noRollbackFor = DomibusCertificateException.class)
     public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
         LOG.debug("Checking certificate validation for [" + alias + "]");
         KeyStore trustStore = cryptoService.getTrustStore();

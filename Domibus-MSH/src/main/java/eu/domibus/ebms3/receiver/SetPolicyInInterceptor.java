@@ -59,6 +59,7 @@ import java.util.Set;
 public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SetPolicyInInterceptor.class);
+
     private JAXBContext jaxbContext;
 
     @Autowired
@@ -111,6 +112,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         String messageId = null;
 
         try {
+
             messaging=soapService.getMessage(message);
             LegConfigurationExtractor legConfigurationExtractor = messageLegConfigurationFactory.extractMessageConfiguration(message, messaging);
             if(legConfigurationExtractor ==null)return;
@@ -146,6 +148,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
     //this is a hack to avoid a nullpointer in @see WebFaultOutInterceptor.
     //I suppose the bindingOperation is set after the execution of this interceptor and is empty in case of error.
+
     private void setBindingOperation(SoapMessage message) {
         final Exchange exchange = message.getExchange();
         if (exchange == null) {

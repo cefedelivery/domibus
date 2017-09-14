@@ -145,7 +145,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         Party initiator;
         try {
             initiator = pModeProvider.getGatewayParty();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalStateException e) {
             LOG.trace("A configuration problem occured while initiating the pull request. Probably no configuration is loaded");
             return;
         }
@@ -258,6 +258,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
 
     @Override
+    @Transactional(noRollbackFor = ChainCertificateInvalidException.class)
     public void verifyReceiverCertificate(final LegConfiguration legConfiguration, String receiverName) {
         Policy policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
         if (policyService.isNoSecurityPolicy(policy)) {
@@ -278,6 +279,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     }
 
     @Override
+    @Transactional(noRollbackFor = ChainCertificateInvalidException.class)
     public void verifySenderCertificate(final LegConfiguration legConfiguration, String senderName) {
         Policy policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
         if (policyService.isNoSecurityPolicy(policy)) {
