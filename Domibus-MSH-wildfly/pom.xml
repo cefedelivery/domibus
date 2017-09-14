@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>eu.domibus.fsplugin</groupId>
+        <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
         <version>3.3-SNAPSHOT</version>
     </parent>
@@ -23,22 +23,22 @@
     <dependencies>
         <!-- Domibus modules -->
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-MSH</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-jms-wildfly</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-taskexecutor-wildfly</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-logging</artifactId>
             <scope>compile</scope>
         </dependency>
@@ -75,7 +75,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
