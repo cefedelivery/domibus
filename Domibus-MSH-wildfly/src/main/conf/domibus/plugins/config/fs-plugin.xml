@@ -23,10 +23,6 @@
           class="eu.domibus.plugin.fs.BackendFSImpl">
         <constructor-arg value="backendFSPlugin"/>
         <property name="lister" ref="fsPluginNotificationListenerService"/>
-        <!-- Check if this configuration is required
-        <property name="messageSubmissionTransformer" ref="fsMessageTransformer"/>
-        <property name="messageRetrievalTransformer"  ref="fsMessageTransformer"/>
-        -->
     </bean>
 
     <bean id="fsPluginNotificationListenerService"
