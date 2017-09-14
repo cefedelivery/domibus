@@ -42,6 +42,7 @@
                                 <id>make-assembly-default-plugins</id>
                                 <configuration>
                                     <descriptors>
+                                        <descriptor>src/main/assembly/default-plugins/default-fs-plugin.xml</descriptor>
                                         <descriptor>src/main/assembly/default-plugins/default-ws-plugin.xml</descriptor>
                                         <descriptor>src/main/assembly/default-plugins/default-jms-plugin.xml</descriptor>
                                     </descriptors>
