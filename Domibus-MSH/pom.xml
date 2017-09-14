@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>eu.domibus.fsplugin</groupId>
+        <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
         <version>3.3-SNAPSHOT</version>
     </parent>
@@ -31,32 +31,32 @@
     <dependencies>
         <!-- Domibus modules -->
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-angular</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-plugin-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-jms-spi</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-logging</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-ext-services-delegate</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -302,25 +302,25 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-default-ws-plugin</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-default-jms-plugin</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>eu.domibus.fsplugin</groupId>
+            <groupId>eu.domibus</groupId>
             <artifactId>domibus-db</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
