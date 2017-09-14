@@ -134,7 +134,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
         } catch (EbMS3Exception e) {
             setBindingOperation(message);
-            SetPolicyInInterceptor.LOG.info("", e); // Those errors are expected (no PMode found, therefore DEBUG)
+            SetPolicyInInterceptor.LOG.debug("", e); // Those errors are expected (no PMode found, therefore DEBUG)
             throw new Fault(e);
         } catch (IOException | ParserConfigurationException | SAXException | JAXBException e) {
             setBindingOperation(message);
