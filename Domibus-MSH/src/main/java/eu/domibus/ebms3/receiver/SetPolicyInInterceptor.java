@@ -59,6 +59,7 @@ import java.util.Set;
 public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SetPolicyInInterceptor.class);
+
     private JAXBContext jaxbContext;
 
     @Autowired
@@ -72,7 +73,6 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     public SetPolicyInInterceptor() {
         this(Phase.RECEIVE);
     }
-
 
     protected SetPolicyInInterceptor(String phase) {
         super(phase);
@@ -98,7 +98,6 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
-        //verifyTrustStoreUpdate(message);
         final String httpMethod = (String) message.get("org.apache.cxf.request.method");
         //TODO add the below logic to a separate interceptor
         if(org.apache.commons.lang.StringUtils.containsIgnoreCase(httpMethod, "GET")) {

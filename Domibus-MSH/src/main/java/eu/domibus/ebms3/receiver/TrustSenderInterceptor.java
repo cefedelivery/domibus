@@ -58,8 +58,8 @@ import java.util.Properties;
 public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     protected static final String DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING = "domibus.sender.trust.validation.onreceiving";
-    protected static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING = "domibus.sender.certificate.validation.onreceiving";
 
+    protected static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING = "domibus.sender.certificate.validation.onreceiving";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TrustSenderInterceptor.class);
 
@@ -74,11 +74,9 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     @Autowired
     private CertificateService certificateService;
 
-
     public TrustSenderInterceptor() {
         super(false);
     }
-
 
     public void setSecurityEncryptionProp(Properties securityEncryptionProp) {
         this.securityEncryptionProp = securityEncryptionProp;

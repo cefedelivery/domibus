@@ -247,7 +247,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     }
 
     @Override
-    @Transactional(readOnly = true, noRollbackFor = ReliabilityException.class)
+    @Transactional(noRollbackFor = ReliabilityException.class)
     public RawEnvelopeDto findPulledMessageRawXmlByMessageId(final String messageId) {
         final RawEnvelopeDto rawXmlByMessageId = rawEnvelopeLogDao.findRawXmlByMessageId(messageId);
         if (rawXmlByMessageId == null) {
