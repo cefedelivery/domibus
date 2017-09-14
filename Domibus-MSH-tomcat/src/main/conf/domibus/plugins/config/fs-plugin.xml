@@ -6,15 +6,10 @@
        xmlns:c="http://www.springframework.org/schema/c"
        xmlns:p="http://www.springframework.org/schema/p"
        xmlns="http://www.springframework.org/schema/beans"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-       http://www.springframework.org/schema/util
-       http://www.springframework.org/schema/util/spring-util.xsd
-
-
-       http://activemq.apache.org/schema/core
-       http://activemq.apache.org/schema/core/activemq-core.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+                           http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
 
     <!-- General File System Plugin properties -->
     <util:properties id="fsPluginProperties" ignore-resource-not-found="true"
@@ -48,7 +43,7 @@
         <property name="jobDetail" ref="fsPluginPurgeSentWorkerJob"/>
         <property name="cronExpression" value="${fsplugin.messages.sent.purge.worker.cronExpression}"/>
     </bean>
-    
+
     <!-- quartz job for purging failed messages -->
     <bean id="fsPluginPurgeFailedWorkerJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
@@ -61,7 +56,7 @@
         <property name="jobDetail" ref="fsPluginPurgeFailedWorkerJob"/>
         <property name="cronExpression" value="${fsplugin.messages.failed.purge.worker.cronExpression}"/>
     </bean>
-    
+
     <!-- quartz job for purging received messages -->
     <bean id="fsPluginPurgeReceivedWorkerJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
@@ -74,7 +69,7 @@
         <property name="jobDetail" ref="fsPluginPurgeReceivedWorkerJob"/>
         <property name="cronExpression" value="${fsplugin.messages.received.purge.worker.cronExpression}"/>
     </bean>
-    
+
     <!-- quartz job for sending messages (from OUT folders) -->
     <bean id="fsPluginSendMessagesWorkerJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
