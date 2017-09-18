@@ -132,7 +132,7 @@ public class RetryService {
                 userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
             } else {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Pull Mesage with " + messagedId + " marked as send failure after max retry attempt reached");
+                    LOG.debug("Pull Message with " + messagedId + " marked as send failure after max retry attempt reached");
                 }
                 userMessageLog.setMessageStatus(MessageStatus.SEND_FAILURE);
             }
