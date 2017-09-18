@@ -31,7 +31,7 @@ html, body {
   -ms-user-select: text;
   -o-user-select: text;
   user-select: text;
-  word-wrap: break-word;
+  word-wrap: break-word !important;
 }
 
 div:before,
@@ -47,6 +47,27 @@ md-card-content:before,
 table.buttonsRow:before,
 table.buttonsMoveRow {
   content: " " !important;
+}
+
+/* selection for datatable */
+.ngx-datatable .datatable-body-cell, .ngx-datatable .datatable-header-cell {
+  -webkit-user-select: auto !important;
+  -moz-user-select: auto !important;
+  -ms-user-select: auto !important;
+  -o-user-select: auto !important;
+  user-select: auto !important;
+}
+
+.ngx-datatable .datatable-body-cell, .ngx-datatable .datatable-header-cell {
+  -webkit-user-select: auto !important;
+  -moz-user-select: auto !important;
+  -ms-user-select: auto !important;
+  -o-user-select: auto !important;
+  user-select: auto !important;
+}
+
+.ngx-datatable span {
+  word-wrap: break-word;
 }
 
 /*--------------------------------------------------
