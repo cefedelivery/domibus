@@ -36,24 +36,39 @@ public class RetrieveMessageIT extends AbstractIT {
 
     @Test(expected = DownloadMessageFault.class)
     public void testMessageIdEmpty() throws DownloadMessageFault {
+        retrieveMessageFail("", "MessageId is empty");
+    }
 
-        String messageId = "";
-
-        retrieveMessageFail(messageId, "MessageId is empty");
+    @Test(expected = DownloadMessageFault.class)
+    public void testMessageNotFound() throws Exception {
+        retrieveMessageFail("notFound", "No message with id [notFound] pending for download");
     }
 
     @Test
     @Transactional
     public void testMessageIdNeedsATrim() throws Exception {
-        String messageId = "    2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu ";
-        retrieveMessage(messageId);
+        retrieveMessage("    2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu ");
     }
 
     @Test
     @Transactional
     public void testRetrieveMessageOk() throws Exception {
-        String messageId = "2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu";
-        retrieveMessage(messageId);
+        retrieveMessage("2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu");
+    }
+
+    private void retrieveMessageFail(String messageId, String errorMessage) throws DownloadMessageFault {
+        RetrieveMessageRequest retrieveMessageRequest = createRetrieveMessageRequest(messageId);
+
+        Holder<RetrieveMessageResponse> retrieveMessageResponse = new Holder<>();
+        Holder<Messaging> ebMSHeaderInfo = new Holder<>();
+
+        try {
+            backendWebService.retrieveMessage(retrieveMessageRequest, retrieveMessageResponse, ebMSHeaderInfo);
+        } catch (DownloadMessageFault re) {
+            Assert.assertEquals(errorMessage, re.getFaultInfo().getMessage());
+            throw re;
+        }
+        Assert.fail("DownloadMessageFault was expected but was not raised");
     }
 
     private void retrieveMessage(String messageId) throws Exception {
@@ -76,28 +91,6 @@ public class RetrieveMessageIT extends AbstractIT {
         String payload = IOUtils.toString(payloadType.getValue().getDataSource().getInputStream());
         System.out.println("Payload returned [" + payload +"]");
         Assert.assertEquals(payload, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>");
-    }
-
-    private void retrieveMessageFail(String messageId, String errorMessage) throws DownloadMessageFault {
-        RetrieveMessageRequest retrieveMessageRequest = createRetrieveMessageRequest(messageId);
-
-        Holder<RetrieveMessageResponse> retrieveMessageResponse = new Holder<>();
-        Holder<Messaging> ebMSHeaderInfo = new Holder<>();
-
-        try {
-            backendWebService.retrieveMessage(retrieveMessageRequest, retrieveMessageResponse, ebMSHeaderInfo);
-        } catch (DownloadMessageFault re) {
-            Assert.assertEquals(errorMessage, re.getFaultInfo().getMessage());
-            throw re;
-        }
-        Assert.fail("DownloadMessageFault was expected but was not raised");
-    }
-
-    @Test(expected = DownloadMessageFault.class)
-    public void testMessageNotFound() throws Exception {
-        String messageId = "notFound";
-
-        retrieveMessageFail(messageId, "No message with id [notFound] pending for download");
     }
 
     private void pushMessage(ActiveMQConnection connection, String messageId) throws Exception {
