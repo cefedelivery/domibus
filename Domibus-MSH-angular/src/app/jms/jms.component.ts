@@ -101,7 +101,8 @@ export class JmsComponent implements OnInit, DirtyOperations {
       {
         cellTemplate: this.rowActions,
         name: 'Actions',
-        width: 60
+        width: 60,
+        sortable: false
       }
 
     ];

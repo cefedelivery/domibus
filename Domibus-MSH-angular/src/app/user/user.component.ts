@@ -79,7 +79,8 @@ export class UserComponent implements OnInit, DirtyOperations {
         cellTemplate: this.passwordTpl,
         name: 'Password',
         prop: 'password',
-        canAutoResize: true
+        canAutoResize: true,
+        sortable: false
 
       },
       {
@@ -91,7 +92,8 @@ export class UserComponent implements OnInit, DirtyOperations {
         cellTemplate: this.rowActions,
         name: 'Actions',
         width: 60,
-        canAutoResize: true
+        canAutoResize: true,
+        sortable: false
       }
 
     ];
