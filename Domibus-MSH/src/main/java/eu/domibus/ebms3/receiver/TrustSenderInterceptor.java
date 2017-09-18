@@ -109,7 +109,8 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         }
 
         boolean isPullMessage = false;
-        if (message.get(MSHDispatcher.MESSAGE_TYPE_IN).equals(MessageType.SIGNAL_MESSAGE)) {
+        MessageType messageType = (MessageType) message.get(MSHDispatcher.MESSAGE_TYPE_IN);
+        if (messageType != null && messageType.equals(MessageType.SIGNAL_MESSAGE)) {
             LOG.info("PULL Signal Message");
             isPullMessage = true;
         }
