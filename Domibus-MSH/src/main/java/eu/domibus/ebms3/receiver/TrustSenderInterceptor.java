@@ -7,6 +7,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
+import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
