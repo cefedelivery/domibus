@@ -74,15 +74,7 @@ public class UpdateRetryLoggingService {
         LOG.debug("Updating sendAttempts to [{}]", userMessageLog.getSendAttempts());
         userMessageLogDao.update(userMessageLog);
         if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
-            LOG.debug("Updating send attempts to [{}]", userMessageLog.getSendAttempts());
-            if (legConfiguration.getReceptionAwareness() != null) {
-                userMessageLog.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(userMessageLog.getNextAttempt(), userMessageLog.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
-                backendNotificationService.notifyOfMessageStatusChange(userMessageLog, messageStatus, new Timestamp(System.currentTimeMillis()));
-                userMessageLog.setMessageStatus(messageStatus);
-                LOG.debug("Updating status to [{}]", userMessageLog.getMessageStatus());
-                userMessageLogDao.update(userMessageLog);
-            }
-
+            increaseAttempAndNotify(legConfiguration, messageStatus, userMessageLog);
         } else { // max retries reached, mark message as ultimately failed (the message may be pushed back to the send queue by an administrator but this send completely failed)
             LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SEND_FAILURE);
             if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus())) {
@@ -97,12 +89,34 @@ public class UpdateRetryLoggingService {
         }
     }
 
+    public void updateWaitingReceiptMessageRetryLogging(final String messageId, final LegConfiguration legConfiguration) {
+        LOG.debug("Updating waiting receipt retry for message");
+        MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
+        userMessageLog.setSendAttempts(userMessageLog.getSendAttempts() + 1);
+        final MessageStatus messageStatus = MessageStatus.WAITING_FOR_RECEIPT;
+        userMessageLog.setMessageStatus(messageStatus);
+        userMessageLogDao.update(userMessageLog);
+        LOG.debug("Updating sendAttempts to [{}]", userMessageLog.getSendAttempts());
+        if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
+            increaseAttempAndNotify(legConfiguration, messageStatus, userMessageLog);
+        }
+    }
+
+    private void increaseAttempAndNotify(LegConfiguration legConfiguration, MessageStatus messageStatus, MessageLog userMessageLog) {
+        LOG.debug("Updating send attempts to [{}]", userMessageLog.getSendAttempts());
+        userMessageLog.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(userMessageLog.getNextAttempt(), userMessageLog.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
+        backendNotificationService.notifyOfMessageStatusChange(userMessageLog, messageStatus, new Timestamp(System.currentTimeMillis()));
+        userMessageLog.setMessageStatus(messageStatus);
+        LOG.debug("Updating status to [{}]", userMessageLog.getMessageStatus());
+        userMessageLogDao.update(userMessageLog);
+    }
+
     /**
      * Check if the message can be sent again: there is time and attempts left
      */
     protected boolean hasAttemptsLeft(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
         // retries start after the first send attempt
-        if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()
+        if (legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()
                 && (getScheduledStartTime(userMessageLog) + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis()) {
             return true;
         }
