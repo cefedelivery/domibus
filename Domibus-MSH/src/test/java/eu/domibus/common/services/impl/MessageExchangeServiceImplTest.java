@@ -136,6 +136,7 @@ public class MessageExchangeServiceImplTest {
 
     @Test
     public void testInitiatePullRequest() throws Exception {
+        when(pModeProvider.isConfigurationLoaded()).thenReturn(true);
         ArgumentCaptor<Map> mapArgumentCaptor= ArgumentCaptor.forClass(Map.class);
         messageExchangeService.initiatePullRequest();
         verify(pModeProvider, times(1)).getGatewayParty();
@@ -152,9 +153,8 @@ public class MessageExchangeServiceImplTest {
 
     @Test
     public void testInitiatePullRequestWithoutConfiguration() throws Exception {
-        when(pModeProvider.getGatewayParty()).thenThrow(new IllegalStateException());
+        when(pModeProvider.isConfigurationLoaded()).thenReturn(false);
         messageExchangeService.initiatePullRequest();
-        verify(pModeProvider, times(1)).getGatewayParty();
         verify(pModeProvider, times(0)).findPullProcessesByInitiator(any(Party.class));
     }
 
