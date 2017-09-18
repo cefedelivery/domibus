@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.xml.bind.JAXBContext;
 import java.math.BigInteger;
 import java.security.Security;
 import java.security.cert.X509Certificate;
@@ -24,12 +25,14 @@ import java.util.Properties;
 @RunWith(JMockit.class)
 public class TrustSenderInterceptorTest {
 
-
     @Injectable
     Properties domibusProperties;
 
     @Injectable
     CertificateService certificateService;
+
+    @Injectable
+    protected JAXBContext jaxbContextEBMS;
 
     @Tested
     TrustSenderInterceptor trustSenderInterceptor;
@@ -56,8 +59,8 @@ public class TrustSenderInterceptorTest {
 
         }};
 
-        Assert.assertTrue(trustSenderInterceptor.checkCertificateValidity(certificate, "test sender"));
-        Assert.assertFalse(trustSenderInterceptor.checkCertificateValidity(expiredCertificate, "test sender"));
+        Assert.assertTrue(trustSenderInterceptor.checkCertificateValidity(certificate, "test sender", false));
+        Assert.assertFalse(trustSenderInterceptor.checkCertificateValidity(expiredCertificate, "test sender", false));
     }
 
     @Test
@@ -68,7 +71,7 @@ public class TrustSenderInterceptorTest {
             domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
             result = "false";
         }};
-        Assert.assertTrue(trustSenderInterceptor.checkCertificateValidity(expiredCertificate, "test sender"));
+        Assert.assertTrue(trustSenderInterceptor.checkCertificateValidity(expiredCertificate, "test sender", false));
     }
 
     @Test
@@ -80,8 +83,8 @@ public class TrustSenderInterceptorTest {
             result = "true";
         }};
 
-        Assert.assertTrue(trustSenderInterceptor.checkSenderPartyTrust(certificate, "GlobalSign", "messageID123"));
-        Assert.assertFalse(trustSenderInterceptor.checkSenderPartyTrust(certificate, "test sender", "messageID123"));
+        Assert.assertTrue(trustSenderInterceptor.checkSenderPartyTrust(certificate, "GlobalSign", "messageID123", false));
+        Assert.assertFalse(trustSenderInterceptor.checkSenderPartyTrust(certificate, "test sender", "messageID123", false));
     }
 
     @Test
@@ -93,6 +96,6 @@ public class TrustSenderInterceptorTest {
             result = "false";
         }};
 
-        Assert.assertTrue(trustSenderInterceptor.checkSenderPartyTrust(certificate, "test sender", "messageID123"));
+        Assert.assertTrue(trustSenderInterceptor.checkSenderPartyTrust(certificate, "test sender", "messageID123", false));
     }
 }
