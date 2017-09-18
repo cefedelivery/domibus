@@ -88,7 +88,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS);
                 break;
             case WAITING_FOR_CALLBACK:
-                userMessageLogService.setMessageAsWaitingForReceipt(messageId);
+                updateRetryLoggingService.updateWaitingReceiptMessageRetryLogging(messageId, legConfiguration);
                 break;
             case SEND_FAIL:
                 updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);

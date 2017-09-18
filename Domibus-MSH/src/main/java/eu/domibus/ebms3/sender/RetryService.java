@@ -6,10 +6,12 @@ import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -78,7 +80,8 @@ public class RetryService {
             userMessageService.scheduleSending(messageId);
         }
 
-        resetUnAcknowledgedPullMessage();
+        purgePullMessage();
+        resetWaitingForReceiptPullMessages();
     }
 
     protected List<String> getMessagesNotAlreadyQueued() {
@@ -111,10 +114,24 @@ public class RetryService {
     }
 
     //@thom test this
-    private void resetUnAcknowledgedPullMessage() {
-        List<String> timedoutPullMessages = userMessageLogDao.findTimedoutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
+    protected void purgePullMessage() {
+        List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String timedoutPullMessage : timedoutPullMessages) {
             purgeTimedoutMessage(timedoutPullMessage);
+        }
+    }
+
+    protected void resetWaitingForReceiptPullMessages() {
+        final List<String> messagesToReset = userMessageLogDao.findPullWaitingForReceiptMessages();
+        for (String messagedId : messagesToReset) {
+            LOG.debug("Message " + messagedId + " set back in READY_TO_PULL state.");
+            final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messagedId);
+            if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()) {
+                userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
+            } else {
+                userMessageLog.setMessageStatus(MessageStatus.SEND_FAILURE);
+            }
+            userMessageLogDao.update(userMessageLog);
         }
     }
 
