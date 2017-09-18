@@ -124,11 +124,16 @@ public class RetryService {
     protected void resetWaitingForReceiptPullMessages() {
         final List<String> messagesToReset = userMessageLogDao.findPullWaitingForReceiptMessages();
         for (String messagedId : messagesToReset) {
-            LOG.debug("Message " + messagedId + " set back in READY_TO_PULL state.");
             final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messagedId);
             if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Message " + messagedId + " set back in READY_TO_PULL state.");
+                }
                 userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
             } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Pull Mesage with " + messagedId + " marked as send failure after max retry attempt reached");
+                }
                 userMessageLog.setMessageStatus(MessageStatus.SEND_FAILURE);
             }
             userMessageLogDao.update(userMessageLog);
