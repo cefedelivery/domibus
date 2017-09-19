@@ -115,7 +115,12 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         }
 
         LOG.info("Validating sender certificate");
-        String senderPartyName = getSenderPartyName(message);
+        String senderPartyName;
+        if (isPullMessage) {
+            senderPartyName = getReceiverPartyName(message);
+        } else {
+            senderPartyName = getSenderPartyName(message);
+        }
         X509Certificate certificate = getSenderCertificate(message);
         if (!checkSenderPartyTrust(certificate, senderPartyName, messageId, isPullMessage)) {
             EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, "Sender [" + senderPartyName + "] is not trusted", messageId, null);
@@ -192,6 +197,13 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         String pmodeKey = (String) message.get(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
         List<String> contents = StringUtils.getParts(pmodeKey, ":");
         return contents.get(0);
+    }
+
+
+    private String getReceiverPartyName(SoapMessage message) {
+        String pmodeKey = (String) message.get(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
+        List<String> contents = StringUtils.getParts(pmodeKey, ":");
+        return contents.get(1);
     }
 
     private X509Certificate getSenderCertificate(SoapMessage msg)  {
