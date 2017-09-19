@@ -349,6 +349,11 @@ public class PModeDao extends PModeProvider {
     }
 
     @Override
+    public boolean isConfigurationLoaded() {
+        return configurationDAO.configurationExists();
+    }
+
+    @Override
     public Role getBusinessProcessRole(String roleValue) {
         final TypedQuery<Role> query = entityManager.createNamedQuery("Role.findByValue", Role.class);
         query.setParameter("VALUE", roleValue);

@@ -353,6 +353,11 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
+    public boolean isConfigurationLoaded() {
+        return this.configuration != null;
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public List<String> updatePModes(final byte[] bytes) throws XmlProcessingException {
         List<String> messages = super.updatePModes(bytes);

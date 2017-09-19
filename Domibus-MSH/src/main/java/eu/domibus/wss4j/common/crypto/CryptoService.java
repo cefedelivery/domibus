@@ -92,10 +92,15 @@ public class CryptoService {
     }
 
     private void loadTrustStore() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, WSSecurityException {
+        if (trustStore == null) {
+            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        }
         LOG.info("Initiating truststore");
         String trustStoreFilename = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
         String trustStorePassword = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password");
-        trustStore.load(new FileInputStream(trustStoreFilename), trustStorePassword.toCharArray());
+        try (final FileInputStream strustStoreStream = new FileInputStream(trustStoreFilename)) {
+            trustStore.load(strustStoreStream, trustStorePassword.toCharArray());
+        }
     }
 
     public void refreshTrustStore() {

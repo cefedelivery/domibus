@@ -56,6 +56,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     private static final String BODYLOAD = "#bodyload";
 
+    private static final String MESSAGE_ID_EMPTY = "Message ID is empty";
+
     private static final String MESSAGE_NOT_FOUND_ID = "Message not found, id [";
 
     private static final String ERROR_IS_PAYLOAD_DATA_HANDLER = "Error getting the input stream from the payload data handler";
@@ -351,12 +353,17 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
 
         UserMessage userMessage = null;
-        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(trim(retrieveMessageRequest.getMessageID()));
+        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(retrieveMessageRequest.getMessageID());
+
+        if(!isMessageIdNotEmpty) {
+            LOG.error(MESSAGE_ID_EMPTY);
+            throw new DownloadMessageFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
+        }
+
+        String trimmedMessageId = trim(retrieveMessageRequest.getMessageID());
 
         try {
-            if (isMessageIdNotEmpty) {
-                userMessage = downloadMessage(retrieveMessageRequest.getMessageID(), null);
-            }
+            userMessage = downloadMessage(trimmedMessageId, null);
         } catch (final MessageNotFoundException mnfEx) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]", mnfEx);
@@ -382,7 +389,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         fillInfoPartsForLargeFiles(retrieveMessageResponse, messaging);
 
         try {
-            messageAcknowledgeService.acknowledgeMessageDelivered(retrieveMessageRequest.getMessageID(), new Timestamp(System.currentTimeMillis()));
+            messageAcknowledgeService.acknowledgeMessageDelivered(trimmedMessageId, new Timestamp(System.currentTimeMillis()));
         } catch (AuthenticationException | MessageAcknowledgeException e) {
             //if an error occurs related to the message acknowledgement do not block the download message operation
             LOG.error("Error acknowledging message [" + retrieveMessageRequest.getMessageID() + "]", e);
