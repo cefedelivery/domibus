@@ -127,7 +127,8 @@ Domibus 3.3-RC1 (from 3.2.5):
                                 - "minPoolSize" mapped to "domibus.datasource.xa.minPoolSize"
                                 - "maxPoolSize" mapped to "domibus.datasource.xa.maxPoolSize"
                                 - "testQuery" mapped to "domibus.datasource.xa.testQuery"
-                                - "xaProperties" properties are mapped with the following convention: prefix "domibus.datasource.xa.property." + property name; Eg: "serverName" mapped to "domibus.datasource.xa.property.serverName"
+                                - "xaProperties" properties are mapped with the following convention: prefix "domibus.datasource.xa.property." + property name; Eg: "user" mapped to "domibus.datasource.xa.property.user";
+                                   Exception to this rule: the property: "serverName" mapped to "domibus.database.serverName"  and "port" mapped to "domibus.database.port"
                         o new properties added:
                                 - check the section "#Non-XA Datasource" and adapt the properties based on the used database(MySQL or Oracle)
                 - [WebLogic only]
