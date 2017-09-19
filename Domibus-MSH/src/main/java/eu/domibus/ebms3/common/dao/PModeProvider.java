@@ -90,6 +90,8 @@ public abstract class PModeProvider {
 
     public abstract void refresh();
 
+    public abstract boolean isConfigurationLoaded();
+
     public byte[] getRawConfiguration() {
         final ConfigurationRaw latest = this.configurationRawDAO.getLatest();
         return (latest != null) ? latest.getXml() : new byte[0];

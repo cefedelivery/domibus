@@ -142,13 +142,12 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional
     public void initiatePullRequest() {
-        Party initiator;
-        try {
-            initiator = pModeProvider.getGatewayParty();
-        } catch (IllegalStateException e) {
-            LOG.trace("A configuration problem occured while initiating the pull request. Probably no configuration is loaded");
+        final boolean configurationLoaded = pModeProvider.isConfigurationLoaded();
+        if (!configurationLoaded) {
+            LOG.debug("A configuration problem occurred while initiating the pull request. Probably no configuration is loaded.");
             return;
         }
+        Party initiator = pModeProvider.getGatewayParty();
         List<Process> pullProcesses = pModeProvider.findPullProcessesByInitiator(initiator);
         LOG.debug("Initiating pull requests:");
         for (Process pullProcess : pullProcesses) {
