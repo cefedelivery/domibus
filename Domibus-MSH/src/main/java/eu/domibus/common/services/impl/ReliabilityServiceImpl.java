@@ -85,7 +85,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                 }
                 backendNotificationService.notifyOfSendSuccess(messageId);
                 messagingDao.clearPayloadData(messageId);
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS);
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS, messageId);
                 break;
             case WAITING_FOR_CALLBACK:
                 updateRetryLoggingService.updateWaitingReceiptMessageRetryLogging(messageId, legConfiguration);
