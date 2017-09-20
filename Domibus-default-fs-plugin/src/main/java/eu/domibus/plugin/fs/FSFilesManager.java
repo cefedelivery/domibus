@@ -11,6 +11,7 @@ import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.activation.DataHandler;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.io.OutputStreamWriter;
  * @author @author FERNANDES Henrique, GONCALVES Bruno
  */
 @Component
+@Transactional(noRollbackFor = FSSetUpException.class)
 public class FSFilesManager {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSFilesManager.class);
