@@ -64,15 +64,13 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
             endpoint = sm.getEndpoint(processIdentifier, new TransportProfile(transportProfileAS4), TransportProfile.AS4);
 
             if (endpoint == null || endpoint.getAddress() == null || endpoint.getProcessIdentifier() == null) {
-                throw new ConfigurationException("Receiver does not support reception of " + documentId + " for process " + processId + " using the AS4 Protocol");
+                LOG.info("Could not fetch metadata from SMP for documentId " + documentId + " processId " + processId);
+                throw new ConfigurationException("Could not fetch metadata from SMP");
             }
-
             return new EndpointInfo(endpoint.getAddress(), endpoint.getCertificate());
-
-        } catch (final PeppolSecurityException | LookupException e) {
-            throw new ConfigurationException("Receiver does not support reception of " + documentId + " for process " + processId + " using the AS4 Protocol", e);
-        } catch (final EndpointNotFoundException e) {
-            throw new ConfigurationException("Could not fetch metadata from SMP", e);
+        } catch (final PeppolSecurityException | LookupException | EndpointNotFoundException | IllegalStateException e) {
+            LOG.info("Could not fetch metadata from SMP for documentId " + documentId + " processId " + processId);
+            throw new ConfigurationException("Could not fetch metadata from SMP.", e);
         }
     }
 }
