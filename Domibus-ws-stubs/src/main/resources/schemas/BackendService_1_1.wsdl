@@ -53,6 +53,10 @@
         <wsdl:part element="tns:retrieveMessageRequest" name="retrieveMessageRequest">
         </wsdl:part>
     </wsdl:message>
+    <wsdl:message name="RetrieveMessageFault">
+        <wsdl:part element="tns:FaultDetail" name="RetrieveMessageFault">
+        </wsdl:part>
+    </wsdl:message>
     <wsdl:message name="retrieveMessageResponse">
         <wsdl:part element="tns:retrieveMessageResponse" name="retrieveMessageResponse">
         </wsdl:part>
@@ -81,6 +85,10 @@
     </wsdl:message>
     <wsdl:message name="getStatus">
         <wsdl:part element="tns:statusRequest" name="statusRequest">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="StatusFault">
+        <wsdl:part element="tns:FaultDetail" name="StatusFault">
         </wsdl:part>
     </wsdl:message>
     <wsdl:message name="sendMessageResponse">
@@ -142,6 +150,8 @@
             </wsdl:input>
             <wsdl:output message="tns:getStatusResponse" name="getStatusResponse">
             </wsdl:output>
+            <wsdl:fault message="tns:StatusFault" name="StatusFault">
+            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="listPendingMessages">
             <wsdl:input message="tns:listPendingMessages" name="listPendingMessages">
@@ -169,7 +179,7 @@
             </wsdl:input>
             <wsdl:output message="tns:retrieveMessageResponse" name="retrieveMessageResponse">
             </wsdl:output>
-            <wsdl:fault message="tns:DownloadMessageFault" name="DownloadMessageFault">
+            <wsdl:fault message="tns:RetrieveMessageFault" name="RetrieveMessageFault">
             </wsdl:fault>
         </wsdl:operation>
     </wsdl:portType>
@@ -219,6 +229,9 @@
             <wsdl:output name="getStatusResponse">
                 <soap12:body use="literal"/>
             </wsdl:output>
+            <wsdl:fault name="StatusFault">
+                <soap12:fault name="StatusFault" use="literal"/>
+            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getMessageErrors">
             <soap12:operation soapAction="" style="document"/>
@@ -260,8 +273,8 @@
                 <soap12:header message="tns:retrieveMessageResponse" part="ebMSHeaderInfo" use="literal"/>
                 <soap12:body parts="retrieveMessageResponse" use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="DownloadMessageFault">
-                <soap12:fault name="DownloadMessageFault" use="literal"/>
+            <wsdl:fault name="RetrieveMessageFault">
+                <soap12:fault name="RetrieveMessageFault" use="literal"/>
             </wsdl:fault>
         </wsdl:operation>
     </wsdl:binding>
