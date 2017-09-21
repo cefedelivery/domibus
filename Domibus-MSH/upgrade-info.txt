@@ -17,8 +17,7 @@ Domibus 3.3-FR (from 3.3-RC1)
                                   ......
                                 <plugins>
                                      ......
-                                     <discardingDLQBrokerPlugin dropOnly="domibus.internal.dispatch.queue" reportInterval="10000"/>
-                                     <discardingDLQBrokerPlugin dropOnly="domibus.internal.pull.queue" reportInterval="10000"/>
+                                     <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue" reportInterval="10000"/>
                                 </plugins>
                              </broker>
                         - the configuration for the redelivery plugin should now look like the one below:
