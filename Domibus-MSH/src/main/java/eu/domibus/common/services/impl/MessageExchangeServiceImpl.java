@@ -229,7 +229,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional(noRollbackFor = ReliabilityException.class)
     public void removeRawMessageIssuedByPullRequest(final String messageId) {
-        rawEnvelopeLogDao.deleteRawMessage(messageId);
+        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
     }
 
     @Override

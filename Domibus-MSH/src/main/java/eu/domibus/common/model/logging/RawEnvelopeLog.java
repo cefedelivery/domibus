@@ -10,6 +10,8 @@ import javax.persistence.*;
 /**
  * @author idragusa
  * @since 3.2.5
+ *
+ * Entity class containing the raw xml of the a message.
  */
 @Entity
 @Table(name = "TB_RAWENVELOPE_LOG")
