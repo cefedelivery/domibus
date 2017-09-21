@@ -9,6 +9,7 @@ import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
+import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,7 @@ public class FSFilesManager {
 
     private static final String FTP_PREFIX = "ftp:";
     private static final String PARENT_RELATIVE_PATH = "../";
+    private static final int TEN_SECONDS = 10000;
 
     public static final String INCOMING_FOLDER = "IN";
     public static final String OUTGOING_FOLDER = "OUT";
@@ -55,13 +57,17 @@ public class FSFilesManager {
         if (location.startsWith(FTP_PREFIX)) {
             FtpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts, false);
         }
+        FtpFileSystemConfigBuilder.getInstance().setConnectTimeout(opts, TEN_SECONDS);
+        FtpFileSystemConfigBuilder.getInstance().setDataTimeout(opts, TEN_SECONDS);
+        FtpFileSystemConfigBuilder.getInstance().setSoTimeout(opts, TEN_SECONDS);
+        SftpFileSystemConfigBuilder.getInstance().setTimeout(opts, TEN_SECONDS);
 
         FileSystemManager fsManager = getVFSManager();
         FileObject rootDir = fsManager.resolveFile(location, opts);
         checkRootDirExists(rootDir);
 
         return rootDir;
-    }
+    }    
 
     private void checkRootDirExists(FileObject rootDir) throws FileSystemException {
         if (!rootDir.exists()) {
