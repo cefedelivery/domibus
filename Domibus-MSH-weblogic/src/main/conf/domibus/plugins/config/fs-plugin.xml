@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:amq="http://activemq.apache.org/schema/core"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:jee="http://www.springframework.org/schema/jee"
        xmlns:c="http://www.springframework.org/schema/c"
        xmlns:p="http://www.springframework.org/schema/p"
        xmlns="http://www.springframework.org/schema/beans"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
-                           http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+       xsi:schemaLocation= "http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
+                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <!-- General File System Plugin properties -->
     <util:properties id="fsPluginProperties" ignore-resource-not-found="true"
@@ -17,8 +18,12 @@
     <context:property-placeholder properties-ref="fsPluginProperties" ignore-resource-not-found="true"
                                   ignore-unresolvable="true" />
 
-    <amq:queue id="notifyBackendFSQueue"
-               physicalName="domibus.notification.filesystem"/>
+    <jee:jndi-lookup id="notifyBackendFSQueue"
+                     jndi-name="jms/domibus.notification.filesystem"
+                     cache="true"
+                     resource-ref="true"
+                     lookup-on-startup="true" environment-ref="contextEnvironment">
+    </jee:jndi-lookup>
 
     <bean id="backendFSPlugin"
           class="eu.domibus.plugin.fs.BackendFSImpl">
@@ -27,9 +32,11 @@
     </bean>
 
     <bean id="fsPluginNotificationListenerService"
-          class="eu.domibus.plugin.NotificationListenerService"
+          class="eu.domibus.submission.WeblogicNotificationListenerService"
           c:queue-ref="notifyBackendFSQueue" c:mode="PUSH"
-          p:backendConnector-ref="backendFSPlugin"/>
+          p:backendConnector-ref="backendFSPlugin">
+        <property name="queueJndi" value="jms/domibus.notification.filesystem"/>
+    </bean>
 
     <!-- quartz job for purging sent messages -->
     <bean id="fsPluginPurgeSentWorkerJob"

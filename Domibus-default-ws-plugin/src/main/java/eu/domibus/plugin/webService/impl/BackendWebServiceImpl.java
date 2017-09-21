@@ -44,6 +44,7 @@ import static org.apache.commons.lang.StringUtils.trim;
 @BindingType(SOAPBinding.SOAP12HTTP_BINDING)
 public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, UserMessage> implements BackendInterface {
 
+    public static final String MESSAGE_SUBMISSION_FAILED = "Message submission failed";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendWebServiceImpl.class);
 
     private static final eu.domibus.plugin.webService.generated.ObjectFactory WEBSERVICE_OF = new eu.domibus.plugin.webService.generated.ObjectFactory();
@@ -55,6 +56,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     private static final String DEFAULT_MT = "text/xml";
 
     private static final String BODYLOAD = "#bodyload";
+
+    private static final String MESSAGE_ID_EMPTY = "Message ID is empty";
 
     private static final String MESSAGE_NOT_FOUND_ID = "Message not found, id [";
 
@@ -136,8 +139,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         try {
             messageId = this.submit(ebMSHeaderInfo);
         } catch (final MessagingProcessingException mpEx) {
-            LOG.error("Message submission failed", mpEx);
-            throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
+            LOG.error(MESSAGE_SUBMISSION_FAILED, mpEx);
+            throw new SendMessageFault(MESSAGE_SUBMISSION_FAILED, generateFaultDetail(mpEx));
         }
         LOG.info("Received message from backend to send, assigning messageID" + messageId);
         final SendResponse response = WEBSERVICE_OF.createSendResponse();
@@ -212,8 +215,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         try {
             messageId = this.submit(ebMSHeaderInfo);
         } catch (final MessagingProcessingException mpEx) {
-            LOG.error("Message submission failed", mpEx);
-            throw new SendMessageFault("Message submission failed", generateFaultDetail(mpEx));
+            LOG.error(MESSAGE_SUBMISSION_FAILED, mpEx);
+            throw new SendMessageFault(MESSAGE_SUBMISSION_FAILED, generateFaultDetail(mpEx));
         }
         LOG.info("Received message from backend to send, assigning messageID" + messageId);
         final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
@@ -348,26 +351,31 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
-    public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
+    public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws RetrieveMessageFault {
 
         UserMessage userMessage = null;
-        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(trim(retrieveMessageRequest.getMessageID()));
+        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(retrieveMessageRequest.getMessageID());
+
+        if(!isMessageIdNotEmpty) {
+            LOG.error(MESSAGE_ID_EMPTY);
+            throw new RetrieveMessageFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
+        }
+
+        String trimmedMessageId = trim(retrieveMessageRequest.getMessageID());
 
         try {
-            if (isMessageIdNotEmpty) {
-                userMessage = downloadMessage(retrieveMessageRequest.getMessageID(), null);
-            }
+            userMessage = downloadMessage(trimmedMessageId, null);
         } catch (final MessageNotFoundException mnfEx) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]", mnfEx);
             }
             LOG.error(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]");
-            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]", createDownloadMessageFault(mnfEx));
+            throw new RetrieveMessageFault(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]", createDownloadMessageFault(mnfEx));
         }
 
         if (userMessage == null) {
             LOG.error(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]");
-            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]", createFault("UserMessage not found"));
+            throw new RetrieveMessageFault(MESSAGE_NOT_FOUND_ID + retrieveMessageRequest.getMessageID() + "]", createFault("UserMessage not found"));
         }
 
         // To avoid blocking errors during the Header's response validation
@@ -382,7 +390,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         fillInfoPartsForLargeFiles(retrieveMessageResponse, messaging);
 
         try {
-            messageAcknowledgeService.acknowledgeMessageDelivered(retrieveMessageRequest.getMessageID(), new Timestamp(System.currentTimeMillis()));
+            messageAcknowledgeService.acknowledgeMessageDelivered(trimmedMessageId, new Timestamp(System.currentTimeMillis()));
         } catch (AuthenticationException | MessageAcknowledgeException e) {
             //if an error occurs related to the message acknowledgement do not block the download message operation
             LOG.error("Error acknowledging message [" + retrieveMessageRequest.getMessageID() + "]", e);
@@ -415,7 +423,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         }
     }
 
-    private void fillInfoPartsForLargeFiles(Holder<RetrieveMessageResponse> retrieveMessageResponse, Messaging messaging) throws DownloadMessageFault {
+    private void fillInfoPartsForLargeFiles(Holder<RetrieveMessageResponse> retrieveMessageResponse, Messaging messaging) {
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
             LargePayloadType payloadType = WEBSERVICE_OF.createLargePayloadType();
@@ -466,7 +474,13 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     }
 
     @Override
-    public MessageStatus getStatus(final StatusRequest statusRequest) {
+    public MessageStatus getStatus(final StatusRequest statusRequest) throws StatusFault {
+        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(statusRequest.getMessageID());
+
+        if(!isMessageIdNotEmpty) {
+            LOG.error(MESSAGE_ID_EMPTY);
+            throw new StatusFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
+        }
         return defaultTransformer.transformFromMessageStatus(messageRetriever.getStatus(statusRequest.getMessageID()));
     }
 

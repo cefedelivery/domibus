@@ -41,7 +41,7 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_LEG_NAME_FOUND("BUS-030", "Leg name found [{}] for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
     BUS_LEG_NAME_NOT_FOUND("BUS-031", "Leg name not found found for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
     BUS_MESSAGE_SEND_INITIATION("BUS-032", "Preparing to send message"),
-    BUS_MESSAGE_SEND_SUCCESS("BUS-033", "Message sent successfully"),
+    BUS_MESSAGE_SEND_SUCCESS("BUS-033", "Message sent successfully [{}]"),
     BUS_MESSAGE_SEND_FAILURE("BUS-034", "Message send failure"),
     BUS_MESSAGE_ATTACHMENT_NOT_FOUND("BUS-035", "No Attachment found for cid [{}]"),
     BUS_MULTIPLE_PART_INFO_REFERENCING_SOAP_BODY("BUS-036", "More than one Partinfo referencing the soap body found"),

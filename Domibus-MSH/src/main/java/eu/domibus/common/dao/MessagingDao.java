@@ -13,7 +13,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.*;
+import javax.persistence.NoResultException;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +30,7 @@ import static org.springframework.util.StringUtils.hasLength;
 @Repository
 public class MessagingDao extends BasicDao<Messaging> {
 
-    final static String FIND_MESSAGING_ON_STATUS_AND_RECEIVER="select new eu.domibus.ebms3.common.model.MessagePullDto(ul.messageId,ul.received) from UserMessageLog ul where ul.messageId in (SELECT m.userMessage.messageInfo.messageId as id FROM  Messaging m left join m.userMessage.partyInfo.to.partyId as pids where pids.value=:PARTY_ID and m.userMessage.mpc=:MPC) and ul.messageStatus=:MESSAGE_STATUS ORDER BY ul.received";
+    final static String FIND_MESSAGING_ON_STATUS_AND_RECEIVER = "select new eu.domibus.ebms3.common.model.MessagePullDto(ul.messageId,ul.received) from UserMessageLog ul where ul.messageId in (SELECT m.userMessage.messageInfo.messageId as id FROM  Messaging m left join m.userMessage.partyInfo.to.partyId as pids where UPPER(pids.value)=UPPER(:PARTY_ID) and m.userMessage.mpc=:MPC) and ul.messageStatus=:MESSAGE_STATUS ORDER BY ul.received";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingDao.class);
     private static final String PARTY_ID = "PARTY_ID";
     private static final String MESSAGE_STATUS = "MESSAGE_STATUS";

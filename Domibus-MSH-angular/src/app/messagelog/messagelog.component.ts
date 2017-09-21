@@ -133,7 +133,8 @@ export class MessageLogComponent {
       {
         cellTemplate: this.rowActions,
         name: 'Actions',
-        width: 80
+        width: 80,
+        sortable: false
       }
 
     ];

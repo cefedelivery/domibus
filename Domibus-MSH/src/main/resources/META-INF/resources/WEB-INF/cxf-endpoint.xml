@@ -109,9 +109,6 @@
         <jaxws:handlers>
             <bean class="eu.domibus.ebms3.receiver.FaultInHandler"/>
         </jaxws:handlers>
-        <jaxws:executor>
-            <ref bean="taskExecutor"/>
-        </jaxws:executor>
 
     </jaxws:endpoint>
 

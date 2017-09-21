@@ -349,7 +349,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
         // The SMP entries missing this info are not for the use of Domibus
         if(endpoint.getAddress() == null  || endpoint.getCertificate() == null) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Invalid endpoint metadata received from the dynamic discovery for ", userMessage.getMessageInfo().getMessageId(), null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Invalid endpoint metadata received from the dynamic discovery process.", userMessage.getMessageInfo().getMessageId(), null);
         }
         LOG.debug("Lookup successful: " + endpoint.getAddress());
         return endpoint;

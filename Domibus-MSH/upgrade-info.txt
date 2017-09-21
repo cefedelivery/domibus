@@ -17,8 +17,7 @@ Domibus 3.3-FR (from 3.3-RC1)
                                   ......
                                 <plugins>
                                      ......
-                                     <discardingDLQBrokerPlugin dropOnly="domibus.internal.dispatch.queue" reportInterval="10000"/>
-                                     <discardingDLQBrokerPlugin dropOnly="domibus.internal.pull.queue" reportInterval="10000"/>
+                                     <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue" reportInterval="10000"/>
                                 </plugins>
                              </broker>
                         - the configuration for the redelivery plugin should now look like the one below:
@@ -36,6 +35,16 @@ Domibus 3.3-FR (from 3.3-RC1)
                                      </redeliveryPolicyMap>
                                  </redeliveryPolicyMap>
                              </redeliveryPlugin>
+                        - add the following entry in the broker/destinations section like described bellow:
+                             <broker>
+                                  ......
+                                <destinations>
+                                     ......
+                                     <queue id="filesystemBackendNotificationQueue" physicalName="domibus.notification.filesystem"/>
+                                     ......
+                                </destinations>
+                                  ......
+                             </broker>
                     o in file "\conf\domibus\domibus.properties":
                         - rename the property "com.atomikos.maxPoolSize" to "domibus.jms.XAConnectionFactory.maxPoolSize"
                         - remove the property "domibus.datasource.xa.testQuery"
@@ -49,6 +58,7 @@ Domibus 3.3-FR (from 3.3-RC1)
                     o modify the following parameters for the queue DomibusSendMessageQueue(jms/domibus.internal.dispatch.queue):
                         - Set "Expiration Policy" to "Discard"
                         - Set "Error Destination" to "None"
+                    o execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.3-RC1-to-3.3-FR-WeblogicSingleServer.properties for single server deployment or 3.3-RC1-to-3.3-FR-WeblogicCluster.properties for cluster deployment
                 - [WildFly only]
                    o in file "cef_edelivery_path\domibus\standalone\configuration\standalone-full.xml":
                        - remove the "dead-letter-address" setting from the "address-setting" configuration of the "jms.queue.DomibusSendMessageQueue"; after the modification will be done the
@@ -59,6 +69,19 @@ Domibus 3.3-FR (from 3.3-RC1)
                             <redelivery-delay>1000</redelivery-delay>
                             <max-delivery-attempts>1</max-delivery-attempts>
                         </address-setting>
+                       - add the following address-setting to section address-settings:
+                         <address-setting match="jms.queue.DomibusNotifyBackendFileSystemQueue">
+                           <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
+                           <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                           <redelivery-delay>300000</redelivery-delay>
+                           <max-delivery-attempts>10</max-delivery-attempts>
+                         </address-setting>
+                       - add the folloowing jms-queue to section jms-destinations:
+                         <jms-queue name="DomibusNotifyBackendFileSystemQueue">
+                           <entry name="java:/jms/domibus.notification.filesystem"/>
+                           <entry name="java:/jms/queue/DomibusNotifyBackendFileSystemQueue"/>
+                           <durable>true</durable>
+                         </jms-queue>
 Domibus 3.3-RC1 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-rc1-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-rc1-migration.ddl for Oracle)
@@ -127,7 +150,8 @@ Domibus 3.3-RC1 (from 3.2.5):
                                 - "minPoolSize" mapped to "domibus.datasource.xa.minPoolSize"
                                 - "maxPoolSize" mapped to "domibus.datasource.xa.maxPoolSize"
                                 - "testQuery" mapped to "domibus.datasource.xa.testQuery"
-                                - "xaProperties" properties are mapped with the following convention: prefix "domibus.datasource.xa.property." + property name; Eg: "serverName" mapped to "domibus.datasource.xa.property.serverName"
+                                - "xaProperties" properties are mapped with the following convention: prefix "domibus.datasource.xa.property." + property name; Eg: "user" mapped to "domibus.datasource.xa.property.user";
+                                   Exception to this rule: the property: "serverName" mapped to "domibus.database.serverName"  and "port" mapped to "domibus.database.port"
                         o new properties added:
                                 - check the section "#Non-XA Datasource" and adapt the properties based on the used database(MySQL or Oracle)
                 - [WebLogic only]

@@ -5,7 +5,9 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.common.model.MessageInfo;
+import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
+import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -37,6 +39,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -71,6 +74,10 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
 
+    @Qualifier("jaxbContextEBMS")
+    @Autowired
+    protected JAXBContext jaxbContext;
+
     @Autowired
     private CertificateService certificateService;
 
@@ -96,34 +103,50 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
         String messageId = (String) message.getExchange().get(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY);
         if (!isMessageSecured(message)) {
-            LOG.info("Message [" + messageId + "] does not contain security info ==> skipping sender trust verification.");
+            LOG.info("Message does not contain security info ==> skipping sender trust verification.");
             return;
         }
 
-        LOG.info("Validate sender certificate");
-        String senderPartyName = getSenderPartyName(message);
+        boolean isPullMessage = false;
+        MessageType messageType = (MessageType) message.get(MSHDispatcher.MESSAGE_TYPE_IN);
+        if (messageType != null && messageType.equals(MessageType.SIGNAL_MESSAGE)) {
+            LOG.info("PULL Signal Message");
+            isPullMessage = true;
+        }
+
+        LOG.info("Validating sender certificate");
+        String senderPartyName;
+        if (isPullMessage) {
+            senderPartyName = getReceiverPartyName(message);
+        } else {
+            senderPartyName = getSenderPartyName(message);
+        }
         X509Certificate certificate = getSenderCertificate(message);
-        if(!checkSenderPartyTrust(certificate, senderPartyName, messageId)) {
+        if (!checkSenderPartyTrust(certificate, senderPartyName, messageId, isPullMessage)) {
             EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, "Sender [" + senderPartyName + "] is not trusted", messageId, null);
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ebMS3Ex);
         }
 
-        if(!checkCertificateValidity(certificate, senderPartyName)) {
+        if (!checkCertificateValidity(certificate, senderPartyName, isPullMessage)) {
             EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, "Sender [" + senderPartyName + "] certificate is not valid or has been revoked", messageId, null);
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ebMS3Ex);
         }
     }
 
-    protected Boolean checkCertificateValidity(X509Certificate certificate, String sender) {
+    protected Boolean checkCertificateValidity(X509Certificate certificate, String sender, boolean isPullMessage) {
         if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true"))) {
             try {
                 if (!certificateService.isCertificateValid(certificate)) {
                     LOG.error("Cannot receive message: sender certificate is not valid or it has been revoked [" + sender + "]");
                     return false;
                 }
-                LOG.info("Sender certificate exists and is valid [" + sender + "]");
+                if (isPullMessage) {
+                    LOG.info("[Pulling] - Sender certificate exists and is valid [" + sender + "]");
+                } else {
+                    LOG.info("Sender certificate exists and is valid [" + sender + "]");
+                }
             } catch (DomibusCertificateException dce) {
                 LOG.error("Could not verify if the certificate chain is valid for alias " + sender, dce);
                 return false;
@@ -132,19 +155,26 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         return true;
     }
 
-    protected Boolean checkSenderPartyTrust(X509Certificate certificate, String sender, String messageId) {
+    protected Boolean checkSenderPartyTrust(X509Certificate certificate, String sender, String messageId, boolean isPullMessage) {
         if (!Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false"))) {
             LOG.debug("Sender alias verification is disabled");
             return true;
         }
 
-        LOG.info("Verifying sender trust for message [" + messageId + "]");
+        LOG.info("Verifying sender trust");
         if(certificate != null && org.apache.commons.lang.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), sender) ) {
-            LOG.info("Sender [" + sender + "] is trusted for message [" + messageId + "]");
+            if (isPullMessage) {
+                LOG.info("[Pulling] - Sender [" + sender + "] is trusted.");
+            } else {
+                LOG.info("Sender [" + sender + "] is trusted.");
+            }
             return true;
         }
-
-        LOG.error("Sender [" + sender + "] is not trusted for message [" + messageId + "]. To disable this check, set the property " + DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING + " to false.");
+        if (isPullMessage) {
+            LOG.error("[Pulling] - Sender [" + sender + "] is not trusted. To disable this check, set the property " + DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING + " to false.");
+        } else {
+            LOG.error("Sender [" + sender + "] is not trusted. To disable this check, set the property " + DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING + " to false.");
+        }
         return false;
     }
 
@@ -167,6 +197,13 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         String pmodeKey = (String) message.get(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
         List<String> contents = StringUtils.getParts(pmodeKey, ":");
         return contents.get(0);
+    }
+
+
+    private String getReceiverPartyName(SoapMessage message) {
+        String pmodeKey = (String) message.get(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
+        List<String> contents = StringUtils.getParts(pmodeKey, ":");
+        return contents.get(1);
     }
 
     private X509Certificate getSenderCertificate(SoapMessage msg)  {
@@ -200,7 +237,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             X509Certificate cert = getCertificateFromKeyInfo(requestData, getSecurityHeader(msg));
 
             if (cert == null) { // check for certificate embedded in the message under BinarySecurityToken tag
-                LOG.info("Check for message embedded certificate in the BinarySecurityToken tag");
+                LOG.info("Checking for message embedded certificate in the BinarySecurityToken tag");
                 cert = getCertificateFromBinarySecurityToken(getSecurityHeader(msg));
             }
             if(cert == null) {
