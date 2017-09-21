@@ -123,23 +123,9 @@
                     </redeliveryPolicyMap>
                 </redeliveryPolicyMap>
             </redeliveryPlugin>
-           <!--<loggingBrokerPlugin logAll="true" logConnectionEvents="false" logSessionEvents="false" perDestinationLogger="true"/>-->
-            <!--spring:bean id="throughputLimiterPlugin" class="eu.domibus.messaging.amq.plugins.ThroughputLimiterPlugin">
-                <spring:constructor-arg name="filter" ref="testFilter" />
-                <spring:constructor-arg name="resendDelay" value="10000" />
-            </spring:bean-->
+
             <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue" reportInterval="10000"/>
         </plugins>
     </broker>
-
-    <!--spring:bean id="testFilter" class="eu.domibus.messaging.amq.plugins.ThroughputFilter">
-        <spring:property name="maxParallel" value="3" />
-        <spring:property name="name" value="testFilter" />
-        <spring:property name="queue" value="domibus.internal.dispatch.queue" />
-        <spring:property name="propertyKey" value="#{T(eu.domibus.messaging.MessageConstants).ENDPOINT}" />
-    </spring:bean-->
-
-
-
 
 </spring:beans>
