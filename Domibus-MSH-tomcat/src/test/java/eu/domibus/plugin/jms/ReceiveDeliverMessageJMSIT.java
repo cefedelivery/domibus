@@ -86,6 +86,7 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
         connection.start();
         // Puts the message in the notification queue so it can be downloaded
         pushQueueMessage(messageId, connection, JMS_NOT_QUEUE_NAME);
+        connection.close();
 
         final MapMessage mapMessage = new ActiveMQMapMessage();
 
@@ -97,14 +98,20 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
         // The downloaded MapMessage is used as input parameter for the real Test case here!
         backendJMSImpl.receiveMessage(mapMessage);
         // Verifies that the message is really in the queue
+        connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
+        connection.start();
         Message message = popQueueMessageWithTimeout(connection, JMS_DISPATCH_QUEUE_NAME, 2000);
+        connection.close();
         //Assert.assertNotNull(message); TODO Why the Reply queue is always empty ?
         System.out.println("Out message: " + message);
         //verifyMessageStatus(message.getStringProperty(MESSAGE_ID));
+        connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
+        connection.start();
         message = popQueueMessageWithTimeout(connection, JMS_BACKEND_REPLY_QUEUE_NAME, 2000);
+        connection.close();
         //Assert.assertNotNull(message); // TODO Why the Reply queue is always empty ?
         System.out.println("Reply message: " + message);
-        connection.close();
+
     }
 
     /**
@@ -123,6 +130,7 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
         connection.start();
         // Puts the message in the notification queue so it can be downloaded
         pushQueueMessage(messageId, connection, JMS_NOT_QUEUE_NAME);
+        connection.close();
 
         final MapMessage mapMessage = new ActiveMQMapMessage();
 
@@ -133,12 +141,18 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
         // The downloaded MapMessage is used as input parameter for the real Test case here!
         backendJMSImpl.receiveMessage(mapMessage);
         // Verifies that the message is really in the queue
+        connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
+        connection.start();
         Message message = popQueueMessageWithTimeout(connection, JMS_DISPATCH_QUEUE_NAME, 1000);
+        connection.close();
         Assert.assertNull(message);
         System.out.println("Out message: " + message);
+        connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
+        connection.start();
         message = popQueueMessageWithTimeout(connection, JMS_BACKEND_REPLY_QUEUE_NAME, 2000);
-        //Assert.assertNotNull(message); TODO Why the Reply queue is always empty ?
         connection.close();
+        //Assert.assertNotNull(message); TODO Why the Reply queue is always empty ?
+
         System.out.println("Reply message: " + message);
         // Assert.assertTrue(message.getStringProperty("").contains("Message identifiers must be unique"));
     }
