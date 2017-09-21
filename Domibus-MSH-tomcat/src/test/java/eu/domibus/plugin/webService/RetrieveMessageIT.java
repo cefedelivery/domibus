@@ -34,13 +34,13 @@ public class RetrieveMessageIT extends AbstractIT {
         }
     }
 
-    @Test(expected = DownloadMessageFault.class)
-    public void testMessageIdEmpty() throws DownloadMessageFault {
+    @Test(expected = RetrieveMessageFault.class)
+    public void testMessageIdEmpty() throws RetrieveMessageFault {
         retrieveMessageFail("", "MessageId is empty");
     }
 
-    @Test(expected = DownloadMessageFault.class)
-    public void testMessageNotFound() throws Exception {
+    @Test(expected = RetrieveMessageFault.class)
+    public void testMessageNotFound() throws RetrieveMessageFault {
         retrieveMessageFail("notFound", "No message with id [notFound] pending for download");
     }
 
@@ -56,7 +56,7 @@ public class RetrieveMessageIT extends AbstractIT {
         retrieveMessage("2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu");
     }
 
-    private void retrieveMessageFail(String messageId, String errorMessage) throws DownloadMessageFault {
+    private void retrieveMessageFail(String messageId, String errorMessage) throws RetrieveMessageFault {
         RetrieveMessageRequest retrieveMessageRequest = createRetrieveMessageRequest(messageId);
 
         Holder<RetrieveMessageResponse> retrieveMessageResponse = new Holder<>();
@@ -64,7 +64,7 @@ public class RetrieveMessageIT extends AbstractIT {
 
         try {
             backendWebService.retrieveMessage(retrieveMessageRequest, retrieveMessageResponse, ebMSHeaderInfo);
-        } catch (DownloadMessageFault re) {
+        } catch (RetrieveMessageFault re) {
             Assert.assertEquals(errorMessage, re.getFaultInfo().getMessage());
             throw re;
         }
@@ -81,7 +81,7 @@ public class RetrieveMessageIT extends AbstractIT {
 
         try {
             backendWebService.retrieveMessage(retrieveMessageRequest, retrieveMessageResponse, ebMSHeaderInfo);
-        } catch (DownloadMessageFault dmf) {
+        } catch (RetrieveMessageFault dmf) {
             String message = "Downloading message failed";
             Assert.assertEquals(message, dmf.getMessage());
             throw dmf;
