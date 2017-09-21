@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
@@ -79,7 +80,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
      * @param map The incoming JMS Message
      */
     @JmsListener(destination = "${domibus.backend.jmsInQueue}", containerFactory = "backendJmsListenerContainerFactory")
-    @Transactional
+    //Propagation.REQUIRES_NEW is needed in order to avoid sending the JMS message before the database data is commited; probably this is a bug in Atomikos which will be solved by performing an upgrade
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void receiveMessage(final MapMessage map) {
         try {
             String messageID = map.getStringProperty(MESSAGE_ID);
