@@ -14,8 +14,8 @@ import javax.persistence.*;
 @Entity
 @Table(name = "TB_RAWENVELOPE_LOG")
 @NamedQueries({
-        @NamedQuery(name = "find.by.message.id", query = "SELECT new eu.domibus.common.model.logging.RawEnvelopeDto(l.entityId,l.rawXML) FROM RawEnvelopeLog l where l.userMessage.messageInfo.messageId=:MESSAGE_ID"),
-        @NamedQuery(name = "find.entity.by.message.id", query = "SELECT l FROM RawEnvelopeLog l where l.userMessage.messageInfo.messageId=:MESSAGE_ID")
+        @NamedQuery(name = "RawDto.findByMessageId", query = "SELECT new eu.domibus.common.model.logging.RawEnvelopeDto(l.entityId,l.rawXML) FROM RawEnvelopeLog l where l.userMessage.messageInfo.messageId=:MESSAGE_ID"),
+        @NamedQuery(name = "Raw.findByMessageId", query = "SELECT l FROM RawEnvelopeLog l where l.userMessage.messageInfo.messageId=:MESSAGE_ID")
 })
 public class RawEnvelopeLog extends AbstractBaseEntity {
     @OneToOne
