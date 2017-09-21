@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import java.util.List;
 
 /**
  * @author idragusa
@@ -34,9 +35,13 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
         }
     }
 
-    public void deleteRawMessage(final int id){
-        RawEnvelopeLog read = read(id);
-        delete(read);
+    public void deleteRawMessage(final String messageId) {
+        TypedQuery<RawEnvelopeLog> namedQuery = em.createNamedQuery("find.entity.by.message.id", RawEnvelopeLog.class);
+        namedQuery.setParameter("MESSAGE_ID", messageId);
+        final List<RawEnvelopeLog> resultList = namedQuery.getResultList();
+        for (RawEnvelopeLog rawEnvelopeLog : resultList) {
+            delete(rawEnvelopeLog);
+        }
     }
 
 

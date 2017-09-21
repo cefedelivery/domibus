@@ -192,10 +192,10 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     }
 
-
+    //TODO change this mechanism.
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
+    public synchronized String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
         Set<Identifier> identifiers = initiator.getIdentifiers();
         List<MessagePullDto> messagingOnStatusReceiverAndMpc = new ArrayList<>();
         for (Identifier identifier : identifiers) {
@@ -229,10 +229,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional(noRollbackFor = ReliabilityException.class)
     public void removeRawMessageIssuedByPullRequest(final String messageId) {
-        RawEnvelopeDto rawEnvelopeDto = findPulledMessageRawXmlByMessageId(messageId);
-        if (rawEnvelopeDto != null) {
-            rawEnvelopeLogDao.deleteRawMessage(rawEnvelopeDto.getId());
-        }
+        rawEnvelopeLogDao.deleteRawMessage(messageId);
     }
 
     @Override

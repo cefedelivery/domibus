@@ -1,21 +1,11 @@
 
 package eu.domibus.common.model.logging;
 
-import eu.domibus.common.ErrorCode;
-import eu.domibus.common.ErrorResult;
-import eu.domibus.common.MSHRole;
-import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.common.model.Error;
-import org.hibernate.annotations.Cascade;
-import org.w3c.dom.Element;
+import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import eu.domibus.ebms3.common.model.SignalMessage;
+import eu.domibus.ebms3.common.model.UserMessage;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import static eu.domibus.common.model.configuration.Process.*;
 
 /**
  * @author idragusa
@@ -24,7 +14,8 @@ import static eu.domibus.common.model.configuration.Process.*;
 @Entity
 @Table(name = "TB_RAWENVELOPE_LOG")
 @NamedQueries({
-        @NamedQuery(name = "find.by.message.id", query = "SELECT new eu.domibus.common.model.logging.RawEnvelopeDto(l.entityId,l.rawXML) FROM RawEnvelopeLog l where l.userMessage.messageInfo.messageId=:MESSAGE_ID")
+        @NamedQuery(name = "find.by.message.id", query = "SELECT new eu.domibus.common.model.logging.RawEnvelopeDto(l.entityId,l.rawXML) FROM RawEnvelopeLog l where l.userMessage.messageInfo.messageId=:MESSAGE_ID"),
+        @NamedQuery(name = "find.entity.by.message.id", query = "SELECT l FROM RawEnvelopeLog l where l.userMessage.messageInfo.messageId=:MESSAGE_ID")
 })
 public class RawEnvelopeLog extends AbstractBaseEntity {
     @OneToOne
