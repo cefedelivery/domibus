@@ -439,6 +439,12 @@
                         <redelivery-delay>300000</redelivery-delay>
                         <max-delivery-attempts>10</max-delivery-attempts>
                     </address-setting>
+                    <address-setting match="jms.queue.DomibusNotifyBackendFileSystemQueue">
+                        <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
+                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                        <redelivery-delay>300000</redelivery-delay>
+                        <max-delivery-attempts>10</max-delivery-attempts>
+                    </address-setting>
                     <address-setting match="jms.queue.DomibusUnknownReceiverQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
@@ -542,6 +548,11 @@
                     <jms-queue name="DomibusNotifyBackendWebServiceQueue">
                         <entry name="java:/jms/domibus.notification.webservice"/>
                         <entry name="java:/jms/queue/DomibusNotifyBackendWebServiceQueue"/>
+                        <durable>true</durable>
+                    </jms-queue>
+                    <jms-queue name="DomibusNotifyBackendFileSystemQueue">
+                        <entry name="java:/jms/domibus.notification.filesystem"/>
+                        <entry name="java:/jms/queue/DomibusNotifyBackendFileSystemQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusUnknownReceiverQueue">
