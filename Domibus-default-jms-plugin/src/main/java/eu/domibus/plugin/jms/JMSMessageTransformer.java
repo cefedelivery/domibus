@@ -19,6 +19,7 @@ import javax.activation.DataHandler;
 import javax.activation.URLDataSource;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
+import javax.jms.MessageFormatException;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.FileReader;
 import java.io.IOException;
@@ -324,8 +325,13 @@ public class JMSMessageTransformer
         }
         DataHandler payloadDataHandler = null;
         try {
-            payloadDataHandler = new DataHandler(new ByteArrayDataSource(messageIn.getBytes(propPayload), mimeType));
-        } catch (JMSException jmsEx) {
+
+            final byte[] bytes = messageIn.getBytes(propPayload);
+            if (bytes == null) {
+                throw new MessageFormatException("getBytes is null");
+            }
+            payloadDataHandler = new DataHandler(new ByteArrayDataSource(bytes, mimeType));
+        } catch (Exception jmsEx) {
             LOG.debug("no payload data as byte[] available, trying payload via URL", jmsEx);
             try {
                 payloadDataHandler = new DataHandler(new URLDataSource(new URL(messageIn.getString(propPayload))));

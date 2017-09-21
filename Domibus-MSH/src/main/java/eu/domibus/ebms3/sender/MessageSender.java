@@ -96,13 +96,6 @@ public class MessageSender implements MessageListener {
 
 
     private void sendUserMessage(final String messageId) {
-        final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
-        if (!ALLOWED_STATUSES_FOR_SENDING.contains(messageStatus)) {
-            LOG.warn("Message [{}] has a status [{}] which is not allowed for sending. Only the statuses [{}] are allowed", messageId, messageStatus, ALLOWED_STATUSES_FOR_SENDING);
-            return;
-        }
-
-
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
 
         MessageAttempt attempt = new MessageAttempt();
@@ -111,17 +104,19 @@ public class MessageSender implements MessageListener {
         MessageAttemptStatus attemptStatus = MessageAttemptStatus.SUCCESS;
         String attemptError = null;
 
-
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.SEND_FAIL;
         // Assuming that everything goes fine
         ResponseHandler.CheckResult isOk = ResponseHandler.CheckResult.OK;
-
         LegConfiguration legConfiguration = null;
         final String pModeKey;
-
         Boolean abortSending = false;
-        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         try {
+            final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
+            if (!ALLOWED_STATUSES_FOR_SENDING.contains(messageStatus)) {
+                LOG.warn("Message [{}] has a status [{}] which is not allowed for sending. Only the statuses [{}] are allowed", messageId, messageStatus, ALLOWED_STATUSES_FOR_SENDING);
+                return;
+            }
+            final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
             pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);

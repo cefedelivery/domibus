@@ -63,7 +63,8 @@ public class SendJMSMessageOnTomcat {
 
             String pay1 = "<test>test</test>";
             byte[] payload = pay1.getBytes();
-            messageMap.setBytes("payload_1", payload);
+            //messageMap.setBytes("payload_1", payload);
+            messageMap.setString("payload_1", "file:///home/dussath/changelog.txt");
 
             producer.send(messageMap);
 
