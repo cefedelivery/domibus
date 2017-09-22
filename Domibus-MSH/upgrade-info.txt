@@ -1,4 +1,4 @@
-Domibus 3.3-FR (from 3.3-RC1)
+Domibus 3.3 (from 3.3-RC1)
                - Replace the Domibus war and the plugin(s) jar(s) into "\conf\domibus\plugins\lib"
                - In the file "\conf\domibus\domibus.properties":
                     o rename the property "domibus.senderparty.trust.verification" to "domibus.sender.trust.validation.onreceiving" in your domibus.properties file. If the property is not defined, do nothing. Default value "false" has not been changed.

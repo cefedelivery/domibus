@@ -5,7 +5,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <include file="changelog-3.2.5.xml" relativeToChangelogFile="true"/>
-    <include file="changelog-3.3.0-rc1-delta-model.xml" relativeToChangelogFile="true"/>
+    <include file="changelog-3.3.0-delta-model.xml" relativeToChangelogFile="true"/>
 
     <changeSet author="thomas dussart" id="EDELIVERY-2144">
         <insert tableName="TB_USER_ROLE">
