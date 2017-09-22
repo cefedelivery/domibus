@@ -206,7 +206,7 @@
                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.2.5-delta.mysql
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/mysql5innoDb-3.2.0-to-3.2.5-migration.ddl
+                               ${project.build.directory}/sql-scripts/mysql5innoDb-3.2.x-to-3.2.5-migration.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
@@ -224,7 +224,7 @@
                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.2.5-delta.oracle
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/oracle10g-3.2.0-to-3.2.5-migration.ddl
+                               ${project.build.directory}/sql-scripts/oracle10g-3.2.x-to-3.2.5-migration.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
