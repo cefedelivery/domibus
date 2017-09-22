@@ -97,12 +97,10 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         String destinationFQName = (String) mbsc.getAttribute(jmsDestination, "Name");
                         // The name must be the queueName in a single server or serverName@queueName in a cluster.
                         String destName = getShortDestName(destinationFQName);
-                        destination.setName(destName);
                         destination.setFullyQualifiedName(destinationFQName);
 
-                        if (destName.contains("@")) {
-                            destName = StringUtils.substringAfter(destName, "@");
-                        }
+                        destName = getOnlyDestName(destName);
+                        destination.setName(destName);
                         ObjectName configQueue = getQueueMap(mbsc).get(destName);
                         if (configQueue != null) {
                             destination.setType(QUEUE);
@@ -123,11 +121,11 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     }
 
 
-    protected Map<String, List<InternalJMSDestination>> findDestinationsGroupedByName() {
+    protected Map<String, InternalJMSDestination> findDestinationsGroupedByName() {
         return jmxTemplate.query(
                 new JMXOperation() {
                     @Override
-                    public Map<String, List<InternalJMSDestination>> execute(MBeanServerConnection mbsc) {
+                    public Map<String, InternalJMSDestination> execute(MBeanServerConnection mbsc) {
                         return findDestinationsGroupedByName(mbsc);
                     }
                 }
@@ -135,8 +133,8 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     }
 
 
-    protected Map<String, List<InternalJMSDestination>> findDestinationsGroupedByName(MBeanServerConnection mbsc) {
-        Map<String, List<InternalJMSDestination>> destinationMap = new TreeMap<>();
+    protected Map<String, InternalJMSDestination> findDestinationsGroupedByName(MBeanServerConnection mbsc) {
+        Map<String, InternalJMSDestination> destinationsMap = new HashMap<>();
         try {
             ObjectName drs = jmxHelper.getDomainRuntimeService();
             ObjectName[] servers = (ObjectName[]) mbsc.getAttribute(drs, "ServerRuntimes");
@@ -151,10 +149,13 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         LOG.debug("JMS Destination " + jmsDestination);
                         InternalJMSDestination destination = new InternalJMSDestination();
                         String destinationFQName = (String) mbsc.getAttribute(jmsDestination, "Name");
-                        String destinationName = getShortDestName(destinationFQName);
-                        destination.setName(destinationName);
+                        // The name must be the queueName in a single server or serverName@queueName in a cluster.
+                        String destName = getShortDestName(destinationFQName);
+                        destination.setFullyQualifiedName(destinationFQName);
 
-                        ObjectName configQueue = getQueueMap(mbsc).get(destinationName);
+                        destName = getOnlyDestName(destName);
+                        destination.setName(destName);
+                        ObjectName configQueue = getQueueMap(mbsc).get(destName);
                         if (configQueue != null) {
                             destination.setType(QUEUE);
                             destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
@@ -164,26 +165,22 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         }
 
                         destination.setNumberOfMessages(getMessagesTotalCount(mbsc, jmsDestination));
-                        addDestination(destinationMap, destination);
+                        destinationsMap.put(destinationFQName, destination);
                     }
                 }
             }
-            return destinationMap;
+            return destinationsMap;
         } catch (Exception e) {
             throw new InternalJMSException(FAILED_TO_BUILD_JMS_DEST_MAP, e);
         }
 
     }
 
-    private void addDestination(Map<String, List<InternalJMSDestination>> destinationMap, InternalJMSDestination destination) {
-        if (destinationMap.containsKey(destination.getName())) {
-            List<InternalJMSDestination> destinations = destinationMap.get(destination.getName());
-            destinations.add(destination);
-        } else {
-            List<InternalJMSDestination> destinations = new ArrayList<>();
-            destinations.add(destination);
-            destinationMap.put(destination.getName(), destinations);
+    private String getOnlyDestName(String destName) {
+        if (destName.contains("@")) {
+            destName = StringUtils.substringAfterLast(destName, "@");
         }
+        return destName;
     }
 
     protected Long getMessagesTotalCount(MBeanServerConnection mbsc, ObjectName jmsDestination) throws AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
@@ -265,7 +262,14 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     protected Destination lookupDestination(String destName) throws NamingException {
         // It is enough to get the first destination object also in case of clustered destinations because then a JNDI look up is performed.
-        InternalJMSDestination internalJmsDestination = findDestinationsGroupedByName().get(destName).get(0);
+        InternalJMSDestination internalJmsDestination = null;
+        Map<String, InternalJMSDestination> internalDestinations = findDestinationsGroupedByFQName();
+        for (Map.Entry<String, InternalJMSDestination> entry : internalDestinations.entrySet()) {
+            if (entry.getKey().contains(destName)) {
+                LOG.debug("Internal destination found for source [" + destName + "]");
+                internalJmsDestination = entry.getValue();
+            }
+        }
         if (internalJmsDestination == null) {
             throw new InternalJMSException("Destination [" + destName + "] does not exists");
         }
@@ -411,9 +415,16 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         if (StringUtils.isEmpty(source)) {
             throw new InternalJMSException("Source has not been specified");
         }
-        List<InternalJMSDestination> destinations = findDestinationsGroupedByName().get(getShortDestName(source));
-        if (destinations == null || destinations.isEmpty()) {
-            throw new InternalJMSException("Could not find destination for [" + source + "]");
+        List<InternalJMSDestination> destinations = new ArrayList<>();
+        Map<String, InternalJMSDestination> internalDestinations = findDestinationsGroupedByName();
+        for (Map.Entry<String, InternalJMSDestination> entry : internalDestinations.entrySet()) {
+            if (entry.getKey().contains(source)) {
+                LOG.debug("Internal destination found for source [" + source + "]");
+                destinations.add(entry.getValue());
+            }
+        }
+        if (destinations.isEmpty()) {
+            throw new InternalJMSException("Could not find any destination for source[" + source + "]");
         }
         return destinations;
     }
