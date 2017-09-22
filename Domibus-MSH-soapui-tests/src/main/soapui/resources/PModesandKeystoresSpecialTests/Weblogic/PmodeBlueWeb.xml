@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="ETrustExNode">
+    <mpcs>
+        <mpc name="defaultMpc"		qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"		enabled="true"  default="true"  retention_downloaded="10080" retention_undownloaded="10080"/>
+        <mpc name="noRetentionMpc"	qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/noRetentionMPC"	enabled="false" default="false" retention_downloaded="0"     retention_undownloaded="86400"/>
+    </mpcs>
+    <businessProcesses>
+        <roles>
+            <role name="defaultInitiatorRole" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
+            <role name="defaultResponderRole" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
+        </roles>
+        <parties>
+            <partyIdTypes>
+                <partyIdType name="unregisteredPartyETX" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered:ETXAS4"/>
+            </partyIdTypes>
+
+            <party name="ETrustExNode" endpoint="http://10.57.40.24:1027/domibus-weblogic/services/msh" allowChunking="false">
+                <identifier partyId="ETxNodeParty" partyIdType="unregisteredPartyETX"/>
+            </party>
+			
+			<party name="red_gw" endpoint="http://d02di1532316dit.net1.cec.eu.int:8180/domibus/services/msh" allowChunking="false">
+				<identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
+			</party>
+
+            <party name="EtxBackendItaly" endpoint="http://wlts0236.cc.cec.eu.int:1043/domibus-weblogic/services/msh" allowChunking="false">
+                <identifier partyId="EtxBackendItaly_EGREFFE-SYS" partyIdType="unregisteredPartyETX"/>
+                <identifier partyId="EtxBackendItaly_ETX-WEB-SYS" partyIdType="unregisteredPartyETX"/>
+            </party>
+
+        </parties>
+        <meps>
+            <mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
+            <mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
+            <binding name="push"        value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+            <binding name="pushAndPush" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
+        </meps>
+        <properties>
+            <property name="originalSenderProperty"  key="originalSender"  datatype="string" required="true"/>
+            <property name="finalRecipientProperty"  key="finalRecipient"  datatype="string" required="true"/>
+            <property name="userNameProperty" 		 key="userName" 	   datatype="string" required="false"/>
+            <property name="userPasswordProperty" 	 key="userPassword"    datatype="string" required="false"/>
+            <property name="eTxBackendMsgIdProperty" key="eTxBackendMsgId" datatype="string" required="false"/>
+            <property name="eTxFileNameProperty"     key="fileName"        datatype="string" required="false"/>
+            <propertySet name="etxAS4PropertySet">
+                <propertyRef property="finalRecipientProperty"/>
+                <propertyRef property="originalSenderProperty"/>
+                <propertyRef property="userNameProperty"/>
+                <propertyRef property="userPasswordProperty"/>
+                <propertyRef property="eTxBackendMsgIdProperty"/>
+                <propertyRef property="eTxFileNameProperty"/>
+            </propertySet>
+        </properties>
+        <payloadProfiles>
+            <payload name="etxAS4HeaderPayload" 		cid="cid:header" 		required="false" mimeType="text/xml"/>
+            <payload name="etxAS4FaultResponsePayload"  cid="cid:faultResponse" required="false" mimeType="text/xml"/>
+            <payload name="etxAS4GenericPayload" 		cid="cid:generic" 		required="false" mimeType="text/xml"/>
+            <payload name="etxAS4WrapperPayload" 		cid="cid:wrapper" 		required="false" mimeType="application/octet-stream"/>
+            <payload name="etxAS4FaultPayload" cid="cid:fault" required="false" mimeType="application/octet-stream"/>
+            <payloadProfile name="etxAS4PayloadProfile" maxSize="688000">
+                <attachment name="etxAS4HeaderPayload"/>
+                <attachment name="etxAS4WrapperPayload"/>
+                <attachment name="etxAS4FaultResponsePayload"/>
+                <attachment name="etxAS4GenericPayload"/>
+                <attachment name="etxAS4FaultPayload"/>
+            </payloadProfile>
+        </payloadProfiles>
+        <securities>
+            <security name="eSensPolicy" policy="eSensPolicy.v2.0.xml" signatureMethod="RSA_SHA256"/>
+        </securities>
+        <errorHandlings>
+            <errorHandling name="defaultErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="true" businessErrorNotifyConsumer="true" deliveryFailureNotifyProducer="false"/>
+        </errorHandlings>
+        <agreements>
+            <agreement name="agreementEmpty" value="" type=""/>
+        </agreements>
+        <services>
+            <service name="ApplicationResponseService" value="ApplicationResponseService" type="eDelivery"/>
+            <service name="DocumentWrapperService" 	   value="DocumentWrapperService" 	  type="eDelivery"/>
+            <service name="DocumentBundleService" 	   value="DocumentBundleService" 	  type="eDelivery"/>
+            <service name="RetrieveICAService" 		   value="RetrieveICAService" 		  type="eDelivery"/>
+            <service name="InboxRequestService" 	   value="InboxRequestService" 		  type="eDelivery"/>
+            <service name="RetrieveRequestService" 	   value="RetrieveRequestService" 	  type="eDelivery"/>
+        </services>
+        <actions>
+            <action name="submitApplicationResponseRequest"  	  value="SubmitApplicationResponseRequest"/>
+            <action name="submitApplicationResponseResponse" 	  value="SubmitApplicationResponseResponse"/>
+            <action name="storeDocumentWrapperRequest"       	  value="StoreDocumentWrapperRequest"/>
+            <action name="storeDocumentWrapperResponse"      	  value="StoreDocumentWrapperResponse"/>
+            <action name="submitDocumentBundleRequest"       	  value="SubmitDocumentBundleRequest"/>
+            <action name="submitDocumentBundleResponse"      	  value="SubmitDocumentBundleResponse"/>
+            <action name="retrieveICARequest"  			     	  value="RetrieveICARequest"/>
+            <action name="retrieveICAResponse" 			     	  value="RetrieveICAResponse"/>
+            <action name="submitInboxRequestRequest"  	     	  value="SubmitInboxRequestRequest"/>
+            <action name="submitInboxRequestResponse" 	     	  value="SubmitInboxRequestResponse"/>
+            <action name="submitRetrieveRequestRequest"      	  value="SubmitRetrieveRequestRequest"/>
+            <action name="submitRetrieveRequestResponse"     	  value="SubmitRetrieveRequestResponse"/>
+            <action name="retrieveDocumentWrapperRequestRequest"  value="RetrieveDocumentWrapperRequestRequest"/>
+            <action name="retrieveDocumentWrapperRequestResponse" value="RetrieveDocumentWrapperRequestResponse"/>
+            <action name="faultActionResponse" 					  value="FaultAction"/>
+        </actions>
+        <as4>
+            <receptionAwareness name="receptionAwareness" retry="5;5;CONSTANT" duplicateDetection="true"/>
+            <reliability name="AS4Reliability" nonRepudiation="true"  replyPattern="response"/>
+            <reliability name="noReliability"  nonRepudiation="false" replyPattern="response"/>
+        </as4>
+        <legConfigurations>
+            <legConfiguration name="nodeSubmitApplicationResponseRequest"       service="ApplicationResponseService" action="submitApplicationResponseRequest"       compressPayloads="false"  defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeSubmitApplicationResponseResponse"      service="ApplicationResponseService" action="submitApplicationResponseResponse"      compressPayloads="false"  defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeSubmitApplicationResponseFault"         service="ApplicationResponseService" action="faultActionResponse"                    compressPayloads="false"  defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeStoreDocumentWrapperRequest"            service="DocumentWrapperService"     action="storeDocumentWrapperRequest"            compressPayloads="true"   defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeStoreDocumentWrapperResponse"           service="DocumentWrapperService"     action="storeDocumentWrapperResponse"           compressPayloads="true"   defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeStoreDocumentWrapperFault"           	service="DocumentWrapperService"     action="faultActionResponse"                    compressPayloads="true"   defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeSubmitDocumentBundleRequest"            service="DocumentBundleService"      action="submitDocumentBundleRequest"            compressPayloads="false"  defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeSubmitDocumentBundleResponse"           service="DocumentBundleService"      action="submitDocumentBundleResponse"           compressPayloads="false"  defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeSubmitDocumentBundleFault"  		    service="DocumentBundleService"      action="faultActionResponse"                    compressPayloads="false"  defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeRetrieveICARequest"                     service="RetrieveICAService"         action="retrieveICARequest"                     compressPayloads="false"  defaultMpc="noRetentionMpc"  reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeRetrieveICAResponse"                    service="RetrieveICAService"         action="retrieveICAResponse"                    compressPayloads="false"  defaultMpc="noRetentionMpc"  reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeRetrieveICAFault"			            service="RetrieveICAService"         action="faultActionResponse"                    compressPayloads="false"  defaultMpc="noRetentionMpc"  reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeSubmitInboxRequestRequest"              service="InboxRequestService"        action="submitInboxRequestRequest"              compressPayloads="false"  defaultMpc="defaultMpc"  	reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeSubmitInboxRequestResponse"             service="InboxRequestService"        action="submitInboxRequestResponse"             compressPayloads="false"  defaultMpc="defaultMpc"  	reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeSubmitInboxRequestFault"		        service="InboxRequestService"        action="faultActionResponse"                    compressPayloads="false"  defaultMpc="defaultMpc"  	reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeSubmitRetrieveRequestRequest"           service="RetrieveRequestService"     action="submitRetrieveRequestRequest"           compressPayloads="false"  defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeSubmitRetrieveRequestResponse"          service="RetrieveRequestService"     action="submitRetrieveRequestResponse"          compressPayloads="false"  defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeSubmitRetrieveRequestFault"		        service="RetrieveRequestService"     action="faultActionResponse"                    compressPayloads="false"  defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeRetrieveDocumentWrapperRequestRequest"  service="DocumentWrapperService"     action="retrieveDocumentWrapperRequestRequest"  compressPayloads="true"   defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeRetrieveDocumentWrapperRequestResponse" service="DocumentWrapperService"     action="retrieveDocumentWrapperRequestResponse" compressPayloads="true"   defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+            <legConfiguration name="nodeRetrieveDocumentWrapperRequestFault"	service="DocumentWrapperService"     action="faultActionResponse"                    compressPayloads="true"   defaultMpc="defaultMpc"      reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="etxAS4PropertySet" payloadProfile="etxAS4PayloadProfile" errorHandling="defaultErrorHandling"/>
+        </legConfigurations>
+
+        <process name="etxAS4Process" agreement="agreementEmpty" mep="twoway" binding="pushAndPush" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="EtxBackendItaly"/>
+                <initiatorParty name="ETrustExNode"/>
+				<initiatorParty name="red_gw"/>
+				
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="ETrustExNode"/>
+                <responderParty name="EtxBackendItaly"/>
+				<responderParty name="red_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="nodeSubmitApplicationResponseRequest"/>
+                <leg name="nodeStoreDocumentWrapperRequest"/>
+                <leg name="nodeSubmitDocumentBundleRequest"/>
+                <leg name="nodeRetrieveICARequest"/>
+                <leg name="nodeSubmitInboxRequestRequest"/>
+                <leg name="nodeSubmitRetrieveRequestRequest"/>
+                <leg name="nodeRetrieveDocumentWrapperRequestRequest"/>
+
+                <leg name="nodeSubmitApplicationResponseResponse"/>
+                <leg name="nodeSubmitApplicationResponseFault"/>
+                <leg name="nodeStoreDocumentWrapperResponse"/>
+                <leg name="nodeStoreDocumentWrapperFault"/>
+                <leg name="nodeSubmitDocumentBundleResponse"/>
+                <leg name="nodeSubmitDocumentBundleFault"/>
+                <leg name="nodeRetrieveICAResponse"/>
+                <leg name="nodeRetrieveICAFault"/>
+                <leg name="nodeSubmitInboxRequestResponse"/>
+                <leg name="nodeSubmitInboxRequestFault"/>
+                <leg name="nodeSubmitRetrieveRequestResponse"/>
+                <leg name="nodeSubmitRetrieveRequestFault"/>
+                <leg name="nodeRetrieveDocumentWrapperRequestResponse"/>
+                <leg name="nodeRetrieveDocumentWrapperRequestFault"/>
+            </legs>
+        </process>
+        <process name="etxAS4Process" agreement="agreementEmpty" mep="twoway" binding="pushAndPush" initiatorRole="defaultResponderRole" responderRole="defaultInitiatorRole">
+            <initiatorParties>
+                <initiatorParty name="EtxBackendItaly"/>
+                <initiatorParty name="ETrustExNode"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="ETrustExNode"/>
+                <responderParty name="EtxBackendItaly"/>
+            </responderParties>
+            <legs>
+                <leg name="nodeSubmitApplicationResponseRequest"/>
+                <leg name="nodeStoreDocumentWrapperRequest"/>
+                <leg name="nodeSubmitDocumentBundleRequest"/>
+                <leg name="nodeRetrieveICARequest"/>
+                <leg name="nodeSubmitInboxRequestRequest"/>
+                <leg name="nodeSubmitRetrieveRequestRequest"/>
+                <leg name="nodeRetrieveDocumentWrapperRequestRequest"/>
+
+                <leg name="nodeSubmitApplicationResponseResponse"/>
+                <leg name="nodeSubmitApplicationResponseFault"/>
+                <leg name="nodeStoreDocumentWrapperResponse"/>
+                <leg name="nodeStoreDocumentWrapperFault"/>
+                <leg name="nodeSubmitDocumentBundleResponse"/>
+                <leg name="nodeSubmitDocumentBundleFault"/>
+                <leg name="nodeRetrieveICAResponse"/>
+                <leg name="nodeRetrieveICAFault"/>
+                <leg name="nodeSubmitInboxRequestResponse"/>
+                <leg name="nodeSubmitInboxRequestFault"/>
+                <leg name="nodeSubmitRetrieveRequestResponse"/>
+                <leg name="nodeSubmitRetrieveRequestFault"/>
+                <leg name="nodeRetrieveDocumentWrapperRequestResponse"/>
+                <leg name="nodeRetrieveDocumentWrapperRequestFault"/>
+            </legs>
+        </process>
+    </businessProcesses>
+</db:configuration>

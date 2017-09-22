@@ -16,14 +16,14 @@
             <input mdInput placeholder="Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId"
                    #messageInErrorId="ngModel" id="messageid_id">
           </md-input-container>
-          <md2-datepicker placeholder="Error from:"
+          <md2-datepicker placeholder="Error From:"
                           [(ngModel)]="filter.timestampFrom"
                           name="fromTimestmap"
                           [type]="'datetime'"
                           [max]="timestampFromMaxDate"
                           (change)='onTimestampFromChange($event)'
                           #timestampControl="ngModel" id="fromtimestamp_id"></md2-datepicker>
-          <md2-datepicker placeholder="Error to:"
+          <md2-datepicker placeholder="Error To:"
                           [(ngModel)]="filter.timestampTo"
                           name="toTimestmap"
                           [min]="timestampToMinDate"
@@ -33,7 +33,7 @@
                           #timestampControl="ngModel" id="totimestamp_id"></md2-datepicker>
 
           <md-input-container *ngIf="advancedSearch">
-            <input mdInput placeholder="Error detail" name="ErrorDetail" [(ngModel)]="filter.errorDetail"
+            <input mdInput placeholder="Error Detail" name="ErrorDetail" [(ngModel)]="filter.errorDetail"
                    #errorDetail="ngModel" id="errordetail_id">
           </md-input-container>
           <md-select placeholder="AP Role" [(ngModel)]="filter.mshRole" name="mshRole" class="optionField"
@@ -56,7 +56,7 @@
           </md-select>
 
 
-          <md2-datepicker placeholder="Notified from:"
+          <md2-datepicker placeholder="Notified From:"
                           [(ngModel)]="filter.notifiedFrom"
                           name="notifiedFrom"
                           [type]="'datetime'"
@@ -64,7 +64,7 @@
                           (change)='onNotifiedFromChange($event)'
                           #timestampControl="ngModel" id="notifiedfrom_id"
                           *ngIf="advancedSearch"></md2-datepicker>
-          <md2-datepicker placeholder="Notified to:"
+          <md2-datepicker placeholder="Notified To:"
                           [(ngModel)]="filter.notifiedTo"
                           name="notifiedTo"
                           [type]="'datetime'"

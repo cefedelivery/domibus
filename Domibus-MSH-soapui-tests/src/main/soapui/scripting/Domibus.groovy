@@ -16,13 +16,13 @@ class Domibus
     def messageExchange=null
     def context=null
     def log=null
-	// SLEEP_DELAY value is increased from 2000 to 8000 because of pull request take longer ...
-    def SLEEP_DELAY=20000;
+	// sleepDelay value is increased from 2000 to 6000 because of pull request take longer ...
+    def sleepDelay=6000
     def sqlBlue=null;
     def sqlRed=null;
 	def sqlGreen=null;
 	def thirdGateway = "false";
-
+	//com.eviware.soapui.support.GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
@@ -40,7 +40,7 @@ class Domibus
 	// Connect to a schema
 	def connectTo(String database, String driver, String url, String dbUser, String dbPassword){
 		log.info("Open connection to DB: " + database + " Url: " + url);
-		
+		com.eviware.soapui.support.GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
 		def sql = null;
 
         try{
@@ -93,7 +93,7 @@ class Domibus
         def requestFile = new XmlSlurper().parseText(requestContent)
         requestFile.depthFirst().each{
             if(it.name()== "MessageId"){
-                messageID=it.text().toLowerCase()
+                messageID=it.text().toLowerCase().trim()
             }
         }
         return(messageID)
@@ -114,14 +114,14 @@ class Domibus
             //if(findGivenMessageID()!=null){
             assert (messageID.toLowerCase() == findGivenMessageID().toLowerCase()),locateTest(context)+"Error:findReturnedMessageID: The message ID returned is ("+messageID+"), the message ID provided is ("+findGivenMessageID()+")."
         }
-        return(messageID.toLowerCase())
+        return(messageID.toLowerCase().trim())
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Verification of message existence
     def verifyMessagePresence(int presence1,int presence2, String IDMes=null, int mapDoms = 3){
         def messageID=null;
 		def sqlSender = null; def sqlReceiver = null;
-        sleep(SLEEP_DELAY);
+        sleep(sleepDelay);
 		
         if(IDMes!=null){
             messageID=IDMes
@@ -152,7 +152,7 @@ class Domibus
 		}
 
         // Sender DB
-        sqlSender.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
+        sqlSender.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where REPLACE(LOWER(MESSAGE_ID),' ','') = REPLACE(LOWER(${messageID}),' ','')"){
             total=it.lignes
         }
         if(presence1==1){
@@ -165,8 +165,8 @@ class Domibus
 
         // Receiver DB
         total=0
-        sleep(SLEEP_DELAY)
-        sqlReceiver.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
+        sleep(sleepDelay)
+        sqlReceiver.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where REPLACE(LOWER(MESSAGE_ID),' ','') = REPLACE(LOWER(${messageID}),' ','')"){
             total=it.lignes
         }
         if(presence2==1){
@@ -181,7 +181,7 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Verification of message unicity
     def verifyMessageUnicity(String IDMes=null, int mapDoms = 3){
-        sleep(SLEEP_DELAY);
+        sleep(sleepDelay);
         def messageID;
         def total=0;
 		def sqlSender = null; def sqlReceiver = null;
@@ -209,12 +209,12 @@ class Domibus
 				break;
 		}
 		
-        sqlSender.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
+        sqlSender.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where REPLACE(LOWER(MESSAGE_ID),' ','') = REPLACE(LOWER(${messageID}),' ','')"){
             total=it.lignes
         }
         assert(total==1),locateTest(context)+"Error:verifyMessageUnicity: Message found "+total+" times in sender side."
-        sleep(SLEEP_DELAY)
-        sqlReceiver.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
+        sleep(sleepDelay)
+        sqlReceiver.eachRow("Select count(*) lignes from TB_MESSAGE_LOG where REPLACE(LOWER(MESSAGE_ID),' ','') = REPLACE(LOWER(${messageID}),' ','')"){
             total=it.lignes
         }
         assert(total==1),locateTest(context)+"Error:verifyMessageUnicity: Message found "+total+" times in receiver side."
@@ -223,7 +223,7 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Wait until status or timer expire
     def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null, int mapDoms = 3){
-        def MAX_WAIT_TIME=200_000; // Maximum time to wait to check the message status.
+		def MAX_WAIT_TIME=60_000; // Maximum time to wait to check the message status. 
 		def STEP_WAIT_TIME=1000; // Time to wait before re-checking the message status.	
         def messageID=null;
         def numberAttempts=0;
@@ -272,11 +272,11 @@ class Domibus
                 }
                 log.info "maxNumberAttempts-numberAttempts: "+maxNumberAttempts+"-"+numberAttempts
                 log.info "WAIT: "+MAX_WAIT_TIME
-                sqlSender.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
+                sqlSender.eachRow("Select * from TB_MESSAGE_LOG where REPLACE(LOWER(MESSAGE_ID),' ','') = REPLACE(LOWER(${messageID}),' ','')"){
                     messageStatus=it.MESSAGE_STATUS
                     numberAttempts=it.SEND_ATTEMPTS
                 }
-                log.info "SENDER: Expected Message Status ="+ SMSH +"-- Current Message Status = "+messageStatus; 
+                log.info "|MSG_ID: "+messageID+" | SENDER: Expected Message Status ="+ SMSH +"-- Current Message Status = "+messageStatus+" | maxNumberAttempts: "+maxNumberAttempts+"-- numberAttempts: "+numberAttempts; 
                 if((SMSH=="SEND_FAILURE")&&(messageStatus=="WAITING_FOR_RETRY")){
                     if(((maxNumberAttempts-numberAttempts)>0)&&(!wait)){
                         wait=true
@@ -294,7 +294,7 @@ class Domibus
         if (bonusTimeForReceiver)
         {
             log.info "Waiting time for Receiver extended to 500 seconds"
-            MAX_WAIT_TIME=200_000
+            MAX_WAIT_TIME=100_000
         }
         else
         {
@@ -305,7 +305,7 @@ class Domibus
             while((messageStatus!=RMSH)&&(MAX_WAIT_TIME>0)){
                 sleep(STEP_WAIT_TIME)
                 MAX_WAIT_TIME=MAX_WAIT_TIME-STEP_WAIT_TIME
-                sqlReceiver.eachRow("Select * from TB_MESSAGE_LOG where LOWER(MESSAGE_ID) = LOWER(${messageID})"){
+                sqlReceiver.eachRow("Select * from TB_MESSAGE_LOG where REPLACE(LOWER(MESSAGE_ID),' ','') = REPLACE(LOWER(${messageID}),' ','')"){
                     messageStatus=it.MESSAGE_STATUS
                 }
                 log.info "W:" + MAX_WAIT_TIME + " M:" + messageStatus
@@ -663,6 +663,7 @@ class Domibus
 		def String output = fetchCookieHeader(side,context,log);		
 		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
 		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context);
+		//log.info "PMODE FILE PATH: "+pmodeFile;
 		
 		
 		switch(side.toLowerCase()){
@@ -691,6 +692,7 @@ class Domibus
 			}
 		}
 		//log.info errorCatcher.toString();
+		//log.info outputCatcher.toString();
 		assert(outputCatcher.toString().contains(outcome)),"Error:uploadPmode: Error while trying to connect to domibus."
 		if(outcome.toLowerCase()=="successfully"){
 			log.info outputCatcher.toString()+" Domibus: \""+side+"\".";
@@ -736,6 +738,8 @@ class Domibus
 				proc.waitFor()
 			}
 		}
+		log.info outputCatcher.toString()
+		log.info errorCatcher.toString()
 		assert(outputCatcher.toString().contains("successfully")),"Error:uploadTruststore: Error while trying to connect to domibus."
 		log.info outputCatcher.toString()+" Domibus: \""+side+"\".";
 		
