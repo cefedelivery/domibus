@@ -97,12 +97,10 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         String destinationFQName = (String) mbsc.getAttribute(jmsDestination, "Name");
                         // The name must be the queueName in a single server or serverName@queueName in a cluster.
                         String destName = getShortDestName(destinationFQName);
-                        destination.setName(destName);
                         destination.setFullyQualifiedName(destinationFQName);
 
-                        if (destName.contains("@")) {
-                            destName = StringUtils.substringAfter(destName, "@");
-                        }
+                        destName = getOnlyDestName(destName);
+                        destination.setName(destName);
                         ObjectName configQueue = getQueueMap(mbsc).get(destName);
                         if (configQueue != null) {
                             destination.setType(QUEUE);
@@ -153,12 +151,10 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         String destinationFQName = (String) mbsc.getAttribute(jmsDestination, "Name");
                         // The name must be the queueName in a single server or serverName@queueName in a cluster.
                         String destName = getShortDestName(destinationFQName);
-                        destination.setName(destName);
                         destination.setFullyQualifiedName(destinationFQName);
 
-                        if (destName.contains("@")) {
-                            destName = StringUtils.substringAfter(destName, "@");
-                        }
+                        destName = getOnlyDestName(destName);
+                        destination.setName(destName);
                         ObjectName configQueue = getQueueMap(mbsc).get(destName);
                         if (configQueue != null) {
                             destination.setType(QUEUE);
@@ -178,6 +174,13 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             throw new InternalJMSException(FAILED_TO_BUILD_JMS_DEST_MAP, e);
         }
 
+    }
+
+    private String getOnlyDestName(String destName) {
+        if (destName.contains("@")) {
+            destName = StringUtils.substringAfterLast(destName, "@");
+        }
+        return destName;
     }
 
     protected Long getMessagesTotalCount(MBeanServerConnection mbsc, ObjectName jmsDestination) throws AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
@@ -420,7 +423,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                 destinations.add(entry.getValue());
             }
         }
-        if (destinations == null || destinations.isEmpty()) {
+        if (destinations.isEmpty()) {
             throw new InternalJMSException("Could not find any destination for source[" + source + "]");
         }
         return destinations;

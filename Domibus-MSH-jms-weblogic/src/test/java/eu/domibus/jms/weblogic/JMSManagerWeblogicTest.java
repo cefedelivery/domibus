@@ -268,23 +268,25 @@ public class JMSManagerWeblogicTest {
 
     @Test
     public void testGetMessage(final @Injectable InternalJMSDestination internalJmsDestination,
-                               final @Injectable ObjectName destination) throws Exception {
-        final String myqueue = "myqueue";
+                               final @Injectable ObjectName destination,
+                               final @Injectable InternalJmsMessage jmsMessage) throws Exception {
+
+        final String sourceQueue = "eDeliveryJMS@ms2@machineName@DomibusNotifyBackendQueue";
         final String messageId = "id1";
 
         new Expectations(jmsManagerWeblogic) {{
-            jmsManagerWeblogic.getInternalJMSDestinations(myqueue);
+
+            jmsManagerWeblogic.getInternalJMSDestinations(sourceQueue);
             result = internalJmsDestination;
 
             internalJmsDestination.getProperty("ObjectName");
             result = destination;
 
-            jmsManagerWeblogic.getMessageFromDestination(withAny(destination), anyString);
-            result = null;
+            jmsManagerWeblogic.getMessageFromDestination(withAny(destination), messageId);
+            result = jmsMessage;
         }};
 
-
-        jmsManagerWeblogic.getMessage(myqueue, messageId);
+        final InternalJmsMessage jmsMsg = jmsManagerWeblogic.getMessage(sourceQueue, messageId);
 
         new Verifications() {{
             String capturedMessageId = null;
@@ -293,6 +295,7 @@ public class JMSManagerWeblogicTest {
             jmsManagerWeblogic.getMessageFromDestination(capturedDestination = withCapture(), capturedMessageId = withCapture());
             assertTrue(destination == capturedDestination);
             assertEquals(messageId, capturedMessageId);
+            assertEquals(jmsMsg, jmsMessage);
         }};
     }
 
@@ -398,10 +401,11 @@ public class JMSManagerWeblogicTest {
     }
 
     @Test
-    public void testConsumeMessage(final @Injectable InternalJMSDestination internalJmsDestination, final @Injectable ObjectName destination,
-                                   final @Injectable InternalJmsMessage internalJmsMessage)            throws Exception {
+    public void testConsumeMessage(final @Injectable InternalJMSDestination internalJmsDestination,
+                                   final @Injectable ObjectName destination,
+                                   final @Injectable InternalJmsMessage internalJmsMessage) throws Exception {
 
-        final String sourceQueue = "sourceQueue";
+        final String sourceQueue = "eDeliveryJMS@ms2@machineName@DomibusNotifyBackendQueue";
         final String customMessageId = "ID1";
         final String selector = "MESSAGE_ID = '" + customMessageId + "' AND NOTIFICATION_TYPE ='MESSAGE_RECEIVED'";
 
@@ -428,6 +432,40 @@ public class JMSManagerWeblogicTest {
             jmsManagerWeblogic.consumeMessage(capturedSourceQueue = withCapture(), capturedMessageId = withCapture());
             assertEquals(sourceQueue, capturedSourceQueue);
             assertEquals(customMessageId, capturedMessageId);
+        }};
+    }
+
+    @Test
+    public void testConsumeMessageNOk(final @Injectable InternalJMSDestination internalJmsDestination,
+                                      final @Injectable ObjectName destination
+    ) throws Exception {
+
+        final String sourceQueue = "eDeliveryJMS@ms2@machineName@DomibusNotifyBackendQueue";
+        final String customMessageId = "ID1";
+        final String selector = "MESSAGE_ID = '" + customMessageId + "' AND NOTIFICATION_TYPE ='MESSAGE_RECEIVED'";
+
+        new Expectations(jmsManagerWeblogic) {{
+            jmsManagerWeblogic.getInternalJMSDestinations(sourceQueue);
+            result = internalJmsDestination;
+
+            internalJmsDestination.getProperty("ObjectName");
+            result = destination;
+
+            jmsManagerWeblogic.getMessageFromDestinationUsingCustomSelector(withAny(destination), selector);
+            result = null;
+
+        }};
+
+        jmsManagerWeblogic.consumeMessage(sourceQueue, customMessageId);
+
+        new Verifications() {{
+            String capturedSourceQueue = null;
+
+            jmsManagerWeblogic.consumeMessage(capturedSourceQueue = withCapture(), customMessageId);
+            assertEquals(sourceQueue, capturedSourceQueue);
+
+            jmsManagerWeblogic.deleteMessages(destination, selector);
+            times = 0;
         }};
     }
 
