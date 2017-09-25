@@ -2,7 +2,6 @@ package eu.domibus.configuration;
 
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
@@ -63,6 +61,8 @@ public class Storage {
                 if (path != null) {
                     storageDirectory = path.toFile();
                     LOG.info("Initialized payload folder on path [{}]", path);
+                } else {
+                    LOG.warn("There was an error initializing the payload folder, so Domibus will be using the database");
                 }
             }
         } else {
@@ -91,7 +91,7 @@ public class Storage {
             }
             return payloadPath;
         } catch (IOException ioEx) {
-            LOG.error("Error during the creation of the payload location", ioEx);
+            LOG.error("Error creating/accessing the payload folder [{}]", path, ioEx);
         }
         return null;
     }
