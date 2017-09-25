@@ -35,6 +35,7 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
             case ACKNOWLEDGED:
             case ACKNOWLEDGED_WITH_WARNING:
                 messageLog.setDeleted(new Date());
+                messageLog.setNextAttempt(null);
                 break;
             case DOWNLOADED:
                 messageLog.setDownloaded(new Date());
