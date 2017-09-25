@@ -45,7 +45,8 @@ md-card-content:before,
 .panel:before,
 .selectionCriteria:before,
 table.buttonsRow:before,
-table.buttonsMoveRow {
+table.buttonsMoveRow,
+ngx-datatable span:before {
   content: " " !important;
 }
 
