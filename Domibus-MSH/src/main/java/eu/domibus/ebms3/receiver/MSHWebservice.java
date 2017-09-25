@@ -31,6 +31,7 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.util.SoapUtil;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
@@ -103,7 +104,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     public SOAPMessage invoke(final SOAPMessage request) {
         SOAPMessage responseMessage = null;
         Messaging messaging;
