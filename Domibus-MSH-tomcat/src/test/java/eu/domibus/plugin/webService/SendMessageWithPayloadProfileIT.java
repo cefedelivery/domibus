@@ -8,6 +8,7 @@ import eu.domibus.plugin.webService.generated.SendRequest;
 import eu.domibus.plugin.webService.generated.SendResponse;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,6 +18,7 @@ import java.sql.SQLException;
 /**
  * Created by draguio on 17/02/2016.
  */
+@Ignore
 public class SendMessageWithPayloadProfileIT extends AbstractSendMessageIT {
 
     private static boolean initialized;

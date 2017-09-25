@@ -9,6 +9,7 @@ import eu.domibus.plugin.webService.generated.SendRequest;
 import eu.domibus.plugin.webService.generated.SendResponse;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,6 +23,7 @@ import java.util.List;
  *
  * @author martifp
  */
+@Ignore
 public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
 
     private static boolean initialized;
