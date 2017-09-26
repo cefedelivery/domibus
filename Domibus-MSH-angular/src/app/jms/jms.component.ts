@@ -223,7 +223,11 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
       },
       error => {
-        this.alertService.error('Could not load messages: ' + error);
+        if(error.status == 400) {
+          this.alertService.error('Please follow the rules for Selector/JMS Type according to Help Page / Admin Guide.');
+        } else {
+          this.alertService.error('Could not load messages: ' + error);
+        }
         this.loading = false;
       }
     );
