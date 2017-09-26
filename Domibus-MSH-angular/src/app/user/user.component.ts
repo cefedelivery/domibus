@@ -171,6 +171,9 @@ export class UserComponent implements OnInit, DirtyOperations {
         this.enableCancel = true;
       } else {
         this.users.pop();
+        this.selected = [];
+        this.enableEdit = false;
+        this.enableDelete = false;
       }
     });
   }

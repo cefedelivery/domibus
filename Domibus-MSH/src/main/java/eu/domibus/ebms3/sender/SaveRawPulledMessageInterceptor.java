@@ -2,8 +2,6 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.model.MessageType;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.util.SoapUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
@@ -19,7 +17,10 @@ import javax.xml.ws.WebServiceException;
 /**
  * @author Thomas Dussart
  * @since 3.3
- * Interceptor to save the raw xml in case of a pull message with non repudiation setup.
+ * Interceptor to save the raw xml in case of a pull message.
+ * The non repudiation mechanism needs the raw message at the end of the interceptor queue, as it needs the security interceptors added
+ * informations in order to do his job.
+ * It is only saving userMessage found in the ServerOutInterceptor=> PullMessage.
  */
 //@thom test this class
 public class SaveRawPulledMessageInterceptor extends AbstractSoapInterceptor {
@@ -42,6 +43,7 @@ public class SaveRawPulledMessageInterceptor extends AbstractSoapInterceptor {
         try {
             SOAPMessage soapContent = message.getContent(SOAPMessage.class);
             String rawXMLMessage = SoapUtil.getRawXMLMessage(soapContent);
+            messageExchangeService.removeRawMessageIssuedByPullRequest(messageId.toString());
             messageExchangeService.savePulledMessageRawXml(rawXMLMessage,messageId.toString());
         } catch (TransformerException e) {
             throw new WebServiceException(new IllegalArgumentException(e));
