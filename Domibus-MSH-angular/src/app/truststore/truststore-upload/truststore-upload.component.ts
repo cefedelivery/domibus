@@ -2,6 +2,7 @@ import {Component, EventEmitter, Inject, ViewChild} from "@angular/core";
 import {MD_DIALOG_DATA, MdDialogRef} from "@angular/material";
 import {TrustStoreService} from "../trustore.service";
 import {AlertService} from "../../alert/alert.service";
+import {isNullOrUndefined} from "util";
 
 @Component({
   selector: 'app-trustore-upload',
@@ -35,7 +36,11 @@ export class TrustStoreUploadComponent {
         this.onTruststoreUploaded.emit();
       },
       err => {
-        this.alertService.error("Error updating truststore file", false);
+        if(isNullOrUndefined((err._body))) {
+          this.alertService.error("Error updating truststore file", false);
+        } else {
+          this.alertService.error(err._body, false);
+        }
       }
     );
     this.dialogRef.close();
