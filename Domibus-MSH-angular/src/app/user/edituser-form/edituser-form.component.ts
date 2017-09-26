@@ -2,6 +2,7 @@ import {Component, Inject} from "@angular/core";
 import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {MD_DIALOG_DATA, MdDialogRef} from "@angular/material";
 import {UserValidatorService} from "../uservalidator.service";
+import {SecurityService} from "../../security/security.service";
 
 let NEW_MODE = 'New User';
 let EDIT_MODE = 'User Edit';
@@ -35,7 +36,8 @@ export class EditUserComponent {
   constructor(public dialogRef: MdDialogRef<EditUserComponent>,
               @Inject(MD_DIALOG_DATA) public data: any,
               fb: FormBuilder,
-              userValidatorService:UserValidatorService) {
+              userValidatorService:UserValidatorService,
+              private securityService: SecurityService) {
 
     this.existingRoles = data.userroles;
 
@@ -56,7 +58,7 @@ export class EditUserComponent {
         'roles': new FormControl(this.roles, Validators.required),
         'password': [null, Validators.pattern],
         'confirmation': [null],
-        'active': [Validators.required]
+        'active': new FormControl({value: this.active, disabled: this.isCurrentUser()}, Validators.required)
       }, {
         validator: userValidatorService.matchPassword
       });
@@ -97,6 +99,10 @@ export class EditUserComponent {
 
   submitForm() {
     this.dialogRef.close(true);
+  }
+
+  isCurrentUser(): boolean {
+    return this.securityService.getCurrentUser().username === this.userName;
   }
 
 }
