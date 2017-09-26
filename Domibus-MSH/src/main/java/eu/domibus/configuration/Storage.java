@@ -11,9 +11,9 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
@@ -80,7 +80,7 @@ public class Storage {
      */
     private Path createLocation(String path) {
         try {
-            Path payloadPath = FileSystems.getDefault().getPath(path).normalize().toAbsolutePath();
+            Path payloadPath = Paths.get(path).normalize();
             // Checks if the path exists, if not it creates it
             if (Files.notExists(payloadPath)) {
                 Files.createDirectories(payloadPath);
