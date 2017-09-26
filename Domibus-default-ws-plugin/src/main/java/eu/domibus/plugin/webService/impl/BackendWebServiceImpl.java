@@ -352,7 +352,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
      * @throws DownloadMessageFault
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 300, rollbackFor = DownloadMessageFault.class)
     public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws RetrieveMessageFault {
 
         UserMessage userMessage = null;
