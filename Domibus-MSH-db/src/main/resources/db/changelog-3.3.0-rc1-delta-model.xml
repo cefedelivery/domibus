@@ -137,4 +137,21 @@
         </sql>
     </changeSet>
 
+    <changeSet author="dussath" id="EDELIVERY_2580">
+        <createIndex indexName="IDX_PROPERTY_NAME" tableName="TB_PROPERTY">
+            <column name="NAME"/>
+        </createIndex>
+        <createIndex indexName="IDX_PARTY_ID_VALUE" tableName="TB_PARTY_ID">
+            <column name="VALUE"/>
+        </createIndex>
+        <createIndex indexName="IDX_MESSAGE_LOG_RECEIVED" tableName="TB_MESSAGE_LOG">
+            <column name="RECEIVED"/>
+        </createIndex>
+        <createIndex indexName="IDX_MESSAGE_LOG_M_STATUS" tableName="TB_MESSAGE_LOG">
+            <column name="MESSAGE_STATUS"/>
+        </createIndex>
+        <createIndex indexName="IDX_MESSAGE_INFO_R_T_M_ID" tableName="TB_MESSAGE_INFO">
+            <column name="REF_TO_MESSAGE_ID"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
