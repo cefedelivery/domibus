@@ -167,8 +167,8 @@ export class UserComponent implements OnInit, DirtyOperations {
           this.users[this.rowNumber].status = UserState[UserState.UPDATED]
         }
 
-        this.enableSave = true;
-        this.enableCancel = true;
+        this.enableSave = formRef.componentInstance.userForm.dirty;
+        this.enableCancel = formRef.componentInstance.userForm.dirty;
       } else {
         this.users.pop();
         this.selected = [];
@@ -201,8 +201,8 @@ export class UserComponent implements OnInit, DirtyOperations {
           this.users[this.rowNumber].status = UserState[UserState.UPDATED]
         }
 
-        this.enableSave = true;
-        this.enableCancel = true;
+        this.enableSave = formRef.componentInstance.userForm.dirty;
+        this.enableCancel = formRef.componentInstance.userForm.dirty;
       }
     });
   }
