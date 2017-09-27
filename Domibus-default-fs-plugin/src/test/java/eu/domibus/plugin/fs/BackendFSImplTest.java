@@ -114,12 +114,12 @@ public class BackendFSImplTest {
         final String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
         final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
         final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
-        final Map<String, DataHandler> dataHandlers = new HashMap<>();
-        dataHandlers.put("cid:message", dataHandler);
+        final Map<String, FSPayload> fsPayloads = new HashMap<>();
+        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, dataHandler));
 
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
-            result = new FSMessage(dataHandlers, userMessage);
+            result = new FSMessage(fsPayloads, userMessage);
             
             fsFilesManager.setUpFileSystem(null);
             result = rootDir;
@@ -152,13 +152,13 @@ public class BackendFSImplTest {
 
         final DataHandler messageHandler = new DataHandler(new ByteArrayDataSource(messageContent.getBytes(), TEXT_XML));
         final DataHandler invoiceHandler = new DataHandler(new ByteArrayDataSource(invoiceContent.getBytes(), TEXT_XML));
-        final Map<String, DataHandler> dataHandlers = new HashMap<>();
-        dataHandlers.put("cid:message", messageHandler);
-        dataHandlers.put("cid:invoice", invoiceHandler);
+        final Map<String, FSPayload> fsPayloads = new HashMap<>();
+        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, messageHandler));
+        fsPayloads.put("cid:invoice", new FSPayload(TEXT_XML, invoiceHandler));
 
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
-            result = new FSMessage(dataHandlers, userMessage);
+            result = new FSMessage(fsPayloads, userMessage);
             
             fsFilesManager.setUpFileSystem(null);
             result = rootDir;
@@ -215,12 +215,12 @@ public class BackendFSImplTest {
         final String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
         final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
         final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
-        final Map<String, DataHandler> dataHandlers = new HashMap<>();
-        dataHandlers.put("cid:message", dataHandler);
+        final Map<String, FSPayload> fsPayloads = new HashMap<>();
+        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, dataHandler));
 
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
-            result = new FSMessage(dataHandlers, userMessage);
+            result = new FSMessage(fsPayloads, userMessage);
 
             fsFilesManager.setUpFileSystem(null);
             result = new FSSetUpException("Test-forced exception");
@@ -237,12 +237,12 @@ public class BackendFSImplTest {
         // the null causes an IOException
         final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource((byte[])null, TEXT_XML));
         final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
-        final Map<String, DataHandler> dataHandlers = new HashMap<>();
-        dataHandlers.put("cid:message", dataHandler);
+        final Map<String, FSPayload> fsPayloads = new HashMap<>();
+        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, dataHandler));
 
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
-            result = new FSMessage(dataHandlers, userMessage);
+            result = new FSMessage(fsPayloads, userMessage);
             
             fsFilesManager.setUpFileSystem(null);
             result = rootDir;

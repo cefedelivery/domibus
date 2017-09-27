@@ -2,7 +2,6 @@ package eu.domibus.plugin.fs;
 
 import eu.domibus.plugin.fs.ebms3.UserMessage;
 
-import javax.activation.DataHandler;
 import java.util.Map;
 
 /**
@@ -12,25 +11,25 @@ import java.util.Map;
  */
 public class FSMessage {
 
-    private final Map<String, DataHandler> dataHandlers;
+    private final Map<String, FSPayload> payloads;
     
     private final UserMessage metadata;
     
     /**
-     * Creates a FSMessage with the given data handlers and metadata
-     * @param dataHandlers  The data handler map (contentId, payload)
+     * Creates a FSMessage with the given payloads and metadata
+     * @param payloads The payloads map (contentId, payload)
      * @param metadata UserMessage metadata
      */
-    public FSMessage(Map<String, DataHandler> dataHandlers, UserMessage metadata) {
-        this.dataHandlers = dataHandlers;
+    public FSMessage(Map<String, FSPayload> payloads, UserMessage metadata) {
+        this.payloads = payloads;
         this.metadata = metadata;
     }
 
     /**
-     * @return The data handler map (contentId, payload)
+     * @return The payload map (contentId, payload)
      */
-    public Map<String, DataHandler> getDataHandlers() {
-        return dataHandlers;
+    public Map<String, FSPayload> getPayloads() {
+        return payloads;
     }
 
     /**

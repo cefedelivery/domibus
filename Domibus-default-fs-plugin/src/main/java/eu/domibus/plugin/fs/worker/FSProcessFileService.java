@@ -21,6 +21,7 @@ import eu.domibus.plugin.fs.BackendFSImpl;
 import eu.domibus.plugin.fs.FSFileNameHelper;
 import eu.domibus.plugin.fs.FSFilesManager;
 import eu.domibus.plugin.fs.FSMessage;
+import eu.domibus.plugin.fs.FSPayload;
 import eu.domibus.plugin.fs.FSXMLHelper;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
 import eu.domibus.plugin.fs.exception.FSPluginException;
@@ -50,9 +51,9 @@ public class FSProcessFileService {
                 LOG.debug("[{}]: Metadata found and valid", processableFile.getName());
 
                 DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
-                Map<String, DataHandler> dataHandlers = new HashMap<>(1);
-                dataHandlers.put(DEFAULT_CONTENT_ID, dataHandler);
-                FSMessage message= new FSMessage(dataHandlers, metadata);
+                Map<String, FSPayload> fsPayloads = new HashMap<>(1);
+                fsPayloads.put(DEFAULT_CONTENT_ID, new FSPayload(null, dataHandler));
+                FSMessage message= new FSMessage(fsPayloads, metadata);
                 String messageId = backendFSPlugin.submit(message);
                 LOG.debug("[{}]: Message submitted successfully", processableFile.getName());
 

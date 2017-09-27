@@ -42,7 +42,7 @@ public class FSMessageTransformer
         metadata.setPartyInfo(getPartyInfoFromSubmission(submission));
         metadata.setCollaborationInfo(getCollaborationInfoFromSubmission(submission));
         metadata.setMessageProperties(getMessagePropertiesFromSubmission(submission));
-        Map<String, DataHandler> dataHandlers = getPayloadsFromSubmission(submission);
+        Map<String, FSPayload> dataHandlers = getPayloadsFromSubmission(submission);
         return new FSMessage(dataHandlers, metadata);
     }
 
@@ -62,17 +62,17 @@ public class FSMessageTransformer
         setCollaborationInfoToSubmission(submission, metadata.getCollaborationInfo());
         setMessagePropertiesToSubmission(submission, metadata.getMessageProperties());
         try {
-            setPayloadToSubmission(submission, messageIn.getDataHandlers());
+            setPayloadToSubmission(submission, messageIn.getPayloads());
         } catch (FSPayloadException ex) {
             throw new FSPluginException("Could not set payload to Submission", ex);
         }
         return submission;
     }
 
-    private void setPayloadToSubmission(Submission submission, final Map<String, DataHandler> dataHandlers) {
-        for (Map.Entry<String, DataHandler> entry : dataHandlers.entrySet()) {
+    private void setPayloadToSubmission(Submission submission, final Map<String, FSPayload> dataHandlers) {
+        for (Map.Entry<String, FSPayload> entry : dataHandlers.entrySet()) {
             String contentId = entry.getKey();
-            DataHandler dataHandler = entry.getValue();
+            DataHandler dataHandler = entry.getValue().getDataHandler();
             String mimeType = FSMimeTypeHelper.getMimeType(dataHandler.getName());
             if (StringUtils.isEmpty(mimeType)) {
                 throw new FSPayloadException("Could not detect mime type for " + dataHandler.getName());
@@ -83,10 +83,23 @@ public class FSMessageTransformer
         }
     }
 
-    private Map<String, DataHandler> getPayloadsFromSubmission(Submission submission) {
-        Map<String, DataHandler> result = new HashMap<>(submission.getPayloads().size());
+    private Map<String, FSPayload> getPayloadsFromSubmission(Submission submission) {
+        Map<String, FSPayload> result = new HashMap<>(submission.getPayloads().size());
         for (final Submission.Payload payload : submission.getPayloads()) {
-            result.put(payload.getContentId(), payload.getPayloadDatahandler());
+            String mimeType = null;
+            for (Submission.TypedProperty payloadProperty : payload.getPayloadProperties()) {
+                if (payloadProperty.getKey().equals(MIME_TYPE)) {
+                    mimeType = payloadProperty.getValue();
+                    break;
+                }
+            }
+            
+            if (mimeType == null) {
+                mimeType = payload.getPayloadDatahandler().getContentType();
+            }
+            
+            FSPayload fsPayload = new FSPayload(mimeType, payload.getPayloadDatahandler());
+            result.put(payload.getContentId(), fsPayload);
         }
         return result;
     }
