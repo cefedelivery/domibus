@@ -45,7 +45,7 @@ public class MessageLogResource {
     @Autowired
     DateUtil dateUtil;
 
-    //significant improvements the querye execution plan have been found by always passing the date.
+    //significant improvements to the query execution plan have been found by always passing the date.
     //so we provide a default from and to.
     Date defaultFrom;
 
@@ -54,7 +54,6 @@ public class MessageLogResource {
     @PostConstruct
     protected void init() {
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd");
-        Date t;
         try {
             defaultFrom = ft.parse("1977-10-25");
             defaultTo = ft.parse("2977-10-25");
