@@ -104,7 +104,6 @@ public class UserResponseRO {
                 .append("authorities", authorities)
                 .append("roles", roles)
                 .append("status", status)
-                .append("password", password)
                 .toString();
     }
 

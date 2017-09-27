@@ -52,6 +52,7 @@ public class UserResource {
 
     @RequestMapping(value = {"/users"}, method = RequestMethod.PUT)
     public void updateUsers(@RequestBody List<UserResponseRO> userROS) {
+        LOG.debug("Update Users was called: " + userROS);
         updateUserRoles(userROS);
         List<User> users = domainConverter.convert(userROS, User.class);
         userService.updateUsers(users);
@@ -69,7 +70,7 @@ public class UserResource {
 
     @RequestMapping(value = {"/save"}, method = RequestMethod.POST)
     public void save(@RequestBody List<UserResponseRO> usersRo) {
-        LOG.debug("Saving " + usersRo.size() + "");
+        LOG.debug("Saving " + usersRo);
         List<eu.domibus.api.user.User> users = domainConverter.convert(usersRo, eu.domibus.api.user.User.class);
         userService.saveUsers(users);
     }
