@@ -125,7 +125,7 @@ public class FSMessageTransformerTest {
         dataSource.setName("content.xml");
         DataHandler dataHandler = new DataHandler(dataSource);
         final Map<String, FSPayload> fsPayloads = new HashMap<>();
-        fsPayloads.put("cid:message", new FSPayload(APPLICATION_XML, dataHandler));
+        fsPayloads.put("cid:message", new FSPayload(null, dataHandler));
         FSMessage fsMessage = new FSMessage(fsPayloads, metadata);
 
         // Transform FSMessage to Submission
