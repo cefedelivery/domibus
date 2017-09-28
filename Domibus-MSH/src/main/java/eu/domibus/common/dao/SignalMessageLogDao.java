@@ -51,7 +51,7 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         try {
             return query.getSingleResult();
         } catch (NoResultException nrEx) {
-            LOG.debug("Query SignalMessageLog.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]", nrEx);
+            LOG.debug("Query SignalMessageLog.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]");
             return null;
         }
     }
