@@ -54,7 +54,7 @@ public class MessagingDao extends BasicDao<Messaging> {
             query.setParameter("MESSAGE_ID", messageId);
             return query.getSingleResult();
         } catch (NoResultException nrEx) {
-            LOG.debug("Could not find any message for message id[" + messageId + "]", nrEx);
+            LOG.debug("Could not find any message for message id[" + messageId + "]");
             return null;
         }
     }

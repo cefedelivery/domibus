@@ -1,6 +1,5 @@
 package eu.domibus.plugin.webService;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.AbstractSendMessageIT;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.ebms3.sender.NonRepudiationChecker;
@@ -11,14 +10,10 @@ import eu.domibus.plugin.webService.generated.SendRequest;
 import eu.domibus.plugin.webService.generated.SendResponse;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +30,7 @@ public class SendMessageSignOnlyIT extends AbstractSendMessageIT {
     @Autowired
     BackendInterface backendWebService;
 
-    @Mock
+    @Autowired
     NonRepudiationChecker nonRepudiationChecker;
 
     @InjectMocks
@@ -46,7 +41,6 @@ public class SendMessageSignOnlyIT extends AbstractSendMessageIT {
     public void before() throws IOException {
         // Initialize the mock objects
         MockitoAnnotations.initMocks(this);
-        Mockito.when(nonRepudiationChecker.compareUnorderedReferenceNodeLists(Mockito.any(NodeList.class), Mockito.any(NodeList.class))).thenReturn(true);
 
         if (!initialized) {
             // The dataset is executed only once for each class

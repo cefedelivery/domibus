@@ -150,7 +150,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         try {
             return query.getResultList();
         } catch (NoResultException nrEx) {
-            LOG.debug("Query UserMessageLog.findUndownloadedUserMessagesOlderThan did not find any result for date [" + date + "] and MPC [" + mpc + "]", nrEx);
+            LOG.debug("Query UserMessageLog.findUndownloadedUserMessagesOlderThan did not find any result for date [" + date + "] and MPC [" + mpc + "]");
             return Collections.EMPTY_LIST;
         }
     }
@@ -162,7 +162,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         try {
             return query.getResultList();
         } catch (NoResultException nrEx) {
-            LOG.debug("Query UserMessageLog.findDownloadedUserMessagesOlderThan did not find any result for date [" + date + "] and MPC [" + mpc + "]", nrEx);
+            LOG.debug("Query UserMessageLog.findDownloadedUserMessagesOlderThan did not find any result for date [" + date + "] and MPC [" + mpc + "]");
             return Collections.EMPTY_LIST;
         }
     }

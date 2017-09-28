@@ -13,11 +13,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.w3c.dom.NodeList;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,9 +35,12 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(SERVICE_PORT);
+
     @Autowired
     BackendInterface backendWebService;
-    @Mock
+
+    /* Mock the nonRepudiationChecker, it fails because security in/out policy interceptors are not ran */
+    @Autowired
     NonRepudiationChecker nonRepudiationChecker;
 
     @InjectMocks
@@ -51,8 +51,6 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
     public void prepareSendMessage(String responseFileName) {
         /* Initialize the mock objects */
         MockitoAnnotations.initMocks(this);
-        /* Mock the nonRepudiationChecker, it fails because security in/out policy interceptors are not ran */
-        Mockito.when(nonRepudiationChecker.compareUnorderedReferenceNodeLists(Mockito.any(NodeList.class), Mockito.any(NodeList.class))).thenReturn(true);
 
         String body = getAS4Response(responseFileName);
 

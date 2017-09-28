@@ -31,7 +31,7 @@ public class SignalMessageDao extends BasicDao<SignalMessage> {
             query.setParameter("ORI_MESSAGE_ID", originalMessageId);
             return query.getResultList();
         } catch (NoResultException nrEx) {
-            LOG.debug("Could not find any signal message for original message id[" + originalMessageId + "]", nrEx);
+            LOG.debug("Could not find any signal message for original message id[" + originalMessageId + "]");
             return null;
         }
     }
@@ -42,7 +42,7 @@ public class SignalMessageDao extends BasicDao<SignalMessage> {
             query.setParameter("ORI_MESSAGE_ID", originalMessageId);
             return query.getResultList();
         } catch (NoResultException nrEx) {
-            LOG.debug("Could not find any signal message id for original message id[" + originalMessageId + "]", nrEx);
+            LOG.debug("Could not find any signal message id for original message id[" + originalMessageId + "]");
             return null;
         }
     }
