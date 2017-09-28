@@ -120,6 +120,12 @@ public class MessageLogResource {
         //needed here because the info is not needed for the queries but is used by the gui as the filter is returned with
         //the result. Why??.
         filters.put("messageType", messageType);
+        if (filters.get("receivedFrom").equals(defaultFrom)) {
+            filters.remove("receivedFrom");
+        }
+        if (filters.get("receivedTo").equals(defaultTo)) {
+            filters.remove("receivedTo");
+        }
         result.setMessageLogEntries(convertMessageLogInfoList(resultList));
         result.setMshRoles(MSHRole.values());
         result.setMsgTypes(MessageType.values());
