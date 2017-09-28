@@ -55,6 +55,7 @@ Domibus 3.3 (from 3.3-RC1)
                         - add the property "domibus.datasource.maxLifetime=60"
                         - add the property "domibus.datasource.xa.maxLifetime=60"
                - [WebLogic only]
+                    o in case the probe URL is used, the new probe URL is /domibus-weblogic/services/msh
                     o modify the following parameters for the queue DomibusSendMessageQueue(jms/domibus.internal.dispatch.queue):
                         - Set "Expiration Policy" to "Discard"
                         - Set "Error Destination" to "None"
