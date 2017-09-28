@@ -3,6 +3,8 @@
 	<mpcs>
 		<mpc name="defaultMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="600"/>
 		<mpc name="brisMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="2"/>
+		<mpc name="brisMpcPull1" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMpcPull1" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="2"/>
+		<mpc name="brisMpcPull2" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMpcPull2" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="2"/>
 	</mpcs>
 	<businessProcesses>
 		<roles>
@@ -29,6 +31,7 @@
 			<mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
 			<mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
 			<binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+			<binding name="pull" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull"/>
 			<binding name="pushAndPush" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
 		</meps>
 		<properties>
@@ -61,9 +64,13 @@
 		</agreements>
 		<services>
 			<service name="testService5" value="bdx:noprocess" type="tc5"/>
+			<service name="testService50" value="bdx:noprocess" type="tc50"/>
+			<service name="testService51" value="bdx:noprocess" type="tc51"/>
 		</services>
 		<actions>
 			<action name="tc5Action" value="TC5Leg1"/>
+			<action name="tc50Action" value="TC50Leg10"/>
+			<action name="tc51Action" value="TC51Leg11"/>
 		</actions>
 		<as4>
 			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
@@ -72,6 +79,8 @@
 		</as4>
 		<legConfigurations>
 			<legConfiguration name="pushTestcase5tc1Action" service="testService5" action="tc5Action" defaultMpc="brisMpc" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase50tc10Action" service="testService50" action="tc50Action" defaultMpc="brisMpcPull1" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase51tc11Action" service="testService51" action="tc51Action" defaultMpc="brisMpcPull2" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 		</legConfigurations>
 		<process name="tc5Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
@@ -86,6 +95,28 @@
 			</responderParties>
 			<legs>
 				<leg name="pushTestcase5tc1Action"/>
+			</legs>
+		</process>
+		<process name="tc50Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="green_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase50tc10Action"/>
+			</legs>
+		</process>
+		<process name="tc51Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="blue_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="green_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase51tc11Action"/>
 			</legs>
 		</process>
 	</businessProcesses>

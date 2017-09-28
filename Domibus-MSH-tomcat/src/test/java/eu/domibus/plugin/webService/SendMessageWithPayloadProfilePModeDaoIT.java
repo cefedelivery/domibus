@@ -2,6 +2,7 @@ package eu.domibus.plugin.webService;
 
 import eu.domibus.plugin.webService.generated.SendMessageFault;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -12,6 +13,7 @@ import java.sql.SQLException;
  * Created by draguio on 17/02/2016.
  */
 @ContextConfiguration("classpath:pmode-dao.xml")
+@Ignore
 public class SendMessageWithPayloadProfilePModeDaoIT extends SendMessageWithPayloadProfileIT {
 
     private static boolean initialized;

@@ -246,10 +246,14 @@
 			</legs>
 		</process>
 		
+		
+		
+		
+		
 		<process name="tc2Process" 
 		agreement="agreementEmpty" 
-		mep="oneway" 
-		binding="push" 
+		mep="twoway" 
+		binding="pushAndPush" 
 		initiatorRole="defaultInitiatorRole" 
 		responderRole="defaultResponderRole">
 	<initiatorParties>

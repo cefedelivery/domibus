@@ -136,11 +136,27 @@ public class CryptoService {
         }
 
         LOG.debug("Replacing the existing truststore file [" + trustStoreFileValue + "] with the provided one");
-        try (ByteArrayInputStream newTrustStoreBytes = new ByteArrayInputStream(store); FileOutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
+        FileOutputStream fileOutputStream = null;
+        try (ByteArrayInputStream newTrustStoreBytes = new ByteArrayInputStream(store)) {
+            validateLoadOperation(newTrustStoreBytes, password);
+            fileOutputStream = new FileOutputStream(trustStoreFile);
             trustStore.load(newTrustStoreBytes, password.toCharArray());
             trustStore.store(fileOutputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
+        } finally {
+            if(fileOutputStream != null) {
+                fileOutputStream.close();
+            }
         }
+
         updateTrustStore();
+    }
+
+    // This method verifies in a temporary variable that the load of the new truststore is possible,
+    // because load() method is loading the content in memory even if the password does not match.
+    protected void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password) throws KeyStoreException, NoSuchAlgorithmException, IOException, CertificateException {
+        KeyStore tempTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        tempTrustStore.load(newTrustStoreBytes, password.toCharArray());
+        newTrustStoreBytes.reset();
     }
 
     class ReloadTrustStoreMessageCreator implements MessageCreator {

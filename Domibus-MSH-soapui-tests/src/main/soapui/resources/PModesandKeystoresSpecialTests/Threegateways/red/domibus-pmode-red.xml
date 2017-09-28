@@ -3,6 +3,8 @@
 	<mpcs>
 		<mpc name="defaultMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="600"/>
 		<mpc name="insolvencyMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/insolvencyMPC" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="5"/>
+		<mpc name="insolvencyMpcPull1" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/insolvencyMPCPull1" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="5"/>
+		<mpc name="insolvencyMpcPull2" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/insolvencyMPCPull2" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="5"/>
 	</mpcs>
 	<businessProcesses>
 		<roles>
@@ -29,6 +31,7 @@
 			<mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
 			<mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
 			<binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+			<binding name="pull" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull"/>
 			<binding name="pushAndPush" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
 		</meps>
 		<properties>
@@ -61,9 +64,13 @@
 		</agreements>
 		<services>
 			<service name="testService6" value="bdx:noprocess" type="tc6"/>
+			<service name="testService60" value="bdx:noprocess" type="tc60"/>
+			<service name="testService61" value="bdx:noprocess" type="tc61"/>
 		</services>
 		<actions>
 			<action name="tc6Action" value="TC6Leg1"/>
+			<action name="tc60Action" value="TC60Leg10"/>
+			<action name="tc61Action" value="TC61Leg11"/>
 		</actions>
 		<as4>
 			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
@@ -72,6 +79,8 @@
 		</as4>
 		<legConfigurations>
 			<legConfiguration name="pushTestcase6tc1Action" service="testService6" action="tc6Action" defaultMpc="insolvencyMpc" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase60tc10Action" service="testService60" action="tc60Action" defaultMpc="insolvencyMpcPull1" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase61tc11Action" service="testService61" action="tc61Action" defaultMpc="insolvencyMpcPull2" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 		</legConfigurations>
 		<process name="tc6Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
@@ -86,6 +95,28 @@
 			</responderParties>
 			<legs>
 				<leg name="pushTestcase6tc1Action"/>
+			</legs>
+		</process>
+		<process name="tc60Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="green_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase60tc10Action"/>
+			</legs>
+		</process>
+		<process name="tc61Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="green_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase61tc11Action"/>
 			</legs>
 		</process>
 	</businessProcesses>

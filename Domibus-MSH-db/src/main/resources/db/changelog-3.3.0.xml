@@ -41,5 +41,11 @@
             <column name="ROLE_ID" value="2" type="INT"/>
         </insert>
     </changeSet>
+    
+    <changeSet id="EDELIVERY-2726" author="migueti">
+        <sql>
+            ALTER TABLE TB_BACKEND_FILTER DROP COLUMN CRITERIA_OPERATOR;
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
