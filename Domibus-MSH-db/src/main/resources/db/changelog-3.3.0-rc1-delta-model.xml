@@ -128,7 +128,7 @@
 
     <changeSet author="musatmi " id="changelog-ws-plugin-auth-drop-trigger" dbms="oracle">
         <comment>Drop the trigger_auth trigger.</comment>
-        <sql>
+        <sql endDelimiter="\n/">
             BEGIN
             FOR i IN (SELECT null FROM user_triggers WHERE trigger_name = 'TRIGGER_AUTH') LOOP
             EXECUTE IMMEDIATE 'DROP TRIGGER TRIGGER_AUTH';
