@@ -18,7 +18,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -40,6 +44,23 @@ public class MessageLogResource {
 
     @Autowired
     DateUtil dateUtil;
+
+    //significant improvements to the query execution plan have been found by always passing the date.
+    //so we provide a default from and to.
+    Date defaultFrom;
+
+    Date defaultTo;
+
+    @PostConstruct
+    protected void init() {
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            defaultFrom = ft.parse("1977-10-25");
+            defaultTo = ft.parse("2977-10-25");
+        } catch (ParseException e) {
+            LOGGER.error("Impossible to initiate default dates");
+        }
+    }
 
     @RequestMapping(method = RequestMethod.GET)
     public MessageLogResultRO getMessageLog(
@@ -67,19 +88,18 @@ public class MessageLogResource {
         MessageLogResultRO result = new MessageLogResultRO();
 
         //TODO why are those filters send back to the GUI??
-        HashMap<String, Object> filters = new HashMap<>();
-        filters.put("messageId", messageId);
-        filters.put("conversationId", conversationId);
-        filters.put("mshRole", mshRole);
-        filters.put("messageStatus", messageStatus);
-        filters.put("notificationStatus", notificationStatus);
-        filters.put("fromPartyId", fromPartyId);
-        filters.put("toPartyId", toPartyId);
-        filters.put("refToMessageId", refToMessageId);
-        filters.put("originalSender", originalSender);
-        filters.put("finalRecipient", finalRecipient);
-        filters.put("receivedFrom", dateUtil.fromString(receivedFrom));
-        filters.put("receivedTo", dateUtil.fromString(receivedTo));
+        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient);
+
+        Date from = dateUtil.fromString(receivedFrom);
+        if (from == null) {
+            from = defaultFrom;
+        }
+        Date to = dateUtil.fromString(receivedTo);
+        if (to == null) {
+            to = defaultTo;
+        }
+        filters.put("receivedFrom", from);
+        filters.put("receivedTo", to);
 
         result.setFilter(filters);
         LOGGER.debug("using filters [{}]", filters);
@@ -100,6 +120,12 @@ public class MessageLogResource {
         //needed here because the info is not needed for the queries but is used by the gui as the filter is returned with
         //the result. Why??.
         filters.put("messageType", messageType);
+        if (filters.get("receivedFrom").equals(defaultFrom)) {
+            filters.remove("receivedFrom");
+        }
+        if (filters.get("receivedTo").equals(defaultTo)) {
+            filters.remove("receivedTo");
+        }
         result.setMessageLogEntries(convertMessageLogInfoList(resultList));
         result.setMshRoles(MSHRole.values());
         result.setMsgTypes(MessageType.values());
@@ -120,6 +146,21 @@ public class MessageLogResource {
             }
         }
         return result;
+    }
+
+    private HashMap<String, Object> createFilterMap(@RequestParam(value = "messageId", required = false) String messageId, @RequestParam(value = "conversationId", required = false) String conversationId, @RequestParam(value = "mshRole", required = false) MSHRole mshRole, @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus, @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus, @RequestParam(value = "fromPartyId", required = false) String fromPartyId, @RequestParam(value = "toPartyId", required = false) String toPartyId, @RequestParam(value = "refToMessageId", required = false) String refToMessageId, @RequestParam(value = "originalSender", required = false) String originalSender, @RequestParam(value = "finalRecipient", required = false) String finalRecipient) {
+        HashMap<String, Object> filters = new HashMap<>();
+        filters.put("messageId", messageId);
+        filters.put("conversationId", conversationId);
+        filters.put("mshRole", mshRole);
+        filters.put("messageStatus", messageStatus);
+        filters.put("notificationStatus", notificationStatus);
+        filters.put("fromPartyId", fromPartyId);
+        filters.put("toPartyId", toPartyId);
+        filters.put("refToMessageId", refToMessageId);
+        filters.put("originalSender", originalSender);
+        filters.put("finalRecipient", finalRecipient);
+        return filters;
     }
 
     private MessageLogRO convertMessageLogInfo(MessageLogInfo messageLogInfo) {

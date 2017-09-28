@@ -13,7 +13,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -31,7 +30,7 @@ public class SendMessageEncryptAllIT extends AbstractSendMessageIT {
     @Autowired
     BackendInterface backendWebService;
 
-    @Mock
+    @Autowired
     NonRepudiationChecker nonRepudiationChecker;
 
     @InjectMocks
