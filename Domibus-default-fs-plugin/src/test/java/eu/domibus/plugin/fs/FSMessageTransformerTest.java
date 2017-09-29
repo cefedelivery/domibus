@@ -111,9 +111,9 @@ public class FSMessageTransformerTest {
         Assert.assertEquals(PROPERTY_FINAL_RECIPIENT, property1.getName());
         Assert.assertEquals(FINAL_RECIPIENT, property1.getValue());
 
-        DataHandler dataHandler = fsMessage.getDataHandlers().get(CONTENT_ID);
-        Assert.assertEquals(APPLICATION_XML, dataHandler.getContentType());
-        Assert.assertEquals(payloadContent, IOUtils.toString(dataHandler.getInputStream()));
+        FSPayload fSPayload = fsMessage.getPayloads().get(CONTENT_ID);
+        Assert.assertEquals(APPLICATION_XML, fSPayload.getMimeType());
+        Assert.assertEquals(payloadContent, IOUtils.toString(fSPayload.getDataHandler().getInputStream()));
     }
 
     @Test
@@ -124,9 +124,9 @@ public class FSMessageTransformerTest {
         ByteArrayDataSource dataSource = new ByteArrayDataSource(payloadContent.getBytes(), APPLICATION_XML);
         dataSource.setName("content.xml");
         DataHandler dataHandler = new DataHandler(dataSource);
-        final Map<String, DataHandler> dataHandlers = new HashMap<>();
-        dataHandlers.put("cid:message", dataHandler);
-        FSMessage fsMessage = new FSMessage(dataHandlers, metadata);
+        final Map<String, FSPayload> fsPayloads = new HashMap<>();
+        fsPayloads.put("cid:message", new FSPayload(null, dataHandler));
+        FSMessage fsMessage = new FSMessage(fsPayloads, metadata);
 
         // Transform FSMessage to Submission
         FSMessageTransformer transformer = new FSMessageTransformer();

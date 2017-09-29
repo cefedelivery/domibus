@@ -113,12 +113,13 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER)) {
             
-            boolean multiplePayloads = fsMessage.getDataHandlers().size() > 1;
+            boolean multiplePayloads = fsMessage.getPayloads().size() > 1;
 
-            for (Map.Entry<String, DataHandler> entry : fsMessage.getDataHandlers().entrySet()) {
-                DataHandler dataHandler = entry.getValue();
+            for (Map.Entry<String, FSPayload> entry : fsMessage.getPayloads().entrySet()) {
+                FSPayload fsPayload = entry.getValue();
+                DataHandler dataHandler = fsPayload.getDataHandler();
                 String contentId  = entry.getKey();
-                String fileName = getFileName(multiplePayloads, messageId, contentId, dataHandler);
+                String fileName = getFileName(multiplePayloads, messageId, contentId, fsPayload.getMimeType());
 
                 try (FileObject fileObject = incomingFolder.resolveFile(fileName);
                      FileContent fileContent = fileObject.getContent()) {
@@ -130,19 +131,18 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         }
     }
 
-    private String getFileName(boolean multiplePayloads, String messageId, String contentId, DataHandler dataHandler) {
+    private String getFileName(boolean multiplePayloads, String messageId, String contentId, String mimeType) {
         String fileName = messageId;
         if (multiplePayloads) {
             fileName += "_" + contentId.replaceFirst("cid:", "");
         }
-        fileName += getFileNameExtension(dataHandler);
+        fileName += getFileNameExtension(mimeType);
         return fileName;
     }
 
-    private String getFileNameExtension(DataHandler dataHandler) {
+    private String getFileNameExtension(String mimeType) {
         String extension = "";
         try {
-            String mimeType = dataHandler.getContentType();
             extension = FSMimeTypeHelper.getExtension(mimeType);
         } catch (MimeTypeException ex) {
             LOG.warn("Error parsing MIME type", ex);

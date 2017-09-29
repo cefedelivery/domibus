@@ -10,6 +10,7 @@ import javax.activation.DataSource;
 import javax.xml.bind.JAXBException;
 
 import mockit.*;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
@@ -26,6 +27,7 @@ import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.fs.BackendFSImpl;
 import eu.domibus.plugin.fs.FSFilesManager;
 import eu.domibus.plugin.fs.FSMessage;
+import eu.domibus.plugin.fs.FSPayload;
 import eu.domibus.plugin.fs.FSPluginProperties;
 import eu.domibus.plugin.fs.FSTestHelper;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
@@ -122,12 +124,13 @@ public class FSSendMessagesServiceTest {
             backendFSPlugin.submit(with(new Delegate<FSMessage>() {
                  void delegate(FSMessage message) throws IOException {
                      Assert.assertNotNull(message);
-                     Assert.assertNotNull(message.getDataHandlers());
-                     DataHandler dataHandler = message.getDataHandlers().get("cid:message");
-                     Assert.assertNotNull(dataHandler);
+                     Assert.assertNotNull(message.getPayloads());
+                     FSPayload fsPayload = message.getPayloads().get("cid:message");
+                     Assert.assertNotNull(fsPayload);
+                     Assert.assertNotNull(fsPayload.getDataHandler());
                      Assert.assertNotNull(message.getMetadata());
 
-                     DataSource dataSource = dataHandler.getDataSource();
+                     DataSource dataSource = fsPayload.getDataHandler().getDataSource();
                      Assert.assertNotNull(dataSource);
                      Assert.assertEquals("content.xml", dataSource.getName());
                      Assert.assertTrue(
@@ -217,12 +220,13 @@ public class FSSendMessagesServiceTest {
             backendFSPlugin.submit(with(new Delegate<FSMessage>() {
                  void delegate(FSMessage message) throws IOException {
                      Assert.assertNotNull(message);
-                     Assert.assertNotNull(message.getDataHandlers());
-                     DataHandler dataHandler = message.getDataHandlers().get("cid:message");
-                     Assert.assertNotNull(dataHandler);
+                     Assert.assertNotNull(message.getPayloads());
+                     FSPayload fsPayload = message.getPayloads().get("cid:message");
+                     Assert.assertNotNull(fsPayload);
+                     Assert.assertNotNull(fsPayload.getDataHandler());
                      Assert.assertNotNull(message.getMetadata());
 
-                     DataSource dataSource = dataHandler.getDataSource();
+                     DataSource dataSource = fsPayload.getDataHandler().getDataSource();
                      Assert.assertNotNull(dataSource);
                      Assert.assertEquals("content.xml", dataSource.getName());
                      Assert.assertTrue(
