@@ -17,9 +17,11 @@ import java.sql.SQLException;
  * @author venugar
  * @since 3.3
  */
+
 public class SendMessageCaseInsensitiveIT extends AbstractSendMessageIT {
 
     private static boolean initialized;
+
     @Autowired
     BackendInterface backendWebService;
 

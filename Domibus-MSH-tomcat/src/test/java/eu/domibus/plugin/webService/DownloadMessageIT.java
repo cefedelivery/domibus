@@ -6,6 +6,7 @@ import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._
 import eu.domibus.plugin.webService.generated.*;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -90,6 +91,15 @@ public class DownloadMessageIT extends AbstractIT {
         Holder<DownloadMessageResponse> downloadMessageResponse = new Holder<>();
         Holder<Messaging> ebMSHeaderInfo = new Holder<>();
 
+        downloadMessageRequestResponse(downloadMessageRequest, downloadMessageResponse, ebMSHeaderInfo);
+        Assert.assertFalse(downloadMessageResponse.value.getPayload().isEmpty());
+        PayloadType payloadType = downloadMessageResponse.value.getPayload().iterator().next();
+        String payload = new String(payloadType.getValue());
+        System.out.println("Payload returned [" + payload +"]");
+        Assert.assertEquals(payload, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>");
+    }
+
+    private void downloadMessageRequestResponse(DownloadMessageRequest downloadMessageRequest, Holder<DownloadMessageResponse> downloadMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
         try {
             backendWebService.downloadMessage(downloadMessageRequest, downloadMessageResponse, ebMSHeaderInfo);
         } catch (DownloadMessageFault dmf) {
@@ -97,11 +107,6 @@ public class DownloadMessageIT extends AbstractIT {
             Assert.assertEquals(message, dmf.getMessage());
             throw dmf;
         }
-        Assert.assertFalse(downloadMessageResponse.value.getPayload().isEmpty());
-        PayloadType payloadType = downloadMessageResponse.value.getPayload().iterator().next();
-        String payload = new String(payloadType.getValue());
-        System.out.println("Payload returned [" + payload +"]");
-        Assert.assertEquals(payload, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>");
     }
 
     /**
@@ -125,13 +130,7 @@ public class DownloadMessageIT extends AbstractIT {
         Holder<DownloadMessageResponse> downloadMessageResponse = new Holder<>();
         Holder<Messaging> ebMSHeaderInfo = new Holder<>();
 
-        try {
-            backendWebService.downloadMessage(downloadMessageRequest, downloadMessageResponse, ebMSHeaderInfo);
-        } catch (DownloadMessageFault dmf) {
-            String message = "Downloading message failed";
-            Assert.assertEquals(message, dmf.getMessage());
-            throw dmf;
-        }
+        downloadMessageRequestResponse(downloadMessageRequest, downloadMessageResponse, ebMSHeaderInfo);
         Assert.assertFalse(downloadMessageResponse.value.getPayload().isEmpty());
         PayloadType payloadType = downloadMessageResponse.value.getPayload().iterator().next();
         String payload = new String(payloadType.getValue());
@@ -148,24 +147,37 @@ public class DownloadMessageIT extends AbstractIT {
     @Test
     @Transactional
     public void testDownloadMessageBodyLoad() throws Exception {
+        downloadMessage("2bbc05d8-b603-4742-a118-137898a81de3@domibus.eu");
+    }
 
+    @Test
+    @Transactional
+    public void testMessageIdNeedsATrimSpaces() throws Exception {
+        downloadMessage("    2bbc05d8-b603-4742-a118-137898a81de3@domibus.eu ");
+    }
+
+    @Test
+    @Transactional
+    public void testMessageIdNeedsATrimTabs() throws Exception {
+        downloadMessage("\t2bbc05d8-b603-4742-a118-137898a81de3@domibus.eu\t");
+    }
+
+    @Test
+    @Transactional
+    public void testMessageIdNeedsATrimSpacesAndTabs() throws Exception {
+        downloadMessage(" \t 2bbc05d8-b603-4742-a118-137898a81de3@domibus.eu \t ");
+    }
+
+    private void downloadMessage(String messageId) throws Exception {
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
 
-        String messageId = "2bbc05d8-b603-4742-a118-137898a81de3@domibus.eu";
-
-        pushMessage(connection, messageId);
+        pushMessage(connection, StringUtils.trim(messageId).replace("\t", ""));
 
         DownloadMessageRequest downloadMessageRequest = createDownloadMessageRequest(messageId);
         Holder<DownloadMessageResponse> downloadMessageResponse = new Holder<>();
         Holder<Messaging> ebMSHeaderInfo = new Holder<>();
 
-        try {
-            backendWebService.downloadMessage(downloadMessageRequest, downloadMessageResponse, ebMSHeaderInfo);
-        } catch (DownloadMessageFault dmf) {
-            String message = "Downloading message failed";
-            Assert.assertEquals(message, dmf.getMessage());
-            throw dmf;
-        }
+        downloadMessageRequestResponse(downloadMessageRequest, downloadMessageResponse, ebMSHeaderInfo);
         Assert.assertNotNull(downloadMessageResponse.value.getBodyload());
         PayloadType payloadType = downloadMessageResponse.value.getBodyload();
         String payload = new String(payloadType.getValue());

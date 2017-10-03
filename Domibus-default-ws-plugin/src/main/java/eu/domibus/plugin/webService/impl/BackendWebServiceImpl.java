@@ -298,9 +298,11 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         UserMessage userMessage = null;
         boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(downloadMessageRequest.getMessageID());
 
+        String trimmedMessageId = trim(downloadMessageRequest.getMessageID()).replace("\t","");
+
         try {
             if (isMessageIdNotEmpty) {
-                userMessage = downloadMessage(trim(downloadMessageRequest.getMessageID()), null);
+                userMessage = downloadMessage(trimmedMessageId, null);
             }
         } catch (final MessageNotFoundException mnfEx) {
             if (LOG.isDebugEnabled()) {
@@ -327,7 +329,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         fillInfoParts(downloadMessageResponse, messaging);
 
         try {
-            messageAcknowledgeService.acknowledgeMessageDelivered(downloadMessageRequest.getMessageID(), new Timestamp(System.currentTimeMillis()));
+            messageAcknowledgeService.acknowledgeMessageDelivered(trimmedMessageId, new Timestamp(System.currentTimeMillis()));
         } catch (AuthenticationException | MessageAcknowledgeException e) {
             //if an error occurs related to the message acknowledgement do not block the download message operation
             LOG.error("Error acknowledging message [" + downloadMessageRequest.getMessageID() + "]", e);
@@ -350,7 +352,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
      * @throws DownloadMessageFault
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 300, rollbackFor = DownloadMessageFault.class)
     public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws RetrieveMessageFault {
 
         UserMessage userMessage = null;
@@ -361,7 +363,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             throw new RetrieveMessageFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
         }
 
-        String trimmedMessageId = trim(retrieveMessageRequest.getMessageID());
+        String trimmedMessageId = trim(retrieveMessageRequest.getMessageID()).replace("\t","");
 
         try {
             userMessage = downloadMessage(trimmedMessageId, null);

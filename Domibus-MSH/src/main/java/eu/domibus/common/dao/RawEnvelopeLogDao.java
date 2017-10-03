@@ -8,11 +8,13 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import java.util.List;
 
 /**
  * @author idragusa
  * @since 3.2.5
  */
+//@thom test this class
 @Repository
 public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
 
@@ -22,9 +24,9 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
         super(RawEnvelopeLog.class);
     }
 
-    //@thom test this class
+
     public RawEnvelopeDto findRawXmlByMessageId(final String messageId) {
-        TypedQuery<RawEnvelopeDto> namedQuery = em.createNamedQuery("find.by.message.id", RawEnvelopeDto.class);
+        TypedQuery<RawEnvelopeDto> namedQuery = em.createNamedQuery("RawDto.findByMessageId", RawEnvelopeDto.class);
         namedQuery.setParameter("MESSAGE_ID",messageId);
         try {
             return namedQuery.getSingleResult();
@@ -34,9 +36,18 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
         }
     }
 
-    public void deleteRawMessage(final int id){
-        RawEnvelopeLog read = read(id);
-        delete(read);
+    /**
+     * Delete all the raw entries related to a given UserMessage id.
+     *
+     * @param messageId the id of the message.
+     */
+    public void deleteUserMessageRawEnvelope(final String messageId) {
+        TypedQuery<RawEnvelopeLog> namedQuery = em.createNamedQuery("Raw.findByMessageId", RawEnvelopeLog.class);
+        namedQuery.setParameter("MESSAGE_ID", messageId);
+        final List<RawEnvelopeLog> resultList = namedQuery.getResultList();
+        for (RawEnvelopeLog rawEnvelopeLog : resultList) {
+            delete(rawEnvelopeLog);
+        }
     }
 
 

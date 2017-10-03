@@ -69,7 +69,8 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
         //ReceiveTimeOut - Specifies the amount of time, in milliseconds, that the consumer will wait for a response before it times out. 0 is infinite.
         int receiveTimeout = Integer.parseInt(domibusProperties.getProperty("domibus.dispatcher.receiveTimeout", "120000"));
         httpClientPolicy.setReceiveTimeout(receiveTimeout);
-        httpClientPolicy.setAllowChunking(Boolean.valueOf(domibusProperties.getProperty("domibus.dispatcher.allowChunking", "false")));
+        httpClientPolicy.setAllowChunking(Boolean.valueOf(domibusProperties.getProperty("domibus.dispatcher.allowChunking", "true")));
+        httpClientPolicy.setChunkingThreshold(Integer.parseInt(domibusProperties.getProperty("domibus.dispatcher.chunkingThreshold", "104857600")));
 
         final TLSClientParameters params = tlsReader.getTlsClientParameters();
         if (params != null && endpoint.startsWith("https://")) {

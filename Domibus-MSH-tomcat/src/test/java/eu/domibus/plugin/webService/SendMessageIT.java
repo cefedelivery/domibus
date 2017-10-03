@@ -10,6 +10,7 @@ import eu.domibus.plugin.webService.generated.SendMessageFault;
 import eu.domibus.plugin.webService.generated.SendRequest;
 import eu.domibus.plugin.webService.generated.SendResponse;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,6 +20,7 @@ import java.sql.SQLException;
 /**
  * Created by feriaad on 02/02/2016.
  */
+@Ignore
 public class SendMessageIT extends AbstractSendMessageIT {
 
     private static boolean initialized;

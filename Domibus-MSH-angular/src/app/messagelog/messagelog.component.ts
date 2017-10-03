@@ -1,4 +1,4 @@
-import {Component, TemplateRef, ViewChild} from "@angular/core";
+import {Component, EventEmitter, TemplateRef, ViewChild} from "@angular/core";
 import {Http, URLSearchParams, Response} from "@angular/http";
 import {MessageLogResult} from "./messagelogresult";
 import {Observable} from "rxjs";
@@ -53,6 +53,7 @@ export class MessageLogComponent {
 
   advancedSearch: boolean;
 
+  messageResent = new EventEmitter(false);
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
@@ -301,7 +302,9 @@ export class MessageLogComponent {
         case 'Resend' :
           this.resend(this.selected[0].messageId);
           this.selected = [];
-          this.search();
+          this.messageResent.subscribe(result => {
+            this.search();
+          });
           break;
         case 'Cancel' :
         //do nothing
@@ -318,6 +321,9 @@ export class MessageLogComponent {
 
     this.http.put(url, {}, {}).subscribe(res => {
       this.alertService.success("The operation resend message completed successfully");
+      setTimeout(() => {
+        this.messageResent.emit();
+      }, 500);
     }, err => {
       this.alertService.error("The message " + messageId + " could not be resent.");
     });

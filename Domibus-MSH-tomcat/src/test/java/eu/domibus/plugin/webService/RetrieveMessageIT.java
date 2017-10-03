@@ -46,8 +46,20 @@ public class RetrieveMessageIT extends AbstractIT {
 
     @Test
     @Transactional
-    public void testMessageIdNeedsATrim() throws Exception {
+    public void testMessageIdNeedsATrimSpaces() throws Exception {
         retrieveMessage("    2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu ");
+    }
+
+    @Test
+    @Transactional
+    public void testMessageIdNeedsATrimTabs() throws Exception {
+        retrieveMessage("\t2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu\t");
+    }
+
+    @Test
+    @Transactional
+    public void testMessageIdNeedsATrimSpacesAndTabs() throws Exception {
+        retrieveMessage(" \t 2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu \t ");
     }
 
     @Test
@@ -73,7 +85,7 @@ public class RetrieveMessageIT extends AbstractIT {
 
     private void retrieveMessage(String messageId) throws Exception {
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
-        pushMessage(connection, StringUtils.trim(messageId));
+        pushMessage(connection, StringUtils.trim(messageId).replace("\t", ""));
 
         RetrieveMessageRequest retrieveMessageRequest = createRetrieveMessageRequest(messageId);
         Holder<RetrieveMessageResponse> retrieveMessageResponse = new Holder<>();

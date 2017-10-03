@@ -66,7 +66,7 @@
                    #finalRecipient="ngModel" id="finalrecipient_id">
           </md-input-container>
 
-          <md2-datepicker placeholder="Sent from:"
+          <md2-datepicker placeholder="Sent From:"
                           [(ngModel)]="filter.receivedFrom"
                           name="receivedFrom"
                           [type]="'datetime'"
@@ -74,7 +74,7 @@
                           (change)='onTimestampFromChange($event)'
                           #timestampControl="ngModel" id="receivedfrom_id" *ngIf="advancedSearch">
           </md2-datepicker>
-          <md2-datepicker placeholder="Received up to:"
+          <md2-datepicker placeholder="Received Up To:"
                           [(ngModel)]="filter.receivedTo"
                           name="receivedTo"
                           [min]="timestampToMinDate"

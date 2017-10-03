@@ -143,7 +143,7 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
         // Verifies that the message is really in the queue
         connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
         connection.start();
-        Message message = popQueueMessageWithTimeout(connection, JMS_DISPATCH_QUEUE_NAME, 1000);
+        Message message = popQueueMessageWithTimeout(connection, JMS_DISPATCH_QUEUE_NAME, 2000);
         connection.close();
         Assert.assertNull(message);
         System.out.println("Out message: " + message);

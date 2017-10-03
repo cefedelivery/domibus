@@ -171,6 +171,9 @@ public class UserMessageHandlerService {
     protected void checkCharset(final Messaging messaging) throws EbMS3Exception {
         LOG.info("Checking charset for attachments");
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
+            if(partInfo.getPartProperties() == null || partInfo.getPartProperties().getProperties() == null) {
+                continue;
+            }
             for (final Property property : partInfo.getPartProperties().getProperties()) {
                 if (Property.CHARSET.equals(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
                     LOG.businessError(DomibusMessageCode.BUS_MESSAGE_CHARSET_INVALID, property.getValue(), messaging.getUserMessage().getMessageInfo().getMessageId());

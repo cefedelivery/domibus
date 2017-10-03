@@ -7,6 +7,11 @@
 		<mpc name="defaultMpcWSDom123" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCWSDOM123" enabled="true" default="true" retention_downloaded="12" retention_undownloaded="14"/>			
 		<mpc name="defaultMpcJMS" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCJMS" enabled="true" default="true" retention_downloaded="4" retention_undownloaded="3600"/>		
 		<mpc name="insolvencyMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/insolvencyMPC" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="5"/>
+		<mpc name="defaultMpcOne" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCOne" enabled="true" default="true" retention_downloaded="10" retention_undownloaded="600"/>
+		<mpc name="defaultMpcTwo" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCTwo" enabled="true" default="true" retention_downloaded="15" retention_undownloaded="600"/>
+		<mpc name="defaultMpcThree" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCThree" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="600"/>
+		<mpc name="defaultMpcFour" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCFour" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="600"/>
+		<mpc name="defaultMpcFive" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCFive" enabled="true" default="true" retention_downloaded="5" retention_undownloaded="600"/>
 	</mpcs>
 	<businessProcesses>
 		<roles>
@@ -40,6 +45,7 @@
 			<mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
 			<mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
 			<binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+			<binding name="pull" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull"/>
 			<binding name="pushAndPush" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
 		</meps>
 		<properties>
@@ -62,7 +68,7 @@
 			<security name="eDeliveryPolicy" policy="eDeliveryPolicy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
-			<security name="eSensPolicy" policy="eSensPolicy.xml" signatureMethod="RSA_SHA256"/>			
+			<security name="eSensPolicy" policy="eSensPolicy.v2.0.xml" signatureMethod="RSA_SHA256"/>			
 		</securities>
 		<errorHandlings>
 			 <!--<errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="false" businessErrorNotifyConsumer="false" deliveryFailureNotifyProducer="false"/> --> 
@@ -89,6 +95,11 @@
 			<service name="testService10" value="bdx:noprocess" type="tc10"/>	
 			<service name="testService11" value="bdx:noprocess" type="tc11"/>					
 			<service name="testService12" value="bdx:noprocess" type="tc12"/>	
+			<service name="testService13" value="bdx:noprocess" type="tc13"/>
+			<service name="testService14" value="bdx:noprocess" type="tc14"/>
+			<service name="testService15" value="bdx:noprocess" type="tc15"/>
+			<service name="testService16" value="bdx:noprocess" type="tc16"/>
+			<service name="testService17" value="bdx:noprocess" type="tc17"/>
 			<service name="connectivityservice" value="http://ec.europa.eu/e-delivery/services/connectivity-service" type="edelivery"/>				
 		</services>
 		<actions>
@@ -103,6 +114,11 @@
 			<action name="tc10Action" value="TC10Leg1"/>	
 			<action name="tc11Action" value="TC11Leg1"/>					
 			<action name="tc12Action" value="TC12Leg1"/>
+			<action name="tc13Action" value="TC13Leg1"/>
+			<action name="tc14Action" value="TC14Leg1"/>
+			<action name="tc15Action" value="TC15Leg1"/>
+			<action name="tc16Action" value="TC16Leg1"/>
+			<action name="tc17Action" value="TC17Leg1"/>
 			<action name="submitMessage" value="submitMessage"/>			
 		</actions>
 		<as4>
@@ -123,6 +139,11 @@
 			<legConfiguration name="pushTestcase11tc11Action" service="testService11" action="tc11Action" defaultMpc="defaultMpcWSDom109" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>					
 			<legConfiguration name="pushTestcase12tc12Action" service="testService12" action="tc12Action" defaultMpc="defaultMpcWSDom123" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>				
 			<legConfiguration name="pushConnectivityTest" service="connectivityservice" action="submitMessage" defaultMpc="defaultMpc" reliability="noReliability" security="noSigNoEnc" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="false"/>
+			<legConfiguration name="pullTestcase13tc13Action" service="testService13" action="tc13Action" defaultMpc="defaultMpcOne" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pullTestcase14tc14Action" service="testService14" action="tc14Action" defaultMpc="defaultMpcTwo" reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pullTestcase15tc15Action" service="testService15" action="tc15Action" defaultMpc="defaultMpcThree" reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pullTestcase16tc16Action" service="testService16" action="tc16Action" defaultMpc="defaultMpcFour" reliability="AS4Reliability" security="signOnly" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pullTestcase17tc17Action" service="testService17" action="tc17Action" defaultMpc="defaultMpcFive" reliability="noReliability" security="noSigNoEnc" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="false"/>
 			</legConfigurations>
 		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
@@ -290,5 +311,60 @@
 				<leg name="pushConnectivityTest"/>
 			</legs>
 		</process>	
+		<process name="tc13Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pullTestcase13tc13Action"/>
+			</legs>
+		</process>		
+		<process name="tc14Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pullTestcase14tc14Action"/>
+			</legs>
+		</process>
+		<process name="tc15Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pullTestcase15tc15Action"/>
+			</legs>
+		</process>
+		<process name="tc16Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pullTestcase16tc16Action"/>
+			</legs>
+		</process>
+		<process name="tc17Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pullTestcase17tc17Action"/>
+			</legs>
+		</process>
 		</businessProcesses>
 </db:configuration>
