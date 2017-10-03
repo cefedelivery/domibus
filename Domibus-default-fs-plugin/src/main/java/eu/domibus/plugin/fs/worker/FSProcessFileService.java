@@ -48,14 +48,14 @@ public class FSProcessFileService {
         try (FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, FSSendMessagesService.METADATA_FILE_NAME)) {
             if (metadataFile.exists()) {
                 UserMessage metadata = parseMetadata(metadataFile);
-                LOG.debug("[{}]: Metadata found and valid", processableFile.getName());
+                LOG.debug("Metadata found and valid: [{}]", processableFile.getName());
 
                 DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
                 Map<String, FSPayload> fsPayloads = new HashMap<>(1);
                 fsPayloads.put(DEFAULT_CONTENT_ID, new FSPayload(null, dataHandler));
                 FSMessage message= new FSMessage(fsPayloads, metadata);
                 String messageId = backendFSPlugin.submit(message);
-                LOG.debug("[{}]: Message submitted successfully", processableFile.getName());
+                LOG.info("Message submitted: [{}]", processableFile.getName());
 
                 renameProcessedFile(processableFile, messageId);
             } else {
