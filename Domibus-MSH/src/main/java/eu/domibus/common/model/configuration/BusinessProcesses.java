@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.common.model.configuration;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
@@ -51,45 +32,45 @@ public class BusinessProcesses extends AbstractBaseEntity {
 
     @XmlElement(required = true, name = "roles")
     @Transient
-    protected Roles rolesXml;
+    protected Roles rolesXml; //NOSONAR
     @XmlElement(required = true, name = "parties")
     @Transient
-    protected Parties partiesXml;
+    protected Parties partiesXml; //NOSONAR
     @XmlElement(required = true, name = "meps")
     @Transient
-    protected Meps mepsXml;
+    protected Meps mepsXml; //NOSONAR
     @XmlElement(name = "properties")
     @Transient
-    protected Properties propertiesXml;
+    protected Properties propertiesXml; //NOSONAR
     @XmlElement(required = true, name = "payloadProfiles")
     @Transient
-    protected PayloadProfiles payloadProfilesXml;
+    protected PayloadProfiles payloadProfilesXml; //NOSONAR
     @XmlElement(required = true, name = "errorHandlings")
     @Transient
-    protected ErrorHandlings errorHandlingsXml;
+    protected ErrorHandlings errorHandlingsXml; //NOSONAR
     @XmlElement(required = true, name = "agreements")
     @Transient
-    protected Agreements agreementsXml;
+    protected Agreements agreementsXml; //NOSONAR
     @XmlElement(required = true, name = "services")
     @Transient
-    protected Services servicesXml;
+    protected Services servicesXml; //NOSONAR
     @XmlElement(required = true, name = "actions")
     @Transient
-    protected Actions actionsXml;
+    protected Actions actionsXml; //NOSONAR
     @XmlElement(required = true, name = "as4")
     @Transient
-    protected As4 as4Xml;
+    protected As4 as4Xml; //NOSONAR
     @XmlElement(required = true, name = "securities")
     @Transient
-    protected Securities securitiesXml;
+    protected Securities securitiesXml; //NOSONAR
     @XmlElement(required = true, name = "legConfigurations")
     @Transient
-    protected LegConfigurations legConfigurationsXml;
+    protected LegConfigurations legConfigurationsXml; //NOSONAR
 
     @XmlElement(required = true, name = "process")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_BUSINESSPROCESS")
-    protected Set<Process> processes;
+    private Set<Process> processes;
 
 
     @XmlTransient

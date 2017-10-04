@@ -7,10 +7,11 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.2.5</version>
+        <version>3.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>domibus-ws-stubs</artifactId>
+    <name>Domibus MSH Default WS Plugin Stubs</name>
 
     <build>
         <plugins>
@@ -28,6 +29,10 @@
                         </goals>
                         <configuration>
                             <extension>true</extension>
+                            <wsdlDirectory>src/main/resources/schemas</wsdlDirectory>
+                            <wsdlFiles>
+                                <wsdlFile>BackendService_1_1.wsdl</wsdlFile>
+                            </wsdlFiles>
                         </configuration>
                     </execution>
                 </executions>

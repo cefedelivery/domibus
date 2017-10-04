@@ -1,0 +1,9 @@
+<div>
+  <md-select placeholder="Rows" [(ngModel)]="pageSize" name="pageSize" (change)="changePageSize($event)"
+             id="pagesize_id">
+    <md-option *ngFor="let rowLimit of pageSizes" [value]="rowLimit.value">
+      {{rowLimit.key}}
+    </md-option>
+  </md-select>
+</div>
+

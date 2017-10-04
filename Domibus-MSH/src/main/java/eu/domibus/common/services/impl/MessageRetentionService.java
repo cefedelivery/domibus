@@ -1,31 +1,21 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.api.jms.JMSManager;
-import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.message.UserMessageService;
 import eu.domibus.api.util.CollectionUtil;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.SignalMessage;
-import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.ebms3.security.util.AuthUtils;
-import eu.domibus.plugin.NotificationListener;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.jms.JMSException;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-
 
 /**
  * This service class is responsible for the retention and clean up of Domibus messages, including signal messages.
@@ -37,7 +27,7 @@ import java.util.Properties;
 @Service
 public class MessageRetentionService {
 
-    private static final Log LOG = LogFactory.getLog(MessageRetentionService.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageRetentionService.class);
 
     public static final Integer DEFAULT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 50;
     public static final Integer DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 50;
@@ -58,22 +48,8 @@ public class MessageRetentionService {
     private UserMessageLogDao userMessageLogDao;
 
     @Autowired
-    private MessagingDao messagingDao;
+    private UserMessageService userMessageService;
 
-    @Autowired
-    private SignalMessageDao signalMessageDao;
-
-    @Autowired
-    private SignalMessageLogDao signalMessageLogDao;
-
-    @Autowired
-    private BackendNotificationService backendNotificationService;
-
-    @Autowired
-    private JMSManager jmsManager;
-
-    @Autowired
-    AuthUtils authUtils;
 
     /**
      * Deletes the expired messages(downloaded or not) using the configured limits
@@ -152,67 +128,16 @@ public class MessageRetentionService {
         return defaultValue;
     }
 
-    /* TODO it is not the responsibility of the MessageRetentionService to delete messages, the actual delete of the message should be delegated;
-    move this method in the MessageService;*/
     protected Integer delete(List<String> messageIds, Integer limit) {
         List<String> toDelete = messageIds;
         if (messageIds.size() > limit) {
             LOG.debug("Only the first [" + limit + "] will be deleted");
             toDelete = collectionUtil.safeSubList(messageIds, 0, limit);
         }
-        delete(toDelete);
+        userMessageService.delete(toDelete);
         return toDelete.size();
     }
 
-    /* TODO it is not the responsibility of the MessageRetentionService to delete messages, the actual delete of the message should be delegated;
-    move this method in the MessageService;*/
-    protected void delete(List<String> messageIds) {
-        if (messageIds == null) {
-            LOG.debug("Nothing to delete");
-            return;
-        }
 
-        LOG.debug("Deleting [" + messageIds.size() + "] messages");
-        for (final String messageId : messageIds) {
-            deleteMessage(messageId);
-        }
-    }
-
-    private void deleteMessage(String messageId) {
-        LOG.debug("Deleting message [" + messageId + "]");
-        if (backendNotificationService.getNotificationListenerServices() != null) {
-            for (NotificationListener notificationListener : backendNotificationService.getNotificationListenerServices()) {
-                try {
-                    String queueName = notificationListener.getBackendNotificationQueue().getQueueName();
-                    JmsMessage message = jmsManager.consumeMessage(queueName, messageId);
-                    if (message != null) {
-                        LOG.info("Message [" + messageId + "] consumed from queue [" + queueName + "]");
-                    }
-                } catch (JMSException jmsEx) {
-                    LOG.error("Error trying to get the queue name", jmsEx);
-                    // TODO to be changed with something like the new DomibusCoreException
-                    throw new RuntimeException("Queue name error", jmsEx.getCause());
-                }
-            }
-        }
-        messagingDao.clearPayloadData(messageId);
-        userMessageLogDao.setMessageAsDeleted(messageId);
-        handleSignalMessageDelete(messageId);
-    }
-
-    private void handleSignalMessageDelete(String messageId) {
-        List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
-        if (!signalMessages.isEmpty()) {
-            for (SignalMessage signalMessage : signalMessages) {
-                signalMessageDao.clear(signalMessage);
-            }
-        }
-        List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
-        if (!signalMessageIds.isEmpty()) {
-            for (String signalMessageId : signalMessageIds) {
-                signalMessageLogDao.setMessageAsDeleted(signalMessageId);
-            }
-        }
-    }
 
 }

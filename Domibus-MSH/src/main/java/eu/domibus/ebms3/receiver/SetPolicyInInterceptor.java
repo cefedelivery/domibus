@@ -1,35 +1,16 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.ebms3.common.model.MessageInfo;
+import eu.domibus.common.services.SoapService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
-import eu.domibus.ebms3.sender.MSHDispatcher;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.apache.cxf.attachment.AttachmentDataSource;
 import org.apache.cxf.binding.soap.HeaderUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -37,33 +18,33 @@ import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.binding.soap.interceptor.MustUnderstandInterceptor;
 import org.apache.cxf.binding.soap.saaj.SAAJInInterceptor;
 import org.apache.cxf.common.util.StringUtils;
-import org.apache.cxf.helpers.IOUtils;
+import org.apache.cxf.endpoint.Endpoint;
 import org.apache.cxf.interceptor.AttachmentInInterceptor;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.interceptor.StaxInInterceptor;
 import org.apache.cxf.message.Attachment;
+import org.apache.cxf.message.Exchange;
 import org.apache.cxf.phase.Phase;
+import org.apache.cxf.service.model.BindingInfo;
+import org.apache.cxf.service.model.BindingOperationInfo;
+import org.apache.cxf.service.model.EndpointInfo;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.policy.PolicyInInterceptor;
 import org.apache.cxf.ws.security.SecurityConstants;
 import org.apache.neethi.Policy;
-import org.apache.neethi.builders.converters.StaxToDOMConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.stream.XMLStreamReader;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -77,19 +58,34 @@ import java.util.Set;
  */
 public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
-    private static final Log LOG = LogFactory.getLog(SetPolicyInInterceptor.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SetPolicyInInterceptor.class);
+
     private JAXBContext jaxbContext;
+
     @Autowired
-    private PModeProvider pModeProvider;
+    private DomibusConfigurationService domibusConfigurationService;
+
+    @Autowired
+    private SoapService soapService;
+
+    private MessageLegConfigurationFactory messageLegConfigurationFactory;
 
     public SetPolicyInInterceptor() {
-        super(Phase.RECEIVE);
+        this(Phase.RECEIVE);
+    }
+
+    protected SetPolicyInInterceptor(String phase) {
+        super(phase);
         this.addBefore(PolicyInInterceptor.class.getName());
         this.addAfter(AttachmentInInterceptor.class.getName());
     }
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
+    }
+
+    public void setMessageLegConfigurationFactory(MessageLegConfigurationFactory messageLegConfigurationFactory) {
+        this.messageLegConfigurationFactory = messageLegConfigurationFactory;
     }
 
     /**
@@ -111,48 +107,72 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             return;
         }
 
-        final InputStream inputStream = message.getContent(InputStream.class);
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Messaging messaging = null;
+        String policyName = null;
+        String messageId = null;
+
         try {
-            IOUtils.copy(inputStream, byteArrayOutputStream); //FIXME: do not copy the whole byte[], use SequenceInputstream instead
-            final byte[] data = byteArrayOutputStream.toByteArray();
-            message.setContent(InputStream.class, new ByteArrayInputStream(data));
-            new StaxInInterceptor().handleMessage(message);
-            final XMLStreamReader xmlStreamReader = message.getContent(XMLStreamReader.class);
-            final Element soapEnvelope = new StaxToDOMConverter().convert(xmlStreamReader);
-            message.removeContent(XMLStreamReader.class);
-            message.setContent(InputStream.class, new ByteArrayInputStream(data));
-            //message.setContent(XMLStreamReader.class, XMLInputFactory.newInstance().createXMLStreamReader(message.getContent(InputStream.class)));
-            final Node messagingNode = soapEnvelope.getElementsByTagNameNS(ObjectFactory._Messaging_QNAME.getNamespaceURI(), ObjectFactory._Messaging_QNAME.getLocalPart()).item(0);
-            messaging = ((JAXBElement<Messaging>) this.jaxbContext.createUnmarshaller().unmarshal(messagingNode)).getValue();
-            final String pmodeKey = this.pModeProvider.findPModeKeyForUserMessage(messaging.getUserMessage(), MSHRole.RECEIVING); // FIXME: This does not work for signalmessages
-            final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
+
+            messaging=soapService.getMessage(message);
+            LegConfigurationExtractor legConfigurationExtractor = messageLegConfigurationFactory.extractMessageConfiguration(message, messaging);
+            if(legConfigurationExtractor ==null)return;
+
+            final LegConfiguration legConfiguration= legConfigurationExtractor.extractMessageConfiguration();
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
-            final Policy policy = builder.getPolicy(new FileInputStream(new File(System.getProperty("domibus.config.location") + File.separator + "policies", legConfiguration.getSecurity().getPolicy())));
-            message.put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
-            //FIXME: Test!!!!
-            message.getExchange().put(MSHDispatcher.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
-            //FIXME: Consistent way! If properties are added to the exchange you will have access via PhaseInterceptorChain
-            message.getExchange().put(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY, messaging.getUserMessage().getMessageInfo().getMessageId());
+            policyName = legConfiguration.getSecurity().getPolicy();
+            final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));
+            LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want
             message.getExchange().put(PolicyConstants.POLICY_OVERRIDE, policy);
             message.put(PolicyConstants.POLICY_OVERRIDE, policy);
             message.getInterceptorChain().add(new SetPolicyInInterceptor.CheckEBMSHeaderInterceptor());
             message.getInterceptorChain().add(new SetPolicyInInterceptor.SOAPMessageBuilderInterceptor());
-            message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm());
-            message.getExchange().put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm());
+            final String securityAlgorithm = legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
+            message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
+            message.getExchange().put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
+            LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_ALGORITHM_INCOMING_USE, securityAlgorithm);
 
         } catch (EbMS3Exception e) {
+            setBindingOperation(message);
             SetPolicyInInterceptor.LOG.debug("", e); // Those errors are expected (no PMode found, therefore DEBUG)
             throw new Fault(e);
         } catch (IOException | ParserConfigurationException | SAXException | JAXBException e) {
-            SetPolicyInInterceptor.LOG.error("", e); // Those errors are not expected
-            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messaging.getUserMessage().getMessageInfo().getMessageId() : "unknown", e);
+            setBindingOperation(message);
+            LOG.businessError(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_NOT_FOUND, e, policyName); // Those errors are not expected
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messageId : "unknown", e);
             ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ex);
         }
 
+    }
+
+    //this is a hack to avoid a nullpointer in @see WebFaultOutInterceptor.
+    //I suppose the bindingOperation is set after the execution of this interceptor and is empty in case of error.
+
+    private void setBindingOperation(SoapMessage message) {
+        final Exchange exchange = message.getExchange();
+        if (exchange == null) {
+            return;
+        }
+        final Endpoint endpoint = exchange.getEndpoint();
+        if (endpoint == null) {
+            return;
+        }
+        final EndpointInfo endpointInfo = endpoint.getEndpointInfo();
+        if (endpointInfo == null) {
+            return;
+        }
+        final BindingInfo binding = endpointInfo.getBinding();
+        if (binding == null) {
+            return;
+        }
+        final Collection<BindingOperationInfo> operations = binding.getOperations();
+        if (operations == null) {
+            return;
+        }
+        for (BindingOperationInfo operation : operations) {
+            exchange.put(BindingOperationInfo.class, operation);
+        }
     }
 
 
@@ -191,8 +211,6 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             final SOAPMessage result = message.getContent(SOAPMessage.class);
             try {
                 SAAJInInterceptor.replaceHeaders(result, message);
-
-
                 result.removeAllAttachments();
                 final Collection<Attachment> atts = message.getAttachments();
                 if (atts != null) {
@@ -224,6 +242,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
         }
     }
+
 }
 
 

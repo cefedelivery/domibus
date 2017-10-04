@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <import resource="file:///${domibus.config.location}/plugins/config/*-plugin.xml"/>
+
+    <!--    <import resource="/plugins/config/*-plugin.xml"/>  -->
+
+    <util:list id="routingCriteriaFactories"
+               value-type="eu.domibus.plugin.routing.CriteriaFactory">
+        <ref bean="from"/>
+        <ref bean="to"/>
+        <ref bean="service"/>
+        <ref bean="action"/>
+    </util:list>
+
+    <bean id="from"
+          class="eu.domibus.plugin.routing.FromRoutingCriteriaFactory">
+    </bean>
+    <bean id="to"
+          class="eu.domibus.plugin.routing.ToRoutingCriteriaFactory">
+    </bean>
+    <bean id="service"
+          class="eu.domibus.plugin.routing.ServiceRoutingCriteriaFactory">
+    </bean>
+    <bean id="action"
+          class="eu.domibus.plugin.routing.ActionRoutingCriteriaFactory">
+    </bean>
+
+</beans>

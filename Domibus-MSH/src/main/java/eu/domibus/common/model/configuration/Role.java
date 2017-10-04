@@ -1,29 +1,10 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.common.model.configuration;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -36,6 +17,10 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "")
 @Entity
 @Table(name = "TB_ROLE")
+@NamedQueries({
+        @NamedQuery(name = "Role.findByValue", query = "select role from Role role where role.value=:VALUE"),
+        @NamedQuery(name = "Role.findByName", query = "select role from Role role where role.name=:NAME")
+})
 public class Role extends AbstractBaseEntity {
 
     @XmlAttribute(name = "name", required = true)
@@ -90,22 +75,24 @@ public class Role extends AbstractBaseEntity {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Role)) return false;
-        if (!super.equals(o)) return false;
 
-        final Role role = (Role) o;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        if (!name.equals(role.name)) return false;
+        Role role = (Role) o;
 
-        return true;
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(name, role.name)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + name.hashCode();
-        return result;
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(name)
+                .toHashCode();
     }
 }

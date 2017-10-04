@@ -1,9 +1,10 @@
 package eu.domibus.ebms3.common.dao;
 
-import eu.domibus.api.xml.UnmarshallerResult;
-import eu.domibus.api.xml.XMLUtil;
+import eu.domibus.api.util.xml.UnmarshallerResult;
+import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
@@ -17,7 +18,7 @@ import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.Service;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateServiceImpl;
-import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.domibus.xml.XMLUtilImpl;
 import eu.europa.ec.dynamicdiscovery.model.Endpoint;
 import eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier;
@@ -45,8 +46,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.UUID;
 import java.util.Properties;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -88,6 +89,9 @@ public class DynamicDiscoveryPModeProviderTest {
     private DynamicDiscoveryServicePEPPOL dynamicDiscoveryServicePEPPOL;
 
     @Mock
+    private ProcessDao processDao;
+
+    @Mock
     private DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
 
     @Rule
@@ -103,7 +107,7 @@ public class DynamicDiscoveryPModeProviderTest {
     ConfigurationDAO configurationDAO;
 
     @Mock
-    TrustStoreService trustStoreService;
+    CryptoService cryptoService;
 
     @Spy
     private Properties domibusProperties;
@@ -165,8 +169,8 @@ public class DynamicDiscoveryPModeProviderTest {
 
         EndpointInfo testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, ADDRESS, ALIAS_CN_AVAILABLE);
         doReturn(testDataEndpoint).when(dynamicDiscoveryServiceOASIS).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
-        doReturn(KeyStore.getInstance(KeyStore.getDefaultType())).when(trustStoreService).getTrustStore();
-        doReturn(true).when(trustStoreService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
+        doReturn(KeyStore.getInstance(KeyStore.getDefaultType())).when(cryptoService).getTrustStore();
+        doReturn(true).when(cryptoService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
         UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
         dynamicDiscoveryPModeProvider.doDynamicDiscovery(userMessage, MSHRole.SENDING);
         Party expectedParty = new Party();
@@ -180,6 +184,21 @@ public class DynamicDiscoveryPModeProviderTest {
         expectedIdentifier.setPartyIdType(expectedPartyIType);
         expectedParty.getIdentifiers().add(expectedIdentifier);
         assertTrue(dynamicDiscoveryPModeProvider.getConfiguration().getBusinessProcesses().getParties().contains(expectedParty));
+    }
+
+    @Test(expected = EbMS3Exception.class)
+    public void testDoDynamicDiscoveryOnSenderNullCertificate() throws Exception {
+        Configuration testData = initializeConfiguration(DYNAMIC_DISCOVERY_ENABLED);
+        doReturn(true).when(configurationDAO).configurationExists();
+        doReturn(testData).when(configurationDAO).readEager();
+        dynamicDiscoveryPModeProvider.init();
+
+        EndpointInfo testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, null, ALIAS_CN_AVAILABLE);
+        doReturn(testDataEndpoint).when(dynamicDiscoveryServiceOASIS).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        doReturn(null).when(cryptoService).getTrustStore();
+        doReturn(true).when(cryptoService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
+        UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
+        dynamicDiscoveryPModeProvider.doDynamicDiscovery(userMessage, MSHRole.SENDING);
     }
 
     @Test

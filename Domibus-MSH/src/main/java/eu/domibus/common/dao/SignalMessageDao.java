@@ -1,27 +1,8 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.common.dao;
 
 import eu.domibus.ebms3.common.model.SignalMessage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +19,7 @@ import java.util.List;
 @Repository
 public class SignalMessageDao extends BasicDao<SignalMessage> {
 
-    private static final Log LOG = LogFactory.getLog(SignalMessageDao.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SignalMessageDao.class);
 
     public SignalMessageDao() {
         super(SignalMessage.class);
@@ -50,7 +31,7 @@ public class SignalMessageDao extends BasicDao<SignalMessage> {
             query.setParameter("ORI_MESSAGE_ID", originalMessageId);
             return query.getResultList();
         } catch (NoResultException nrEx) {
-            LOG.debug("Could not find any signal message for original message id[" + originalMessageId + "]", nrEx);
+            LOG.debug("Could not find any signal message for original message id[" + originalMessageId + "]");
             return null;
         }
     }
@@ -61,7 +42,7 @@ public class SignalMessageDao extends BasicDao<SignalMessage> {
             query.setParameter("ORI_MESSAGE_ID", originalMessageId);
             return query.getResultList();
         } catch (NoResultException nrEx) {
-            LOG.debug("Could not find any signal message id for original message id[" + originalMessageId + "]", nrEx);
+            LOG.debug("Could not find any signal message id for original message id[" + originalMessageId + "]");
             return null;
         }
     }

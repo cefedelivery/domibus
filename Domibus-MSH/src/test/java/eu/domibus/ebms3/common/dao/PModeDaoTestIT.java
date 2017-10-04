@@ -1,15 +1,19 @@
 package eu.domibus.ebms3.common.dao;
 
-import eu.domibus.api.xml.UnmarshallerResult;
-import eu.domibus.api.xml.XMLUtil;
+import eu.domibus.api.util.xml.UnmarshallerResult;
+import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.dao.ConfigurationRawDAO;
 import eu.domibus.common.dao.PModeDao;
+import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.common.model.configuration.ConfigurationRaw;
+import eu.domibus.ebms3.common.validators.ConfigurationValidator;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.xml.XMLUtilImpl;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +32,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -41,7 +46,7 @@ import static org.mockito.Mockito.never;
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class PModeDaoTestIT {
 
-    private static final Log LOG = LogFactory.getLog(PModeDaoTestIT.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeDaoTestIT.class);
 
 
     @org.springframework.context.annotation.Configuration
@@ -50,6 +55,11 @@ public class PModeDaoTestIT {
         @Bean
         public ConfigurationDAO configurationDAO() {
             return Mockito.mock(ConfigurationDAO.class);
+        }
+
+        @Bean
+        public ConfigurationRawDAO configurationRawDAO() {
+            return Mockito.mock(ConfigurationRawDAO.class);
         }
 
         @Bean(name = "domibusJTA")
@@ -63,6 +73,11 @@ public class PModeDaoTestIT {
         }
 
         @Bean
+        public ProcessDao processDao() {
+            return Mockito.mock(ProcessDao.class);
+        }
+
+        @Bean
         public JAXBContext jaxbContextConfig() throws JAXBException {
             return JAXBContext.newInstance("eu.domibus.common.model.configuration");
         }
@@ -71,6 +86,16 @@ public class PModeDaoTestIT {
         @Qualifier("jmsTemplateCommand")
         public JmsOperations jmsOperations() throws JAXBException {
             return Mockito.mock(JmsOperations.class);
+        }
+
+        @Bean
+        public ConfigurationValidator validator() {
+            return new ConfigurationValidator() {
+                @Override
+                public List<String> validate(Configuration configuration) {
+                    return Collections.emptyList();
+                }
+            };
         }
 
         @Bean
@@ -94,17 +119,21 @@ public class PModeDaoTestIT {
     ConfigurationDAO configurationDAO;
 
     @Autowired
+    ConfigurationRawDAO configurationRawDAO;
+
+    @Autowired
     JAXBContext jaxbContext;
 
     @Before
     public void resetMocks() {
         Mockito.reset(configurationDAO);
+        Mockito.reset(configurationRawDAO);
     }
 
 
     @Test
     public void testUpdatePModeWithPmodeContainingWhiteSpace() throws Exception {
-        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("SamplePModes/domibus-configuration-with-whitespaces.xml");
+        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-with-whitespaces.xml");
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
         UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, new ByteArrayInputStream(pModeBytes), null);
 
@@ -121,17 +150,26 @@ public class PModeDaoTestIT {
         Configuration original = unmarshallerResult.getResult();
         assertEquals(saved.getMpcsXml().getMpc().size(), original.getMpcsXml().getMpc().size());
         assertEquals(saved.getBusinessProcesses(), original.getBusinessProcesses());
+
+        ArgumentCaptor<ConfigurationRaw> rawConfig = ArgumentCaptor.forClass(ConfigurationRaw.class);
+        Mockito.verify(configurationRawDAO).create(rawConfig.capture());
+
+        final ConfigurationRaw raw = rawConfig.getValue();
+        assertNotNull(raw.getConfigurationDate());
+        assertEquals(raw.getXml(), pModeBytes);
+
     }
+
 
     @Test
     public void testUpdatePModeWithValidPmode() throws Exception {
-        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("SamplePModes/domibus-configuration-valid.xml");
+        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-valid.xml");
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
         UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, new ByteArrayInputStream(pModeBytes), null);
 
         List<String> updatePmodeMessage = pModeDao.updatePModes(pModeBytes);
         //there are no warnings
-        assertNull(updatePmodeMessage);
+        assertTrue(updatePmodeMessage.isEmpty());
 
         ArgumentCaptor<Configuration> parameter = ArgumentCaptor.forClass(Configuration.class);
         Mockito.verify(configurationDAO).updateConfiguration(parameter.capture());
@@ -146,7 +184,7 @@ public class PModeDaoTestIT {
 
     @Test
     public void testUpdatePModeWithXsdNotCompliantPmode() throws Exception {
-        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("SamplePModes/domibus-configuration-xsd-not-compliant.xml");
+        InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-xsd-not-compliant.xml");
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
 
         try {

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util.xsd">
+
+
+     <bean id="pModeProviderFactory" class="eu.domibus.ebms3.common.dao.PModeProviderFactory">
+		  <property name="implementation" value="${domibus.pmode.dao.implementation}"/>
+	</bean>	
+	<bean id="pModeProvider" class="eu.domibus.ebms3.common.dao.PModeProvider" 
+		  factory-method="getObject"   
+	      factory-bean="pModeProviderFactory">
+	</bean>  
+
+    <!-- quartz job for the retry  -->
+    <bean id="retryWorkerJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.ebms3.sender.SendRetryWorker"/>
+        <property name="durability" value="true"/>
+    </bean>
+    <bean id="pullRequestJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.ebms3.puller.MessagePullerJob"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="retryWorkerTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="retryWorkerJob"/>
+        <property name="cronExpression" value="${domibus.msh.retry.cron}"/>
+    </bean>
+    <bean id="pullRequestTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="pullRequestJob"/>
+        <property name="cronExpression" value="${domibus.msh.pull.cron}"/>
+    </bean>
+
+    <!-- customizable list of triggers to be executed by quartz -->
+    <bean id="userdefinedTriggerList"
+          class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list>
+                <ref bean="retryWorkerTrigger"/>
+                <ref bean="pullRequestTrigger"/>
+            </list>
+        </property>
+    </bean>
+
+
+</beans>

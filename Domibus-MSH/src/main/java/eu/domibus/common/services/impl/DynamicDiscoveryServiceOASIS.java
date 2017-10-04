@@ -1,9 +1,13 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
-import eu.domibus.wss4j.common.crypto.TrustStoreService;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
@@ -15,8 +19,6 @@ import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.*;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
@@ -43,19 +45,19 @@ import java.util.regex.Pattern;
 @Qualifier("dynamicDiscoveryServiceOASIS")
 public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
-    private static final Log LOG = LogFactory.getLog(DynamicDiscoveryServiceOASIS.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryServiceOASIS.class);
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^(?<scheme>.+?)::(?<value>.+)$");
 
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
 
     @Autowired
-    private TrustStoreService trustStoreService;
+    private CryptoService cryptoService;
 
     @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
     public EndpointInfo lookupInformation(final String receiverId, final String receiverIdType,
                                           final String documentId, final String processId,
-                                          final String processIdType) {
+                                          final String processIdType) throws EbMS3Exception {
 
         LOG.info("[OASIS SMP] Do the lookup by: " + receiverId + " " + receiverIdType + " " + documentId +
                 " " + processId + " " + processIdType);
@@ -72,8 +74,8 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             LOG.debug("Get the endpoint for " + transportProfileAS4);
             final Endpoint endpoint = sm.getEndpoint(processIdentifier, new TransportProfile(transportProfileAS4));
             if (endpoint == null || endpoint.getAddress() == null || endpoint.getProcessIdentifier() == null) {
-                throw new ConfigurationException("Receiver does not support reception of " + documentId +
-                        " for process " + processId + " using the AS4 Protocol");
+                throw new ConfigurationException("Could not fetch metadata for: " + receiverId + " " + receiverIdType + " " + documentId +
+                        " " + processId + " " + processIdType + " using the AS4 Protocol " + transportProfileAS4);
             }
 
             return new EndpointInfo(endpoint.getAddress(), endpoint.getCertificate());
@@ -89,8 +91,13 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
         }
 
+        final String certRegex = domibusProperties.getProperty(DYNAMIC_DISCOVERY_CERT_REGEX);
+        if(StringUtils.isEmpty(certRegex)) {
+            LOG.debug("The value for property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation is empty.");
+        }
+
         LOG.debug("Load trustore for the smpClient");
-        KeyStore truststore = trustStoreService.getTrustStore();
+        KeyStore truststore = cryptoService.getTrustStore();
         try {
             DefaultProxy defaultProxy = getConfiguredProxy();
             if (defaultProxy != null) {
@@ -98,7 +105,8 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
                 return DynamicDiscoveryBuilder.newInstance()
                         .fetcher(new DefaultURLFetcher(defaultProxy))
                         .locator(new DefaultBDXRLocator(smlInfo))
-                        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+                        //.reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, "^.*EHEALTH_SMP.*$")))
+                        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)))
                         .build();
             }
 
@@ -106,7 +114,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             // no proxy is configured
             return DynamicDiscoveryBuilder.newInstance()
                     .locator(new DefaultBDXRLocator(smlInfo))
-                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)))
                     .build();
 
         } catch (TechnicalException exc) {
@@ -114,10 +122,14 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
         }
     }
 
-    protected DocumentIdentifier createDocumentIdentifier(String documentId) {
-        String scheme = extract(documentId, "scheme");
-        String value = extract(documentId, "value");
-        return new DocumentIdentifier(value, scheme);
+    protected DocumentIdentifier createDocumentIdentifier(String documentId) throws EbMS3Exception {
+        try {
+            String scheme = extract(documentId, "scheme");
+            String value = extract(documentId, "value");
+            return new DocumentIdentifier(value, scheme);
+        } catch (IllegalStateException ise) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Could not extract @scheme and @value from " + documentId, null, ise);
+        }
     }
 
     protected String extract(String doubleColonDelimitedId, String groupName) {

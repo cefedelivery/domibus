@@ -1,0 +1,44 @@
+
+
+<assembly xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>sample-configuration-and-testing</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <baseDirectory>config</baseDirectory>
+    <includeSiteDirectory>false</includeSiteDirectory>
+    <files>
+        <!-- testing -->
+        <file>
+            <source>${project.basedir}/../Domibus-MSH-tomcat/src/test/resources/soapUI/AS4-test-guide-soapui-project.xml</source>
+            <outputDirectory>test/soapui/</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/../Domibus-MSH/src/main/conf/pmodes/domibus-gw-sample-pmode-blue.xml</source>
+            <outputDirectory>conf/pmodes/</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>${project.basedir}/../Domibus-MSH/src/main/conf/pmodes/domibus-gw-sample-pmode-red.xml</source>
+            <outputDirectory>conf/pmodes/</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+    </files>
+    <fileSets>
+        <fileSet>
+            <directory>${project.basedir}/../Domibus-MSH/src/main/conf/domibus/keystores/</directory>
+            <useDefaultExcludes>false</useDefaultExcludes>
+            <outputDirectory>conf/domibus/keystores</outputDirectory>
+            <!-- excludes/-->
+            <fileMode>0444</fileMode>
+            <directoryMode>0555</directoryMode>
+            <!-- directory/-->
+            <!--lineEnding>unix</lineEnding-->
+            <filtered>false</filtered>
+        </fileSet>
+    </fileSets>
+</assembly>

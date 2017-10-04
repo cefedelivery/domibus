@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * // TODO Documentation
- *
+ * <p>
  * Created by Cosmin Baciu on 17-Aug-16.
  */
 public class JMSDestination {
@@ -13,6 +13,7 @@ public class JMSDestination {
     protected Map<String, Object> properties = new HashMap<>();
 
     protected String name;
+    protected String fullyQualifiedName;
     protected boolean isInternal;
     protected String type;
     protected long numberOfMessages;
@@ -57,8 +58,9 @@ public class JMSDestination {
         this.numberOfMessages = numberOfMessages;
     }
 
+    @Override
     public String toString() {
-        return name;
+        return fullyQualifiedName;
     }
 
     public boolean isInternal() {
@@ -68,4 +70,13 @@ public class JMSDestination {
     public void setInternal(boolean internal) {
         isInternal = internal;
     }
+
+    public String getFullyQualifiedName() {
+        return fullyQualifiedName;
+    }
+
+    public void setFullyQualifiedName(String fullyQualifiedName) {
+        this.fullyQualifiedName = fullyQualifiedName;
+    }
+
 }

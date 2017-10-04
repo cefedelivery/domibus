@@ -6,23 +6,18 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.2.5</version>
+        <version>3.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>domibus-MSH</artifactId>
-    <packaging>war</packaging>
-    <name>domibus-MSH</name>
+    <packaging>jar</packaging>
+    <name>Domibus MSH Core</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hibernate.version>4.1.9.Final</hibernate.version>
-        <cxf.version>3.1.7</cxf.version>
-        <log4j.version>1.2.17</log4j.version>
-        <spring.security.version>3.2.0.RELEASE</spring.security.version>
-        <jstl.version>1.2</jstl.version>
-        <atomikos.version>3.9.3</atomikos.version>
-        <webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
+        <dom4j.version>1.6.1</dom4j.version>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 
@@ -32,481 +27,14 @@
         <soapui.remoteUrl>http://localhost:9080</soapui.remoteUrl>
     </properties>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>plugin.joinup</id>
-            <url>https://joinup.ec.europa.eu/nexus/content/groups/public/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>smartbear</id>
-            <url>http://smartbearsoftware.com/repository/maven2</url>
-        </pluginRepository>
-    </pluginRepositories>
-    <repositories>
-        <repository>
-            <id>joinup.nexus</id>
-            <url>https://joinup.ec.europa.eu/nexus/content/groups/public</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>joinup.nexus.snapshot</id>
-            <url>https://joinup.ec.europa.eu/nexus/content/repositories/snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
-    <profiles>
-        <profile>
-            <id>wildfly-mysql</id>
-            <properties>
-                <webXmlPath>src/main/conf/wildfly/web.xml</webXmlPath>
-                <domibus.classifier>wildfly</domibus.classifier>
-                <wildfly.version>9.0.2.Final</wildfly.version>
-            </properties>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>true</filtering>
-                    </resource>
-                </resources>
-
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.cargo</groupId>
-                        <artifactId>cargo-maven2-plugin</artifactId>
-                        <version>1.4.15</version>
-                        <executions>
-                            <execution>
-                                <id>build-wildfly</id>
-                                <goals>
-                                    <goal>configure</goal>
-                                </goals>
-                                <phase>pre-integration-test</phase>
-                                <configuration>
-                                    <container>
-                                        <containerId>wildfly9x</containerId>
-                                        <zipUrlInstaller>
-                                            <url>
-                                                https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery/org/wildfly/as/wildfly-as-dist/9.0.2.Final/wildfly-as-dist-9.0.2.Final.zip
-                                            </url>
-                                        </zipUrlInstaller>
-                                    </container>
-                                    <deployables>
-                                        <deployable/>
-                                    </deployables>
-                                    <configuration>
-                                        <files>
-                                            <file>
-                                                <file>${project.basedir}/src/main/conf/wildfly/domibus/conf</file>
-                                                <todir>conf/domibus</todir>
-                                            </file>
-                                        </files>
-                                    </configuration>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>com.google.code.maven-replacer-plugin</groupId>
-                        <artifactId>replacer</artifactId>
-                        <version>1.5.3</version>
-                        <executions>
-                            <execution>
-                                <id>domibus-conf-location</id>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>replace</goal>
-                                </goals>
-                                <configuration>
-                                    <includes>
-                                        <include>
-                                            ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}/bin/standalone.conf.bat
-                                        </include>
-                                        <include>
-                                            ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}/bin/standalone.conf
-                                        </include>
-                                    </includes>
-                                    <replacements>
-                                        <!-- Please keep the values from the "token" and the "value" fields on one line and do not include any whitespaces -->
-                                        <replacement>
-                                            <token>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M"</token>
-                                            <value>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M -Ddomibus.config.location=%JBOSS_HOME%/conf/domibus"</value>
-                                        </replacement>
-                                        <!-- Please keep the values from the "token" and the "value" fields on one line and do not include any whitespaces -->
-                                        <replacement>
-                                            <token>JAVA_OPTS="-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true"</token>
-                                            <value>JAVA_OPTS="-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Ddomibus.config.location=\$JBOSS_HOME/conf/domibus"</value>
-                                        </replacement>
-                                    </replacements>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.4</version>
-                        <configuration>
-
-                            <descriptors>
-                                <descriptor>src/main/assembly/wildfly/wildfly-full.xml</descriptor>
-                                <descriptor>src/main/assembly/wildfly/wildfly-configuration-only.xml</descriptor>
-                                <descriptor>src/main/assembly/sample-configuration-and-testing.xml</descriptor>
-                                <descriptor>src/main/assembly/sql-scripts.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>make-assembly</id>
-                                <!-- bound to verify because we need to execute cargo-package first
-                                    which is in pre-integration-test -->
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-
-            <dependencies>
-                <dependency>
-                    <groupId>eu.domibus</groupId>
-                    <artifactId>domibus-jms-wildfly</artifactId>
-                    <version>${project.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.glassfish.main.javaee-api</groupId>
-                    <artifactId>javax.jws</artifactId>
-                    <version>3.1.2.2</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-spring</artifactId>
-                    <version>${activemq.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-jaas</artifactId>
-                    <version>${activemq.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-kahadb-store</artifactId>
-                    <version>${activemq.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <!-- Atokimos Library for distributed transactions -->
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-jta</artifactId>
-                    <version>${atomikos.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-jdbc</artifactId>
-                    <version>${atomikos.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-jms</artifactId>
-                    <version>${atomikos.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-hibernate3</artifactId>
-                    <version>${atomikos.version}</version>
-                    <scope>provided</scope>
-                    <exclusions>
-                        <exclusion>
-                            <artifactId>hibernate</artifactId>
-                            <groupId>org.hibernate</groupId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-                <dependency>
-                    <groupId>xalan</groupId>
-                    <artifactId>xalan</artifactId>
-                    <version>2.7.1</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>weblogic-oracle</id>
-            <properties>
-                <webXmlPath>src/main/conf/weblogic/web.xml</webXmlPath>
-                <domibus.classifier>weblogic</domibus.classifier>
-            </properties>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>true</filtering>
-                    </resource>
-                </resources>
-
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.4</version>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/assembly/weblogic/weblogic-configuration-only.xml</descriptor>
-                                <descriptor>src/main/assembly/sample-configuration-and-testing.xml</descriptor>
-                                <descriptor>src/main/assembly/sql-scripts.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>make-assembly</id>
-                                <!-- bound to verify because we need to execute cargo-package first
-                                    which is in pre-integration-test -->
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <dependencies>
-                <dependency>
-                    <groupId>eu.domibus</groupId>
-                    <artifactId>domibus-jms-weblogic</artifactId>
-                    <version>${project.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.glassfish.main.javaee-api</groupId>
-                    <artifactId>javax.jws</artifactId>
-                    <version>3.1.2.2</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-spring</artifactId>
-                    <version>${activemq.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-jaas</artifactId>
-                    <version>${activemq.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-kahadb-store</artifactId>
-                    <version>${activemq.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <!-- Atokimos Library for distributed transactions -->
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-jta</artifactId>
-                    <version>${atomikos.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-jdbc</artifactId>
-                    <version>${atomikos.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-jms</artifactId>
-                    <version>${atomikos.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-hibernate3</artifactId>
-                    <version>${atomikos.version}</version>
-                    <scope>provided</scope>
-                    <exclusions>
-                        <exclusion>
-                            <artifactId>hibernate</artifactId>
-                            <groupId>org.hibernate</groupId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>tomcat-mysql</id>
-            <properties>
-                <filesToExclude>log4j.properties</filesToExclude>
-                <domibus.classifier>tomcat</domibus.classifier>
-                <tomcat.version>8.0.24</tomcat.version>
-            </properties>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>eu.domibus</groupId>
-                    <artifactId>domibus-jms-activemq</artifactId>
-                    <version>${project.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-spring</artifactId>
-                    <version>${activemq.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-jaas</artifactId>
-                    <version>${activemq.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-kahadb-store</artifactId>
-                    <version>${activemq.version}</version>
-                </dependency>
-
-                <!-- Atokimos Library for distributed transactions -->
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-jta</artifactId>
-                    <version>${atomikos.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-jdbc</artifactId>
-                    <version>${atomikos.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-jms</artifactId>
-                    <version>${atomikos.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.atomikos</groupId>
-                    <artifactId>transactions-hibernate3</artifactId>
-                    <version>${atomikos.version}</version>
-                    <exclusions>
-                        <exclusion>
-                            <artifactId>hibernate</artifactId>
-                            <groupId>org.hibernate</groupId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-            </dependencies>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>true</filtering>
-                    </resource>
-                </resources>
-
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.cargo</groupId>
-                        <artifactId>cargo-maven2-plugin</artifactId>
-                        <version>1.4.12</version>
-                        <executions>
-                            <execution>
-                                <id>build-tomcat</id>
-                                <goals>
-                                    <goal>configure</goal>
-                                    <goal>package</goal>
-                                </goals>
-                                <phase>pre-integration-test</phase>
-                                <configuration>
-                                    <container>
-                                        <containerId>tomcat8x</containerId>
-                                        <zipUrlInstaller>
-                                            <url>
-                                                https://joinup.ec.europa.eu/nexus/service/local/repositories/central/content/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip
-                                            </url>
-                                        </zipUrlInstaller>
-                                    </container>
-                                    <packager>
-                                        <outputLocation>
-                                            ${project.build.directory}/artifacts/domibus-container
-                                        </outputLocation>
-                                    </packager>
-                                    <deployables>
-                                        <deployable/>
-                                    </deployables>
-                                    <configuration>
-                                        <files>
-                                            <file>
-                                                <file>${project.basedir}/src/main/conf/domibus
-                                                </file>
-                                                <todir>conf/domibus</todir>
-                                            </file>
-                                        </files>
-                                    </configuration>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.4</version>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/assembly/tomcat-full.xml
-                                </descriptor>
-                                <descriptor>src/main/assembly/default-jms-plugin.xml
-                                </descriptor>
-                                <descriptor>src/main/assembly/default-ws-plugin.xml
-                                </descriptor>
-                                <descriptor>src/main/assembly/sample-configuration-and-testing.xml
-                                </descriptor>
-                                <descriptor>src/main/assembly/configuration-only.xml
-                                </descriptor>
-                                <descriptor>src/main/assembly/sql-scripts.xml
-                                </descriptor>
-                            </descriptors>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>make-assembly</id>
-                                <!-- bound to verify because we need to execute cargo-package first
-                                    which is in pre-integration-test -->
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-    </profiles>
     <dependencies>
+        <!-- Domibus modules -->
+        <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-angular</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-plugin-api</artifactId>
@@ -523,19 +51,50 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-logging</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-ext-services-delegate</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- End Domibus modules -->
+
+        <!-- AspectJ -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+        </dependency>
+        <!-- End AspectJ -->
+
+        <!-- Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <!-- End Jackson -->
+
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
         </dependency>
         <dependency>
             <groupId>dom4j</groupId>
             <artifactId>dom4j</artifactId>
-            <version>1.6.1</version>
+            <version>${dom4j.version}</version>
         </dependency>
+
+        <!-- Spring -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
@@ -567,32 +126,55 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+        <!-- End Spring -->
+
+        <!-- Spring Security -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+        <!-- End Spring Security -->
+
+        <!-- CXF -->
+        <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxws</artifactId>
-            <version>${cxf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-security</artifactId>
-            <version>${cxf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-ws-security</artifactId>
-            <version>${cxf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-transports-http</artifactId>
-            <version>${cxf.version}</version>
         </dependency>
+
+        <!-- Overrides the version coming from CXF due to a bug related to large attachments; to be removed when CXF upgrades also the xmlsec version -->
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+            <version>2.0.8</version>
+        </dependency>
+        <!-- End CXF -->
+
+        <!-- Hibernate -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
@@ -613,31 +195,12 @@
             <artifactId>hibernate-validator</artifactId>
             <version>5.1.2.Final</version>
         </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-        </dependency>
+        <!-- End Hibernate -->
+
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
-            <version>2.2.1</version>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
-            <scope>test</scope>
-        </dependency>
-
 
         <!-- Difi libraries -->
         <dependency>
@@ -655,21 +218,22 @@
         <dependency>
             <groupId>eu.europa.ec.dynamic-discovery</groupId>
             <artifactId>dynamic-discovery-client</artifactId>
-            <version>1.2</version>
+            <version>1.5</version>
         </dependency>
+        <!-- End Difi libraries -->
 
-
-        <!-- In order to enable gcm algorithms it was necessary to use a more recent version of bouncy castle (at least 1.49) -->
+        <!-- BouncyCastle: In order to enable gcm algorithms it was necessary to use a more recent version of bouncy castle (at least 1.49) -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.51</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.51</version>
         </dependency>
+        <!-- End BouncyCastle -->
+
+        <!-- Apache commons -->
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
@@ -679,71 +243,39 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.faces</groupId>
-            <artifactId>jsf-api</artifactId>
-            <version>2.1.20</version>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-            <version>${spring.security.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-            <version>${spring.security.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-taglibs</artifactId>
-            <version>${spring.security.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>spring-aop</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>jstl</groupId>
-            <artifactId>jstl</artifactId>
-            <version>${jstl.version}</version>
-        </dependency>
+        <!-- End Apache commons -->
+
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
             <version>1.1.0.Final</version>
         </dependency>
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-            <version>1.3.1</version>
-        </dependency>
+
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -781,110 +313,34 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>eu.domibus</groupId>
-            <artifactId>domibus-ActiveMQ-ThroughputLimiter</artifactId>
+            <artifactId>domibus-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>-->
+        </dependency>
+        <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-db</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.jmockit</groupId>
             <artifactId>jmockit</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- End Test dependencies -->
     </dependencies>
 
     <build>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                <excludes>
-                    <exclude>${filesToExclude}</exclude>
-                </excludes>
+                <filtering>true</filtering>
             </resource>
         </resources>
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-        </testResources>
         <plugins>
-            <plugin>
-                <groupId>com.smartbear.soapui</groupId>
-                <artifactId>soapui-pro-maven-plugin</artifactId>
-                <version>5.1.2</version>
-                <executions>
-                    <execution>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <outputFolder>${project.build.directory}/surefire-reports</outputFolder>
-                    <junitReport>true</junitReport>
-                    <printReport>true</printReport>
-                    <testSuite>Web Service Submission</testSuite>
-                    <projectProperties>
-                        <value>localUrl=${soapui.localUrl}</value>
-                        <value>remoteUrl=${soapui.remoteUrl}</value>
-                    </projectProperties>
-                    <soapuiProperties>
-                        <property>
-                            <name>soapui.logroot</name>
-                            <value>${project.build.directory}/soapui/logs/</value>
-                        </property>
-                        <property>
-                            <name>http.nonProxyHosts</name>
-                            <value>localhost|127.*|[::1]</value>
-                        </property>
-                    </soapuiProperties>
-                    <testFailIgnore>false</testFailIgnore>
-                    <projectFile>${projectFile}</projectFile>
-                </configuration>
-
-                <dependencies>
-                    <dependency>
-                        <groupId>org.reflections</groupId>
-                        <artifactId>reflections</artifactId>
-                        <version>0.9.8</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>net.ju-n.maven.plugins</groupId>
-                <artifactId>checksum-maven-plugin</artifactId>
-                <version>1.2</version>
-                <executions>
-                    <execution>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>files</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <algorithms>
-                        <algorithm>SHA-256</algorithm>
-                    </algorithms>
-                    <fileSets>
-                        <fileSet>
-                            <directory>${project.basedir}/src/main/conf/domibus</directory>
-                            <includes>
-                                <include>domibus-datasources.xml</include>
-                            </includes>
-                        </fileSet>
-                        <fileSet>
-                            <directory>${project.basedir}/src/main/conf/domibus</directory>
-                            <includes>
-                                <include>domibus-security.xml</include>
-                            </includes>
-                        </fileSet>
-                    </fileSets>
-                    <individualFilesOutputDirectory>${project.build.outputDirectory}</individualFilesOutputDirectory>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -899,50 +355,11 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.3</version>
-                <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <webXml>${webXmlPath}</webXml>
-                    <warName>${project.artifactId}-${project.version}</warName>
-                    <classifier>${domibus.classifier}</classifier>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.3</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <failOnError>false</failOnError>
-                    <!--doclet>org.dbdoclet.doclet.docbook.DocBookDoclet</doclet>
-                    <docletArtifact>
-                        <groupId>org.dbdoclet</groupId>
-                        <artifactId>dbdoclet</artifactId>
-                        <version>8.0.2</version>
-                    </docletArtifact-->
-                </configuration>
-
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -969,316 +386,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Create the folder to store the generated sql scripts-->
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <id>generate-sources</id>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <target>
-                                <mkdir dir="target/sql-scripts"/>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
-                <version>3.4.2</version>
-                <configuration>
-
-                    <outputFileEncoding>UTF-8</outputFileEncoding>
-                </configuration>
-                <executions>
-                    <!-- 3.2.5 -->
-                    <execution>
-                        <id>generate-mysql-script-full-3.2.5</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>updateSQL</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>
-                                src/main/resources/db/changelog-3.2.5.xml
-                            </changeLogFile>
-                            <url>
-                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.2.5.mysql
-                            </url>
-                            <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.2.5.ddl
-                            </migrationSqlOutputFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-oracle-script-full-3.2.5</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>updateSQL</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>
-                                src/main/resources/db/changelog-3.2.5.xml
-                            </changeLogFile>
-                            <url>
-                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.2.5.oracle
-                            </url>
-                            <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/oracle10g-3.2.5.ddl
-                            </migrationSqlOutputFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-mysql-script-delta-3.2.5</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>updateSQL</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>
-                                src/main/resources/db/changelog-3.2.5-delta.xml
-                            </changeLogFile>
-                            <url>
-                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.2.5-delta.mysql
-                            </url>
-                            <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.2.4-to-3.2.5-migration.ddl
-                            </migrationSqlOutputFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-oracle-script-delta-3.2.5</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>updateSQL</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>
-                                src/main/resources/db/changelog-3.2.5-delta.xml
-                            </changeLogFile>
-                            <url>
-                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.2.5-delta.oracle
-                            </url>
-                            <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/oracle10g-3.2.4-to-3.2.5-migration.ddl
-                            </migrationSqlOutputFile>
-                        </configuration>
-                    </execution>
-                    <!-- 3.2.5 end-->
-
-                    <execution>
-                        <id>generate-mysql-script-delta-3.1</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>updateSQL</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>
-                                src/main/resources/db/changelog-3.1-delta.xml
-                            </changeLogFile>
-                            <url>
-                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.1-delta.mysql
-                            </url>
-                            <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.0-to-3.1.1-migration.ddl
-                            </migrationSqlOutputFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-oracle-script-delta-3.1</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>updateSQL</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>
-                                src/main/resources/db/changelog-3.1-delta.xml
-                            </changeLogFile>
-                            <url>
-                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.1-delta.oracle
-                            </url>
-                            <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/oracle10g-3.0-to-3.1-migration.ddl
-                            </migrationSqlOutputFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-mysql-script-delta-3.1.1</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>updateSQL</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>
-                                src/main/resources/db/changelog-3.1.1-delta.xml
-                            </changeLogFile>
-                            <url>
-                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.1.1-delta.mysql
-                            </url>
-                            <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.1.0-to-3.1.1-migration.ddl
-                            </migrationSqlOutputFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-oracle-script-delta-3.1.1</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>updateSQL</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>
-                                src/main/resources/db/changelog-3.1.1-delta.xml
-                            </changeLogFile>
-                            <url>
-                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.1.1-delta.oracle
-                            </url>
-                            <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/oracle10g-3.1.0-to-3.1.1-migration.ddl
-                            </migrationSqlOutputFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-mysql-script-delta-3.2.0</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>updateSQL</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>
-                                src/main/resources/db/changelog-3.2.0-delta.xml
-                            </changeLogFile>
-                            <url>
-                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.2.0-delta.mysql
-                            </url>
-                            <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.2-rc1-to-3.2.0-migration.ddl
-                            </migrationSqlOutputFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-oracle-script-delta-3.2.0</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>updateSQL</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>
-                                src/main/resources/db/changelog-3.2.0-delta.xml
-                            </changeLogFile>
-                            <url>
-                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.2.0-delta.oracle
-                            </url>
-                            <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/oracle10g-3.2-rc1-to-3.2.0-migration.ddl
-                            </migrationSqlOutputFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-mysql-script-3.1.1-delta-3.2.0</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>updateSQL</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>
-                                src/main/resources/db/changelog-3.1.1-3.2.0-delta.xml
-                            </changeLogFile>
-                            <url>
-                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-3.1.1-3.2.0-delta.mysql
-                            </url>
-                            <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/mysql5innoDb-3.1.1-to-3.2.0-migration.ddl
-                            </migrationSqlOutputFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-oracle-script-3.1.1-delta-3.2.0</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>updateSQL</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>
-                                src/main/resources/db/changelog-3.1.1-3.2.0-delta.xml
-                            </changeLogFile>
-                            <url>
-                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-3.1.1-3.2.0-delta.oracle
-                            </url>
-                            <migrationSqlOutputFile>
-                                ${project.build.directory}/sql-scripts/oracle10g-3.1.1-to-3.2.0-migration.ddl
-                            </migrationSqlOutputFile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.agilejava.docbkx</groupId>
-                <artifactId>docbkx-maven-plugin</artifactId>
-                <version>2.0.15</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate-pdf</goal>
-                        </goals>
-                        <phase>verify</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <includes>Domibus.xml</includes>
-                    <xincludeSupported>true</xincludeSupported>
-                    <sectionAutolabel>true</sectionAutolabel>
-                    <sectionLabelIncludesComponentLabel>true
-                    </sectionLabelIncludesComponentLabel>
-                    <highlightSource>true</highlightSource>
-                    <shadeVerbatim>true</shadeVerbatim>
-                    <useExtensions>true</useExtensions>
-                    <paperType>A4</paperType>
-                    <highlightXslthlConfig>${project.basedir}/src/docbkx/xslthl/xslthl-config.xml
-                    </highlightXslthlConfig>
-                    <foCustomization>
-                        src/docbkx/customization/foCustomization.xml
-                    </foCustomization>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.xmlgraphics</groupId>
-                        <artifactId>fop</artifactId>
-                        <version>1.1</version>
-                        <scope>runtime</scope>
-                    </dependency>
-
-                    <dependency>
-                        <groupId>net.sf.docbook</groupId>
-                        <artifactId>docbook-xml</artifactId>
-                        <version>5.0-all</version>
-                        <classifier>resources</classifier>
-                        <type>zip</type>
-                        <scope>runtime</scope>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sf.offo</groupId>
-                        <artifactId>fop-hyph</artifactId>
-                        <version>2.0</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sf.xslthl</groupId>
-                        <artifactId>xslthl</artifactId>
-                        <version>2.1.0</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
-
         </plugins>
     </build>
 </project>

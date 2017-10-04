@@ -3,6 +3,7 @@ services:
   mysqlblue:
     container_name: mysqlblue
     image: domibus/mysql:development
+    command: --lower-case-table-names=1
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=domibus
@@ -15,7 +16,6 @@ services:
   mysqlred:
     container_name: mysqlred
     image: domibus/mysql:development
-    command: --lower-case-table-names=1
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=domibus
@@ -24,7 +24,7 @@ services:
     expose:
       - "3306"
     ports:
-      - "3305:3306"
+      - "3302:3306"
   domibusblue:
     container_name: domibusblue
     image: domibus/tomcat/blue:development

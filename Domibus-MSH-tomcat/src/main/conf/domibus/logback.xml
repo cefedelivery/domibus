@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <appender name="atomikos" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.home}/logs/atomikos.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${catalina.home}/logs/atomikos-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
+            <maxFileSize>30MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.home}/logs/domibus.log</file>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>LOGGED_MARKER</marker>
+            </evaluator>
+            <onMismatch>NEUTRAL</onMismatch>
+            <onMatch>DENY</onMatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${catalina.home}/logs/domibus-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
+            <maxFileSize>30MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="security_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.home}/logs/security.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>SECURITY</marker>
+            </evaluator>
+            <onMismatch>DENY</onMismatch>
+            <onMatch>NEUTRAL</onMatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${catalina.home}/logs/security-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
+            <maxFileSize>30MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="business_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.home}/logs/business.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>BUSINESS</marker>
+            </evaluator>
+            <onMismatch>DENY</onMismatch>
+            <onMatch>NEUTRAL</onMatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${catalina.home}/logs/business-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
+            <maxFileSize>30MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="eu.domibus" level="INFO">
+        <appender-ref ref="security_file"/>
+        <appender-ref ref="business_file"/>
+    </logger>
+
+    <logger name="com.atomikos" level="ERROR">
+        <appender-ref ref="atomikos"/>
+    </logger>
+
+    <!--  In order to enable logging of request/responses please change the loglevel to INFO -->
+    <logger name="org.apache.cxf" level="WARN"/>
+
+    <root level="INFO">
+        <appender-ref ref="file"/>
+        <appender-ref ref="stdout"/>
+    </root>
+</configuration>

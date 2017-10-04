@@ -3,6 +3,9 @@ package eu.domibus.plugin;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.MessageStatusChangeEvent;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.messaging.PModeMismatchException;
@@ -11,8 +14,6 @@ import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,7 @@ import java.util.List;
  */
 public abstract class AbstractBackendConnector<U, T> implements BackendConnector<U, T> {
 
-    private static final Log LOG = LogFactory.getLog(AbstractBackendConnector.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractBackendConnector.class);
 
     private final String name;
     @Autowired
@@ -50,10 +51,12 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     public abstract MessageRetrievalTransformer<T> getMessageRetrievalTransformer();
 
     @Override
-    @Transactional(noRollbackFor = {IllegalArgumentException.class, IllegalStateException.class})
-    public final String submit(final U message) throws MessagingProcessingException {
+    // The following does not have effect at this level since the transaction would have already been rolled back!
+    // @Transactional(noRollbackFor = {IllegalArgumentException.class, IllegalStateException.class})
+    public String submit(final U message) throws MessagingProcessingException {
         try {
-            return this.messageSubmitter.submit(this.getMessageSubmissionTransformer().transformToSubmission(message), this.getName());
+            final Submission messageData = getMessageSubmissionTransformer().transformToSubmission(message);
+            return this.messageSubmitter.submit(messageData, this.getName());
         } catch (IllegalArgumentException iaEx) {
             throw new TransformationException(iaEx);
         } catch (IllegalStateException ise) {
@@ -65,25 +68,37 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
-    public final T downloadMessage(final String messageId, final T target) throws MessageNotFoundException {
+    public T downloadMessage(final String messageId, final T target) throws MessageNotFoundException {
         lister.removeFromPending(messageId);
         return this.getMessageRetrievalTransformer().transformFromSubmission(this.messageRetriever.downloadMessage(messageId), target);
     }
 
 
     @Override
-    public final Collection<String> listPendingMessages() {
+    public Collection<String> listPendingMessages() {
         return lister.listPendingMessages();
     }
 
 
+    /**
+     * @deprecated since 3.3-rc1; this method converts DOWNLOADED status to RECEIVED to maintain
+     * the backwards compatibility. Use {@link AbstractBackendConnector#getStatus(String)} instead
+     * @param messageId id of the message the status is requested for
+     * @return the message status
+     */
     @Override
-    public final MessageStatus getMessageStatus(final String messageId) {
+    @Deprecated
+    public MessageStatus getMessageStatus(final String messageId) {
         return this.messageRetriever.getMessageStatus(messageId);
     }
 
     @Override
-    public final List<ErrorResult> getErrorsForMessage(final String messageId) {
+    public MessageStatus getStatus(final String messageId) {
+        return this.messageRetriever.getStatus(messageId);
+    }
+
+    @Override
+    public List<ErrorResult> getErrorsForMessage(final String messageId) {
         return new ArrayList<>(this.messageRetriever.getErrorsForMessage(messageId));
     }
 
@@ -101,6 +116,11 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     @Override
     public void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent) {
         throw new UnsupportedOperationException("Plugins using " + Mode.PUSH.name() + " must implement this method");
+    }
+
+    @Override
+    public void messageStatusChanged(MessageStatusChangeEvent event) {
+        //this method should be implemented by the plugins needed to be notified when the User Message status changes
     }
 
     @Override

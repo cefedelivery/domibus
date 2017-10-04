@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <!-- Domibus 3.0 - 3.1 -->
+    <changeSet author="Christian Koch" id="changelog-3.1">
+        <addColumn tableName="tb_message_log">
+            <column name="BACKEND" type="VARCHAR(255)"/>
+        </addColumn>
+        <addColumn tableName="tb_message_log">
+            <column name="ENDPOINT" type="VARCHAR(255)"/>
+        </addColumn>
+        <addColumn tableName="tb_part_info">
+            <column name="FILENAME" type="VARCHAR(255)"/>
+        </addColumn>
+        <addColumn tableName="tb_part_info">
+            <column name="MIME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="tb_property">
+            <column name="TYPE" type="VARCHAR(255)"/>
+        </addColumn>
+        <addColumn tableName="tb_process">
+            <column name="USE_DYNAMIC_INITIATOR" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="tb_process">
+            <column name="USE_DYNAMIC_RESPONDER" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="changelog-3.1-FINAL" author="Stefan Mueller">
+        <renameColumn tableName="tb_error_log" oldColumnName="TIMESTAMP" newColumnName="TIME_STAMP" columnDataType="DATETIME" />
+        <renameColumn tableName="tb_message_info" oldColumnName="TIMESTAMP" newColumnName="TIME_STAMP" columnDataType="DATETIME" />
+    </changeSet>
+</databaseChangeLog>

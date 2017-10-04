@@ -1,9 +1,13 @@
 package eu.domibus.common.validators;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.common.util.WarningUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -17,28 +21,32 @@ import java.util.Properties;
 /**
  * Created by idragusa on 4/14/16.
  */
+@Component
 public class GatewayConfigurationValidator {
 
-    private static final Log LOG = LogFactory.getLog(GatewayConfigurationValidator.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(GatewayConfigurationValidator.class);
 
     private static final String BLUE_GW_ALIAS = "blue_gw";
-
-
-    final String domibusConfigLocation = System.getProperty("domibus.config.location");
 
     @Resource(name = "trustStoreProperties")
     private Properties trustStoreProperties;
 
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
+
     @PostConstruct
-    public void validateConfiguration() throws Exception {
+    public void validateConfiguration() {
         LOG.info("Checking gateway configuration ...");
         validateCerts();
-        try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus-datasources.xml.sha256"))));) {
-            validateFileHash("domibus-datasources.xml", br.readLine());
+
+        try {
+            try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus.properties.sha256"))));) {
+                validateFileHash("domibus.properties", br.readLine());
+            }
+        } catch (Exception e) {
+            LOG.warn("Could not verify the configuration files hash", e);
         }
-        try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus-security.xml.sha256"))));) {
-            validateFileHash("domibus-security.xml", br.readLine());
-        }
+
     }
 
     private void validateCerts() {
@@ -47,17 +55,16 @@ public class GatewayConfigurationValidator {
             ks = KeyStore.getInstance(KeyStore.getDefaultType());
         } catch (KeyStoreException e) {
             LOG.warn("Failed to get keystore instance! " + e.getMessage());
-            LOG.debug(e);
             return;
         }
 
-        try {
-            ks.load(new FileInputStream(trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file")), trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
+        try (FileInputStream fileInputStream = new FileInputStream(trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file"))) {
+            ks.load(fileInputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
         } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
             LOG.warn("Failed to load certificates! " + e.getMessage());
-            LOG.debug(e);
             warnOutput("CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
         }
+
         try {
             if (ks.containsAlias(BLUE_GW_ALIAS)) {
                 warnOutput("SAMPLE CERTIFICATES ARE BEING USED - NOT FOR PRODUCTION USAGE");
@@ -65,13 +72,12 @@ public class GatewayConfigurationValidator {
 
         } catch (KeyStoreException e) {
             LOG.warn("Failed to load certificates! " + e.getMessage());
-            LOG.debug(e);
             warnOutput("CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
         }
     }
 
     private void validateFileHash(String filename, String expectedHash) throws IOException {
-        File file = new File(domibusConfigLocation + "/" + filename);
+        File file = new File(domibusConfigurationService.getConfigLocation(), filename);
         try {
             String hash = DigestUtils.sha256Hex(FileUtils.readFileToByteArray(file));
             LOG.debug("Hash for " + filename + ": " + hash);
@@ -86,10 +92,7 @@ public class GatewayConfigurationValidator {
     }
 
     private void warnOutput(String message) {
-        LOG.warn("\n\n\n");
-        LOG.warn("**************** WARNING **************** WARNING **************** WARNING **************** ");
-        LOG.warn(message);
-        LOG.warn("*******************************************************************************************\n\n\n");
+        LOG.warn(WarningUtil.warnOutput(message));
     }
 
 }

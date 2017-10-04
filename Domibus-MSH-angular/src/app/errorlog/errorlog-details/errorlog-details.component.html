@@ -1,0 +1,44 @@
+<h2 md-dialog-title>Error log details</h2>
+<md-dialog-content style="height:450px;width:650px">
+  <md-card>
+    <md-card-content>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Signal Message Id" value="{{message.errorSignalMessageId}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="AP Role" value="{{message.mshRole}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Message Id" value="{{message.messageInErrorId}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Error Code" value="{{message.errorCode}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Error Detail" value="{{message.errorDetail}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Timestamp" value="{{message.timestamp | domibusDate: dateFormat}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Notified" value="{{message.notified | domibusDate: dateFormat}}" readonly/>
+      </md-input-container>
+
+    </md-card-content>
+  </md-card>
+
+</md-dialog-content>
+
+<md-dialog-actions>
+  <button id="messageLogDetailsCloseButton" md-raised-button color="primary" (click)="dialogRef.close({})" style="margin-top:10px">
+    <md-icon>close</md-icon>
+    <span>Close</span>
+  </button>
+</md-dialog-actions>
+

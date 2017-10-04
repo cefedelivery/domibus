@@ -1,43 +1,18 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.common.model;
 
-import eu.domibus.common.model.Schema;
-import eu.domibus.configuration.Storage;
-import org.apache.commons.io.IOUtils;
+import eu.domibus.common.AutoCloseFileDataSource;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
 import javax.mail.util.ByteArrayDataSource;
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.io.*;
-import java.util.UUID;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * <p/>
@@ -60,19 +35,19 @@ import java.util.zip.GZIPOutputStream;
 @Table(name = "TB_PART_INFO")
 public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo> {
 
-    private static final Log LOG = LogFactory.getLog(PartInfo.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PartInfo.class);
 
     @XmlElement(name = "Schema")
     @Embedded
-    protected Schema schema;
+    protected Schema schema; //NOSONAR
 
     @XmlElement(name = "Description")
     @Embedded
-    protected Description description;
+    protected Description description; //NOSONAR
 
     @XmlElement(name = "PartProperties")
     @Embedded
-    protected PartProperties partProperties;
+    protected PartProperties partProperties; //NOSONAR
 
     @XmlAttribute(name = "href")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -95,7 +70,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
     protected boolean inBody;
     @Transient
     @XmlTransient
-    protected DataHandler payloadDatahandler;
+    protected DataHandler payloadDatahandler; //NOSONAR
     @Column(name = "MIME")
     @XmlTransient
     private String mime;
@@ -106,6 +81,18 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
 
     public void setPayloadDatahandler(final DataHandler payloadDatahandler) {
         this.payloadDatahandler = payloadDatahandler;
+    }
+
+    public byte[] getBinaryData() {
+        return binaryData;
+    }
+
+    public void setBinaryData(byte[] binaryData) {
+        this.binaryData = binaryData;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getMime() {
@@ -128,62 +115,11 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
         return fileName;
     }
 
-    @PrePersist
-    private void storeBinary() {
-        mime = payloadDatahandler.getContentType();
-        if (mime == null) {
-            mime = "application/unknown";
-        }
-        try {
-            if (Storage.storageDirectory == null) {
-
-                binaryData = IOUtils.toByteArray(payloadDatahandler.getInputStream());
-
-                if(isCompressed()) {
-                    final byte[] buffer = new byte[1024];
-                    InputStream sourceStream = new ByteArrayInputStream(binaryData);
-                    ByteArrayOutputStream compressedContent = new ByteArrayOutputStream();
-                    GZIPOutputStream targetStream = new GZIPOutputStream(compressedContent);
-                    try {
-                        int i;
-                        while ((i = sourceStream.read(buffer)) > 0) {
-                            targetStream.write(buffer, 0, i);
-                        }
-                        sourceStream.close();
-                        targetStream.finish();
-                        targetStream.close();
-                    } catch (IOException e) {
-                        LOG.error("I/O exception during gzip compression", e);
-                        throw e;
-                    }
-                    binaryData = compressedContent.toByteArray();
-                }
-
-                fileName = null;
-
-            } else {
-                final File attachmentStore = new File(Storage.storageDirectory, UUID.randomUUID().toString() + ".payload");
-                fileName = attachmentStore.getAbsolutePath();
-                OutputStream fileOutputStream = new FileOutputStream(attachmentStore);
-
-                if (isCompressed()) {
-                    fileOutputStream = new GZIPOutputStream(fileOutputStream);
-                }
-
-                IOUtils.copy(payloadDatahandler.getInputStream(), fileOutputStream);
-                fileOutputStream.flush();
-                fileOutputStream.close();
-            }
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @PostLoad
     private void loadBinaray() {
         if (fileName != null) { /* Create payload data handler from File */
             LOG.debug("LoadBinary from file: " + fileName);
-            payloadDatahandler = new DataHandler(new FileDataSource(fileName));
+            payloadDatahandler = new DataHandler(new AutoCloseFileDataSource(fileName));
             return;
         }
         /* Create payload data handler from binaryData (byte[]) */
@@ -195,16 +131,6 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
         }
 
     }
-
-    private boolean isCompressed() {
-        for (final Property property : partProperties.getProperties()) {
-            if (property.getName().equals(CompressionService.COMPRESSION_PROPERTY_KEY) && property.getValue().equals(CompressionService.COMPRESSION_PROPERTY_VALUE)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     /**
      * This element occurs zero or more times. It refers to schema(s) that define the instance document
@@ -355,7 +281,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
                 .appendSuper(super.equals(o))
                 .append(schema, partInfo.schema)
                 .append(description, partInfo.description)
-                .append(partProperties, partInfo.partProperties)
+                //.append(partProperties, partInfo.partProperties)
                 .append(href, partInfo.href)
                 .isEquals();
     }
@@ -366,7 +292,7 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
                 .appendSuper(super.hashCode())
                 .append(schema)
                 .append(description)
-                .append(partProperties)
+                // .append(partProperties)
                 .append(href)
                 .toHashCode();
     }

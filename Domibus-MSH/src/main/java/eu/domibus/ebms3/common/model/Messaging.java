@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.common.model;
 
 import javax.persistence.*;
@@ -28,6 +9,7 @@ import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * The eb:Messaging element is the top element of ebMS-3 headers, and it is
@@ -60,6 +42,7 @@ import java.util.Map;
         @NamedQuery(name = "Messaging.emptyPayloads", query = "update PartInfo p set p.binaryData = null where p in :PARTINFOS"),
 })
 public class Messaging extends AbstractBaseEntity {
+
 
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -96,7 +79,7 @@ public class Messaging extends AbstractBaseEntity {
     @XmlAnyElement(lax = true)
     @Transient
     //According to how we read the spec those attributes serve no purpose in the AS4 profile, therefore they are discarded
-    protected List<Object> any;
+    protected List<Object> any; //NOSONAR
 
     /**
      * The OPTIONAL element is named

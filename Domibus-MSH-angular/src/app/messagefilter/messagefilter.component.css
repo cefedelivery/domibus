@@ -1,0 +1,33 @@
+.justified {
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
+}
+
+:before {
+  content: "\200D";
+  display:inline;
+}
+
+.clickable {
+  display:inline-block;
+  width: 100%;
+  height: 100%;
+}
+
+.rowsDiv {
+  margin-top:30px;
+}
+
+.pluginRow {
+  width: 100%;
+}
+
+
+.tableArea {
+  width: 100%;
+  height: 80%;
+}
+

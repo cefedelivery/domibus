@@ -1,0 +1,36 @@
+<h2 md-dialog-title>Upload truststore</h2>
+<md-dialog-content style="height:150px;width:350px">
+  <md-card>
+    <md-card-content>
+      <div class="divTableRow">
+        <div class="divTableCell">
+          <input #fileInput type="file" id="trustsore" accept=".jks" (change)="checkFile()">
+        </div>
+        <div class="divTableCell">
+        </div>
+      </div>
+      <md-input-container style="width:100%;margin-top: 1em;">
+        <input mdInput placeholder="Password" id="password_id" name="password" type="password" [(ngModel)]="password">
+      </md-input-container>
+    </md-card-content>
+  </md-card>
+</md-dialog-content>
+
+<table class="buttonsRow">
+  <tr>
+    <td>
+      <button id="okbuttonupload_id" md-raised-button color="primary" (click)="submit()" style="margin-top:10px" [disabled]="!enableSubmit">
+        <md-icon>check_circle</md-icon>
+        <span>OK</span>
+      </button>
+      <button id="cancelbuttonupload_id" md-raised-button color="primary" (click)="dialogRef.close({})"
+              style="margin-top:10px">
+        <md-icon>cancel</md-icon>
+        <span>Cancel</span>
+      </button>
+    </td>
+  </tr>
+</table>
+
+
+

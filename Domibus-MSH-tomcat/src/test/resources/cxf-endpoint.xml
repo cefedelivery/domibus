@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!-- This file contains the configuration of both the Webservice endpoint and client -->
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:cxf="http://cxf.apache.org/core"
+       xmlns:http-conf="http://cxf.apache.org/transports/http/configuration"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd">
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+    <import resource="domibus-configuration.xml"/>
+
+    <bean id="mshWebservice" class="eu.domibus.ebms3.receiver.MSHWebservice">
+        <property name="jaxbContext" ref="jaxbContextEBMS"/>
+    </bean>
+
+    <cxf:bus>
+        <cxf:inInterceptors>
+            <ref bean="logInbound" />
+        </cxf:inInterceptors>
+        <cxf:outInterceptors>
+            <ref bean="logOutbound" />
+            <ref bean="attachmentCleanupInterceptor"/>
+        </cxf:outInterceptors>
+        <cxf:outFaultInterceptors>
+            <ref bean="attachmentCleanupInterceptor"/>
+        </cxf:outFaultInterceptors>
+        <cxf:features>
+            <cxf:logging />
+        </cxf:features>
+    </cxf:bus>
+
+    <!--Message logger configuration-->
+    <bean id="logInbound" class="org.apache.cxf.interceptor.LoggingInInterceptor">
+        <property name="prettyLogging" value="true"/>
+        <property name="showBinaryContent" value="false"/>
+        <property name="before" value="eu.domibus.ebms3.receiver.SetPolicyInInterceptor"/>
+    </bean>
+
+    <bean id="logOutbound" class="org.apache.cxf.interceptor.LoggingOutInterceptor">
+        <property name="prettyLogging" value="true"/>
+        <property name="showBinaryContent" value="false"/>
+        <property name="after" value="org.apache.cxf.ws.policy.PolicyVerificationOutInterceptor.class"/>
+    </bean>
+
+    <bean id="trustSenderInterceptor" class="eu.domibus.ebms3.receiver.TrustSenderInterceptor">
+        <property name="securityEncryptionProp" ref="trustStoreProperties"/>
+    </bean>
+
+    <!--Interceptors to enable SwA encryption for Dispatch/WebServiceProvider implementations-->
+    <bean id="setPolicyInInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor">
+        <property name="jaxbContext" ref="jaxbContextEBMS"/>
+    </bean>
+
+    <bean id="setSignatureAlgorithmInInterceptor"
+          class="eu.domibus.ebms3.sender.SetSignatureAlgorithmInInterceptor"/>
+
+    <bean id="propertyValueExchangeInterceptor" class="eu.domibus.ebms3.receiver.PropertyValueExchangeInterceptor"/>
+    <bean id="propertyValueExchangeInterceptorOut" class="eu.domibus.ebms3.sender.PropertyValueExchangeOutInterceptor"/>
+
+    <bean id="setPolicyOutInterceptor" class="eu.domibus.ebms3.sender.SetPolicyOutInterceptor"/>
+
+    <bean id="attachmentCleanupInterceptor" class="eu.domibus.ebms3.common.AttachmentCleanupInterceptor"/>
+
+    <!-- DomibusAlgorithmSuiteLoader -->
+    <bean id="algorithmSuiteLoader" class="eu.domibus.ebms3.security.custom.DomibusAlgorithmSuiteLoader">
+        <constructor-arg ref="cxf"/>
+    </bean>
+
+    <!--MSH Webservice endpoint-->
+    <jaxws:endpoint id="msh" address="/msh">
+        <jaxws:implementor>
+            <bean parent="mshWebservice"/>
+        </jaxws:implementor>
+        <jaxws:properties>
+            <entry key="ws-security.cache.config.file" value="/cxf-ehcache.xml"/>
+            <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
+            <entry key="ws-security.encryption.properties" value-ref="trustStoreProperties"/>
+            <entry key="ws-security.signature.properties" value-ref="keystoreProperties"/>
+            <!--use the alias from the request-->
+            <entry key="ws-security.encryption.username" value="useReqSigCert"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+        <jaxws:inInterceptors>
+            <!--<ref bean="logInbound"/>-->
+            <ref bean="trustSenderInterceptor"/>
+            <ref bean="setPolicyInInterceptorServer"/>
+            <ref bean="propertyValueExchangeInterceptor"/>
+        </jaxws:inInterceptors>
+
+        <jaxws:outInterceptors>
+            <ref bean="propertyValueExchangeInterceptorOut"/>
+            <bean class="org.apache.cxf.jaxws.handler.SetCodeValueFaultOutInterceptor"/>
+        </jaxws:outInterceptors>
+
+        <jaxws:handlers>
+            <bean class="eu.domibus.ebms3.receiver.FaultInHandler"/>
+        </jaxws:handlers>
+
+    </jaxws:endpoint>
+
+    <!--MSH Webservice client-->
+    <jaxws:client id="{http://domibus.eu}msh-dispatch" name="{http://domibus.eu}msh-dispatch" createdFromAPI="true">
+        <jaxws:outInterceptors>
+            <!--<ref bean="logOutbound"/>-->
+            <ref bean="setPolicyOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:inInterceptors>
+            <ref bean="setSignatureAlgorithmInInterceptor"/>
+        </jaxws:inInterceptors>
+        <jaxws:handlers>
+            <bean class="eu.domibus.ebms3.sender.FaultOutHandler"/>
+        </jaxws:handlers>
+
+        <jaxws:properties>
+            <entry key="ws-security.signature.properties" value-ref="keystoreProperties"/>
+            <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
+            <entry key="ws-security.encryption.properties" value-ref="trustStoreProperties"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+    </jaxws:client>
+
+    <http-conf:conduit name="*.http-conduit">
+        <http-conf:client AllowChunking="false"/>
+    </http-conf:conduit>
+
+</beans>

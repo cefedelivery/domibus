@@ -1,31 +1,13 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.common.dao;
 
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.NotificationStatus;
+import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -36,7 +18,6 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.springframework.util.StringUtils.hasLength;
@@ -45,10 +26,15 @@ import static org.springframework.util.StringUtils.hasLength;
  * @author Christian Koch, Stefan Mueller, Federico Martini
  * @since 3.0
  */
+
 @Repository
 public class MessagingDao extends BasicDao<Messaging> {
 
-    private static final Log LOG = LogFactory.getLog(MessagingDao.class);
+    final static String FIND_MESSAGING_ON_STATUS_AND_RECEIVER = "select new eu.domibus.ebms3.common.model.MessagePullDto(ul.messageId,ul.received) from UserMessageLog ul where ul.messageId in (SELECT m.userMessage.messageInfo.messageId as id FROM  Messaging m left join m.userMessage.partyInfo.to.partyId as pids where UPPER(pids.value)=UPPER(:PARTY_ID) and m.userMessage.mpc=:MPC) and ul.messageStatus=:MESSAGE_STATUS ORDER BY ul.received";
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingDao.class);
+    private static final String PARTY_ID = "PARTY_ID";
+    private static final String MESSAGE_STATUS = "MESSAGE_STATUS";
+    private static final String MPC = "MPC";
 
     public MessagingDao() {
         super(Messaging.class);
@@ -68,21 +54,9 @@ public class MessagingDao extends BasicDao<Messaging> {
             query.setParameter("MESSAGE_ID", messageId);
             return query.getSingleResult();
         } catch (NoResultException nrEx) {
-            LOG.debug("Could not find any message for message id[" + messageId + "]", nrEx);
+            LOG.debug("Could not find any message for message id[" + messageId + "]");
             return null;
         }
-    }
-
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void delete(final String messageId, final MessageStatus messageStatus, final NotificationStatus notificationStatus) {
-        clearPayloadData(messageId);
-
-        final Query messageStatusQuery = this.em.createNamedQuery("UserMessageLog.setMessageStatusAndNotificationStatus");
-        messageStatusQuery.setParameter("MESSAGE_ID", messageId);
-        messageStatusQuery.setParameter("TIMESTAMP", new Date());
-        messageStatusQuery.setParameter("MESSAGE_STATUS", messageStatus);
-        messageStatusQuery.setParameter("NOTIFICATION_STATUS", notificationStatus);
-        messageStatusQuery.executeUpdate();
     }
 
     /**
@@ -102,7 +76,9 @@ public class MessagingDao extends BasicDao<Messaging> {
 
         for (PartInfo result : results) {
             if (hasLength(result.getFileName())) {
-                new File(result.getFileName()).delete();
+                if (!new File(result.getFileName()).delete()) {
+                    LOG.warn("Problem deleting payload data files");
+                }
             } else {
                 databasePayloads.add(result);
             }
@@ -112,7 +88,22 @@ public class MessagingDao extends BasicDao<Messaging> {
             emptyQuery.setParameter("PARTINFOS", databasePayloads);
             emptyQuery.executeUpdate();
         }
-        LOG.debug("Payload data for user message [" + messageId + "] have been cleared");
+        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DATA_CLEARED, messageId);
     }
 
+    /**
+     * Retrieves messages based STATUS and TO fields. The return is ordered by received date.
+     * @param partyIdentifier the party to which this message should be delivered.
+     * @param messageStatus the status of the message.
+     * @param mpc
+     * @return a list of class containing the date and the messageId.
+     */
+    public List<MessagePullDto> findMessagingOnStatusReceiverAndMpc(final String partyIdentifier, final MessageStatus messageStatus, final String mpc){
+        TypedQuery<MessagePullDto> processQuery= em.createQuery(FIND_MESSAGING_ON_STATUS_AND_RECEIVER,MessagePullDto.class);
+        processQuery.setParameter(PARTY_ID, partyIdentifier);
+        processQuery.setParameter(MESSAGE_STATUS, messageStatus);
+        processQuery.setParameter(MPC, mpc);
+        return processQuery.getResultList();
+    }
 }
+

@@ -1,0 +1,33 @@
+﻿<div id="page" class="login-page">
+  <div id="formContainer">
+    <form name="loginForm" #loginForm="ngForm" (ngSubmit)="login()">
+      <table cellspacing="0">
+        <tr>
+          <td>
+            <md-input-container>
+              <input mdInput placeholder="Username" name="username" [(ngModel)]="model.username" #username="ngModel"
+                     required id="username_id">
+            </md-input-container>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <md-input-container>
+              <input type="password" mdInput placeholder="Password" name="password" [(ngModel)]="model.password"
+                     #password="ngModel" required id="password_id">
+            </md-input-container>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <button md-raised-button color="primary" [disabled]="!loginForm.form.valid" id="loginbutton_id">
+              <md-icon>input</md-icon>
+              <span>Login</span>
+            </button>
+          </td>
+        </tr>
+      </table>
+      <footer></footer>
+    </form>
+  </div>
+</div>

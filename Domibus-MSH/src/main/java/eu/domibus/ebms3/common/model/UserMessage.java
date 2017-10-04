@@ -1,28 +1,9 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.common.model;
 
-import eu.domibus.common.model.configuration.Mpc;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -68,20 +49,20 @@ public class UserMessage extends AbstractBaseEntity {
     protected MessageInfo messageInfo;
     @XmlElement(name = "PartyInfo", required = true)
     @Embedded
-    protected PartyInfo partyInfo;
+    protected PartyInfo partyInfo; //NOSONAR
     @XmlElement(name = "CollaborationInfo", required = true)
     @Embedded
-    protected CollaborationInfo collaborationInfo;
+    protected CollaborationInfo collaborationInfo; //NOSONAR
     @XmlElement(name = "MessageProperties")
     @Embedded
-    protected MessageProperties messageProperties;
+    protected MessageProperties messageProperties; //NOSONAR
     @XmlElement(name = "PayloadInfo")
     @Embedded
-    protected PayloadInfo payloadInfo;
+    protected PayloadInfo payloadInfo; //NOSONAR
     @XmlAttribute(name = "mpc")
     @XmlSchemaType(name = "anyURI")
     @Column(name = "MPC")
-    protected String mpc = Mpc.DEFAULT_MPC;
+    protected String mpc = Ebms3Constants.DEFAULT_MPC;
 
     /**
      * This REQUIRED element occurs once,
@@ -271,14 +252,14 @@ public class UserMessage extends AbstractBaseEntity {
 
     @Override
     public String toString() {
-        return "UserMessage{" +
-                "messageInfo=" + messageInfo +
-                ", partyInfo=" + partyInfo +
-                ", collaborationInfo=" + collaborationInfo +
-                ", messageProperties=" + messageProperties +
-                ", payloadInfo=" + payloadInfo +
-                ", mpc='" + mpc + '\'' +
-                '}';
+        return new ToStringBuilder(this)
+                .append("messageInfo", messageInfo)
+                .append("partyInfo", partyInfo)
+                .append("collaborationInfo", collaborationInfo)
+                .append("messageProperties", messageProperties)
+                .append("payloadInfo", payloadInfo)
+                .append("mpc", mpc)
+                .toString();
     }
 
 }

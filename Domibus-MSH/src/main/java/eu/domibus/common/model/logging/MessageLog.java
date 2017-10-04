@@ -1,28 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package eu.domibus.common.model.logging;
 
 import eu.domibus.common.MSHRole;
@@ -88,6 +63,18 @@ public abstract class MessageLog extends AbstractBaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date received;
 
+    @Column(name = "RESTORED")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date restored;
+
+    @Column(name = "DOWNLOADED")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date downloaded;
+
+    @Column(name = "FAILED")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date failed;
+
     @Column(name = "SEND_ATTEMPTS")
     private int sendAttempts;
 
@@ -152,6 +139,30 @@ public abstract class MessageLog extends AbstractBaseEntity {
 
     public void setReceived(final Date received) {
         this.received = received;
+    }
+
+    public Date getRestored() {
+        return restored;
+    }
+
+    public void setRestored(Date restored) {
+        this.restored = restored;
+    }
+
+    public Date getDownloaded() {
+        return this.downloaded;
+    }
+
+    public void setDownloaded(final Date downloaded) {
+        this.downloaded = downloaded;
+    }
+
+    public Date getFailed() {
+        return failed;
+    }
+
+    public void setFailed(Date failed) {
+        this.failed = failed;
     }
 
     public Date getNextAttempt() {

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.2">
+    <deployment>
+        <exclude-subsystems>
+            <subsystem name="webservices" />
+            <subsystem name="jaxrs" />
+            <subsystem name="resteasy" />
+        </exclude-subsystems>
+
+        <dependencies>
+            <module name="javax.xml.ws.api"/>
+            <module name="javax.jms.api"/>
+            <module name="com.sun.xml.messaging.saaj"/>
+            <!-- <module name="org.apache.xalan"/>-->
+
+            <system export="true">
+                <paths>
+                    <path name="com/sun/org/apache/xerces/internal/jaxp/datatype"/>
+                </paths>
+            </system>
+        </dependencies>
+
+        <resources>
+            <resource-root path="WEB-INF/lib/bcprov-jdk15on-1.51.jar" use-physical-code-source="true"/>
+        </resources>
+
+        <exclusions>
+            <module name="org.bouncycastle" />
+            <module name="org.apache.cxf" />
+            <module name="org.apache.cxf.impl" />
+            <module name="org.slf4j" />
+            <module name="org.slf4j.impl" />
+        </exclusions>
+
+
+    </deployment>
+</jboss-deployment-structure>

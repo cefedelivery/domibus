@@ -1,25 +1,8 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.common.model.configuration;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -71,7 +54,7 @@ public class Party extends AbstractBaseEntity {
     @XmlElement(required = true, name = "identifier")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PARTY")
-    protected Set<Identifier> identifiers;
+    protected Set<Identifier> identifiers; //NOSONAR
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME")
     protected String name;
@@ -194,38 +177,36 @@ public class Party extends AbstractBaseEntity {
     }
 
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Party)) return false;
-        if (!super.equals(o)) return false;
-
-        final Party party = (Party) o;
-
-        if (endpoint != null ? !endpoint.equals(party.endpoint) : party.endpoint != null) return false;
-        if (!identifiers.equals(party.identifiers)) return false;
-        if (!name.equals(party.name)) return false;
-        if (password != null ? !password.equals(party.password) : party.password != null) return false;
-        if (userName != null ? !userName.equals(party.userName) : party.userName != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + identifiers.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + (userName != null ? userName.hashCode() : 0);
-        result = 31 * result + (password != null ? password.hashCode() : 0);
-        result = 31 * result + (endpoint != null ? endpoint.hashCode() : 0);
-        return result;
-    }
-
     public void init(final Configuration configuration) {
         for (final Identifier identifier : this.identifiers) {
             identifier.init(configuration);
         }
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Party party = (Party) o;
+
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(identifiers, party.identifiers)
+                .append(name, party.name)
+                .append(endpoint, party.endpoint)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(identifiers)
+                .append(name)
+                .append(endpoint)
+                .toHashCode();
     }
 }

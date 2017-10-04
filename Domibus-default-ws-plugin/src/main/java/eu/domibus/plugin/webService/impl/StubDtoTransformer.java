@@ -1,20 +1,21 @@
 package eu.domibus.plugin.webService.impl;
 
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
-import eu.domibus.common.*;
+import eu.domibus.common.ErrorResult;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.webService.generated.*;
-import eu.domibus.plugin.webService.generated.ErrorCode;
-import eu.domibus.plugin.webService.generated.ErrorResultImpl;
-import eu.domibus.plugin.webService.generated.MessageStatus;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+
+import static org.apache.commons.lang.StringUtils.trim;
 
 /**
  * Converter class for Submission <-> UserMessage objects.
@@ -24,8 +25,7 @@ import java.util.*;
 @Component
 public class StubDtoTransformer implements MessageSubmissionTransformer<Messaging>, MessageRetrievalTransformer<UserMessage> {
 
-
-    private static final Log LOGGER = LogFactory.getLog(StubDtoTransformer.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(StubDtoTransformer.class);
 
     @Override
     public UserMessage transformFromSubmission(final Submission submission, final UserMessage target) {
@@ -45,9 +45,6 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         this.generatePartyInfo(submission, result);
         this.generatePayload(submission, result);
         this.generateMessageProperties(submission, result);
-
-        //TODO: set mpc from pmode
-
         return result;
     }
 
@@ -69,8 +66,6 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
     private void generateCollaborationInfo(final Submission submission, final UserMessage result) {
         final CollaborationInfo collaborationInfo = new CollaborationInfo();
         collaborationInfo.setConversationId(submission.getConversationId());
-                /*(submission.getConversationId() != null && submission.getConversationId().trim().length() > 0)
-                        ? submission.getConversationId() : this.generateConversationId());*/
         collaborationInfo.setAction(submission.getAction());
         final AgreementRef agreementRef = new AgreementRef();
         agreementRef.setValue(submission.getAgreementRef());
@@ -86,12 +81,10 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
     private void generateMessageInfo(final Submission submission, final UserMessage result) {
         final MessageInfo messageInfo = new MessageInfo();
         messageInfo.setMessageId(submission.getMessageId());
-        LOGGER.debug("MESSAGE ID " + messageInfo.getMessageId());
-              /*  (submission.getMessageId() != null && submission.getMessageId().trim().length() > 0)
-                        ? submission.getMessageId() : this.messageIdGenerator.generateMessageId());*/
+        LOG.debug("MESSAGE ID " + messageInfo.getMessageId());
         GregorianCalendar gc = new GregorianCalendar();
         messageInfo.setTimestamp(new XMLGregorianCalendarImpl(gc));
-        LOGGER.debug("TIMESTAMP " + messageInfo.getTimestamp());
+        LOG.debug("TIMESTAMP " + messageInfo.getTimestamp());
         messageInfo.setRefToMessageId(submission.getRefToMessageId());
         result.setMessageInfo(messageInfo);
     }
@@ -157,7 +150,9 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
     }
 
 
+
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS,noRollbackFor = {IllegalArgumentException.class,IllegalStateException.class})
     public Submission transformToSubmission(final Messaging messageData) {
         return transformFromMessaging(messageData.getUserMessage());
     }
@@ -170,73 +165,66 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
      * @return
      */
     public Submission transformFromMessaging(final UserMessage messaging) {
+        LOG.debug("Entered method: transformFromMessaging(final UserMessage messaging)");
 
         final Submission result = new Submission();
 
         final CollaborationInfo collaborationInfo = messaging.getCollaborationInfo();
-        result.setAction(collaborationInfo.getAction());
-        result.setService(messaging.getCollaborationInfo().getService().getValue());
-        result.setServiceType(messaging.getCollaborationInfo().getService().getType());
+        result.setAction(trim(collaborationInfo.getAction()));
+        result.setService(trim(messaging.getCollaborationInfo().getService().getValue()));
+        result.setServiceType(trim(messaging.getCollaborationInfo().getService().getType()));
         if (collaborationInfo.getAgreementRef() != null) {
-            result.setAgreementRef(collaborationInfo.getAgreementRef().getValue());
-            result.setAgreementRefType(collaborationInfo.getAgreementRef().getType());
+            result.setAgreementRef(trim(collaborationInfo.getAgreementRef().getValue()));
+            result.setAgreementRefType(trim(collaborationInfo.getAgreementRef().getType()));
         }
-        result.setConversationId(collaborationInfo.getConversationId());
+        result.setConversationId(trim(collaborationInfo.getConversationId()));
 
-        result.setMessageId(messaging.getMessageInfo().getMessageId());
-        result.setRefToMessageId(messaging.getMessageInfo().getRefToMessageId());
+        result.setMessageId(messaging.getMessageInfo().getMessageId());  //not trimming message id as non printable special characters needs to be checked.
+        result.setRefToMessageId(trim(messaging.getMessageInfo().getRefToMessageId()));
 
         if (messaging.getPayloadInfo() != null) {
             for (final PartInfo partInfo : messaging.getPayloadInfo().getPartInfo()) {
                 ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
-                String mime = "";
                 final Collection<Submission.TypedProperty> properties = new ArrayList<>();
                 if (extPartInfo.getPartProperties() != null) {
                     for (final Property property : extPartInfo.getPartProperties().getProperty()) {
-                        properties.add(new Submission.TypedProperty(property.getName(), property.getValue(), property.getType()));
-                        if (property.getName().equals("MIME_TYPE")) {
-                            mime = property.getValue();
-                        }
+                        properties.add(new Submission.TypedProperty(trim(property.getName()), trim(property.getValue()), trim(property.getType())));
                     }
                 }
                 Submission.Description description = null;
                 if (partInfo.getDescription() != null) {
-                    description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), partInfo.getDescription().getValue());
+                    description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), trim(partInfo.getDescription().getValue()));
                 }
                 result.addPayload(extPartInfo.getHref(), extPartInfo.getPayloadDatahandler(), properties, extPartInfo.isInBody(), description, /*(partInfo.getSchema() != null) ? partInfo.getSchema().getLocation() :*/ null);
             }
         }
+
         if(messaging.getPartyInfo() != null && messaging.getPartyInfo().getFrom() != null) {
             PartyId partyId = messaging.getPartyInfo().getFrom().getPartyId();
             if(partyId != null) {
-                result.addFromParty(partyId.getValue(), partyId.getType());
+                result.addFromParty(trim(partyId.getValue()), trim(partyId.getType()));
             }
-            result.setFromRole(messaging.getPartyInfo().getFrom().getRole());
+            result.setFromRole(trim(messaging.getPartyInfo().getFrom().getRole()));
         }
         if(messaging.getPartyInfo() != null && messaging.getPartyInfo().getTo() != null) {
             PartyId partyId = messaging.getPartyInfo().getTo().getPartyId();
             if(partyId != null) {
-                result.addToParty(partyId.getValue(), partyId.getType());
+                result.addToParty(trim(partyId.getValue()), trim(partyId.getType()));
             }
-            result.setToRole(messaging.getPartyInfo().getTo().getRole());
+            result.setToRole(trim(messaging.getPartyInfo().getTo().getRole()));
         }
 
         if (messaging.getMessageProperties() != null) {
             for (final Property property : messaging.getMessageProperties().getProperty()) {
-                result.addMessageProperty(property.getName(), property.getValue(), property.getType());
+                result.addMessageProperty(trim(property.getName()), trim(property.getValue()), trim(property.getType()));
             }
         }
+
         return result;
     }
 
     public MessageStatus transformFromMessageStatus(eu.domibus.common.MessageStatus messageStatus) {
-        if(eu.domibus.common.MessageStatus.DOWNLOADED == messageStatus) {
-            //temporarily revert the DOWNLOADED status to address the incompatibility issue EDELIVERY-2085
-            LOGGER.debug("Changing DOWNLOADED status to RECEIVED");
-            messageStatus = eu.domibus.common.MessageStatus.RECEIVED;
-        }
         return MessageStatus.fromValue(messageStatus.name());
-
     }
 
     public ErrorResultImplArray transformFromErrorResults(List<? extends ErrorResult> errors) {

@@ -12,8 +12,8 @@ import no.difi.vefa.peppol.lookup.fetcher.ApacheFetcher;
 import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
 import no.difi.vefa.peppol.security.Mode;
 import no.difi.vefa.peppol.security.api.PeppolSecurityException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ import java.util.Properties;
 @Qualifier("dynamicDiscoveryServicePEPPOL")
 public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
-    private static final Log LOG = LogFactory.getLog(DynamicDiscoveryServicePEPPOL.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryServicePEPPOL.class);
 
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
@@ -64,15 +64,11 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
             endpoint = sm.getEndpoint(processIdentifier, new TransportProfile(transportProfileAS4), TransportProfile.AS4);
 
             if (endpoint == null || endpoint.getAddress() == null || endpoint.getProcessIdentifier() == null) {
-                throw new ConfigurationException("Receiver does not support reception of " + documentId + " for process " + processId + " using the AS4 Protocol");
+                throw new ConfigurationException("Could not fetch metadata from SMP for documentId " + documentId + " processId " + processId);
             }
-
             return new EndpointInfo(endpoint.getAddress(), endpoint.getCertificate());
-
-        } catch (final PeppolSecurityException | LookupException e) {
-            throw new ConfigurationException("Receiver does not support reception of " + documentId + " for process " + processId + " using the AS4 Protocol", e);
-        } catch (final EndpointNotFoundException e) {
-            throw new ConfigurationException("Could not fetch metadata from SMP", e);
+        } catch (final PeppolSecurityException | LookupException | EndpointNotFoundException | IllegalStateException e) {
+            throw new ConfigurationException("Could not fetch metadata from SMP for documentId " + documentId + " processId " + processId, e);
         }
     }
 }

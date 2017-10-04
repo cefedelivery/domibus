@@ -7,9 +7,9 @@ import eu.domibus.jms.spi.InternalJMSManager;
 import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hornetq.api.jms.management.JMSQueueControl;
 import org.hornetq.api.jms.management.JMSServerControl;
 import org.hornetq.api.jms.management.TopicControl;
@@ -37,7 +37,7 @@ import java.util.*;
 @Component
 public class InternalJMSManagerWildFly implements InternalJMSManager {
 
-    private static final Log LOG = LogFactory.getLog(InternalJMSManagerWildFly.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(InternalJMSManagerWildFly.class);
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
     private static final String PROPERTY_JNDI_NAME = "Jndi";
@@ -352,7 +352,8 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     public InternalJmsMessage consumeMessage(String source, String customMessageId) {
 
         InternalJmsMessage intJmsMsg = null;
-        String selector = "MESSAGE_ID='" + customMessageId + "'";
+        String selector = "MESSAGE_ID='" + customMessageId + "' AND NOTIFICATION_TYPE ='MESSAGE_RECEIVED'";
+
         try {
             List<InternalJmsMessage> messages = getMessagesFromDestination(source, selector);
             if (!messages.isEmpty()) {

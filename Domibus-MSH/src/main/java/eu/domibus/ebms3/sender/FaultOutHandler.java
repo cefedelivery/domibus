@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.MSHRole;
@@ -24,8 +5,8 @@ import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.ebms3.common.handler.AbstractFaultHandler;
 import eu.domibus.ebms3.common.model.Messaging;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.xml.namespace.QName;
@@ -41,7 +22,7 @@ import java.util.Set;
  */
 public class FaultOutHandler extends AbstractFaultHandler {
 
-    private static final Log LOG = LogFactory.getLog(FaultOutHandler.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FaultOutHandler.class);
 
     @Autowired
     private ErrorLogDao errorLogDao;

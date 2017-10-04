@@ -1,32 +1,16 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.common.dao;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
+import eu.domibus.common.model.configuration.Process;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
@@ -43,21 +27,42 @@ import java.util.List;
 @Transactional
 public class PModeDao extends PModeProvider {
 
-    private static final Log LOG = LogFactory.getLog(PModeDao.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeDao.class);
 
+    @Override
+    public Party getGatewayParty() {
+        //TODO check if it can be optimized
+        return configurationDAO.read().getParty();
+    }
 
     @Override
     public Party getSenderParty(final String pModeKey) {
+
+        String senderPartyName = this.getSenderPartyNameFromPModeKey(pModeKey);
+
         final TypedQuery<Party> query = this.entityManager.createNamedQuery("Party.findByName", Party.class);
-        query.setParameter("NAME", this.getSenderPartyNameFromPModeKey(pModeKey));
-        return query.getSingleResult();
+        query.setParameter("NAME", senderPartyName);
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException pEx) {
+            LOG.businessError(DomibusMessageCode.BUS_PARTY_NAME_NOT_FOUND, senderPartyName);
+            return null;
+        }
     }
 
     @Override
     public Party getReceiverParty(final String pModeKey) {
+
+        String senderPartyName = this.getReceiverPartyNameFromPModeKey(pModeKey);
+
         final TypedQuery<Party> query = this.entityManager.createNamedQuery("Party.findByName", Party.class);
-        query.setParameter("NAME", this.getReceiverPartyNameFromPModeKey(pModeKey));
-        return query.getSingleResult();
+        query.setParameter("NAME", senderPartyName);
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException pEx) {
+            LOG.businessError(DomibusMessageCode.BUS_PARTY_NAME_NOT_FOUND, senderPartyName);
+            return null;
+        }
     }
 
     @Override
@@ -95,14 +100,42 @@ public class PModeDao extends PModeProvider {
     }
 
     protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
+        try {
+            //this is the normal call for a push.
+            return findLegNameMepBindingAgnostic(agreementName, senderParty, receiverParty, service, action);
+        } catch (EbMS3Exception e) {
+            //Here we invert the parties to find leg configured for a pull.
+            try {
+                String legNameInPullProcess = findLegNameMepBindingAgnostic(agreementName, receiverParty, senderParty, service, action);
+                //then we verify that the leg is indeed in a pull process.
+                final List<Process> resultList = processDao.findPullProcessByLegName(legNameInPullProcess);
+                //if not pull process found then this is a miss configuration.
+                if (resultList.isEmpty()) {
+                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
+                }
+                return legNameInPullProcess;
+            } catch (EbMS3Exception e1) {
+                LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, e, agreementName, senderParty, receiverParty, service, action);
+                throw e1;
+            }
+        }
+
+    }
+
+    public String findLegNameMepBindingAgnostic(String agreementName, String senderParty, String receiverParty, String service, String action) throws EbMS3Exception {
+        LOG.debug("Finding leg name using agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]",
+                agreementName, senderParty, receiverParty, service, action);
         String namedQuery;
         if (agreementName.equals(OPTIONAL_AND_EMPTY)) {
             namedQuery = "LegConfiguration.findForPartiesAndAgreementsOAE";
         } else {
             namedQuery = "LegConfiguration.findForPartiesAndAgreements";
         }
+        LOG.debug("Using named query [{}]", namedQuery);
+
         Query candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
         if (!agreementName.equals(OPTIONAL_AND_EMPTY)) {
+            LOG.debug("Setting agreement [{}]", OPTIONAL_AND_EMPTY);
             candidatesQuery.setParameter("AGREEMENT", agreementName);
         }
         candidatesQuery.setParameter("SENDER_PARTY", senderParty);
@@ -112,11 +145,13 @@ public class PModeDao extends PModeProvider {
         if (candidates == null || candidates.isEmpty()) {
             // To be removed when the backward compatibility will be finally broken!
             namedQuery = "LegConfiguration.findForPartiesAndAgreementEmpty";
+            LOG.debug("No candidates found, using namedQuery to find candidates [{}]", namedQuery);
             candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
             candidatesQuery.setParameter("SENDER_PARTY", senderParty);
             candidatesQuery.setParameter("RECEIVER_PARTY", receiverParty);
             candidates = candidatesQuery.getResultList();
             if (candidates == null || candidates.isEmpty()) {
+                LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, agreementName, senderParty, receiverParty, service, action);
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
             }
         }
@@ -131,9 +166,8 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            PModeDao.LOG.info("", e);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
     }
 
     protected String findAgreement(final AgreementRef agreementRef) throws EbMS3Exception {
@@ -148,9 +182,9 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            PModeDao.LOG.info("No matching agreement found", e);
+            LOG.businessError(DomibusMessageCode.BUS_MESSAGE_AGREEMENT_NOT_FOUND, e, agreementRef);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreement found", null, null);
         }
-        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching agreement found", null, null);
     }
 
     protected String findActionName(final String action) throws EbMS3Exception {
@@ -163,7 +197,7 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            PModeDao.LOG.info("No matching action found", e);
+            LOG.businessError(DomibusMessageCode.BUS_MESSAGE_ACTION_NOT_FOUND, e, action);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching action found", null, null);
         }
     }
@@ -178,8 +212,8 @@ public class PModeDao extends PModeProvider {
                 query = entityManager.createNamedQuery("Service.findWithoutType", String.class);
                 query.setParameter("SERVICE", value);
             } catch (final IllegalArgumentException e) {
-                final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Service " + value + " is not a valid URI [CORE] 5.2.2.8", null, e);
-                throw ex;
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SERVICE_INVALID_URI, value);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Service " + value + " is not a valid URI [CORE]", null, e);
             }
         } else {
             query = this.entityManager.createNamedQuery("Service.findByServiceAndType", String.class);
@@ -189,7 +223,7 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            PModeDao.LOG.info("No matching service found", e);
+            LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SERVICE_FOUND, e);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching service found", null, null);
         }
     }
@@ -197,6 +231,7 @@ public class PModeDao extends PModeProvider {
     protected String findPartyName(final Collection<PartyId> partyIds) throws EbMS3Exception {
         Identifier identifier;
         for (final PartyId partyId : partyIds) {
+            LOG.debug("Trying to find party [" + partyId + "]");
             try {
                 String type = partyId.getType();
                 if (type == null || type.isEmpty()) { //PartyId must be an URI
@@ -205,22 +240,24 @@ public class PModeDao extends PModeProvider {
                         URI.create(partyId.getValue()); //if not an URI an IllegalArgumentException will be thrown
                         type = "";
                     } catch (final IllegalArgumentException e) {
-                        final EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "PartyId " + partyId.getValue() + " is not a valid URI [CORE] 5.2.2.3", null, e);
-                        throw ex;
+                        LOG.businessError(DomibusMessageCode.BUS_PARTY_ID_INVALID_URI, partyId.getValue());
+                        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "PartyId " + partyId.getValue() + " is not a valid URI [CORE]", null, e);
                     }
                 }
                 final TypedQuery<Identifier> identifierQuery = this.entityManager.createNamedQuery("Identifier.findByTypeAndPartyId", Identifier.class);
                 identifierQuery.setParameter("PARTY_ID", partyId.getValue());
                 identifierQuery.setParameter("PARTY_ID_TYPE", type);
                 identifier = identifierQuery.getSingleResult();
+                LOG.debug("Found identifier [" + identifier + "]");
                 final TypedQuery<String> query = this.entityManager.createNamedQuery("Party.findPartyByIdentifier", String.class);
                 query.setParameter("PARTY_IDENTIFIER", identifier);
 
                 return query.getSingleResult();
             } catch (final NoResultException e) {
-                PModeDao.LOG.debug("", e); // Its ok to not know all identifiers, we just have to know one
+                LOG.debug("", e); // Its ok to not know all identifiers, we just have to know one
             }
         }
+        LOG.businessError(DomibusMessageCode.BUS_PARTY_ID_NOT_FOUND, partyIds);
         throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "No matching party found", null, null);
     }
 
@@ -239,7 +276,7 @@ public class PModeDao extends PModeProvider {
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            PModeDao.LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of 0 for downloaded messages.");
+            LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of 0 for downloaded messages.");
             return 0;
         }
 
@@ -255,7 +292,7 @@ public class PModeDao extends PModeProvider {
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            PModeDao.LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of 0 for downloaded messages.");
+            LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of 0 for downloaded messages.");
             return 0;
         }
 
@@ -271,7 +308,7 @@ public class PModeDao extends PModeProvider {
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            PModeDao.LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of -1 for undownloaded messages.");
+            LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of -1 for undownloaded messages.");
             return 0;
         }
 
@@ -287,7 +324,7 @@ public class PModeDao extends PModeProvider {
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            PModeDao.LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of -1 for undownloaded messages.");
+            LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of -1 for undownloaded messages.");
             return 0;
         }
 
@@ -310,4 +347,38 @@ public class PModeDao extends PModeProvider {
     public void refresh() {
         //as we always query the DB pmodes never are stale, thus no refresh needed
     }
+
+    @Override
+    public boolean isConfigurationLoaded() {
+        return configurationDAO.configurationExists();
+    }
+
+    @Override
+    public Role getBusinessProcessRole(String roleValue) {
+        final TypedQuery<Role> query = entityManager.createNamedQuery("Role.findByValue", Role.class);
+        query.setParameter("VALUE", roleValue);
+
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException pEx) {
+            LOG.businessError(DomibusMessageCode.BUS_PARTY_ROLE_NOT_FOUND, roleValue);
+            return null;
+        }
+    }
+
+    @Override
+    public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
+        return processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
+    }
+
+    @Override
+    public List<Process> findPullProcessesByInitiator(final Party party) {
+        return processDao.findPullProcessesByInitiator(party);
+    }
+
+    @Override
+    public List<Process> findPullProcessByMpc(final String mpc) {
+        return processDao.findPullProcessByMpc(mpc);
+    }
+
 }

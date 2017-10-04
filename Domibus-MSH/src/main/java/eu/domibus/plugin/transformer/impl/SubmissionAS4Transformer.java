@@ -1,24 +1,6 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.plugin.transformer.impl;
 
+import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.plugin.Submission;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +15,6 @@ import java.util.Locale;
  */
 @org.springframework.stereotype.Service
 public class SubmissionAS4Transformer {
-
-    public static final String DESCRIPTION_PROPERTY_NAME = "description";
 
     @Autowired
     private MessageIdGenerator messageIdGenerator;
@@ -126,10 +106,6 @@ public class SubmissionAS4Transformer {
             partInfo.setInBody(payload.isInBody());
             partInfo.setPayloadDatahandler(payload.getPayloadDatahandler());
             partInfo.setHref(payload.getContentId());
-           /* final Schema schema = new Schema();
-            schema.setLocation(payload.getSchemaLocation());
-            partInfo.setSchema(schema);*/
-            boolean descriptionPropertyExists = false;
             final PartProperties partProperties = new PartProperties();
             for (final Submission.TypedProperty entry : payload.getPayloadProperties()) {
                 final Property property = new Property();
@@ -158,6 +134,10 @@ public class SubmissionAS4Transformer {
     public Submission transformFromMessaging(final UserMessage messaging) {
         final Submission result = new Submission();
 
+        if(messaging == null) {
+            return result;
+        }
+
         final CollaborationInfo collaborationInfo = messaging.getCollaborationInfo();
         result.setAction(collaborationInfo.getAction());
         result.setService(messaging.getCollaborationInfo().getService().getValue());
@@ -173,21 +153,7 @@ public class SubmissionAS4Transformer {
 
         if (messaging.getPayloadInfo() != null) {
             for (final PartInfo partInfo : messaging.getPayloadInfo().getPartInfo()) {
-                String mime = "";
-                final Collection<Submission.TypedProperty> properties = new ArrayList<>();
-                if (partInfo.getPartProperties() != null) {
-                    for (final Property property : partInfo.getPartProperties().getProperties()) {
-                        properties.add(new Submission.TypedProperty(property.getName(), property.getValue(), property.getType()));
-                        if (property.getName().equals(Property.MIME_TYPE)) {
-                            mime = property.getValue();
-                        }
-                    }
-                }
-                Submission.Description description = null;
-                if(partInfo.getDescription() != null){
-                    description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), partInfo.getDescription().getValue());
-                }
-                result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), description, (partInfo.getSchema() != null ? partInfo.getSchema().getLocation() : null));
+                addPayload(result, partInfo);
             }
         }
         result.setFromRole(messaging.getPartyInfo().getFrom().getRole());
@@ -207,6 +173,23 @@ public class SubmissionAS4Transformer {
             }
         }
         return result;
+    }
+
+    private void addPayload(Submission result, PartInfo partInfo) {
+        final Collection<Submission.TypedProperty> properties = new ArrayList<>();
+        if (partInfo.getPartProperties() != null) {
+            for (final Property property : partInfo.getPartProperties().getProperties()) {
+                properties.add(new Submission.TypedProperty(property.getName(), property.getValue(), property.getType()));
+            }
+        }
+        if (partInfo.getFileName() != null) {
+            properties.add(new Submission.TypedProperty("FileName", partInfo.getFileName(), ""));
+        }
+        Submission.Description description = null;
+        if(partInfo.getDescription() != null){
+            description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), partInfo.getDescription().getValue());
+        }
+        result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), description, (partInfo.getSchema() != null ? partInfo.getSchema().getLocation() : null));
     }
 
     private String generateConversationId() {

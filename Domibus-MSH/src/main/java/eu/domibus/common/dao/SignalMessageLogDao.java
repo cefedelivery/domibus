@@ -1,12 +1,17 @@
 package eu.domibus.common.dao;
 
+import com.google.common.collect.Maps;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.SignalMessageLog;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.common.model.logging.SignalMessageLogInfoFilter;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -14,6 +19,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Federico Martini
@@ -22,7 +28,10 @@ import java.util.List;
 @Repository
 public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
 
-    private static final Log LOG = LogFactory.getLog(SignalMessageLogDao.class);
+    @Autowired
+    private SignalMessageLogInfoFilter signalMessageLogInfoFilter;
+
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SignalMessageLogDao.class);
 
     public SignalMessageLogDao() {
         super(SignalMessageLog.class);
@@ -42,7 +51,7 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         try {
             return query.getSingleResult();
         } catch (NoResultException nrEx) {
-            LOG.debug("Query SignalMessageLog.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]", nrEx);
+            LOG.debug("Query SignalMessageLog.findByMessageId did not find any result for message with id [" + messageId + "] and MSH role [" + mshRole + "]");
             return null;
         }
     }
@@ -77,6 +86,38 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         query.setFirstResult(from);
         query.setMaxResults(max);
         return query.getResultList();
+    }
+
+    public int countAllInfo(boolean asc, HashMap<String, Object> filters) {
+        final Map<String, Object> filteredEntries = Maps.filterEntries(filters, new com.google.common.base.Predicate<Map.Entry<String, Object>>() {
+            @Override
+            public boolean apply(Map.Entry<String, Object> input) {
+                return input.getValue() != null;
+            }
+        });
+        if (filteredEntries.size() == 0) {
+            return countAll();
+        }
+        String filteredSignalMessageLogQuery = signalMessageLogInfoFilter.countSignalMessageLogQuery(asc, filters);
+        TypedQuery<Number> countQuery = em.createQuery(filteredSignalMessageLogQuery, Number.class);
+        countQuery = signalMessageLogInfoFilter.applyParameters(countQuery, filters);
+        final Number count = countQuery.getSingleResult();
+        return count.intValue();
+    }
+
+    public List<MessageLogInfo> findAllInfoPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
+        String filteredSignalMessageLogQuery = signalMessageLogInfoFilter.filterSignalMessageLogQuery(column, asc, filters);
+        TypedQuery<MessageLogInfo> typedQuery = em.createQuery(filteredSignalMessageLogQuery, MessageLogInfo.class);
+        TypedQuery<MessageLogInfo> queryParameterized = signalMessageLogInfoFilter.applyParameters(typedQuery, filters);
+        queryParameterized.setFirstResult(from);
+        queryParameterized.setMaxResults(max);
+        return queryParameterized.getResultList();
+    }
+
+    public Integer countAll() {
+        final Query nativeQuery = em.createNativeQuery("SELECT count(sm.ID_PK) FROM  TB_SIGNAL_MESSAGE sm");
+        final Number singleResult = (Number) nativeQuery.getSingleResult();
+        return singleResult.intValue();
     }
 
 }

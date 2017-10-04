@@ -1,3 +1,54 @@
+Domibus 3.3
+- Additional validation on pMode upload: when @type is missing or is empty, the value of PartyId, Service and AgreementRef, must be an URI (relative URIs accepted).
+- Use optional regex validation for dynamic discovery certificate. New property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation.
+- Fix sendAttempt counter (initial one plus number of retries defined in the pmode)
+- Block the receiving of the message in case the sender's certificate is not valid or revoked.
+    Two more properties were added (for more details check domibus.properties file):
+        o domibus.sender.certificate.validation.onsending=true
+        o domibus.sender.certificate.validation.onreceiving=true
+    Renamed "domibus.senderparty.trust.verification" to "domibus.sender.trust.validation.onreceiving". Default value "false" has not been changed.
+    Renamed "domibus.certificate.validation.enabled" to "domibus.receiver.certificate.validation.onsending". Default value "true" has not been changed.
+- Discard domibus.internal.dispatch.queue from using the DLQ queue.
+- Discard domibus.internal.pull.queue from using the DLQ queue.
+- Possibility to notify the plugins when the message status changes; new method added in the plugin API: eu.domibus.plugin.BackendConnector.messageStatusChanged(eu.domibus.common.MessageStatusChangeEvent)
+- Included the payload location as a property of the JMS Message
+- New default Domibus plugin added: FileSystem Plugin
+- Performance improvements
+- Configuration of Domibus is done with domibus.properties instead of externalized spring xml files
+- Add the possibility to pull messages
+- Expose the DOWNLOADED message status in the plugin API and the default ws plugin
+- Deprecated the methods eu.domibus.plugin.AbstractBackendConnector.getMessageStatus(String messageId) and eu.domibus.plugin.handler.MessageRetriever.getMessageStatus(String messageId) which converts the DOWNLOADED status to RECEIVED. Use the new getStatus(String messageId) method instead.
+- Deprecated the following methods from eu.domibus.plugin.webService.impl.BackendWebServiceImpl in the Default WS Plugin:
+    o sendMessage(SubmitRequest, Messaging). Use submitMessage(SubmitRequest, Messaging) which add support for large files.
+    o downloadMessage(RetrieveMessageRequest, Holder, Holder). Use retrieveMessage(RetrieveMessageRequest, Holder, Holder) which add support for large files.
+    o getMessageStatus(StatusRequest). Use getStatus(StatusRequest) which converts the DOWNLOADED status to RECEIVED.
+- Migrated the logging framework to SLF4J and Logback
+- Domibus uses 3 logs files: domibus.log, domibus-business.log and domibus-security.log
+- JMS monitoring: fixed the computation of the total number of messages in the queue for WebLogic
+- JMS monitoring: fixed the search of the JMS messages for WebLogic(for JMS messages having property with null values) and Tomcat(for JMS messages with no "Text" property)
+- JMS monitoring: extended the functionality for clustered installations.
+- Core: listPendingMessages and download operations behave correctly in case of a clustered installation.
+- Core: Spring services are always executing within a transaction even if there is no specific @Transactional annotation present
+- Core: Quartz integration with managed threads in WebLogic and WildFly
+- Core: during sendMessage operation, Domibus verifies that the parties roles are allowed (present in PMode) and different among them.
+- Core: during sendMessage operation, Domibus verifies that the message is being sent by the same party as the one configured as the sending access point.
+- Core: during sendMessage operation, Domibus trims the leading and trailing whitespaces in all the request fields.
+- Core: during sendMessage operation, Domibus verifies that, if MessageId and RefToMessageId is specified by backend client, then it should contain only printable ASCII characters.
+- Core: during sendMessage operation, all validations comparisons with the PMode data are case insensitive.
+- Core: during MSH dispatch operation, Domibus verifies the validity of sender's certificate. The sender party name needs to be the same as the certificate alias from the keystore.
+- Core: during MSH receive operation, Domibus can verify the trust of the sender if activated.
+- Core: validation on MessageId and RefToMessageId can be by-passed by removing the key "domibus.sendMessage.messageIdPattern" from configuration file.
+- Core: new configuration properties added for ConnectionTimeout and ReceiveTimeout to allow fine tuning of the access points' conduit.
+- Core: provision added to support the "DoNothing security" policy (no security, no encryption).
+- Core+Plugins: added the DOWNLOADED status to message state workflow. This new status is also visible through the console.
+- DB: MySQL installation of Domibus database is set to have collation of 'UTF8_BIN' to make DB level string comparison (in SQLs) case sensitive. This will enable support for case sensitive message ids.
+- WS Plugin: the response list of ListPendingMessages operation can be limited using a new configuration property (domibus.listPendingMessages.maxCount).
+- Config: increased the value of the retry tolerance to 3 hours
+- Config: added new property "domibus.sendMessage.failure.delete.payload" to enable/disable the removal of the message payload on send failure.
+- Core: the core exposes services via the new domibus-ext-services-api module
+- Core: possibility to register message acknowledgments using the Java API and the REST core services
+- Core: possibility to monitor and manage messages using the Java API and the REST core services
+- JMS: In ActiveMQ message redelivery is now configured solely on the broker;The client / connection factory will not try to redeliver anymore.
 Domibus 3.2.5
 - Dynamic discovery: integrate Domibus with OASIS compliant SMP
 - Added new security policy file, eSensPolicy.v2.0_CA.xml to support embedded public certificate
@@ -110,3 +161,5 @@ Domibus 3.0-RC1
  Domibus 3.0-RC3
  - bugfixes
  - experimental SMP/SML support
+
+

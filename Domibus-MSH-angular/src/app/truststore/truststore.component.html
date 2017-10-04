@@ -1,0 +1,57 @@
+<h1 id="truststoreheader_id">Truststore</h1>
+<div class="panel">
+  <div class="selectionCriteria">
+    <md-card>
+      <md-card-content>
+
+        <div class="group-filter-button">
+          <span class="row-button">
+            <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                             (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+          </span>
+          <span class="column-filter-button">
+            <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                               (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+          </span>
+        </div>
+
+      <ngx-datatable
+        id="errorLogTable"
+        class="material striped"
+        [rows]="trustStoreEntries"
+        [columnMode]="'force'"
+        [columns]="columnPicker.selectedColumns"
+        [headerHeight]="50"
+        [footerHeight]="50"
+        [rowHeight]="'auto'"
+        [scrollbarH]="true"
+        [loadingIndicator]="loading"
+        [selectionType]="'multi'"
+        [selected]="selectedMessages"
+        [limit]="rowLimiter.pageSize"
+        [sorts]="[{prop: 'alias', dir: 'desc'}]"
+        (activate)="onActivate($event)"
+        (select)="onSelect($event)">
+
+
+      </ngx-datatable>
+
+      <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+        <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+      </ng-template>
+
+        <table class="group-action-button">
+          <tr>
+            <td>
+              <button md-raised-button color="primary" (click)="openEditTrustStore()" id="uploadbutton_id">
+                <md-icon>file_upload</md-icon>
+                <span>Upload</span>
+              </button>
+            </td>
+          </tr>
+        </table>
+      </md-card-content>
+    </md-card>
+  </div>
+</div>
+

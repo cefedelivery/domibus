@@ -1,45 +1,33 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.sender;
 
-import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.message.attempt.MessageAttempt;
+import eu.domibus.api.message.attempt.MessageAttemptService;
+import eu.domibus.api.message.attempt.MessageAttemptStatus;
+import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.dao.ErrorLogDao;
+import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
-import eu.domibus.common.model.logging.ErrorLogEntry;
+import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.DelayedDispatchMessageCreator;
 import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.ebms3.receiver.BackendNotificationService;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
-import eu.domibus.pki.CertificateService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.pki.PolicyService;
+import org.apache.commons.lang.Validate;
 import org.apache.cxf.interceptor.Fault;
+import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,9 +35,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import javax.jms.Queue;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
+import java.sql.Timestamp;
+import java.util.EnumSet;
+import java.util.Set;
 
 
 /**
@@ -60,26 +50,16 @@ import javax.xml.ws.soap.SOAPFaultException;
  */
 @Service(value = "messageSenderService")
 public class MessageSender implements MessageListener {
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageSender.class);
 
-    private static final Log LOG = LogFactory.getLog(MessageSender.class);
-
-    private final String UNRECOVERABLE_ERROR_RETRY = "domibus.dispatch.ebms.error.unrecoverable.retry";
-
-    @Autowired
-    JMSManager jmsManager;
+    private static final Set<MessageStatus> ALLOWED_STATUSES_FOR_SENDING = EnumSet.of(MessageStatus.SEND_ENQUEUED, MessageStatus.WAITING_FOR_RETRY);
 
     @Autowired
-    @Qualifier("sendMessageQueue")
-    private Queue sendMessageQueue;
-
-    @Autowired
-    private ErrorLogDao errorLogDao;
+    private UserMessageService userMessageService;
 
     @Autowired
     private MessagingDao messagingDao;
 
-    @Autowired
-    private UserMessageLogDao userMessageLogDao;
 
     @Autowired
     private PModeProvider pModeProvider;
@@ -97,20 +77,42 @@ public class MessageSender implements MessageListener {
     private ResponseHandler responseHandler;
 
     @Autowired
-    private BackendNotificationService backendNotificationService;
+    private RetryService retryService;
 
     @Autowired
-    private UpdateRetryLoggingService updateRetryLoggingService;
+    private MessageAttemptService messageAttemptService;
 
     @Autowired
-    CertificateService certificateService;
+    private MessageExchangeService messageExchangeService;
 
     @Autowired
-    RetryService retryService;
+    PolicyService policyService;
+
+    @Autowired
+    private ReliabilityService reliabilityService;
+
+    @Autowired
+    UserMessageLogDao userMessageLogDao;
 
 
     private void sendUserMessage(final String messageId) {
-        ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.FAIL;
+        final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
+        if (!ALLOWED_STATUSES_FOR_SENDING.contains(messageStatus)) {
+            LOG.warn("Message [{}] has a status [{}] which is not allowed for sending. Only the statuses [{}] are allowed", messageId, messageStatus, ALLOWED_STATUSES_FOR_SENDING);
+            return;
+        }
+
+
+        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
+
+        MessageAttempt attempt = new MessageAttempt();
+        attempt.setMessageId(messageId);
+        attempt.setStartDate(new Timestamp(System.currentTimeMillis()));
+        MessageAttemptStatus attemptStatus = MessageAttemptStatus.SUCCESS;
+        String attemptError = null;
+
+
+        ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.SEND_FAIL;
         // Assuming that everything goes fine
         ResponseHandler.CheckResult isOk = ResponseHandler.CheckResult.OK;
 
@@ -118,108 +120,104 @@ public class MessageSender implements MessageListener {
         final String pModeKey;
 
         Boolean abortSending = false;
-        final UserMessage userMessage = this.messagingDao.findUserMessageByMessageId(messageId);
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         try {
-            pModeKey = this.pModeProvider.findPModeKeyForUserMessage(userMessage, MSHRole.SENDING);
-            legConfiguration = this.pModeProvider.getLegConfiguration(pModeKey);
+            pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
+            LOG.debug("PMode key found : " + pModeKey);
+            legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+            LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
 
-            if (certificateService.isCertificateValidationEnabled()) {
-                Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
-                try {
-                    boolean certificateChainValid = certificateService.isCertificateChainValid(receiverParty.getName());
-                    if (!certificateChainValid) {
-                        LOG.error("Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverParty.getName() + "]");
-                        retryService.purgeTimedoutMessage(messageId);
-                        abortSending = true;
-                        return;
-                    }
-                } catch (Exception e) {
-                    LOG.warn("Could not verify if the certificate chain is valid for alias " + receiverParty.getName(), e);
-                }
+            Policy policy;
+            try {
+                policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+            } catch (final ConfigurationException e) {
+
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
+                ex.setMshRole(MSHRole.SENDING);
+                throw ex;
+            }
+
+            Party sendingParty = pModeProvider.getSenderParty(pModeKey);
+            Validate.notNull(sendingParty, "Initiator party was not found");
+            Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+            Validate.notNull(receiverParty, "Responder party was not found");
+
+            try {
+                messageExchangeService.verifyReceiverCertificate(legConfiguration, receiverParty.getName());
+                messageExchangeService.verifySenderCertificate(legConfiguration, sendingParty.getName());
+            } catch (ChainCertificateInvalidException cciEx) {
+                LOG.securityError(DomibusMessageCode.SEC_INVALID_X509CERTIFICATE, cciEx, null);
+                attemptError = cciEx.getMessage();
+                attemptStatus = MessageAttemptStatus.ABORT;
+                // this flag is used in the finally clause
+                abortSending = true;
+                return;
             }
 
             LOG.debug("PMode found : " + pModeKey);
-            final SOAPMessage soapMessage = this.messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
-            final SOAPMessage response = this.mshDispatcher.dispatch(soapMessage, pModeKey);
+            final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
+            final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
             isOk = responseHandler.handle(response);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
                 EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occurred during marshalling", messageId, null);
                 e.setMshRole(MSHRole.SENDING);
                 throw e;
             }
-            reliabilityCheckSuccessful = this.reliabilityChecker.check(soapMessage, response, pModeKey);
+            reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, response, pModeKey);
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
-                this.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
-            } else LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
-
+                reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
+            } else {
+                LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
+            }
+            attemptError = soapFEx.getMessage();
+            attemptStatus = MessageAttemptStatus.ERROR;
         } catch (final EbMS3Exception e) {
-            this.handleEbms3Exception(e, messageId);
+            reliabilityChecker.handleEbms3Exception(e, messageId);
+            attemptError = e.getMessage();
+            attemptStatus = MessageAttemptStatus.ERROR;
+        } catch (Throwable t) {
+            //NOSONAR: Catching Throwable is done on purpose in order to even catch out of memory exceptions in case large files are sent.
+            LOG.error("Error sending message [{}]", messageId, t);
+            attemptError = t.getMessage();
+            attemptStatus = MessageAttemptStatus.ERROR;
+            throw t;
         } finally {
-            if (abortSending) {
-                LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
-                return;
-            }
-
-            switch (reliabilityCheckSuccessful) {
-                case OK:
-                    switch (isOk) {
-                        case OK:
-                            userMessageLogDao.setMessageAsAcknowledged(messageId);
-                            break;
-                        case WARNING:
-                            userMessageLogDao.setMessageAsAckWithWarnings(messageId);
-                            break;
-                        default:
-                            assert false;
-                    }
-                    backendNotificationService.notifyOfSendSuccess(messageId);
-                    userMessageLogDao.setAsNotified(messageId);
-                    messagingDao.clearPayloadData(messageId);
-                    break;
-                case WAITING_FOR_CALLBACK:
-                    userMessageLogDao.setMessageAsWaitingForReceipt(messageId);
-                    break;
-                case FAIL:
-                    updateRetryLoggingService.updateRetryLogging(messageId, legConfiguration);
+            try {
+                if (abortSending) {
+                    LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
+                    retryService.purgeTimedoutMessageInANewTransaction(messageId);
+                } else {
+                    reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+                }
+                attempt.setError(attemptError);
+                attempt.setStatus(attemptStatus);
+                attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
+                messageAttemptService.create(attempt);
+            } catch (Exception ex) {
+                LOG.error("Finally: ", ex);
             }
         }
     }
 
-    /**
-     * This method is responsible for the ebMS3 error handling (creation of errorlogs and marking message as sent)
-     *
-     * @param exceptionToHandle the exception {@link eu.domibus.common.exception.EbMS3Exception} that needs to be handled
-     * @param messageId         id of the message the exception belongs to
-     */
-    private void handleEbms3Exception(final EbMS3Exception exceptionToHandle, final String messageId) {
-        exceptionToHandle.setRefToMessageId(messageId);
-        if (!exceptionToHandle.isRecoverable() && !Boolean.parseBoolean(System.getProperty(UNRECOVERABLE_ERROR_RETRY))) {
-            userMessageLogDao.setMessageAsAcknowledged(messageId);
-            // TODO Shouldn't clear the payload data here ?
-        }
-
-        exceptionToHandle.setMshRole(MSHRole.SENDING);
-        LOG.error("Error for message with ID [" + messageId + "]", exceptionToHandle);
-        this.errorLogDao.create(new ErrorLogEntry(exceptionToHandle));
-        //TODO: notify backends of error
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void onMessage(final Message message) {
-        Long delay = null;
+        LOG.debug("Processing message [{}]", message);
+        Long delay;
         String messageId = null;
         try {
             messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
             delay = message.getLongProperty(MessageConstants.DELAY);
             if (delay > 0) {
-                jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, message.getStringProperty(MessageConstants.ENDPOINT), delay).createMessage(), sendMessageQueue);
+                userMessageService.scheduleSending(messageId, delay);
                 return;
             }
         } catch (final NumberFormatException nfe) {
             //This is ok, no delay has been set
         } catch (final JMSException e) {
-            LOG.error("", e);
+            LOG.error("Error processing message", e);
         }
         sendUserMessage(messageId);
     }

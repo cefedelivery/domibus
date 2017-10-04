@@ -1,0 +1,68 @@
+<h2 md-dialog-title>JMS Message</h2>
+<md-dialog-content style="height:450px;width:650px">
+  <md-card>
+    <md-card-content>
+      <md-card-title-group>
+        <md-card-title>Header</md-card-title>
+      </md-card-title-group>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Source" value="{{currentSearchSelectedSource.name}}" readonly/>
+      </md-input-container>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Id" value="{{message.id}}" readonly/>
+      </md-input-container>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Timestamp" value="{{message.timestamp| domibusDate: dateFormat}}" readonly/>
+      </md-input-container>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="JMS Type" value="{{message.type}}" readonly/>
+      </md-input-container>
+      <md-input-container style="width:100%">
+        <textarea mdInput
+                  mdTextareaAutosize
+                  placeholder="Custom Properties" readonly>{{message.customProperties|json}}</textarea>
+      </md-input-container>
+    </md-card-content>
+  </md-card>
+
+  <md-card>
+    <md-card-content>
+      <md-card-title-group>
+        <md-card-title>Properties</md-card-title>
+      </md-card-title-group>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="JMSMessageID" value="{{message.jmsproperties.JMSMessageID}}"
+               readonly/>
+      </md-input-container>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="JMSDestination" value="{{message.jmsproperties.JMSDestination}}"
+               readonly/>
+      </md-input-container>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="JMSDeliveryMode" value="{{message.jmsproperties.JMSDeliveryMode}}"
+               readonly/>
+      </md-input-container>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="JMS Type" value="{{message.MESSAGE_ID}}" readonly/>
+      </md-input-container>
+    </md-card-content>
+  </md-card>
+
+  <md-card>
+    <md-card-content>
+      <md-card-title-group>
+        <md-card-title>Content</md-card-title>
+      </md-card-title-group>
+      <md-input-container style="width:100%">
+        <input mdInput value="{{message.content}}" readonly/>
+      </md-input-container>
+    </md-card-content>
+  </md-card>
+</md-dialog-content>
+
+<md-dialog-actions>
+  <button id="messageDialogCloseButton" md-raised-button color="primary" (click)="dialogRef.close({})" style="margin-top:10px">
+    <md-icon>close</md-icon>
+    <span>Close</span>
+  </button>
+</md-dialog-actions>

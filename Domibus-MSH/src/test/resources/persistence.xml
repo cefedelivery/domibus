@@ -1,22 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright 2015 e-CODEX Project
-  ~
-  ~ Licensed under the EUPL, Version 1.1 or – as soon they
-  ~ will be approved by the European Commission - subsequent
-  ~ versions of the EUPL (the "Licence");
-  ~ You may not use this work except in compliance with the
-  ~ Licence.
-  ~ You may obtain a copy of the Licence at:
-  ~ http://ec.europa.eu/idabc/eupl5
-  ~ Unless required by applicable law or agreed to in
-  ~ writing, software distributed under the Licence is
-  ~ distributed on an "AS IS" basis,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  ~ express or implied.
-  ~ See the Licence for the specific language governing
-  ~ permissions and limitations under the Licence.
-  -->
+
 
 <persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              version="2.0"
@@ -30,6 +13,7 @@
         <class>eu.domibus.common.model.configuration.Binding</class>
         <class>eu.domibus.common.model.configuration.BusinessProcesses</class>
         <class>eu.domibus.common.model.configuration.Configuration</class>
+        <class>eu.domibus.common.model.configuration.ConfigurationRaw</class>
         <class>eu.domibus.common.model.configuration.ErrorHandling</class>
         <class>eu.domibus.common.model.configuration.Identifier</class>
         <class>eu.domibus.common.model.configuration.LegConfiguration</class>
@@ -48,7 +32,6 @@
         <class>eu.domibus.common.model.configuration.Security</class>
         <class>eu.domibus.common.model.configuration.Service</class>
         <class>eu.domibus.common.model.logging.ErrorLogEntry</class>
-        <class>eu.domibus.common.model.logging.RawEnvelopeLog</class>
         <class>eu.domibus.common.model.logging.UserMessageLog</class>
         <class>eu.domibus.common.model.logging.SignalMessageLog</class>
         <class>eu.domibus.ebms3.common.model.Error</class>
@@ -60,8 +43,8 @@
         <class>eu.domibus.ebms3.common.model.Receipt</class>
         <class>eu.domibus.ebms3.common.model.SignalMessage</class>
         <class>eu.domibus.ebms3.common.model.UserMessage</class>
-        <class>eu.domibus.plugin.routing.BackendFilter</class>
-        <class>eu.domibus.plugin.routing.RoutingCriteria</class>
+        <class>eu.domibus.plugin.routing.BackendFilterEntity</class>
+        <class>eu.domibus.plugin.routing.RoutingCriteriaEntity</class>
 
         <!-- Comment this class if you don't use the default ws plugin.
         Default ws plugin uses the same db config as the core for storing auth info-->

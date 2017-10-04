@@ -1,21 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
 
 package eu.domibus.plugin.jms;
 
@@ -23,6 +5,11 @@ package eu.domibus.plugin.jms;
  * @author Christian Koch, Stefan Mueller
  */
 public class JMSMessageConstants {
+
+    private JMSMessageConstants() {
+        // empty constructor
+    }
+
     public static final String MESSAGE_ID = "messageId";
     public static final String P1_IN_BODY = "p1InBody";
     public static final String JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY = "messageType";
@@ -44,8 +31,6 @@ public class JMSMessageConstants {
     public static final String PROPERTY_ENDPOINT = "endPointAddress";
     public static final String PROTOCOL = "protocol";
     public static final String TOTAL_NUMBER_OF_PAYLOADS = "totalNumberOfPayloads";
-    public static final String PAYLOAD_FILE_NAME_FORMAT = "payload_{0}.bin";
-    public static final String BODYLOAD_FILE_NAME_FORMAT = "bodyload.bin";
     public static final String MESSAGE_TYPE_SUBMIT = "submitMessage";
     public static final String MESSAGE_TYPE_SUBMIT_RESPONSE = "submitResponse";
     public static final String MESSAGE_TYPE_INCOMING = "incomingMessage";
@@ -63,8 +48,10 @@ public class JMSMessageConstants {
     public static final String PAYLOAD_DESCRIPTION_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_DESCRIPTION_SUFFIX;
     private static final String PAYLOAD_MIME_TYPE_SUFFIX = "_mimeType";
     public static final String PAYLOAD_MIME_TYPE_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_MIME_TYPE_SUFFIX;
+    private static final String PAYLOAD_FILE_NAME_SUFFIX = "_fileName";
+    public static final String PAYLOAD_FILE_NAME_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_FILE_NAME_SUFFIX;
     private static final String PAYLOAD_MIME_CONTENT_ID_SUFFIX = "_mimeContentId";
     public static final String PAYLOAD_MIME_CONTENT_ID_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_MIME_CONTENT_ID_SUFFIX;
-
-
+    public static final String PUT_ATTACHMENTS_IN_QUEUE = "putAttachmentInQueue";
+    public static final String PAYLOAD_FILENAME = "FileName";
 }

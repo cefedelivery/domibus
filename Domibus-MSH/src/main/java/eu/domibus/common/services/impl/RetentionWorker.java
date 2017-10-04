@@ -1,14 +1,15 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.common.dao.ConfigurationDAO;
-import eu.domibus.ebms3.security.util.AuthUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.api.security.AuthUtils;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
+
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -16,7 +17,9 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 @DisallowConcurrentExecution
 public class RetentionWorker extends QuartzJobBean {
 
-    private static final Log LOG = LogFactory.getLog(RetentionWorker.class);
+
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RetentionWorker.class);
+
 
     @Autowired
     private MessageRetentionService messageRetentionService;

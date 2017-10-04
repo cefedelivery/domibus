@@ -5,9 +5,9 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.jms.spi.InternalJMSManager;
 import eu.domibus.jms.spi.InternalJmsMessage;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * // TODO Documentation
- *
  * @author Cosmin Baciu
  * @since 3.2
  */
@@ -28,7 +26,7 @@ import java.util.Map;
 @Transactional
 public class JMSManagerImpl implements JMSManager {
 
-    private static final Log LOG = LogFactory.getLog(JMSManagerImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMSManagerImpl.class);
 
     @Autowired
     InternalJMSManager internalJmsManager;
@@ -64,7 +62,7 @@ public class JMSManagerImpl implements JMSManager {
 
     @Override
     public void sendMessageToQueue(JmsMessage message, String destination) {
-        message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, removeJmsModule(destination));
+        message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination);
         InternalJmsMessage internalJmsMessage = jmsMessageMapper.convert(message);
         internalJmsManager.sendMessage(internalJmsMessage, destination);
     }
@@ -72,7 +70,7 @@ public class JMSManagerImpl implements JMSManager {
     @Override
     public void sendMessageToQueue(JmsMessage message, Queue destination) {
         try {
-            message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, removeJmsModule(destination.getQueueName()));
+            message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination.getQueueName());
         } catch (JMSException e) {
             LOG.warn("Could not add the property [" + JmsMessage.PROPERTY_ORIGINAL_QUEUE + "] on the destination", e);
         }
@@ -94,10 +92,5 @@ public class JMSManagerImpl implements JMSManager {
     public JmsMessage consumeMessage(String source, String messageId) {
         InternalJmsMessage internalJmsMessage = internalJmsManager.consumeMessage(source, messageId);
         return jmsMessageMapper.convert(internalJmsMessage);
-    }
-
-    private String removeJmsModule(String destination) {
-        String destName = StringUtils.substringAfter(destination, "!");
-        return (destName.equals("")) ? destination : destName;
     }
 }

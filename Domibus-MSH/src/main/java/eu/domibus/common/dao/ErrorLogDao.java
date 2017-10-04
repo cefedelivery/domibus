@@ -1,25 +1,9 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
 
 package eu.domibus.common.dao;
 
 import eu.domibus.common.model.logging.ErrorLogEntry;
+import eu.domibus.common.util.ErrorLogEntryTruncateUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +22,10 @@ import java.util.*;
  * @author Christian Koch, Stefan Mueller
  */
 public class ErrorLogDao extends BasicDao<ErrorLogEntry> {
+
+
+    @Autowired
+    private ErrorLogEntryTruncateUtil errorLogEntryTruncateUtil;
 
     public ErrorLogDao() {
         super(ErrorLogEntry.class);
@@ -98,17 +86,27 @@ public class ErrorLogDao extends BasicDao<ErrorLogEntry> {
                         switch (filter.getKey().toString()) {
                             case "":
                                 break;
+                            default:
+                                predicates.add(cb.like(ele.<String>get(filter.getKey()), (String) filter.getValue()));
+                                break;
+                        }
+                    }
+                } else if (filter.getValue() instanceof Date) {
+                    if (!filter.getValue().toString().isEmpty()) {
+                        switch (filter.getKey().toString()) {
+                            case "":
+                                break;
                             case "timestampFrom":
-                                predicates.add(cb.greaterThanOrEqualTo(ele.<Date>get("timestamp"), Timestamp.valueOf(filter.getValue().toString())));
+                                predicates.add(cb.greaterThanOrEqualTo(ele.<Date>get("timestamp"), (Timestamp) filter.getValue()));
                                 break;
                             case "timestampTo":
-                                predicates.add(cb.lessThanOrEqualTo(ele.<Date>get("timestamp"), Timestamp.valueOf(filter.getValue().toString())));
+                                predicates.add(cb.lessThanOrEqualTo(ele.<Date>get("timestamp"), (Timestamp) filter.getValue()));
                                 break;
                             case "notifiedFrom":
-                                predicates.add(cb.greaterThanOrEqualTo(ele.<Date>get("notified"), Timestamp.valueOf(filter.getValue().toString())));
+                                predicates.add(cb.greaterThanOrEqualTo(ele.<Date>get("notified"), (Timestamp) filter.getValue()));
                                 break;
                             case "notifiedTo":
-                                predicates.add(cb.lessThanOrEqualTo(ele.<Date>get("notified"), Timestamp.valueOf(filter.getValue().toString())));
+                                predicates.add(cb.lessThanOrEqualTo(ele.<Date>get("notified"), (Timestamp) filter.getValue()));
                                 break;
                             default:
                                 predicates.add(cb.like(ele.<String>get(filter.getKey()), (String) filter.getValue()));
@@ -133,5 +131,10 @@ public class ErrorLogDao extends BasicDao<ErrorLogEntry> {
         return query.getSingleResult();
     }
 
+    @Override
+    public void create(ErrorLogEntry errorLogEntry) {
+        errorLogEntryTruncateUtil.truncate(errorLogEntry);
+        super.create(errorLogEntry);
+    }
 
 }

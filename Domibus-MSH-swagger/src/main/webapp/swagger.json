@@ -1,0 +1,360 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "Domibus REST API documentation",
+    "version" : "v1",
+    "title" : "Domibus REST API documentation",
+    "license" : {
+      "name" : "EUPL 1.2",
+      "url" : "https://joinup.ec.europa.eu/community/eupl/og_page/eupl-text-11-12"
+    }
+  },
+  "basePath" : "/domibus",
+  "tags" : [ {
+    "name" : "acknowledgement"
+  }, {
+    "name" : "monitoring"
+  } ],
+  "schemes" : [ "http", "https" ],
+  "paths" : {
+    "/ext/messages/acknowledgments/delivered" : {
+      "post" : {
+        "tags" : [ "acknowledgement" ],
+        "summary" : "Create a message delivered acknowledgement",
+        "description" : "Acknowledges that a message has been delivered to the backend",
+        "operationId" : "acknowledgeMessageDelivered",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/MessageAcknowledgementRequestDTO"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/MessageAcknowledgementDTO"
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/ext/messages/acknowledgments/processed" : {
+      "post" : {
+        "tags" : [ "acknowledgement" ],
+        "summary" : "Create a message processed acknowledgement",
+        "description" : "Acknowledges that a message has been processed by the backend",
+        "operationId" : "acknowledgeMessageProcessed",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/MessageAcknowledgementRequestDTO"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/MessageAcknowledgementDTO"
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/ext/messages/acknowledgments/{messageId}" : {
+      "get" : {
+        "tags" : [ "acknowledgement" ],
+        "summary" : "Get acknowledgements",
+        "description" : "Gets all acknowledgments associated to a message id",
+        "operationId" : "getAcknowledgedMessages",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string",
+          "pattern" : ".+"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/MessageAcknowledgementDTO"
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/ext/monitoring/messages/failed" : {
+      "get" : {
+        "tags" : [ "monitoring" ],
+        "summary" : "Get failed messages",
+        "description" : "Retrieve all the messages with the specified finalRecipient(if provided) that are currently in a SEND_FAILURE status",
+        "operationId" : "getFailedMessages",
+        "parameters" : [ {
+          "name" : "finalRecipient",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/ext/monitoring/messages/failed/restore" : {
+      "post" : {
+        "tags" : [ "monitoring" ],
+        "summary" : "Resend all messages with SEND_FAILURE status within a certain time interval",
+        "description" : "Resend all messages with SEND_FAILURE status within a certain time interval",
+        "operationId" : "restoreFailedMessages",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/FailedMessagesCriteriaRO"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/ext/monitoring/messages/failed/{messageId}" : {
+      "delete" : {
+        "tags" : [ "monitoring" ],
+        "summary" : "Delete failed message payload",
+        "description" : "Delete the payload of a message which has a SEND_FAILURE status",
+        "operationId" : "deleteFailedMessage",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string",
+          "pattern" : ".+"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/ext/monitoring/messages/failed/{messageId}/elapsedtime" : {
+      "get" : {
+        "tags" : [ "monitoring" ],
+        "summary" : "Get failed message elapsed time",
+        "description" : "Retrieve the time that a message has been in a SEND_FAILURE status",
+        "operationId" : "getFailedMessageInterval",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string",
+          "pattern" : ".+"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/ext/monitoring/messages/failed/{messageId}/restore" : {
+      "put" : {
+        "tags" : [ "monitoring" ],
+        "summary" : "Resend failed message",
+        "description" : "Resend a message which has a SEND_FAILURE status",
+        "operationId" : "restoreFailedMessage",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string",
+          "pattern" : ".+"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/ext/monitoring/messages/{messageId}/attempts" : {
+      "get" : {
+        "tags" : [ "monitoring" ],
+        "summary" : "Get message attempts",
+        "description" : "Retrieve the history of the delivery attempts for a certain message",
+        "operationId" : "getMessageAttempts",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string",
+          "pattern" : ".+"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/MessageAttemptDTO"
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "basicAuth" : {
+      "type" : "basic"
+    }
+  },
+  "definitions" : {
+    "FailedMessagesCriteriaRO" : {
+      "type" : "object",
+      "properties" : {
+        "fromDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "toDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        }
+      }
+    },
+    "MessageAcknowledgementDTO" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "messageId" : {
+          "type" : "string"
+        },
+        "from" : {
+          "type" : "string"
+        },
+        "to" : {
+          "type" : "string"
+        },
+        "properties" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          }
+        },
+        "acknowledgeDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "createDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "createUser" : {
+          "type" : "string"
+        }
+      }
+    },
+    "MessageAcknowledgementRequestDTO" : {
+      "type" : "object",
+      "properties" : {
+        "messageId" : {
+          "type" : "string"
+        },
+        "acknowledgeDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "properties" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "MessageAttemptDTO" : {
+      "type" : "object",
+      "properties" : {
+        "messageId" : {
+          "type" : "string"
+        },
+        "startDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "endDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "status" : {
+          "type" : "string",
+          "enum" : [ "SUCCESS", "ABORT", "ERROR" ]
+        },
+        "error" : {
+          "type" : "string"
+        }
+      }
+    }
+  }
+}

@@ -6,9 +6,9 @@ package eu.domibus.api.util;
  */
 public interface ClassUtil {
 
-    String getTargetObjectClassCanonicalName(Object proxy) throws Exception;
+    String getTargetObjectClassCanonicalName(Object proxy);
 
-    Class getTargetObjectClass(Object proxy) throws Exception;
+    Class getTargetObjectClass(Object proxy) throws ClassNotFoundException;
 
 
 }

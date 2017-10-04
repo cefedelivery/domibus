@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <!-- Domibus 3.2-rc1 - 3.2.0 -->
+    <changeSet dbms="mysql" author="idragusa" id="changelog_linux_case_sensitive">
+        <renameTable oldTableName="qrtz_blob_triggers" newTableName="QRTZ_BLOB_TRIGGERS"/>
+        <renameTable oldTableName="qrtz_calendars" newTableName="QRTZ_CALENDARS"/>
+        <renameTable oldTableName="qrtz_cron_triggers" newTableName="QRTZ_CRON_TRIGGERS"/>
+        <renameTable oldTableName="qrtz_fired_triggers" newTableName="QRTZ_FIRED_TRIGGERS"/>
+        <renameTable oldTableName="qrtz_job_details" newTableName="QRTZ_JOB_DETAILS"/>
+        <renameTable oldTableName="qrtz_locks" newTableName="QRTZ_LOCKS"/>
+        <renameTable oldTableName="qrtz_paused_trigger_grps" newTableName="QRTZ_PAUSED_TRIGGER_GRPS"/>
+        <renameTable oldTableName="qrtz_scheduler_state" newTableName="QRTZ_SCHEDULER_STATE"/>
+        <renameTable oldTableName="qrtz_simple_triggers" newTableName="QRTZ_SIMPLE_TRIGGERS"/>
+        <renameTable oldTableName="qrtz_simprop_triggers" newTableName="QRTZ_SIMPROP_TRIGGERS"/>
+        <renameTable oldTableName="qrtz_triggers" newTableName="QRTZ_TRIGGERS"/>
+        <renameTable oldTableName="tb_action" newTableName="TB_ACTION"/>
+        <renameTable oldTableName="tb_agreement" newTableName="TB_AGREEMENT"/>
+        <renameTable oldTableName="tb_backend_filter" newTableName="TB_BACKEND_FILTER"/>
+        <renameTable oldTableName="tb_business_process" newTableName="TB_BUSINESS_PROCESS"/>
+        <renameTable oldTableName="tb_configuration" newTableName="TB_CONFIGURATION"/>
+        <renameTable oldTableName="tb_error" newTableName="TB_ERROR"/>
+        <renameTable oldTableName="tb_error_handling" newTableName="TB_ERROR_HANDLING"/>
+        <renameTable oldTableName="tb_error_log" newTableName="TB_ERROR_LOG"/>
+        <renameTable oldTableName="tb_join_payload_profile" newTableName="TB_JOIN_PAYLOAD_PROFILE"/>
+        <renameTable oldTableName="tb_join_process_init_party" newTableName="TB_JOIN_PROCESS_INIT_PARTY"/>
+        <renameTable oldTableName="tb_join_process_leg" newTableName="TB_JOIN_PROCESS_LEG"/>
+        <renameTable oldTableName="tb_join_process_resp_party" newTableName="TB_JOIN_PROCESS_RESP_PARTY"/>
+        <renameTable oldTableName="tb_join_property_set" newTableName="TB_JOIN_PROPERTY_SET"/>
+        <renameTable oldTableName="tb_leg" newTableName="TB_LEG"/>
+        <renameTable oldTableName="tb_leg_tb_mpc" newTableName="TB_LEG_TB_MPC"/>
+        <renameTable oldTableName="tb_mep" newTableName="TB_MEP"/>
+        <renameTable oldTableName="tb_mep_binding" newTableName="TB_MEP_BINDING"/>
+        <renameTable oldTableName="tb_message_info" newTableName="TB_MESSAGE_INFO"/>
+        <renameTable oldTableName="tb_message_log" newTableName="TB_MESSAGE_LOG"/>
+        <renameTable oldTableName="tb_message_property" newTableName="TB_MESSAGE_PROPERTY"/>
+        <renameTable oldTableName="tb_message_property_set" newTableName="TB_MESSAGE_PROPERTY_SET"/>
+        <renameTable oldTableName="tb_messaging" newTableName="TB_MESSAGING"/>
+        <renameTable oldTableName="tb_mpc" newTableName="TB_MPC"/>
+        <renameTable oldTableName="tb_part_info" newTableName="TB_PART_INFO"/>
+        <renameTable oldTableName="tb_party" newTableName="TB_PARTY"/>
+        <renameTable oldTableName="tb_party_id" newTableName="TB_PARTY_ID"/>
+        <renameTable oldTableName="tb_party_id_type" newTableName="TB_PARTY_ID_TYPE"/>
+        <renameTable oldTableName="tb_party_identifier" newTableName="TB_PARTY_IDENTIFIER"/>
+        <renameTable oldTableName="tb_payload" newTableName="TB_PAYLOAD"/>
+        <renameTable oldTableName="tb_payload_profile" newTableName="TB_PAYLOAD_PROFILE"/>
+        <renameTable oldTableName="tb_process" newTableName="TB_PROCESS"/>
+        <renameTable oldTableName="tb_property" newTableName="TB_PROPERTY"/>
+        <renameTable oldTableName="tb_receipt" newTableName="TB_RECEIPT"/>
+        <renameTable oldTableName="tb_receipt_data" newTableName="TB_RECEIPT_DATA"/>
+        <renameTable oldTableName="tb_reception_awareness" newTableName="TB_RECEPTION_AWARENESS"/>
+        <renameTable oldTableName="tb_reliability" newTableName="TB_RELIABILITY"/>
+        <renameTable oldTableName="tb_role" newTableName="TB_ROLE"/>
+        <renameTable oldTableName="tb_routing_criteria" newTableName="TB_ROUTING_CRITERIA"/>
+        <renameTable oldTableName="tb_security" newTableName="TB_SECURITY"/>
+        <renameTable oldTableName="tb_service" newTableName="TB_SERVICE"/>
+        <renameTable oldTableName="tb_signal_message" newTableName="TB_SIGNAL_MESSAGE"/>
+        <renameTable oldTableName="tb_user_message" newTableName="TB_USER_MESSAGE"/>
+    </changeSet>
+
+
+    <changeSet author="idragusa" id="changelog-ws-plugin-auth">
+        <createTable tableName="TB_AUTHENTICATION_ENTRY">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="CERTIFICATE_ID" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="USERNAME" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="PASSWD" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="AUTH_ROLES" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ORIGINAL_USER" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="BACKEND" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="insert_ws_default_auth" author="idragusa" dbms="oracle">
+        <insert tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="ID_PK" valueComputed="HIBERNATE_SEQUENCE.nextval"/>
+            <column name="USERNAME" value="admin"/>
+            <column name="PASSWD" value="8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"/>
+            <column name="AUTH_ROLES" value="ROLE_ADMIN"/>
+        </insert>
+        <insert tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="ID_PK" valueComputed="HIBERNATE_SEQUENCE.nextval"/>
+            <column name="USERNAME" value="user"/>
+            <column name="PASSWD" value="8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"/>
+            <column name="AUTH_ROLES" value="ROLE_USER"/>
+            <column name="ORIGINAL_USER" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1"/>
+        </insert>
+        <insert tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="ID_PK" valueComputed="HIBERNATE_SEQUENCE.nextval"/>
+            <column name="CERTIFICATE_ID" value="CN=blue_gw,O=eDelivery,C=BE:10370035830817850458"/>
+            <column name="AUTH_ROLES" value="ROLE_ADMIN"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert_ws_default_auth" author="idragusa" dbms="mysql">
+        <insert tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="USERNAME" value="admin"/>
+            <column name="PASSWD" value="8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"/>
+            <column name="AUTH_ROLES" value="ROLE_ADMIN"/>
+        </insert>
+        <insert tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="USERNAME" value="user"/>
+            <column name="PASSWD" value="8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"/>
+            <column name="AUTH_ROLES" value="ROLE_USER"/>
+            <column name="ORIGINAL_USER" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1"/>
+        </insert>
+        <insert tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="CERTIFICATE_ID" value="CN=blue_gw,O=eDelivery,C=BE:10370035830817850458"/>
+            <column name="AUTH_ROLES" value="ROLE_ADMIN"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

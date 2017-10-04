@@ -1,0 +1,32 @@
+<h2 md-dialog-title>Truststore entry</h2>
+<md-dialog-content style="height:450px;width:650px">
+  <md-card>
+    <md-card-content>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Name" value="{{trustStoreEntry.name}}" readonly/>
+      </md-input-container>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Subject" value="{{trustStoreEntry.subject}}" readonly/>
+      </md-input-container>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Issuer" value="{{trustStoreEntry.issuer}}" readonly/>
+      </md-input-container>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Valid from" value="{{trustStoreEntry.validFrom| domibusDate: dateFormat}}"
+               readonly/>
+      </md-input-container>
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Valid until" value="{{trustStoreEntry.validUntil| domibusDate: dateFormat}}"
+               readonly/>
+      </md-input-container>
+    </md-card-content>
+  </md-card>
+</md-dialog-content>
+
+<md-dialog-actions>
+  <button id="closebutton_id" md-raised-button color="primary" (click)="dialogRef.close({})"
+          style="margin-top:10px">
+    <md-icon>close</md-icon>
+    <span>Close</span>
+  </button>
+</md-dialog-actions>

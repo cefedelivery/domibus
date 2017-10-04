@@ -8,7 +8,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.2.5</version>
+        <version>3.3-SNAPSHOT</version>
     </parent>
     <artifactId>domibus-soapui-tests</artifactId>
     <packaging>jar</packaging>
@@ -16,7 +16,6 @@
 
     <properties>
         <mysql.version>5.1.34</mysql.version>
-        <jdbc.url>jdbc:mysql://localhost:3306/domibus?pinGlobalTxToPhysicalConnection=true</jdbc.url>
         <soapui.root.folder>${project.basedir}/src/main/soapui</soapui.root.folder>
         <soapui.scripting.library>${soapui.root.folder}/scripting</soapui.scripting.library>
         <soapui.ext.libraries>${soapui.root.folder}/lib</soapui.ext.libraries>
@@ -52,16 +51,22 @@
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
                     <testSuite>WS-Auto for Bamboo</testSuite>
-                    <!--<testCase>Dom118-Submit message-Data-AgreementRefId-Value</testCase>-->
+                    <!--<testCase>Dom141-Pull-Submit Message-Basic Flow</testCase>-->
                     <projectProperties>
-                        <value>localUrl=http://localhost:8180</value>
-                        <value>remoteUrl=http://localhost:9080</value>
-                        <value>driver=com.mysql.jdbc.Driver</value>
-                        <value>jdbcUrl1=jdbc:mysql://127.0.0.1:3304/domibus</value>
-                        <value>jdbcUrl2=jdbc:mysql://127.0.0.1:3305/domibus</value>
-                        <value>database=mysql</value>
-                        <value>user=root</value>
-                        <value>password=123456</value>
+                        <value>${localUrl}</value>
+                        <value>${remoteUrl}</value>
+                        <value>${driverBlue}</value>
+                        <value>${driverRed}</value>
+                        <value>${jdbcUrlBlue}</value>
+                        <value>${jdbcUrlRed}</value>
+                        <value>${databaseBlue}</value>
+                        <value>${databaseRed}</value>
+                        <value>${blueDbUser}</value>
+                        <value>${blueDbPassword}</value>
+                        <value>${redDbUser}</value>
+                        <value>${redDbPassword}</value>
+                        <value>updateReport=false</value>
+                        <value>thirdGateway=false</value>
                     </projectProperties>
                     <soapuiProperties>
                         <property>

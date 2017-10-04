@@ -8,7 +8,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.2.5</version>
+        <version>3.3-SNAPSHOT</version>
     </parent>
     <artifactId>domibus-api</artifactId>
     <packaging>jar</packaging>
@@ -24,11 +24,31 @@
     </build>
 
     <dependencies>
+        <!-- Domibus modules -->
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <scope>provided</scope>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-logging</artifactId>
         </dependency>
+        <!-- End Domibus modules -->
+
+        <!-- Spring -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+        </dependency>
+        <!-- End Spring -->
+
+        <!-- AspectJ -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+        </dependency>
+        <!-- End AspectJ -->
+
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>

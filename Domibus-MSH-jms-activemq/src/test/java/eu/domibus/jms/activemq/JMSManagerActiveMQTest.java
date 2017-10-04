@@ -295,7 +295,7 @@ public class JMSManagerActiveMQTest {
     @Test
     public void testConvertCompositeDataArrayWhenAMessageCannotBeConverted(final @Injectable CompositeData data1,
                                                                            final @Injectable CompositeData data2,
-                                                                           final @Injectable InternalJmsMessage internalJmsMessage1) throws Exception {
+                                              final @Injectable InternalJmsMessage internalJmsMessage1) throws Exception {
         CompositeData[] compositeDatas = new CompositeData[]{data1, data2};
 
         new Expectations(jmsManagerActiveMQ) {{

@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.common.exception;
 
 import eu.domibus.common.ErrorCode;
@@ -24,7 +5,12 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.ebms3.common.model.Description;
 import eu.domibus.ebms3.common.model.Error;
 import org.apache.commons.lang.StringUtils;
+import org.dom4j.dom.DOMDocument;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.ws.WebFault;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -49,7 +35,7 @@ public class EbMS3Exception extends Exception {
      */
     public static final ResourceBundle DEFAULT_MESSAGES = ResourceBundle.getBundle(EbMS3Exception.RESOURCE_BUNDLE_NAME, EbMS3Exception.DEFAULT_LOCALE);
 
-    private final ErrorCode.EbMS3ErrorCode errorCode;
+    private final ErrorCode.EbMS3ErrorCode ebMS3ErrorCode;
     /**
      * "This OPTIONAL attribute provides a short description of the error that can be reported in a log, in order to facilitate readability."
      * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
@@ -67,9 +53,9 @@ public class EbMS3Exception extends Exception {
      * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
      */
     //private final String description;
-    public EbMS3Exception(final ErrorCode.EbMS3ErrorCode errorCode, final String errorDetail, final String refToMessageId, final Throwable cause) {
+    public EbMS3Exception(final ErrorCode.EbMS3ErrorCode ebMS3ErrorCode, final String errorDetail, final String refToMessageId, final Throwable cause) {
         super(cause);
-        this.errorCode = errorCode;
+        this.ebMS3ErrorCode = ebMS3ErrorCode;
         this.errorDetail = errorDetail;
         this.refToMessageId = refToMessageId;
     }
@@ -88,7 +74,7 @@ public class EbMS3Exception extends Exception {
 
     public Description getDescription(final ResourceBundle bundle) {
         final Description description = new Description();
-        description.setValue(bundle.getString(this.errorCode.getCode().name()));
+        description.setValue(bundle.getString(this.ebMS3ErrorCode.getCode().name()));
         description.setLang(bundle.getLocale().getLanguage());
 
         return description;
@@ -107,38 +93,46 @@ public class EbMS3Exception extends Exception {
     }
 
     public String getOrigin() {
-        return this.errorCode.getCode().getOrigin();
+        return this.ebMS3ErrorCode.getCode().getOrigin();
     }
 
-    public String getErrorCode() {
-        return this.errorCode.getCode().getErrorCode().name();
+    public ErrorCode.EbMS3ErrorCode getErrorCode() {
+        return ebMS3ErrorCode;
     }
 
     public ErrorCode getErrorCodeObject() {
-        return this.errorCode.getCode().getErrorCode();
+        return ebMS3ErrorCode.getCode().getErrorCode();
     }
 
     public String getShortDescription() {
-        return this.errorCode.getShortDescription();
+        return this.ebMS3ErrorCode.getShortDescription();
     }
 
     public String getSeverity() {
-        return this.errorCode.getSeverity();
+        return this.ebMS3ErrorCode.getSeverity();
     }
 
     public String getCategory() {
-        return this.errorCode.getCategory().name();
+        return this.ebMS3ErrorCode.getCategory().name();
     }
 
-    public Error getFaultInfo() {
+    //this is a hack to avoid a classCastException in @see WebFaultOutInterceptor
+    public Source getFaultInfo() {
+        Document document = new DOMDocument("Empty document");
+        final Element firstElement = document.createElement("Empty child");
+        document.appendChild(firstElement);
+        return new DOMSource(document);
+    }
+
+    public Error getFaultInfoError() {
 
         final Error ebMS3Error = new Error();
 
-        ebMS3Error.setOrigin(this.errorCode.getCode().getOrigin());
-        ebMS3Error.setErrorCode(this.errorCode.getCode().getErrorCode().getErrorCodeName());
-        ebMS3Error.setSeverity(this.errorCode.getSeverity());
+        ebMS3Error.setOrigin(this.ebMS3ErrorCode.getCode().getOrigin());
+        ebMS3Error.setErrorCode(this.ebMS3ErrorCode.getCode().getErrorCode().getErrorCodeName());
+        ebMS3Error.setSeverity(this.ebMS3ErrorCode.getSeverity());
         ebMS3Error.setErrorDetail((this.errorDetail != null ? getErrorDetail() : ""));
-        ebMS3Error.setCategory(this.errorCode.getCategory().name());
+        ebMS3Error.setCategory(this.ebMS3ErrorCode.getCategory().name());
         ebMS3Error.setRefToMessageInError(this.refToMessageId);
         ebMS3Error.setShortDescription(this.getShortDescription());
         ebMS3Error.setDescription(this.getDescription());

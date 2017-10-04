@@ -34,14 +34,14 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_MESSAGE_AGREEMENT_NOT_FOUND("BUS-023", "Message agreement not found for value [{}]"),
     BUS_PARTY_ID_FOUND("BUS-024", "Party id [{}] found for value [{}]"),
     BUS_PARTY_ID_NOT_FOUND("BUS-025", "Party id not found for value [{}]"),
-    BUS_PARTY_ID_INVALID_URI("BUS-026", "Party [{}] is not a valid URI [CORE] 5.2.2.3"),
+    BUS_PARTY_ID_INVALID_URI("BUS-026", "Party [{}] is not a valid URI [CORE]"),
     BUS_MESSAGE_SERVICE_FOUND("BUS-027", "Message service [{}] found for value [{}]"),
     BUS_MESSAGE_SERVICE_NOT_FOUND("BUS-028", "Message service not found for value [{}]"),
-    BUS_MESSAGE_SERVICE_INVALID_URI("BUS-029", "Message service [{}] is not a valid URI [CORE] 5.2.2.8"),
+    BUS_MESSAGE_SERVICE_INVALID_URI("BUS-029", "Message service [{}] is not a valid URI [CORE]"),
     BUS_LEG_NAME_FOUND("BUS-030", "Leg name found [{}] for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
     BUS_LEG_NAME_NOT_FOUND("BUS-031", "Leg name not found found for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
     BUS_MESSAGE_SEND_INITIATION("BUS-032", "Preparing to send message"),
-    BUS_MESSAGE_SEND_SUCCESS("BUS-033", "Message sent successfully"),
+    BUS_MESSAGE_SEND_SUCCESS("BUS-033", "Message sent successfully [{}]"),
     BUS_MESSAGE_SEND_FAILURE("BUS-034", "Message send failure"),
     BUS_MESSAGE_ATTACHMENT_NOT_FOUND("BUS-035", "No Attachment found for cid [{}]"),
     BUS_MULTIPLE_PART_INFO_REFERENCING_SOAP_BODY("BUS-036", "More than one Partinfo referencing the soap body found"),
@@ -79,7 +79,9 @@ public enum DomibusMessageCode implements MessageCode {
     SEC_UNAUTHORIZED_ACCESS("SEC-007", "The host [{}] has been refused access to [{}]"),
     SEC_CERTIFICATE_EXPIRED("SEC-008", "Certificate is not valid at the current date [{}]. Certificate valid from [{}] to [{}]"),
     SEC_CERTIFICATE_NOT_YET_VALID("SEC-009", "Certificate is not yet valid at the current date [{}]. Certificate valid from [{}] to [{}]"),
-    SEC_NO_SECURITY_POLICY_USED("SEC-010", "No security policy (intended for testing alone) is used. Security certificate validations will be bypassed!");
+    SEC_NO_SECURITY_POLICY_USED("SEC-010", "No security policy (intended for testing alone) is used. Security certificate validations will be bypassed!"),
+    SEC_UNAUTHORIZED_MESSAGE_ACCESS("SEC-011", "User [{}] is trying to access a message having final recipient: [{}]"),
+    SEC_INVALID_X509CERTIFICATE("SEC-012", "X509Certificate invalid or not found");
 
     String code;
     String message;

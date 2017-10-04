@@ -1,0 +1,96 @@
+
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:sec="http://www.springframework.org/schema/security"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util.xsd
+    http://www.springframework.org/schema/security
+    http://www.springframework.org/schema/security/spring-security.xsd">
+
+
+    <!-- Passwordcallback for private key access. By default a simple
+         implementation which stores the password in plaintext is used.
+         THIS IS NOT SAFE FOR PRODUCTION PURPOSES please switch to
+         your own implementation
+    -->
+    <bean id="keystorePasswordCallback"
+          class="eu.domibus.ebms3.security.SimpleKeystorePasswordCallback">
+        <!-- Map with "alias" as key and "password" as value.
+             This map will be used by the passwordcallback to
+             retrieve the private key password for a given alias -->
+        <property name="passwordStore">
+            <util:map>
+                <entry key="${domibus.security.key.private.alias}" value="${domibus.security.key.private.password}"/>
+            </util:map>
+        </property>
+    </bean>
+
+    <!-- Properties for keystore with private key -->
+    <util:properties id="keystoreProperties">
+        <!-- The crypto provider to be used -->
+        <prop key="org.apache.ws.security.crypto.provider">
+            org.apache.wss4j.common.crypto.Merlin
+        </prop>
+        <!-- Type of the used keystore -->
+        <prop key="org.apache.ws.security.crypto.merlin.keystore.type">${domibus.security.keystore.type}</prop>
+        <!-- The password used to load the keystore -->
+        <prop key="org.apache.ws.security.crypto.merlin.keystore.password">
+            ${domibus.security.keystore.password}
+        </prop>
+        <!-- The keystore alias to use for decryption and signing. -->
+        <prop key="org.apache.ws.security.crypto.merlin.keystore.alias">
+            ${domibus.security.key.private.alias}
+        </prop>
+        <!-- The location of the keystore -->
+        <prop key="org.apache.ws.security.crypto.merlin.file">
+            ${domibus.security.keystore.location}
+        </prop>
+    </util:properties>
+
+    <!-- Properties for trustStore with public keys for the partners -->
+    <util:properties id="trustStoreProperties">
+        <!-- The crypto provider to be used -->
+        <prop key="org.apache.ws.security.crypto.provider">
+            eu.domibus.wss4j.common.crypto.Merlin
+        </prop>
+        <!-- Type of the used keystore -->
+        <prop key="org.apache.ws.security.crypto.merlin.trustStore.type">${domibus.security.truststore.type}</prop>
+
+        <!-- The password used to load the trustStore -->
+        <prop key="org.apache.ws.security.crypto.merlin.trustStore.password">
+            ${domibus.security.truststore.password}
+        </prop>
+        <prop key="org.apache.ws.security.crypto.merlin.load.cacerts">
+            false
+        </prop>
+        <!-- The location and name of the trustStore -->
+        <prop key="org.apache.ws.security.crypto.merlin.trustStore.file">
+            ${domibus.security.truststore.location}
+        </prop>
+    </util:properties>
+
+    <!-- Administration GUI user credentials-->
+    <bean name="bcryptEncoder"
+          class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+    <bean name="userDetailService"  
+          class="eu.domibus.common.services.impl.UserDetailServiceImpl"/>
+    <sec:authentication-manager>
+        <sec:authentication-provider ref="allowAllAuthenticationProvider"/>
+    </sec:authentication-manager>
+
+    <sec:authentication-manager id="authenticationManagerForAdminConsole">
+        <sec:authentication-provider
+                user-service-ref="userDetailService" >
+            <sec:password-encoder ref="bcryptEncoder"/>
+
+        </sec:authentication-provider>
+    </sec:authentication-manager>
+
+    <sec:global-method-security pre-post-annotations="enabled"/>
+
+</beans>

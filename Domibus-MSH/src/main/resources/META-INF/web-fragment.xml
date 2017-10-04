@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-fragment version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-fragment_3_0.xsd">
+
+    <distributable/>
+
+    <ordering>
+        <before>
+            <others/>
+        </before>
+    </ordering>
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+    <!-- Spring MVC -->
+    <servlet>
+        <servlet-name>mvc-dispatcher</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>mvc-dispatcher</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            classpath:META-INF/cxf/cxf.xml
+            classpath:META-INF/cxf/cxf-extension-jaxws.xml
+            classpath:META-INF/cxf/cxf-servlet.xml
+            classpath*:META-INF/resources/WEB-INF/spring-context.xml
+        </param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>pluginsLocation</param-name>
+        <param-value>${domibus.config.location}/plugins/lib</param-value>
+    </context-param>
+
+    <!-- Spring Security -->
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>eu.domibus.logging.DomibusLoggingConfiguratorListener</listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>eu.domibus.spring.DomibusContextLoaderListener</listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+    </listener>
+
+    <!-- Apache CXF Servlet and mapping -->
+    <servlet>
+        <servlet-name>CXF</servlet-name>
+        <servlet-class>org.apache.cxf.transport.servlet.CXFServlet
+        </servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CXF</servlet-name>
+        <url-pattern>/services/*</url-pattern>
+    </servlet-mapping>
+    <resource-ref>
+        <description>DB Connection</description>
+        <res-ref-name>ds/DomibusDS</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/index.html</location>
+    </error-page>
+
+</web-fragment>

@@ -3,8 +3,9 @@ package eu.domibus.common.dao;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.logging.MessageLog;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -20,40 +21,13 @@ import java.util.*;
  */
 public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
 
-    private static final Log LOG = LogFactory.getLog(MessageLog.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageLog.class);
 
     public MessageLogDao(final Class<F> type) {
-
         super(type);
     }
 
-    public void setMessageAsDownloaded(String messageId) {
-        setMessageStatus(messageId, MessageStatus.DOWNLOADED);
-    }
-
-    public void setMessageAsDeleted(String messageId) {
-        setMessageStatus(messageId, MessageStatus.DELETED);
-    }
-
-    public void setMessageAsAcknowledged(String messageId) {
-        setMessageStatus(messageId, MessageStatus.ACKNOWLEDGED);
-    }
-
-    public void setMessageAsAckWithWarnings(String messageId) {
-        setMessageStatus(messageId, MessageStatus.ACKNOWLEDGED_WITH_WARNING);
-    }
-
-    public void setMessageAsWaitingForReceipt(String messageId) {
-        setMessageStatus(messageId, MessageStatus.WAITING_FOR_RECEIPT);
-    }
-
-    public void setMessageAsSendFailure(String messageId) {
-        setMessageStatus(messageId, MessageStatus.SEND_FAILURE);
-    }
-
-    private void setMessageStatus(String messageId, MessageStatus messageStatus) {
-
-        MessageLog messageLog = findByMessageId(messageId);
+    public void setMessageStatus(MessageLog messageLog, MessageStatus messageStatus) {
         messageLog.setMessageStatus(messageStatus);
 
         switch (messageStatus) {
@@ -61,18 +35,27 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
             case ACKNOWLEDGED:
             case ACKNOWLEDGED_WITH_WARNING:
                 messageLog.setDeleted(new Date());
+                messageLog.setNextAttempt(null);
+                break;
+            case DOWNLOADED:
+                messageLog.setDownloaded(new Date());
+                messageLog.setNextAttempt(null);
+                break;
+            case SEND_FAILURE:
+                messageLog.setFailed(new Date());
+                messageLog.setNextAttempt(null);
                 break;
             default:
         }
         super.update(messageLog);
-        LOG.debug(messageLog.getClass().getSimpleName() + " status updated to [" + messageStatus + "]");
+        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_STATUS_UPDATE, messageStatus);
     }
 
     public MessageStatus getMessageStatus(String messageId) {
         try {
             return findByMessageId(messageId).getMessageStatus();
         } catch (NoResultException nrEx) {
-            LOG.debug("No result for message with id [" + messageId + "]", nrEx);
+            LOG.debug("No result for message with id [" + messageId + "]");
             return MessageStatus.NOT_FOUND;
         }
     }
@@ -92,14 +75,21 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
                 if (filter.getValue() instanceof String) {
                     if (!filter.getValue().toString().isEmpty()) {
                         switch (filter.getKey()) {
+                            case "":
+                                break;
+                            default:
+                                predicates.add(cb.like(mle.<String>get(filter.getKey()), (String) filter.getValue()));
+                                break;
+                        }
+                    }
+                } else if (filter.getValue() instanceof Date) {
+                    if (!filter.getValue().toString().isEmpty()) {
+                        switch (filter.getKey()) {
                             case "receivedFrom":
                                 predicates.add(cb.greaterThanOrEqualTo(mle.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
                                 break;
                             case "receivedTo":
                                 predicates.add(cb.lessThanOrEqualTo(mle.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
-                                break;
-                            default:
-                                predicates.add(cb.like(mle.<String>get(filter.getKey()), (String) filter.getValue()));
                                 break;
                         }
                     }
@@ -110,6 +100,5 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         }
         return predicates;
     }
-
 
 }

@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.plugin.jms;
 
 import eu.domibus.common.ErrorResult;
@@ -27,13 +8,14 @@ import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
@@ -51,7 +33,7 @@ import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
  */
 public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMessage> {
 
-    private static final Log LOG = LogFactory.getLog(BackendJMSImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendJMSImpl.class);
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
     private JmsOperations replyJmsTemplate;
@@ -98,7 +80,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
      * @param map The incoming JMS Message
      */
     @JmsListener(destination = "${domibus.backend.jmsInQueue}", containerFactory = "backendJmsListenerContainerFactory")
-    @Transactional
+    //Propagation.REQUIRES_NEW is needed in order to avoid sending the JMS message before the database data is commited; probably this is a bug in Atomikos which will be solved by performing an upgrade
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void receiveMessage(final MapMessage map) {
         try {
             String messageID = map.getStringProperty(MESSAGE_ID);
@@ -128,7 +111,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             LOG.info("Submitted message with messageId [" + messageID + "], jmsCorrelationID [" + jmsCorrelationID + "]");
         } catch (Exception e) {
             LOG.error("Exception occurred while receiving message [" + map + "]" , e);
-            throw new RuntimeException("Exception occurred while receiving message [" + map + "]", e);
+            throw new DefaultJmsPluginException("Exception occurred while receiving message [" + map + "]", e);
         }
     }
 
@@ -181,7 +164,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             try {
                 downloadMessage(messageId, mapMessage);
             } catch (final MessageNotFoundException e) {
-                throw new RuntimeException("Unable to create push message", e);
+                throw new DefaultJmsPluginException("Unable to create push message", e);
             }
             mapMessage.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, JMSMessageConstants.MESSAGE_TYPE_INCOMING);
             return mapMessage;

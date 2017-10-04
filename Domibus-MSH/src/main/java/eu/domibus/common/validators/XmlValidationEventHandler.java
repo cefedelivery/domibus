@@ -1,8 +1,8 @@
 package eu.domibus.common.validators;
 
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.ValidationEvent;
@@ -13,11 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by martifp on 21/04/2016.
+ @author Federico Martini
+ @since 3.1
+ <br/> Class to handle and customize the validation events triggered during XML parsing.
  */
 public class XmlValidationEventHandler implements ValidationEventHandler {
 
-    private static final Log LOG = LogFactory.getLog(XmlValidationEventHandler.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(XmlValidationEventHandler.class);
 
     protected List<String> errors = new ArrayList<>();
 
@@ -50,8 +52,7 @@ public class XmlValidationEventHandler implements ValidationEventHandler {
                 retVal = true; // continue after fatal errors because we want to show all errors together
                 break;
             default:
-                assert false :
-                        severity = "UNRECOGNIZED_SEVERITY";
+                severity = "UNRECOGNIZED_SEVERITY";
         }
 
         String location = getLocation(event);

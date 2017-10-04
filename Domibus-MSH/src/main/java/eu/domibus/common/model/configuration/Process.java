@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.common.model.configuration;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
@@ -25,6 +6,8 @@ import javax.persistence.*;
 import javax.xml.bind.annotation.*;
 import java.util.HashSet;
 import java.util.Set;
+
+import static eu.domibus.common.model.configuration.Process.*;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -37,22 +20,31 @@ import java.util.Set;
 })
 @Entity
 @Table(name = "TB_PROCESS")
+@NamedQueries({
+        @NamedQuery(name = RETRIEVE_PULL_PROCESS_FROM_MESSAGE_CONTEXT, query = "SELECT p FROM Process as p left join p.legs as l left join p.initiatorParties init left join p.responderParties resp  where p.mepBinding.value=:mepBinding and l.name=:leg and init.name=:initiatorName and resp.name=:responderName"),
+        @NamedQuery(name = FIND_PULL_PROCESS_TO_INITIATE, query = "SELECT p FROM Process as p join p.initiatorParties as resp WHERE p.mepBinding.value=:mepBinding and resp in(:initiator)"),
+        @NamedQuery(name = FIND_PULL_PROCESS_FROM_MPC, query = "SELECT p FROM Process as p left join p.legs as l where p.mepBinding.value=:mepBinding and l.defaultMpc.qualifiedName=:mpcName"),
+        @NamedQuery(name = FIND_PULL_PROCESS_FROM_LEG_NAME, query = "SELECT p FROM Process as p left join p.legs as l where p.mepBinding.value=:mepBinding and l.name=:legName")})
 public class Process extends AbstractBaseEntity {
-
-
+    @Transient
+    @XmlTransient
+    public final static String RETRIEVE_PULL_PROCESS_FROM_MESSAGE_CONTEXT = "Process.retrievePullProcessFromMessageContext";
+    public final static String FIND_PULL_PROCESS_TO_INITIATE = "Process.findPullProcessToInitiate";
+    public final static String FIND_PULL_PROCESS_FROM_MPC = "Process.findPullProcessFromMpc";
+    public final static String FIND_PULL_PROCESS_FROM_LEG_NAME = "Process.findPullProcessFromLegName";
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME")
     protected String name;
 
     @XmlElement(required = true, name = "initiatorParties")
     @Transient
-    protected InitiatorParties initiatorPartiesXml;
+    protected InitiatorParties initiatorPartiesXml; //NOSONAR
     @XmlElement(required = true, name = "responderParties")
     @Transient
-    protected ResponderParties responderPartiesXml;
+    protected ResponderParties responderPartiesXml; //NOSONAR
     @XmlElement(required = true, name = "legs")
     @Transient
-    protected Legs legsXml;
+    protected Legs legsXml; //NOSONAR
     @XmlAttribute(name = "initiatorRole", required = true)
     @Transient
     protected String initiatorRoleXml;
@@ -241,4 +233,5 @@ public class Process extends AbstractBaseEntity {
     public boolean isDynamicInitiator() {
         return dynamicInitiator;
     }
+
 }

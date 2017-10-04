@@ -1,23 +1,7 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.common.model;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -79,19 +63,22 @@ public class PayloadInfo {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PayloadInfo)) return false;
 
-        final PayloadInfo that = (PayloadInfo) o;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        PayloadInfo that = (PayloadInfo) o;
 
-        return !(this.partInfo != null ? !this.partInfo.equals(that.partInfo) : that.partInfo != null);
-
+        return new EqualsBuilder()
+                .append(partInfo, that.partInfo)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return this.partInfo.hashCode();
+        return new HashCodeBuilder(17, 37)
+                .append(partInfo)
+                .toHashCode();
     }
 }

@@ -1,22 +1,3 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.common.model.logging;
 
 import eu.domibus.common.ErrorCode;
@@ -26,6 +7,9 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -76,6 +60,13 @@ public class ErrorLogEntry extends AbstractBaseEntity implements ErrorResult {
         this.timestamp = new Date();
     }
 
+    public ErrorLogEntry(MSHRole mshRole, String messageInErrorId, ErrorCode errorCode, String errorDetail) {
+        this.mshRole = mshRole;
+        this.messageInErrorId = messageInErrorId;
+        this.errorCode = errorCode;
+        this.errorDetail = errorDetail;
+    }
+
     /**
      * Creates an ErrorLogEntry from an ebMS3 signal message
      *
@@ -100,45 +91,48 @@ public class ErrorLogEntry extends AbstractBaseEntity implements ErrorResult {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ErrorLogEntry)) return false;
-        if (!super.equals(o)) return false;
+
+        if (o == null || getClass() != o.getClass()) return false;
 
         ErrorLogEntry that = (ErrorLogEntry) o;
 
-        if (errorSignalMessageId != null ? !errorSignalMessageId.equals(that.errorSignalMessageId) : that.errorSignalMessageId != null)
-            return false;
-        if (mshRole != that.mshRole) return false;
-        if (messageInErrorId != null ? !messageInErrorId.equals(that.messageInErrorId) : that.messageInErrorId != null)
-            return false;
-        if (errorCode != that.errorCode) return false;
-        if (errorDetail != null ? !errorDetail.equals(that.errorDetail) : that.errorDetail != null) return false;
-        if (timestamp != null ? !timestamp.equals(that.timestamp) : that.timestamp != null) return false;
-        return !(notified != null ? !notified.equals(that.notified) : that.notified != null);
-
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(errorSignalMessageId, that.errorSignalMessageId)
+                .append(mshRole, that.mshRole)
+                .append(messageInErrorId, that.messageInErrorId)
+                .append(errorCode, that.errorCode)
+                .append(errorDetail, that.errorDetail)
+                .append(timestamp, that.timestamp)
+                .append(notified, that.notified)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (errorSignalMessageId != null ? errorSignalMessageId.hashCode() : 0);
-        result = 31 * result + (mshRole != null ? mshRole.hashCode() : 0);
-        result = 31 * result + (messageInErrorId != null ? messageInErrorId.hashCode() : 0);
-        result = 31 * result + (errorCode != null ? errorCode.hashCode() : 0);
-        result = 31 * result + (errorDetail != null ? errorDetail.hashCode() : 0);
-        result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
-        result = 31 * result + (notified != null ? notified.hashCode() : 0);
-        return result;
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(errorSignalMessageId)
+                .append(mshRole)
+                .append(messageInErrorId)
+                .append(errorCode)
+                .append(errorDetail)
+                .append(timestamp)
+                .append(notified)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "ErrorLogEntry{" +
-                "mshRole=" + mshRole +
-                ", messageInErrorId='" + messageInErrorId + '\'' +
-                ", errorCode=" + errorCode +
-                ", errorDetail='" + errorDetail + '\'' +
-                ", timestamp=" + timestamp +
-                '}';
+        return new ToStringBuilder(this)
+                .append("errorSignalMessageId", errorSignalMessageId)
+                .append("mshRole", mshRole)
+                .append("messageInErrorId", messageInErrorId)
+                .append("errorCode", errorCode)
+                .append("errorDetail", errorDetail)
+                .append("timestamp", timestamp)
+                .append("notified", notified)
+                .toString();
     }
 
     public String getErrorSignalMessageId() {

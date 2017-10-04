@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="ArunRaj" id="Add_Downloaded_1542">
+        <addColumn tableName="TB_MESSAGE_LOG">
+            <column name="DOWNLOADED" type="datetime" afterColumn="RECEIVED"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="TiagoMiguel" id="EDelivery_1940">
+        <createTable tableName="TB_MESSAGE_ACKNW">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="MESSAGE_ID" type="VARCHAR(255)"/>
+            <column name="FROM_VALUE" type="VARCHAR(255)"/>
+            <column name="TO_VALUE" type="VARCHAR(255)"/>
+            <column name="CREATE_DATE" type="DATETIME"/>
+            <column name="CREATE_USER" type="VARCHAR(255)"/>
+            <column name="ACKNOWLEDGE_DATE" type="DATETIME"/>
+        </createTable>
+        <createTable tableName="TB_MESSAGE_ACKNW_PROP">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="PROPERTY_NAME" type="VARCHAR(255)"/>
+            <column name="PROPERTY_VALUE" type="VARCHAR(255)"/>
+            <column name="FK_MSG_ACKNOWLEDGE" type="INT"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="FK_MSG_ACKNOWLEDGE" baseTableName="TB_MESSAGE_ACKNW_PROP"
+                                 constraintName="FK_MSG_ACK_PROP_MSG_ACK" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_ACKNW"/>
+    </changeSet>
+
+    <changeSet author="CosminBaciu" id="EDELIVERY_1941">
+        <addColumn tableName="TB_MESSAGE_LOG">
+            <column name="FAILED" type="datetime" afterColumn="DOWNLOADED"/>
+            <column name="RESTORED" type="datetime" afterColumn="RECEIVED"/>
+        </addColumn>
+        <createTable tableName="TB_SEND_ATTEMPT">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="MESSAGE_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="START_DATE" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="END_DATE" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATUS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ERROR" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Mircea" id="Add raw configuration table">
+        <createTable tableName="TB_CONFIGURATION_RAW">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="CONFIGURATION_DATE" type="DATETIME"/>
+            <column name="XML" type="BLOB"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="dussath" id="EDELIVERY_2144">
+        <createTable tableName="TB_USER">
+            <column autoIncrement="true" name="ID_PK" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="USER_EMAIL" type="VARCHAR(255)"/>
+            <column name="USER_ENABLED" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OPTLOCK" type="INT"/>
+        </createTable>
+
+        <createTable tableName="TB_USER_ROLE">
+            <column autoIncrement="true" name="ID_PK" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ROLE_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="TB_USER_ROLES">
+            <column name="USER_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROLE_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="USER_ID, ROLE_ID" constraintName="PK_PRIMARY" tableName="TB_USER_ROLES"/>
+
+        <addUniqueConstraint columnNames="ROLE_NAME" constraintName="UQ_ROLE_NAME" tableName="TB_USER_ROLE"/>
+
+        <addUniqueConstraint columnNames="USER_NAME" constraintName="USER_NAME" tableName="TB_USER"/>
+
+        <createIndex indexName="IDX_ROLE_ID" tableName="TB_USER_ROLES">
+            <column name="ROLE_ID"/>
+        </createIndex>
+
+        <createIndex indexName="IDX_USER_ID" tableName="TB_USER_ROLES">
+            <column name="USER_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="ROLE_ID" baseTableName="TB_USER_ROLES" constraintName="FK_USER_ROLES_USER" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_ROLE"/>
+
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_USER_ROLES" constraintName="FK_USER_ROLES_ROLE" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER"/>
+    </changeSet>
+
+    <changeSet author="musatmi " id="changelog-ws-plugin-auth-drop-trigger" dbms="oracle">
+        <comment>Drop the trigger_auth trigger.</comment>
+        <sql endDelimiter="\n/">
+            BEGIN
+            FOR i IN (SELECT null FROM user_triggers WHERE trigger_name = 'TRIGGER_AUTH') LOOP
+            EXECUTE IMMEDIATE 'DROP TRIGGER TRIGGER_AUTH';
+            END LOOP;
+            END;
+        </sql>
+    </changeSet>
+
+    <changeSet author="dussath" id="EDELIVERY_2580">
+        <createIndex indexName="IDX_PROPERTY_NAME" tableName="TB_PROPERTY">
+            <column name="NAME"/>
+        </createIndex>
+        <createIndex indexName="IDX_PARTY_ID_VALUE" tableName="TB_PARTY_ID">
+            <column name="VALUE"/>
+        </createIndex>
+        <createIndex indexName="IDX_MESSAGE_LOG_RECEIVED" tableName="TB_MESSAGE_LOG">
+            <column name="RECEIVED"/>
+        </createIndex>
+        <createIndex indexName="IDX_MESSAGE_LOG_M_STATUS" tableName="TB_MESSAGE_LOG">
+            <column name="MESSAGE_STATUS"/>
+        </createIndex>
+        <createIndex indexName="IDX_MESSAGE_INFO_R_T_M_ID" tableName="TB_MESSAGE_INFO">
+            <column name="REF_TO_MESSAGE_ID"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

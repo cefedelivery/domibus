@@ -1,25 +1,7 @@
-/*
- * Copyright 2015 e-CODEX Project
- *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/eupl5
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
- */
-
 package eu.domibus.ebms3.common.model;
 
-import eu.domibus.common.xmladapter.XMLGregorianCalendarAdapter;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -144,25 +126,28 @@ public class MessageInfo extends AbstractBaseEntity {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MessageInfo)) return false;
 
-        final MessageInfo that = (MessageInfo) o;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        if (!this.messageId.equals(that.messageId)) return false;
-        if (this.refToMessageId != null ? !this.refToMessageId.equals(that.refToMessageId) : that.refToMessageId != null)
-            return false;
-        return this.timestamp.equals(that.timestamp);
+        MessageInfo that = (MessageInfo) o;
 
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(timestamp, that.timestamp)
+                .append(messageId, that.messageId)
+                .append(refToMessageId, that.refToMessageId)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = 31;
-        result = 31 * result + this.timestamp.hashCode();
-        result = 31 * result + this.messageId.hashCode();
-        result = 31 * result + (this.refToMessageId != null ? this.refToMessageId.hashCode() : 0);
-        return result;
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(timestamp)
+                .append(messageId)
+                .append(refToMessageId)
+                .toHashCode();
     }
 }

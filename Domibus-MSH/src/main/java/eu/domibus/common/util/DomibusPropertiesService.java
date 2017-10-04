@@ -1,7 +1,7 @@
 package eu.domibus.common.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -17,11 +17,15 @@ import java.util.TimeZone;
 @Service(value = "domibusPropertiesService")
 public class DomibusPropertiesService {
 
-    private static final Log LOG = LogFactory.getLog(DomibusPropertiesService.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusPropertiesService.class);
 
     private static Properties domibusProps = new Properties();
 
-    DomibusPropertiesService() {
+    public DomibusPropertiesService() {
+        init();
+    }
+
+    public void init() {
         try {
             InputStream is = getClass().getClassLoader().getResourceAsStream("domibus.properties");
             if (is == null) {

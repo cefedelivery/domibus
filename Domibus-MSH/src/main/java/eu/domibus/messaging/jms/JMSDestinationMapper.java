@@ -37,6 +37,7 @@ public class JMSDestinationMapper {
         JMSDestination result = new JMSDestination();
         result.setType(internalJmsDestination.getType());
         result.setName(internalJmsDestination.getName());
+        result.setFullyQualifiedName(internalJmsDestination.getFullyQualifiedName());
         result.setNumberOfMessages(internalJmsDestination.getNumberOfMessages());
         result.setInternal(internalJmsDestination.isInternal());
         result.setProperties(internalJmsDestination.getProperties());
