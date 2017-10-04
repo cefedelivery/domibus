@@ -41,6 +41,9 @@ public class UserManagementServiceImpl implements UserService {
     @Autowired
     private DomainCoreConverter domainConverter;
 
+    /**
+     *{@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<eu.domibus.api.user.User> findUsers() {
@@ -64,6 +67,9 @@ public class UserManagementServiceImpl implements UserService {
         return users;
     }
 
+    /**
+     *{@inheritDoc}
+     */
     @Override
     @Transactional
     public void saveUsers(List<eu.domibus.api.user.User> users) {
@@ -78,6 +84,9 @@ public class UserManagementServiceImpl implements UserService {
         updateUserWithPasswordChange(passwordChangedModifiedUsers);
     }
 
+    /**
+     *{@inheritDoc}
+     */
     @Override
     public List<eu.domibus.api.user.UserRole> findUserRoles() {
         List<UserRole> userRolesEntities = userRoleDao.listRoles();
@@ -90,6 +99,9 @@ public class UserManagementServiceImpl implements UserService {
         return userRoles;
     }
 
+    /**
+     *{@inheritDoc}
+     */
     @Override
     public void updateUsers(List<eu.domibus.api.user.User> users) {
         // update

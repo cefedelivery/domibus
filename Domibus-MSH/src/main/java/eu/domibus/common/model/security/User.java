@@ -1,6 +1,7 @@
 package eu.domibus.common.model.security;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.hibernate.envers.Audited;
 import org.hibernate.validator.constraints.Email;
 
 import javax.persistence.*;
@@ -28,16 +29,22 @@ import java.util.Set;
         @NamedQuery(name = "User.findByUserName", query = "FROM User u where u.userName=:USER_NAME"),
         @NamedQuery(name = "User.findActiveByUserName", query = "FROM User u where u.userName=:USER_NAME and u.active=true")
 })
+
+@Audited(withModifiedFlag = true)
 public class User extends AbstractBaseEntity{
+
     @NotNull
     @Column(name = "USER_NAME")
     private String userName;
+
     @Column(name = "USER_EMAIL")
     @Email
     private String email;
+
     @NotNull
     @Column(name = "USER_PASSWORD")
     private String password;
+
     @NotNull
     @Column(name = "USER_ENABLED")
     private Boolean active;
