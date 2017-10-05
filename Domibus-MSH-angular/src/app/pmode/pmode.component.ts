@@ -8,6 +8,8 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import * as FileSaver from "file-saver";
 import {isNullOrUndefined} from "util";
+import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
+import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 
 @Component({
   moduleId: module.id,
@@ -23,11 +25,85 @@ export class PModeComponent {
   public pModeExists = false;
   private pModeContents: string = '';
 
+  rows = [];
+  selected = [];
+  columnPicker: ColumnPickerBase = new ColumnPickerBase();
+  rowLimiter: RowLimiterBase = new RowLimiterBase();
+  count: number = 0;
+  offset: number = 0;
+
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   ngOnInit() {
+    this.initializeArchivePmodes();
     this.checkPmodeActive();
+  }
+
+  initializeArchivePmodes() {
+    this.columnPicker.allColumns = [
+      {
+        name: 'Upload Date'
+      },
+      {
+        name: 'Username'
+      },
+      {
+        name: 'Changes Description'
+      },
+      {
+        name: 'Actions'
+      }
+    ];
+    this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
+      return ["Upload Date", "Username", "Changes Description", "Actions"].indexOf(col.name) != -1
+    });
+  }
+
+  onPage(event) {
+    console.log('Page Event', event);
+    //this.page(event.offset, event.pageSize, this.orderBy, this.asc);
+  }
+
+  onSort(event) {
+    console.log('Sort Event', event);
+    /*let ascending = true;
+    if (event.newValue === 'desc') {
+      ascending = false;
+    }
+    this.page(this.offset, this.rowLimiter.pageSize, event.column.prop, ascending);*/
+  }
+
+  onSelect({selected}) {
+    // console.log('Select Event', selected, this.selected);
+  }
+
+  onActivate(event) {
+    // console.log('Activate Event', event);
+
+    /*if ("dblclick" === event.type) {
+      this.details(event.row);
+    }*/
+  }
+
+  saveButton() {
+
+  }
+
+  cancelButton() {
+
+  }
+
+  downloadArchive() {
+
+  }
+
+  deleteArchive() {
+
+  }
+
+  rollbackArchive() {
+
   }
 
   checkPmodeActive() {

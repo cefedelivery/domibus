@@ -73,9 +73,10 @@ public class PModeResourceTest {
     public void testUploadPmodesEmptyFile() {
         // Given
         MultipartFile file = new MockMultipartFile("filename", new byte[]{});
+        String description = "description1";
 
         // When
-        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file);
+        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file, "description");
 
         // Then
         Assert.assertNotNull(stringResponseEntity);
@@ -87,9 +88,10 @@ public class PModeResourceTest {
     public void testUploadPmodesSuccess() {
         // Given
         MultipartFile file = new MockMultipartFile("filename", new byte[]{1, 0, 1});
+        String description = "description1";
 
         // When
-        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file);
+        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file, "description");
 
         // Then
         Assert.assertNotNull(stringResponseEntity);
@@ -101,14 +103,15 @@ public class PModeResourceTest {
     public void testUploadPmodesIssues() throws XmlProcessingException {
         // Given
         MultipartFile file = new MockMultipartFile("filename", new byte[]{1, 0, 1});
+        String description = "description1";
 
         new Expectations() {{
-            pModeProvider.updatePModes((byte[]) any);
+            pModeProvider.updatePModes((byte[]) any, anyString);
             result = new ArrayList<>().add("issue1");
         }};
 
         // When
-        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file);
+        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file, "description");
 
         // Then
         Assert.assertNotNull(stringResponseEntity);
@@ -121,14 +124,15 @@ public class PModeResourceTest {
     public void testUploadPModesXmlProcessingException() throws XmlProcessingException {
         // Given
         MultipartFile file = new MockMultipartFile("filename", new byte[]{1, 0, 1});
+        String description = "description1";
 
         new Expectations() {{
-            pModeProvider.updatePModes((byte[]) any);
+            pModeProvider.updatePModes((byte[]) any, anyString);
             result = new XmlProcessingException("UnitTest1");
         }};
 
         // When
-        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file);
+        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file, "description");
 
         // Then
         Assert.assertNotNull(stringResponseEntity);
@@ -141,14 +145,15 @@ public class PModeResourceTest {
     public void testUploadPModesException() throws XmlProcessingException {
         // Given
         MultipartFile file = new MockMultipartFile("filename", new byte[]{1, 0, 1});
+        String description = "description1";
 
         new Expectations() {{
-            pModeProvider.updatePModes((byte[]) any);
+            pModeProvider.updatePModes((byte[]) any, anyString);
             result = new Exception("UnitTest2");
         }};
 
         // When
-        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file);
+        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file, "description");
 
         // Then
         Assert.assertNotNull(stringResponseEntity);

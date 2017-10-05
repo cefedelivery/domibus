@@ -99,7 +99,7 @@ public abstract class PModeProvider {
 
     @Transactional(propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<String> updatePModes(byte[] bytes) throws XmlProcessingException {
+    public List<String> updatePModes(byte[] bytes, String description) throws XmlProcessingException {
         LOG.debug("Updating the PMode");
 
         //unmarshall the PMode with whitespaces ignored
@@ -132,6 +132,7 @@ public abstract class PModeProvider {
         final ConfigurationRaw configurationRaw = new ConfigurationRaw();
         configurationRaw.setConfigurationDate(Calendar.getInstance().getTime());
         configurationRaw.setXml(bytes);
+        configurationRaw.setDescription(description);
         configurationRawDAO.create(configurationRaw);
 
         LOG.info("Configuration successfully updated");

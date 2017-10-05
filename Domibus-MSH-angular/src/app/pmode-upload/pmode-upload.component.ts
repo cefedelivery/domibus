@@ -16,14 +16,16 @@ export class PmodeUploadComponent implements OnInit {
 
   enableSubmit = false;
 
+  description: string = "";
+
   constructor(public dialogRef: MdDialogRef<PmodeUploadComponent>, private http: Http, private alertService: AlertService) {
   }
 
   ngOnInit() {
   }
 
-  public checkFile() {
-    this.enableSubmit = this.fileInput.nativeElement.files.length != 0;
+  public checkFileAndDescription() {
+    this.enableSubmit = this.fileInput.nativeElement.files.length != 0 && this.description.length != 0;
   }
 
   @ViewChild('fileInput')
@@ -33,6 +35,7 @@ export class PmodeUploadComponent implements OnInit {
     let fi = this.fileInput.nativeElement;
     let input = new FormData();
     input.append('file', fi.files[0]);
+    input.append('description', this.description);
     this.http.post(this.url, input).subscribe(res => {
           this.alertService.success(res.text(), false);
           this.onPModeUploaded.emit();

@@ -4,6 +4,7 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
+import eu.domibus.web.rest.ro.PModeResponseRO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -11,12 +12,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -57,14 +56,14 @@ public class PModeResource {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<String> uploadPmodes(@RequestPart("file") MultipartFile pmode) {
+    public ResponseEntity<String> uploadPmodes(@RequestPart("file") MultipartFile pmode, @RequestParam("description") String pModeDescription) {
         if (pmode.isEmpty()) {
             return ResponseEntity.badRequest().body("Failed to upload the PMode file since it was empty.");
         }
         try {
             byte[] bytes = pmode.getBytes();
 
-            List<String> pmodeUpdateMessage = pModeProvider.updatePModes(bytes);
+            List<String> pmodeUpdateMessage = pModeProvider.updatePModes(bytes, pModeDescription);
             String message = "PMode file has been successfully uploaded";
             if (pmodeUpdateMessage != null && !pmodeUpdateMessage.isEmpty()) {
                 message += " but some issues were detected: \n" + StringUtils.join(pmodeUpdateMessage, "\n");
@@ -77,5 +76,11 @@ public class PModeResource {
             LOG.error("Error uploading the PMode", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + e.getMessage());
         }
+    }
+
+    @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
+    public List<PModeResponseRO> pmodeList() {
+        List<PModeResponseRO> result = new ArrayList<>();
+        return result;
     }
 }

@@ -20,6 +20,9 @@ public class ConfigurationRaw extends AbstractBaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     Date configurationDate;
 
+    @Column(name = "DESCRIPTION")
+    String description;
+
     public byte[] getXml() {
         return xml;
     }
@@ -34,5 +37,13 @@ public class ConfigurationRaw extends AbstractBaseEntity {
 
     public void setConfigurationDate(Date configurationDate) {
         this.configurationDate = configurationDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

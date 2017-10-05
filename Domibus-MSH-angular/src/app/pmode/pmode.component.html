@@ -1,27 +1,80 @@
 ﻿<h1 id="pmodeheader_id">PMode</h1>
 <div class="selectionCriteria">
-  <md-card>
-    <md-card-content>
-      <div class="textarea" *ngIf="pModeExists">
-        <textarea id="pmodetextarea_id" class="textarea" disabled style="resize: none">{{pModeContents}}</textarea>
-      </div>
-      <div class="pModeInfo" *ngIf="!pModeExists">
-        <span>No PMode uploaded yet</span>
-      </div>
+  <md2-tabs>
+    <md2-tab #xmlTab label="XML">
+      <md-card>
+        <md-card-content>
+          <div class="textarea" *ngIf="pModeExists">
+            <textarea id="pmodetextarea_id" class="textarea" disabled style="resize: none">{{pModeContents}}</textarea>
+          </div>
+          <div class="pModeInfo" *ngIf="!pModeExists">
+            <span>No PMode uploaded yet</span>
+          </div>
+          <table class="group-action-button">
+            <tr>
+              <td>
+                <button md-raised-button color="primary" (click)="upload()" id="uploadbutton_id">
+                  <md-icon>file_upload</md-icon>
+                  <span>Upload</span>
+                </button>
+                <button md-raised-button color="primary" (click)="download()" id="downloadbutton_id"
+                        [disabled]="!pModeExists">
+                  <md-icon>file_download</md-icon>
+                  <span>Download</span>
+                </button>
+              </td>
+            </tr>
+          </table>
+        </md-card-content>
+      </md-card>
+    </md2-tab>
+
+    <md2-tab #archiveTab label="Archive">
+      <ngx-datatable
+        #archivePmodeDatatable
+        id="archivePmodeTable"
+        class="material striped"
+        [rows]="rows"
+        [columns]="columnPicker.selectedColumns"
+        [columnMode]="'force'"
+        [headerHeight]="50"
+        [footerHeight]="50"
+        [rowHeight]="'auto'"
+        [selected]="selected"
+        [selectionType]="'multi'"
+        (select)="onSelect($event)">
+      </ngx-datatable>
       <table class="group-action-button">
         <tr>
           <td>
-            <button md-raised-button color="primary" (click)="upload()" id="uploadbutton_id">
-              <md-icon>file_upload</md-icon>
-              <span>Upload</span>
+            <button md-raised-button color="primary" (click)="saveButton()" id="savebutton_id">
+              <md-icon>save</md-icon>
+              <span>Save</span>
             </button>
-            <button md-raised-button color="primary" (click)="download()" id="downloadbutton_id" [disabled]="!pModeExists">
+            <button md-raised-button color="primary" (click)="cancelButton()" id="cancelbutton_id">
+              <md-icon>cancel</md-icon>
+              <span>Cancel</span>
+            </button>
+            <button md-raised-button color="primary" (click)="downloadArchive()" id="downloadArchivebutton_id">
               <md-icon>file_download</md-icon>
               <span>Download</span>
+            </button>
+            <button md-raised-button color="primary" (click)="deleteArchive()" id="deleteArchivebutton_id">
+              <md-icon>delete</md-icon>
+              <span>Delete</span>
+            </button>
+            <button md-raised-button color="primary" (click)="rollbackArchive()" id="rollbackArchivebutton_id">
+              <md-icon>settings_backup_restore</md-icon>
+              <span>Rollback</span>
             </button>
           </td>
         </tr>
       </table>
-    </md-card-content>
-  </md-card>
+      <table>
+        <tr>
+
+        </tr>
+      </table>
+    </md2-tab>
+  </md2-tabs>
 </div>
