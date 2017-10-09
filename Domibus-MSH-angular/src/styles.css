@@ -243,27 +243,27 @@ md-card {
 }
 
 /* --- INPUT ---*/
-.panel md-select, .panel md2-datepicker {
+.panel md-select, .panel md2-datepicker, .panel md2-select {
   padding-top: 10px;
   padding-bottom: 10px;
 }
 
-.panel md-select, .panel md-input-container, .panel md2-datepicker {
+.panel md-select, .panel md-input-container, .panel md2-datepicker, .panel md2-select {
   margin-right: 2%;
 }
 
-.panel md-input-container, .panel md-select, .panel md2-datepicker {
+.panel md-input-container, .panel md-select, .panel md2-datepicker, .panel md2-select {
   width: 22%;
 }
 
 @media (max-width: 991px) {
-  .panel md-input-container, .panel md-select, .panel md2-datepicker {
+  .panel md-input-container, .panel md-select, .panel md2-datepicker, .panel md2-select {
     width: 46%;
   }
 }
 
 @media (max-width: 767px) {
-  .panel md-input-container, .panel md-select, .panel md2-datepicker {
+  .panel md-input-container, .panel md-select, .panel md2-datepicker, .panel md2-select {
     width: 100%;
   }
 }

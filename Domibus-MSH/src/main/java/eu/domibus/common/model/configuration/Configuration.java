@@ -1,11 +1,15 @@
 package eu.domibus.common.model.configuration;
 
+import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -18,11 +22,14 @@ import java.util.Set;
 @Table(name = "TB_CONFIGURATION")
 @XmlRootElement(name = "configuration")
 @NamedQueries({@NamedQuery(name = "Configuration.count", query = "SELECT COUNT(c.entityId) FROM Configuration c"), @NamedQuery(name = "Configuration.getConfiguration", query = "select conf from Configuration conf")})
+@Audited(withModifiedFlag = true)
+@RevisionLogicalName("Pmode")
 public class Configuration extends AbstractBaseEntity {
 
     @XmlElement(required = true, name = "businessProcesses")
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "FK_BUSINESSPROCESSES")
+    @Audited(targetAuditMode = NOT_AUDITED)
     protected BusinessProcesses businessProcesses;
     @XmlElement(required = true, name = "mpcs")
     @Transient
@@ -30,6 +37,7 @@ public class Configuration extends AbstractBaseEntity {
     @XmlTransient
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_CONFIGURATION")
+    @Audited(targetAuditMode = NOT_AUDITED)
     private Set<Mpc> mpcs;
     @XmlAttribute(name = "party", required = true)
     @Transient

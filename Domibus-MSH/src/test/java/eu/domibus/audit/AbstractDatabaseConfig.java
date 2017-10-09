@@ -28,9 +28,9 @@ public abstract class AbstractDatabaseConfig {
         Properties jpaProperties = new Properties();
         jpaProperties.put("hibernate.hbm2ddl.auto","update");
         jpaProperties.put("org.hibernate.envers.audit_strategy","org.hibernate.envers.strategy.ValidityAuditStrategy");
-        jpaProperties.put("org.hibernate.envers.track_entities_changed_in_revision","true");
+        //jpaProperties.put("org.hibernate.envers.track_entities_changed_in_revision","true");
         jpaProperties.put("org.hibernate.envers.store_data_at_delete","true");
-        //jpaProperties.put("org.hibernate.envers.global_with_modified_flag","true");
+        jpaProperties.put("org.hibernate.envers.using_modified_flag", "true");
 
         jpaProperties.putAll(getProperties());
         localContainerEntityManagerFactoryBean.setJpaProperties(jpaProperties);

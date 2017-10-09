@@ -1,8 +1,10 @@
 package eu.domibus.common.model.configuration;
 
+import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -49,6 +51,8 @@ import java.util.Set;
 @NamedQueries({@NamedQuery(name = "Party.findPartyByIdentifier", query = "select p.name from Party p where :PARTY_IDENTIFIER member of p.identifiers"),
         @NamedQuery(name = "Party.findByName", query = "select p from Party p where p.name = :NAME"),
         @NamedQuery(name = "Party.findPartyIdentifiersByEndpoint", query = "select p.identifiers from Party p where p.endpoint = :ENDPOINT")})
+@Audited(withModifiedFlag = true)
+@RevisionLogicalName("Party")
 public class Party extends AbstractBaseEntity {
 
     @XmlElement(required = true, name = "identifier")

@@ -1,5 +1,6 @@
 package eu.domibus.common.model.security;
 
+import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.hibernate.envers.Audited;
 import org.hibernate.validator.constraints.Email;
@@ -31,6 +32,7 @@ import java.util.Set;
 })
 
 @Audited(withModifiedFlag = true)
+@RevisionLogicalName("User")
 public class User extends AbstractBaseEntity{
 
     @NotNull

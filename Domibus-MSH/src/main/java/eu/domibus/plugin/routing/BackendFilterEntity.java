@@ -1,10 +1,11 @@
 package eu.domibus.plugin.routing;
 
+import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
-import eu.domibus.plugin.routing.operation.LogicalOperator;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -18,6 +19,8 @@ import java.util.List;
 @NamedQueries({
         @NamedQuery(name = "BackendFilter.findEntries", query = "select bf from BackendFilterEntity bf order by bf.index")
 })
+@Audited(withModifiedFlag = true)
+@RevisionLogicalName("Message filter")
 public class BackendFilterEntity extends AbstractBaseEntity implements Comparable<BackendFilterEntity> {
 
     @Column(name = "PRIORITY")
