@@ -6,7 +6,7 @@
     "title" : "Domibus REST API documentation",
     "license" : {
       "name" : "EUPL 1.2",
-      "url" : "https://joinup.ec.europa.eu/community/eupl/og_page/eupl-text-11-12"
+      "url" : "https://joinup.ec.europa.eu/page/eupl-text-11-12"
     }
   },
   "basePath" : "/domibus",

@@ -1,4 +1,4 @@
-Domibus 3.3-FR
+Domibus 3.3
 - Additional validation on pMode upload: when @type is missing or is empty, the value of PartyId, Service and AgreementRef, must be an URI (relative URIs accepted).
 - Use optional regex validation for dynamic discovery certificate. New property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation.
 - Fix sendAttempt counter (initial one plus number of retries defined in the pmode)
@@ -14,7 +14,6 @@ Domibus 3.3-FR
 - Included the payload location as a property of the JMS Message
 - New default Domibus plugin added: FileSystem Plugin
 - Performance improvements
-Domibus 3.3-RC1
 - Configuration of Domibus is done with domibus.properties instead of externalized spring xml files
 - Add the possibility to pull messages
 - Expose the DOWNLOADED message status in the plugin API and the default ws plugin
@@ -57,6 +56,7 @@ Domibus 3.2.5
 - Persist raw request/response headers for non repudiation purposes
 - Possibility to use AND/OR operator in the message filter routing criteria
 - Ignore LDAP CRL endpoints when checking certificates revocation
+- Block the sending of the message in case the receiver certificate is not valid or revoked
 Domibus 3.2.4
 - Default WS plugin: backwards compatibility fix for Domibus >3.2.2
 - Fix error when downloading a message with an empty payload

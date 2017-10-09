@@ -1,5 +1,5 @@
 
-[![License badge](https://img.shields.io/badge/license-EUPL-blue.svg)](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus?preview=/46992642/47186330/eupl1.1.-licence-en.pdf)
+[![License badge](https://img.shields.io/badge/license-EUPL-blue.svg)](https://ec.europa.eu/cefdigital/wiki/download/attachments/52601883/eupl_v1.2_en%20.pdf?version=1&modificationDate=1507206778126&api=v2)
 [![Documentation badge](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus)
 [![Docker](https://img.shields.io/badge/docker-25-yellowgreen.svg)](https://hub.docker.com/r/fiware/domibus-tomcat/)
 [![Support badge]( https://img.shields.io/badge/support-sof-yellowgreen.svg)](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Support)
@@ -51,7 +51,7 @@ If this is your first contact with the CEF eDelivery Access Point, it is highly 
 
 To build Domibus for Tomcat 8, Wildfly 9 and Weblogic 12c, including all release artifacts use the following profiles:
 
-    mvn clean install -Ptomcat -Pweblogic -Pwildfly -Pdefault-plugins -Pdatabase -Psample-configuration -Pdistribution
+    mvn clean install -Ptomcat -Pweblogic -Pwildfly -Pdefault-plugins -Pdatabase -Psample-configuration -PUI -Pdistribution
 
 
 [Top](#top)
@@ -89,10 +89,11 @@ To skip the unit tests from the build process:
 ## Default plugins
 
 The purpose of Domibus is to facilitate B2B communication. To achieve this goal it provides a very flexible plugin model which allows the integration with nearly all back office applications. 
-Domibus offers two default plugins, available with the Domibus distribution:
+Domibus offers three default plugins, available with the Domibus distribution:
 
 *   Web Service plugin
 *   JMS plugin
+*   File System plugin
 
 The Interface Control Document (ICD) of the default JMS plugin outlines the JMS Data Format Exchange to be used as part of the default JMS backend plugin.
 The Interface Control Document (ICD) of the default WS plugin describes the WSDL and the observable behaviour of the interface provided in the default WS plugin

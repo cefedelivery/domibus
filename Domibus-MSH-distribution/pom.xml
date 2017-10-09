@@ -87,7 +87,7 @@
                                         <containerId>tomcat8x</containerId>
                                         <zipUrlInstaller>
                                             <url>
-                                                https://joinup.ec.europa.eu/nexus/service/local/repositories/central/content/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip
+                                                https://ec.europa.eu/cefdigital/artifact/service/local/repositories/eDelivery/content/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip
                                             </url>
                                         </zipUrlInstaller>
                                     </container>

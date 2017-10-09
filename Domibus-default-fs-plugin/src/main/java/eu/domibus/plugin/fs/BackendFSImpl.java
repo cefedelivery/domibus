@@ -124,6 +124,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 try (FileObject fileObject = incomingFolder.resolveFile(fileName);
                      FileContent fileContent = fileObject.getContent()) {
                     dataHandler.writeTo(fileContent.getOutputStream());
+                    LOG.info("Message payload received: [{}]", fileObject.getName());
                 }
             }
         } catch (IOException | FSSetUpException ex) {
