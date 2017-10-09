@@ -1,0 +1,88 @@
+<h1 id="auditHeader_id">Audit</h1>
+
+<div class="selectionCriteria">
+  <md-card>
+
+    <md-card-content>
+      <div class="panel">
+        <md2-select mdInput placeholder="Table" id="table_id" multiple [(ngModel)]="tables">
+          <md2-option *ngFor="let item of existingTables" [value]="item">{{item}}</md2-option>
+        </md2-select>
+        <md2-select mdInput placeholder="User" id="user_id" multiple [(ngModel)]="users">
+          <md2-option *ngFor="let item of existingUsers" [value]="item">{{item}}</md2-option>
+        </md2-select>
+        <md2-select mdInput placeholder="Action" id="user_id" multiple [(ngModel)]="actions">
+          <md2-option *ngFor="let item of existingActions" [value]="item">{{item}}</md2-option>
+        </md2-select>
+        <md2-datepicker placeholder="From:"
+                        [(ngModel)]="from"
+                        name="from"
+                        [type]="'datetime'"
+                        #timestampControl="ngModel" id="from_id" *ngIf="advancedSearch">
+          <!--(change)='onTimestampFromChange($event)'-->
+        </md2-datepicker>
+        <md2-datepicker placeholder="To:"
+                        [(ngModel)]="to"
+                        name="to"
+                        [type]="'datetime'"
+                        #timestampControl="ngModel" id="to_id" *ngIf="advancedSearch">
+        </md2-datepicker>
+        <div class="searchArea">
+          <button md-raised-button color="primary" id="searchbutton_id">
+            <md-icon>search</md-icon>
+            <span>Search</span>
+          </button>
+          <a href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()" id="advancedlink_id">Advanced</a>
+          <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()" id="basiclink_id">Basic</a>
+        </div>
+      </div>
+      <ngx-datatable
+        #mydatatable
+        class="material striped"
+        [columnMode]="'force'"
+        [headerHeight]="50"
+        [footerHeight]="50"
+        [rowHeight]="'auto'"
+        [rows]="rows"
+        [selectionType]="'multi'"
+        id="messageFilterTable">
+        <ngx-datatable-column name="Table" prop="table" [sortable]="false">
+          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              <span class="justified, clickable" style="word-wrap: break-word" id="tableRow{{row.$$index}}_id">
+                {{value}}
+              </span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="Action" prop="action" [sortable]="false">
+          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              <span class="justified, clickable" style="word-wrap: break-word" id="actionRow{{row.$$index}}_id">
+                {{value}}
+              </span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="User" prop="user" [sortable]="false">
+          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              <span class="justified, clickable" style="word-wrap: break-word" id="userRow{{row.$$index}}_id">
+                {{value}}
+              </span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="Timestamp" prop="timestamp" [sortable]="false">
+          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              <span class="clickable" style="word-wrap: break-word" id="timestamp{{row.$$index}}_id">
+                {{value}}
+              </span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="Id" prop="id" [sortable]="false">
+          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+              <span class="justified, clickable" style="word-wrap: break-word" id="idRow{{row.$$index}}_id">
+                {{value}}
+              </span>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+
+    </md-card-content>
+  </md-card>
+</div>
