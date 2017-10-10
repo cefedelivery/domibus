@@ -45,6 +45,7 @@ Domibus 3.3 (from 3.2.5):
                      - in the file "\conf\domibus\domibus-configuration.xml" all the properties defined in "<util:properties id="domibusProperties">" have been copied such as
                         with the following exception:
                          o rename the property "domibus.certificate.validation.enabled" to "domibus.receiver.certificate.validation.onsending" in your domibus.properties file. If the property is not defined, do nothing. Default value "true" has not been changed.
+                         o the value for the property "domibus.msh.retry.tolerance" should be changed to 10800000
                      - in the file "\conf\domibus\domibus-security.xml"
                          o in the "keystorePasswordCallback" section:
                                 - "key" mapped to "domibus.security.key.private.alias"
