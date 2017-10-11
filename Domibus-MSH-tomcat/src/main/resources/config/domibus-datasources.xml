@@ -1,5 +1,3 @@
-
-
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:amq="http://activemq.apache.org/schema/core"
        xmlns="http://www.springframework.org/schema/beans"
@@ -70,18 +68,26 @@
         </property>
         <property name="maxLifetime" value="${domibus.datasource.xa.maxLifetime}"/>
     </bean>
+
+    <!--<bean id="domibusJDBC-XADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="connectionProperties" ref="xaProperties"/>
+        <property name="driverClassName" value="com.arjuna.ats.jdbc.TransactionalDriver"/>
+       <property name="url" value="jdbc:arjuna:database.properties"/>
+    </bean>
+-->
+
     <bean id="domibusJDBC-nonXADataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
-	   <property name="uniqueResourceName" value="domibusNonXADataSource"/>
-	   <property name="driverClassName" value="${domibus.datasource.driverClassName}"/>
-	   <property name="url" value="${domibus.datasource.url}"/>
-	   <property name="user" value="${domibus.datasource.user}"/>
-	   <property name="password" value="${domibus.datasource.password}"/>
-       <property name="minPoolSize" value="${domibus.datasource.minPoolSize}"/>
-       <property name="maxPoolSize" value=" ${domibus.datasource.maxPoolSize}"/>
-       <property name="maxLifetime" value="${domibus.datasource.maxLifetime}"/>
+        <property name="uniqueResourceName" value="domibusNonXADataSource"/>
+        <property name="driverClassName" value="${domibus.datasource.driverClassName}"/>
+        <property name="url" value="${domibus.datasource.url}"/>
+        <property name="user" value="${domibus.datasource.user}"/>
+        <property name="password" value="${domibus.datasource.password}"/>
+        <property name="minPoolSize" value="${domibus.datasource.minPoolSize}"/>
+        <property name="maxPoolSize" value=" ${domibus.datasource.maxPoolSize}"/>
+        <property name="maxLifetime" value="${domibus.datasource.maxLifetime}"/>
     </bean>
 
-     <bean id="jpaProperties" class="eu.domibus.spring.PrefixedProperties">
+    <bean id="jpaProperties" class="eu.domibus.spring.PrefixedProperties">
         <constructor-arg name="props" ref="domibusProperties"/>
         <constructor-arg name="prefix" value="domibus.entityManagerFactory.jpaProperty."/>
     </bean>
@@ -109,6 +115,7 @@
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
     </bean>
+
 
 </beans>
 

@@ -8,12 +8,15 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.envers.EntityTrackingRevisionListener;
 import org.hibernate.envers.RevisionType;
+import org.slf4j.MDC;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
+
+import static eu.domibus.logging.DomibusLogger.MDC_USER;
 
 /**
  * @author Thomas Dussart
@@ -34,7 +37,7 @@ public class CustomRevisionEntityListener implements EntityTrackingRevisionListe
     public void newRevision(Object revision) {
         RevisionLog revisionLog = (RevisionLog) revision;
         revisionLog.setRevisionDate(new Date(System.currentTimeMillis()));
-        revisionLog.setUserName("Thomas");
+        revisionLog.setUserName(MDC.get(MDC_USER));
     }
 
     /**

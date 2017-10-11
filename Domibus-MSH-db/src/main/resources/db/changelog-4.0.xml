@@ -4,25 +4,25 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-    <include file="changelog-3.2.5.xml" relativeToChangelogFile="true"/>
-    <include file="changelog-3.3.0-delta-model.xml" relativeToChangelogFile="true"/>
+    <!--<include file="changelog-3.2.5.xml" relativeToChangelogFile="true"/>
+    <include file="changelog-3.3.0-delta-model.xml" relativeToChangelogFile="true"/>-->
 
     <changeSet author="dussath" id="EDELIVERY-1790">
         <addColumn
                 tableName="TB_MESSAGE_LOG">
-            <column name="datetime" type="CREATED_ON"/>
+            <column type="datetime" name="CREATED_ON"/>
         </addColumn>
         <addColumn
                 tableName="TB_MESSAGE_LOG">
-            <column name="datetime" type="MODIFIED_ON"/>
+            <column type="datetime" name="MODIFIED_ON"/>
         </addColumn>
         <addColumn
                 tableName="TB_MESSAGE_LOG">
-            <column name="VARCHAR(255)" type="CREATED_BY"/>
+            <column type="VARCHAR(255)" name="CREATED_BY"/>
         </addColumn>
         <addColumn
                 tableName="TB_MESSAGE_LOG">
-            <column name="VARCHAR(255)" type="MODIFIED_BY"/>
+            <column type="VARCHAR(255)" name="MODIFIED_BY"/>
         </addColumn>
     </changeSet>
 

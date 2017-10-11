@@ -65,6 +65,24 @@
                        </configuration>
                    </execution>
                    <execution>
+                       <id>generate-oracle-script-full-4.0</id>
+                       <phase>generate-resources</phase>
+                       <goals>
+                           <goal>updateSQL</goal>
+                       </goals>
+                       <configuration>
+                           <changeLogFile>
+                               src/main/resources/db/changelog-4.0.xml
+                           </changeLogFile>
+                           <url>
+                               offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.0.oracle
+                           </url>
+                           <migrationSqlOutputFile>
+                               ${project.build.directory}/sql-scripts/oracle10g-4.0.ddl
+                           </migrationSqlOutputFile>
+                       </configuration>
+                   </execution>
+                   <execution>
                        <id>generate-oracle-script-full-3.3.0</id>
                        <phase>generate-resources</phase>
                        <goals>

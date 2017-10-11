@@ -8,7 +8,7 @@ import java.util.Date;
  */
 public class AuditLog {
 
-    private Long revisionId;
+    private String revisionId;
 
     private String auditTargetName;
 
@@ -18,7 +18,7 @@ public class AuditLog {
 
     private Date changed;
 
-    public AuditLog(Long revisionId, String auditTargetName, String action, String user, Date changed) {
+    public AuditLog(String revisionId, String auditTargetName, String action, String user, Date changed) {
         this.revisionId = revisionId;
         this.auditTargetName = auditTargetName;
         this.action = action;
@@ -26,7 +26,7 @@ public class AuditLog {
         this.changed = changed;
     }
 
-    public Long getRevisionId() {
+    public String getRevisionId() {
         return revisionId;
     }
 
