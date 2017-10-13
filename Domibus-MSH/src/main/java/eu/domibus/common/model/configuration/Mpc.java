@@ -22,7 +22,6 @@ import java.math.BigInteger;
         @NamedQuery(name = "Mpc.getAllNames", query = "select mpc.name from Mpc mpc"),
         @NamedQuery(name = "Mpc.getAllURIs", query = "select mpc.qualifiedName from Mpc mpc")})
 
-
 public class Mpc extends AbstractBaseEntity {
 
 

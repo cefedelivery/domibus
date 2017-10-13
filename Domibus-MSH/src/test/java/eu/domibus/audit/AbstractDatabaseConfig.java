@@ -21,16 +21,17 @@ public abstract class AbstractDatabaseConfig {
     abstract Map<Object,String> getProperties();
 
     @Bean
-    public LocalContainerEntityManagerFactoryBean em() {
+    public LocalContainerEntityManagerFactoryBean domibusJTA() {
         LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
         localContainerEntityManagerFactoryBean.setPackagesToScan("eu.domibus.common.model","eu.domibus.ebms3.common.model");
         localContainerEntityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         Properties jpaProperties = new Properties();
         jpaProperties.put("hibernate.hbm2ddl.auto","update");
-        jpaProperties.put("org.hibernate.envers.audit_strategy","org.hibernate.envers.strategy.ValidityAuditStrategy");
+        //jpaProperties.put("org.hibernate.envers.audit_strategy","org.hibernate.envers.strategy.ValidityAuditStrategy");
         //jpaProperties.put("org.hibernate.envers.track_entities_changed_in_revision","true");
-        jpaProperties.put("org.hibernate.envers.store_data_at_delete","true");
+        jpaProperties.put("org.hibernate.envers.store_data_at_delete", "false");
         jpaProperties.put("org.hibernate.envers.using_modified_flag", "true");
+//        jpaProperties.put("org.hibernate.envers.audit_table_prefix", "TB_");
 
         jpaProperties.putAll(getProperties());
         localContainerEntityManagerFactoryBean.setJpaProperties(jpaProperties);
@@ -41,7 +42,25 @@ public abstract class AbstractDatabaseConfig {
     @Bean
     public JpaTransactionManager jpaTransactionManager(){
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
-        jpaTransactionManager.setEntityManagerFactory(em().getObject());
+        jpaTransactionManager.setEntityManagerFactory(domibusJTA().getObject());
         return jpaTransactionManager;
     }
+
+   /* @Bean
+    public PModeDao pModeDao(){
+        PModeDao pModeDao = new PModeDao();
+        return pModeDao;
+    }
+
+    @Bean
+    protected ConfigurationRawDAO configurationRawDAO(){
+        return new ConfigurationRawDAO();
+    }
+
+    @Bean
+    protected ConfigurationDAO configurationDAO(){
+        return new ConfigurationDAO();
+    }
+*/
+
 }

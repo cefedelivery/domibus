@@ -19,31 +19,74 @@ public class AuditCriteria {
 
     private Date to;
 
-    public AuditCriteria(Set<String> auditTargetName, Set<String> action, Set<String> user, Date from, Date to) {
-        this.auditTargetName = auditTargetName;
-        this.action = action;
-        this.user = user;
-        this.from = from;
-        this.to = to;
-    }
+    private int start, max;
 
     public Set<String> getAuditTargetName() {
         return auditTargetName;
+    }
+
+    public void setAuditTargetName(Set<String> auditTargetName) {
+        this.auditTargetName = auditTargetName;
     }
 
     public Set<String> getAction() {
         return action;
     }
 
+    public void setAction(Set<String> action) {
+        this.action = action;
+    }
+
     public Set<String> getUser() {
         return user;
+    }
+
+    public void setUser(Set<String> user) {
+        this.user = user;
     }
 
     public Date getFrom() {
         return from;
     }
 
+    public void setFrom(Date from) {
+        this.from = from;
+    }
+
     public Date getTo() {
         return to;
+    }
+
+    public void setTo(Date to) {
+        this.to = to;
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    public int getMax() {
+        return max;
+    }
+
+    public void setMax(int max) {
+        this.max = max;
+    }
+
+    @Override
+    public String toString() {
+        return "AuditCriteria{" +
+                "auditTargetName=" + auditTargetName +
+                ", action=" + action +
+                ", user=" + user +
+                ", from=" + from +
+                ", to=" + to +
+                ", start=" + start +
+                ", max=" + max +
+                '}';
     }
 }

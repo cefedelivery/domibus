@@ -18,6 +18,9 @@ public class AuditResponseRo {
 
     private Date changed;
 
+    public AuditResponseRo() {
+    }
+
     public String getRevisionId() {
         return revisionId;
     }

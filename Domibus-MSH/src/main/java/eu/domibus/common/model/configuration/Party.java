@@ -4,12 +4,15 @@ import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.hibernate.envers.AuditJoinTable;
 import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 
 /**
@@ -58,6 +61,8 @@ public class Party extends AbstractBaseEntity {
     @XmlElement(required = true, name = "identifier")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PARTY")
+    @Audited(targetAuditMode = NOT_AUDITED)
+    @AuditJoinTable(name = "TB_PARTY_IDENTIFIER_AUD")
     protected Set<Identifier> identifiers; //NOSONAR
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME")

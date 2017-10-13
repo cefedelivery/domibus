@@ -3,13 +3,12 @@ package eu.domibus.common.model.configuration;
 import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -29,7 +28,7 @@ public class Configuration extends AbstractBaseEntity {
     @XmlElement(required = true, name = "businessProcesses")
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "FK_BUSINESSPROCESSES")
-    @Audited(targetAuditMode = NOT_AUDITED)
+    @NotAudited
     protected BusinessProcesses businessProcesses;
     @XmlElement(required = true, name = "mpcs")
     @Transient
@@ -37,7 +36,7 @@ public class Configuration extends AbstractBaseEntity {
     @XmlTransient
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_CONFIGURATION")
-    @Audited(targetAuditMode = NOT_AUDITED)
+    @NotAudited
     private Set<Mpc> mpcs;
     @XmlAttribute(name = "party", required = true)
     @Transient
@@ -45,6 +44,7 @@ public class Configuration extends AbstractBaseEntity {
     @XmlTransient
     @JoinColumn(name = "FK_PARTY")
     @OneToOne
+    @NotAudited
     private Party party;
 
     private void initMpcs() {

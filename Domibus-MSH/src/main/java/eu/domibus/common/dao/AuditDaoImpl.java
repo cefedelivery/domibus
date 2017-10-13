@@ -7,10 +7,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -39,15 +36,18 @@ public class AuditDaoImpl implements AuditDao {
         criteriaQuery.select(root);
         if (CollectionUtils.isNotEmpty(actions)) {
             Path<Object> actionField = root.get("actions");
-            actionField.in(actions);
+            Predicate in = actionField.in(actions);
+            criteriaQuery.where(in);
         }
         if (CollectionUtils.isNotEmpty(auditTargets)) {
-            Path<Object> auditTargetField = root.get("auditTargets");
-            auditTargetField.in(auditTargets);
+            Path<Object> auditTargetField = root.get("auditTargetName");
+            Predicate in = auditTargetField.in(auditTargets);
+            criteriaQuery.where(in);
         }
         if (CollectionUtils.isNotEmpty(users)) {
             Path<Object> userField = root.get("users");
-            userField.in(users);
+            Predicate in = userField.in(users);
+            criteriaQuery.where(in);
         }
         if (from != null) {
             Path<Date> changedDate = root.get("changed");

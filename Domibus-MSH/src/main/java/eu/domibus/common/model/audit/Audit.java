@@ -2,8 +2,7 @@ package eu.domibus.common.model.audit;
 
 import org.hibernate.annotations.Immutable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -12,9 +11,17 @@ import java.util.Date;
  */
 @Entity
 @Immutable
+@Table(name = "V_AUDIT")
 public class Audit {
 
-    @Column(name = "REV_ID")
+
+    //needed for dozer.
+    public Audit() {
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "REV_ID", updatable = false, nullable = false)
     private String revisionId;
 
     @Column(name = "AUDIT_TYPE")

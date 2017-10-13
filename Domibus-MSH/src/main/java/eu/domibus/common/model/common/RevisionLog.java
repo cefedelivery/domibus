@@ -19,18 +19,22 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "TB_REV_INFO")
-@RevisionEntity( CustomRevisionEntityListener.class )
+@RevisionEntity(CustomRevisionEntityListener.class)
 public class RevisionLog extends DefaultRevisionEntity {
     /**
      * User involve in this modification
      */
+    @Column(name = "USER_NAME")
     private String userName;
-
     /**
      * Date of the modification.
      */
+    @Column(name = "REVISION_DATE")
     private Date revisionDate;
-
+    /**
+     * Different entities can be modified during the same transaction update/create/delete.
+     * This field reflect the list of entities.
+     */
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "TB_REV_CHANGES", joinColumns = @JoinColumn(name = "REV"))
     @Fetch(FetchMode.JOIN)
@@ -53,17 +57,11 @@ public class RevisionLog extends DefaultRevisionEntity {
         this.revisionDate = revisionDate;
     }
 
-    public void addEntityRevisionType(final String name, final ModificationType modificationType) {
+    public void addEntityRevisionType(final String entityName, final String groupName, final ModificationType modificationType) {
         EntityRevisionType entityRevisionType = new EntityRevisionType();
-        entityRevisionType.setName(name);
+        entityRevisionType.setGroupName(groupName);
+        entityRevisionType.setEntityName(entityName);
         entityRevisionType.setModificationType(modificationType);
         this.revisionTypes.add(entityRevisionType);
     }
-
-
-
-
-
-
-
 }

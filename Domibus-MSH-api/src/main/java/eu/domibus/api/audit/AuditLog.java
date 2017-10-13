@@ -18,11 +18,26 @@ public class AuditLog {
 
     private Date changed;
 
-    public AuditLog(String revisionId, String auditTargetName, String action, String user, Date changed) {
+    public AuditLog() {
+    }
+
+    public void setRevisionId(String revisionId) {
         this.revisionId = revisionId;
+    }
+
+    public void setAuditTargetName(String auditTargetName) {
         this.auditTargetName = auditTargetName;
+    }
+
+    public void setAction(String action) {
         this.action = action;
+    }
+
+    public void setUser(String user) {
         this.user = user;
+    }
+
+    public void setChanged(Date changed) {
         this.changed = changed;
     }
 

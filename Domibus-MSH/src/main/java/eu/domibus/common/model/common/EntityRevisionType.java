@@ -2,6 +2,7 @@ package eu.domibus.common.model.common;
 
 import org.hibernate.envers.RevisionType;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -16,24 +17,30 @@ import javax.persistence.Enumerated;
  */
 @Embeddable
 public class EntityRevisionType {
-
     /**
-     * The logical name of the entity.
+     * The logical group name. For instance a modification to a legconfiguration will
+     * be reference under configuration logical name.
      */
-    private String name;
-
+    @Column(name = "GROUP_NAME")
+    private String groupName;
+    /**
+     * The name of the entity.
+     */
+    @Column(name = "ENTIY_NAME")
+    private String entityName;
     /**
      * The type of modification of the entity.
      */
+    @Column(name = "MODIFICATION_TYPE")
     @Enumerated(EnumType.STRING)
     private ModificationType modificationType;
 
-    public String getName() {
-        return name;
+    public String getGroupName() {
+        return groupName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
     public ModificationType getModificationType() {
@@ -42,5 +49,13 @@ public class EntityRevisionType {
 
     public void setModificationType(ModificationType modificationType) {
         this.modificationType = modificationType;
+    }
+
+    public String getEntityName() {
+        return entityName;
+    }
+
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
     }
 }

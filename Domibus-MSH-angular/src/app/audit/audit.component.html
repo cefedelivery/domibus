@@ -5,8 +5,8 @@
 
     <md-card-content>
       <div class="panel">
-        <md2-select mdInput placeholder="Table" id="table_id" multiple [(ngModel)]="tables">
-          <md2-option *ngFor="let item of existingTables" [value]="item">{{item}}</md2-option>
+        <md2-select mdInput placeholder="Table" id="table_id" multiple [(ngModel)]="auditTarget">
+          <md2-option *ngFor="let item of existingAuditTargets" [value]="item">{{item}}</md2-option>
         </md2-select>
         <md2-select mdInput placeholder="User" id="user_id" multiple [(ngModel)]="users">
           <md2-option *ngFor="let item of existingUsers" [value]="item">{{item}}</md2-option>
@@ -28,7 +28,7 @@
                         #timestampControl="ngModel" id="to_id" *ngIf="advancedSearch">
         </md2-datepicker>
         <div class="searchArea">
-          <button md-raised-button color="primary" id="searchbutton_id">
+          <button md-raised-button color="primary" id="searchbutton_id" (click)="search()">
             <md-icon>search</md-icon>
             <span>Search</span>
           </button>
@@ -46,7 +46,7 @@
         [rows]="rows"
         [selectionType]="'multi'"
         id="messageFilterTable">
-        <ngx-datatable-column name="Table" prop="table" [sortable]="false">
+        <ngx-datatable-column style="width: 10px" name="Table" prop="auditTargetName" [sortable]="false">
           <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span class="justified, clickable" style="word-wrap: break-word" id="tableRow{{row.$$index}}_id">
                 {{value}}
@@ -67,14 +67,14 @@
               </span>
           </ng-template>
         </ngx-datatable-column>
-        <ngx-datatable-column name="Timestamp" prop="timestamp" [sortable]="false">
+        <ngx-datatable-column name="Timestamp" prop="changed" [sortable]="false">
           <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span class="clickable" style="word-wrap: break-word" id="timestamp{{row.$$index}}_id">
-                {{value}}
+                {{(value | domibusDate: dateFormat)}}
               </span>
           </ng-template>
         </ngx-datatable-column>
-        <ngx-datatable-column name="Id" prop="id" [sortable]="false">
+        <ngx-datatable-column name="Id" prop="revisionId" [sortable]="false">
           <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
               <span class="justified, clickable" style="word-wrap: break-word" id="idRow{{row.$$index}}_id">
                 {{value}}

@@ -1,12 +1,14 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.api.audit.AuditCriteria;
+import eu.domibus.api.audit.AuditLog;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.web.rest.criteria.AuditCriteria;
 import eu.domibus.web.rest.ro.AuditResponseRo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,12 +33,26 @@ public class AuditResource {
     @Autowired
     private AuditService auditService;
 
-    @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
-    public List<AuditResponseRo> users(AuditCriteria auditCriteria) {
-        return domainConverter.convert(auditService.listAudit(auditCriteria.getAuditTargetName(),
-                auditCriteria.getAction(),
+    @RequestMapping(value = {"/list"}, method = RequestMethod.POST)
+    public List<AuditResponseRo> users(@RequestBody AuditCriteria auditCriteria) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Audit criteria received:");
+            LOG.debug(auditCriteria.toString());
+        }
+        List<AuditLog> sourceList = auditService.listAudit(
+                auditCriteria.getAuditTargetName(),
                 auditCriteria.getUser(),
-                auditCriteria.getFrom(), auditCriteria.getTo(),
-                auditCriteria.getStart(), auditCriteria.getMax()), AuditResponseRo.class);
+                auditCriteria.getAction(),
+                auditCriteria.getFrom(),
+                auditCriteria.getTo(),
+                auditCriteria.getStart(),
+                auditCriteria.getMax());
+
+        return domainConverter.convert(sourceList, AuditResponseRo.class);
+    }
+
+    @RequestMapping(value = {"/targets"}, method = RequestMethod.GET)
+    public List<String> auditTargets() {
+        return auditService.listAuditTarget();
     }
 }
