@@ -28,7 +28,7 @@
                         #timestampControl="ngModel" id="to_id" *ngIf="advancedSearch">
         </md2-datepicker>
         <div class="searchArea">
-          <button md-raised-button color="primary" id="searchbutton_id" (click)="search()">
+          <button md-raised-button color="primary" id="searchbutton_id" (click)="searchAndCount()">
             <md-icon>search</md-icon>
             <span>Search</span>
           </button>
@@ -36,53 +36,82 @@
           <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()" id="basiclink_id">Basic</a>
         </div>
       </div>
-      <ngx-datatable
-        #mydatatable
-        class="material striped"
-        [columnMode]="'force'"
-        [headerHeight]="50"
-        [footerHeight]="50"
-        [rowHeight]="'auto'"
-        [rows]="rows"
-        [selectionType]="'multi'"
-        id="messageFilterTable">
-        <ngx-datatable-column style="width: 10px" name="Table" prop="auditTargetName" [sortable]="false">
-          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable" style="word-wrap: break-word" id="tableRow{{row.$$index}}_id">
-                {{value}}
-              </span>
-          </ng-template>
-        </ngx-datatable-column>
-        <ngx-datatable-column name="Action" prop="action" [sortable]="false">
-          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable" style="word-wrap: break-word" id="actionRow{{row.$$index}}_id">
-                {{value}}
-              </span>
-          </ng-template>
-        </ngx-datatable-column>
-        <ngx-datatable-column name="User" prop="user" [sortable]="false">
-          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable" style="word-wrap: break-word" id="userRow{{row.$$index}}_id">
-                {{value}}
-              </span>
-          </ng-template>
-        </ngx-datatable-column>
-        <ngx-datatable-column name="Timestamp" prop="changed" [sortable]="false">
-          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="clickable" style="word-wrap: break-word" id="timestamp{{row.$$index}}_id">
-                {{(value | domibusDate: dateFormat)}}
-              </span>
-          </ng-template>
-        </ngx-datatable-column>
-        <ngx-datatable-column name="Id" prop="revisionId" [sortable]="false">
-          <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
-              <span class="justified, clickable" style="word-wrap: break-word" id="idRow{{row.$$index}}_id">
-                {{value}}
-              </span>
-          </ng-template>
-        </ngx-datatable-column>
-      </ngx-datatable>
-
     </md-card-content>
   </md-card>
 </div>
+
+<div class="panel">
+  <div class="group-filter-button">
+    <span class="row-button">
+      <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                       (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+    </span>
+    <span class="column-filter-button">
+      <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                         (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+    </span>
+  </div>
+
+
+  <ngx-datatable
+    id="auditTable"
+    class="material striped"
+    [rows]="rows"
+    [columnMode]="'force'"
+    [columns]="columnPicker.selectedColumns"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    [rowHeight]="'auto'"
+    [scrollbarH]="true"
+    [externalPaging]="true"
+    [externalSorting]="true"
+    [loadingIndicator]="loading"
+    [count]="count"
+    [offset]="offset"
+    [limit]="rowLimiter.pageSize"
+    [offset]="offset"
+    [limit]="rowLimiter.pageSize"
+    (page)='onPage($event)'
+  >
+    <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+      <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+    </ng-template>
+    <!--<ngx-datatable-column style="width: 10px" name="Table" prop="auditTargetName" [sortable]="false">
+      <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+                <span class="justified, clickable" style="word-wrap: break-word" id="tableRow{{row.$$index}}_id">
+                  {{value}}
+                </span>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column name="Action" prop="action" [sortable]="false">
+      <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+                <span class="justified, clickable" style="word-wrap: break-word" id="actionRow{{row.$$index}}_id">
+                  {{value}}
+                </span>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column name="User" prop="user" [sortable]="false">
+      <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+                <span class="justified, clickable" style="word-wrap: break-word" id="userRow{{row.$$index}}_id">
+                  {{value}}
+                </span>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column name="Timestamp" prop="changed" [sortable]="false">
+      <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+                <span class="clickable" style="word-wrap: break-word" id="timestamp{{row.$$index}}_id">
+                  {{(value | domibusDate: dateFormat)}}
+                </span>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column name="Id" prop="revisionId" [sortable]="false">
+      <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+                <span class="justified, clickable" style="word-wrap: break-word" id="idRow{{row.$$index}}_id">
+                  {{value}}
+                </span>
+      </ng-template>
+    </ngx-datatable-column>
+    -->
+  </ngx-datatable>
+
+

@@ -29,7 +29,7 @@ public class AuditTest {
     @Commit
     public void testSaveEntity() throws SQLException {
         User user=new User();
-        user.setUserName("Test30");
+        user.setUserName("Test33");
         user.setEmail("dussart.thomas@gmail.com");
         user.setPassword("test");
         user.setActive(true);

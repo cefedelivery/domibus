@@ -17,6 +17,12 @@ import javax.persistence.Enumerated;
  */
 @Embeddable
 public class EntityRevisionType {
+
+    /**
+     * The audited entity ID.
+     */
+    @Column(name = "ENTITY_ID")
+    private String id;
     /**
      * The logical group name. For instance a modification to a legconfiguration will
      * be reference under configuration logical name.
@@ -34,6 +40,14 @@ public class EntityRevisionType {
     @Column(name = "MODIFICATION_TYPE")
     @Enumerated(EnumType.STRING)
     private ModificationType modificationType;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getGroupName() {
         return groupName;

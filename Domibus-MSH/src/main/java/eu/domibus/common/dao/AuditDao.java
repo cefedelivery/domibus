@@ -20,4 +20,10 @@ public interface AuditDao {
                           int start,
                           int max);
 
+    Long countAudit(Set<String> auditTargets,
+                    Set<String> actions,
+                    Set<String> users,
+                    Date from,
+                    Date to);
+
 }

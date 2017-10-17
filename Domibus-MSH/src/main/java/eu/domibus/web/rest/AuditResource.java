@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * @author Thomas Dussart
  * @since 4.0
- *
+ * <p>
  * Rest entry point to retrieve the audit logs.
  */
 @RestController
@@ -34,7 +34,7 @@ public class AuditResource {
     private AuditService auditService;
 
     @RequestMapping(value = {"/list"}, method = RequestMethod.POST)
-    public List<AuditResponseRo> users(@RequestBody AuditCriteria auditCriteria) {
+    public List<AuditResponseRo> listAudits(@RequestBody AuditCriteria auditCriteria) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Audit criteria received:");
             LOG.debug(auditCriteria.toString());
@@ -49,6 +49,17 @@ public class AuditResource {
                 auditCriteria.getMax());
 
         return domainConverter.convert(sourceList, AuditResponseRo.class);
+    }
+
+
+    @RequestMapping(value = {"/count"}, method = RequestMethod.POST)
+    public Long countAudits(@RequestBody AuditCriteria auditCriteria) {
+        return auditService.countAudit(
+                auditCriteria.getAuditTargetName(),
+                auditCriteria.getUser(),
+                auditCriteria.getAction(),
+                auditCriteria.getFrom(),
+                auditCriteria.getTo());
     }
 
     @RequestMapping(value = {"/targets"}, method = RequestMethod.GET)

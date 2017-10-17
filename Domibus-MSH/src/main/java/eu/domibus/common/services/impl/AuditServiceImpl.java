@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * @since 4.0
  * {@inheritDoc}
  * <p>
- * Service in charge of retriving audit logs, audit targets, etc...
+ * Service in charge of retrieving audit logs, audit targets, etc...
  */
 @Service
 public class AuditServiceImpl implements AuditService {
@@ -57,6 +57,14 @@ public class AuditServiceImpl implements AuditService {
                         to,
                         start,
                         max), AuditLog.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long countAudit(Set<String> auditTargetName, Set<String> action, Set<String> user, Date from, Date to) {
+        return auditDao.countAudit(auditTargetName, action, user, from, to);
     }
 
     /**

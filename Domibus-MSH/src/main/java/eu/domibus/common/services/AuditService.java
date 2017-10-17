@@ -35,6 +35,22 @@ public interface AuditService {
                              int max);
 
     /**
+     * Count the number of audit for the given criterias.
+     *
+     * @param auditTargetName the type of audit to retrive (Message, User, etc...).
+     * @param action          the type of action to retrieve (DEL/ADD/MODD).
+     * @param user            the users that did the modifications.
+     * @param from            the lower bound of the modification date.
+     * @param to              the higher bound of the modification date.
+     * @return the audit count.
+     */
+    Long countAudit(Set<String> auditTargetName,
+                    Set<String> action,
+                    Set<String> user,
+                    Date from,
+                    Date to);
+
+    /**
      * Entities that are audited by the system have a logical name. Linked {@see RevisionLogicalName}
      *
      * @return the logical names.

@@ -52,7 +52,7 @@ public class CustomRevisionEntityListener implements EntityTrackingRevisionListe
     @Override
     public void entityChanged(Class entityClass, String entityName, Serializable entityId, RevisionType revisionType, Object revisionEntity) {
         Optional<String> logicalName = annotationsUtil.getValue(entityClass, RevisionLogicalName.class);
-        ((RevisionLog) revisionEntity).addEntityRevisionType(
+        ((RevisionLog) revisionEntity).addEntityRevisionType(entityId.toString(),
                 entityName,
                 logicalName.orElse(entityName),
                 getModificationType(revisionType)
