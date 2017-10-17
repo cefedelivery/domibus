@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.common.model.configuration.ConfigurationRaw;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -35,10 +36,10 @@ public class PModeResource {
         this.pModeProvider = pModeProvider;
     }
 
-    @RequestMapping(method = RequestMethod.GET, produces = "application/xml")
-    public ResponseEntity<? extends Resource> downloadPmodes() {
+    @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = "application/xml")
+    public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value="id") int id) {
 
-        final byte[] rawConfiguration = pModeProvider.getRawConfiguration();
+        final byte[] rawConfiguration = pModeProvider.getRawConfiguration(id);
         ByteArrayResource resource = new ByteArrayResource(new byte[0]);
         if (rawConfiguration != null) {
             resource = new ByteArrayResource(rawConfiguration);
@@ -80,7 +81,19 @@ public class PModeResource {
 
     @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
     public List<PModeResponseRO> pmodeList() {
+        return convertRawConfigurationList(pModeProvider.getRawConfigurationList());
+    }
+
+    private List<PModeResponseRO> convertRawConfigurationList(List<ConfigurationRaw> rawConfigurationList) {
         List<PModeResponseRO> result = new ArrayList<>();
+        for(ConfigurationRaw configurationRaw : rawConfigurationList) {
+            PModeResponseRO pModeResponseRO = new PModeResponseRO();
+            pModeResponseRO.setId(configurationRaw.getEntityId());
+            pModeResponseRO.setConfigurationDate(configurationRaw.getConfigurationDate());
+            pModeResponseRO.setDescription(configurationRaw.getDescription());
+            pModeResponseRO.setUsername("username"); //TODO: migueti: Missing username information
+            result.add(pModeResponseRO);
+        }
         return result;
     }
 }

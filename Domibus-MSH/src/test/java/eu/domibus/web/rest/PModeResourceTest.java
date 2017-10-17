@@ -35,12 +35,12 @@ public class PModeResourceTest {
         // Given
         final byte[] byteA = new byte[]{1, 0, 1};
         new Expectations() {{
-            pModeProvider.getRawConfiguration();
+            pModeProvider.getRawConfiguration(0);
             result = byteA;
         }};
 
         // When
-        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmodes();
+        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmode(0);
 
         // Then
         validateResponseEntity(responseEntity, HttpStatus.OK);
@@ -51,12 +51,12 @@ public class PModeResourceTest {
         // Given
         final byte[] byteA = new byte[]{};
         new Expectations() {{
-            pModeProvider.getRawConfiguration();
+            pModeProvider.getRawConfiguration(0);
             result = byteA;
         }};
 
         // When
-        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmodes();
+        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmode(0);
 
         // Then
         validateResponseEntity(responseEntity, HttpStatus.NO_CONTENT);

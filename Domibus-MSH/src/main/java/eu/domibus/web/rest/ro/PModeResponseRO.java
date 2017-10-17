@@ -4,9 +4,19 @@ import java.util.Date;
 
 public class PModeResponseRO {
 
+    int id;
     Date configurationDate;
     String username;
     String description;
+    boolean current;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public Date getConfigurationDate() {
         return configurationDate;
@@ -30,5 +40,13 @@ public class PModeResponseRO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isCurrent() {
+        return current;
+    }
+
+    public void setCurrent(boolean current) {
+        this.current = current;
     }
 }

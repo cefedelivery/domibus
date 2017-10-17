@@ -9,7 +9,11 @@ import java.util.Date;
 
 @Entity
 @Table(name = "TB_CONFIGURATION_RAW")
-@NamedQueries({@NamedQuery(name = "ConfigurationRaw.getLatest", query = "select conf from ConfigurationRaw conf ORDER BY conf.configurationDate desc")})
+@NamedQueries({
+        @NamedQuery(name = "ConfigurationRaw.getLatest",
+                query = "select conf from ConfigurationRaw conf ORDER BY conf.configurationDate desc")
+}
+)
 public class ConfigurationRaw extends AbstractBaseEntity {
 
     @Lob

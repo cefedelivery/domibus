@@ -92,9 +92,18 @@ public abstract class PModeProvider {
 
     public abstract boolean isConfigurationLoaded();
 
-    public byte[] getRawConfiguration() {
-        final ConfigurationRaw latest = this.configurationRawDAO.getLatest();
-        return (latest != null) ? latest.getXml() : new byte[0];
+    public byte[] getRawConfiguration(int id) {
+        final List<ConfigurationRaw> list = this.configurationRawDAO.getList();
+        for(ConfigurationRaw configurationRaw : list) {
+            if(configurationRaw.getEntityId() == id) {
+                return configurationRaw.getXml();
+            }
+        }
+        return new byte[0];
+    }
+
+    public List<ConfigurationRaw> getRawConfigurationList() {
+        return this.configurationRawDAO.getList();
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
