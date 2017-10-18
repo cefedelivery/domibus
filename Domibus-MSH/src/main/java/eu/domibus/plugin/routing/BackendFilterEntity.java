@@ -5,6 +5,7 @@ import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.hibernate.envers.AuditJoinTable;
 import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
@@ -29,6 +30,7 @@ public class BackendFilterEntity extends AbstractBaseEntity implements Comparabl
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "FK_BACKEND_FILTER")
     @OrderColumn(name = "PRIORITY")
+    @AuditJoinTable(name = "TB_BACKENDFILTER_ROUTINGCRITERIA_AUD")
     private List<RoutingCriteriaEntity> routingCriterias = new ArrayList<>();
 
     @Column(name = "BACKEND_NAME")

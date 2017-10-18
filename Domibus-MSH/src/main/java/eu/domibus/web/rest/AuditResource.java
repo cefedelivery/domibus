@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.audit.AuditLog;
+import eu.domibus.common.model.common.ModificationType;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
@@ -13,7 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Thomas Dussart
@@ -41,8 +46,8 @@ public class AuditResource {
         }
         List<AuditLog> sourceList = auditService.listAudit(
                 auditCriteria.getAuditTargetName(),
+                changeActionType(auditCriteria.getAction()),
                 auditCriteria.getUser(),
-                auditCriteria.getAction(),
                 auditCriteria.getFrom(),
                 auditCriteria.getTo(),
                 auditCriteria.getStart(),
@@ -56,10 +61,22 @@ public class AuditResource {
     public Long countAudits(@RequestBody AuditCriteria auditCriteria) {
         return auditService.countAudit(
                 auditCriteria.getAuditTargetName(),
+                changeActionType(auditCriteria.getAction()),
                 auditCriteria.getUser(),
-                auditCriteria.getAction(),
                 auditCriteria.getFrom(),
                 auditCriteria.getTo());
+    }
+
+    private Set<String> changeActionType(Set<String> actions) {
+        Set<String> modificationTypes = new HashSet<>();
+        actions.forEach(action -> {
+            Set<String> collect = Arrays.stream(ModificationType.values()).
+                    filter(modificationType -> modificationType.getLabel().equals(action)).
+                    map(Enum::name).
+                    collect(Collectors.toSet());
+            modificationTypes.addAll(collect);
+        });
+        return modificationTypes;
     }
 
     @RequestMapping(value = {"/targets"}, method = RequestMethod.GET)

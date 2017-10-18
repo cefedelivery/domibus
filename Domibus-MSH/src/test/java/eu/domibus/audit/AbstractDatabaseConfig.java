@@ -23,7 +23,7 @@ public abstract class AbstractDatabaseConfig {
     @Bean
     public LocalContainerEntityManagerFactoryBean domibusJTA() {
         LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
-        localContainerEntityManagerFactoryBean.setPackagesToScan("eu.domibus.common.model","eu.domibus.ebms3.common.model");
+        localContainerEntityManagerFactoryBean.setPackagesToScan("eu.domibus");
         localContainerEntityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         Properties jpaProperties = new Properties();
         jpaProperties.put("hibernate.hbm2ddl.auto","update");

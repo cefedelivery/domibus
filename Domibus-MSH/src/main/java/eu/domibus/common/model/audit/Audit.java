@@ -45,4 +45,16 @@ public class Audit {
         return changed;
     }
 
+    public String getId() {
+        return id.getId();
+    }
+
+    public String getRevisionId() {
+        return id.getRevisionId();
+    }
+
+    public String getAuditTargetName() {
+        return id.getAuditTargetName();
+    }
+
 }

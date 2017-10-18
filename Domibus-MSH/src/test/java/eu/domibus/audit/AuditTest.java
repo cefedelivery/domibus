@@ -3,7 +3,6 @@ package eu.domibus.audit;
 import eu.domibus.common.model.security.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -26,7 +25,6 @@ public class AuditTest {
 
     @Test
     @Transactional
-    @Commit
     public void testSaveEntity() throws SQLException {
         User user=new User();
         user.setUserName("Test33");

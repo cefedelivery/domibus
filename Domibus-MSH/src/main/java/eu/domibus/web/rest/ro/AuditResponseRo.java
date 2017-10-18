@@ -8,6 +8,8 @@ import java.util.Date;
  */
 public class AuditResponseRo {
 
+    private String id;
+
     private String revisionId;
 
     private String auditTargetName;
@@ -19,6 +21,14 @@ public class AuditResponseRo {
     private Date changed;
 
     public AuditResponseRo() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getRevisionId() {

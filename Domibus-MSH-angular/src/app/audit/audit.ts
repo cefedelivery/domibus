@@ -1,11 +1,13 @@
 export class AuditResponseRo {
+  id: string;
   revisionId: string;
   auditTargetName: string;
   action: string;
   user: string;
   changed: string;
 
-  constructor(revisionId: string, auditTargetName: string, action: string, user: string, changed: string) {
+  constructor(id: string, revisionId: string, auditTargetName: string, action: string, user: string, changed: string) {
+    this.id = id;
     this.revisionId = revisionId;
     this.auditTargetName = auditTargetName;
     this.action = action;

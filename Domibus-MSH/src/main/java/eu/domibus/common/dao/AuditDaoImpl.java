@@ -1,7 +1,6 @@
 package eu.domibus.common.dao;
 
 import eu.domibus.common.model.audit.Audit;
-import eu.domibus.common.model.common.ModificationType;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.collections.CollectionUtils;
@@ -11,8 +10,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Thomas Dussart
@@ -34,7 +35,6 @@ public class AuditDaoImpl implements AuditDao {
                                  Date to,
                                  int start,
                                  int max) {
-
 
         logCriteria(auditTargets, actions, users, from, to, start, max);
         TypedQuery<Audit> query = entityManager.createQuery(
@@ -81,7 +81,7 @@ public class AuditDaoImpl implements AuditDao {
     @Override
     public Long countAudit(Set<String> auditTargets, Set<String> actions, Set<String> users, Date from, Date to) {
         TypedQuery<Long> query = entityManager.createQuery(
-                builCountListCriteria(
+                buildCountListCriteria(
                         auditTargets,
                         actions,
                         users,
@@ -90,11 +90,11 @@ public class AuditDaoImpl implements AuditDao {
         return query.getSingleResult();
     }
 
-    private CriteriaQuery<Long> builCountListCriteria(Set<String> auditTargets,
-                                                      Set<String> actions,
-                                                      Set<String> users,
-                                                      Date from,
-                                                      Date to) {
+    private CriteriaQuery<Long> buildCountListCriteria(Set<String> auditTargets,
+                                                       Set<String> actions,
+                                                       Set<String> users,
+                                                       Date from,
+                                                       Date to) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
         Root<Audit> root = criteriaQuery.from(Audit.class);
@@ -104,36 +104,30 @@ public class AuditDaoImpl implements AuditDao {
     }
 
     private void where(Set<String> auditTargets, Set<String> actions, Set<String> users, Date from, Date to, CriteriaBuilder criteriaBuilder, CriteriaQuery criteriaQuery, Root<Audit> root) {
-        final Set<String> modificationTypes = new HashSet<>();
-        actions.forEach(action -> {
-            Set<String> collect = Arrays.stream(ModificationType.values()).
-                    filter(modificationType -> modificationType.getLabel().equals(action)).
-                    map(Enum::name).
-                    collect(Collectors.toSet());
-            modificationTypes.addAll(collect);
-        });
-        if (CollectionUtils.isNotEmpty(modificationTypes)) {
-            Path<Object> actionField = root.get("actions");
-            Predicate in = actionField.in(modificationTypes);
-            criteriaQuery.where(in);
+
+        List<Predicate> predicates = new ArrayList<Predicate>();
+        if (CollectionUtils.isNotEmpty(actions)) {
+            Path<Object> actionField = root.get("action");
+            predicates.add(actionField.in(actions));
         }
         if (CollectionUtils.isNotEmpty(auditTargets)) {
-            Path<Object> auditTargetField = root.get("auditTargetName");
-            Predicate in = auditTargetField.in(auditTargets);
-            criteriaQuery.where(in);
+            Path<Object> auditTargetField = root.get("id").get("auditTargetName");
+            predicates.add(auditTargetField.in(auditTargets));
         }
         if (CollectionUtils.isNotEmpty(users)) {
-            Path<Object> userField = root.get("users");
-            Predicate in = userField.in(users);
-            criteriaQuery.where(in);
+            Path<Object> userField = root.get("user");
+            predicates.add(userField.in(users));
         }
         if (from != null) {
             Path<Date> changedDate = root.get("changed");
-            criteriaBuilder.greaterThanOrEqualTo(changedDate, from);
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(changedDate, from));
         }
         if (to != null) {
             Path<Date> changedDate = root.get("changed");
-            criteriaBuilder.lessThanOrEqualTo(changedDate, to);
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(changedDate, to));
+        }
+        if (!predicates.isEmpty()) {
+            criteriaQuery.where(predicates.toArray(new Predicate[]{}));
         }
     }
 }

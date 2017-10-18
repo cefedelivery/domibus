@@ -67,6 +67,7 @@ export class AuditComponent implements OnInit {
   }
 
   searchAndCount() {
+    this.offset = 0;
     let auditCriteria: AuditCriteria = this.buildCriteria();
     let auditLogsObservable = this.auditService.listAuditLogs(auditCriteria);
     let auditCountOservable: Observable<number> = this.auditService.countAuditLogs(auditCriteria);
@@ -111,6 +112,12 @@ export class AuditComponent implements OnInit {
     return auditCriteria;
   }
 
+  changePageSize(newPageLimit: number) {
+    this.offset = 0;
+    this.rowLimiter.pageSize = newPageLimit;
+    this.searchAuditLog();
+  }
+
   initColumns() {
     this.columnPicker.allColumns = [
       {
@@ -136,7 +143,7 @@ export class AuditComponent implements OnInit {
       },
       {
         name: 'Id',
-        prop: "revisionId",
+        prop: "id",
         width: 300
       }
     ];

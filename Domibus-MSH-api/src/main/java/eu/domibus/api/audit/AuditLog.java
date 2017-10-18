@@ -8,6 +8,8 @@ import java.util.Date;
  */
 public class AuditLog {
 
+    private String id;
+
     private String revisionId;
 
     private String auditTargetName;
@@ -19,6 +21,14 @@ public class AuditLog {
     private Date changed;
 
     public AuditLog() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setRevisionId(String revisionId) {
@@ -60,6 +70,7 @@ public class AuditLog {
     public Date getChanged() {
         return changed;
     }
+
 
     @Override
     public boolean equals(Object o) {

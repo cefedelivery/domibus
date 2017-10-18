@@ -21,7 +21,7 @@ import java.util.Set;
 @Table(name = "TB_CONFIGURATION")
 @XmlRootElement(name = "configuration")
 @NamedQueries({@NamedQuery(name = "Configuration.count", query = "SELECT COUNT(c.entityId) FROM Configuration c"), @NamedQuery(name = "Configuration.getConfiguration", query = "select conf from Configuration conf")})
-@Audited(withModifiedFlag = true)
+@Audited(withModifiedFlag = false)
 @RevisionLogicalName("Pmode")
 public class Configuration extends AbstractBaseEntity {
 
