@@ -29,7 +29,7 @@ import java.util.Set;
         }
 )
 @Audited(withModifiedFlag = true)
-@RevisionLogicalName("User")
+@RevisionLogicalName(value = "User", auditOrder = 1)
 public class UserRole extends AbstractBaseEntity{
 
     @NotNull

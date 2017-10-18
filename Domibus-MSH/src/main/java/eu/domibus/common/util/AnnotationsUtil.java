@@ -1,6 +1,5 @@
 package eu.domibus.common.util;
 
-import eu.domibus.common.model.common.RevisionLogicalName;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
@@ -24,8 +23,12 @@ public class AnnotationsUtil {
      * @return an optional value.
      */
     public Optional<String> getValue(final Class clazz, final Class annotation) {
-        if (clazz.isAnnotationPresent(RevisionLogicalName.class)) {
-            String logicalName = (String) AnnotationUtils.getValue(clazz.getAnnotation(annotation));
+        return getValue(clazz, annotation, "value", String.class);
+    }
+
+    public <E> Optional<E> getValue(final Class clazz, final Class annotation, final String methodName, Class<E> e) {
+        if (clazz.isAnnotationPresent(annotation)) {
+            E logicalName = (E) AnnotationUtils.getValue(clazz.getAnnotation(annotation), methodName);
             return Optional.of(logicalName);
         }
         return Optional.empty();

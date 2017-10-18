@@ -22,6 +22,9 @@ public class AuditId implements Serializable {
     @Column(name = "AUDIT_TYPE", updatable = false, nullable = false)
     private String auditTargetName;
 
+    @Column(name = "ACTION_TYPE")
+    private String action;
+
     public String getId() {
         return id;
     }
@@ -34,6 +37,10 @@ public class AuditId implements Serializable {
         return auditTargetName;
     }
 
+    public String getAction() {
+        return action;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -43,7 +50,8 @@ public class AuditId implements Serializable {
 
         if (!id.equals(auditId.id)) return false;
         if (!revisionId.equals(auditId.revisionId)) return false;
-        return auditTargetName.equals(auditId.auditTargetName);
+        if (!auditTargetName.equals(auditId.auditTargetName)) return false;
+        return action.equals(auditId.action);
     }
 
     @Override
@@ -51,6 +59,7 @@ public class AuditId implements Serializable {
         int result = id.hashCode();
         result = 31 * result + revisionId.hashCode();
         result = 31 * result + auditTargetName.hashCode();
+        result = 31 * result + action.hashCode();
         return result;
     }
 }

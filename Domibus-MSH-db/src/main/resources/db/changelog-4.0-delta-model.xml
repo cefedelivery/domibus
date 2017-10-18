@@ -39,6 +39,7 @@
 
         <createTable tableName="TB_REV_CHANGES">
             <column name="REV" type="INT"/>
+            <column name="AUDIT_ORDER" type="INT"/>
             <column name="ENTIY_NAME" type="VARCHAR(255)"/>
             <column name="GROUP_NAME" type="VARCHAR(255)"/>
             <column name="ENTITY_ID" type="VARCHAR(255)"/>
@@ -204,12 +205,42 @@
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
 
+        <createTable tableName="TB_BACKENDFILTER_ROUTINGCRITERIA_AUD">
+            <column name="ID_PK" type="INT"/>
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="FK_BACKEND_FILTER" type="INT"/>
+            <column name="PRIORITY" type="INT"/>
+        </createTable>
+        <addPrimaryKey
+                columnNames="ID_PK, REV"
+                constraintName="PK_BACKENDFILTER_ROUTINGCRITERIA_AUD"
+                tableName="TB_BACKENDFILTER_ROUTINGCRITERIA_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_BACKENDFILTER_ROUTINGCRITERIA_AUD"
+                                 constraintName="FK_BACKENDFILTER_ROUTINGCRITERIA_AUD" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
         <createTable tableName="TB_USER_ROLES_AUD">
             <column name="REV" type="INT"/>
             <column name="REVTYPE" type="TINYINT"/>
             <column name="USER_ID" type="INT"/>
             <column name="ROLE_ID" type="INT"/>
         </createTable>
+
+        <createView
+                replaceIfExists="true"
+                viewName="V_AUDIT">
+            SELECT DISTINCT AUDIT_TYPE,ACTION_TYPE,USER_NAME,AUDIT_DATE,ID,REV_ID FROM (
+            SELECT 'MESSAGE' as AUDIT_TYPE,'ADD' as ACTION_TYPE,CREATED_BY AS USER_NAME,CREATED_ON AS
+            AUDIT_DATE,MESSAGE_ID AS ID,'' as REV_ID FROM TB_MESSAGE_LOG WHERE CREATED_ON is not null
+            UNION
+            SELECT 'MESSAGE','MOD',MODIFIED_BY,MODIFIED_ON,MESSAGE_ID,'' as REV_ID FROM TB_MESSAGE_LOG WHERE MODIFIED_ON
+            is not null
+            UNION
+            SELECT rc.GROUP_NAME, rc.MODIFICATION_TYPE, ri.USER_NAME ,ri.REVISION_DATE,''||rc.ENTITY_ID,''||ri.ID FROM
+            TB_REV_INFO ri,TB_REV_CHANGES rc where ri.ID=rc.REV) ORDER BY AUDIT_DATE DESC ,AUDIT_TYPE
+        </createView>
 
     </changeSet>
 </databaseChangeLog>

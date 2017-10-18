@@ -20,4 +20,6 @@ public @interface RevisionLogicalName {
 
     String value() default "";
 
+    int auditOrder() default 0;
+
 }

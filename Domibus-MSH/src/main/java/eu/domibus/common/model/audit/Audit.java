@@ -24,9 +24,6 @@ public class Audit {
     @EmbeddedId()
     private AuditId id;
 
-    @Column(name = "ACTION_TYPE")
-    private String action;
-
     @Column(name = "USER_NAME")
     private String user;
 
@@ -37,9 +34,6 @@ public class Audit {
     public Audit() {
     }
 
-    public String getAction() {
-        return action;
-    }
 
     public String getUser() {
         return user;
@@ -61,4 +55,27 @@ public class Audit {
         return id.getAuditTargetName();
     }
 
+    public String getAction() {
+        return id.getAction();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Audit audit = (Audit) o;
+
+        if (!id.equals(audit.id)) return false;
+        if (user != null ? !user.equals(audit.user) : audit.user != null) return false;
+        return changed.equals(audit.changed);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + (user != null ? user.hashCode() : 0);
+        result = 31 * result + changed.hashCode();
+        return result;
+    }
 }

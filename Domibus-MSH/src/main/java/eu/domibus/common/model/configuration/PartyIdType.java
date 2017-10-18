@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.*;
 @Table(name = "TB_PARTY_ID_TYPE")
 @NamedQueries(@NamedQuery(name = "PartyIdType.findByValue", query = "select p from PartyIdType p where p.value = :VALUE"))
 @Audited(withModifiedFlag = true)
-@RevisionLogicalName("Party")
+@RevisionLogicalName(value = "Party", auditOrder = 2)
 public class PartyIdType extends AbstractBaseEntity {
 
     @XmlAttribute(name = "name", required = true)

@@ -56,10 +56,12 @@ public class CustomRevisionEntityListener implements EntityTrackingRevisionListe
                               final RevisionType revisionType, final
                               Object revisionEntity) {
         Optional<String> logicalName = annotationsUtil.getValue(entityClass, RevisionLogicalName.class);
+        Optional<Integer> auditOrder = annotationsUtil.getValue(entityClass, RevisionLogicalName.class, "auditOrder", Integer.class);
         ((RevisionLog) revisionEntity).addEntityRevisionType(entityId.toString(),
                 entityName,
                 logicalName.orElse(entityName),
-                getModificationType(revisionType)
+                getModificationType(revisionType),
+                auditOrder.orElse(10)
         );
     }
 

@@ -55,7 +55,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
         @NamedQuery(name = "Party.findByName", query = "select p from Party p where p.name = :NAME"),
         @NamedQuery(name = "Party.findPartyIdentifiersByEndpoint", query = "select p.identifiers from Party p where p.endpoint = :ENDPOINT")})
 @Audited(withModifiedFlag = true)
-@RevisionLogicalName("Party")
+@RevisionLogicalName(value = "Party", auditOrder = 1)
 public class Party extends AbstractBaseEntity {
 
     @XmlElement(required = true, name = "identifier")

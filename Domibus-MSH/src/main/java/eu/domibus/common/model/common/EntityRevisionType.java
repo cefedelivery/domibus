@@ -41,6 +41,9 @@ public class EntityRevisionType {
     @Enumerated(EnumType.STRING)
     private ModificationType modificationType;
 
+    @Column(name = "AUDIT_ORDER")
+    private Integer auditOrder;
+
     public String getId() {
         return id;
     }
@@ -71,5 +74,13 @@ public class EntityRevisionType {
 
     public void setEntityName(String entityName) {
         this.entityName = entityName;
+    }
+
+    public Integer getAuditOrder() {
+        return auditOrder;
+    }
+
+    public void setAuditOrder(Integer auditOrder) {
+        this.auditOrder = auditOrder;
     }
 }

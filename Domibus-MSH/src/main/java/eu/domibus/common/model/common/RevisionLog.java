@@ -57,12 +57,13 @@ public class RevisionLog extends DefaultRevisionEntity {
         this.revisionDate = revisionDate;
     }
 
-    public void addEntityRevisionType(final String entityId, final String entityName, final String groupName, final ModificationType modificationType) {
+    public void addEntityRevisionType(final String entityId, final String entityName, final String groupName, final ModificationType modificationType, final int auditOrder) {
         EntityRevisionType entityRevisionType = new EntityRevisionType();
         entityRevisionType.setGroupName(groupName);
         entityRevisionType.setEntityName(entityName);
         entityRevisionType.setModificationType(modificationType);
         entityRevisionType.setId(entityId);
+        entityRevisionType.setAuditOrder(auditOrder);
         this.revisionTypes.add(entityRevisionType);
     }
 }
