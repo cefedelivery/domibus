@@ -67,6 +67,14 @@ public class AuditResource {
                 auditCriteria.getTo());
     }
 
+    /**
+     * Action type send from the admin console are different from the one used in the database.
+     * Eg: In the admin console the filter for a modified entity is Modified where in the database a modified reccord
+     * has the MOD flag. This method does the translation.
+     *
+     * @param actions
+     * @return
+     */
     private Set<String> changeActionType(Set<String> actions) {
         Set<String> modificationTypes = new HashSet<>();
         actions.forEach(action -> {

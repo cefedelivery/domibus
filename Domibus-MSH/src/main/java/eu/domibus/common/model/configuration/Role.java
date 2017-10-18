@@ -21,7 +21,6 @@ import javax.xml.bind.annotation.XmlType;
         @NamedQuery(name = "Role.findByValue", query = "select role from Role role where role.value=:VALUE"),
         @NamedQuery(name = "Role.findByName", query = "select role from Role role where role.name=:NAME")
 })
-
 public class Role extends AbstractBaseEntity {
 
     @XmlAttribute(name = "name", required = true)

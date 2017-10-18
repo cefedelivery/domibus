@@ -11,8 +11,8 @@ import javax.persistence.Enumerated;
  * @author Thomas Dussart
  * @since 4.0
  * <p>
- * This class is used to store the type of entity modified in hibernate and the type of modification.
- * The type of modification is also reflected in the different audit tables by {@link RevisionType}, but we
+ * This class is used to store the type of entity modified in hibernate, the type of modification and the entity id.
+ * The type of modification {@link RevisionType} and entity id are also reflected in the different audit tables , but we
  * wanted to have it centralized in order to facilitate the audit log queries.
  */
 @Embeddable

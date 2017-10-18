@@ -28,17 +28,17 @@ public class AuditDaoImpl implements AuditDao {
     private EntityManager entityManager;
 
     @Override
-    public List<Audit> listAudit(Set<String> auditTargets,
-                                 Set<String> actions,
-                                 Set<String> users,
-                                 Date from,
-                                 Date to,
-                                 int start,
-                                 int max) {
+    public List<Audit> listAudit(final Set<String> auditTargets,
+                                 final Set<String> actions,
+                                 final Set<String> users,
+                                 final Date from,
+                                 final Date to,
+                                 final int start,
+                                 final int max) {
 
         logCriteria(auditTargets, actions, users, from, to, start, max);
         TypedQuery<Audit> query = entityManager.createQuery(
-                builAuditListCriteria(
+                buildAuditListCriteria(
                         auditTargets,
                         actions,
                         users,
@@ -49,11 +49,11 @@ public class AuditDaoImpl implements AuditDao {
         return query.getResultList();
     }
 
-    private CriteriaQuery<Audit> builAuditListCriteria(Set<String> auditTargets,
-                                                       Set<String> actions,
-                                                       Set<String> users,
-                                                       Date from,
-                                                       Date to) {
+    private CriteriaQuery<Audit> buildAuditListCriteria(final Set<String> auditTargets,
+                                                        final Set<String> actions,
+                                                        final Set<String> users,
+                                                        final Date from,
+                                                        final Date to) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Audit> criteriaQuery = criteriaBuilder.createQuery(Audit.class);
         Root<Audit> root = criteriaQuery.from(Audit.class);
@@ -62,7 +62,13 @@ public class AuditDaoImpl implements AuditDao {
         return criteriaQuery;
     }
 
-    private void logCriteria(Set<String> auditTargets, Set<String> actions, Set<String> users, Date from, Date to, int start, int max) {
+    private void logCriteria(final Set<String> auditTargets,
+                             final Set<String> actions,
+                             final Set<String> users,
+                             final Date from,
+                             final Date to,
+                             final int start,
+                             final int max) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Searching audit for ");
             LOG.debug("target :");
@@ -79,7 +85,10 @@ public class AuditDaoImpl implements AuditDao {
     }
 
     @Override
-    public Long countAudit(Set<String> auditTargets, Set<String> actions, Set<String> users, Date from, Date to) {
+    public Long countAudit(final Set<String> auditTargets,
+                           final Set<String> actions, final Set<String> users,
+                           final Date from,
+                           final Date to) {
         TypedQuery<Long> query = entityManager.createQuery(
                 buildCountListCriteria(
                         auditTargets,
@@ -90,11 +99,11 @@ public class AuditDaoImpl implements AuditDao {
         return query.getSingleResult();
     }
 
-    private CriteriaQuery<Long> buildCountListCriteria(Set<String> auditTargets,
-                                                       Set<String> actions,
-                                                       Set<String> users,
-                                                       Date from,
-                                                       Date to) {
+    private CriteriaQuery<Long> buildCountListCriteria(final Set<String> auditTargets,
+                                                       final Set<String> actions,
+                                                       final Set<String> users,
+                                                       final Date from,
+                                                       final Date to) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
         Root<Audit> root = criteriaQuery.from(Audit.class);
@@ -103,9 +112,16 @@ public class AuditDaoImpl implements AuditDao {
         return criteriaQuery;
     }
 
-    private void where(Set<String> auditTargets, Set<String> actions, Set<String> users, Date from, Date to, CriteriaBuilder criteriaBuilder, CriteriaQuery criteriaQuery, Root<Audit> root) {
+    private void where(final Set<String> auditTargets,
+                       final Set<String> actions,
+                       final Set<String> users,
+                       final Date from,
+                       final Date to,
+                       final CriteriaBuilder criteriaBuilder,
+                       final CriteriaQuery criteriaQuery,
+                       final Root<Audit> root) {
 
-        List<Predicate> predicates = new ArrayList<Predicate>();
+        List<Predicate> predicates = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(actions)) {
             Path<Object> actionField = root.get("action");
             predicates.add(actionField.in(actions));

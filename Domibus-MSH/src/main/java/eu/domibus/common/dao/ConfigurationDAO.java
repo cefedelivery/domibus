@@ -4,8 +4,6 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +15,6 @@ import javax.persistence.TypedQuery;
  */
 @Repository
 public class ConfigurationDAO extends BasicDao<Configuration> {
-
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ConfigurationDAO.class);
 
     public ConfigurationDAO() {
         super(Configuration.class);
@@ -92,7 +88,7 @@ public class ConfigurationDAO extends BasicDao<Configuration> {
             this.delete(this.read());
         }
         this.create(configuration);
+
+
     }
-
-
 }

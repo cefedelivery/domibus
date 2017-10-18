@@ -1,3 +1,9 @@
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ * <p>
+ * Rest entry point to retrieve the audit logs.
+ */
 export class AuditResponseRo {
   id: string;
   revisionId: string;

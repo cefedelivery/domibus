@@ -51,7 +51,7 @@ public interface AuditService {
                     Date to);
 
     /**
-     * Entities that are audited by the system have a logical name. Linked {@see RevisionLogicalName}
+     * Entities targeted by the auditing system have a logical name.{@link eu.domibus.common.model.common.RevisionLogicalName}
      *
      * @return the logical names.
      */

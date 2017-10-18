@@ -37,7 +37,7 @@ public class CustomRevisionEntityListener implements EntityTrackingRevisionListe
      * @param revision the new revision.
      */
     @Override
-    public void newRevision(Object revision) {
+    public void newRevision(final Object revision) {
         RevisionLog revisionLog = (RevisionLog) revision;
         revisionLog.setRevisionDate(new Date(System.currentTimeMillis()));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -50,7 +50,11 @@ public class CustomRevisionEntityListener implements EntityTrackingRevisionListe
      * {@inheritDoc}
      */
     @Override
-    public void entityChanged(Class entityClass, String entityName, Serializable entityId, RevisionType revisionType, Object revisionEntity) {
+    public void entityChanged(final Class entityClass,
+                              final String entityName,
+                              final Serializable entityId,
+                              final RevisionType revisionType, final
+                              Object revisionEntity) {
         Optional<String> logicalName = annotationsUtil.getValue(entityClass, RevisionLogicalName.class);
         ((RevisionLog) revisionEntity).addEntityRevisionType(entityId.toString(),
                 entityName,
@@ -65,7 +69,7 @@ public class CustomRevisionEntityListener implements EntityTrackingRevisionListe
      * @param revisionType the envers enum.
      * @return our modification enum..
      */
-    private ModificationType getModificationType(RevisionType revisionType) {
+    private ModificationType getModificationType(final RevisionType revisionType) {
         switch (revisionType) {
             case ADD:
                 return ModificationType.ADD;

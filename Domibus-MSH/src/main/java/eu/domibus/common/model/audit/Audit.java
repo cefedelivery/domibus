@@ -11,6 +11,10 @@ import java.util.Date;
 /**
  * @author Thomas Dussart
  * @since 4.0
+ *
+ * Orm class in charge of representing the system audit.
+ * The entity is mapped to a view (V_AUDIT).
+ * V_AUDIT is a union between TB_MESSAGE_LOG table and hibernate-envers auditing tables.
  */
 @Entity
 @Immutable

@@ -68,14 +68,6 @@
         </property>
         <property name="maxLifetime" value="${domibus.datasource.xa.maxLifetime}"/>
     </bean>
-
-    <!--<bean id="domibusJDBC-XADataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="connectionProperties" ref="xaProperties"/>
-        <property name="driverClassName" value="com.arjuna.ats.jdbc.TransactionalDriver"/>
-       <property name="url" value="jdbc:arjuna:database.properties"/>
-    </bean>
--->
-
     <bean id="domibusJDBC-nonXADataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
         <property name="uniqueResourceName" value="domibusNonXADataSource"/>
         <property name="driverClassName" value="${domibus.datasource.driverClassName}"/>
@@ -115,7 +107,6 @@
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
     </bean>
-
 
 </beans>
 

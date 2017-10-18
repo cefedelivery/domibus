@@ -10,6 +10,7 @@ import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -40,14 +41,15 @@ public class AuditServiceImpl implements AuditService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional(readOnly = true)
     public List<AuditLog> listAudit(
-            Set<String> auditTargets,
-            Set<String> actions,
-            Set<String> users,
-            Date from,
-            Date to,
-            int start,
-            int max) {
+            final Set<String> auditTargets,
+            final Set<String> actions,
+            final Set<String> users,
+            final Date from,
+            final Date to,
+            final int start,
+            final int max) {
         return domainCoreConverter.convert(
                 auditDao.listAudit(
                         auditTargets,
@@ -63,7 +65,12 @@ public class AuditServiceImpl implements AuditService {
      * {@inheritDoc}
      */
     @Override
-    public Long countAudit(Set<String> auditTargetName, Set<String> action, Set<String> user, Date from, Date to) {
+    @Transactional(readOnly = true)
+    public Long countAudit(final Set<String> auditTargetName,
+                           final Set<String> action,
+                           final Set<String> user,
+                           final Date from,
+                           final Date to) {
         return auditDao.countAudit(auditTargetName, action, user, from, to);
     }
 
@@ -72,6 +79,7 @@ public class AuditServiceImpl implements AuditService {
      */
     @Override
     @Cacheable("auditTarget")
+    @Transactional(readOnly = true)
     public List<String> listAuditTarget() {
         Set<Class<?>> typesAnnotatedWith = new Reflections("eu.domibus").
                 getTypesAnnotatedWith(RevisionLogicalName.class);

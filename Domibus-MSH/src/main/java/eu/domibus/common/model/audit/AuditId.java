@@ -7,6 +7,8 @@ import java.io.Serializable;
 /**
  * @author Thomas Dussart
  * @since 4.0
+ *
+ * Composite primary key needed for {@link Audit} because it is map to a view.
  */
 @Embeddable
 public class AuditId implements Serializable {

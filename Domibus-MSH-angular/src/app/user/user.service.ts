@@ -22,9 +22,6 @@ export class UserService {
       .map((user: UserResponseRO) => user.userName);
   }
 
-  private extractJson(res: Response) {
-    return res.json();
-  }
 
   getUserRoles():Observable<String[]> {
     return this.http.get("rest/user/userroles")

@@ -27,11 +27,9 @@ public abstract class AbstractDatabaseConfig {
         localContainerEntityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         Properties jpaProperties = new Properties();
         jpaProperties.put("hibernate.hbm2ddl.auto","update");
-        //jpaProperties.put("org.hibernate.envers.audit_strategy","org.hibernate.envers.strategy.ValidityAuditStrategy");
-        //jpaProperties.put("org.hibernate.envers.track_entities_changed_in_revision","true");
         jpaProperties.put("org.hibernate.envers.store_data_at_delete", "false");
         jpaProperties.put("org.hibernate.envers.using_modified_flag", "true");
-//        jpaProperties.put("org.hibernate.envers.audit_table_prefix", "TB_");
+
 
         jpaProperties.putAll(getProperties());
         localContainerEntityManagerFactoryBean.setJpaProperties(jpaProperties);
@@ -45,22 +43,5 @@ public abstract class AbstractDatabaseConfig {
         jpaTransactionManager.setEntityManagerFactory(domibusJTA().getObject());
         return jpaTransactionManager;
     }
-
-   /* @Bean
-    public PModeDao pModeDao(){
-        PModeDao pModeDao = new PModeDao();
-        return pModeDao;
-    }
-
-    @Bean
-    protected ConfigurationRawDAO configurationRawDAO(){
-        return new ConfigurationRawDAO();
-    }
-
-    @Bean
-    protected ConfigurationDAO configurationDAO(){
-        return new ConfigurationDAO();
-    }
-*/
 
 }

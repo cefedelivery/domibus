@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <con:soapui-project id="1c29d1fb-f8ae-4ddb-ac43-1469a15001ec" activeEnvironment="Default" name="TESTS_WS"
-                    resourceRoot="" soapui-version="5.3.0" abortOnError="false" runType="SEQUENTIAL"
+                    resourceRoot="" soapui-version="5.1.2-m-SNAPSHOT" abortOnError="false" runType="SEQUENTIAL"
                     xmlns:con="http://eviware.com/soapui/config">
     <con:settings/>
     <con:interface xsi:type="con:WsdlInterface" id="9581111c-248c-4085-bf9f-dc452577042f" wsaVersion="NONE"
@@ -12245,9 +12245,7 @@ test.waitForStatus("ACKNOWLEDGED","RECEIVED");
 </con:config>
 </con:testStep>
     <con:loadTest id="82d754fe-f4ee-4e28-9199-d362b4381033" name="LoadTest 1">
-        <con:settings>
-            <con:setting id="HttpSettings@close-connections">false</con:setting>
-        </con:settings>
+        <con:settings/>
         <con:threadCount>5</con:threadCount>
         <con:startDelay>0</con:startDelay>
         <con:sampleInterval>250</con:sampleInterval>
@@ -12719,9 +12717,7 @@ test.waitForStatus("ACKNOWLEDGED","DELETED","-Dom099-2-");
 </con:config>
 </con:testStep>
     <con:loadTest id="53493c07-0865-4108-8af6-74d6c6462617" name="LoadTest 1">
-        <con:settings>
-            <con:setting id="HttpSettings@close-connections">false</con:setting>
-        </con:settings>
+        <con:settings/>
         <con:threadCount>8</con:threadCount>
         <con:startDelay>0</con:startDelay>
         <con:sampleInterval>250</con:sampleInterval>
@@ -14640,9 +14636,7 @@ test.waitForStatus("ACKNOWLEDGED","DELETED","-Dom099-2-");
 </con:config>
 </con:testStep>
     <con:loadTest id="bfc504c1-7072-493f-8fd8-b8b214012423" name="LoadTest 1">
-        <con:settings>
-            <con:setting id="HttpSettings@close-connections">false</con:setting>
-        </con:settings>
+        <con:settings/>
         <con:threadCount>8</con:threadCount>
         <con:startDelay>0</con:startDelay>
         <con:sampleInterval>250</con:sampleInterval>
@@ -23488,9 +23482,7 @@ Domibus.swapJdbcUrls("Green","Red",testRunner,log);
 </con:config>
 </con:testStep>
     <con:loadTest id="6411ed7e-39e0-4421-b8e8-9a4ed689cd78" name="LoadTest 1">
-        <con:settings>
-            <con:setting id="HttpSettings@close-connections">false</con:setting>
-        </con:settings>
+        <con:settings/>
         <con:threadCount>4</con:threadCount>
         <con:startDelay>0</con:startDelay>
         <con:sampleInterval>250</con:sampleInterval>
@@ -23901,7 +23893,7 @@ test.finalize();*/
         </con:property>
         <con:property>
             <con:name>remoteUrl</con:name>
-            <con:value>http://localhost:8001/domibus-weblogic</con:value>
+            <con:value>http://localhost:8180/domibus</con:value>
         </con:property>
         <con:property>
             <con:name>databaseRed</con:name>
