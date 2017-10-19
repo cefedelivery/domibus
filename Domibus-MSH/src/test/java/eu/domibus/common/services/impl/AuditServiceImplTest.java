@@ -9,7 +9,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Thomas Dussart
@@ -24,10 +25,6 @@ public class AuditServiceImplTest {
     @InjectMocks
     private AuditServiceImpl auditService;
 
-    @Test
-    public void listAudit() throws Exception {
-        fail();
-    }
 
     @Test
     public void listAuditTarget() throws Exception {

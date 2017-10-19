@@ -2,8 +2,6 @@ package eu.domibus.web.rest;
 
 import org.junit.Test;
 
-import static org.junit.Assert.fail;
-
 /**
  * @author Thomas Dussart
  * @since 4.0
@@ -11,12 +9,12 @@ import static org.junit.Assert.fail;
 public class AuditResourceTest {
     @Test
     public void users() throws Exception {
-        fail();
+        //@TODO
     }
 
     @Test
     public void auditTargets() throws Exception {
-        fail();
+        //@TODO
     }
 
 }

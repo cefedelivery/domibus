@@ -37,6 +37,7 @@ public abstract class AbstractDatabaseConfig {
         return localContainerEntityManagerFactoryBean;
     }
 
+
     @Bean
     public JpaTransactionManager jpaTransactionManager(){
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();

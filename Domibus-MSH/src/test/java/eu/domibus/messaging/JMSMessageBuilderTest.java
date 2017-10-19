@@ -23,7 +23,7 @@ public class JMSMessageBuilderTest {
                 .property("longProp", 200L)
                 .build();
         assertEquals(message.getProperty("stringProp"), "myString");
-        assertEquals(message.getProperty("integerProp"), 100, 0);
-        assertEquals(message.getProperty("longProp"), 200L, 0);
+        assertEquals(message.getProperty("integerProp"), Integer.valueOf(100));
+        assertEquals(message.getProperty("longProp"), Long.valueOf(200L));
     }
 }

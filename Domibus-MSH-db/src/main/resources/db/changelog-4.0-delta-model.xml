@@ -38,6 +38,7 @@
                 tableName="TB_REV_INFO"/>
 
         <createTable tableName="TB_REV_CHANGES">
+            <column name="ID_PK" type="INT"/>
             <column name="REV" type="INT"/>
             <column name="AUDIT_ORDER" type="INT"/>
             <column name="ENTIY_NAME" type="VARCHAR(255)"/>

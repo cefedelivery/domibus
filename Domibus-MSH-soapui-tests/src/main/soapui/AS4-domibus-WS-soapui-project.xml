@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <con:soapui-project id="1c29d1fb-f8ae-4ddb-ac43-1469a15001ec" activeEnvironment="Default" name="TESTS_WS"
-                    resourceRoot="" soapui-version="5.1.2-m-SNAPSHOT" abortOnError="false" runType="SEQUENTIAL"
+                    resourceRoot="" soapui-version="5.3.0" abortOnError="false" runType="SEQUENTIAL"
                     xmlns:con="http://eviware.com/soapui/config">
     <con:settings/>
     <con:interface xsi:type="con:WsdlInterface" id="9581111c-248c-4085-bf9f-dc452577042f" wsaVersion="NONE"
@@ -1001,8 +1001,8 @@ test.finalize();
                </ns:To>\r
             </ns:PartyInfo>\r
             <ns:CollaborationInfo>\r
-               <ns:Service type="tc7">bdx:noprocess</ns:Service>\r
-               <ns:Action>TC7Leg1</ns:Action>\r
+               <ns:Service type="tc1">bdx:noprocess</ns:Service>\r
+               <ns:Action>TC1Leg1</ns:Action>\r
             </ns:CollaborationInfo>\r
             <ns:MessageProperties>\r
                <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>\r
@@ -1014,6 +1014,11 @@ test.finalize();
                      <ns:Property name="MimeType">text/xml</ns:Property>\r
                   </ns:PartProperties>\r
                </ns:PartInfo>\r
+                <ns:PartInfo href="cid:attachment">
+                  <ns:PartProperties>
+                     <ns:Property name="MimeType">application/octet-stream</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
             </ns:PayloadInfo>\r
          </ns:UserMessage>\r
       </ns:Messaging>\r
@@ -1023,11 +1028,37 @@ test.finalize();
          <payload payloadId="cid:message" contentType="text/xml">
          	<value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>
          </payload>\r
+          <payload payloadId="cid:attachment">
+            <value>cid:1234</value>
+         </payload>
       </_1:submitRequest>\r
    </soap:Body>\r
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response1" id="cd57a04c-25ec-4747-830d-3232f50acae3"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="d660f0c2-2f39-442f-a5ad-ad89cee0da5f"/><con:assertion type="XPath Match" name="XPath Match" id="c8f079bd-9c98-4d03-9769-220891a40294"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5a19348e-d8bc-4594-80d4-adddb8be0d2a"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
 test.waitForStatus("ACKNOWLEDGED","RECEIVED");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>
+                test.finalize();
+            </scriptText>
+            </con:configuration>
+            </con:assertion>
+                <con:credentials>
+                    <con:authType>No Authorization</con:authType>
+                </con:credentials>
+                <con:attachment>
+                    <con:name>Administration Guide v1.7_comments.pdf</con:name>
+                    <con:contentType>application/pdf</con:contentType>
+                    <con:contentId>1234</con:contentId>
+                    <con:part>1234</con:part>
+                    <con:url>C:/Users/hykiukira/Documents/Administration Guide v1.7_comments.pdf</con:url>
+                    <con:id>1ab046ab-8d1a-4ded-b132-3bb5ac49ba8d</con:id>
+                </con:attachment>
+                <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+                <con:jmsPropertyConfig/>
+                <con:wsaConfig mustUnderstand="NONE" version="200508"
+                               action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/>
+                <con:wsrmConfig version="1.2"/>
+            </con:request>
+            </con:config>
+            </con:testStep>
+    <con:tearDownScript>
 //ExcelReporting.reportTestCase(testRunner, log)
 
 def test = new Domibus(log,null,context)
@@ -12245,7 +12276,9 @@ test.waitForStatus("ACKNOWLEDGED","RECEIVED");
 </con:config>
 </con:testStep>
     <con:loadTest id="82d754fe-f4ee-4e28-9199-d362b4381033" name="LoadTest 1">
-        <con:settings/>
+        <con:settings>
+            <con:setting id="HttpSettings@close-connections">false</con:setting>
+        </con:settings>
         <con:threadCount>5</con:threadCount>
         <con:startDelay>0</con:startDelay>
         <con:sampleInterval>250</con:sampleInterval>
@@ -12717,7 +12750,9 @@ test.waitForStatus("ACKNOWLEDGED","DELETED","-Dom099-2-");
 </con:config>
 </con:testStep>
     <con:loadTest id="53493c07-0865-4108-8af6-74d6c6462617" name="LoadTest 1">
-        <con:settings/>
+        <con:settings>
+            <con:setting id="HttpSettings@close-connections">false</con:setting>
+        </con:settings>
         <con:threadCount>8</con:threadCount>
         <con:startDelay>0</con:startDelay>
         <con:sampleInterval>250</con:sampleInterval>
@@ -14636,7 +14671,9 @@ test.waitForStatus("ACKNOWLEDGED","DELETED","-Dom099-2-");
 </con:config>
 </con:testStep>
     <con:loadTest id="bfc504c1-7072-493f-8fd8-b8b214012423" name="LoadTest 1">
-        <con:settings/>
+        <con:settings>
+            <con:setting id="HttpSettings@close-connections">false</con:setting>
+        </con:settings>
         <con:threadCount>8</con:threadCount>
         <con:startDelay>0</con:startDelay>
         <con:sampleInterval>250</con:sampleInterval>
@@ -23482,7 +23519,9 @@ Domibus.swapJdbcUrls("Green","Red",testRunner,log);
 </con:config>
 </con:testStep>
     <con:loadTest id="6411ed7e-39e0-4421-b8e8-9a4ed689cd78" name="LoadTest 1">
-        <con:settings/>
+        <con:settings>
+            <con:setting id="HttpSettings@close-connections">false</con:setting>
+        </con:settings>
         <con:threadCount>4</con:threadCount>
         <con:startDelay>0</con:startDelay>
         <con:sampleInterval>250</con:sampleInterval>
@@ -23865,7 +23904,7 @@ test.finalize();*/
     <con:properties>
         <con:property>
             <con:name>localUrl</con:name>
-            <con:value>http://localhost:8080/domibus</con:value>
+            <con:value>http://localhost:7001/domibus-weblogic</con:value>
         </con:property>
         <con:property>
             <con:name>databaseBlue</con:name>
