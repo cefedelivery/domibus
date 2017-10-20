@@ -21,7 +21,6 @@
         <module>Domibus-plugin-api</module>
         <module>Domibus-MSH-fiware</module>
         <module>Domibus-MSH-test</module>
-        <module>Domibus-MSH-db-util</module>
     </modules>
     <properties>
         <cxf.version>3.1.7</cxf.version>
