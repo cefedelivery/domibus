@@ -1,13 +1,19 @@
 ﻿import {Component, EventEmitter, TemplateRef, ViewChild} from "@angular/core";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
-import {Http, Response} from "@angular/http";
+import {Http, Headers, Response} from "@angular/http";
 import {AlertService} from "app/alert/alert.service";
 import {MdDialog} from "@angular/material";
 import {isNullOrUndefined} from "util";
-import {PmodeUploadComponent} from "../pmode-upload/pmode-upload.component";
+import {PmodeUploadComponent} from "./pmode-upload/pmode-upload.component";
 import * as FileSaver from "file-saver";
 import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
+import {RollbackDialogComponent} from "app/pmode/rollback-dialog/rollback-dialog.component";
+import {SecurityService} from "../security/security.service";
+import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
+import {DirtyOperations} from "../common/dirty-operations";
+import {RollbackDirtyDialogComponent} from "./rollback-dirty-dialog/rollback-dirty-dialog.component";
+import {PmodeDirtyUploadComponent} from "./pmode-dirty-upload/pmode-dirty-upload.component";
 
 @Component({
   moduleId: module.id,
@@ -19,7 +25,7 @@ import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.compo
 /**
  * PMode Component Typescript
  */
-export class PModeComponent {
+export class PModeComponent implements DirtyOperations {
   private ERROR_PMODE_EMPTY = "As PMode is empty, no file was downloaded.";
   private url = "rest/pmode";
 
@@ -50,7 +56,8 @@ export class PModeComponent {
 
   pModeInformationGot = new EventEmitter(false);
 
-  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog,
+              private securityService: SecurityService) {
   }
 
   /**
@@ -120,69 +127,15 @@ export class PModeComponent {
     });
   }
 
-  /*getPModeEntries(offset: number, pageSize: number): Observable<PModeResult> {
-    let searchParams: URLSearchParams = new URLSearchParams();
-    searchParams.set('page', offset.toString());
-    searchParams.set('pageSize', pageSize.toString());
-
-    return this.http.get(this.url + "/list", {search:searchParams}).map((response: Response) =>
-      response.json()
-    );
-  }*/
-
   page(offset, pageSize) {
     this.loading = true;
 
     this.offset = offset;
 
-    /*let array = this.allPModes.slice();
-    array.slice(offset * pageSize, offset * pageSize + pageSize);
-    this.rows = array.slice();*/
-
     this.rows = this.allPModes.slice(offset * pageSize, offset * pageSize + pageSize);
     this.count = this.allPModes.length;
 
     this.loading = false;
-
-    /*this.getPModeEntries(offset, pageSize).subscribe((result: any) => {
-      this.offset = offset;
-      this.rowLimiter.pageSize = pageSize;
-
-      const start = offset * pageSize;
-      const end = start + pageSize;
-
-      this.count = result.length;
-
-      const newRows = [];
-
-      let index = 0;
-      for (let i = start; i < end; i++) {
-        newRows[index++] = result[i];
-      }
-
-      this.rows = newRows;
-
-      if(offset == 0) {
-        this.rows[0].current = true;
-        this.rows[0].description = "[CURRENT]: " + this.rows[0].description;
-        this.actualId = this.rows[0].id;
-        this.pModeInformationGot.emit();
-      }
-
-      this.loading = false;
-
-    }, (error: any) => {
-        console.log("error getting the PMode Archive:" + error);
-        this.loading = false;
-        this.alertService.error("Error occured:" + error);
-      });*/
-
-/*    this.http.get(this.url + "/list").subscribe( res => {
-      this.rows = res.json();
-      //this.rows[0].current = true;
-      //this.rows[0].description += " (current)";
-      this.count = this.rows.length;
-    });*/
   }
 
   /**
@@ -214,6 +167,8 @@ export class PModeComponent {
   onSelect({selected}) {
     console.log('Select Event', selected, this.selected);
     if (isNullOrUndefined(selected) || selected.length == 0) {
+      this.disabledSave = true;
+      this.disabledCancel = true;
       this.disabledDownload = true;
       this.disabledDelete = true;
       this.disabledRollback = true;
@@ -230,18 +185,36 @@ export class PModeComponent {
    * @param event
    */
   onActivate(event) {
-    // console.log('Activate Event', event);
-
-    /*if ("dblclick" === event.type) {
-      this.details(event.row);
-    }*/
   }
 
   /**
    *
    */
   saveButton() {
-    this.actualId = this.allPModes[0].id;
+    let headers = new Headers({'Content-Type': 'application/json'});
+    let dialogRef = this.dialog.open(SaveDialogComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+        this.http.put(this.url + "/addAll", JSON.stringify(this.allPModes), {headers: headers}).subscribe( result => {
+          this.alertService.success("The operation 'update pmodes' completed successfully.", false);
+          this.disabledSave = true;
+          this.disabledCancel = true;
+          this.disabledDownload = true;
+          this.disabledDelete = true;
+          this.disabledRollback = true;
+          this.selected = [];
+        },
+          error => {
+            this.alertService.error("The operation 'update pmodes' not completed successfully.", false);
+            this.disabledSave = false;
+            this.disabledCancel = false;
+            this.disabledDownload = true;
+            this.disabledDelete = true;
+            this.disabledRollback = true;
+            this.selected = [];
+          });
+      }
+    });
   }
 
   /**
@@ -252,11 +225,17 @@ export class PModeComponent {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.initializeArchivePmodes();
-        this.disabledCancel = true;
         this.disabledSave = true;
-        this.selected = [];
+        this.disabledCancel = true;
+      } else {
+        this.disabledSave = false;
+        this.disabledCancel = false;
       }
     });
+    this.disabledDownload = true;
+    this.disabledDelete = true;
+    this.disabledRollback = true;
+    this.selected = [];
   }
 
   /**
@@ -282,11 +261,16 @@ export class PModeComponent {
     this.rows = array.slice();
     this.count--;
 
-    this.disabledSave = false;
-    this.disabledCancel = false;
     setTimeout(() => {
       this.selected = [];
-    }, 50);
+      this.disabledSave = false;
+      this.disabledCancel = false;
+      this.disabledDownload = true;
+      this.disabledDelete = true;
+      this.disabledRollback = true;
+    }, 100);
+
+
   }
 
   /**
@@ -304,49 +288,92 @@ export class PModeComponent {
 
     this.disabledSave = false;
     this.disabledCancel = false;
+    this.disabledDownload = true;
     this.disabledDelete = true;
+    this.disabledRollback = true;
     this.selected = [];
   }
 
   /**
+   * Rollbacks the PMode for the selected row
+   * - Creates a similar entry like @param selectedRow
+   * - Sets that entry as current
    *
-   * @param row
+   * @param selectedRow Selected Row
    */
-  rollbackArchive(row) {
-    //this.rows[row].current = true;
-    //this.rows[row].description = "[CURRENT]: " + this.rows[row].description;
-    //let array = this.rows.slice();
-    /*for(let i = this.rowLimiter.pageSize; i > 0; i--) {
-      array[i] = array[i-1];
-    }*/
-    //array[0].configurationDate = new Date();
-    //array[0].username = "admin";
-    //array[0].description = "Rolled back to " + this.rows[row].description;
-    //this.rows = array;
+  rollbackArchive(selectedRow) {
+    if(!this.isDirty()) {
+      let dialogRef = this.dialog.open(RollbackDialogComponent);
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.allPModes[this.actualRow].current = false;
+          let input = new FormData();
+          input.append('rolledbackId', selectedRow.id);
+          this.http.post(this.url + "/add", input).subscribe(res => {
+            this.actualRow = 0;
 
-    //this.actualId = this.rows[row].id;
-    //this.actualRow = row;
+            setTimeout(() => {
+              this.getAllPModeEntries();
+            }, 100);
+            this.disabledDelete = true;
+            this.disabledRollback = true;
+            this.disabledDownload = true;
 
-    this.allPModes[this.actualRow].current = false;
-    let elem = {id: row.id,
-                configurationDate: new Date(),
-                current: true,
-                description: "rolledBack " + row.description + " (" + new Date(row.configurationDate).toDateString()  + ")",
-                username: "migueti"};
-    this.actualRow = 0;
+          });
+        }
+      });
+    } else {
+      let dialogRef = this.dialog.open(RollbackDirtyDialogComponent);
+      dialogRef.afterClosed().subscribe(result => {
+        if (result === 'first') {
+          let headers = new Headers({'Content-Type': 'application/json'});
+          this.http.put(this.url + "/addAll", JSON.stringify(this.allPModes), {headers: headers}).subscribe( result => {
+              this.alertService.success("The operation 'update pmodes' completed successfully.", false);
+              this.disabledSave = true;
+              this.disabledCancel = true;
+              this.disabledDownload = true;
+              this.disabledDelete = true;
+              this.disabledRollback = true;
+              this.selected = [];
+              this.allPModes[this.actualRow].current = false;
+              let input = new FormData();
+              input.append('rolledbackId', selectedRow.id);
+              this.http.post(this.url + "/add", input).subscribe(res => {
+                this.actualRow = 0;
 
-    this.allPModes.unshift(elem);
-    this.count++;
+                setTimeout(() => {
+                  this.getAllPModeEntries();
+                }, 100);
+              });
+            },
+            error => {
+              this.alertService.error("The operation 'update pmodes' not completed successfully.", false);
+              this.disabledSave = false;
+              this.disabledCancel = false;
+              this.disabledDownload = true;
+              this.disabledDelete = true;
+              this.disabledRollback = true;
+              this.selected = [];
+            });
+        } else if (result === 'third') {
+          this.allPModes[this.actualRow].current = false;
+          let input = new FormData();
+          input.append('rolledbackId', selectedRow.id);
+          this.http.post(this.url + "/add", input).subscribe(res => {
+            this.actualRow = 0;
 
-    this.page(0, this.rowLimiter.pageSize);
+            setTimeout(() => {
+              this.getAllPModeEntries();
+            }, 100);
+          });
+        }
+        this.disabledDelete = true;
+        this.disabledRollback = true;
+        this.disabledDownload = true;
+        this.selected = [];
 
-    this.disabledSave = false;
-    this.disabledCancel = false;
-
-    setTimeout(() => {
-      this.selected = [this.allPModes[0]];
-    }, 50);
-
+      });
+    }
   }
 
   /**
@@ -371,10 +398,46 @@ export class PModeComponent {
    *
    */
   upload() {
-    let dialogRef = this.dialog.open(PmodeUploadComponent);
-    dialogRef.componentInstance.onPModeUploaded.subscribe(result => {
-      this.checkPmodeActive();
-    });
+    if(this.isDirty()) {
+      let dialogRef = this.dialog.open(PmodeDirtyUploadComponent);
+      dialogRef.afterClosed().subscribe(result => {
+        if (result === 'first') {
+          let headers = new Headers({'Content-Type': 'application/json'});
+          this.http.put(this.url + "/addAll", JSON.stringify(this.allPModes), {headers: headers}).subscribe( result => {
+              this.disabledSave = true;
+              this.disabledCancel = true;
+              this.disabledDownload = true;
+              this.disabledDelete = true;
+              this.disabledRollback = true;
+              this.selected = [];
+
+              let dialogRef = this.dialog.open(PmodeUploadComponent);
+              dialogRef.componentInstance.onPModeUploaded.subscribe(result => {
+                this.initializeArchivePmodes();
+              });
+            },
+            error => {
+              this.alertService.error("The operation 'update pmodes' not completed successfully.", false);
+              this.disabledSave = false;
+              this.disabledCancel = false;
+              this.disabledDownload = true;
+              this.disabledDelete = true;
+              this.disabledRollback = true;
+              this.selected = [];
+            });
+        } else if (result === 'third') {
+          let dialogRef = this.dialog.open(PmodeUploadComponent);
+          dialogRef.componentInstance.onPModeUploaded.subscribe(result => {
+            this.initializeArchivePmodes();
+          });
+        }
+      });
+    } else {
+      let dialogRef = this.dialog.open(PmodeUploadComponent);
+      dialogRef.componentInstance.onPModeUploaded.subscribe(result => {
+        this.initializeArchivePmodes();
+      });
+    }
   }
 
   /**

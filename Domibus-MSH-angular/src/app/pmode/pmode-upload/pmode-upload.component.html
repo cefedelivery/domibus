@@ -4,10 +4,10 @@
     <md-card-content>
       <div class="divTableRow">
         <div class="divTableCell">
-          <input #fileInput type="file" id="pmode" accept=".xml" (change)="checkFileAndDescription()" required>
+          <input #fileInput type="file" id="pmode" accept=".xml" (change)="checkFileAndDescription()" required on>
 
           <md-input-container>
-            <input mdInput placeholder="Description" name="description" [(ngModel)]="description" id="description_id" (change)="checkFileAndDescription()" required>
+            <input mdInput placeholder="Description" name="description" [(ngModel)]="description" id="description_id" (input)="checkFileAndDescription()" required>
           </md-input-container>
         </div>
         <div class="divTableCell">

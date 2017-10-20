@@ -35,7 +35,7 @@ public class PModeResourceTest {
         // Given
         final byte[] byteA = new byte[]{1, 0, 1};
         new Expectations() {{
-            pModeProvider.getRawConfiguration(0);
+            pModeProvider.getPModeFile(0);
             result = byteA;
         }};
 
@@ -51,7 +51,7 @@ public class PModeResourceTest {
         // Given
         final byte[] byteA = new byte[]{};
         new Expectations() {{
-            pModeProvider.getRawConfiguration(0);
+            pModeProvider.getPModeFile(0);
             result = byteA;
         }};
 

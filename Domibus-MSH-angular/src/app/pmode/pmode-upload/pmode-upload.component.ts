@@ -1,6 +1,6 @@
 import {Component, EventEmitter, OnInit, ViewChild} from '@angular/core';
 import {MdDialogRef} from "@angular/material";
-import {AlertService} from "../alert/alert.service";
+import {AlertService} from "../../alert/alert.service";
 import {Http} from "@angular/http";
 
 @Component({

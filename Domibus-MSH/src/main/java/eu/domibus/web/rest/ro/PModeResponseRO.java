@@ -1,5 +1,9 @@
 package eu.domibus.web.rest.ro;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.util.Date;
 
 public class PModeResponseRO {
@@ -48,5 +52,36 @@ public class PModeResponseRO {
 
     public void setCurrent(boolean current) {
         this.current = current;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PModeResponseRO that = (PModeResponseRO) o;
+
+        return new EqualsBuilder()
+                .append(id, that.id)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(id)
+                .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("configurationDate", configurationDate)
+                .append("username", username)
+                .append("description", description)
+                .append("current", current)
+                .toString();
     }
 }

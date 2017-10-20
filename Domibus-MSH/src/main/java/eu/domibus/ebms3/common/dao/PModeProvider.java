@@ -92,14 +92,32 @@ public abstract class PModeProvider {
 
     public abstract boolean isConfigurationLoaded();
 
-    public byte[] getRawConfiguration(int id) {
+    public byte[] getPModeFile(int id) {
+        final ConfigurationRaw rawConfiguration = getRawConfiguration(id);
+        if(rawConfiguration != null) {
+            return rawConfiguration.getXml();
+        }
+        return new byte[0];
+    }
+
+    public ConfigurationRaw getRawConfiguration(int id) {
         final List<ConfigurationRaw> list = this.configurationRawDAO.getList();
         for(ConfigurationRaw configurationRaw : list) {
             if(configurationRaw.getEntityId() == id) {
-                return configurationRaw.getXml();
+                return configurationRaw;
             }
         }
-        return new byte[0];
+        return null;
+    }
+
+    public void insertPMode(ConfigurationRaw configurationRaw) {
+        LOG.debug("Inserting new PMode" + configurationRaw);
+        configurationRawDAO.create(configurationRaw);
+    }
+
+    public void removePModes(List<ConfigurationRaw> removePModes) {
+        LOG.debug("Removing PModes" + removePModes);
+        configurationRawDAO.deleteAll(removePModes);
     }
 
     public List<ConfigurationRaw> getRawConfigurationList() {

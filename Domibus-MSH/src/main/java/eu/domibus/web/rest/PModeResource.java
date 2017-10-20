@@ -16,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,7 +41,7 @@ public class PModeResource {
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = "application/xml")
     public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value="id") int id) {
 
-        final byte[] rawConfiguration = pModeProvider.getRawConfiguration(id);
+        final byte[] rawConfiguration = pModeProvider.getPModeFile(id);
         ByteArrayResource resource = new ByteArrayResource(new byte[0]);
         if (rawConfiguration != null) {
             resource = new ByteArrayResource(rawConfiguration);
@@ -79,6 +81,33 @@ public class PModeResource {
         }
     }
 
+    @RequestMapping(value = {"/addAll"}, method = RequestMethod.PUT)
+    public ResponseEntity<String> uploadAllPmodes(@RequestBody List<PModeResponseRO> pmodesROS) {
+        List<PModeResponseRO> toDelete = pmodeList();
+        toDelete.removeAll(pmodesROS);
+
+        pModeProvider.removePModes(convertPModeResponseROs(toDelete));
+
+        return ResponseEntity.ok("OK to upload the PMode file\n");
+    }
+
+    @RequestMapping(value = {"/add"}, method = RequestMethod.POST)
+    public ResponseEntity<String> uploadPmode(@RequestParam("rolledbackId") Integer rolledbackId) {
+        ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(rolledbackId);
+        rawConfiguration.setEntityId(0);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ssZ");
+        rawConfiguration.setDescription("Reverted to version of " + sdf.format(rawConfiguration.getConfigurationDate()));
+        rawConfiguration.setConfigurationDate(new Date());
+
+        try {
+            pModeProvider.insertPMode(rawConfiguration);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload new PMode due to: \n" + e.getMessage());
+        }
+        return ResponseEntity.ok("PMode was successfully uploaded.");
+    }
+
     @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
     public List<PModeResponseRO> pmodeList() {
         return convertRawConfigurationList(pModeProvider.getRawConfigurationList());
@@ -91,8 +120,20 @@ public class PModeResource {
             pModeResponseRO.setId(configurationRaw.getEntityId());
             pModeResponseRO.setConfigurationDate(configurationRaw.getConfigurationDate());
             pModeResponseRO.setDescription(configurationRaw.getDescription());
-            pModeResponseRO.setUsername("username"); //TODO: migueti: Missing username information
+            pModeResponseRO.setUsername("admin"); //TODO: migueti: Missing username information
             result.add(pModeResponseRO);
+        }
+        return result;
+    }
+
+    private List<ConfigurationRaw> convertPModeResponseROs(List<PModeResponseRO> pModeResponseROList) {
+        List<ConfigurationRaw> result = new ArrayList<>();
+        for(PModeResponseRO pModeResponseRO : pModeResponseROList) {
+            ConfigurationRaw configurationRaw = new ConfigurationRaw();
+            configurationRaw.setEntityId(pModeResponseRO.getId());
+            configurationRaw.setConfigurationDate(pModeResponseRO.getConfigurationDate());
+            configurationRaw.setDescription(pModeResponseRO.getDescription());
+            result.add(configurationRaw);
         }
         return result;
     }

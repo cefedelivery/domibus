@@ -1,0 +1,40 @@
+<div style="width: 1000px;text-align: center">
+  <h1 md-dialog-title>
+    You have previously deleted entries from the Archive. You will now upload another PMode:
+  </h1>
+  <h2 md-dialog-title>
+    If you want to keep your changes and upload, click "Ok".<br>
+    If you want to postpone the upload and keep your changes, click "Cancel".<br>
+    If you want to revert your changes, click "Upload only".<br>
+  </h2>
+
+  <div class="divTable">
+    <div class="divTableBody">
+
+      <div class="divTableRow">
+
+        <div class="divTableCell">
+          <button md-raised-button color="primary" (click)="dialogRef.close('first')" id="okbuttondialog_id">
+            <md-icon>check_circle</md-icon>
+            <span>OK</span>
+          </button>
+        </div>
+
+        <div class="divTableCell">
+          <button md-raised-button color="primary" (click)="dialogRef.close('second')" id="cancelbuttondialog_id">
+            <md-icon>cancel</md-icon>
+            <span>Cancel</span>
+          </button>
+        </div>
+
+        <div class="divTableCell">
+          <button md-raised-button color="primary" (click)="dialogRef.close('third')" id="uploadbuttondialog_id">
+            <md-icon>file_upload</md-icon>
+            <span>Upload Only</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

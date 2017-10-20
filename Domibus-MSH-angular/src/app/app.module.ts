@@ -41,7 +41,7 @@ import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
 import {MessageLogComponent} from "./messagelog/messagelog.component";
 import {UserComponent} from "./user/user.component";
 import {TruststoreComponent} from "./truststore/truststore.component";
-import {PmodeUploadComponent} from "./pmode-upload/pmode-upload.component";
+import {PmodeUploadComponent} from "./pmode/pmode-upload/pmode-upload.component";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MessagelogDialogComponent} from "./messagelog/messagelog-dialog/messagelog-dialog.component";
 import {JmsComponent} from "./jms/jms.component";
@@ -62,6 +62,9 @@ import {TrustStoreUploadComponent} from "./truststore/truststore-upload/truststo
 import {ColumnPickerComponent} from "./common/column-picker/column-picker.component";
 import {PageHelperComponent} from "./common/page-helper/page-helper.component";
 import {SharedModule} from "./common/module/SharedModule";
+import {RollbackDialogComponent} from "./pmode/rollback-dialog/rollback-dialog.component";
+import {RollbackDirtyDialogComponent} from "./pmode/rollback-dirty-dialog/rollback-dirty-dialog.component";
+import {PmodeDirtyUploadComponent} from "./pmode/pmode-dirty-upload/pmode-dirty-upload.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -99,7 +102,10 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TrustStoreUploadComponent,
     ColumnPickerComponent,
     TrustStoreUploadComponent,
-    PageHelperComponent
+    PageHelperComponent,
+    RollbackDialogComponent,
+    RollbackDirtyDialogComponent,
+    PmodeDirtyUploadComponent
   ],
   entryComponents: [
     AppComponent,
@@ -115,7 +121,10 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     ErrorlogDetailsComponent,
     EditUserComponent,
     TruststoreDialogComponent,
-    TrustStoreUploadComponent
+    TrustStoreUploadComponent,
+    RollbackDialogComponent,
+    RollbackDirtyDialogComponent,
+    PmodeDirtyUploadComponent
   ],
   imports: [
     BrowserModule,
