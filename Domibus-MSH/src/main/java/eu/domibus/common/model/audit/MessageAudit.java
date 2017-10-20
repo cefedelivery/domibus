@@ -11,6 +11,8 @@ import java.util.Date;
 /**
  * @author Thomas Dussart
  * @since 4.0
+ *
+ * Entity used to track actions on the Admin console Message log page.
  */
 @Entity
 @DiscriminatorValue("Message")
@@ -21,7 +23,11 @@ public class MessageAudit extends AbstractGenericAudit {
     public MessageAudit() {
     }
 
-    public MessageAudit(final String id, final String userName, final Date revisionDate, final ModificationType modificationType) {
+    public MessageAudit(
+            final String id,
+            final String userName,
+            final Date revisionDate,
+            final ModificationType modificationType) {
         super(id, userName, revisionDate, modificationType);
     }
 }

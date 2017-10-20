@@ -83,17 +83,24 @@ public class RevisionLog extends DefaultRevisionEntity {
         revisionTypes.add(enversAudit);
 
 
-        //remove every entry with higher audit order. (Eg: when you update a PMODE, you also update a PARTY, but in the audit system you juste want to see update pmode).
+        //remove every entry with higher audit order. (Eg: when you update a PMODE, you also update and/or add a a PARTY , but in the audit system you just want that an action has been made on the pmode).
         Optional<Integer> min = this.revisionTypes.stream().map(EnversAudit::getAuditOrder).min(Integer::compareTo);
         min.ifPresent(integer -> revisionTypes.removeIf(r -> r.getAuditOrder() > integer));
 
-        //Group Audit entity by id in order to remove modification in case of an addition in the samre revision.
+        //If an entity is added and then modified in the same revision, envers will trigger ADD then MOD. In ower audit system we only
+        //want to see that an entity has been added eg:User/ADD. So ADD wil have a lower order that MOD, and mod will not be saved in the central audit table.
+        //Of course the full action perfomed on the entity can be retrieved in the entity audit specific audit table.
+
+        //group entities version on their ids.
         Map<String, List<EnversAudit>> collect = revisionTypes.stream()
                 .collect(Collectors.groupingBy(e -> e.getId()));
+        //Iterate over a collection of same entity ids.
         for (List<EnversAudit> enversAudits : collect.values()) {
+            //retrieve the entity wih min modification type.
             min = enversAudits.stream().map(EnversAudit::getModificationType).map(ModificationType::getOrder).min(Integer::compareTo);
-            //Keep only the one with higher order, the one that we want to elinate.
+            //Remove the entity from the temporary list and Keep only the one with higher order, the one that we want to eliminate.
             min.ifPresent(integer -> enversAudits.removeIf(r -> r.getModificationType().getOrder() == integer));
+            //substract temporary list from global entity list.
             revisionTypes.removeAll(enversAudits);
         }
     }

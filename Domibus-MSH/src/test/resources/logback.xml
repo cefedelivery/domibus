@@ -13,5 +13,4 @@
     <root level="INFO">
         <appender-ref ref="stdout"/>
     </root>
-    <logger name="eu.domibus.common.model.common.RevisionLog" level="DEBUG"/>
 </configuration>

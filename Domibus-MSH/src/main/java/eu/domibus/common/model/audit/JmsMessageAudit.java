@@ -12,6 +12,9 @@ import java.util.Date;
 /**
  * @author Thomas Dussart
  * @since 4.0
+ *
+ * Entity used to track actions on the Admin console Jms Monitoring page.
+ *
  */
 
 @Entity

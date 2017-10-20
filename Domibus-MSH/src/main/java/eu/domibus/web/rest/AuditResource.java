@@ -38,6 +38,12 @@ public class AuditResource {
     @Autowired
     private AuditService auditService;
 
+    /**
+     * Entry point of the Audit rest service to list the system audit logs.
+     *
+     * @param auditCriteria the audit criteria used to filter the returned list.
+     * @return an audit list.
+     */
     @RequestMapping(value = {"/list"}, method = RequestMethod.POST)
     public List<AuditResponseRo> listAudits(@RequestBody AuditCriteria auditCriteria) {
         if (LOG.isDebugEnabled()) {

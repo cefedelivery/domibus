@@ -57,14 +57,31 @@ public interface AuditService {
      */
     List<String> listAuditTarget();
 
+    /**
+     * Add message download audit for a message.
+     *
+     * @param messageId the id of the message.
+     */
     void addMessageDownloadedAudit(String messageId);
 
+    /**
+     * Add message resent audit for a message.
+     * @param messageId the id of the message.
+     */
     void addMessageResentAudit(String messageId);
 
+    /**
+     * Add message deleted audit for a jms message.
+     * @param messageId the id of the message.
+     */
     void addJmsMessageDeletedAudit(
             String messageId,
             String fromQueue, String toQueue);
 
+    /**
+     * Add message moved audit for a message.
+     * @param messageId the id of the message.
+     */
     void addJmsMessageMovedAudit(
             String messageId,
             String fromQueue, String toQueue);

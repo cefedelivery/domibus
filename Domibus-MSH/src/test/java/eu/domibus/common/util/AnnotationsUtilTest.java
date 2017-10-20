@@ -1,5 +1,6 @@
 package eu.domibus.common.util;
 
+import eu.domibus.common.model.audit.JmsMessageAudit;
 import eu.domibus.common.model.audit.MessageAudit;
 import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.common.model.configuration.Configuration;
@@ -23,6 +24,7 @@ public class AnnotationsUtilTest {
         assertEquals("Party", annotationsUtil.getValue(Party.class, RevisionLogicalName.class).get());
         assertEquals("User", annotationsUtil.getValue(User.class, RevisionLogicalName.class).get());
         assertEquals("Message filter", annotationsUtil.getValue(BackendFilterEntity.class, RevisionLogicalName.class).get());
+        assertEquals("Jms message", annotationsUtil.getValue(JmsMessageAudit.class, RevisionLogicalName.class).get());
     }
 
 }

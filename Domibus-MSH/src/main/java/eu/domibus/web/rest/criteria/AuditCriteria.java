@@ -6,20 +6,45 @@ import java.util.Set;
 /**
  * @author Thomas Dussart
  * @since 4.0
+ *
+ * Criteria class to filter the audit logs.
  */
 public class AuditCriteria {
 
+    /**
+     * Type of audit.
+     */
     private Set<String> auditTargetName;
 
+    /**
+     * Type of action linked with audit.
+     */
     private Set<String> action;
 
+    /**
+     * the user that perfomed the audited action.
+     */
     private Set<String> user;
 
+    /**
+     * Date from which we want to retrieve audit logs.
+     */
     private Date from;
 
+    /**
+     * Date from which we want to retrieve audit logs.
+     */
     private Date to;
 
-    private int start, max;
+    /**
+     * The index we want to start from in the list (Page number in pagination system)
+     */
+    private int start;
+
+    /**
+     * The number of reccords we want to retrieve.
+     */
+    private int max;
 
     public Set<String> getAuditTargetName() {
         return auditTargetName;

@@ -99,6 +99,9 @@ public class AuditServiceImpl implements AuditService {
                         collect(Collectors.toList());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addMessageDownloadedAudit(final String messageId) {
         auditDao.saveMessageAudit(
@@ -108,6 +111,9 @@ public class AuditServiceImpl implements AuditService {
                         ModificationType.DOWNLOADED));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addMessageResentAudit(final String messageId) {
         auditDao.saveMessageAudit(
@@ -117,6 +123,9 @@ public class AuditServiceImpl implements AuditService {
                         ModificationType.RESENT));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addJmsMessageDeletedAudit(
             final String messageId,
@@ -125,11 +134,13 @@ public class AuditServiceImpl implements AuditService {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addJmsMessageMovedAudit(
             final String messageId,
             final String fromQueue, final String toQueue) {
-        ModificationType modificationType = ModificationType.DEL;
         saveJmsMessage(messageId, fromQueue, toQueue, ModificationType.DEL);
 
     }
