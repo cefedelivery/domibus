@@ -1,6 +1,8 @@
 package eu.domibus.common.dao;
 
 import eu.domibus.common.model.audit.Audit;
+import eu.domibus.common.model.audit.JmsMessageAudit;
+import eu.domibus.common.model.audit.MessageAudit;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.collections.CollectionUtils;
@@ -145,5 +147,15 @@ public class AuditDaoImpl implements AuditDao {
         if (!predicates.isEmpty()) {
             criteriaQuery.where(predicates.toArray(new Predicate[]{}));
         }
+    }
+
+    @Override
+    public void saveMessageAudit(final MessageAudit messageAudit) {
+        entityManager.persist(messageAudit);
+    }
+
+    @Override
+    public void saveJmsMessageAudit(final JmsMessageAudit jmsMessageAudit) {
+        entityManager.persist(jmsMessageAudit);
     }
 }

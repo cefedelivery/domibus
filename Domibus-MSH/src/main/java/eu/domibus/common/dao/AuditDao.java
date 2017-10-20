@@ -1,6 +1,8 @@
 package eu.domibus.common.dao;
 
 import eu.domibus.common.model.audit.Audit;
+import eu.domibus.common.model.audit.JmsMessageAudit;
+import eu.domibus.common.model.audit.MessageAudit;
 
 import java.util.Date;
 import java.util.List;
@@ -26,4 +28,7 @@ public interface AuditDao {
                     Date from,
                     Date to);
 
+    void saveMessageAudit(MessageAudit messageAudit);
+
+    void saveJmsMessageAudit(JmsMessageAudit jmsMessageAudit);
 }

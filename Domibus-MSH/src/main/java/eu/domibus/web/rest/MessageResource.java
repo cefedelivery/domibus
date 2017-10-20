@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.services.AuditService;
 import eu.domibus.core.message.MessageConverterService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
@@ -43,6 +44,9 @@ public class MessageResource {
     @Autowired
     private MessagingDao messagingDao;
 
+    @Autowired
+    private AuditService auditService;
+
 
     @RequestMapping(path = "{messageId:.+}/restore", method = RequestMethod.PUT)
     public void resend(@PathVariable(value = "messageId") String messageId) {
@@ -64,6 +68,7 @@ public class MessageResource {
             }
         }
 
+        auditService.addMessageDownloadedAudit(messageId);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
                 .header("content-disposition", "attachment; filename=" + messageId + ".xml")

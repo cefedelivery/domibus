@@ -31,6 +31,7 @@ export class AuditComponent implements OnInit {
   actions = [];
   from: Date;
   to: Date;
+  loading: boolean = false;
 
 //--- Table binding ---
   rows = [];
@@ -67,15 +68,21 @@ export class AuditComponent implements OnInit {
   }
 
   searchAndCount() {
+    this.loading = true;
     this.offset = 0;
     let auditCriteria: AuditCriteria = this.buildCriteria();
     let auditLogsObservable = this.auditService.listAuditLogs(auditCriteria);
     let auditCountOservable: Observable<number> = this.auditService.countAuditLogs(auditCriteria);
-    auditLogsObservable.subscribe((response: AuditResponseRo[]) => this.rows = response,
+    auditLogsObservable.subscribe((response: AuditResponseRo[]) => {
+        this.rows = response;
+        this.loading = false;
+      },
       error => {
-        this.alertService.error("Could not load audits " + error)
+        this.alertService.error("Could not load audits " + error);
+        this.loading = false;
       },
       //on complete of auditLogsObservable Observable, we load the count
+      //TODO load this in parrallel and merge the stream at the end.
       () => auditCountOservable.subscribe(auditCount => this.count = auditCount,
         error => this.alertService.error("Could not count audits " + error))
     );
@@ -87,10 +94,12 @@ export class AuditComponent implements OnInit {
   }
 
   searchAuditLog() {
+    this.loading = true;
     let auditCriteria: AuditCriteria = this.buildCriteria();
     let auditLogsObservable = this.auditService.listAuditLogs(auditCriteria);
     auditLogsObservable.subscribe((response: AuditResponseRo[]) => {
       this.rows = response;
+      this.loading = false;
     })
   }
 

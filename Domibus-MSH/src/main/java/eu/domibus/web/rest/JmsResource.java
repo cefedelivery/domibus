@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.common.services.AuditService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.*;
@@ -27,6 +28,9 @@ public class JmsResource {
 
     @Autowired
     JMSManager jmsManager;
+
+    @Autowired
+    private AuditService auditService;
 
     @RequestMapping(value = {"/destinations"}, method = GET)
     public ResponseEntity<DestinationsResponseRO> destinations() {
@@ -76,8 +80,10 @@ public class JmsResource {
 
             if (request.getAction() == MessagesActionRequestRO.Action.MOVE) {
                 jmsManager.moveMessages(request.getSource(), request.getDestination(), ids);
+                messageIds.forEach(m -> auditService.addJmsMessageMovedAudit(m, request.getSource(), request.getDestination()));
             } else if (request.getAction() == MessagesActionRequestRO.Action.REMOVE) {
                 jmsManager.deleteMessages(request.getSource(), ids);
+                messageIds.forEach(m -> auditService.addJmsMessageDeletedAudit(m, request.getSource(), request.getDestination()));
             }
 
             return ResponseEntity.ok()

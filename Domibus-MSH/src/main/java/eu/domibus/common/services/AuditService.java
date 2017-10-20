@@ -57,5 +57,16 @@ public interface AuditService {
      */
     List<String> listAuditTarget();
 
+    void addMessageDownloadedAudit(String messageId);
+
+    void addMessageResentAudit(String messageId);
+
+    void addJmsMessageDeletedAudit(
+            String messageId,
+            String fromQueue, String toQueue);
+
+    void addJmsMessageMovedAudit(
+            String messageId,
+            String fromQueue, String toQueue);
 }
 

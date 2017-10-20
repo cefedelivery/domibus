@@ -16,6 +16,7 @@ import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.services.AuditService;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.SignalMessage;
@@ -84,6 +85,9 @@ public class UserMessageDefaultService implements UserMessageService {
     @Autowired
     private MessageExchangeService messageExchangeService;
 
+    @Autowired
+    private AuditService auditService;
+
     @Override
     public String getFinalRecipient(String messageId) {
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
@@ -137,6 +141,7 @@ public class UserMessageDefaultService implements UserMessageService {
         if (MessageStatus.READY_TO_PULL != newMessageStatus) {
             scheduleSending(messageId);
         }
+        auditService.addMessageResentAudit(messageId);
     }
 
     protected Integer getMaxAttemptsConfiguration(final String messageId) {

@@ -17,12 +17,13 @@ import java.sql.SQLException;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {InMemoryDataBaseConfig.class,
                     OracleDataBaseConfig.class})
-@ActiveProfiles("ORACLE_DATABASE")
+@ActiveProfiles("IN_MEMORY_DATABASE")
 public class AuditTest {
 
     @PersistenceContext
     private javax.persistence.EntityManager em;
 
+    //juste inserting audited entity to verify that envers does not cause any problems.
     @Test
     @Transactional
     public void testSaveEntity() throws SQLException {
@@ -32,32 +33,7 @@ public class AuditTest {
         user.setPassword("test");
         user.setActive(true);
         em.persist(user);
-
-      /*  Configuration configuration = new Configuration();
-        configuration.setMpcs(new HashSet<Mpc>());
-        BusinessProcesses businessProcesses = new BusinessProcesses();
-
-        configuration.setBusinessProcesses(businessProcesses);
-        Party party = new Party();
-        party.setName("Test1");
-        configuration.setParty(party);
-        em.persist(configuration);
-
-        TypedQuery<RevisionLog> query = em.createQuery("From RevisionLog", RevisionLog.class);
-        List<RevisionLog> resultList = query.getResultList();
-        Assert.assertEquals(2, resultList.size());*/
-        /*AuditReader auditReader = AuditReaderFactory.get(em);
-        AuditQuery query = auditReader.createQuery()
-                .forRevisionsOfEntity(AbstractBaseEntity.class, false, false);
-        List resultList = query.getResultList();
-        for (Object o : resultList) {
-
-        }*/
-      /*  User user1 = em.find(User.class, 568);
-        UserRole userRole = em.find(UserRole.class, 1);
-        user1.addRole(userRole);
-        em.persist(user1);*/
-
+        //TODO add the other entities here.(Configuration/Message filter)
     }
 
 }

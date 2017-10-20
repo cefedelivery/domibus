@@ -18,7 +18,19 @@ public enum ModificationType {
     /**
      * Indicates that the entity was deleted.
      */
-    DEL("Deleted", 0);
+    DEL("Deleted", 0),
+    /**
+     * Indicates the message was downloaded.
+     */
+    DOWNLOADED("Downloaded", 3),
+    /**
+     * Indicates the message was resent.
+     */
+    RESEND("Resend", 4),
+    /**
+     * Indicates the message was moved from a queue.
+     */
+    MOVED("Moved", 5);
 
     private final String label;
 

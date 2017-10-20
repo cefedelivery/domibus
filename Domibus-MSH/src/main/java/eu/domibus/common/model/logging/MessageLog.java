@@ -3,7 +3,6 @@ package eu.domibus.common.model.logging;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseAuditEntity;
 import eu.domibus.ebms3.common.model.MessageType;
 
@@ -16,7 +15,6 @@ import java.util.Date;
  */
 @MappedSuperclass
 @DiscriminatorColumn(name = "MESSAGE_TYPE")
-@RevisionLogicalName("Message")
 public abstract class MessageLog extends AbstractBaseAuditEntity {
 
     @Column(name = "MESSAGE_STATUS")

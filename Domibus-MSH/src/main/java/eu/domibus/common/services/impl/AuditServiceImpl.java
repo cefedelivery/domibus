@@ -2,8 +2,12 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.api.audit.AuditLog;
 import eu.domibus.common.dao.AuditDao;
+import eu.domibus.common.model.audit.JmsMessageAudit;
+import eu.domibus.common.model.audit.MessageAudit;
+import eu.domibus.common.model.common.ModificationType;
 import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.common.services.AuditService;
+import eu.domibus.common.services.UserService;
 import eu.domibus.common.util.AnnotationsUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
 import org.reflections.Reflections;
@@ -36,6 +40,9 @@ public class AuditServiceImpl implements AuditService {
 
     @Autowired
     private AnnotationsUtil annotationsUtil;
+
+    @Autowired
+    private UserService userService;
 
     /**
      * {@inheritDoc}
@@ -90,5 +97,51 @@ public class AuditServiceImpl implements AuditService {
                         map(Optional::get).
                         distinct().
                         collect(Collectors.toList());
+    }
+
+    @Override
+    public void addMessageDownloadedAudit(final String messageId) {
+        auditDao.saveMessageAudit(
+                new MessageAudit(messageId,
+                        userService.getLoggedUserNamed(),
+                        new Date(),
+                        ModificationType.DOWNLOADED));
+    }
+
+    @Override
+    public void addMessageResentAudit(final String messageId) {
+        auditDao.saveMessageAudit(
+                new MessageAudit(messageId,
+                        userService.getLoggedUserNamed(),
+                        new Date(),
+                        ModificationType.RESEND));
+    }
+
+    @Override
+    public void addJmsMessageDeletedAudit(
+            final String messageId,
+            final String fromQueue, final String toQueue) {
+        saveJmsMessage(messageId, fromQueue, toQueue, ModificationType.DEL);
+
+    }
+
+    @Override
+    public void addJmsMessageMovedAudit(
+            final String messageId,
+            final String fromQueue, final String toQueue) {
+        ModificationType modificationType = ModificationType.DEL;
+        saveJmsMessage(messageId, fromQueue, toQueue, ModificationType.DEL);
+
+    }
+
+    private void saveJmsMessage(final String messageId, final String fromQueue, final String toQueue, final ModificationType modificationType) {
+        auditDao.saveJmsMessageAudit(
+                new JmsMessageAudit(
+                        messageId,
+                        userService.getLoggedUserNamed(),
+                        new Date(),
+                        modificationType,
+                        fromQueue,
+                        toQueue));
     }
 }

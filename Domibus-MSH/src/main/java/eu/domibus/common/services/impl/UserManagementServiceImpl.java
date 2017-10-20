@@ -12,6 +12,8 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -122,6 +124,18 @@ public class UserManagementServiceImpl implements UserService {
         List<User> allUsersEntities = userDao.listUsers();
         List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
         userDao.deleteAll(usersEntitiesToDelete);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getLoggedUserNamed() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            return authentication.getName();
+        }
+        return null;
     }
 
     private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
