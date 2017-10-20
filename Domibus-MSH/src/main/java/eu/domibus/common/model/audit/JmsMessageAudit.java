@@ -6,8 +6,8 @@ import eu.domibus.common.model.common.RevisionLogicalName;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
+
 
 /**
  * @author Thomas Dussart
@@ -15,13 +15,13 @@ import java.util.Date;
  */
 
 @Entity
-@Table(name = "TB_ACTION_AUDIT")
-@DiscriminatorValue("MESSAGE_AUDIT")
-@RevisionLogicalName("Message")
+@DiscriminatorValue("Jms message")
+@RevisionLogicalName("Jms message")
 public class JmsMessageAudit extends AbstractGenericAudit {
 
 
     public JmsMessageAudit() {
+
     }
 
     public JmsMessageAudit(
@@ -34,6 +34,7 @@ public class JmsMessageAudit extends AbstractGenericAudit {
         super(id, userName, revisionDate, modificationType);
         this.fromQueue = fromQueue;
         this.toQueue = toQueue;
+
     }
 
     @Column(name = "FROM_QUEUE")

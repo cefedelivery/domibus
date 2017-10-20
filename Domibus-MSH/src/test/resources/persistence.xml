@@ -54,6 +54,8 @@
 
             <property name="hibernate.transaction.jta.platform"
                       value="com.atomikos.icatch.jta.hibernate4.AtomikosPlatform"/>
+            <property name="hibernate.current_session_context_class"
+                      value="jta"/>
             <property name="hibernate.archive.autodetection" value="class"/>
             <property name="hibernate.ConnectionReleaseMode" value="after_statement"/>
             <property name="hibernate.hbm2ddl.auto" value="create-drop"/>

@@ -1,3 +1,6 @@
+Domibus 4.0
+- Add an audit and versionning system for User/Party/Message filter.
+- Add an audit system for Pmode/JmsMessage/Message
 Domibus 3.3
 - Additional validation on pMode upload: when @type is missing or is empty, the value of PartyId, Service and AgreementRef, must be an URI (relative URIs accepted).
 - Use optional regex validation for dynamic discovery certificate. New property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation.

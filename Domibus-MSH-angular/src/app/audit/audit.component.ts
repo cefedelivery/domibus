@@ -1,5 +1,5 @@
 import {Component, OnInit, TemplateRef, ViewChild} from "@angular/core";
-import {AuditService} from "./audit-service.service";
+import {AuditService} from "./audit.service";
 import {UserService} from "../user/user.service";
 import {AlertService} from "../alert/alert.service";
 import {AuditCriteria, AuditResponseRo} from "./audit";

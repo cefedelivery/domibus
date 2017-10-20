@@ -32,7 +32,7 @@ export class AuditService {
   }
 
   listActions(): Observable<string> {
-    return Observable.from(["Created", "Modified", "Deleted"]);
+    return Observable.from(["Created", "Modified", "Deleted", "Downloaded", "Resent", "Moved"]);
   }
 
 }

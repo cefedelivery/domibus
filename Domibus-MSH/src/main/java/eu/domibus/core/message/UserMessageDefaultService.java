@@ -141,7 +141,7 @@ public class UserMessageDefaultService implements UserMessageService {
         if (MessageStatus.READY_TO_PULL != newMessageStatus) {
             scheduleSending(messageId);
         }
-        auditService.addMessageResentAudit(messageId);
+
     }
 
     protected Integer getMaxAttemptsConfiguration(final String messageId) {

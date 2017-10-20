@@ -39,10 +39,6 @@ public class BasicAuditAspect {
         final Date currentDate = new Date(System.currentTimeMillis());
         if (auditEntity.getEntityId() == 0) {
             auditEntity.setCreatedBy(userName);
-            auditEntity.setCreatedOn(currentDate);
-        } else {
-            auditEntity.setModifiedBy(userName);
-            auditEntity.setModifiedOn(currentDate);
         }
     }
 }

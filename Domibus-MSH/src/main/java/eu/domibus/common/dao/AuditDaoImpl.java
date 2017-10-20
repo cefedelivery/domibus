@@ -125,7 +125,7 @@ public class AuditDaoImpl implements AuditDao {
 
         List<Predicate> predicates = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(actions)) {
-            Path<Object> actionField = root.get("action");
+            Path<Object> actionField = root.get("id").get("action");
             predicates.add(actionField.in(actions));
         }
         if (CollectionUtils.isNotEmpty(auditTargets)) {

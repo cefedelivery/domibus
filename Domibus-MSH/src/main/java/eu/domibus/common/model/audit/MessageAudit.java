@@ -5,16 +5,15 @@ import eu.domibus.common.model.common.RevisionLogicalName;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
+
 
 /**
  * @author Thomas Dussart
  * @since 4.0
  */
 @Entity
-@Table(name = "TB_ACTION_AUDIT")
-@DiscriminatorValue("MESSAGE_AUDIT")
+@DiscriminatorValue("Message")
 @RevisionLogicalName("Message")
 public class MessageAudit extends AbstractGenericAudit {
 

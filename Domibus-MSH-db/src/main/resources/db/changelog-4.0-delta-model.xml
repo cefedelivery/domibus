@@ -11,19 +11,7 @@
     <changeSet author="dussath" id="EDELIVERY-1790">
         <addColumn
                 tableName="TB_MESSAGE_LOG">
-            <column type="datetime" name="CREATED_ON"/>
-        </addColumn>
-        <addColumn
-                tableName="TB_MESSAGE_LOG">
-            <column type="datetime" name="MODIFIED_ON"/>
-        </addColumn>
-        <addColumn
-                tableName="TB_MESSAGE_LOG">
             <column type="VARCHAR(255)" name="CREATED_BY"/>
-        </addColumn>
-        <addColumn
-                tableName="TB_MESSAGE_LOG">
-            <column type="VARCHAR(255)" name="MODIFIED_BY"/>
         </addColumn>
 
         <createTable tableName="TB_REV_INFO">
@@ -229,18 +217,37 @@
             <column name="ROLE_ID" type="INT"/>
         </createTable>
 
+        <createTable tableName="TB_ACTION_AUDIT">
+            <column name="AUDIT_TYPE" type="VARCHAR2(31 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column autoIncrement="true" name="ID_PK" type="NUMBER(10, 0)">
+                <constraints primaryKey="true" primaryKeyName="TB_ACTION_AUDITPK"/>
+            </column>
+            <column name="ENTITY_ID" type="VARCHAR2(255 CHAR)"/>
+            <column name="MODIFICATION_TYPE" type="VARCHAR2(255 CHAR)"/>
+            <column name="REVISION_DATE" type="TIMESTAMP"/>
+            <column name="USER_NAME" type="VARCHAR2(255 CHAR)"/>
+            <column name="FROM_QUEUE" type="VARCHAR2(255 CHAR)"/>
+            <column name="TO_QUEUE" type="VARCHAR2(255 CHAR)"/>
+        </createTable>
+
         <createView
                 replaceIfExists="true"
                 viewName="V_AUDIT">
-            SELECT DISTINCT AUDIT_TYPE,ACTION_TYPE,USER_NAME,AUDIT_DATE,ID,REV_ID FROM (
-            SELECT 'MESSAGE' as AUDIT_TYPE,'ADD' as ACTION_TYPE,CREATED_BY AS USER_NAME,CREATED_ON AS
-            AUDIT_DATE,MESSAGE_ID AS ID,'' as REV_ID FROM TB_MESSAGE_LOG WHERE CREATED_ON is not null
+            SELECT * FROM (SELECT
+            DISTINCT rc.GROUP_NAME as AUDIT_TYPE ,
+            rc.MODIFICATION_TYPE as ACTION_TYPE,
+            ri.USER_NAME as USER_NAME ,
+            ri.REVISION_DATE as AUDIT_DATE,
+            '' || rc.ENTITY_ID as ID,
+            '' || ri.ID as REV_ID
+            FROM TB_REV_INFO ri, TB_REV_CHANGES rc
+            WHERE ri.ID=rc.REV
             UNION
-            SELECT 'MESSAGE','MOD',MODIFIED_BY,MODIFIED_ON,MESSAGE_ID,'' as REV_ID FROM TB_MESSAGE_LOG WHERE MODIFIED_ON
-            is not null
-            UNION
-            SELECT rc.GROUP_NAME, rc.MODIFICATION_TYPE, ri.USER_NAME ,ri.REVISION_DATE,''||rc.ENTITY_ID,''||ri.ID FROM
-            TB_REV_INFO ri,TB_REV_CHANGES rc where ri.ID=rc.REV) ORDER BY AUDIT_DATE DESC ,AUDIT_TYPE
+            SELECT aa.AUDIT_TYPE,aa.MODIFICATION_TYPE,aa.USER_NAME,aa.REVISION_DATE,aa.ENTITY_ID,'1' FROM
+            TB_ACTION_AUDIT aa)Q
+            ORDER BY Q.AUDIT_DATE DESC
         </createView>
 
     </changeSet>

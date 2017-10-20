@@ -27,8 +27,6 @@ public abstract class AbstractDatabaseConfig {
         localContainerEntityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         Properties jpaProperties = new Properties();
         jpaProperties.put("hibernate.hbm2ddl.auto","update");
-        jpaProperties.put("org.hibernate.envers.store_data_at_delete", "false");
-        jpaProperties.put("org.hibernate.envers.using_modified_flag", "true");
 
 
         jpaProperties.putAll(getProperties());

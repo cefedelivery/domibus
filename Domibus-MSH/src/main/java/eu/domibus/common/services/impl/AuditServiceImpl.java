@@ -114,7 +114,7 @@ public class AuditServiceImpl implements AuditService {
                 new MessageAudit(messageId,
                         userService.getLoggedUserNamed(),
                         new Date(),
-                        ModificationType.RESEND));
+                        ModificationType.RESENT));
     }
 
     @Override

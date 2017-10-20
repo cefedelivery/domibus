@@ -26,7 +26,7 @@ public enum ModificationType {
     /**
      * Indicates the message was resent.
      */
-    RESEND("Resend", 4),
+    RESENT("Resent", 4),
     /**
      * Indicates the message was moved from a queue.
      */

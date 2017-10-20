@@ -51,6 +51,7 @@ public class MessageResource {
     @RequestMapping(path = "{messageId:.+}/restore", method = RequestMethod.PUT)
     public void resend(@PathVariable(value = "messageId") String messageId) {
         userMessageService.restoreFailedMessage(messageId);
+        auditService.addMessageResentAudit(messageId);
     }
 
     @RequestMapping(path = "{messageId:.+}/downloadOld", method = RequestMethod.GET)
@@ -81,7 +82,7 @@ public class MessageResource {
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         final Map<String, InputStream> message = getMessageWithAttachments(userMessage);
         byte[] zip = zip(message);
-
+        auditService.addMessageDownloadedAudit(messageId);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .header("content-disposition", "attachment; filename=" + messageId + ".zip")

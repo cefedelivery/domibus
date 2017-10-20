@@ -77,6 +77,7 @@
                 <prop key="transaction.factory_class">org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory</prop>
                 <prop key="hibernate.transaction.jta.platform">com.atomikos.icatch.jta.hibernate4.AtomikosPlatform
                 </prop>
+                <prop key="hibernate.current_session_context_class">jta</prop>
                 <prop key="hibernate.hbm2ddl.auto">create-drop</prop>
                 <prop key="hibernate.hbm2ddl.import_files">dataset/database/quartz.sql</prop>
             </props>

@@ -10,7 +10,9 @@ import java.util.Date;
  * @author Thomas Dussart
  * @since 4.0
  */
-@MappedSuperclass
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Table(name = "TB_ACTION_AUDIT")
 @DiscriminatorColumn(name = "AUDIT_TYPE")
 public class AbstractGenericAudit extends AbstractBaseEntity {
 
@@ -26,6 +28,7 @@ public class AbstractGenericAudit extends AbstractBaseEntity {
     @Column(name = "MODIFICATION_TYPE")
     @Enumerated(EnumType.STRING)
     private ModificationType modificationType;
+
 
     public AbstractGenericAudit() {
     }
