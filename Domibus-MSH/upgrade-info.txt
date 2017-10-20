@@ -213,42 +213,8 @@ Domibus 3.3 (from 3.2.5):
                                      </address-setting>
 
                 - [Tomcat only]
-                     o in file \conf\domibus\internal\activemq.xml
-                        - add the following queue in the broker/destinations section:
-                            <broker .....>
-                              .............................
-                              <destinations>
-                              .............................
-                                <queue id="pullMessageQueue" physicalName="domibus.internal.pull.queue"/>
-                                <queue id="filesystemBackendNotificationQueue" physicalName="domibus.notification.filesystem"/>
-                              .............................
-                              </<destinations>>
-                              .............................
-                            </broker>
-                        - add the following two entries in the broker/plugins section like described bellow:
-                             <broker>
-                                  ......
-                                <plugins>
-                                     ......
-                                     <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue" reportInterval="10000"/>
-                                </plugins>
-                             </broker>
-                        - the configuration for the redelivery plugin should now look like the one below:
-                             <redeliveryPlugin fallbackToDeadLetter="true" sendToDlqIfMaxRetriesExceeded="true">
-                                 <redeliveryPolicyMap>
-                                     <redeliveryPolicyMap>
-                                         <defaultEntry>
-                                             <!-- default policy-->
-                                             <redeliveryPolicy maximumRedeliveries="10" redeliveryDelay="300000"/>
-                                         </defaultEntry>
-                                         <redeliveryPolicyEntries>
-                                             <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0"/>
-                                             <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0"/>
-                                         </redeliveryPolicyEntries>
-                                     </redeliveryPolicyMap>
-                                 </redeliveryPolicyMap>
-                             </redeliveryPlugin>
-
+                     o The "\conf\domibus\internal\activemq.xml" file has been considerably modified and has to be replaced.
+                       If custom modification have been done(like adding new queues) re-apply these changes into the new version.
 
                 Optional changes
 
