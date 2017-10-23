@@ -9,6 +9,7 @@ import java.sql.SQLException
 
 import static javax.swing.JOptionPane.showConfirmDialog
 import groovy.util.AntBuilder
+import com.eviware.soapui.support.GroovyUtils
 
 
 class Domibus
@@ -40,7 +41,7 @@ class Domibus
 	// Connect to a schema
 	def connectTo(String database, String driver, String url, String dbUser, String dbPassword){
 		log.info("Open connection to DB: " + database + " Url: " + url);
-		com.eviware.soapui.support.GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
+		//com.eviware.soapui.support.GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
 		def sql = null;
 
         try{
