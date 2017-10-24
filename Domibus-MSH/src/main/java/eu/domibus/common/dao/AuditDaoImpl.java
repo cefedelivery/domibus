@@ -51,11 +51,11 @@ public class AuditDaoImpl implements AuditDao {
         return query.getResultList();
     }
 
-    private CriteriaQuery<Audit> buildAuditListCriteria(final Set<String> auditTargets,
-                                                        final Set<String> actions,
-                                                        final Set<String> users,
-                                                        final Date from,
-                                                        final Date to) {
+    protected CriteriaQuery<Audit> buildAuditListCriteria(final Set<String> auditTargets,
+                                                          final Set<String> actions,
+                                                          final Set<String> users,
+                                                          final Date from,
+                                                          final Date to) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Audit> criteriaQuery = criteriaBuilder.createQuery(Audit.class);
         Root<Audit> root = criteriaQuery.from(Audit.class);
@@ -92,7 +92,7 @@ public class AuditDaoImpl implements AuditDao {
                            final Date from,
                            final Date to) {
         TypedQuery<Long> query = entityManager.createQuery(
-                buildCountListCriteria(
+                buildAuditCountCriteria(
                         auditTargets,
                         actions,
                         users,
@@ -101,11 +101,11 @@ public class AuditDaoImpl implements AuditDao {
         return query.getSingleResult();
     }
 
-    private CriteriaQuery<Long> buildCountListCriteria(final Set<String> auditTargets,
-                                                       final Set<String> actions,
-                                                       final Set<String> users,
-                                                       final Date from,
-                                                       final Date to) {
+    protected CriteriaQuery<Long> buildAuditCountCriteria(final Set<String> auditTargets,
+                                                          final Set<String> actions,
+                                                          final Set<String> users,
+                                                          final Date from,
+                                                          final Date to) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
         Root<Audit> root = criteriaQuery.from(Audit.class);
@@ -114,23 +114,23 @@ public class AuditDaoImpl implements AuditDao {
         return criteriaQuery;
     }
 
-    private void where(final Set<String> auditTargets,
-                       final Set<String> actions,
-                       final Set<String> users,
-                       final Date from,
-                       final Date to,
-                       final CriteriaBuilder criteriaBuilder,
-                       final CriteriaQuery criteriaQuery,
-                       final Root<Audit> root) {
+    protected void where(final Set<String> auditTargets,
+                         final Set<String> actions,
+                         final Set<String> users,
+                         final Date from,
+                         final Date to,
+                         final CriteriaBuilder criteriaBuilder,
+                         final CriteriaQuery criteriaQuery,
+                         final Root<Audit> root) {
 
         List<Predicate> predicates = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(actions)) {
-            Path<Object> actionField = root.get("id").get("action");
-            predicates.add(actionField.in(actions));
-        }
         if (CollectionUtils.isNotEmpty(auditTargets)) {
             Path<Object> auditTargetField = root.get("id").get("auditTargetName");
             predicates.add(auditTargetField.in(auditTargets));
+        }
+        if (CollectionUtils.isNotEmpty(actions)) {
+            Path<Object> actionField = root.get("id").get("action");
+            predicates.add(actionField.in(actions));
         }
         if (CollectionUtils.isNotEmpty(users)) {
             Path<Object> userField = root.get("user");
