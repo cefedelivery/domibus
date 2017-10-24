@@ -13,7 +13,7 @@ Domibus 4.0 (from 3.3):
                     o delete property domibus.entityManagerFactory.jpaProperty.hibernate.transaction.manager_lookup_class
                       and replace it by:
                       - [WebLogic only]
-                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=rg.hibernate.engine.transaction.jta.platform.internal.WeblogicJtaPlatform
+                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.WeblogicJtaPlatform
                       - [Tomcat only]
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=com.atomikos.icatch.jta.hibernate4.AtomikosPlatform
                       - [Wildfly only]
