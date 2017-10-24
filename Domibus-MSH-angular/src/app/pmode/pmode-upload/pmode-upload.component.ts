@@ -12,7 +12,7 @@ export class PmodeUploadComponent implements OnInit {
 
   private url = "rest/pmode";
 
-  onPModeUploaded = new EventEmitter();
+  //onPModeUploaded = new EventEmitter();
 
   enableSubmit = false;
 
@@ -38,12 +38,13 @@ export class PmodeUploadComponent implements OnInit {
     input.append('description', this.description);
     this.http.post(this.url, input).subscribe(res => {
           this.alertService.success(res.text(), false);
-          this.onPModeUploaded.emit();
+          //this.onPModeUploaded.emit();
+          this.dialogRef.close();
         }, err => {
           this.alertService.error(err._body, false);
+          this.dialogRef.close();
         }
       );
-      this.dialogRef.close();
   }
 
 }

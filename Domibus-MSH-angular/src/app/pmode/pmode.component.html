@@ -1,6 +1,6 @@
 ﻿<h1 id="pmodeheader_id">PMode</h1>
 <div class="selectionCriteria">
-  <md2-tabs>
+  <md2-tabs (selectedIndexChange)="selectedIndexChange($event)">
     <md2-tab #xmlTab label="Current">
       <md-card>
         <md-card-content>
@@ -48,7 +48,7 @@
           #archivePmodeDatatable
           id="archivePmodeTable"
           class="material striped"
-          [rows]="rows"
+          [rows]="tableRows"
           [columns]="columnPicker.selectedColumns"
           [columnMode]="'force'"
           [headerHeight]="50"
@@ -110,11 +110,6 @@
                 <span>Rollback</span>
               </button>
             </td>
-          </tr>
-        </table>
-        <table>
-          <tr>
-
           </tr>
         </table>
       </div>

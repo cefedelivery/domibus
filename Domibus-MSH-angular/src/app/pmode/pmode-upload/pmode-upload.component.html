@@ -1,17 +1,16 @@
 <h2 md-dialog-title>Upload File</h2>
-<md-dialog-content style="height:110px;width:350px">
+<md-dialog-content style="height:180px;width:450px">
   <md-card>
     <md-card-content>
-      <div class="divTableRow">
-        <div class="divTableCell">
-          <input #fileInput type="file" id="pmode" accept=".xml" (change)="checkFileAndDescription()" required on>
-
-          <md-input-container>
+      <div>
+          <input placeholder="File" #fileInput type="file" id="pmode" accept=".xml" (change)="checkFileAndDescription()" required on>
+          <!--<md-input-container>
             <input mdInput placeholder="Description" name="description" [(ngModel)]="description" id="description_id" (input)="checkFileAndDescription()" required>
-          </md-input-container>
-        </div>
-        <div class="divTableCell">
-        </div>
+          </md-input-container>-->
+      </div>
+      <div>
+        <h3 style="font-style: normal; font-size: small">Description:</h3>
+        <textarea style="resize: none; width: 100%; height: 100%;" rows="6" [(ngModel)]="description" id="description_id" (input)="checkFileAndDescription()" required></textarea>
       </div>
     </md-card-content>
   </md-card>
