@@ -55,6 +55,16 @@ public class AuditDaoImplTest {
             Predicate[] predicateList;
             criteriaQuery.where(predicateList = withCapture());
             times = 1;
+            root.get("id");
+            times = 2;
+            root.get("id").get("auditTargetName");
+            times = 1;
+            root.get("id").get("action");
+            times = 1;
+            root.get("changed");
+            times = 2;
+            root.get("user");
+            times = 1;
             assertEquals(5, predicateList.length);
 
         }};
