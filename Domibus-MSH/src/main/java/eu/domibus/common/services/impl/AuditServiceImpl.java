@@ -129,8 +129,8 @@ public class AuditServiceImpl implements AuditService {
     @Override
     public void addJmsMessageDeletedAudit(
             final String messageId,
-            final String fromQueue, final String toQueue) {
-        saveJmsMessage(messageId, fromQueue, toQueue, ModificationType.DEL);
+            final String fromQueue) {
+        saveJmsMessage(messageId, fromQueue, null, ModificationType.DEL);
 
     }
 

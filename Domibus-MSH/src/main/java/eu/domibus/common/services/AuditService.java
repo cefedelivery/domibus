@@ -76,7 +76,7 @@ public interface AuditService {
      */
     void addJmsMessageDeletedAudit(
             String messageId,
-            String fromQueue, String toQueue);
+            String fromQueue);
 
     /**
      * Add message moved audit for a message.
