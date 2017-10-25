@@ -218,18 +218,18 @@
         </createTable>
 
         <createTable tableName="TB_ACTION_AUDIT">
-            <column name="AUDIT_TYPE" type="VARCHAR2(31 CHAR)">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="AUDIT_TYPE" type="VARCHAR2(31)">
                 <constraints nullable="false"/>
             </column>
-            <column autoIncrement="true" name="ID_PK" type="NUMBER(10, 0)">
-                <constraints primaryKey="true" primaryKeyName="TB_ACTION_AUDITPK"/>
-            </column>
-            <column name="ENTITY_ID" type="VARCHAR2(255 CHAR)"/>
-            <column name="MODIFICATION_TYPE" type="VARCHAR2(255 CHAR)"/>
+            <column name="ENTITY_ID" type="VARCHAR2(255)"/>
+            <column name="MODIFICATION_TYPE" type="VARCHAR2(255)"/>
             <column name="REVISION_DATE" type="TIMESTAMP"/>
-            <column name="USER_NAME" type="VARCHAR2(255 CHAR)"/>
-            <column name="FROM_QUEUE" type="VARCHAR2(255 CHAR)"/>
-            <column name="TO_QUEUE" type="VARCHAR2(255 CHAR)"/>
+            <column name="USER_NAME" type="VARCHAR2(255)"/>
+            <column name="FROM_QUEUE" type="VARCHAR2(255)"/>
+            <column name="TO_QUEUE" type="VARCHAR2(255)"/>
         </createTable>
 
         <createView
