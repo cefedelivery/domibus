@@ -13,7 +13,12 @@ import {DirtyGuard} from "./common/dirty.guard";
 
 const appRoutes: Routes = [
   {path: '', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
-  {path: 'pmode', component: PModeComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
+  {
+    path: 'pmode',
+    component: PModeComponent,
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canDeactivate: [DirtyGuard]
+  },
   {
     path: 'jms',
     component: JmsComponent,
