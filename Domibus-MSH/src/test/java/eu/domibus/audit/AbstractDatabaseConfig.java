@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Created by hykiukira on 04/10/2017.
+ * @author Thomas Dussart
+ * @since 4.0
  */
 @Configuration
 public abstract class AbstractDatabaseConfig {

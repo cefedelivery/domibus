@@ -1,34 +1,7 @@
 Domibus 4.0
-- Adapt weblogic.xml in order to resolve class loading problem after library upgrade.
-- In domibus.properties, replace:
-        o domibus.entityManagerFactory.jpaProperty.hibernate.transaction.manager_lookup_class=com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup
-        by
-        o domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform={Platform dependend.}
-- Upgrate java version from 1.7 to 1.8
-- Upgrate junit from version 4.11 to version 4.12
-- Upgrate liquibase from version 3.4.2 to version 3.5.3
-- Upgrate spring from version 4.2.2.RELEASE to version 4.3.11.RELEASE
-- Upgrate atomikos from version 3.9.3 to version 4.0.4
-- Upgrade hibernate from version 4.1.9.Final to version 5.2.11.final
-- Add an audit and versionning system for User/Party/Message filter.
-- Add an audit system for Pmode/JmsMessage/Message
-    13 tables have been added:
-        o TB_ACTION_AUDIT
-        o TB_BACKEND_FILTER_AUD
-        o TB_BACKENDFILTER_ROUTINGCRITERIA_AUD
-        o TB_CONFIGURATION_AUD
-        o TB_PARTY_AUD
-        o TB_PARTY_ID_TYPE_AUD
-        o TB_PARTY_IDENTIFIER_AUD
-        o TB_REV_CHANGES
-        o TB_REV_INFO
-        o TB_ROUTING_CRITERIA_AUD
-        o TB_USER_AUD
-        o TB_USER_ROLE_AUD
-        o TB_USER_ROLES_AUD
-    1 view has been added:
-        o V_AUDIT
-- Add an aspect that will add a "created by" entry into MessageLog to reccord who is sending messages.
+- Upgrade the following libraries:hibernate, atomikos,spring,liquibase,junit
+- Upgrade the java version
+- Add an audit and versioning system
 Domibus 3.3
 - Additional validation on pMode upload: when @type is missing or is empty, the value of PartyId, Service and AgreementRef, must be an URI (relative URIs accepted).
 - Use optional regex validation for dynamic discovery certificate. New property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation.

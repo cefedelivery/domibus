@@ -12,7 +12,8 @@ import javax.persistence.PersistenceContext;
 import java.sql.SQLException;
 
 /**
- * Created by hykiukira on 04/10/2017.
+ * @author Thomas Dussart
+ * @since 4.0
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {InMemoryDataBaseConfig.class,
