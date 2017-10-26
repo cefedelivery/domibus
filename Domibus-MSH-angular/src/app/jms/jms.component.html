@@ -11,7 +11,7 @@
           </md-option>
         </md-select>
         <md2-datepicker id="jmsFromDatePicker"
-                        placeholder="From:"
+                        placeholder="Received From:"
                         [(ngModel)]="request.fromDate"
                         name="receivedFrom"
                         [type]="'datetime'"
@@ -20,7 +20,7 @@
                         #timestampControl="ngModel">
         </md2-datepicker>
         <md2-datepicker id="jmsToDatePicker"
-                        placeholder="To:"
+                        placeholder="Received Up To:"
                         [(ngModel)]="request.toDate"
                         name="receivedTo"
                         [min]="timestampToMinDate"
