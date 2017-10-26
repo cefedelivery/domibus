@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {MdDialogRef} from "@angular/material";
 import {AlertService} from "../../alert/alert.service";
 import {Http} from "@angular/http";
@@ -11,8 +11,6 @@ import {Http} from "@angular/http";
 export class PmodeUploadComponent implements OnInit {
 
   private url = "rest/pmode";
-
-  //onPModeUploaded = new EventEmitter();
 
   enableSubmit = false;
 
@@ -38,7 +36,6 @@ export class PmodeUploadComponent implements OnInit {
     input.append('description', this.description);
     this.http.post(this.url, input).subscribe(res => {
           this.alertService.success(res.text(), false);
-          //this.onPModeUploaded.emit();
           this.dialogRef.close();
         }, err => {
           this.alertService.error(err._body, false);

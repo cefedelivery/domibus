@@ -26,4 +26,16 @@ public class ConfigurationRawDAO extends BasicDao<ConfigurationRaw> {
         final TypedQuery<ConfigurationRaw> query = this.em.createNamedQuery("ConfigurationRaw.getLatest", ConfigurationRaw.class);
         return query.getResultList();
     }
+
+    public ConfigurationRaw getConfigurationRaw(int id) {
+        final TypedQuery<ConfigurationRaw> query = this.em.createNamedQuery("ConfigurationRaw.getById", ConfigurationRaw.class);
+        query.setParameter("CONF_ID", id);
+        return query.getSingleResult();
+    }
+
+    public void deleteById(int id) {
+        ConfigurationRaw configurationRaw = new ConfigurationRaw();
+        configurationRaw.setEntityId(id);
+        this.delete(configurationRaw);
+    }
 }

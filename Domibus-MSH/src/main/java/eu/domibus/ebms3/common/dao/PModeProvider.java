@@ -101,13 +101,7 @@ public abstract class PModeProvider {
     }
 
     public ConfigurationRaw getRawConfiguration(int id) {
-        final List<ConfigurationRaw> list = this.configurationRawDAO.getList();
-        for(ConfigurationRaw configurationRaw : list) {
-            if(configurationRaw.getEntityId() == id) {
-                return configurationRaw;
-            }
-        }
-        return null;
+        return this.configurationRawDAO.getConfigurationRaw(id);
     }
 
     public void insertPMode(ConfigurationRaw configurationRaw) {
@@ -118,6 +112,11 @@ public abstract class PModeProvider {
     public void removePModes(List<ConfigurationRaw> removePModes) {
         LOG.debug("Removing PModes" + removePModes);
         configurationRawDAO.deleteAll(removePModes);
+    }
+
+    public void removePMode(int id) {
+        LOG.debug("Removing PMode with id:" + id);
+        configurationRawDAO.deleteById(id);
     }
 
     public List<ConfigurationRaw> getRawConfigurationList() {

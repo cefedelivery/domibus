@@ -81,19 +81,25 @@ public class PModeResource {
         }
     }
 
-    @RequestMapping(value = {"/addAll"}, method = RequestMethod.PUT)
-    public ResponseEntity<String> uploadAllPmodes(@RequestBody List<PModeResponseRO> pmodesROS) {
-        List<PModeResponseRO> toDelete = pmodeList();
-        toDelete.removeAll(pmodesROS);
-
-        pModeProvider.removePModes(convertPModeResponseROs(toDelete));
-
-        return ResponseEntity.ok("OK to upload the PMode file\n");
+    @RequestMapping(method = RequestMethod.DELETE)
+    public ResponseEntity<String> deletePmodes(@RequestParam("ids") List<String> pmodesString) {
+        if (pmodesString.isEmpty()) {
+            return ResponseEntity.badRequest().body("Failed to delete PModes since the list of ids was empty.");
+        }
+        try {
+            for (String pModeId : pmodesString) {
+                pModeId = pModeId.replace("[", "").replace("]", "");
+                pModeProvider.removePMode(Integer.parseInt(pModeId));
+            }
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Impossible to delete PModes due to \n" + ex.getMessage());
+        }
+        return ResponseEntity.ok("PModes were deleted\n");
     }
 
-    @RequestMapping(value = {"/add"}, method = RequestMethod.POST)
-    public ResponseEntity<String> uploadPmode(@RequestParam("rolledbackId") Integer rolledbackId) {
-        ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(rolledbackId);
+    @RequestMapping(value = {"/rollback/{id}"}, method = RequestMethod.PUT)
+    public ResponseEntity<String> uploadPmode(@PathVariable(value="id") Integer id) {
+        ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(id);
         rawConfiguration.setEntityId(0);
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ssZ");
@@ -122,18 +128,6 @@ public class PModeResource {
             pModeResponseRO.setDescription(configurationRaw.getDescription());
             pModeResponseRO.setUsername("admin"); //TODO: migueti: Missing username information
             result.add(pModeResponseRO);
-        }
-        return result;
-    }
-
-    private List<ConfigurationRaw> convertPModeResponseROs(List<PModeResponseRO> pModeResponseROList) {
-        List<ConfigurationRaw> result = new ArrayList<>();
-        for(PModeResponseRO pModeResponseRO : pModeResponseROList) {
-            ConfigurationRaw configurationRaw = new ConfigurationRaw();
-            configurationRaw.setEntityId(pModeResponseRO.getId());
-            configurationRaw.setConfigurationDate(pModeResponseRO.getConfigurationDate());
-            configurationRaw.setDescription(pModeResponseRO.getDescription());
-            result.add(configurationRaw);
         }
         return result;
     }

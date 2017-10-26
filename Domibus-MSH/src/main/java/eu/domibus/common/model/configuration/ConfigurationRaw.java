@@ -4,14 +4,15 @@ package eu.domibus.common.model.configuration;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
 import javax.persistence.*;
-import java.util.Calendar;
 import java.util.Date;
 
 @Entity
 @Table(name = "TB_CONFIGURATION_RAW")
 @NamedQueries({
         @NamedQuery(name = "ConfigurationRaw.getLatest",
-                query = "select conf from ConfigurationRaw conf ORDER BY conf.configurationDate desc")
+                query = "select conf from ConfigurationRaw conf ORDER BY conf.configurationDate desc"),
+        @NamedQuery(name = "ConfigurationRaw.getById",
+                query = "select conf from ConfigurationRaw conf WHERE conf.entityId = :CONF_ID")
 }
 )
 public class ConfigurationRaw extends AbstractBaseEntity {

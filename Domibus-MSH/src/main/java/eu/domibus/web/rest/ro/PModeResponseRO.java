@@ -8,11 +8,11 @@ import java.util.Date;
 
 public class PModeResponseRO {
 
-    int id;
-    Date configurationDate;
-    String username;
-    String description;
-    boolean current;
+    private int id;
+    private Date configurationDate;
+    private String username;
+    private String description;
+    private boolean current;
 
     public int getId() {
         return id;

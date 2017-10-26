@@ -1,4 +1,4 @@
-﻿import {Component, EventEmitter, OnInit, TemplateRef, ViewChild} from "@angular/core";
+﻿import {Component, OnInit, TemplateRef, ViewChild} from "@angular/core";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {Http, Headers, Response} from "@angular/http";
@@ -53,6 +53,16 @@ export class PModeComponent implements OnInit, DirtyOperations {
 
   actualId: number = 0;
   actualRow: number = 0;
+
+  deleteList = [];
+
+  // needed for the first request after upload
+  // datatable was empty if we don't do the request again
+  // resize window shows information
+  // check: @selectedIndexChange(value)
+  private uploaded = false;
+
+  private headers = new Headers({'Content-Type': 'application/json'});
 
   /**
    * Constructor
@@ -208,22 +218,19 @@ export class PModeComponent implements OnInit, DirtyOperations {
    * Method used when button save is clicked
    */
   saveButton() {
-    let headers = new Headers({'Content-Type': 'application/json'});
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.http.put(this.url + "/addAll", JSON.stringify(this.allPModes), {headers: headers}).subscribe(result => {
+        this.http.delete(this.url,{params: {ids: JSON.stringify(this.deleteList)}}).subscribe(() => {
             this.alertService.success("The operation 'update pmodes' completed successfully.", false);
             this.disableAllButtons();
             this.selected = [];
+            this.deleteList = [];
           },
-          error => {
+          () => {
             this.alertService.error("The operation 'update pmodes' not completed successfully.", false);
-            this.disabledSave = false;
-            this.disabledCancel = false;
-            this.disabledDownload = true;
-            this.disabledDelete = true;
-            this.disabledRollback = true;
+            this.getAllPModeEntries();
+            this.disableAllButtons();
             this.selected = [];
           });
       }
@@ -268,6 +275,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
     // workaround to delete one entry from the array
     // since "this.rows.splice(row, 1);" doesn't work...
     let array = this.tableRows.slice();
+    this.deleteList.push(array[row].id);
     array.splice(row, 1);
     array = array.concat(this.allPModes[this.offset * this.rowLimiter.pageSize + this.rowLimiter.pageSize]);
     this.allPModes.splice(this.offset * this.rowLimiter.pageSize + row, 1);
@@ -291,6 +299,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
       array = array.concat(this.allPModes[this.offset * this.rowLimiter.pageSize + this.rowLimiter.pageSize]);
       this.allPModes.splice(this.offset * this.rowLimiter.pageSize + this.selected[i].$$index, 1);
       this.tableRows = array.slice();
+      this.deleteList.push(this.selected[i].id);
       this.count--;
     }
 
@@ -312,16 +321,13 @@ export class PModeComponent implements OnInit, DirtyOperations {
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
           this.allPModes[this.actualRow].current = false;
-          let input = new FormData();
-          input.append('rolledbackId', selectedRow.id);
-          this.http.post(this.url + "/add", input).subscribe(res => {
+          this.http.put(this.url + "/rollback/" + selectedRow.id, null,{headers: this.headers}).subscribe(res => {
             this.actualRow = 0;
 
             this.getAllPModeEntries();
 
             this.disableAllButtons();
             this.selected = [];
-
           });
         }
       });
@@ -329,14 +335,11 @@ export class PModeComponent implements OnInit, DirtyOperations {
       let dialogRef = this.dialog.open(RollbackDirtyDialogComponent);
       dialogRef.afterClosed().subscribe(result => {
         if (result === 'ok') {
-          let headers = new Headers({'Content-Type': 'application/json'});
-          this.http.put(this.url + "/addAll", JSON.stringify(this.allPModes), {headers: headers}).subscribe(result => {
+          this.http.put(this.url, JSON.stringify(this.allPModes), {headers: this.headers}).subscribe(result => {
               this.disableAllButtons();
               this.selected = [];
               this.allPModes[this.actualRow].current = false;
-              let input = new FormData();
-              input.append('rolledbackId', selectedRow.id);
-              this.http.post(this.url + "/add", input).subscribe(res => {
+              this.http.put(this.url + "/rollback/" + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
                 this.actualRow = 0;
                 this.getAllPModeEntries();
               });
@@ -348,9 +351,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
             });
         } else if (result === 'rollback_only') {
           this.allPModes[this.actualRow].current = false;
-          let input = new FormData();
-          input.append('rolledbackId', selectedRow.id);
-          this.http.post(this.url + "/add", input).subscribe(res => {
+          this.http.put(this.url + "/rollback/" + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
             this.actualRow = 0;
             this.getAllPModeEntries();
           });
@@ -358,6 +359,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
         this.selected = [];
       });
     }
+    this.page(0,this.rowLimiter.pageSize);
   }
 
   /**
@@ -386,8 +388,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
       let dialogRef = this.dialog.open(PmodeDirtyUploadComponent);
       dialogRef.afterClosed().subscribe(result => {
         if (result === 'ok') {
-          let headers = new Headers({'Content-Type': 'application/json'});
-          this.http.put(this.url + "/addAll", JSON.stringify(this.allPModes), {headers: headers}).subscribe(result => {
+          this.http.delete(this.url,{params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
               this.disableAllButtons();
               this.selected = [];
 
@@ -395,6 +396,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
               dialogRef.afterClosed().subscribe(result => {
                 this.getAllPModeEntries();
               });
+              this.uploaded = true;
             },
             error => {
               this.alertService.error("The operation 'update pmodes' not completed successfully.", false);
@@ -406,6 +408,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
           dialogRef.afterClosed().subscribe(result => {
             this.getAllPModeEntries();
           });
+          this.uploaded = true;
         }
       });
     } else {
@@ -413,6 +416,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
       dialogRef.afterClosed().subscribe(result => {
         this.getAllPModeEntries();
       });
+      this.uploaded = true;
     }
   }
 
@@ -455,8 +459,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
    * @param value Tab Position
    */
   selectedIndexChange(value){
-    console.log(value);
-    if(value==1) { // Archive Tab
+    if(value==1 && this.uploaded) { // Archive Tab
       this.getResultObservable().
       map((response: Response) => response.json()).
       map((response)=>response.slice(this.offset * this.rowLimiter.pageSize, (this.offset + 1) * this.rowLimiter.pageSize)).
@@ -466,6 +469,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
             this.tableRows[0].current = true;
             this.tableRows[0].description = "[CURRENT]: " + response[0].description;
           }
+          this.uploaded = false;
         }, () => {
         },
         () => {
