@@ -15,18 +15,22 @@
         </addColumn>
 
         <createTable tableName="TB_REV_INFO">
-            <column name="ID" type="INT"/>
+            <column autoIncrement="true" name="ID" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="TIMESTAMP" type="BIGINT"/>
             <column name="REVISION_DATE" type="TIMESTAMP"/>
             <column name="USER_NAME" type="VARCHAR(255)"/>
         </createTable>
-        <addPrimaryKey
+        <!--<addPrimaryKey
                 columnNames="ID"
                 constraintName="PK_REV_INFO"
-                tableName="TB_REV_INFO"/>
+                tableName="TB_REV_INFO"/>-->
 
         <createTable tableName="TB_REV_CHANGES">
-            <column name="ID_PK" type="INT"/>
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="REV" type="INT"/>
             <column name="AUDIT_ORDER" type="INT"/>
             <column name="ENTIY_NAME" type="VARCHAR(255)"/>

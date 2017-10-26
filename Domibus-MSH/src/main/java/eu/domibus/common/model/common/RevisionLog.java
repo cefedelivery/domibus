@@ -7,8 +7,11 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.envers.DefaultRevisionEntity;
 import org.hibernate.envers.RevisionEntity;
+import org.hibernate.envers.RevisionNumber;
+import org.hibernate.envers.RevisionTimestamp;
 
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,9 +24,17 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "TB_REV_INFO")
 @RevisionEntity(CustomRevisionEntityListener.class)
-public class RevisionLog extends DefaultRevisionEntity {
+public class RevisionLog {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RevisionLog.class);
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @RevisionNumber
+    private int id;
+
+    @RevisionTimestamp
+    private long timestamp;
     /**
      * User involve in this modification
      */
@@ -51,13 +62,46 @@ public class RevisionLog extends DefaultRevisionEntity {
         this.userName = userName;
     }
 
-    @Override
     public Date getRevisionDate() {
         return revisionDate;
     }
 
     public void setRevisionDate(Date revisionDate) {
         this.revisionDate = revisionDate;
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+
+    public long getTimestamp() {
+        return this.timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public boolean equals(Object o) {
+        if(this == o) {
+            return true;
+        } else if(!(o instanceof RevisionLog)) {
+            return false;
+        } else {
+            RevisionLog that = (RevisionLog)o;
+            return this.id == that.id && this.timestamp == that.timestamp;
+        }
+    }
+
+    public int hashCode() {
+        int result = this.id;
+        result = 31 * result + (int)(this.timestamp ^ this.timestamp >>> 32);
+        return result;
     }
 
     /**
