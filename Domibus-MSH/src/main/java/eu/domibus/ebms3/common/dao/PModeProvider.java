@@ -104,16 +104,6 @@ public abstract class PModeProvider {
         return this.configurationRawDAO.getConfigurationRaw(id);
     }
 
-    public void insertPMode(ConfigurationRaw configurationRaw) {
-        LOG.debug("Inserting new PMode" + configurationRaw);
-        configurationRawDAO.create(configurationRaw);
-    }
-
-    public void removePModes(List<ConfigurationRaw> removePModes) {
-        LOG.debug("Removing PModes" + removePModes);
-        configurationRawDAO.deleteAll(removePModes);
-    }
-
     public void removePMode(int id) {
         LOG.debug("Removing PMode with id:" + id);
         configurationRawDAO.deleteById(id);

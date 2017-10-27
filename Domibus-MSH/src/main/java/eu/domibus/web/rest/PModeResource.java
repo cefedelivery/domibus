@@ -106,12 +106,19 @@ public class PModeResource {
         rawConfiguration.setDescription("Reverted to version of " + sdf.format(rawConfiguration.getConfigurationDate()));
         rawConfiguration.setConfigurationDate(new Date());
 
+        String message = "PMode was successfully uploaded.";
         try {
-            pModeProvider.insertPMode(rawConfiguration);
+            byte[] bytes = rawConfiguration.getXml();
+
+            List<String> pmodeUpdateMessage = pModeProvider.updatePModes(bytes, rawConfiguration.getDescription());
+
+            if (pmodeUpdateMessage != null && !pmodeUpdateMessage.isEmpty()) {
+                message += " but some issues were detected: \n" + StringUtils.join(pmodeUpdateMessage, "\n");
+            }
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload new PMode due to: \n" + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message + e.getMessage());
         }
-        return ResponseEntity.ok("PMode was successfully uploaded.");
+        return ResponseEntity.ok(message);
     }
 
     @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
