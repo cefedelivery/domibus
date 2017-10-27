@@ -8,7 +8,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3</version>
+        <version>3.3.1-SNAPSHOT</version>
     </parent>
     <artifactId>domibus-test</artifactId>
     <packaging>jar</packaging>
