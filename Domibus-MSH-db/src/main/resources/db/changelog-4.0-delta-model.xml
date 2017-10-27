@@ -251,7 +251,7 @@
         </createView>
 
     </changeSet>
-    <changeSet author="" id="">
+    <changeSet author="migueti" id="EDELIVERY-2754_AUDIT">
         <createTable tableName="TB_CONFIGURATION_RAW_AUD">
             <column name="ID_PK" type="INT"/>
             <column name="REV" type="INT"/>
