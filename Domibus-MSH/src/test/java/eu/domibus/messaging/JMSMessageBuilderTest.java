@@ -2,7 +2,6 @@ package eu.domibus.messaging;
 
 import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.common.NotificationType;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +23,7 @@ public class JMSMessageBuilderTest {
                 .property("longProp", 200L)
                 .build();
         assertEquals(message.getProperty("stringProp"), "myString");
-        assertEquals(message.getProperty("integerProp"), 100);
-        assertEquals(message.getProperty("longProp"), 200L);
+        assertEquals(message.getProperty("integerProp"), Integer.valueOf(100));
+        assertEquals(message.getProperty("longProp"), Long.valueOf(200L));
     }
 }

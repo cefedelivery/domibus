@@ -65,6 +65,7 @@ import {SharedModule} from "./common/module/SharedModule";
 import {RollbackDialogComponent} from "./pmode/rollback-dialog/rollback-dialog.component";
 import {RollbackDirtyDialogComponent} from "./pmode/rollback-dirty-dialog/rollback-dirty-dialog.component";
 import {PmodeDirtyUploadComponent} from "./pmode/pmode-dirty-upload/pmode-dirty-upload.component";
+import {AuditComponent} from "./audit/audit.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -105,7 +106,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     PageHelperComponent,
     RollbackDialogComponent,
     RollbackDirtyDialogComponent,
-    PmodeDirtyUploadComponent
+    PmodeDirtyUploadComponent,
+    AuditComponent
   ],
   entryComponents: [
     AppComponent,

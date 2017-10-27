@@ -6,7 +6,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3-SNAPSHOT</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>domibus-MSH-tomcat</artifactId>
@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-        <atomikos.version>3.9.3</atomikos.version>
+        <atomikos.version>4.0.4</atomikos.version>
         <projectFile>${project.basedir}/src/test/resources/soapUI/AS4-test-guide-soapui-project.xml</projectFile>
         <soapui.root.folder>${project.basedir}/src/test</soapui.root.folder>
         <soapui.localUrl>http://localhost:8180</soapui.localUrl>
@@ -128,9 +128,15 @@
             <artifactId>transactions-jms</artifactId>
             <version>${atomikos.version}</version>
         </dependency>
+        <!--<dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jta_1.0.1B_spec</artifactId>
+            <version>1.0</version>
+            <scope>provided</scope>
+        </dependency>-->
         <dependency>
             <groupId>com.atomikos</groupId>
-            <artifactId>transactions-hibernate3</artifactId>
+            <artifactId>transactions-hibernate4</artifactId>
             <version>${atomikos.version}</version>
             <exclusions>
                 <exclusion>

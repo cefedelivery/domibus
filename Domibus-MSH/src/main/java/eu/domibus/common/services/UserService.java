@@ -30,4 +30,11 @@ public interface UserService{
      * update users
      */
     void updateUsers(List<User> users);
+
+    /**
+     * Get currently logged user name.
+     *
+     * @return the userName
+     */
+    String getLoggedUserNamed();
 }

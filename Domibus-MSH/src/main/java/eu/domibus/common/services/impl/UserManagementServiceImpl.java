@@ -12,6 +12,8 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,9 @@ public class UserManagementServiceImpl implements UserService {
     @Autowired
     private DomainCoreConverter domainConverter;
 
+    /**
+     *{@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<eu.domibus.api.user.User> findUsers() {
@@ -64,6 +69,9 @@ public class UserManagementServiceImpl implements UserService {
         return users;
     }
 
+    /**
+     *{@inheritDoc}
+     */
     @Override
     @Transactional
     public void saveUsers(List<eu.domibus.api.user.User> users) {
@@ -78,6 +86,9 @@ public class UserManagementServiceImpl implements UserService {
         updateUserWithPasswordChange(passwordChangedModifiedUsers);
     }
 
+    /**
+     *{@inheritDoc}
+     */
     @Override
     public List<eu.domibus.api.user.UserRole> findUserRoles() {
         List<UserRole> userRolesEntities = userRoleDao.listRoles();
@@ -90,6 +101,9 @@ public class UserManagementServiceImpl implements UserService {
         return userRoles;
     }
 
+    /**
+     *{@inheritDoc}
+     */
     @Override
     public void updateUsers(List<eu.domibus.api.user.User> users) {
         // update
@@ -110,6 +124,18 @@ public class UserManagementServiceImpl implements UserService {
         List<User> allUsersEntities = userDao.listUsers();
         List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
         userDao.deleteAll(usersEntitiesToDelete);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getLoggedUserNamed() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            return authentication.getName();
+        }
+        return null;
     }
 
     private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {

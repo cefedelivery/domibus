@@ -1,3 +1,29 @@
+Domibus 4.0 (from 3.3):
+               - in file "\conf\domibus\internal\ehcache.xml" add the following cache defintion at the of caches definition:
+                    <ehcache>
+                    ........................
+                    <cache name="auditTarget"
+                               maxBytesLocalHeap="5m"
+                               timeToLiveSeconds="3600"
+                               overflowToDisk="false">
+                     </cache>
+                  ........................
+                  </ehcache>
+                -Modify file "\conf\domibus\domibus.properties":
+                    o delete property domibus.entityManagerFactory.jpaProperty.hibernate.transaction.manager_lookup_class
+                      and replace it by:
+                      - [WebLogic only]
+                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.WeblogicJtaPlatform
+                      - [Tomcat only]
+                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=com.atomikos.icatch.jta.hibernate4.AtomikosPlatform
+                            domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
+                      - [Wildfly only]
+                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.JBossAppServerJtaPlatform
+
+                     o add property domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings
+                        - [Tomcat only]
+                             domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
+
 Domibus 3.3 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-migration.ddl for Oracle)
@@ -45,6 +71,7 @@ Domibus 3.3 (from 3.2.5):
                      - in the file "\conf\domibus\domibus-configuration.xml" all the properties defined in "<util:properties id="domibusProperties">" have been copied such as
                         with the following exception:
                          o rename the property "domibus.certificate.validation.enabled" to "domibus.receiver.certificate.validation.onsending" in your domibus.properties file. If the property is not defined, do nothing. Default value "true" has not been changed.
+                         o the value for the property "domibus.msh.retry.tolerance" should be changed to 10800000
                      - in the file "\conf\domibus\domibus-security.xml"
                          o in the "keystorePasswordCallback" section:
                                 - "key" mapped to "domibus.security.key.private.alias"
@@ -191,42 +218,8 @@ Domibus 3.3 (from 3.2.5):
                                      </address-setting>
 
                 - [Tomcat only]
-                     o in file \conf\domibus\internal\activemq.xml
-                        - add the following queue in the broker/destinations section:
-                            <broker .....>
-                              .............................
-                              <destinations>
-                              .............................
-                                <queue id="pullMessageQueue" physicalName="domibus.internal.pull.queue"/>
-                                <queue id="filesystemBackendNotificationQueue" physicalName="domibus.notification.filesystem"/>
-                              .............................
-                              </<destinations>>
-                              .............................
-                            </broker>
-                        - add the following two entries in the broker/plugins section like described bellow:
-                             <broker>
-                                  ......
-                                <plugins>
-                                     ......
-                                     <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue" reportInterval="10000"/>
-                                </plugins>
-                             </broker>
-                        - the configuration for the redelivery plugin should now look like the one below:
-                             <redeliveryPlugin fallbackToDeadLetter="true" sendToDlqIfMaxRetriesExceeded="true">
-                                 <redeliveryPolicyMap>
-                                     <redeliveryPolicyMap>
-                                         <defaultEntry>
-                                             <!-- default policy-->
-                                             <redeliveryPolicy maximumRedeliveries="10" redeliveryDelay="300000"/>
-                                         </defaultEntry>
-                                         <redeliveryPolicyEntries>
-                                             <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0"/>
-                                             <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0"/>
-                                         </redeliveryPolicyEntries>
-                                     </redeliveryPolicyMap>
-                                 </redeliveryPolicyMap>
-                             </redeliveryPlugin>
-
+                     o The "\conf\domibus\internal\activemq.xml" file has been considerably modified and has to be replaced.
+                       If custom modification have been done(like adding new queues) re-apply these changes into the new version.
 
                 Optional changes
 

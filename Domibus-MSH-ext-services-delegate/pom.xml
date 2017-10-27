@@ -6,7 +6,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3-SNAPSHOT</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>domibus-ext-services-delegate</artifactId>
@@ -150,6 +150,19 @@
             <artifactId>jmockit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.10</version>
+            <scope>test</scope>
+        </dependency>
+
+
         <!-- End Test dependencies -->
 
         <!--Swagger-->

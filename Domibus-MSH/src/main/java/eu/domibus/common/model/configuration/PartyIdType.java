@@ -1,9 +1,11 @@
 package eu.domibus.common.model.configuration;
 
+import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
@@ -32,6 +34,8 @@ import javax.xml.bind.annotation.*;
 @Entity
 @Table(name = "TB_PARTY_ID_TYPE")
 @NamedQueries(@NamedQuery(name = "PartyIdType.findByValue", query = "select p from PartyIdType p where p.value = :VALUE"))
+@Audited(withModifiedFlag = true)
+@RevisionLogicalName(value = "Party", auditOrder = 2)
 public class PartyIdType extends AbstractBaseEntity {
 
     @XmlAttribute(name = "name", required = true)

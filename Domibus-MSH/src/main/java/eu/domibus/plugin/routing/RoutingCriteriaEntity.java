@@ -1,7 +1,9 @@
 package eu.domibus.plugin.routing;
 
+import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import eu.domibus.ebms3.common.model.UserMessage;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +20,8 @@ import java.util.regex.Pattern;
  */
 @Entity
 @Table(name = "TB_ROUTING_CRITERIA")
+@Audited(withModifiedFlag = true)
+@RevisionLogicalName(value = "Message filter", auditOrder = 1)
 public class RoutingCriteriaEntity extends AbstractBaseEntity implements IRoutingCriteria {
 
     @Column(name = "NAME")

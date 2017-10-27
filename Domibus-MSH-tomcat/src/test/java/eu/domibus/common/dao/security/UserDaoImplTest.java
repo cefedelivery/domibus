@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -21,12 +23,16 @@ public class UserDaoImplTest extends AbstractIT{
     @Autowired
     private UserDao userDao;
 
+    @PersistenceContext(unitName = "domibusJTA")
+    protected EntityManager entityManager;
+
     @Test
     @Transactional
     @Rollback
     public void listUsers() throws Exception {
         User user=new User("userOne", "test");
         UserRole userRole=new UserRole("ROLE_USER");
+        entityManager.persist(userRole);
         user.addRole(userRole);
         user.setEmail("test@gmail.com");
         user.setActive(true);
@@ -44,7 +50,8 @@ public class UserDaoImplTest extends AbstractIT{
     @Rollback
     public void loadActiveUserByUsername() {
         User user = new User("userTwo", "test");
-        UserRole userRole = new UserRole("ROLE_USER");
+        UserRole userRole = new UserRole("ROLE_USER_2");
+        entityManager.persist(userRole);
         user.addRole(userRole);
         user.setEmail("test@gmail.com");
         user.setActive(true);

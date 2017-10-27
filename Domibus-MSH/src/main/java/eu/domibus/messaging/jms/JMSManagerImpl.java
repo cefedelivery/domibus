@@ -3,17 +3,18 @@ package eu.domibus.messaging.jms;
 import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.common.services.AuditService;
 import eu.domibus.jms.spi.InternalJMSManager;
 import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
 import javax.jms.Queue;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,9 @@ public class JMSManagerImpl implements JMSManager {
 
     @Autowired
     JMSMessageMapper jmsMessageMapper;
+
+    @Autowired
+    private AuditService auditService;
 
     @Override
     public Map<String, JMSDestination> getDestinations() {
@@ -81,11 +85,13 @@ public class JMSManagerImpl implements JMSManager {
     @Override
     public void deleteMessages(String source, String[] messageIds) {
         internalJmsManager.deleteMessages(source, messageIds);
+        Arrays.asList(messageIds).forEach(m -> auditService.addJmsMessageDeletedAudit(m, source));
     }
 
     @Override
     public void moveMessages(String source, String destination, String[] messageIds) {
         internalJmsManager.moveMessages(source, destination, messageIds);
+        Arrays.asList(messageIds).forEach(m -> auditService.addJmsMessageMovedAudit(m, source, destination));
     }
 
     @Override

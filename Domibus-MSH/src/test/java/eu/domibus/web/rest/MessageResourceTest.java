@@ -3,6 +3,7 @@ package eu.domibus.web.rest;
 import eu.domibus.api.message.UserMessageService;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.services.AuditService;
 import eu.domibus.core.message.MessageConverterService;
 import eu.domibus.ebms3.common.model.*;
 import mockit.Expectations;
@@ -41,6 +42,9 @@ public class MessageResourceTest {
 
     @Injectable
     private UserMessageLogDao userMessageLogDao;
+
+    @Injectable
+    private AuditService auditService;
 
     private UserMessage createUserMessage() {
         UserMessage userMessage = new UserMessage();

@@ -1,0 +1,82 @@
+<h1 id="auditHeader_id">Audit</h1>
+
+<div class="selectionCriteria">
+  <md-card>
+
+    <md-card-content>
+      <div class="panel">
+        <md2-select mdInput placeholder="Table" id="table_id" multiple [(ngModel)]="auditTarget">
+          <md2-option *ngFor="let item of existingAuditTargets" [value]="item">{{item}}</md2-option>
+        </md2-select>
+        <md2-select mdInput placeholder="User" id="user_id" multiple [(ngModel)]="users">
+          <md2-option *ngFor="let item of existingUsers" [value]="item">{{item}}</md2-option>
+        </md2-select>
+        <md2-select mdInput placeholder="Action" id="user_id" multiple [(ngModel)]="actions">
+          <md2-option *ngFor="let item of existingActions" [value]="item">{{item}}</md2-option>
+        </md2-select>
+        <md2-datepicker placeholder="From:"
+                        [(ngModel)]="from"
+                        name="from"
+                        [type]="'datetime'"
+                        #timestampControl="ngModel" id="from_id" *ngIf="advancedSearch">
+          <!--(change)='onTimestampFromChange($event)'-->
+        </md2-datepicker>
+        <md2-datepicker placeholder="To:"
+                        [(ngModel)]="to"
+                        name="to"
+                        [type]="'datetime'"
+                        #timestampControl="ngModel" id="to_id" *ngIf="advancedSearch">
+        </md2-datepicker>
+        <div class="searchArea">
+          <button md-raised-button color="primary" id="searchbutton_id" (click)="searchAndCount()">
+            <md-icon>search</md-icon>
+            <span>Search</span>
+          </button>
+          <a href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()" id="advancedlink_id">Advanced</a>
+          <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()" id="basiclink_id">Basic</a>
+        </div>
+      </div>
+    </md-card-content>
+  </md-card>
+</div>
+
+<div class="panel">
+  <div class="group-filter-button">
+    <span class="row-button">
+      <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                       (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+    </span>
+    <span class="column-filter-button">
+      <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                         (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+    </span>
+  </div>
+</div>
+
+
+<ngx-datatable
+  id="auditTable"
+  class="material striped"
+  [rows]="rows"
+  [columnMode]="'force'"
+  [columns]="columnPicker.selectedColumns"
+  [headerHeight]="50"
+  [footerHeight]="50"
+  [rowHeight]="'auto'"
+  [scrollbarH]="true"
+  [externalPaging]="true"
+  [externalSorting]="true"
+  [loadingIndicator]="loading"
+  [count]="count"
+  [offset]="offset"
+  [limit]="rowLimiter.pageSize"
+  [offset]="offset"
+  [limit]="rowLimiter.pageSize"
+  (page)='onPage($event)'
+>
+  <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+    <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+  </ng-template>
+</ngx-datatable>
+
+

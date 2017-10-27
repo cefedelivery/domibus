@@ -1,6 +1,6 @@
 import {UserResponseRO} from "./user";
 import {Injectable} from "@angular/core";
-import {Http,Response} from "@angular/http";
+import {Http, Response} from "@angular/http";
 import {AlertService} from "../alert/alert.service";
 import {Observable} from "rxjs/Observable";
 @Injectable()
@@ -15,6 +15,13 @@ export class UserService {
       .map(this.extractData)
       .catch(this.handleError);
   }
+
+  getUserNames(): Observable<string> {
+    return this.http.get("rest/user/users")
+      .flatMap(res => res.json())
+      .map((user: UserResponseRO) => user.userName);
+  }
+
 
   getUserRoles():Observable<String[]> {
     return this.http.get("rest/user/userroles")
