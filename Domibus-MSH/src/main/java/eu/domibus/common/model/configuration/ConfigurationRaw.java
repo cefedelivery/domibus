@@ -1,7 +1,9 @@
 
 package eu.domibus.common.model.configuration;
 
+import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -15,6 +17,8 @@ import java.util.Date;
                 query = "select conf from ConfigurationRaw conf WHERE conf.entityId = :CONF_ID")
 }
 )
+@Audited(withModifiedFlag = true)
+@RevisionLogicalName(value = "Pmode Archive", auditOrder = 1)
 public class ConfigurationRaw extends AbstractBaseEntity {
 
     @Lob
