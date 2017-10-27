@@ -1,6 +1,7 @@
 
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.clustering.Command;
@@ -109,8 +110,8 @@ public abstract class PModeProvider {
         configurationRawDAO.deleteById(id);
     }
 
-    public List<ConfigurationRaw> getRawConfigurationList() {
-        return this.configurationRawDAO.getList();
+    public List<PModeArchiveInfo> getRawConfigurationList() {
+        return this.configurationRawDAO.getDetailedConfigurationRaw();
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

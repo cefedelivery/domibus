@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.common.model.configuration.ConfigurationRaw;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,12 +31,11 @@ public class PModeResource {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeResource.class);
 
+    @Autowired
     private PModeProvider pModeProvider;
 
     @Autowired
-    public PModeResource(PModeProvider pModeProvider) {
-        this.pModeProvider = pModeProvider;
-    }
+    private DomainCoreConverter domainConverter;
 
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = "application/xml")
     public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value="id") int id) {
@@ -84,6 +83,7 @@ public class PModeResource {
     @RequestMapping(method = RequestMethod.DELETE)
     public ResponseEntity<String> deletePmodes(@RequestParam("ids") List<String> pmodesString) {
         if (pmodesString.isEmpty()) {
+            LOG.error("Failed to delete PModes since the list of ids was empty.");
             return ResponseEntity.badRequest().body("Failed to delete PModes since the list of ids was empty.");
         }
         try {
@@ -92,8 +92,10 @@ public class PModeResource {
                 pModeProvider.removePMode(Integer.parseInt(pModeId));
             }
         } catch (Exception ex) {
+            LOG.error("Impossible to delete PModes", ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Impossible to delete PModes due to \n" + ex.getMessage());
         }
+        LOG.debug("PModes " + pmodesString + " were deleted");
         return ResponseEntity.ok("PModes were deleted\n");
     }
 
@@ -123,19 +125,6 @@ public class PModeResource {
 
     @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
     public List<PModeResponseRO> pmodeList() {
-        return convertRawConfigurationList(pModeProvider.getRawConfigurationList());
-    }
-
-    private List<PModeResponseRO> convertRawConfigurationList(List<ConfigurationRaw> rawConfigurationList) {
-        List<PModeResponseRO> result = new ArrayList<>();
-        for(ConfigurationRaw configurationRaw : rawConfigurationList) {
-            PModeResponseRO pModeResponseRO = new PModeResponseRO();
-            pModeResponseRO.setId(configurationRaw.getEntityId());
-            pModeResponseRO.setConfigurationDate(configurationRaw.getConfigurationDate());
-            pModeResponseRO.setDescription(configurationRaw.getDescription());
-            pModeResponseRO.setUsername("admin"); //TODO: migueti: Missing username information
-            result.add(pModeResponseRO);
-        }
-        return result;
+        return domainConverter.convert(pModeProvider.getRawConfigurationList(), PModeResponseRO.class);
     }
 }

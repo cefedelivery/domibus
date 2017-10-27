@@ -244,6 +244,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
     let dialogRef = this.dialog.open(CancelDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        this.deleteList = [];
         this.initializeArchivePmodes();
         this.disabledSave = true;
         this.disabledCancel = true;
@@ -335,7 +336,8 @@ export class PModeComponent implements OnInit, DirtyOperations {
       let dialogRef = this.dialog.open(RollbackDirtyDialogComponent);
       dialogRef.afterClosed().subscribe(result => {
         if (result === 'ok') {
-          this.http.put(this.url, JSON.stringify(this.allPModes), {headers: this.headers}).subscribe(result => {
+          this.http.delete(this.url, {params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
+              this.deleteList = [];
               this.disableAllButtons();
               this.selected = [];
               this.allPModes[this.actualRow].current = false;
@@ -350,6 +352,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
               this.selected = [];
             });
         } else if (result === 'rollback_only') {
+          this.deleteList = [];
           this.allPModes[this.actualRow].current = false;
           this.http.put(this.url + "/rollback/" + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
             this.actualRow = 0;
@@ -389,6 +392,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
       dialogRef.afterClosed().subscribe(result => {
         if (result === 'ok') {
           this.http.delete(this.url,{params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
+              this.deleteList = [];
               this.disableAllButtons();
               this.selected = [];
 
@@ -404,6 +408,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
               this.selected = [];
             });
         } else if (result === 'upload_only') {
+          this.deleteList = [];
           let dialogRef = this.dialog.open(PmodeUploadComponent);
           dialogRef.afterClosed().subscribe(result => {
             this.getAllPModeEntries();
