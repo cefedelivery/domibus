@@ -1,3 +1,29 @@
+Domibus 4.0 (from 3.3):
+               - in file "\conf\domibus\internal\ehcache.xml" add the following cache defintion at the of caches definition:
+                    <ehcache>
+                    ........................
+                    <cache name="auditTarget"
+                               maxBytesLocalHeap="5m"
+                               timeToLiveSeconds="3600"
+                               overflowToDisk="false">
+                     </cache>
+                  ........................
+                  </ehcache>
+                -Modify file "\conf\domibus\domibus.properties":
+                    o delete property domibus.entityManagerFactory.jpaProperty.hibernate.transaction.manager_lookup_class
+                      and replace it by:
+                      - [WebLogic only]
+                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.WeblogicJtaPlatform
+                      - [Tomcat only]
+                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=com.atomikos.icatch.jta.hibernate4.AtomikosPlatform
+                            domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
+                      - [Wildfly only]
+                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.JBossAppServerJtaPlatform
+
+                     o add property domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings
+                        - [Tomcat only]
+                             domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
+
 Domibus 3.3 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-migration.ddl for Oracle)

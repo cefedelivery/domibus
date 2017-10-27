@@ -9,7 +9,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>domibus-ActiveMQ-ThroughputLimiter</artifactId>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-plugin-api</artifactId>
-            <version>3.3</version>
+            <version>4.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>

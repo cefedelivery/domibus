@@ -38,4 +38,10 @@
            overflowToDisk="false">
         <sizeOfPolicy maxDepthExceededBehavior="abort"/>
     </cache>
+    <cache name="auditTarget"
+           maxBytesLocalHeap="5m"
+           timeToLiveSeconds="3600"
+           overflowToDisk="false">
+    </cache>
+
 </ehcache>

@@ -1,8 +1,10 @@
 package eu.domibus.common.model.security;
 
+import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -26,6 +28,8 @@ import java.util.Set;
                 )
         }
 )
+@Audited(withModifiedFlag = true)
+@RevisionLogicalName(value = "User", auditOrder = 1)
 public class UserRole extends AbstractBaseEntity{
 
     @NotNull

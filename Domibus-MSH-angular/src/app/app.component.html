@@ -38,6 +38,10 @@
       <md-icon md-tooltip="Users" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">people</md-icon>
       <span *ngIf="fullMenu">Users</span>
     </button>
+    <button md-raised-button class="sideNavButton" [routerLink]="['/audit']" *ngIf="hasAdmin()" id="audit_id">
+      <md-icon md-tooltip="Audit" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">visibility</md-icon>
+      <span *ngIf="fullMenu">Audit</span>
+    </button>
 
     <div class="collapse-button">
       <button *ngIf="fullMenu" md-raised-button id="expand_id" (click)="toggleMenu()">

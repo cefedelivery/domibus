@@ -28,6 +28,7 @@ public class JmsResource {
     @Autowired
     JMSManager jmsManager;
 
+
     @RequestMapping(value = {"/destinations"}, method = GET)
     public ResponseEntity<DestinationsResponseRO> destinations() {
 
@@ -76,6 +77,7 @@ public class JmsResource {
 
             if (request.getAction() == MessagesActionRequestRO.Action.MOVE) {
                 jmsManager.moveMessages(request.getSource(), request.getDestination(), ids);
+
             } else if (request.getAction() == MessagesActionRequestRO.Action.REMOVE) {
                 jmsManager.deleteMessages(request.getSource(), ids);
             }

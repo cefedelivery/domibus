@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet author="Tiago Miguel" id="EDELIVERY-2754">
+        <addColumn tableName="TB_CONFIGURATION_RAW">
+            <column name="DESCRIPTION" type="VARCHAR(255)" defaultValue=""/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dussath" id="EDELIVERY-1790">
+        <addColumn
+                tableName="TB_MESSAGE_LOG">
+            <column type="VARCHAR(255)" name="CREATED_BY"/>
+        </addColumn>
+
+        <createTable tableName="TB_REV_INFO">
+            <column autoIncrement="true" name="ID" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="TIMESTAMP" type="BIGINT"/>
+            <column name="REVISION_DATE" type="TIMESTAMP"/>
+            <column name="USER_NAME" type="VARCHAR(255)"/>
+        </createTable>
+        <!--<addPrimaryKey
+                columnNames="ID"
+                constraintName="PK_REV_INFO"
+                tableName="TB_REV_INFO"/>-->
+
+        <createTable tableName="TB_REV_CHANGES">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="REV" type="INT"/>
+            <column name="AUDIT_ORDER" type="INT"/>
+            <column name="ENTIY_NAME" type="VARCHAR(255)"/>
+            <column name="GROUP_NAME" type="VARCHAR(255)"/>
+            <column name="ENTITY_ID" type="VARCHAR(255)"/>
+            <column name="MODIFICATION_TYPE" type="VARCHAR(255)"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_REV_CHANGES"
+                                 constraintName="FK_REV_CHANGES_REV" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+        <createTable tableName="TB_BACKEND_FILTER_AUD">
+            <column name="ID_PK" type="INT"/>
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="BACKEND_NAME" type="VARCHAR(255)"/>
+            <column name="BACKENDNAME_MOD" type="BOOLEAN"/>
+            <column name="PRIORITY" type="INT"/>
+            <column name="INDEX_MOD" type="BOOLEAN"/>
+            <column name="ROUTINGCRITERIAS_MOD" type="BOOLEAN"/>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="ID_PK, REV"
+                constraintName="PK_BACKEND_FILTER_AUD"
+                tableName="TB_BACKEND_FILTER_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_BACKEND_FILTER_AUD"
+                                 constraintName="FK_BACKEND_FILTER_AUD_REV" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+        <createTable tableName="TB_ROUTING_CRITERIA_AUD">
+            <column name="ID_PK" type="INT"/>
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="EXPRESSION" type="VARCHAR(255)"/>
+            <column name="EXPRESSION_MOD" type="BOOLEAN"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="NAME_MOD" type="BOOLEAN"/>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="ID_PK, REV"
+                constraintName="PK_ROUTING_CRITERIA_AUD"
+                tableName="TB_ROUTING_CRITERIA_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_ROUTING_CRITERIA_AUD"
+                                 constraintName="FK_ROUTING_CRITERIA_AUD_REV" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+        <createTable tableName="TB_CONFIGURATION_AUD">
+            <column name="ID_PK" type="INT"/>
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="EXPRESSION" type="VARCHAR(255)"/>
+            <column name="EXPRESSION_MOD" type="BOOLEAN"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="NAME_MOD" type="BOOLEAN"/>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="ID_PK, REV"
+                constraintName="PK_CONFIGURATION_AUD"
+                tableName="TB_CONFIGURATION_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_CONFIGURATION_AUD"
+                                 constraintName="FK_CONFIGURATION_AUD_REV" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+        <createTable tableName="TB_PARTY_AUD">
+            <column name="ID_PK" type="INT"/>
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="ENDPOINT" type="VARCHAR(255)"/>
+            <column name="ENDPOINT_MOD" type="BOOLEAN"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="NAME_MOD" type="BOOLEAN"/>
+            <column name="PASSWORD" type="VARCHAR(255)"/>
+            <column name="PASSWORD_MOD" type="BOOLEAN"/>
+            <column name="USERNAME" type="VARCHAR(255)"/>
+            <column name="USERNAME_MOD" type="BOOLEAN"/>
+        </createTable>
+        <addPrimaryKey
+                columnNames="ID_PK, REV"
+                constraintName="PK_PARTY_AUD"
+                tableName="TB_PARTY_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_PARTY_AUD"
+                                 constraintName="FK_PARTY_AUD_REV" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+        <createTable tableName="TB_PARTY_IDENTIFIER_AUD">
+            <column name="ID_PK" type="INT"/>
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="FK_PARTY" type="INT"/>
+        </createTable>
+        <addPrimaryKey
+                columnNames="ID_PK, REV"
+                constraintName="PK_PARTY_IDENTIFIER_AUD"
+                tableName="TB_PARTY_IDENTIFIER_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_PARTY_IDENTIFIER_AUD"
+                                 constraintName="FK_PARTY_IDENTIFIER_AUD_REV" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+        <createTable tableName="TB_PARTY_ID_TYPE_AUD">
+            <column name="ID_PK" type="INT"/>
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="NAME_MOD" type="BOOLEAN"/>
+            <column name="VALUE" type="VARCHAR(255)"/>
+            <column name="VALUE_MOD" type="BOOLEAN"/>
+        </createTable>
+        <addPrimaryKey
+                columnNames="ID_PK, REV"
+                constraintName="PK_PARTY_ID_TYPE_AUD"
+                tableName="TB_PARTY_ID_TYPE_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_PARTY_ID_TYPE_AUD"
+                                 constraintName="FK_PARTY_ID_TYPE_AUD_REV" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+        <createTable tableName="TB_USER_AUD">
+            <column name="ID_PK" type="INT"/>
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="USER_ENABLED" type="BOOLEAN"/>
+            <column name="ACTIVE_MOD" type="BOOLEAN"/>
+            <column name="USER_EMAIL" type="VARCHAR(255)"/>
+            <column name="EMAIL_MOD" type="BOOLEAN"/>
+            <column name="USER_PASSWORD" type="VARCHAR(255)"/>
+            <column name="PASSWORD_MOD" type="BOOLEAN"/>
+            <column name="USER_NAME" type="VARCHAR(255)"/>
+            <column name="USERNAME_MOD" type="BOOLEAN"/>
+            <column name="OPTLOCK" type="INT"/>
+            <column name="VERSION_MOD" type="BOOLEAN"/>
+            <column name="ROLES_MOD" type="BOOLEAN"/>
+        </createTable>
+        <addPrimaryKey
+                columnNames="ID_PK, REV"
+                constraintName="PK_USER_AUD"
+                tableName="TB_USER_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_USER_AUD"
+                                 constraintName="FK_USER_AUD_REV" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+        <createTable tableName="TB_USER_ROLE_AUD">
+            <column name="ID_PK" type="INT"/>
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="ROLE_NAME" type="VARCHAR(255)"/>
+            <column name="NAME_MOD" type="BOOLEAN"/>
+            <column name="USERS_MOD" type="BOOLEAN"/>
+        </createTable>
+        <addPrimaryKey
+                columnNames="ID_PK, REV"
+                constraintName="PK_USER_ROLE_AUD"
+                tableName="TB_USER_ROLE_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_USER_ROLE_AUD"
+                                 constraintName="FK_USER_ROLE_AUD" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+        <createTable tableName="TB_BACKENDFILTER_ROUTINGCRITERIA_AUD">
+            <column name="ID_PK" type="INT"/>
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="FK_BACKEND_FILTER" type="INT"/>
+            <column name="PRIORITY" type="INT"/>
+        </createTable>
+        <addPrimaryKey
+                columnNames="ID_PK, REV"
+                constraintName="PK_BACKENDFILTER_ROUTINGCRITERIA_AUD"
+                tableName="TB_BACKENDFILTER_ROUTINGCRITERIA_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_BACKENDFILTER_ROUTINGCRITERIA_AUD"
+                                 constraintName="FK_BACKENDFILTER_ROUTINGCRITERIA_AUD" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+        <createTable tableName="TB_USER_ROLES_AUD">
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="USER_ID" type="INT"/>
+            <column name="ROLE_ID" type="INT"/>
+        </createTable>
+
+        <createTable tableName="TB_ACTION_AUDIT">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="AUDIT_TYPE" type="VARCHAR2(31)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ENTITY_ID" type="VARCHAR2(255)"/>
+            <column name="MODIFICATION_TYPE" type="VARCHAR2(255)"/>
+            <column name="REVISION_DATE" type="TIMESTAMP"/>
+            <column name="USER_NAME" type="VARCHAR2(255)"/>
+            <column name="FROM_QUEUE" type="VARCHAR2(255)"/>
+            <column name="TO_QUEUE" type="VARCHAR2(255)"/>
+        </createTable>
+
+        <createView
+                replaceIfExists="true"
+                viewName="V_AUDIT">
+            SELECT * FROM (SELECT
+            DISTINCT rc.GROUP_NAME as AUDIT_TYPE ,
+            rc.MODIFICATION_TYPE as ACTION_TYPE,
+            ri.USER_NAME as USER_NAME ,
+            ri.REVISION_DATE as AUDIT_DATE,
+            '' || rc.ENTITY_ID as ID,
+            '' || ri.ID as REV_ID
+            FROM TB_REV_INFO ri, TB_REV_CHANGES rc
+            WHERE ri.ID=rc.REV
+            UNION
+            SELECT aa.AUDIT_TYPE,aa.MODIFICATION_TYPE,aa.USER_NAME,aa.REVISION_DATE,aa.ENTITY_ID,'1' FROM
+            TB_ACTION_AUDIT aa)Q
+            ORDER BY Q.AUDIT_DATE DESC
+        </createView>
+
+    </changeSet>
+</databaseChangeLog>

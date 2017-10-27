@@ -62,6 +62,7 @@ import {TrustStoreUploadComponent} from "./truststore/truststore-upload/truststo
 import {ColumnPickerComponent} from "./common/column-picker/column-picker.component";
 import {PageHelperComponent} from "./common/page-helper/page-helper.component";
 import {SharedModule} from "./common/module/SharedModule";
+import {AuditComponent} from "./audit/audit.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -99,7 +100,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TrustStoreUploadComponent,
     ColumnPickerComponent,
     TrustStoreUploadComponent,
-    PageHelperComponent
+    PageHelperComponent,
+    AuditComponent
   ],
   entryComponents: [
     AppComponent,
