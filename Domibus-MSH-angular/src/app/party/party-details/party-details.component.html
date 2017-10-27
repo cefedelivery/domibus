@@ -1,0 +1,100 @@
+<h2 md-dialog-title>Party</h2>
+<md-dialog-content style="height:450px;width:650px">
+  <form name="filterForm">
+    <div>
+      <md-card>
+        <md-card-content>
+          <div class="panel">
+            <md-input-container style="width:100%">
+              <input mdInput placeholder="Name" name="name" id="name_id">
+            </md-input-container>
+            <md-input-container style="width:100%">
+              <input mdInput placeholder="End point" name="endPoint" id="endPoint_id">
+            </md-input-container>
+          </div>
+        </md-card-content>
+      </md-card>
+    </div>
+    <div>
+      <md-card>
+        <md-card-header>
+          <md-card-title>Certificate</md-card-title>
+        </md-card-header>
+        <md-card-content>
+          <div class="panel">
+            <md-input-container style="width:100%">
+              <input mdInput placeholder="Subject name" name="subjectName" id="subjectName_id">
+            </md-input-container>
+            <md-input-container style="width:40%">
+              <input mdInput placeholder="Valid from" name="validityFrom" id="validityFrom_id">
+            </md-input-container>
+            <md-input-container style="width:40%">
+              <input mdInput placeholder="Valid to" name="validityTo" id="validityTo_id">
+            </md-input-container>
+            <md-input-container style="width:100%">
+              <input mdInput placeholder="Finger prints" name="fingerPrint" id="fingerPrint_id">
+            </md-input-container>
+          </div>
+        </md-card-content>
+      </md-card>
+    </div>
+    <div>
+      <md-card>
+        <md-card-header>
+          <md-card-title>Identifiers</md-card-title>
+        </md-card-header>
+        <md-card-content>
+          <div class="panel">
+            <ngx-datatable
+              id="identifierTable"
+              class="material striped"
+              [rows]="identifiersRow"
+              [columnMode]="'force'"
+              [columns]="identifiersRowColumnPicker.selectedColumns"
+              [headerHeight]="50"
+              [footerHeight]="50"
+              [rowHeight]="'auto'"
+              [scrollbarH]="true"
+              [externalPaging]="true"
+              [externalSorting]="true"
+              [loadingIndicator]="loading"
+              [count]="identifiersRowCount"
+              (page)='onPage($event)'
+            >
+            </ngx-datatable>
+
+          </div>
+        </md-card-content>
+      </md-card>
+    </div>
+    <div>
+      <md-card>
+        <md-card-header>
+          <md-card-title>Processes</md-card-title>
+        </md-card-header>
+        <md-card-content>
+          <div class="panel">
+            <ngx-datatable
+              id="processTable"
+              class="material striped"
+              [rows]="processesRow"
+              [columnMode]="'force'"
+              [columns]="processesRowColumnPicker.selectedColumns"
+              [headerHeight]="50"
+              [footerHeight]="50"
+              [rowHeight]="'auto'"
+              [scrollbarH]="true"
+              [externalPaging]="true"
+              [externalSorting]="true"
+              [loadingIndicator]="loading"
+              [count]="processesRowCount"
+              (page)='onPage($event)'
+            >
+            </ngx-datatable>
+
+          </div>
+        </md-card-content>
+      </md-card>
+    </div>
+  </form>
+</md-dialog-content>
