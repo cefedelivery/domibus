@@ -11,6 +11,7 @@ import {TruststoreComponent} from "app/truststore/truststore.component";
 import {JmsComponent} from "./jms/jms.component";
 import {DirtyGuard} from "./common/dirty.guard";
 import {AuditComponent} from "./audit/audit.component";
+import {PartyComponent} from "./party/party.component";
 
 const appRoutes: Routes = [
   {path: '', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
@@ -38,6 +39,7 @@ const appRoutes: Routes = [
   {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard]},
   {path: 'login', component: LoginComponent},
   {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
+  {path: 'party', component: PartyComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard]}
 ];
 

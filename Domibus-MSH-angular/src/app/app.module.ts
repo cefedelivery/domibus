@@ -63,6 +63,8 @@ import {ColumnPickerComponent} from "./common/column-picker/column-picker.compon
 import {PageHelperComponent} from "./common/page-helper/page-helper.component";
 import {SharedModule} from "./common/module/SharedModule";
 import {AuditComponent} from "./audit/audit.component";
+import {PartyComponent} from "./party/party.component";
+import {PartyDetailsComponent} from "./party/party-details/party-details.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -101,7 +103,9 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     ColumnPickerComponent,
     TrustStoreUploadComponent,
     PageHelperComponent,
-    AuditComponent
+    AuditComponent,
+    PartyComponent,
+    PartyDetailsComponent
   ],
   entryComponents: [
     AppComponent,
@@ -117,7 +121,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     ErrorlogDetailsComponent,
     EditUserComponent,
     TruststoreDialogComponent,
-    TrustStoreUploadComponent
+    TrustStoreUploadComponent,
+    PartyDetailsComponent
   ],
   imports: [
     BrowserModule,
