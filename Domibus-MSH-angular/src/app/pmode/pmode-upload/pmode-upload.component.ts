@@ -6,7 +6,7 @@ import {Http} from "@angular/http";
 @Component({
   selector: 'app-pmode-upload',
   templateUrl: './pmode-upload.component.html',
-  styleUrls: ['./pmode-upload.component.css']
+  styleUrls: ['../pmode.component.css']
 })
 export class PmodeUploadComponent implements OnInit {
 

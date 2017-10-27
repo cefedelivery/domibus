@@ -4,7 +4,7 @@ import {MdDialogRef} from "@angular/material";
 @Component({
   selector: 'app-rollback-dialog',
   templateUrl: './rollback-dialog.component.html',
-  styleUrls: ['./rollback-dialog.component.css']
+  styleUrls: ['../pmode.component.css']
 })
 export class RollbackDialogComponent implements OnInit {
 
