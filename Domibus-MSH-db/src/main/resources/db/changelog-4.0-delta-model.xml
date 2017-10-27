@@ -251,4 +251,25 @@
         </createView>
 
     </changeSet>
+    <changeSet author="" id="">
+        <createTable tableName="TB_CONFIGURATION_RAW_AUD">
+            <column name="ID_PK" type="INT"/>
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="CONFIGURATION_DATE" type="TIMESTAMP"/>
+            <column name="CONFIGURATIONDATE_MOD" type="BOOLEAN"/>
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
+            <column name="DESCRIPTION_MOD" type="VARCHAR(255)"/>
+            <column name="XML" type="BLOB"/>
+            <column name="XML_MOD" type="BOOLEAN"/>
+        </createTable>
+        <addPrimaryKey
+                columnNames="ID_PK, REV"
+                constraintName="PK_CONFIGURATION_RAW_AUD"
+                tableName="TB_CONFIGURATION_RAW_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_CONFIGURATION_RAW_AUD"
+                                 constraintName="FK_CONFIGURATION_RAW_AUD" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+    </changeSet>
 </databaseChangeLog>
