@@ -16,7 +16,6 @@ Domibus 4.0 (from 3.3):
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.WeblogicJtaPlatform
                       - [Tomcat only]
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=com.atomikos.icatch.jta.hibernate4.AtomikosPlatform
-                            domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
                       - [Wildfly only]
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.JBossAppServerJtaPlatform
 
