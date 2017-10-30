@@ -23,6 +23,7 @@ import java.util.List;
 
 /**
  * @author Mircea Musat
+ * @author Tiago Miguel
  * @since 3.3
  */
 @RestController
@@ -108,7 +109,7 @@ public class PModeResource {
         rawConfiguration.setDescription("Reverted to version of " + sdf.format(rawConfiguration.getConfigurationDate()));
         rawConfiguration.setConfigurationDate(new Date());
 
-        String message = "PMode was successfully uploaded.";
+        String message = "PMode was successfully uploaded";
         try {
             byte[] bytes = rawConfiguration.getXml();
 
@@ -118,7 +119,7 @@ public class PModeResource {
                 message += " but some issues were detected: \n" + StringUtils.join(pmodeUpdateMessage, "\n");
             }
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Impossible to upload PModes due to \n" + e.getMessage());
         }
         return ResponseEntity.ok(message);
     }

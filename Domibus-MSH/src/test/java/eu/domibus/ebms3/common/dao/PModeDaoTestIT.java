@@ -90,12 +90,7 @@ public class PModeDaoTestIT {
 
         @Bean
         public ConfigurationValidator validator() {
-            return new ConfigurationValidator() {
-                @Override
-                public List<String> validate(Configuration configuration) {
-                    return Collections.emptyList();
-                }
-            };
+            return configuration -> Collections.emptyList();
         }
 
         @Bean
@@ -157,7 +152,7 @@ public class PModeDaoTestIT {
         final ConfigurationRaw raw = rawConfig.getValue();
         assertNotNull(raw.getConfigurationDate());
         assertEquals(raw.getXml(), pModeBytes);
-
+        assertEquals(raw.getDescription(), "description");
     }
 
 
@@ -196,6 +191,6 @@ public class PModeDaoTestIT {
             assertTrue(e.getErrors().size() > 0);
         }
 
-        Mockito.verify(configurationDAO, never()).updateConfiguration((Configuration) Mockito.anyObject());
+        Mockito.verify(configurationDAO, never()).updateConfiguration(Mockito.anyObject());
     }
 }
