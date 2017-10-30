@@ -7,8 +7,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-
 import static eu.domibus.logging.DomibusLogger.MDC_USER;
 
 /**
@@ -23,7 +21,7 @@ import static eu.domibus.logging.DomibusLogger.MDC_USER;
 @Component
 public class BasicAuditAspect {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BasicAuditAspect.class);
+    static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BasicAuditAspect.class);
 
     /**
      * Add creation/modification dates, creation/modification user.
@@ -36,7 +34,6 @@ public class BasicAuditAspect {
             LOG.debug("Adding basic audit to entity " + auditEntity + " whith id " + auditEntity.getEntityId());
         }
         final String userName = LOG.getMDC(MDC_USER);
-        final Date currentDate = new Date(System.currentTimeMillis());
         if (auditEntity.getEntityId() == 0) {
             auditEntity.setCreatedBy(userName);
         }

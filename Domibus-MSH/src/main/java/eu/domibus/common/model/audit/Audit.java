@@ -59,6 +59,7 @@ public class Audit {
         return id.getAction();
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
