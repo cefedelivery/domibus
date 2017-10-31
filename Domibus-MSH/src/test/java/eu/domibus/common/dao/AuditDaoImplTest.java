@@ -2,6 +2,8 @@ package eu.domibus.common.dao;
 
 import com.google.common.collect.Sets;
 import eu.domibus.common.model.audit.Audit;
+import eu.domibus.common.model.audit.JmsMessageAudit;
+import eu.domibus.common.model.audit.MessageAudit;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.hibernate.internal.SessionFactoryImpl;
@@ -154,6 +156,26 @@ public class AuditDaoImplTest {
             times = 0;
             query.setMaxResults(10);
             times = 0;
+        }};
+    }
+
+    @Test
+    public void saveMessageAudit() {
+        MessageAudit messageAudit = new MessageAudit();
+        auditDao.saveMessageAudit(messageAudit);
+        new Verifications() {{
+            entityManager.persist(messageAudit);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void saveJmsMessageAudit() {
+        JmsMessageAudit messageAudit = new JmsMessageAudit();
+        auditDao.saveJmsMessageAudit(messageAudit);
+        new Verifications() {{
+            entityManager.persist(messageAudit);
+            times = 1;
         }};
     }
 
