@@ -27,13 +27,14 @@ public class PartyServiceImpl implements PartyService {
                                    String process,
                                    int pargeStart,
                                    int pageSize) {
-        return domainCoreConverter.convert(partyDao.listParties(
+        List<eu.domibus.common.model.configuration.Party> sourceList = partyDao.listParties(
                 name,
                 endPoint,
                 partyId,
                 process,
                 pargeStart,
-                pageSize),
-                Party.class);
+                pageSize);
+        return domainCoreConverter.convert(sourceList, Party.class);
+
     }
 }

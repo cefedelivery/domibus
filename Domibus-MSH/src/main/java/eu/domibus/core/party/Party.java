@@ -1,7 +1,5 @@
 package eu.domibus.core.party;
 
-import org.springframework.expression.spel.ast.Identifier;
-
 import java.util.Set;
 
 /**

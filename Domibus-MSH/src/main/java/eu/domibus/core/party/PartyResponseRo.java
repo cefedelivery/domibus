@@ -1,6 +1,6 @@
 package eu.domibus.core.party;
 
-import org.springframework.expression.spel.ast.Identifier;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Set;
 
@@ -12,7 +12,7 @@ public class PartyResponseRo {
 
     private Integer entityId;
 
-    protected Set<Identifier> identifiers; //NOSONAR
+    protected Set<IdentifierRo> identifiers; //NOSONAR
 
     protected String name;
 
@@ -20,12 +20,15 @@ public class PartyResponseRo {
 
     protected String endpoint;
 
-    public Set<Identifier> getIdentifiers() {
+    public Set<IdentifierRo> getIdentifiers() {
         return identifiers;
     }
 
-    public void setIdentifiers(Set<Identifier> identifiers) {
+    public String flatIdentifiers;
+
+    public void setIdentifiers(Set<IdentifierRo> identifiers) {
         this.identifiers = identifiers;
+        flatIdentifiers = StringUtils.join(identifiers, ",");
     }
 
     public String getName() {
@@ -50,5 +53,21 @@ public class PartyResponseRo {
 
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
+    }
+
+    public Integer getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(Integer entityId) {
+        this.entityId = entityId;
+    }
+
+    public String getFlatIdentifiers() {
+        return flatIdentifiers;
+    }
+
+    public void setFlatIdentifiers(String flatIdentifiers) {
+        this.flatIdentifiers = flatIdentifiers;
     }
 }

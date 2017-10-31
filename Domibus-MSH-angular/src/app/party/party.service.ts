@@ -12,7 +12,7 @@ export class PartyService {
 
   }
 
-  listAuditLogs(name: string, endPoint: string, partyId: string, process: string, pageStart, pageSize): Observable<PartyResponseRo[]> {
+  listParties(name: string, endPoint: string, partyId: string, process: string, pageStart, pageSize): Observable<PartyResponseRo[]> {
     let searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('name', name);
     searchParams.set('endPoint', endPoint);

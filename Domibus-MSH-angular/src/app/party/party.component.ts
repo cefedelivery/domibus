@@ -40,7 +40,7 @@ export class PartyComponent implements OnInit {
     this.loading = true;
     let pageStart = this.offset * this.rowLimiter.pageSize;
     let pageSize = this.rowLimiter.pageSize;
-    let partyObservable: Observable<PartyResponseRo[]> = this.partyService.listAuditLogs(
+    let partyObservable: Observable<PartyResponseRo[]> = this.partyService.listParties(
       this.name,
       this.endPoint,
       this.partyID,
@@ -55,6 +55,9 @@ export class PartyComponent implements OnInit {
     Observable.zip(partyObservable, countObservable).subscribe((response) => {
         console.log('zip result');
         console.log(response);
+        this.rows = response[0];
+        console.log(response[0]);
+        this.count = response[1];
         this.loading = false;
       },
       error => {
@@ -73,7 +76,7 @@ export class PartyComponent implements OnInit {
       },
       {
         name: 'End point',
-        prop: 'endPoint',
+        prop: 'endpoint',
         width: 250
       },
       {

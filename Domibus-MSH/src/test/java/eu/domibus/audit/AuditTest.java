@@ -18,7 +18,7 @@ import java.sql.SQLException;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {InMemoryDataBaseConfig.class,
                     OracleDataBaseConfig.class})
-@ActiveProfiles("ORACLE_DATABASE")
+@ActiveProfiles("IN_MEMORY_DATABASE")
 public class AuditTest {
 
     @PersistenceContext
