@@ -233,6 +233,12 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void removeRawMessageIssuedByPullRequestInNewTransaction(String messageId) {
+        removeRawMessageIssuedByPullRequest(messageId);
+    }
+
+    @Override
     @Transactional
     public void savePulledMessageRawXml(final String rawXml, final String messageId) {
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);

@@ -74,6 +74,8 @@ public interface MessageExchangeService {
     //@thom test this method.
     void removeRawMessageIssuedByPullRequest(String messageId);
 
+    void removeRawMessageIssuedByPullRequestInNewTransaction(String messageId);
+
 
     void verifyReceiverCertificate(final LegConfiguration legConfiguration, String receiverName);
 
