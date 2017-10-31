@@ -30,7 +30,7 @@ public class BackendFilterEntity extends AbstractBaseEntity implements Comparabl
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "FK_BACKEND_FILTER")
     @OrderColumn(name = "PRIORITY")
-    @AuditJoinTable(name = "TB_BACKENDFILTER_ROUTINGCRITERIA_AUD")
+    @AuditJoinTable(name = "TB_BACK_RCRITERIA_AUD")
     private List<RoutingCriteriaEntity> routingCriterias = new ArrayList<>();
 
     @Column(name = "BACKEND_NAME")
