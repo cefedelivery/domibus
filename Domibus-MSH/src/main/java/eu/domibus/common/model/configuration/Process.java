@@ -234,4 +234,18 @@ public class Process extends AbstractBaseEntity {
         return dynamicInitiator;
     }
 
+    public void addInitiator(Party party) {
+        if (this.initiatorParties == null) {
+            initiatorParties = new HashSet<>();
+            initiatorParties.add(party);
+        }
+    }
+
+    public void addResponder(Party party) {
+        if (this.responderParties == null) {
+            responderParties = new HashSet<>();
+            responderParties.add(party);
+        }
+    }
+
 }

@@ -9,7 +9,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
@@ -24,8 +23,6 @@ import java.util.List;
 public class PartyDao extends BasicDao<Party> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PartyDao.class);
-    @PersistenceContext(unitName = "domibusJTA")
-    private EntityManager entityManager;
 
     public PartyDao() {
         super(Party.class);
@@ -44,7 +41,7 @@ public class PartyDao extends BasicDao<Party> {
                                    String process,
                                    int pargeStart,
                                    int pageSize) {
-        TypedQuery<Party> query = entityManager.createQuery(buildPartyListCriteria(name, endPoint, partyId, process));
+        TypedQuery<Party> query = em.createQuery(buildPartyListCriteria(name, endPoint, partyId, process));
         query.setFirstResult(pargeStart);
         query.setMaxResults(pageSize);
         return query.getResultList();
@@ -55,7 +52,7 @@ public class PartyDao extends BasicDao<Party> {
                                                           final String partyId,
                                                           final String process
     ) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Party> criteriaQuery = criteriaBuilder.createQuery(Party.class);
         Root<Party> root = criteriaQuery.from(Party.class);
         criteriaQuery.select(root);
@@ -93,5 +90,11 @@ public class PartyDao extends BasicDao<Party> {
             criteriaQuery.where(predicates.toArray(new Predicate[]{}));
         }
     }
+
+    void setEntityManager(EntityManager entityManager) {
+        em = entityManager;
+    }
+
+
 
 }
