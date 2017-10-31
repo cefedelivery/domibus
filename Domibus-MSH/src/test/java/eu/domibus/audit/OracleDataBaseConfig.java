@@ -9,14 +9,15 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
- * Created by hykiukira on 04/10/2017.
+ * @author Thomas Dussart
+ * @since 4.0
  *
  * Utility class that allows to run some test directly on you local database while developing you tests, instead of using
  * H2 brower utility. When your test is working switch the profile to @ActiveProfiles("IN_MEMORY_DATABASE")
  * lik in {@link AuditTest}
  */
-
 @EnableTransactionManagement
 @Profile("ORACLE_DATABASE")
 public class OracleDataBaseConfig extends AbstractDatabaseConfig{

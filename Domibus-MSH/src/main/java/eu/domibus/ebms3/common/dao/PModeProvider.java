@@ -1,6 +1,7 @@
 
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.clustering.Command;
@@ -92,14 +93,30 @@ public abstract class PModeProvider {
 
     public abstract boolean isConfigurationLoaded();
 
-    public byte[] getRawConfiguration() {
-        final ConfigurationRaw latest = this.configurationRawDAO.getLatest();
-        return (latest != null) ? latest.getXml() : new byte[0];
+    public byte[] getPModeFile(int id) {
+        final ConfigurationRaw rawConfiguration = getRawConfiguration(id);
+        if(rawConfiguration != null) {
+            return rawConfiguration.getXml();
+        }
+        return new byte[0];
+    }
+
+    public ConfigurationRaw getRawConfiguration(int id) {
+        return this.configurationRawDAO.getConfigurationRaw(id);
+    }
+
+    public void removePMode(int id) {
+        LOG.debug("Removing PMode with id:" + id);
+        configurationRawDAO.deleteById(id);
+    }
+
+    public List<PModeArchiveInfo> getRawConfigurationList() {
+        return this.configurationRawDAO.getDetailedConfigurationRaw();
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<String> updatePModes(byte[] bytes) throws XmlProcessingException {
+    public List<String> updatePModes(byte[] bytes, String description) throws XmlProcessingException {
         LOG.debug("Updating the PMode");
 
         //unmarshall the PMode with whitespaces ignored
@@ -132,6 +149,7 @@ public abstract class PModeProvider {
         final ConfigurationRaw configurationRaw = new ConfigurationRaw();
         configurationRaw.setConfigurationDate(Calendar.getInstance().getTime());
         configurationRaw.setXml(bytes);
+        configurationRaw.setDescription(description);
         configurationRawDAO.create(configurationRaw);
 
         LOG.info("Configuration successfully updated");
