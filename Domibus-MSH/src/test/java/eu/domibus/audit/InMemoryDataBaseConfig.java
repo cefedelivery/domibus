@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by hykiukira on 04/10/2017.
+ * @author Thomas Dussart
+ * @since 4.0
  */
-
 @EnableTransactionManagement
 @Profile("IN_MEMORY_DATABASE")
 public class InMemoryDataBaseConfig extends AbstractDatabaseConfig{

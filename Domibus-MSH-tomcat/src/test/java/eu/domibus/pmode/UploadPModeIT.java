@@ -76,7 +76,7 @@ public class UploadPModeIT extends AbstractIT {
             InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-valid.xml");
             //MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-blue_gw", pModeFile.getName(), "text/xml", IOUtils.toByteArray(fis));
             //String response = adminGui.uploadFileHandler(pModeContent);
-            pModeProvider.updatePModes(IOUtils.toByteArray(is));
+            pModeProvider.updatePModes(IOUtils.toByteArray(is), "description");
             //Assert.assertEquals("You successfully uploaded the PMode file.", response);
         } catch (IOException ioEx) {
             System.out.println("File reading error: " + ioEx.getMessage());
@@ -99,7 +99,7 @@ public class UploadPModeIT extends AbstractIT {
             InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/" + pmodeName);
 
             MultipartFile pModeContent = new MockMultipartFile("wrong-domibus-configuration", pmodeName, "text/xml", IOUtils.toByteArray(is));
-            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent);
+            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent, "description");
             Assert.assertTrue(response.getBody().contains("Failed to upload the PMode file due to"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());
@@ -230,7 +230,7 @@ public class UploadPModeIT extends AbstractIT {
             String pmodeName = "domibus-configuration-long-names.xml";
             InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/" + pmodeName);
             MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-long-names", pmodeName, "text/xml", IOUtils.toByteArray(is));
-            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent);
+            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent, "description");
             Assert.assertTrue(response.getBody().contains("is not facet-valid with respect to maxLength"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());

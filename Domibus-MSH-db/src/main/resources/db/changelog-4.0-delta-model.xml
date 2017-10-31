@@ -22,10 +22,6 @@
             <column name="REVISION_DATE" type="TIMESTAMP"/>
             <column name="USER_NAME" type="VARCHAR(255)"/>
         </createTable>
-        <!--<addPrimaryKey
-                columnNames="ID"
-                constraintName="PK_REV_INFO"
-                tableName="TB_REV_INFO"/>-->
 
         <createTable tableName="TB_REV_CHANGES">
             <column autoIncrement="true" name="ID_PK" type="INT">
@@ -198,7 +194,7 @@
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
 
-        <createTable tableName="TB_BACKENDFILTER_ROUTINGCRITERIA_AUD">
+        <createTable tableName="TB_BACK_RCRITERIA_AUD">
             <column name="ID_PK" type="INT"/>
             <column name="REV" type="INT"/>
             <column name="REVTYPE" type="TINYINT"/>
@@ -207,10 +203,10 @@
         </createTable>
         <addPrimaryKey
                 columnNames="ID_PK, REV"
-                constraintName="PK_BACKENDFILTER_ROUTINGCRITERIA_AUD"
-                tableName="TB_BACKENDFILTER_ROUTINGCRITERIA_AUD"/>
-        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_BACKENDFILTER_ROUTINGCRITERIA_AUD"
-                                 constraintName="FK_BACKENDFILTER_ROUTINGCRITERIA_AUD" deferrable="false"
+                constraintName="PK_BACK_RCRITERIA_AUD"
+                tableName="TB_BACK_RCRITERIA_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_BACK_RCRITERIA_AUD"
+                                 constraintName="FK_BACK_RCRITERIA_AUD" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
 
@@ -254,5 +250,26 @@
             ORDER BY Q.AUDIT_DATE DESC
         </createView>
 
+    </changeSet>
+    <changeSet author="migueti" id="EDELIVERY-2754_AUDIT">
+        <createTable tableName="TB_CONFIGURATION_RAW_AUD">
+            <column name="ID_PK" type="INT"/>
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="CONFIGURATION_DATE" type="TIMESTAMP"/>
+            <column name="CONFIGURATIONDATE_MOD" type="BOOLEAN"/>
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
+            <column name="DESCRIPTION_MOD" type="VARCHAR(255)"/>
+            <column name="XML" type="BLOB"/>
+            <column name="XML_MOD" type="BOOLEAN"/>
+        </createTable>
+        <addPrimaryKey
+                columnNames="ID_PK, REV"
+                constraintName="PK_CONFIGURATION_RAW_AUD"
+                tableName="TB_CONFIGURATION_RAW_AUD"/>
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_CONFIGURATION_RAW_AUD"
+                                 constraintName="FK_CONFIGURATION_RAW_AUD" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
     </changeSet>
 </databaseChangeLog>
