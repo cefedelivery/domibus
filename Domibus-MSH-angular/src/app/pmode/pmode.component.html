@@ -1,27 +1,118 @@
 ﻿<h1 id="pmodeheader_id">PMode</h1>
 <div class="selectionCriteria">
-  <md-card>
-    <md-card-content>
-      <div class="textarea" *ngIf="pModeExists">
-        <textarea id="pmodetextarea_id" class="textarea" disabled style="resize: none">{{pModeContents}}</textarea>
+  <md2-tabs (selectedIndexChange)="selectedIndexChange($event)">
+    <md2-tab #xmlTab label="Current">
+      <md-card>
+        <md-card-content>
+          <div class="textarea" *ngIf="pModeExists">
+            <textarea id="pmodetextarea_id" class="textarea" disabled style="resize: none">{{pModeContents}}</textarea>
+          </div>
+          <div class="pModeInfo" *ngIf="!pModeExists">
+            <span>No PMode uploaded yet</span>
+          </div>
+          <table class="group-action-button">
+            <tr>
+              <td>
+                <button md-raised-button color="primary" (click)="upload()" id="uploadbutton_id">
+                  <md-icon>file_upload</md-icon>
+                  <span>Upload</span>
+                </button>
+                <button md-raised-button color="primary" (click)="download(actualId)" id="downloadbutton_id"
+                        [disabled]="!pModeExists">
+                  <md-icon>file_download</md-icon>
+                  <span>Download</span>
+                </button>
+              </td>
+            </tr>
+          </table>
+        </md-card-content>
+      </md-card>
+    </md2-tab>
+
+    <md2-tab #archiveTab label="Archive">
+      <div class="panel">
+        <div class="group-filter-button">
+          <span class="row-button">
+            <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                       (onPageSizeChanged)="changePageSize($event.value)">
+            </app-row-limiter>
+          </span>
+          <span class="column-filter-button">
+            <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                         (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)">
+            </app-column-picker>
+          </span>
+        </div>
+
+        <ngx-datatable
+          #archivePmodeDatatable
+          id="archivePmodeTable"
+          class="material striped"
+          [rows]="tableRows"
+          [columns]="columnPicker.selectedColumns"
+          [columnMode]="'force'"
+          [headerHeight]="50"
+          [footerHeight]="50"
+          [rowHeight]="'auto'"
+          [scrollbarH]="true"
+          [externalPaging]="true"
+          [externalSorting]="true"
+          [loadingIndicator]="loading"
+          [count]="count"
+          [offset]="offset"
+          [limit]="rowLimiter.pageSize"
+          (page)='onPage($event)'
+          [selected]="selected"
+          [selectionType]="'multi'"
+          (select)="onSelect($event)">
+        </ngx-datatable>
+
+        <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span class="text-select">{{value| domibusDate: dateFormat}}</span>
+        </ng-template>
+
+        <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>
+          <button md-icon-button color="primary" id="downloadButtonRow{{row.$$index}}_id" tooltip="Download"
+                  (click)="downloadArchive(row.$$index)">
+            <md-icon>file_download</md-icon>
+          </button>
+          <button md-icon-button color="primary" id="deleteButtonRow{{row.$$index}}_id" tooltip="Delete"
+                  [disabled]="row.current" (click)="deleteArchiveAction(row.$$index)">
+            <md-icon>delete</md-icon>
+          </button>
+          <button md-icon-button color="primary" id="rollbackButtonRow{{row.$$index}}_id" tooltip="Rollback"
+                  [disabled]="row.current" (click)="rollbackArchive(row)">
+            <md-icon>settings_backup_restore</md-icon>
+          </button>
+        </ng-template>
+
+        <table class="group-action-button">
+          <tr>
+            <td>
+              <button md-raised-button color="primary" (click)="saveButton()" id="savebutton_id" [disabled]="disabledSave">
+                <md-icon>save</md-icon>
+                <span>Save</span>
+              </button>
+              <button md-raised-button color="primary" (click)="cancelButton()" id="cancelbutton_id" [disabled]="disabledCancel">
+                <md-icon>cancel</md-icon>
+                <span>Cancel</span>
+              </button>
+              <button md-raised-button color="primary" (click)="downloadArchive(selected[0].$$index)" id="downloadArchivebutton_id" [disabled]="disabledDownload">
+                <md-icon>file_download</md-icon>
+                <span>Download</span>
+              </button>
+              <button md-raised-button color="primary" (click)="deleteArchive()" id="deleteArchivebutton_id" [disabled]="disabledDelete">
+                <md-icon>delete</md-icon>
+                <span>Delete</span>
+              </button>
+              <button md-raised-button color="primary" (click)="rollbackArchive(selected[0])" id="rollbackArchivebutton_id" [disabled]="disabledRollback">
+                <md-icon>settings_backup_restore</md-icon>
+                <span>Rollback</span>
+              </button>
+            </td>
+          </tr>
+        </table>
       </div>
-      <div class="pModeInfo" *ngIf="!pModeExists">
-        <span>No PMode uploaded yet</span>
-      </div>
-      <table class="group-action-button">
-        <tr>
-          <td>
-            <button md-raised-button color="primary" (click)="upload()" id="uploadbutton_id">
-              <md-icon>file_upload</md-icon>
-              <span>Upload</span>
-            </button>
-            <button md-raised-button color="primary" (click)="download()" id="downloadbutton_id" [disabled]="!pModeExists">
-              <md-icon>file_download</md-icon>
-              <span>Download</span>
-            </button>
-          </td>
-        </tr>
-      </table>
-    </md-card-content>
-  </md-card>
+    </md2-tab>
+  </md2-tabs>
 </div>
