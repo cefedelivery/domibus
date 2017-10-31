@@ -1,3 +1,62 @@
-<p>
-  party works!
-</p>
+<h1 id="partyHeader_id">Party</h1>
+<div class="selectionCriteria">
+  <md-card>
+    <md-card-content>
+      <div class="panel">
+        <md-input-container>
+          <input mdInput placeholder="Name" [(ngModel)]="name" id="name_id">
+        </md-input-container>
+        <md-input-container>
+          <input mdInput placeholder="End point" [(ngModel)]="endPoint" id="endPoint_id">
+        </md-input-container>
+        <md-input-container>
+          <input mdInput placeholder="Party id" [(ngModel)]="partyID" id="partyID_id">
+        </md-input-container>
+        <md-input-container>
+          <input mdInput placeholder="Process" [(ngModel)]="process" id="process_id">
+        </md-input-container>
+      </div>
+      <div class="searchArea">
+        <button md-raised-button color="primary" id="searchbutton_id" (click)="searchAndCount()">
+          <md-icon>search</md-icon>
+          <span>Search</span>
+        </button>
+      </div>
+    </md-card-content>
+  </md-card>
+</div>
+
+<div class="panel">
+  <div class="group-filter-button">
+    <span class="row-button">
+      <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                       (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+    </span>
+    <span class="column-filter-button">
+      <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                         (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+    </span>
+  </div>
+</div>
+
+<ngx-datatable
+  id="auditTable"
+  class="material striped"
+  [rows]="rows"
+  [columnMode]="'force'"
+  [columns]="columnPicker.selectedColumns"
+  [headerHeight]="50"
+  [footerHeight]="50"
+  [rowHeight]="'auto'"
+  [scrollbarH]="true"
+  [externalPaging]="true"
+  [externalSorting]="true"
+  [loadingIndicator]="loading"
+  [count]="count"
+  [offset]="offset"
+  [limit]="rowLimiter.pageSize"
+  [offset]="offset"
+  [limit]="rowLimiter.pageSize"
+  (page)='onPage($event)'
+>
+</ngx-datatable>

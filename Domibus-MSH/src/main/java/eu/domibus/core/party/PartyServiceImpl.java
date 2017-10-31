@@ -1,8 +1,9 @@
 package eu.domibus.core.party;
 
-import eu.domibus.api.party.Party;
 import eu.domibus.common.dao.PartyDao;
+import eu.domibus.core.converter.DomainCoreConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -10,12 +11,29 @@ import java.util.List;
  * @author Thomas Dussart
  * @since 4.0
  */
-public class PartyServiceImpl {
+@Service
+public class PartyServiceImpl implements PartyService {
 
     @Autowired
     private PartyDao partyDao;
 
-    public List<Party> listParties() {
-        return null;
+    @Autowired
+    private DomainCoreConverter domainCoreConverter;
+
+    @Override
+    public List<Party> listParties(String name,
+                                   String endPoint,
+                                   String partyId,
+                                   String process,
+                                   int pargeStart,
+                                   int pageSize) {
+        return domainCoreConverter.convert(partyDao.listParties(
+                name,
+                endPoint,
+                partyId,
+                process,
+                pargeStart,
+                pageSize),
+                Party.class);
     }
 }
