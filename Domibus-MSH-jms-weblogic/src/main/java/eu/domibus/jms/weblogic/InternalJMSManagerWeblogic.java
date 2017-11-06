@@ -97,10 +97,10 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         String destinationFQName = (String) mbsc.getAttribute(jmsDestination, "Name");
                         // The name must be the queueName in a single server or serverName@queueName in a cluster.
                         String destName = getShortDestName(destinationFQName);
-                        destination.setFullyQualifiedName(destinationFQName);
+                        destination.setName(destName);
+                        destination.setFullyQualifiedName(removeJmsModule(destinationFQName));
 
                         destName = getOnlyDestName(destName);
-                        destination.setName(destName);
                         ObjectName configQueue = getQueueMap(mbsc).get(destName);
                         if (configQueue != null) {
                             destination.setType(QUEUE);
@@ -151,10 +151,10 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         String destinationFQName = (String) mbsc.getAttribute(jmsDestination, "Name");
                         // The name must be the queueName in a single server or serverName@queueName in a cluster.
                         String destName = getShortDestName(destinationFQName);
-                        destination.setFullyQualifiedName(destinationFQName);
+                        destination.setName(destName);
+                        destination.setFullyQualifiedName(removeJmsModule(destinationFQName));
 
                         destName = getOnlyDestName(destName);
-                        destination.setName(destName);
                         ObjectName configQueue = getQueueMap(mbsc).get(destName);
                         if (configQueue != null) {
                             destination.setType(QUEUE);
