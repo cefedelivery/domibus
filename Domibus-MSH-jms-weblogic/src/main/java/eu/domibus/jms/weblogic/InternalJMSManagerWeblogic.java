@@ -102,13 +102,14 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
                         destName = getOnlyDestName(destName);
                         ObjectName configQueue = getQueueMap(mbsc).get(destName);
-                        if (configQueue != null) {
-                            destination.setType(QUEUE);
-                            destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
-                            String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
-                            destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
-                            destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
-                        }
+                        // We do not manage Topic at the moment
+                        if (configQueue == null) continue;
+
+                        destination.setType(QUEUE);
+                        destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
+                        String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
+                        destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
+                        destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
                         destination.setNumberOfMessages(getMessagesTotalCount(mbsc, jmsDestination));
                         destinationMap.put(removeJmsModuleAndServer(destinationFQName), destination);
                     }
@@ -156,14 +157,14 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
                         destName = getOnlyDestName(destName);
                         ObjectName configQueue = getQueueMap(mbsc).get(destName);
-                        if (configQueue != null) {
-                            destination.setType(QUEUE);
-                            destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
-                            String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
-                            destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
-                            destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
-                        }
+                        // We do not manage Topic at the moment
+                        if (configQueue == null) continue;
 
+                        destination.setType(QUEUE);
+                        destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
+                        String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
+                        destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
+                        destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
                         destination.setNumberOfMessages(getMessagesTotalCount(mbsc, jmsDestination));
                         destinationsMap.put(destinationFQName, destination);
                     }
