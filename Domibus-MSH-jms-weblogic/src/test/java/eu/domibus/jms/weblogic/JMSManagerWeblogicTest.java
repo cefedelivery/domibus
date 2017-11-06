@@ -142,18 +142,75 @@ public class JMSManagerWeblogicTest {
     }
 
     @Test
-    public void testGetDestinations(@Mocked final ObjectName drs,
-                                    @Mocked final ObjectName server1,
-                                    @Mocked final ObjectName jmsRuntime,
-                                    @Mocked final ObjectName jmsServer,
-                                    @Mocked final ObjectName jmsDestination,
-                                    @Mocked final ObjectName configQueue,
-                                    final @Injectable MBeanServerConnection mbsc) throws Exception {
+    public void testGetDestinationsSingleServer(@Mocked final ObjectName server1,
+                                                @Mocked final ObjectName jmsRuntime,
+                                                @Mocked final ObjectName jmsServer,
+                                                @Mocked final ObjectName jmsDestination,
+                                                @Mocked final ObjectName configQueue,
+                                                final @Injectable MBeanServerConnection mbsc) throws Exception {
         final ObjectName[] servers = new ObjectName[]{server1};
         final ObjectName[] jmsServers = new ObjectName[]{jmsServer};
         final ObjectName[] jmsDestinations = new ObjectName[]{jmsDestination};
         final Map<String, ObjectName> queueMap = new HashMap<>();
-        final String queueName = "myqueue";
+        final String queueName = "DomibusDLQ";
+        queueMap.put(queueName, configQueue);
+
+        final String moduleAndQueueName = "eDeliveryModule!DomibusDLQ";
+
+        new Expectations(jmsManagerWeblogic) {{
+            ObjectName drs = jmxHelper.getDomainRuntimeService();
+            result = drs;
+
+            mbsc.getAttribute(drs, "ServerRuntimes");
+            result = servers;
+
+            mbsc.getAttribute(server1, "JMSRuntime");
+            result = jmsRuntime;
+
+            mbsc.getAttribute(jmsRuntime, "JMSServers");
+            result = jmsServers;
+
+            mbsc.getAttribute(jmsServer, "Destinations");
+            result = jmsDestinations;
+
+            mbsc.getAttribute(jmsDestination, "Name");
+            result = moduleAndQueueName;
+
+            jmsManagerWeblogic.getQueueMap(mbsc);
+            result = queueMap;
+
+            mbsc.getAttribute(configQueue, "JNDIName");
+            result = "jms/domibus.DLQ";
+
+            mbsc.getAttribute(jmsDestination, "MessagesCurrentCount");
+            result = 2L;
+
+        }};
+
+        final Map<String, InternalJMSDestination> destinations = jmsManagerWeblogic.findDestinationsGroupedByFQName(mbsc);
+        assertNotNull(destinations);
+        final InternalJMSDestination internalJmsDestination = destinations.get(moduleAndQueueName);
+        assertNotNull(internalJmsDestination);
+
+        assertEquals(internalJmsDestination.getName(), queueName);
+        assertEquals(internalJmsDestination.getProperty("ObjectName"), jmsDestination);
+        assertEquals(internalJmsDestination.getProperty("Jndi"), "jms/domibus.DLQ");
+        assertEquals(internalJmsDestination.getNumberOfMessages(), 2L);
+
+    }
+
+    @Test
+    public void testGetDestinationsCluster(@Mocked final ObjectName server1,
+                                           @Mocked final ObjectName jmsRuntime,
+                                           @Mocked final ObjectName jmsServer,
+                                           @Mocked final ObjectName jmsDestination,
+                                           @Mocked final ObjectName configQueue,
+                                           final @Injectable MBeanServerConnection mbsc) throws Exception {
+        final ObjectName[] servers = new ObjectName[]{server1};
+        final ObjectName[] jmsServers = new ObjectName[]{jmsServer};
+        final ObjectName[] jmsDestinations = new ObjectName[]{jmsDestination};
+        final Map<String, ObjectName> queueMap = new HashMap<>();
+        final String queueName = "DomibusDLQ";
         queueMap.put(queueName, configQueue);
 
 
@@ -174,13 +231,13 @@ public class JMSManagerWeblogicTest {
             result = jmsDestinations;
 
             mbsc.getAttribute(jmsDestination, "Name");
-            result = queueName;
+            result = "eDeliveryModule!eDeliveryJMS@ms1@DomibusDLQ";
 
             jmsManagerWeblogic.getQueueMap(mbsc);
             result = queueMap;
 
             mbsc.getAttribute(configQueue, "JNDIName");
-            result = "jndi/myqueue";
+            result = "jms/domibus.DLQ";
 
             mbsc.getAttribute(jmsDestination, "MessagesCurrentCount");
             result = 2L;
@@ -189,12 +246,14 @@ public class JMSManagerWeblogicTest {
 
         final Map<String, InternalJMSDestination> destinations = jmsManagerWeblogic.findDestinationsGroupedByFQName(mbsc);
         assertNotNull(destinations);
-        final InternalJMSDestination internalJmsDestination = destinations.get(queueName);
+        String queueNameWithServerName = "ms1@DomibusDLQ";
+        final InternalJMSDestination internalJmsDestination = destinations.get(queueNameWithServerName);
         assertNotNull(internalJmsDestination);
 
-        assertEquals(internalJmsDestination.getName(), queueName);
+        assertEquals(internalJmsDestination.getName(), queueNameWithServerName);
+        assertEquals(internalJmsDestination.getFullyQualifiedName(), "eDeliveryJMS@ms1@DomibusDLQ");
         assertEquals(internalJmsDestination.getProperty("ObjectName"), jmsDestination);
-        assertEquals(internalJmsDestination.getProperty("Jndi"), "jndi/myqueue");
+        assertEquals(internalJmsDestination.getProperty("Jndi"), "jms/domibus.DLQ");
         assertEquals(internalJmsDestination.getNumberOfMessages(), 2L);
 
     }
