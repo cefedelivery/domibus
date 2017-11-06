@@ -11,14 +11,14 @@ import eu.domibus.common.services.UserService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Thomas Dussart
@@ -28,6 +28,9 @@ import java.util.List;
 public class UserManagementServiceImpl implements UserService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);
+
+    public static final String MAXIMUM_LOGGIN_ATTEMPT = "domibus.console.loggin.maximum.attempt";
+
 
     @Autowired
     private UserDao userDao;
@@ -41,13 +44,17 @@ public class UserManagementServiceImpl implements UserService {
     @Autowired
     private DomainCoreConverter domainConverter;
 
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
+
     @Override
     @Transactional(readOnly = true)
     public List<eu.domibus.api.user.User> findUsers() {
         //@thom use a dozer custom mapper to map from role to authorities.
         List<User> userEntities = userDao.listUsers();
-        List<eu.domibus.api.user.User> users=new ArrayList<>();
-        for (User userEntity: userEntities) {
+        List<eu.domibus.api.user.User> users = new ArrayList<>();
+        for (User userEntity : userEntities) {
             List<String> authorities = new ArrayList<>();
             Collection<UserRole> roles = userEntity.getRoles();
             for (UserRole role : roles) {
@@ -112,6 +119,39 @@ public class UserManagementServiceImpl implements UserService {
         userDao.deleteAll(usersEntitiesToDelete);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void handleAuthenticationPolicy(final String userName) {
+        User user = userDao.loadUserByUsername(userName);
+        if (user == null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, userName);
+            return;
+        }
+        if (!user.isEnabled() && user.getSuspensionDate() == null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, userName);
+            return;
+        }
+        if (!user.isEnabled() && user.getSuspensionDate() != null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
+            return;
+        }
+        int maxAttemptAmount = 5;
+        try {
+            maxAttemptAmount = Integer.valueOf(domibusProperties.getProperty(MAXIMUM_LOGGIN_ATTEMPT, "5"));
+        } catch (NumberFormatException n) {
+
+        }
+        user.setAttemptCount(user.getAttemptCount() + 1);
+        if (user.getAttemptCount() >= maxAttemptAmount) {
+            user.setActive(false);
+            user.setSuspensionDate(new Date(System.currentTimeMillis()));
+        }
+        userDao.update(user);
+    }
+
     private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
         List<User> result = new ArrayList<>(masterData);
         result.removeAll(newData);
@@ -135,7 +175,7 @@ public class UserManagementServiceImpl implements UserService {
         }
     }
 
-    private void updateUserWithoutPasswordChange(Collection<eu.domibus.api.user.User> users){
+    private void updateUserWithoutPasswordChange(Collection<eu.domibus.api.user.User> users) {
         for (eu.domibus.api.user.User user : users) {
             User userEntity = prepareUserForUpdate(user);
             addRoleToUser(user.getAuthorities(), userEntity);
@@ -143,7 +183,7 @@ public class UserManagementServiceImpl implements UserService {
         }
     }
 
-    private void updateUserWithPasswordChange(Collection<eu.domibus.api.user.User> users){
+    private void updateUserWithPasswordChange(Collection<eu.domibus.api.user.User> users) {
         for (eu.domibus.api.user.User user : users) {
             User userEntity = prepareUserForUpdate(user);
             userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));

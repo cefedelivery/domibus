@@ -30,4 +30,12 @@ public interface UserService{
      * update users
      */
     void updateUsers(List<User> users);
+
+    /**
+     * Handle the account lockout policy.
+     * Will log login attempt to the security log and inactivate user after certain amount of login attempt.
+     *
+     * @param userName the user loggin string
+     */
+    void handleAuthenticationPolicy(final String userName);
 }

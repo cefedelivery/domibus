@@ -11,6 +11,7 @@ export class UserResponseRO {
   authorities: Array<string>;
   roles:string="";
   status:string;
+  suspended: boolean;
 
 
 
@@ -20,6 +21,7 @@ export class UserResponseRO {
     this.password = password;
     this.status= status;
     this.active = active;
+    this.suspended = true;
     this.authorities=authorities;
     for(let authority in authorities){
       this.roles=this.roles.concat(authorities[authority]).concat(" ");

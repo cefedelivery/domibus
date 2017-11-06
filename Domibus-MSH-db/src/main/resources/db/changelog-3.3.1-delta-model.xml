@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="dussath" id="EDELIVERY-2859">
+        <addColumn tableName="TB_USER">
+            <column name="ATTEMPT_COUNT" type="int" defaultValueNumeric="0"/>
+        </addColumn>
+        <addColumn tableName="TB_USER">
+            <column name="SUSPENSION_DATE" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

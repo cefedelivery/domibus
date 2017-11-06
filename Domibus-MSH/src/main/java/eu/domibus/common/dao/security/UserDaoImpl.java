@@ -5,18 +5,18 @@ import eu.domibus.common.dao.BasicDao;
 import eu.domibus.common.model.security.User;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
 /**
  * @author Thomas Dussart
  * @since 3.3
- *
+ * <p>
  * Dao to handle admin console users.
- *
  */
 @Repository
-public class UserDaoImpl extends BasicDao<User> implements UserDao{
+public class UserDaoImpl extends BasicDao<User> implements UserDao {
 
     public UserDaoImpl() {
         super(User.class);
@@ -29,17 +29,25 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao{
     }
 
     @Override
-    public User loadUserByUsername(String userName){
+    public User loadUserByUsername(String userName) {
         TypedQuery<User> namedQuery = em.createNamedQuery("User.findByUserName", User.class);
-        namedQuery.setParameter("USER_NAME",userName);
-        return namedQuery.getSingleResult();
+        namedQuery.setParameter("USER_NAME", userName);
+        try {
+            return namedQuery.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     @Override
-    public User loadActiveUserByUsername(String userName){
+    public User loadActiveUserByUsername(String userName) {
         TypedQuery<User> namedQuery = em.createNamedQuery("User.findActiveByUserName", User.class);
-        namedQuery.setParameter("USER_NAME",userName);
-        return namedQuery.getSingleResult();
+        namedQuery.setParameter("USER_NAME", userName);
+        try {
+            return namedQuery.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     @Override

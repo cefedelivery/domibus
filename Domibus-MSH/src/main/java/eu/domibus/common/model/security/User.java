@@ -5,10 +5,7 @@ import org.hibernate.validator.constraints.Email;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Thomas Dussart
@@ -43,6 +40,11 @@ public class User extends AbstractBaseEntity{
     private Boolean active;
     @Column(name="OPTLOCK")
     public Integer version;
+    @Column(name = "ATTEMPT_COUNT")
+    private Integer attemptCount = 0;
+    @Column(name = "SUSPENSION_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date suspensionDate;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -124,5 +126,21 @@ public class User extends AbstractBaseEntity{
 
     public Boolean getActive() {
         return active;
+    }
+
+    public Integer getAttemptCount() {
+        return attemptCount;
+    }
+
+    public void setAttemptCount(Integer attemptCount) {
+        this.attemptCount = attemptCount;
+    }
+
+    public Date getSuspensionDate() {
+        return suspensionDate;
+    }
+
+    public void setSuspensionDate(Date suspensionDate) {
+        this.suspensionDate = suspensionDate;
     }
 }

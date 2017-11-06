@@ -81,7 +81,10 @@ public enum DomibusMessageCode implements MessageCode {
     SEC_CERTIFICATE_NOT_YET_VALID("SEC-009", "Certificate is not yet valid at the current date [{}]. Certificate valid from [{}] to [{}]"),
     SEC_NO_SECURITY_POLICY_USED("SEC-010", "No security policy (intended for testing alone) is used. Security certificate validations will be bypassed!"),
     SEC_UNAUTHORIZED_MESSAGE_ACCESS("SEC-011", "User [{}] is trying to access a message having final recipient: [{}]"),
-    SEC_INVALID_X509CERTIFICATE("SEC-012", "X509Certificate invalid or not found");
+    SEC_INVALID_X509CERTIFICATE("SEC-012", "X509Certificate invalid or not found"),
+    SEC_CONSOLE_LOGIN_UNKNOWN_USER("SEC-013", "The user [{}] is not known"),
+    SEC_CONSOLE_LOGIN_INACTIVE_USER("SEC-014", "The user [{}] is not active"),
+    SEC_CONSOLE_LOGIN_SUSPENDED_USER("SEC-014", "The user [{}] is not active");
 
     String code;
     String message;
