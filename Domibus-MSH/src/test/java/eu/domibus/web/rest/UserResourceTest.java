@@ -72,7 +72,5 @@ public class UserResourceTest {
         Assert.assertNotNull(userResponseROS);
         UserResponseRO userResponseRO = getUserResponseRO();
         Assert.assertEquals(userResponseRO, userResponseROS.get(0));
-
-
     }
 }

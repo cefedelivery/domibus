@@ -82,9 +82,9 @@ public enum DomibusMessageCode implements MessageCode {
     SEC_NO_SECURITY_POLICY_USED("SEC-010", "No security policy (intended for testing alone) is used. Security certificate validations will be bypassed!"),
     SEC_UNAUTHORIZED_MESSAGE_ACCESS("SEC-011", "User [{}] is trying to access a message having final recipient: [{}]"),
     SEC_INVALID_X509CERTIFICATE("SEC-012", "X509Certificate invalid or not found"),
-    SEC_CONSOLE_LOGIN_UNKNOWN_USER("SEC-013", "The user [{}] is not known"),
+    SEC_CONSOLE_LOGIN_UNKNOWN_USER("SEC-013", "The user [{}] is unknown"),
     SEC_CONSOLE_LOGIN_INACTIVE_USER("SEC-014", "The user [{}] is not active"),
-    SEC_CONSOLE_LOGIN_SUSPENDED_USER("SEC-014", "The user [{}] is not active");
+    SEC_CONSOLE_LOGIN_SUSPENDED_USER("SEC-015", "The user [{}] is suspended");
 
     String code;
     String message;

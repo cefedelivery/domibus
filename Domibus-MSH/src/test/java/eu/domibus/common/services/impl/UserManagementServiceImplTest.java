@@ -239,7 +239,7 @@ public class UserManagementServiceImplTest {
             result = users;
         }};
 
-        userManagementService.undoUserSuspension();
+        userManagementService.findAndReactivateSuspendedUsers();
 
         new Verifications() {{
             List<User> users;

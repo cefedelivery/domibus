@@ -42,6 +42,7 @@ public interface UserService{
     /**
      * Search for all users that have been suspended (due to multiple unsuccessful login attempts)
      * and verify if the suspension date is smaller then current time - interval period defined in property file.
+     * If some user are found they will be reactivated.
      */
-    void undoUserSuspension();
+    void findAndReactivateSuspendedUsers();
 }

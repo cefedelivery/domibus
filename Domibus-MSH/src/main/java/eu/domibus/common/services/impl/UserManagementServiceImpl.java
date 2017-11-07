@@ -133,34 +133,20 @@ public class UserManagementServiceImpl implements UserService {
         applyAccountLockingPolicy(user);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public void undoUserSuspension() {
-        int suspensionInterval;
-        try {
-            suspensionInterval = Integer.valueOf(domibusProperties.getProperty(LOGIN_SUSPENSION_TIME, "3600"));
-        } catch (NumberFormatException n) {
-            suspensionInterval = 3600;
+    boolean logOnly(String userName, User user) {
+        if (user == null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, userName);
+            return true;
         }
-        //user will not be reactivated.
-        if (suspensionInterval == 0) {
-            return;
+        if (!user.isEnabled() && user.getSuspensionDate() == null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, userName);
+            return true;
         }
-
-        Date currentTimeMinusSuspensionInterval = new Date(System.currentTimeMillis() - suspensionInterval * 1000);
-        List<User> users = userDao.listSuspendedUser(currentTimeMinusSuspensionInterval);
-        for (User user : users) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Suspended user " + user.getUserName() + " is going to reactivated.");
-            }
-            user.setSuspensionDate(null);
-            user.setAttemptCount(0);
-            user.setActive(true);
+        if (!user.isEnabled() && user.getSuspensionDate() != null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
+            return true;
         }
-        userDao.update(users);
+        return false;
     }
 
     void applyAccountLockingPolicy(User user) {
@@ -178,20 +164,34 @@ public class UserManagementServiceImpl implements UserService {
         userDao.update(user);
     }
 
-    boolean logOnly(String userName, User user) {
-        if (user == null) {
-            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, userName);
-            return true;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void findAndReactivateSuspendedUsers() {
+        int suspensionInterval;
+        try {
+            suspensionInterval = Integer.valueOf(domibusProperties.getProperty(LOGIN_SUSPENSION_TIME, "3600"));
+        } catch (NumberFormatException n) {
+            suspensionInterval = 3600;
         }
-        if (!user.isEnabled() && user.getSuspensionDate() == null) {
-            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, userName);
-            return true;
+        //user will not be reactivated.
+        if (suspensionInterval == 0) {
+            return;
         }
-        if (!user.isEnabled() && user.getSuspensionDate() != null) {
-            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
-            return true;
+
+        Date currentTimeMinusSuspensionInterval = new Date(System.currentTimeMillis() - (suspensionInterval * 1000));
+        List<User> users = userDao.listSuspendedUser(currentTimeMinusSuspensionInterval);
+        for (User user : users) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Suspended user " + user.getUserName() + " is going to be reactivated.");
+            }
+            user.setSuspensionDate(null);
+            user.setAttemptCount(0);
+            user.setActive(true);
         }
-        return false;
+        userDao.update(users);
     }
 
     private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {

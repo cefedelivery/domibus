@@ -30,6 +30,6 @@ public class AccountUnLockJob extends QuartzJobBean {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Executing job to unlock suspended account at " + new Date());
         }
-        userService.undoUserSuspension();
+        userService.findAndReactivateSuspendedUsers();
     }
 }

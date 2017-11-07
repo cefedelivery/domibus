@@ -34,7 +34,6 @@ public class AuthenticationService {
         try {
             authentication = authenticationManager.authenticate(authenticationToken);
         } catch (AuthenticationException ae) {
-            ae.printStackTrace();
             userService.handleAuthenticationPolicy(username);
             throw ae;
         }
