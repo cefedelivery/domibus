@@ -5,6 +5,8 @@ import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -20,7 +22,10 @@ import javax.xml.xpath.XPathFactory;
  */
 @Service
 public class NonRepudiationCheckerImpl implements NonRepudiationChecker {
-    private static final String XPATH_EXPRESSION_STRING = "/*/*/*[local-name() = 'Reference']/@URI  | /*/*/*[local-name() = 'Reference']/*[local-name() = 'DigestValue']";
+
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(NonRepudiationCheckerImpl.class);
+
+    private static final String XPATH_EXPRESSION_STRING = ".//*[local-name() = 'Reference']/@URI  | .//*[local-name() = 'Reference']/*[local-name() = 'DigestValue']";
     private final XPath xPath = XPathFactory.newInstance().newXPath();
 
     @Override
@@ -51,13 +56,15 @@ public class NonRepudiationCheckerImpl implements NonRepudiationChecker {
         }
         boolean found = false;
         for (int i = 0; i < referencesFromSecurityHeader.getLength(); ++i) {
+            final String referenceFromSecurityHeader = referencesFromSecurityHeader.item(i).getTextContent();
             for (int j = 0; j < referencesFromNonRepudiationInformation.getLength(); ++j) {
-                if (referencesFromSecurityHeader.item(i).getTextContent().equals(referencesFromNonRepudiationInformation.item(j).getTextContent())) {
+                if (referenceFromSecurityHeader.equals(referencesFromNonRepudiationInformation.item(j).getTextContent())) {
                     found = true;
                     break;
                 }
             }
             if (!found) {
+                LOG.error("The reference [{}] from the request Signature could not be found in the response NonRepudiationInformation", referenceFromSecurityHeader);
                 return false;
             }
             found = false;
