@@ -1,3 +1,5 @@
+Domibus 3.3.1
+- Add an account locking policy mechanism. When a user logins unsuccessfully a configurable amount of time, he will be deactivated for a configurable time interval.
 Domibus 3.3
 - Additional validation on pMode upload: when @type is missing or is empty, the value of PartyId, Service and AgreementRef, must be an URI (relative URIs accepted).
 - Use optional regex validation for dynamic discovery certificate. New property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation.
