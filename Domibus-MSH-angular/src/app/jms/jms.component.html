@@ -89,7 +89,7 @@
   </ng-template>
 
   <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>
-    <button id="jmsMoveButtonRow{{row.$$index}}_id" md-icon-button color="primary" (click)="moveAction(row)" tooltip="Move">
+    <button id="jmsMoveButtonRow{{row.$$index}}_id" md-icon-button color="primary" (click)="move()" tooltip="Move">
       <md-icon>move_to_inbox</md-icon>
     </button>
     <button id="jmsDeleteButtonRow{{row.$$index}}_id" md-icon-button color="primary" (click)="deleteAction(row)"
