@@ -136,7 +136,9 @@ export class JmsComponent implements OnInit, DirtyOperations {
         this.queues = [];
         let destinations = response.json().jmsDestinations;
         for (let key in destinations) {
-          this.queues.push(destinations[key]);
+          let destinationWithKey = destinations[key];
+          destinationWithKey['key'] = key;
+          this.queues.push(destinationWithKey);
         }
         this.queuesInfoGot.emit();
       },
@@ -255,7 +257,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
         try {
           let originalQueue = message.customProperties.originalQueue;
           if (!isNullOrUndefined(originalQueue)) {
-            let queue = this.queues.filter((queue) => queue.properties.ObjectName.keyPropertyList.Name === originalQueue).pop();
+            let queue = this.queues.filter((queue) => queue.key === originalQueue).pop();
             if(!isNullOrUndefined(queue)) {
               dialogRef.componentInstance.queues.push(queue);
               dialogRef.componentInstance.destinationsChoiceDisabled = true;
@@ -292,7 +294,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
       try {
         let originalQueue = row.customProperties.originalQueue;
-        let queue = this.queues.filter((queue) => queue.properties.ObjectName.keyPropertyList.Name === originalQueue).pop();
+        let queue = this.queues.filter((queue) => queue.key === originalQueue).pop();
 
         if(!isNullOrUndefined(queue)) {
           dialogRef.componentInstance.queues.push(queue);
