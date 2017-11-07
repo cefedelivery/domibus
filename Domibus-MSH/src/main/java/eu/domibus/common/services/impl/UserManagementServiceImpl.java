@@ -29,7 +29,7 @@ public class UserManagementServiceImpl implements UserService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);
 
-    public static final String MAXIMUM_LOGGIN_ATTEMPT = "domibus.console.loggin.maximum.attempt";
+    static final String MAXIMUM_LOGGIN_ATTEMPT = "domibus.console.loggin.maximum.attempt";
 
 
     @Autowired
@@ -126,18 +126,13 @@ public class UserManagementServiceImpl implements UserService {
     @Transactional
     public void handleAuthenticationPolicy(final String userName) {
         User user = userDao.loadUserByUsername(userName);
-        if (user == null) {
-            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, userName);
+        if (logOnly(userName, user)) {
             return;
         }
-        if (!user.isEnabled() && user.getSuspensionDate() == null) {
-            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, userName);
-            return;
-        }
-        if (!user.isEnabled() && user.getSuspensionDate() != null) {
-            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
-            return;
-        }
+        applyAccountLockingPolicy(user);
+    }
+
+    void applyAccountLockingPolicy(User user) {
         int maxAttemptAmount = 5;
         try {
             maxAttemptAmount = Integer.valueOf(domibusProperties.getProperty(MAXIMUM_LOGGIN_ATTEMPT, "5"));
@@ -150,6 +145,22 @@ public class UserManagementServiceImpl implements UserService {
             user.setSuspensionDate(new Date(System.currentTimeMillis()));
         }
         userDao.update(user);
+    }
+
+    boolean logOnly(String userName, User user) {
+        if (user == null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, userName);
+            return true;
+        }
+        if (!user.isEnabled() && user.getSuspensionDate() == null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, userName);
+            return true;
+        }
+        if (!user.isEnabled() && user.getSuspensionDate() != null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
+            return true;
+        }
+        return false;
     }
 
     private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
