@@ -1,5 +1,6 @@
 package eu.domibus.common.services.impl;
 
+import com.google.common.collect.Lists;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
@@ -13,11 +14,12 @@ import org.junit.runner.RunWith;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
+import static eu.domibus.common.services.impl.UserManagementServiceImpl.LOGIN_SUSPENSION_TIME;
 import static eu.domibus.common.services.impl.UserManagementServiceImpl.MAXIMUM_LOGGIN_ATTEMPT;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Dussart
@@ -211,5 +213,62 @@ public class UserManagementServiceImplTest {
         boolean test = userManagementService.logOnly("test", user);
         assertFalse(test);
     }
+
+    @Test
+    public void undoUserSuspension(@Mocked final System system) {
+
+        final long currentTime = 1510064395598L;
+        final int suspensionInterval = 3600;
+        final Date currentTimeMinusSuspensionInterval = new Date(currentTime - suspensionInterval * 1000);
+
+        final User user = new User();
+        user.setActive(false);
+        user.setAttemptCount(2);
+        user.setSuspensionDate(new Date());
+
+        final List<User> users = Lists.newArrayList(user);
+
+        new Expectations() {{
+            domibusProperties.getProperty(LOGIN_SUSPENSION_TIME, "3600");
+            times = 1;
+            result = suspensionInterval;
+            System.currentTimeMillis();
+            result = currentTime;
+            userDao.listSuspendedUser(currentTimeMinusSuspensionInterval);
+            times = 1;
+            result = users;
+        }};
+
+        userManagementService.undoUserSuspension();
+
+        new Verifications() {{
+            List<User> users;
+            userDao.update(users = withCapture());
+            times = 1;
+            User modifiedUser = users.get(0);
+            assertTrue(modifiedUser.getActive());
+            assertNull(modifiedUser.getSuspensionDate());
+            assertEquals(0, modifiedUser.getAttemptCount(), 0d);
+        }};
+
+    }
+
+    @Test
+    public void prepareUserForUpdate() {
+        final User userEntity = new User();
+        userEntity.setActive(false);
+        userEntity.setSuspensionDate(new Date());
+        userEntity.setAttemptCount(5);
+        eu.domibus.api.user.User user = new eu.domibus.api.user.User();
+        user.setActive(true);
+        new Expectations() {{
+            userDao.loadUserByUsername(anyString);
+            result = userEntity;
+        }};
+        User user1 = userManagementService.prepareUserForUpdate(user);
+        assertNull(user1.getSuspensionDate());
+        assertEquals(0, user1.getAttemptCount(), 0d);
+    }
+
 
 }

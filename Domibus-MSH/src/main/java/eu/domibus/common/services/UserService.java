@@ -38,4 +38,10 @@ public interface UserService{
      * @param userName the user loggin string
      */
     void handleAuthenticationPolicy(final String userName);
+
+    /**
+     * Search for all users that have been suspended (due to multiple unsuccessful login attempts)
+     * and verify if the suspension date is smaller then current time - interval period defined in property file.
+     */
+    void undoUserSuspension();
 }

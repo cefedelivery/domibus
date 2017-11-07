@@ -23,7 +23,8 @@ import java.util.*;
 @NamedQueries({
         @NamedQuery(name = "User.findAll", query = "FROM User"),
         @NamedQuery(name = "User.findByUserName", query = "FROM User u where u.userName=:USER_NAME"),
-        @NamedQuery(name = "User.findActiveByUserName", query = "FROM User u where u.userName=:USER_NAME and u.active=true")
+        @NamedQuery(name = "User.findActiveByUserName", query = "FROM User u where u.userName=:USER_NAME and u.active=true"),
+        @NamedQuery(name = "User.findSuspendedUser", query = "FROM User u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL")
 })
 public class User extends AbstractBaseEntity{
     @NotNull

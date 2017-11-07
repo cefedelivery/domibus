@@ -97,7 +97,6 @@ public class UserResource {
         for (UserResponseRO userResponseRO : userResponseROS) {
             userResponseRO.setStatus("PERSISTED");
             userResponseRO.updateRolesField();
-            userResponseRO.setSuspended(true);
         }
         return userResponseROS;
 

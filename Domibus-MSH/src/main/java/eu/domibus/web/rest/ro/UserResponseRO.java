@@ -19,7 +19,7 @@ public class UserResponseRO {
     private String roles="";
     private String status;
     private String password;
-    private Boolean suspended;
+    private boolean suspended;
 
     public UserResponseRO(String userName, String email, boolean actif) {
         this.userName = userName;
@@ -96,11 +96,11 @@ public class UserResponseRO {
         return roles;
     }
 
-    public Boolean getSuspended() {
+    public boolean isSuspended() {
         return suspended;
     }
 
-    public void setSuspended(Boolean suspended) {
+    public void setSuspended(boolean suspended) {
         this.suspended = suspended;
     }
 

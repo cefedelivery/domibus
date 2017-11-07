@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,6 +26,13 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao {
     @Override
     public List<User> listUsers() {
         TypedQuery<User> namedQuery = em.createNamedQuery("User.findAll", User.class);
+        return namedQuery.getResultList();
+    }
+
+    @Override
+    public List<User> listSuspendedUser(final Date currentTimeMinusSuspensionInterval) {
+        TypedQuery<User> namedQuery = em.createNamedQuery("User.findSuspendedUser", User.class);
+        namedQuery.setParameter("SUSPENSION_INTERVAL", currentTimeMinusSuspensionInterval);
         return namedQuery.getResultList();
     }
 

@@ -13,15 +13,13 @@ export class UserResponseRO {
   status:string;
   suspended: boolean;
 
-
-
-  constructor(userName: string, email: string, password: string, active: boolean, status:string,authorities: Array<string>) {
+  constructor(userName: string, email: string, password: string, active: boolean, status: string, authorities: Array<string>, suspended: boolean) {
     this.userName = userName;
     this.email = email;
     this.password = password;
     this.status= status;
     this.active = active;
-    this.suspended = true;
+    this.suspended = suspended;
     this.authorities=authorities;
     for(let authority in authorities){
       this.roles=this.roles.concat(authorities[authority]).concat(" ");

@@ -29,8 +29,9 @@ public class UserManagementServiceImpl implements UserService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);
 
-    static final String MAXIMUM_LOGGIN_ATTEMPT = "domibus.console.loggin.maximum.attempt";
+    static final String MAXIMUM_LOGGIN_ATTEMPT = "domibus.console.login.maximum.attempt";
 
+    static final String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
 
     @Autowired
     private UserDao userDao;
@@ -65,7 +66,7 @@ public class UserManagementServiceImpl implements UserService {
                     userEntity.getEmail(),
                     userEntity.getActive(),
                     authorities,
-                    UserState.PERSISTED);
+                    UserState.PERSISTED, userEntity.getSuspensionDate());
             users.add(user);
         }
         return users;
@@ -132,12 +133,42 @@ public class UserManagementServiceImpl implements UserService {
         applyAccountLockingPolicy(user);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void undoUserSuspension() {
+        int suspensionInterval;
+        try {
+            suspensionInterval = Integer.valueOf(domibusProperties.getProperty(LOGIN_SUSPENSION_TIME, "3600"));
+        } catch (NumberFormatException n) {
+            suspensionInterval = 3600;
+        }
+        //user will not be reactivated.
+        if (suspensionInterval == 0) {
+            return;
+        }
+
+        Date currentTimeMinusSuspensionInterval = new Date(System.currentTimeMillis() - suspensionInterval * 1000);
+        List<User> users = userDao.listSuspendedUser(currentTimeMinusSuspensionInterval);
+        for (User user : users) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Suspended user " + user.getUserName() + " is going to reactivated.");
+            }
+            user.setSuspensionDate(null);
+            user.setAttemptCount(0);
+            user.setActive(true);
+        }
+        userDao.update(users);
+    }
+
     void applyAccountLockingPolicy(User user) {
-        int maxAttemptAmount = 5;
+        int maxAttemptAmount;
         try {
             maxAttemptAmount = Integer.valueOf(domibusProperties.getProperty(MAXIMUM_LOGGIN_ATTEMPT, "5"));
         } catch (NumberFormatException n) {
-
+            maxAttemptAmount = 5;
         }
         user.setAttemptCount(user.getAttemptCount() + 1);
         if (user.getAttemptCount() >= maxAttemptAmount) {
@@ -203,8 +234,12 @@ public class UserManagementServiceImpl implements UserService {
         }
     }
 
-    private User prepareUserForUpdate(eu.domibus.api.user.User user) {
+    User prepareUserForUpdate(eu.domibus.api.user.User user) {
         User userEntity = userDao.loadUserByUsername(user.getUserName());
+        if (!userEntity.getActive() && user.isActive()) {
+            userEntity.setSuspensionDate(null);
+            userEntity.setAttemptCount(0);
+        }
         userEntity.setActive(user.isActive());
         userEntity.setEmail(user.getEmail());
         userEntity.clearRoles();

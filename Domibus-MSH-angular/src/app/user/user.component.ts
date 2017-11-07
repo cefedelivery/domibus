@@ -145,7 +145,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonNew(): void {
-    this.editedUser = new UserResponseRO("", "", "", true, UserState[UserState.NEW], []);
+    this.editedUser = new UserResponseRO("", "", "", true, UserState[UserState.NEW], [], false);
     this.users.push(this.editedUser);
     this.users = this.users.slice();
     this.rowNumber = this.users.length - 1;

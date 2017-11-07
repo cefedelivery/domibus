@@ -12,12 +12,9 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Tiago Miguel
@@ -56,7 +53,7 @@ public class UserResourceTest {
     public void testUsers() {
         // Given
         final List<User> userList = new ArrayList<User>();
-        userList.add(new User("username", "email", true, new ArrayList<String>(), UserState.PERSISTED));
+        userList.add(new User("username", "email", true, new ArrayList<String>(), UserState.PERSISTED, null));
 
         final List<UserResponseRO> userResponseROList = getUserResponseList();
 
@@ -75,5 +72,7 @@ public class UserResourceTest {
         Assert.assertNotNull(userResponseROS);
         UserResponseRO userResponseRO = getUserResponseRO();
         Assert.assertEquals(userResponseRO, userResponseROS.get(0));
+
+
     }
 }
