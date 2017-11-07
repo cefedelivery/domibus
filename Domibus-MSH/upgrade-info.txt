@@ -20,7 +20,7 @@ Domibus 4.0 (from 3.3):
                       - [Wildfly only]
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.JBossAppServerJtaPlatform
                      o add property domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings
-                        - [Tomcat only]
+                        - [Mysql only]
                              domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
 
 Domibus 3.3 (from 3.2.5):
