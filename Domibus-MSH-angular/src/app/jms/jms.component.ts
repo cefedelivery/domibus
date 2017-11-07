@@ -256,9 +256,11 @@ export class JmsComponent implements OnInit, DirtyOperations {
           let originalQueue = message.customProperties.originalQueue;
           if (!isNullOrUndefined(originalQueue)) {
             let queue = this.queues.filter((queue) => queue.name === originalQueue).pop();
-            dialogRef.componentInstance.queues.push(queue);
-            dialogRef.componentInstance.destinationsChoiceDisabled = true;
-            dialogRef.componentInstance.selectedSource = queue;
+            if(!isNullOrUndefined(queue)) {
+              dialogRef.componentInstance.queues.push(queue);
+              dialogRef.componentInstance.destinationsChoiceDisabled = true;
+              dialogRef.componentInstance.selectedSource = queue;
+            }
             break;
           }
         }
@@ -275,6 +277,35 @@ export class JmsComponent implements OnInit, DirtyOperations {
       dialogRef.componentInstance.queues.push(...this.queues);
     }
 
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (!isNullOrUndefined(result) && !isNullOrUndefined(result.destination)) {
+        let messageIds = this.selectedMessages.map((message) => message.id);
+        this.serverMove(this.currentSearchSelectedSource.name, result.destination, messageIds);
+      }
+    });
+  }
+
+  moveAction(row) {
+    let dialogRef: MdDialogRef<MoveDialogComponent> = this.dialog.open(MoveDialogComponent);
+
+    if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
+      let originalQueue = row.customProperties.originalQueue;
+      let queue = this.queues.filter((queue) => queue.name === originalQueue).pop();
+      if(!isNullOrUndefined(queue)) {
+        dialogRef.componentInstance.queues.push(queue);
+        dialogRef.componentInstance.selectedSource = queue;
+      }
+
+      if (dialogRef.componentInstance.queues.length == 0) {
+        console.log(dialogRef.componentInstance.queues.length);
+        dialogRef.componentInstance.queues.push(...this.queues);
+      } else {
+        dialogRef.componentInstance.destinationsChoiceDisabled = true;
+      }
+    } else {
+      dialogRef.componentInstance.queues.push(...this.queues);
+    }
 
     dialogRef.afterClosed().subscribe(result => {
       if (!isNullOrUndefined(result) && !isNullOrUndefined(result.destination)) {
