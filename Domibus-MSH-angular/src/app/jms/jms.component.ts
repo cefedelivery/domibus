@@ -255,7 +255,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
         try {
           let originalQueue = message.customProperties.originalQueue;
           if (!isNullOrUndefined(originalQueue)) {
-            let queue = this.queues.filter((queue) => queue.name === originalQueue).pop();
+            let queue = this.queues.filter((queue) => queue.properties.ObjectName.keyPropertyList.Name === originalQueue).pop();
             if(!isNullOrUndefined(queue)) {
               dialogRef.componentInstance.queues.push(queue);
               dialogRef.componentInstance.destinationsChoiceDisabled = true;
@@ -290,11 +290,17 @@ export class JmsComponent implements OnInit, DirtyOperations {
     let dialogRef: MdDialogRef<MoveDialogComponent> = this.dialog.open(MoveDialogComponent);
 
     if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
-      let originalQueue = row.customProperties.originalQueue;
-      let queue = this.queues.filter((queue) => queue.name === originalQueue).pop();
-      if(!isNullOrUndefined(queue)) {
-        dialogRef.componentInstance.queues.push(queue);
-        dialogRef.componentInstance.selectedSource = queue;
+      try {
+        let originalQueue = row.customProperties.originalQueue;
+        let queue = this.queues.filter((queue) => queue.properties.ObjectName.keyPropertyList.Name === originalQueue).pop();
+
+        if(!isNullOrUndefined(queue)) {
+          dialogRef.componentInstance.queues.push(queue);
+          dialogRef.componentInstance.selectedSource = queue;
+        }
+      }
+      catch (e) {
+        console.error(e);
       }
 
       if (dialogRef.componentInstance.queues.length == 0) {
