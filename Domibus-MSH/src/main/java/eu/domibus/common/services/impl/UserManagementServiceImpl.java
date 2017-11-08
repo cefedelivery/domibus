@@ -29,9 +29,11 @@ public class UserManagementServiceImpl implements UserService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);
 
-    static final String MAXIMUM_LOGGIN_ATTEMPT = "domibus.console.login.maximum.attempt";
+    static final String MAXIMUM_LOGIN_ATTEMPT = "domibus.console.login.maximum.attempt";
 
     static final String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
+    private static final String DEFAULT_SUSPENSION_TIME = "3600";
+    private static final String DEFAULT_LOGING_ATTEMPT = "5";
 
     @Autowired
     private UserDao userDao;
@@ -149,17 +151,17 @@ public class UserManagementServiceImpl implements UserService {
         return false;
     }
 
-    void applyAccountLockingPolicy(User user) {
+    protected void applyAccountLockingPolicy(User user) {
         int maxAttemptAmount;
         try {
-            maxAttemptAmount = Integer.valueOf(domibusProperties.getProperty(MAXIMUM_LOGGIN_ATTEMPT, "5"));
+            maxAttemptAmount = Integer.valueOf(domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, DEFAULT_LOGING_ATTEMPT));
         } catch (NumberFormatException n) {
-            maxAttemptAmount = 5;
+            maxAttemptAmount = Integer.valueOf(DEFAULT_LOGING_ATTEMPT);
         }
         user.setAttemptCount(user.getAttemptCount() + 1);
         if (user.getAttemptCount() >= maxAttemptAmount) {
             if(LOG.isDebugEnabled()){
-                LOG.debug("Applying account locking policy, max number of attempt ("+maxAttemptAmount+") reached for user"+user.getUserName());
+                LOG.debug("Applying account locking policy, max number of attempt ([{}]) reached for user [{}]",maxAttemptAmount,user.getUserName());
             }
             user.setActive(false);
             user.setSuspensionDate(new Date(System.currentTimeMillis()));
@@ -175,9 +177,9 @@ public class UserManagementServiceImpl implements UserService {
     public void findAndReactivateSuspendedUsers() {
         int suspensionInterval;
         try {
-            suspensionInterval = Integer.valueOf(domibusProperties.getProperty(LOGIN_SUSPENSION_TIME, "3600"));
+            suspensionInterval = Integer.valueOf(domibusProperties.getProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME));
         } catch (NumberFormatException n) {
-            suspensionInterval = 3600;
+            suspensionInterval = Integer.valueOf(DEFAULT_SUSPENSION_TIME);
         }
         //user will not be reactivated.
         if (suspensionInterval == 0) {
@@ -188,7 +190,7 @@ public class UserManagementServiceImpl implements UserService {
         List<User> users = userDao.listSuspendedUser(currentTimeMinusSuspensionInterval);
         for (User user : users) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Suspended user " + user.getUserName() + " is going to be reactivated.");
+                LOG.debug("Suspended user [{}] is going to be reactivated.",user.getUserName());
             }
             user.setSuspensionDate(null);
             user.setAttemptCount(0);
@@ -237,7 +239,7 @@ public class UserManagementServiceImpl implements UserService {
         }
     }
 
-    User prepareUserForUpdate(eu.domibus.api.user.User user) {
+    protected User prepareUserForUpdate(eu.domibus.api.user.User user) {
         User userEntity = userDao.loadUserByUsername(user.getUserName());
         if (!userEntity.getActive() && user.isActive()) {
             userEntity.setSuspensionDate(null);

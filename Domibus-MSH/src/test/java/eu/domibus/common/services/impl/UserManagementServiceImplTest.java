@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Properties;
 
 import static eu.domibus.common.services.impl.UserManagementServiceImpl.LOGIN_SUSPENSION_TIME;
-import static eu.domibus.common.services.impl.UserManagementServiceImpl.MAXIMUM_LOGGIN_ATTEMPT;
+import static eu.domibus.common.services.impl.UserManagementServiceImpl.MAXIMUM_LOGIN_ATTEMPT;
 import static org.junit.Assert.*;
 
 /**
@@ -100,7 +100,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyBellowMaxAttempt(final @Mocked User user) {
         new Expectations() {{
-            domibusProperties.getProperty(MAXIMUM_LOGGIN_ATTEMPT, "5");
+            domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
             times = 1;
             result = 2;
             user.getAttemptCount();
@@ -121,7 +121,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyNotNumberProperty(final @Mocked User user) {
         new Expectations() {{
-            domibusProperties.getProperty(MAXIMUM_LOGGIN_ATTEMPT, "5");
+            domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
             times = 1;
             result = "a";
             user.getAttemptCount();
@@ -142,7 +142,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyReachMaxAttempt(final @Mocked User user) {
         new Expectations() {{
-            domibusProperties.getProperty(MAXIMUM_LOGGIN_ATTEMPT, "5");
+            domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
             times = 1;
             result = 2;
             user.getAttemptCount();
