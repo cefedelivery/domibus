@@ -95,7 +95,7 @@
                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.0-delta.mysql
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/mysql5innoDb-3.3-to-4.0-migration.ddl
+                               ${project.build.directory}/sql-scripts/mysql5innoDb-3.3.1-to-4.0-migration.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
@@ -113,7 +113,7 @@
                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.0-delta.oracle
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/oracle10g-3.3-to-4.0-migration.ddl
+                               ${project.build.directory}/sql-scripts/oracle10g-3.3.1-to-4.0-migration.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
