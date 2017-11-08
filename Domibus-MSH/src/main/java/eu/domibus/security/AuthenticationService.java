@@ -34,7 +34,7 @@ public class AuthenticationService {
         try {
             authentication = authenticationManager.authenticate(authenticationToken);
         } catch (AuthenticationException ae) {
-            userService.handleAuthenticationPolicy(username);
+            userService.handleWrongAuthentication(username);
             throw ae;
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);

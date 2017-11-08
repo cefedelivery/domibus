@@ -71,10 +71,10 @@ public class UserManagementServiceImplTest {
         new Expectations(userManagementService) {{
             userDao.loadUserByUsername(anyString);
             result = user;
-            userManagementService.logOnly(anyString, user);
+            userManagementService.canApplyAccountLockingPolicy(anyString, user);
             result = true;
         }};
-        userManagementService.handleAuthenticationPolicy("");
+        userManagementService.handleWrongAuthentication("");
         new Verifications() {{
             userManagementService.applyAccountLockingPolicy(user);
             times = 0;
@@ -86,10 +86,10 @@ public class UserManagementServiceImplTest {
         new Expectations(userManagementService) {{
             userDao.loadUserByUsername(anyString);
             result = user;
-            userManagementService.logOnly(anyString, user);
+            userManagementService.canApplyAccountLockingPolicy(anyString, user);
             result = false;
         }};
-        userManagementService.handleAuthenticationPolicy("");
+        userManagementService.handleWrongAuthentication("");
         new Verifications() {{
             userManagementService.applyAccountLockingPolicy(user);
             times = 1;
@@ -163,7 +163,7 @@ public class UserManagementServiceImplTest {
 
     @Test
     public void logOnlyUserNulle(@Mocked final DomibusLogger LOG, final @Mocked User user) {
-        boolean test = userManagementService.logOnly("test", null);
+        boolean test = userManagementService.canApplyAccountLockingPolicy("test", null);
         assertTrue(test);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, "test");
@@ -180,7 +180,7 @@ public class UserManagementServiceImplTest {
             user.getSuspensionDate();
             result = null;
         }};
-        boolean test = userManagementService.logOnly("test", user);
+        boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
         assertTrue(test);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, "test");
@@ -196,7 +196,7 @@ public class UserManagementServiceImplTest {
             user.getSuspensionDate();
             result = new Date();
         }};
-        boolean test = userManagementService.logOnly("test", user);
+        boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
         assertTrue(test);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, "test");
@@ -210,7 +210,7 @@ public class UserManagementServiceImplTest {
             user.isEnabled();
             result = true;
         }};
-        boolean test = userManagementService.logOnly("test", user);
+        boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
         assertFalse(test);
     }
 

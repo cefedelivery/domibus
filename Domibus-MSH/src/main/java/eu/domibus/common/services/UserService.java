@@ -37,7 +37,7 @@ public interface UserService{
      *
      * @param userName the user loggin string
      */
-    void handleAuthenticationPolicy(final String userName);
+    void handleWrongAuthentication(final String userName);
 
     /**
      * Search for all users that have been suspended (due to multiple unsuccessful login attempts)

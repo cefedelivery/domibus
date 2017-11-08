@@ -129,28 +129,28 @@ public class UserManagementServiceImpl implements UserService {
      */
     @Override
     @Transactional
-    public void handleAuthenticationPolicy(final String userName) {
+    public void handleWrongAuthentication(final String userName) {
         User user = userDao.loadUserByUsername(userName);
-        if (logOnly(userName, user)) {
+        if (!canApplyAccountLockingPolicy(userName, user)) {
             return;
         }
         applyAccountLockingPolicy(user);
     }
 
-    boolean logOnly(String userName, User user) {
+    boolean canApplyAccountLockingPolicy(String userName, User user) {
         if (user == null) {
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, userName);
-            return true;
+            return false;
         }
         if (!user.isEnabled() && user.getSuspensionDate() == null) {
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, userName);
-            return true;
+            return false;
         }
         if (!user.isEnabled() && user.getSuspensionDate() != null) {
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     protected void applyAccountLockingPolicy(User user) {
