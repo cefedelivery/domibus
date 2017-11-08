@@ -31,7 +31,7 @@ public class UserManagementServiceImpl implements UserService {
 
     protected static final String MAXIMUM_LOGIN_ATTEMPT = "domibus.console.login.maximum.attempt";
 
-    protected final String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
+    protected final static String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
 
     private static final String DEFAULT_SUSPENSION_TIME = "3600";
 
@@ -189,7 +189,7 @@ public class UserManagementServiceImpl implements UserService {
         }
 
         Date currentTimeMinusSuspensionInterval = new Date(System.currentTimeMillis() - (suspensionInterval * 1000));
-        List<User> users = userDao.listSuspendedUser(currentTimeMinusSuspensionInterval);
+        List<User> users = userDao.getSuspendedUser(currentTimeMinusSuspensionInterval);
         for (User user : users) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Suspended user [{}] is going to be reactivated.",user.getUserName());

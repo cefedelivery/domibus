@@ -234,7 +234,7 @@ public class UserManagementServiceImplTest {
             result = suspensionInterval;
             System.currentTimeMillis();
             result = currentTime;
-            userDao.listSuspendedUser(currentTimeMinusSuspensionInterval);
+            userDao.getSuspendedUser(currentTimeMinusSuspensionInterval);
             times = 1;
             result = users;
         }};

@@ -16,7 +16,7 @@ public interface UserDao {
 
     void create(final User user);
 
-    List<User> listSuspendedUser(Date currentTimeMinusSuspensionInterval);
+    List<User> getSuspendedUser(Date currentTimeMinusSuspensionInterval);
 
     User loadUserByUsername(String userName);
 

@@ -18,9 +18,9 @@ import java.util.Date;
  * Job in charge of unlocking suspended user accounts.
  */
 @DisallowConcurrentExecution
-public class AccountUnLockJob extends QuartzJobBean {
+public class ActivateSuspendedUsersJob extends QuartzJobBean {
 
-    public static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AccountUnLockJob.class);
+    public static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ActivateSuspendedUsersJob.class);
 
     @Autowired
     private UserService userService;

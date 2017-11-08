@@ -30,7 +30,7 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao {
     }
 
     @Override
-    public List<User> listSuspendedUser(final Date currentTimeMinusSuspensionInterval) {
+    public List<User> getSuspendedUser(final Date currentTimeMinusSuspensionInterval) {
         TypedQuery<User> namedQuery = em.createNamedQuery("User.findSuspendedUser", User.class);
         namedQuery.setParameter("SUSPENSION_INTERVAL", currentTimeMinusSuspensionInterval);
         return namedQuery.getResultList();

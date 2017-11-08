@@ -116,15 +116,15 @@
         <property name="cronExpression" value="${domibus.msh.pull.cron}"/>
     </bean>
 
-    <bean id="accountUnlockJob"
+    <bean id="activateSuspendedUsersJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="eu.domibus.security.AccountUnLockJob"/>
+        <property name="jobClass" value="eu.domibus.security.ActivateSuspendedUsersJob"/>
         <property name="durability" value="true"/>
     </bean>
 
-    <bean id="accountUnlockTrigger"
+    <bean id="activateSuspendedUserTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="accountUnlockJob"/>
+        <property name="jobDetail" ref="activateSuspendedUsersJob"/>
         <property name="cronExpression" value="${domibus.account.unlock.cron}"/>
     </bean>
 
@@ -135,7 +135,7 @@
             <list>
                 <ref bean="retryWorkerTrigger"/>
                 <ref bean="pullRequestTrigger"/>
-                <ref bean="accountUnlockTrigger"/>
+                <ref bean="activateSuspendedUserTrigger"/>
             </list>
         </property>
     </bean>
