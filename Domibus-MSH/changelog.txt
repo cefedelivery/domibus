@@ -1,4 +1,5 @@
 Domibus 4.0
+- Add an account locking policy mechanism. When a user has failed to provide the correct password five times, his account will be locked for a configurable amount of time (default to one hour).
 - Upgrade the following libraries:hibernate, atomikos,spring,liquibase,junit
 - Upgrade the java version
 - Add an audit and versioning system

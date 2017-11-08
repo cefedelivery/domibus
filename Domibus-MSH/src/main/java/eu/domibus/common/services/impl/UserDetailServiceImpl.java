@@ -29,7 +29,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = UsernameNotFoundException.class)
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
         User user = userDao.loadActiveUserByUsername(userName);
         if (user == null) {
@@ -40,6 +40,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
         boolean defaultPasswordUsed = isDefaultPasswordUsed(userName, user.getPassword());
         return new UserDetail(user,defaultPasswordUsed);
     }
+
 
     private boolean isDefaultPasswordUsed(final String user, final String password){
         boolean defaultPassword=false;

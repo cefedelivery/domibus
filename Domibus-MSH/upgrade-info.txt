@@ -22,7 +22,13 @@ Domibus 4.0 (from 3.3):
                      o add property domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings
                         - [Mysql only]
                              domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
-
+Domibus 3.3.1 (from 3.3):
+               - In the file "\conf\domibus\domibus.properties" add the folowing properties :
+                    o in the security section:
+                        domibus.console.login.maximum.attempt=5
+                        domibus.console.login.suspension.time=3600
+                        domibus.account.unlock.cron=0 0/1 * * * ?
+               - Run the appropriate DB migration script.
 Domibus 3.3 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-migration.ddl for Oracle)

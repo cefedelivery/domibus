@@ -11,16 +11,16 @@ import eu.domibus.common.services.UserService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Thomas Dussart
@@ -30,6 +30,14 @@ import java.util.List;
 public class UserManagementServiceImpl implements UserService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);
+
+    protected static final String MAXIMUM_LOGIN_ATTEMPT = "domibus.console.login.maximum.attempt";
+
+    protected final static String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
+
+    private static final String DEFAULT_SUSPENSION_TIME = "3600";
+
+    private static final String DEFAULT_LOGING_ATTEMPT = "5";
 
     @Autowired
     private UserDao userDao;
@@ -43,6 +51,10 @@ public class UserManagementServiceImpl implements UserService {
     @Autowired
     private DomainCoreConverter domainConverter;
 
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
+
     /**
      *{@inheritDoc}
      */
@@ -51,8 +63,8 @@ public class UserManagementServiceImpl implements UserService {
     public List<eu.domibus.api.user.User> findUsers() {
         //@thom use a dozer custom mapper to map from role to authorities.
         List<User> userEntities = userDao.listUsers();
-        List<eu.domibus.api.user.User> users=new ArrayList<>();
-        for (User userEntity: userEntities) {
+        List<eu.domibus.api.user.User> users = new ArrayList<>();
+        for (User userEntity : userEntities) {
             List<String> authorities = new ArrayList<>();
             Collection<UserRole> roles = userEntity.getRoles();
             for (UserRole role : roles) {
@@ -63,7 +75,7 @@ public class UserManagementServiceImpl implements UserService {
                     userEntity.getEmail(),
                     userEntity.getActive(),
                     authorities,
-                    UserState.PERSISTED);
+                    UserState.PERSISTED, userEntity.getSuspensionDate());
             users.add(user);
         }
         return users;
@@ -138,6 +150,83 @@ public class UserManagementServiceImpl implements UserService {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void handleWrongAuthentication(final String userName) {
+        User user = userDao.loadUserByUsername(userName);
+        if (!canApplyAccountLockingPolicy(userName, user)) {
+            return;
+        }
+        applyAccountLockingPolicy(user);
+    }
+
+    boolean canApplyAccountLockingPolicy(String userName, User user) {
+        if (user == null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, userName);
+            return false;
+        }
+        if (!user.isEnabled() && user.getSuspensionDate() == null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, userName);
+            return false;
+        }
+        if (!user.isEnabled() && user.getSuspensionDate() != null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
+            return false;
+        }
+        return true;
+    }
+
+    protected void applyAccountLockingPolicy(User user) {
+        int maxAttemptAmount;
+        try {
+            maxAttemptAmount = Integer.valueOf(domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, DEFAULT_LOGING_ATTEMPT));
+        } catch (NumberFormatException n) {
+            maxAttemptAmount = Integer.valueOf(DEFAULT_LOGING_ATTEMPT);
+        }
+        user.setAttemptCount(user.getAttemptCount() + 1);
+        if (user.getAttemptCount() >= maxAttemptAmount) {
+            if(LOG.isDebugEnabled()){
+                LOG.debug("Applying account locking policy, max number of attempt ([{}]) reached for user [{}]",maxAttemptAmount,user.getUserName());
+            }
+            user.setActive(false);
+            user.setSuspensionDate(new Date(System.currentTimeMillis()));
+        }
+        userDao.update(user);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void findAndReactivateSuspendedUsers() {
+        int suspensionInterval;
+        try {
+            suspensionInterval = Integer.valueOf(domibusProperties.getProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME));
+        } catch (NumberFormatException n) {
+            suspensionInterval = Integer.valueOf(DEFAULT_SUSPENSION_TIME);
+        }
+        //user will not be reactivated.
+        if (suspensionInterval == 0) {
+            return;
+        }
+
+        Date currentTimeMinusSuspensionInterval = new Date(System.currentTimeMillis() - (suspensionInterval * 1000));
+        List<User> users = userDao.getSuspendedUser(currentTimeMinusSuspensionInterval);
+        for (User user : users) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Suspended user [{}] is going to be reactivated.",user.getUserName());
+            }
+            user.setSuspensionDate(null);
+            user.setAttemptCount(0);
+            user.setActive(true);
+        }
+        userDao.update(users);
+    }
+
     private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
         List<User> result = new ArrayList<>(masterData);
         result.removeAll(newData);
@@ -161,7 +250,7 @@ public class UserManagementServiceImpl implements UserService {
         }
     }
 
-    private void updateUserWithoutPasswordChange(Collection<eu.domibus.api.user.User> users){
+    private void updateUserWithoutPasswordChange(Collection<eu.domibus.api.user.User> users) {
         for (eu.domibus.api.user.User user : users) {
             User userEntity = prepareUserForUpdate(user);
             addRoleToUser(user.getAuthorities(), userEntity);
@@ -169,7 +258,7 @@ public class UserManagementServiceImpl implements UserService {
         }
     }
 
-    private void updateUserWithPasswordChange(Collection<eu.domibus.api.user.User> users){
+    private void updateUserWithPasswordChange(Collection<eu.domibus.api.user.User> users) {
         for (eu.domibus.api.user.User user : users) {
             User userEntity = prepareUserForUpdate(user);
             userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
@@ -178,8 +267,12 @@ public class UserManagementServiceImpl implements UserService {
         }
     }
 
-    private User prepareUserForUpdate(eu.domibus.api.user.User user) {
+    protected User prepareUserForUpdate(eu.domibus.api.user.User user) {
         User userEntity = userDao.loadUserByUsername(user.getUserName());
+        if (!userEntity.getActive() && user.isActive()) {
+            userEntity.setSuspensionDate(null);
+            userEntity.setAttemptCount(0);
+        }
         userEntity.setActive(user.isActive());
         userEntity.setEmail(user.getEmail());
         userEntity.clearRoles();
