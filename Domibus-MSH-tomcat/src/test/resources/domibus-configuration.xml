@@ -31,6 +31,7 @@
         <!-- Retry Worker execution interval as a cron expression -->
         <prop key="domibus.msh.retry.cron">0/5 * * * * ?</prop>
         <prop key="domibus.msh.pull.cron">0/20 * * * * ?</prop>
+        <prop key="domibus.account.unlock.cron">0 0/1 * * * ?</prop>
         <!-- Timeout tolerance for retry messages (in miliseconds). Scheduled retries that, due to any reason, were not performed within this period will be timeout -->
         <prop key="domibus.msh.retry.tolerance">10800000</prop>
         <!-- Should unrecoverable errors should be retried or not -->
