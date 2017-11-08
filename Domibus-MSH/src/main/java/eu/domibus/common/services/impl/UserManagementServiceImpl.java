@@ -158,6 +158,9 @@ public class UserManagementServiceImpl implements UserService {
         }
         user.setAttemptCount(user.getAttemptCount() + 1);
         if (user.getAttemptCount() >= maxAttemptAmount) {
+            if(LOG.isDebugEnabled()){
+                LOG.debug("Applying account locking policy, max number of attempt ("+maxAttemptAmount+") reached for user"+user.getUserName());
+            }
             user.setActive(false);
             user.setSuspensionDate(new Date(System.currentTimeMillis()));
         }
