@@ -72,7 +72,7 @@ public class UserManagementServiceImplTest {
             userDao.loadUserByUsername(anyString);
             result = user;
             userManagementService.canApplyAccountLockingPolicy(anyString, user);
-            result = true;
+            result = false;
         }};
         userManagementService.handleWrongAuthentication("");
         new Verifications() {{
@@ -87,7 +87,7 @@ public class UserManagementServiceImplTest {
             userDao.loadUserByUsername(anyString);
             result = user;
             userManagementService.canApplyAccountLockingPolicy(anyString, user);
-            result = false;
+            result = true;
         }};
         userManagementService.handleWrongAuthentication("");
         new Verifications() {{
@@ -162,9 +162,9 @@ public class UserManagementServiceImplTest {
     }
 
     @Test
-    public void logOnlyUserNulle(@Mocked final DomibusLogger LOG, final @Mocked User user) {
+    public void logOnlyUserNull(@Mocked final DomibusLogger LOG, final @Mocked User user) {
         boolean test = userManagementService.canApplyAccountLockingPolicy("test", null);
-        assertTrue(test);
+        assertFalse(test);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, "test");
             times = 1;
@@ -181,7 +181,7 @@ public class UserManagementServiceImplTest {
             result = null;
         }};
         boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
-        assertTrue(test);
+        assertFalse(test);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, "test");
             times = 1;
@@ -197,7 +197,7 @@ public class UserManagementServiceImplTest {
             result = new Date();
         }};
         boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
-        assertTrue(test);
+        assertFalse(test);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, "test");
             times = 1;
@@ -211,7 +211,7 @@ public class UserManagementServiceImplTest {
             result = true;
         }};
         boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
-        assertFalse(test);
+        assertTrue(test);
     }
 
     @Test
