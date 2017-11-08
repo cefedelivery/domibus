@@ -29,10 +29,12 @@ public class UserManagementServiceImpl implements UserService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);
 
-    static final String MAXIMUM_LOGIN_ATTEMPT = "domibus.console.login.maximum.attempt";
+    protected static final String MAXIMUM_LOGIN_ATTEMPT = "domibus.console.login.maximum.attempt";
 
-    static final String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
+    protected final String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
+
     private static final String DEFAULT_SUSPENSION_TIME = "3600";
+
     private static final String DEFAULT_LOGING_ATTEMPT = "5";
 
     @Autowired
