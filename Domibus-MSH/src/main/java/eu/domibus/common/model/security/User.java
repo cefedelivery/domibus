@@ -3,6 +3,7 @@ package eu.domibus.common.model.security;
 import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.hibernate.validator.constraints.Email;
 
 import javax.persistence.*;
@@ -51,9 +52,11 @@ public class User extends AbstractBaseEntity{
     @Column(name="OPTLOCK")
     public Integer version;
     @Column(name = "ATTEMPT_COUNT")
+    @NotAudited
     private Integer attemptCount = 0;
     @Column(name = "SUSPENSION_DATE")
     @Temporal(TemporalType.TIMESTAMP)
+    @NotAudited
     private Date suspensionDate;
 
     @ManyToMany(fetch = FetchType.EAGER)
