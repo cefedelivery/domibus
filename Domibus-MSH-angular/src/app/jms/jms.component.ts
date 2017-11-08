@@ -250,26 +250,29 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
     if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
 
-      for (let message of this.selectedMessages) {
-
-        try {
-          let originalQueue = message.customProperties.originalQueue;
-          if (!isNullOrUndefined(originalQueue)) {
-            let queue = this.queues.filter((queue) => queue.name === originalQueue).pop();
-            dialogRef.componentInstance.queues.push(queue);
-            dialogRef.componentInstance.destinationsChoiceDisabled = true;
-            dialogRef.componentInstance.selectedSource = queue;
-            break;
+      if(this.selectedMessages.length > 1) {
+        dialogRef.componentInstance.queues.push(...this.queues);
+      } else {
+        for (let message of this.selectedMessages) {
+          try {
+            let originalQueue = message.customProperties.originalQueue;
+            if (!isNullOrUndefined(originalQueue)) {
+              let queue = this.queues.filter((queue) => queue.name === originalQueue).pop();
+              dialogRef.componentInstance.queues.push(queue);
+              dialogRef.componentInstance.destinationsChoiceDisabled = true;
+              dialogRef.componentInstance.selectedSource = queue;
+              break;
+            }
+          }
+          catch (e) {
+            console.error(e);
           }
         }
-        catch (e) {
-          console.error(e);
-        }
-      }
 
-      if (dialogRef.componentInstance.queues.length == 0) {
-        console.warn("Unable to determine the original queue for the selected messages");
-        dialogRef.componentInstance.queues.push(...this.queues);
+        if (dialogRef.componentInstance.queues.length == 0) {
+          console.warn("Unable to determine the original queue for the selected messages");
+          dialogRef.componentInstance.queues.push(...this.queues);
+        }
       }
     } else {
       dialogRef.componentInstance.queues.push(...this.queues);
