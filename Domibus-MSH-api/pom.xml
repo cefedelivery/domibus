@@ -58,5 +58,12 @@
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
