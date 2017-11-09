@@ -24,7 +24,9 @@ import static eu.domibus.common.model.configuration.Process.*;
         @NamedQuery(name = RETRIEVE_PULL_PROCESS_FROM_MESSAGE_CONTEXT, query = "SELECT p FROM Process as p left join p.legs as l left join p.initiatorParties init left join p.responderParties resp  where p.mepBinding.value=:mepBinding and l.name=:leg and init.name=:initiatorName and resp.name=:responderName"),
         @NamedQuery(name = FIND_PULL_PROCESS_TO_INITIATE, query = "SELECT p FROM Process as p join p.initiatorParties as resp WHERE p.mepBinding.value=:mepBinding and resp in(:initiator)"),
         @NamedQuery(name = FIND_PULL_PROCESS_FROM_MPC, query = "SELECT p FROM Process as p left join p.legs as l where p.mepBinding.value=:mepBinding and l.defaultMpc.qualifiedName=:mpcName"),
-        @NamedQuery(name = FIND_PULL_PROCESS_FROM_LEG_NAME, query = "SELECT p FROM Process as p left join p.legs as l where p.mepBinding.value=:mepBinding and l.name=:legName")})
+        @NamedQuery(name = FIND_PULL_PROCESS_FROM_LEG_NAME, query = "SELECT p FROM Process as p left join p.legs as l where p.mepBinding.value=:mepBinding and l.name=:legName"),
+        @NamedQuery(name = FIND_ALL_PROCESSES, query = "SELECT p FROM Process"),
+})
 public class Process extends AbstractBaseEntity {
     @Transient
     @XmlTransient
@@ -32,6 +34,7 @@ public class Process extends AbstractBaseEntity {
     public final static String FIND_PULL_PROCESS_TO_INITIATE = "Process.findPullProcessToInitiate";
     public final static String FIND_PULL_PROCESS_FROM_MPC = "Process.findPullProcessFromMpc";
     public final static String FIND_PULL_PROCESS_FROM_LEG_NAME = "Process.findPullProcessFromLegName";
+    public final static String FIND_ALL_PROCESSES = "Process.findAllProcesses";
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME")
     protected String name;

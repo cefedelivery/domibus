@@ -381,4 +381,14 @@ public class PModeDao extends PModeProvider {
         return processDao.findPullProcessByMpc(mpc);
     }
 
+    @Override
+    public List<Process> findAllProcesses() {
+        return processDao.findAllProcesses();
+    }
+
+    @Override
+    public List<Party> findAllParties() {
+        return partyDao.findAllParties();
+    }
+
 }

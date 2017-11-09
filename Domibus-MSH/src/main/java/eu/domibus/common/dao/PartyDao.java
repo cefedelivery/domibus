@@ -3,6 +3,7 @@ package eu.domibus.common.dao;
 
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.Process;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
@@ -35,6 +36,14 @@ public class PartyDao extends BasicDao<Party> {
         return query.getResultList();
     }
 
+    public List<Party> findAllParties(){
+        return em.createNamedQuery("Party.findAll").getResultList();
+    }
+
+    /*public List<Integer> listParty2(){
+        TypedQuery<Integer> query = em.createQuery("SELECT pa.entityId From Party pa LEFT OUTER JOIN Process p join p.initiatorParties as init", Integer.class);
+        return query.getResultList();
+    }
     public List<Party> listParties(String name,
                                    String endPoint,
                                    String partyId,
@@ -54,9 +63,16 @@ public class PartyDao extends BasicDao<Party> {
     ) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Party> criteriaQuery = criteriaBuilder.createQuery(Party.class);
-        Root<Party> root = criteriaQuery.from(Party.class);
-        criteriaQuery.select(root);
-        where(name, endPoint, partyId, process, criteriaBuilder, criteriaQuery, root);
+        Root<Process> root = criteriaQuery.from(Process.class);
+        Root<Party> party = criteriaQuery.from(Party.class);
+        //criteriaQuery.select(root);
+        Join<Process,Party> p=root.join("initiatorParties",JoinType.RIGHT);
+        p.on(
+                criteriaBuilder.or(
+                        root.in(p.get("initiatorParties")),
+                        root.in(p.get("responderParties")))
+        );
+        //where(name, endPoint, partyId, process, criteriaBuilder, criteriaQuery, root);
         return criteriaQuery;
     }
 
@@ -83,8 +99,8 @@ public class PartyDao extends BasicDao<Party> {
             predicates.add(criteriaBuilder.like(partyIdField, "%" + partyId + "%"));
         }
         if (StringUtils.isNotEmpty(process)) {
-            /*Path<Object> auditTargetField = root.get("id").get("auditTargetName");
-            predicates.add(auditTargetField.in(auditTargets));*/
+            *//*Path<Object> auditTargetField = root.get("id").get("auditTargetName");
+            predicates.add(auditTargetField.in(auditTargets));*//*
         }
         if (!predicates.isEmpty()) {
             criteriaQuery.where(predicates.toArray(new Predicate[]{}));
@@ -93,7 +109,7 @@ public class PartyDao extends BasicDao<Party> {
 
     void setEntityManager(EntityManager entityManager) {
         em = entityManager;
-    }
+    }*/
 
 
 

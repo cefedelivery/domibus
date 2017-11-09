@@ -137,7 +137,7 @@ public class RevisionLog {
 
         //group entities version on their ids.
         Map<String, List<EnversAudit>> collect = revisionTypes.stream()
-                .collect(Collectors.groupingBy(e -> e.getId()));
+                .collect(Collectors.groupingBy(EnversAudit::getId));
         //Iterate over a collection of same entity ids.
         for (List<EnversAudit> enversAudits : collect.values()) {
             //retrieve the entity wih min modification type.
