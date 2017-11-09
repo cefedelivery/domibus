@@ -1,5 +1,6 @@
 package eu.domibus.api.user;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -14,14 +15,18 @@ public class User {
     private List<String> authorities;
     private String status;
     private String password;
+    private boolean suspended;
 
-    public User(String userName, String email, boolean active, List<String> authorities, UserState userState) {
+    public User(String userName, String email, boolean active, List<String> authorities, UserState userState, Date suspensionDate) {
         this.userName = userName;
         this.email = email;
         this.active = active;
         this.authorities = authorities;
         this.status = userState.name();
         this.password = null;
+        if (suspensionDate != null) {
+            this.suspended = true;
+        }
     }
 
     public User() {
@@ -73,5 +78,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isSuspended() {
+        return suspended;
+    }
+
+    public void setSuspended(boolean suspended) {
+        this.suspended = suspended;
     }
 }

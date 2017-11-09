@@ -97,18 +97,19 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         String destinationFQName = (String) mbsc.getAttribute(jmsDestination, "Name");
                         // The name must be the queueName in a single server or serverName@queueName in a cluster.
                         String destName = getShortDestName(destinationFQName);
-                        destination.setFullyQualifiedName(destinationFQName);
+                        destination.setName(destName);
+                        destination.setFullyQualifiedName(removeJmsModule(destinationFQName));
 
                         destName = getOnlyDestName(destName);
-                        destination.setName(destName);
                         ObjectName configQueue = getQueueMap(mbsc).get(destName);
-                        if (configQueue != null) {
-                            destination.setType(QUEUE);
-                            destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
-                            String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
-                            destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
-                            destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
-                        }
+                        // We do not manage Topic at the moment
+                        if (configQueue == null) continue;
+
+                        destination.setType(QUEUE);
+                        destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
+                        String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
+                        destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
+                        destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
                         destination.setNumberOfMessages(getMessagesTotalCount(mbsc, jmsDestination));
                         destinationMap.put(removeJmsModuleAndServer(destinationFQName), destination);
                     }
@@ -151,19 +152,19 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         String destinationFQName = (String) mbsc.getAttribute(jmsDestination, "Name");
                         // The name must be the queueName in a single server or serverName@queueName in a cluster.
                         String destName = getShortDestName(destinationFQName);
-                        destination.setFullyQualifiedName(destinationFQName);
+                        destination.setName(destName);
+                        destination.setFullyQualifiedName(removeJmsModule(destinationFQName));
 
                         destName = getOnlyDestName(destName);
-                        destination.setName(destName);
                         ObjectName configQueue = getQueueMap(mbsc).get(destName);
-                        if (configQueue != null) {
-                            destination.setType(QUEUE);
-                            destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
-                            String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
-                            destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
-                            destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
-                        }
+                        // We do not manage Topic at the moment
+                        if (configQueue == null) continue;
 
+                        destination.setType(QUEUE);
+                        destination.setProperty(PROPERTY_OBJECT_NAME, jmsDestination);
+                        String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
+                        destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
+                        destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
                         destination.setNumberOfMessages(getMessagesTotalCount(mbsc, jmsDestination));
                         destinationsMap.put(destinationFQName, destination);
                     }
