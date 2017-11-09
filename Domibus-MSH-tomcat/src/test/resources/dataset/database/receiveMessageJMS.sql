@@ -1,14 +1,15 @@
+ALTER SEQUENCE HIBERNATE_SEQUENCE RESTART WITH 1000;
 INSERT INTO "TB_BUSINESS_PROCESS" VALUES (1);
 
-INSERT INTO "TB_ACTION" VALUES (1,'noSecAction','NoSecurity',1);
-INSERT INTO "TB_ACTION" VALUES (2,'tc2Action','TC2Leg1',1);
-INSERT INTO "TB_ACTION" VALUES (3,'tc1Action','TC1Leg1',1);
-INSERT INTO "TB_ACTION" VALUES (4,'tc3ActionLeg1','TC3Leg1',1);
-INSERT INTO "TB_ACTION" VALUES (5,'tc3ActionLeg2','TC3Leg2',1);
+INSERT INTO "TB_ACTION" VALUES (1, 'noSecAction', 'NoSecurity', 1);
+INSERT INTO "TB_ACTION" VALUES (2, 'tc2Action', 'TC2Leg1', 1);
+INSERT INTO "TB_ACTION" VALUES (3, 'tc1Action', 'TC1Leg1', 1);
+INSERT INTO "TB_ACTION" VALUES (4, 'tc3ActionLeg1', 'TC3Leg1', 1);
+INSERT INTO "TB_ACTION" VALUES (5, 'tc3ActionLeg2', 'TC3Leg2', 1);
 
-INSERT INTO "TB_AGREEMENT" VALUES (1,'agreementEmpty','','',1);
+INSERT INTO "TB_AGREEMENT" VALUES (1, 'agreementEmpty', '', '', 1);
 
-INSERT INTO "TB_PARTY" VALUES (1,'http://localhost:8080/domibus/services/msh','red_gw',NULL,NULL,1);
+INSERT INTO "TB_PARTY" VALUES (1, 'http://localhost:8080/domibus/services/msh', 'red_gw', NULL, NULL, 1);
 INSERT INTO "TB_PARTY" VALUES (2,'vm://localhost?broker.persistent=false','blue_gw',NULL,NULL,1);
 
 -- This is the PMODE configuration of domibus red!
@@ -110,7 +111,7 @@ VALUES (5,'originalSender','urn:oasis:names:tc:ebcore:partyid-type:unregistered:
 INSERT INTO "TB_PROPERTY" ("ID_PK","NAME","VALUE","MESSAGEPROPERTIES_ID","PARTPROPERTIES_ID")
 VALUES (6,'finalRecipient','urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4',2,NULL);
 INSERT INTO "TB_PROPERTY" ("ID_PK","NAME","VALUE","MESSAGEPROPERTIES_ID","PARTPROPERTIES_ID")
- VALUES (7,'description','e-sens-sbdh-order',NULL,2);
+VALUES (7,'description','e-sens-sbdh-order',NULL,2);
 INSERT INTO "TB_PROPERTY" ("ID_PK","NAME","VALUE","MESSAGEPROPERTIES_ID","PARTPROPERTIES_ID")
 VALUES (8,'MimeType','application/xml',NULL,2);
 

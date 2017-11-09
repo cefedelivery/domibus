@@ -21,6 +21,8 @@
             <package-name>javax.validation.*</package-name>
             <package-name>org.slf4j.*</package-name>
             <package-name>ch.qos.logback.*</package-name>
+            <package-name>javassist.*</package-name>
+            <package-name>javax.persistence.*</package-name>
 
 
             <package-name>javax.faces.*</package-name>

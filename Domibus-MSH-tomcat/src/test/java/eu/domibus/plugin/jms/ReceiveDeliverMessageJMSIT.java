@@ -12,7 +12,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.ConnectionFactory;
@@ -77,7 +77,8 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
      * @throws Exception
      */
     @Test
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
+    @Rollback
     public void testReceiveMessage() throws Exception {
 
         String messageId = "2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu";
@@ -121,7 +122,8 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
      * @throws Exception
      */
     @Test
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
+    @Rollback
     public void testDuplicateMessage() throws Exception {
 
         String messageId = "2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu";

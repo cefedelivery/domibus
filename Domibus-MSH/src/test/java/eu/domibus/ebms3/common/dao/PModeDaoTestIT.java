@@ -90,12 +90,7 @@ public class PModeDaoTestIT {
 
         @Bean
         public ConfigurationValidator validator() {
-            return new ConfigurationValidator() {
-                @Override
-                public List<String> validate(Configuration configuration) {
-                    return Collections.emptyList();
-                }
-            };
+            return configuration -> Collections.emptyList();
         }
 
         @Bean
@@ -137,7 +132,7 @@ public class PModeDaoTestIT {
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
         UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, new ByteArrayInputStream(pModeBytes), null);
 
-        List<String> updatePmodeMessage = pModeDao.updatePModes(pModeBytes);
+        List<String> updatePmodeMessage = pModeDao.updatePModes(pModeBytes, "description");
         assertNotNull(updatePmodeMessage);
         assertTrue(updatePmodeMessage.size() > 0);
 
@@ -157,7 +152,7 @@ public class PModeDaoTestIT {
         final ConfigurationRaw raw = rawConfig.getValue();
         assertNotNull(raw.getConfigurationDate());
         assertEquals(raw.getXml(), pModeBytes);
-
+        assertEquals(raw.getDescription(), "description");
     }
 
 
@@ -167,7 +162,7 @@ public class PModeDaoTestIT {
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
         UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, new ByteArrayInputStream(pModeBytes), null);
 
-        List<String> updatePmodeMessage = pModeDao.updatePModes(pModeBytes);
+        List<String> updatePmodeMessage = pModeDao.updatePModes(pModeBytes, "description");
         //there are no warnings
         assertTrue(updatePmodeMessage.isEmpty());
 
@@ -188,7 +183,7 @@ public class PModeDaoTestIT {
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
 
         try {
-            pModeDao.updatePModes(pModeBytes);
+            pModeDao.updatePModes(pModeBytes, "description");
             fail("The Pmode is invalid so it should have thrown an exception");
         } catch (XmlProcessingException e) {
             LOG.info("Exception thrown as expected due to invalid PMode");
@@ -196,6 +191,6 @@ public class PModeDaoTestIT {
             assertTrue(e.getErrors().size() > 0);
         }
 
-        Mockito.verify(configurationDAO, never()).updateConfiguration((Configuration) Mockito.anyObject());
+        Mockito.verify(configurationDAO, never()).updateConfiguration(Mockito.anyObject());
     }
 }

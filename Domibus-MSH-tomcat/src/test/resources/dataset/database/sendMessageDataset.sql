@@ -1,11 +1,12 @@
+ALTER SEQUENCE HIBERNATE_SEQUENCE RESTART WITH 1000;
 INSERT INTO "TB_BUSINESS_PROCESS" VALUES (1);
 
-INSERT INTO "TB_ACTION" VALUES (1,'noSecAction','NoSecurity',1);
-INSERT INTO "TB_ACTION" VALUES (2,'tc2Action','TC2Leg1',1);
-INSERT INTO "TB_ACTION" VALUES (3,'tc1Action','TC1Leg1',1);
-INSERT INTO "TB_ACTION" VALUES (4,'tc3ActionLeg1','TC3Leg1',1);
-INSERT INTO "TB_ACTION" VALUES (5,'tc3ActionLeg2','TC3Leg2',1);
-INSERT INTO "TB_ACTION" VALUES (6,'pingAction','http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test',1);
+INSERT INTO "TB_ACTION" VALUES (1, 'noSecAction', 'NoSecurity', 1);
+INSERT INTO "TB_ACTION" VALUES (2, 'tc2Action', 'TC2Leg1', 1);
+INSERT INTO "TB_ACTION" VALUES (3, 'tc1Action', 'TC1Leg1', 1);
+INSERT INTO "TB_ACTION" VALUES (4, 'tc3ActionLeg1', 'TC3Leg1', 1);
+INSERT INTO "TB_ACTION" VALUES (5, 'tc3ActionLeg2', 'TC3Leg2', 1);
+INSERT INTO "TB_ACTION" VALUES (6, 'pingAction', 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test', 1);
 
 INSERT INTO "TB_AGREEMENT" VALUES (1,'agreement1110','','EDELIVERY-1110',1);
 

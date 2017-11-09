@@ -5,7 +5,6 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.ebms3.receiver.MessageLegConfigurationFactory;
 import eu.domibus.ebms3.receiver.SetPolicyInInterceptor;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
-import eu.domibus.ebms3.sender.MSHDispatcher;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
+import javax.persistence.PersistenceContext;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.SOAPException;
@@ -45,6 +45,10 @@ public class ReceiveMessageIT extends AbstractIT {
 
     @Autowired
     MessageLegConfigurationFactory serverInMessageLegConfigurationFactory;
+
+    @PersistenceContext
+    private javax.persistence.EntityManager em;
+
     @Before
     public void before() throws IOException {
 
@@ -57,14 +61,13 @@ public class ReceiveMessageIT extends AbstractIT {
     }
 
     private void verifyMessageStatus(String messageId) throws SQLException {
-        Connection con = dataSource.getConnection();
-        String sql = "SELECT MESSAGE_ID, MESSAGE_STATUS FROM TB_MESSAGE_LOG WHERE MESSAGE_TYPE like 'USER_MESSAGE' AND MESSAGE_ID = ?";
-        PreparedStatement pstmt = con.prepareStatement(sql);
-        pstmt.setString(1, messageId);
-        ResultSet resultSet = pstmt.executeQuery();
-        resultSet.next();
-        Assert.assertEquals(resultSet.getString("MESSAGE_STATUS"), MessageStatus.RECEIVED.name());
-        pstmt.close();
+        String sql = "SELECT MESSAGE_ID, MESSAGE_STATUS FROM TB_MESSAGE_LOG WHERE MESSAGE_TYPE LIKE 'USER_MESSAGE' AND MESSAGE_ID = ?";
+        try (Connection con = dataSource.getConnection(); PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setString(1, messageId);
+            ResultSet resultSet = pstmt.executeQuery();
+            resultSet.next();
+            Assert.assertEquals(resultSet.getString("MESSAGE_STATUS"), MessageStatus.RECEIVED.name());
+        }
     }
 
     private void verifySignalMessageStatus(String messageId) throws SQLException {
@@ -77,7 +80,8 @@ public class ReceiveMessageIT extends AbstractIT {
 
         sql = "SELECT MESSAGE_STATUS FROM TB_MESSAGE_LOG WHERE MESSAGE_TYPE like 'SIGNAL_MESSAGE' AND MESSAGE_ID = ?";
         pstmt = con.prepareStatement(sql);
-        pstmt.setString(1, resultSet.getString("MESSAGE_ID"));
+        String message_id = resultSet.getString("MESSAGE_ID");
+        pstmt.setString(1, message_id);
         resultSet = pstmt.executeQuery();
         resultSet.next();
         Assert.assertEquals(resultSet.getString("MESSAGE_STATUS"), MessageStatus.SEND_IN_PROGRESS.name());
@@ -100,6 +104,9 @@ public class ReceiveMessageIT extends AbstractIT {
         String messageId = "43bb6883-77d2-4a41-bac4-52a485d50084@domibus.eu";
         SOAPMessage soapMessage = createSOAPMessage(filename);
         mshWebservice.invoke(soapMessage);
+        //due -hibernate 5 upgrade, the flushing mechanism is certainely occuring at an other moment,
+        //and because the we use sql to retrieve data, the last reccord was never flushed.
+        em.flush();
         verifyMessageStatus(messageId);
         verifySignalMessageStatus(messageId);
     }

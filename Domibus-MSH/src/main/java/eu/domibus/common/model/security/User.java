@@ -1,14 +1,14 @@
 package eu.domibus.common.model.security;
 
+import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.hibernate.validator.constraints.Email;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Thomas Dussart
@@ -26,23 +26,38 @@ import java.util.Set;
 @NamedQueries({
         @NamedQuery(name = "User.findAll", query = "FROM User"),
         @NamedQuery(name = "User.findByUserName", query = "FROM User u where u.userName=:USER_NAME"),
-        @NamedQuery(name = "User.findActiveByUserName", query = "FROM User u where u.userName=:USER_NAME and u.active=true")
+        @NamedQuery(name = "User.findActiveByUserName", query = "FROM User u where u.userName=:USER_NAME and u.active=true"),
+        @NamedQuery(name = "User.findSuspendedUser", query = "FROM User u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL")
 })
+
+@Audited(withModifiedFlag = true)
+@RevisionLogicalName("User")
 public class User extends AbstractBaseEntity{
+
     @NotNull
     @Column(name = "USER_NAME")
     private String userName;
+
     @Column(name = "USER_EMAIL")
     @Email
     private String email;
+
     @NotNull
     @Column(name = "USER_PASSWORD")
     private String password;
+
     @NotNull
     @Column(name = "USER_ENABLED")
     private Boolean active;
     @Column(name="OPTLOCK")
     public Integer version;
+    @Column(name = "ATTEMPT_COUNT")
+    @NotAudited
+    private Integer attemptCount = 0;
+    @Column(name = "SUSPENSION_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    @NotAudited
+    private Date suspensionDate;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -124,5 +139,21 @@ public class User extends AbstractBaseEntity{
 
     public Boolean getActive() {
         return active;
+    }
+
+    public Integer getAttemptCount() {
+        return attemptCount;
+    }
+
+    public void setAttemptCount(Integer attemptCount) {
+        this.attemptCount = attemptCount;
+    }
+
+    public Date getSuspensionDate() {
+        return suspensionDate;
+    }
+
+    public void setSuspensionDate(Date suspensionDate) {
+        this.suspensionDate = suspensionDate;
     }
 }

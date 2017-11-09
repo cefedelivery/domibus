@@ -64,7 +64,7 @@ public class ProcessDaoImplTestIT extends AbstractIT{
 
     private void loadBluePullPmodeFile() throws XmlProcessingException, IOException, URISyntaxException {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-blue-pull.xml");
-        pModeDao.updatePModes(IOUtils.toByteArray(inputStream));
+        pModeDao.updatePModes(IOUtils.toByteArray(inputStream), "description");
 
     }
 
