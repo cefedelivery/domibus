@@ -136,9 +136,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
         this.queues = [];
         let destinations = response.json().jmsDestinations;
         for (let key in destinations) {
-          let destinationWithKey = destinations[key];
-          destinationWithKey['key'] = key;
-          this.queues.push(destinationWithKey);
+          this.queues.push(destinations[key]);
         }
         this.queuesInfoGot.emit();
       },
@@ -225,7 +223,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
       },
       error => {
-        this.alertService.error('An error occured while loading the JMS messages. In case you are using the Selector / JMS Type, please follow the rules for Selector/JMS Type according to Help Page / Admin Guide (Error Status: ' + error.status + ')');
+        this.alertService.error('An error occured while loading the JMS messages. In case you are using the Selector / JMS Type, please follow the rules for Selector / JMS Type according to Help Page / Admin Guide (Error Status: ' + error.status + ')');
         this.loading = false;
       }
     );
@@ -252,28 +250,37 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
     if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
 
-      for (let message of this.selectedMessages) {
+      if(this.selectedMessages.length > 1) {
+        dialogRef.componentInstance.queues.push(...this.queues);
+      } else {
+        for (let message of this.selectedMessages) {
 
-        try {
-          let originalQueue = message.customProperties.originalQueue;
-          if (!isNullOrUndefined(originalQueue)) {
-            let queue = this.queues.filter((queue) => queue.key === originalQueue).pop();
-            if(!isNullOrUndefined(queue)) {
-              dialogRef.componentInstance.queues.push(queue);
-              dialogRef.componentInstance.destinationsChoiceDisabled = true;
-              dialogRef.componentInstance.selectedSource = queue;
+          try {
+            let originalQueue = message.customProperties.originalQueue;
+            // EDELIVERY-2814
+            let originalQueueName = originalQueue.substr(originalQueue.indexOf('!') + 1);
+            if (!isNullOrUndefined(originalQueue)) {
+              let queues = this.queues.filter((queue) => queue.name.indexOf(originalQueueName) != -1);
+              if (!isNullOrUndefined(queues)) {
+                dialogRef.componentInstance.queues = queues;
+                dialogRef.componentInstance.selectedSource = queues[0];
+              }
+              break;
             }
-            break;
+          }
+          catch (e) {
+            console.error(e);
           }
         }
-        catch (e) {
-          console.error(e);
-        }
-      }
 
-      if (dialogRef.componentInstance.queues.length == 0) {
-        console.warn("Unable to determine the original queue for the selected messages");
-        dialogRef.componentInstance.queues.push(...this.queues);
+        if (this.queues.length > 1) {
+          dialogRef.componentInstance.destinationsChoiceDisabled = true;
+        }
+
+        if (dialogRef.componentInstance.queues.length == 0) {
+          console.warn("Unable to determine the original queue for the selected messages");
+          dialogRef.componentInstance.queues.push(...this.queues);
+        }
       }
     } else {
       dialogRef.componentInstance.queues.push(...this.queues);
@@ -294,22 +301,26 @@ export class JmsComponent implements OnInit, DirtyOperations {
     if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
       try {
         let originalQueue = row.customProperties.originalQueue;
-        let queue = this.queues.filter((queue) => queue.key === originalQueue).pop();
+        // EDELIVERY-2814
+        let originalQueueName = originalQueue.substr(originalQueue.indexOf('!') + 1);
+        let queues = this.queues.filter((queue) => queue.name.indexOf(originalQueueName) != -1);
 
-        if(!isNullOrUndefined(queue)) {
-          dialogRef.componentInstance.queues.push(queue);
-          dialogRef.componentInstance.selectedSource = queue;
+        if(!isNullOrUndefined(queues)) {
+          dialogRef.componentInstance.queues = queues;
+          dialogRef.componentInstance.selectedSource = queues[0];
         }
       }
       catch (e) {
         console.error(e);
       }
 
+      if(this.queues.length > 1) {
+        dialogRef.componentInstance.destinationsChoiceDisabled = true;
+      }
+
       if (dialogRef.componentInstance.queues.length == 0) {
         console.log(dialogRef.componentInstance.queues.length);
         dialogRef.componentInstance.queues.push(...this.queues);
-      } else {
-        dialogRef.componentInstance.destinationsChoiceDisabled = true;
       }
     } else {
       dialogRef.componentInstance.queues.push(...this.queues);
