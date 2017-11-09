@@ -71,7 +71,7 @@ public class CustomRevisionEntityListener implements EntityTrackingRevisionListe
      * @param revisionType the envers enum.
      * @return our modification enum..
      */
-    private ModificationType getModificationType(final RevisionType revisionType) {
+    ModificationType getModificationType(final RevisionType revisionType) {
         switch (revisionType) {
             case ADD:
                 return ModificationType.ADD;

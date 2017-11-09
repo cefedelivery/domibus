@@ -15,6 +15,8 @@ import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -50,6 +52,7 @@ public class UpdateRetryLoggingService {
      * @param messageId        id of the message that needs to be retried
      * @param legConfiguration processing information for the message
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updatePushedMessageRetryLogging(final String messageId, final LegConfiguration legConfiguration) {
         updateRetryLogging(messageId, legConfiguration, MessageStatus.WAITING_FOR_RETRY);
     }
@@ -63,6 +66,7 @@ public class UpdateRetryLoggingService {
      * @param legConfiguration processing information for the message
      */
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updatePulledMessageRetryLogging(final String messageId, final LegConfiguration legConfiguration) {
         updateRetryLogging(messageId, legConfiguration, MessageStatus.READY_TO_PULL);
     }

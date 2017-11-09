@@ -51,7 +51,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
      * {@inheritDoc}
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void handleReliability(final String messageId, final ReliabilityChecker.CheckResult reliabilityCheckSuccessful, final ResponseHandler.CheckResult isOk, final LegConfiguration legConfiguration) {
         changeMessageStatusAndNotify(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
@@ -60,10 +60,10 @@ public class ReliabilityServiceImpl implements ReliabilityService {
      * {@inheritDoc}
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = ReliabilityException.class)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void handlePullReceiptReliability(final String messageId, final ReliabilityChecker.CheckResult reliabilityCheckSuccessful, final ResponseHandler.CheckResult isOk, final LegConfiguration legConfiguration) {
         try {
-            messageExchangeService.removeRawMessageIssuedByPullRequest(messageId);
+            messageExchangeService.removeRawMessageIssuedByPullRequestInNewTransaction(messageId);
         } catch (ReliabilityException e) {
             LOG.warn("There should be a raw xml entry for this message.");
         }

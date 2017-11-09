@@ -228,7 +228,7 @@ class Domibus
 		def STEP_WAIT_TIME=1000; // Time to wait before re-checking the message status.	
         def messageID=null;
         def numberAttempts=0;
-        def maxNumberAttempts=4;
+        def maxNumberAttempts=5;
         def messageStatus="INIT";
         def wait=false;
 		def sqlSender = null; def sqlReceiver = null;
@@ -271,20 +271,26 @@ class Domibus
                 if(MAX_WAIT_TIME>0){
                     MAX_WAIT_TIME=MAX_WAIT_TIME-STEP_WAIT_TIME
                 }
-                log.info "maxNumberAttempts-numberAttempts: "+maxNumberAttempts+"-"+numberAttempts
-                log.info "WAIT: "+MAX_WAIT_TIME
+                //log.info "maxNumberAttempts: "+maxNumberAttempts+ "- numberAttempts: "+numberAttempts+"-- 
+				log.info "WAIT: "+MAX_WAIT_TIME
                 sqlSender.eachRow("Select * from TB_MESSAGE_LOG where REPLACE(LOWER(MESSAGE_ID),' ','') = REPLACE(LOWER(${messageID}),' ','')"){
                     messageStatus=it.MESSAGE_STATUS
                     numberAttempts=it.SEND_ATTEMPTS
                 }
                 log.info "|MSG_ID: "+messageID+" | SENDER: Expected Message Status ="+ SMSH +"-- Current Message Status = "+messageStatus+" | maxNumberAttempts: "+maxNumberAttempts+"-- numberAttempts: "+numberAttempts; 
-                if((SMSH=="SEND_FAILURE")&&(messageStatus=="WAITING_FOR_RETRY")){
-                    if(((maxNumberAttempts-numberAttempts)>0)&&(!wait)){
-                        wait=true
-                    }
-                    if((maxNumberAttempts-numberAttempts)<=0){
-                        wait=false
-                    }
+                if(SMSH=="SEND_FAILURE"){
+					if(messageStatus=="WAITING_FOR_RETRY"){
+						if(((maxNumberAttempts-numberAttempts)>0)&&(!wait)){
+							wait=true
+						}
+						if((maxNumberAttempts-numberAttempts)<=0){
+							wait=false
+						}
+					}else{
+						if(messageStatus==SMSH){
+							wait=false;
+						}
+					}
                 }
             }
             log.info "finished checking sender, messageStatus: " + messageStatus + " MAX_WAIT_TIME: " + MAX_WAIT_TIME
@@ -655,7 +661,7 @@ class Domibus
 
 	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-	static def uploadPmode(String side, String baseFilePath, String extFilePath,context,log, String outcome = "successfully"){
+	static def uploadPmode(String side, String baseFilePath, String extFilePath,context,log, String outcome = "successfully", String message =null,boolean logOutput =false){
 		log.info "Start upload PMode for Domibus \""+side+"\".";
 	    def outputCatcher = new StringBuffer();
         def errorCatcher = new StringBuffer();
@@ -692,15 +698,23 @@ class Domibus
 				proc.waitFor()
 			}
 		}
-		//log.info errorCatcher.toString();
-		//log.info outputCatcher.toString();
+		if(logOutput){
+			log.info "outputCatcher: "+outputCatcher.toString();
+			log.info "errorCatcher: "+errorCatcher.toString();
+		}
 		assert(outputCatcher.toString().contains(outcome)),"Error:uploadPmode: Error while trying to connect to domibus."
 		if(outcome.toLowerCase()=="successfully"){
 			log.info outputCatcher.toString()+" Domibus: \""+side+"\".";
+			if(message!=null){
+				assert(outputCatcher.toString().contains(message)),"Error:uploadPmode: Upload done but expected message \""+message+"\" was not returned."
+			}
 		}
 		else{
 			log.info "Upload PMode was not done for Domibus: \""+side+"\".";
-		}
+			if(message!=null){
+				assert(outputCatcher.toString().contains(message)),"Error:uploadPmode: Upload was not done but expected message \""+message+"\" was not returned."
+			}
+		}	
 
 	} 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
@@ -889,5 +903,12 @@ class Domibus
 			assert 0;
 		}
     }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+
+    // replace slashes in project custom properties values
+    static def String formatPathSlashes(String source){
+		return source.replaceAll("/","\\\\");
+    }
+
 
 }
