@@ -2,12 +2,9 @@
 
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans.xsd
-    http://www.springframework.org/schema/util
-    http://www.springframework.org/schema/util/spring-util.xsd">
+    http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 
      <bean id="pModeProviderFactory" class="eu.domibus.ebms3.common.dao.PModeProviderFactory">
@@ -30,6 +27,12 @@
         <property name="durability" value="true"/>
     </bean>
 
+    <bean id="activateSuspendedUsersJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.security.ActivateSuspendedUsersJob"/>
+        <property name="durability" value="true"/>
+    </bean>
+
     <bean id="retryWorkerTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="retryWorkerJob"/>
@@ -41,6 +44,12 @@
         <property name="cronExpression" value="${domibus.msh.pull.cron}"/>
     </bean>
 
+    <bean id="activateSuspendedUserTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="activateSuspendedUsersJob"/>
+        <property name="cronExpression" value="${domibus.account.unlock.cron}"/>
+    </bean>
+
     <!-- customizable list of triggers to be executed by quartz -->
     <bean id="userdefinedTriggerList"
           class="org.springframework.beans.factory.config.ListFactoryBean">
@@ -48,6 +57,7 @@
             <list>
                 <ref bean="retryWorkerTrigger"/>
                 <ref bean="pullRequestTrigger"/>
+                <ref bean="activateSuspendedUserTrigger"/>
             </list>
         </property>
     </bean>

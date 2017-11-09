@@ -1,3 +1,5 @@
+Domibus 3.3.1
+- Add an account locking policy mechanism. When a user has failed to provide the correct password five times, his account will be locked for a configurable amount of time (default to one hour).
 Domibus 3.3
 - Additional validation on pMode upload: when @type is missing or is empty, the value of PartyId, Service and AgreementRef, must be an URI (relative URIs accepted).
 - Use optional regex validation for dynamic discovery certificate. New property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation.
