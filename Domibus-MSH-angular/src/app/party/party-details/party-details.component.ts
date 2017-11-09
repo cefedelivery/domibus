@@ -15,6 +15,7 @@ export class PartyDetailsComponent implements OnInit {
   processesRowColumnPicker: ColumnPickerBase = new ColumnPickerBase();
   identifiersRowCount = 0;
   processesRowCount = 0;
+  loading;
 
   constructor(public dialogRef: MdDialogRef<PartyDetailsComponent>) {
   }
@@ -59,6 +60,10 @@ export class PartyDetailsComponent implements OnInit {
     this.processesRowColumnPicker.selectedColumns = this.processesRowColumnPicker.allColumns.filter(col => {
       return ['Process', 'Initiator', 'Responder'].indexOf(col.name) != -1
     });
+
+
+  }
+  onPage(){
 
   }
 }

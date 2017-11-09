@@ -95,4 +95,12 @@ export class PartyComponent implements OnInit {
     })
   }
 
+  changePageSize(event){
+
+  }
+
+  onPage(event){
+
+  }
+
 }
