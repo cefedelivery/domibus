@@ -1,5 +1,7 @@
 package eu.domibus.api.message;
 
+import eu.domibus.api.message.usermessage.UserMessage;
+
 import java.util.Date;
 import java.util.List;
 
@@ -29,4 +31,6 @@ public interface UserMessageService {
     void scheduleSending(String messageId);
 
     void scheduleSending(String messageId, Long delay);
+
+    UserMessage getMessage(String messageId);
 }
