@@ -1,4 +1,4 @@
-package eu.domibus.api.party;
+package eu.domibus.api.process;
 
 /**
  * @author Thomas Dussart

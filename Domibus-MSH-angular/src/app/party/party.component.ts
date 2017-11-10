@@ -43,6 +43,7 @@ export class PartyComponent implements OnInit {
   }
 
   searchAndCount() {
+    this.offset = 0;
     this.loading = true;
     let pageStart = this.offset * this.rowLimiter.pageSize;
     let pageSize = this.rowLimiter.pageSize;
@@ -62,9 +63,7 @@ export class PartyComponent implements OnInit {
       this.process);
 
     Observable.zip(partyObservable, countObservable).subscribe((response) => {
-        console.log(response);
         this.rows = response[0];
-        console.log(response[0]);
         this.count = response[1];
         this.loading = false;
       },
@@ -73,6 +72,29 @@ export class PartyComponent implements OnInit {
         this.loading = false;
       }
     );
+  }
+
+  search(){
+    this.loading = true;
+    let pageStart = this.offset * this.rowLimiter.pageSize;
+    let pageSize = this.rowLimiter.pageSize;
+
+    this.partyService.listParties(
+      this.name,
+      this.endPoint,
+      this.partyID,
+      this.process,
+      pageStart,
+      pageSize).subscribe((response) => {
+        this.rows = response;
+        this.loading = false;
+      },
+      error => {
+        this.alertService.error("Could not load parties" + error);
+        this.loading = false;
+      }
+    );
+
   }
 
   initColumns() {
@@ -103,12 +125,16 @@ export class PartyComponent implements OnInit {
     })
   }
 
-  changePageSize(event){
-
+  changePageSize(newPageLimit: number) {
+    this.offset = 0;
+    this.rowLimiter.pageSize = newPageLimit;
+    this.searchAndCount();
   }
 
-  onPage(event){
-
+  onPage(event) {
+    console.log('Page Event', event);
+    this.offset = event.offset;
+    this.search();
   }
 
 }

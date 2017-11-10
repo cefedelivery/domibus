@@ -3,7 +3,7 @@ package eu.domibus.web.rest;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.party.IdentifierRo;
 import eu.domibus.core.party.PartyResponseRo;
-import eu.domibus.core.party.PartyService;
+import eu.domibus.api.party.PartyService;
 import eu.domibus.core.party.ProcessRo;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -30,8 +30,8 @@ public class PartyResource {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    private PartyService partyService;
 
+    private PartyService partyService;
     @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
     public List<PartyResponseRo> listParties(
             @RequestParam(value = "name", required = false) String name,
@@ -51,7 +51,7 @@ public class PartyResource {
             LOG.debug("pageSize [{}]", pageSize);
         }
         List<PartyResponseRo> partyResponseRos = domainConverter.convert(
-                partyService.listParties(
+                partyService.getParties(
                         name,
                         endPoint,
                         partyId,
@@ -94,12 +94,13 @@ public class PartyResource {
      * Flatten the list of identifiers of each party into a comma separated list for displaying in the console.
      * @param partyResponseRos the list of party to be adapted.
      */
-    private void flattenIdentifiers(List<PartyResponseRo> partyResponseRos) {
+    protected void flattenIdentifiers(List<PartyResponseRo> partyResponseRos) {
         partyResponseRos.forEach(
                 partyResponseRo -> {
                     String joinedIdentifiers = partyResponseRo.getIdentifiers().
                             stream().
                             map(IdentifierRo::getPartyId).
+                            sorted().
                             collect(Collectors.joining(","));
                     partyResponseRo.setJoinedIdentifiers(joinedIdentifiers);
                     if (LOG.isDebugEnabled()) {
@@ -113,15 +114,15 @@ public class PartyResource {
      * Flatten the list of processes of each party into a comma separated list for displaying in the console.
      * @param partyResponseRos the list of party to be adapted.
      */
-    private void flattenProcesses(List<PartyResponseRo> partyResponseRos) {
+    protected void flattenProcesses(List<PartyResponseRo> partyResponseRos) {
         partyResponseRos.forEach(
                 partyResponseRo -> {
-                    String joinedProcessesWithMeAsInitiator = partyResponseRo.getProcessesWithMeAsInitiator().
+                    String joinedProcessesWithMeAsInitiator = partyResponseRo.getProcessesWithPartyAsInitiator().
                             stream().
                             map(ProcessRo::getName).
                             collect(Collectors.joining(","));
 
-                    String joinedProcessesWithMeAsResponder = partyResponseRo.getProcessesWithMeAsResponder().
+                    String joinedProcessesWithMeAsResponder = partyResponseRo.getProcessesWithPartyAsResponder().
                             stream().
                             map(ProcessRo::getName).
                             collect(Collectors.joining(","));

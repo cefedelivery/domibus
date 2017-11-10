@@ -1,5 +1,7 @@
 package eu.domibus.api.party;
 
+import eu.domibus.api.process.Process;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -14,9 +16,9 @@ public class Party {
 
     protected Set<Identifier> identifiers; //NOSONAR
 
-    protected List<Process> processesWithMeAsInitiator=new ArrayList<>();
+    protected List<Process> processesWithPartyAsInitiator =new ArrayList<>();
 
-    protected List<Process> processesWithMeAsResponder=new ArrayList<>();
+    protected List<Process> processesWithPartyAsResponder =new ArrayList<>();
 
     protected String name;
 
@@ -56,20 +58,20 @@ public class Party {
         this.endpoint = endpoint;
     }
 
-    public List<Process> getProcessesWithMeAsInitiator() {
-        return processesWithMeAsInitiator;
+    public List<Process> getProcessesWithPartyAsInitiator() {
+        return processesWithPartyAsInitiator;
     }
 
-    public void addProcessesWithMeAsInitiator(Process process) {
-        this.processesWithMeAsInitiator.add(process);
+    public void addProcessesWithPartyAsInitiator(Process process) {
+        this.processesWithPartyAsInitiator.add(process);
     }
 
-    public List<Process> getProcessesWithMeAsResponder() {
-        return processesWithMeAsResponder;
+    public List<Process> getProcessesWithPartyAsResponder() {
+        return processesWithPartyAsResponder;
     }
 
-    public void addProcessesWithMeAsResponder(Process process) {
-        this.processesWithMeAsResponder.add(process);
+    public void addprocessesWithPartyAsResponder(Process process) {
+        this.processesWithPartyAsResponder.add(process);
     }
 
     @Override
@@ -77,8 +79,8 @@ public class Party {
         return "Party{" +
                 "entityId=" + entityId +
                 ", identifiers=" + identifiers +
-                ", processesWithMeAsInitiator=" + processesWithMeAsInitiator.size() +
-                ", processesWithMeAsResponder=" + processesWithMeAsResponder.size() +
+                ", processesWithPartyAsInitiator=" + processesWithPartyAsInitiator.size() +
+                ", processesWithPartyAsResponder=" + processesWithPartyAsResponder.size() +
                 ", name='" + name + '\'' +
                 ", userName='" + userName + '\'' +
                 ", endpoint='" + endpoint + '\'' +

@@ -1,4 +1,4 @@
-package eu.domibus.core.party;
+package eu.domibus.api.party;
 
 import eu.domibus.api.party.Party;
 
@@ -21,12 +21,12 @@ public interface PartyService {
      * @param pageSize page size.
      * @return a lit of party.
      */
-    List<Party> listParties(String name,
-                            String endPoint,
-                            String partyId,
-                            String processName,
-                            int pageStart,
-                            int pageSize);
+    List<Party> getParties(String name,
+                           String endPoint,
+                           String partyId,
+                           String processName,
+                           int pageStart,
+                           int pageSize);
 
     /**
      * Count parties for the given search criteria.

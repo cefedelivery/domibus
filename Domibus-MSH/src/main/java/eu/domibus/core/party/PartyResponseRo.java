@@ -1,7 +1,5 @@
 package eu.domibus.core.party;
 
-import eu.domibus.api.party.Process;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -26,9 +24,9 @@ public class PartyResponseRo {
 
     private String joinedProcesses;
 
-    private List<ProcessRo> processesWithMeAsInitiator=new ArrayList<>();
+    private List<ProcessRo> processesWithPartyAsInitiator =new ArrayList<>();
 
-    private List<ProcessRo> processesWithMeAsResponder=new ArrayList<>();
+    private List<ProcessRo> processesWithPartyAsResponder =new ArrayList<>();
 
     public Set<IdentifierRo> getIdentifiers() {
         return identifiers;
@@ -86,19 +84,19 @@ public class PartyResponseRo {
         this.joinedProcesses = joinedProcesses;
     }
 
-    public List<ProcessRo> getProcessesWithMeAsInitiator() {
-        return processesWithMeAsInitiator;
+    public List<ProcessRo> getProcessesWithPartyAsInitiator() {
+        return processesWithPartyAsInitiator;
     }
 
-    public void setProcessesWithMeAsInitiator(List<ProcessRo> processesWithMeAsInitiator) {
-        this.processesWithMeAsInitiator = processesWithMeAsInitiator;
+    public void setProcessesWithPartyAsInitiator(List<ProcessRo> processesWithPartyAsInitiator) {
+        this.processesWithPartyAsInitiator = processesWithPartyAsInitiator;
     }
 
-    public List<ProcessRo> getProcessesWithMeAsResponder() {
-        return processesWithMeAsResponder;
+    public List<ProcessRo> getProcessesWithPartyAsResponder() {
+        return processesWithPartyAsResponder;
     }
 
-    public void setProcessesWithMeAsResponder(List<ProcessRo> processesWithMeAsResponder) {
-        this.processesWithMeAsResponder = processesWithMeAsResponder;
+    public void setProcessesWithPartyAsResponder(List<ProcessRo> processesWithPartyAsResponder) {
+        this.processesWithPartyAsResponder = processesWithPartyAsResponder;
     }
 }

@@ -240,7 +240,7 @@ public class UserManagementServiceImplTest {
         boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
         assertFalse(test);
         new Verifications() {{
-            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, "test");
+            LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, "test");
             times = 1;
         }};
     }
