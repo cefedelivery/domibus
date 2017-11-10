@@ -6,6 +6,7 @@ import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ public class PartyDaoTest {
     @Autowired
     private PartyDao partyDao;
 
+    @Before
     public void init() {
         Party party = new Party();
         party.setName("P1");
@@ -69,10 +71,8 @@ public class PartyDaoTest {
     @Transactional
     @Test
     public void listParties() throws Exception {
-        init();
-        partyDao.listParty2();
-        //List<Party> parties = partyDao.listParties("", "", "", "", 0, 10);
-        //Assert.assertEquals(3, parties.size());
+        List<Party> parties = partyDao.getParties();
+        Assert.assertEquals(3, parties.size());
     }
 
 }

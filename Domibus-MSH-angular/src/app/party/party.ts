@@ -6,19 +6,21 @@
  */
 export class PartyResponseRo {
 
-  protected entityId;
+  entityId:string;
 
-  protected identifiers; //NOSONAR
+  identifiers; //NOSONAR
 
-  protected name;
+  name:string;
 
-  protected userName;
+  endpoint:string;
 
-  protected endpoint;
+  partyIDs:string;
 
-  protected partyIDs;
+  processes;
 
-  protected processes;
+  joinedIdentifiers:string;
+
+  joinedProcesses:string;
 
 }
 

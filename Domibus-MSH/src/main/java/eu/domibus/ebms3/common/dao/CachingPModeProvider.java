@@ -390,17 +390,19 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     public List<Process> findAllProcesses() {
-        if(configuration==null) {
+        try {
+            return Lists.newArrayList(getConfiguration().getBusinessProcesses().getProcesses());
+        }catch (IllegalArgumentException e){
             return Lists.newArrayList();
         }
-        return Lists.newArrayList(configuration.getBusinessProcesses().getProcesses());
     }
 
     @Override
     public List<Party> findAllParties() {
-        if(configuration==null) {
+        try {
+            return Lists.newArrayList(getConfiguration().getBusinessProcesses().getParties());
+        }catch (IllegalArgumentException e){
             return Lists.newArrayList();
         }
-        return Lists.newArrayList(configuration.getBusinessProcesses().getParties());
     }
 }

@@ -40,6 +40,7 @@ export class PartyComponent implements OnInit {
     this.loading = true;
     let pageStart = this.offset * this.rowLimiter.pageSize;
     let pageSize = this.rowLimiter.pageSize;
+    console.log('Name '+this.name);
     let partyObservable: Observable<PartyResponseRo[]> = this.partyService.listParties(
       this.name,
       this.endPoint,
@@ -72,22 +73,22 @@ export class PartyComponent implements OnInit {
       {
         name: 'Name',
         prop: 'name',
-        width: 20
+        width: 10
       },
       {
         name: 'End point',
         prop: 'endpoint',
-        width: 250
+        width: 200
       },
       {
         name: 'Party id',
-        prop: 'partyIDs',
+        prop: 'joinedIdentifiers',
         width: 20
       },
       {
         name: 'Process',
-        prop: "processes",
-        width: 30
+        prop: 'joinedProcesses',
+        width: 150
       }
     ];
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {

@@ -36,81 +36,12 @@ public class PartyDao extends BasicDao<Party> {
         return query.getResultList();
     }
 
-    public List<Party> findAllParties(){
-        return em.createNamedQuery("Party.findAll").getResultList();
+    public List<Party> getParties(){
+        return em.createNamedQuery("Party.findAll",Party.class).getResultList();
     }
 
-    /*public List<Integer> listParty2(){
-        TypedQuery<Integer> query = em.createQuery("SELECT pa.entityId From Party pa LEFT OUTER JOIN Process p join p.initiatorParties as init", Integer.class);
-        return query.getResultList();
+    public void setEntityManager(EntityManager entityManager) {
+        this.em = entityManager;
     }
-    public List<Party> listParties(String name,
-                                   String endPoint,
-                                   String partyId,
-                                   String process,
-                                   int pargeStart,
-                                   int pageSize) {
-        TypedQuery<Party> query = em.createQuery(buildPartyListCriteria(name, endPoint, partyId, process));
-        query.setFirstResult(pargeStart);
-        query.setMaxResults(pageSize);
-        return query.getResultList();
-    }
-
-    protected CriteriaQuery<Party> buildPartyListCriteria(final String name,
-                                                          final String endPoint,
-                                                          final String partyId,
-                                                          final String process
-    ) {
-        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-        CriteriaQuery<Party> criteriaQuery = criteriaBuilder.createQuery(Party.class);
-        Root<Process> root = criteriaQuery.from(Process.class);
-        Root<Party> party = criteriaQuery.from(Party.class);
-        //criteriaQuery.select(root);
-        Join<Process,Party> p=root.join("initiatorParties",JoinType.RIGHT);
-        p.on(
-                criteriaBuilder.or(
-                        root.in(p.get("initiatorParties")),
-                        root.in(p.get("responderParties")))
-        );
-        //where(name, endPoint, partyId, process, criteriaBuilder, criteriaQuery, root);
-        return criteriaQuery;
-    }
-
-    protected void where(
-            final String name,
-            final String endPoint,
-            final String partyId,
-            final String process,
-            final CriteriaBuilder criteriaBuilder,
-            final CriteriaQuery criteriaQuery,
-            final Root<Party> root) {
-
-        List<Predicate> predicates = new ArrayList<>();
-        if (StringUtils.isNotEmpty(name)) {
-            Path<String> nameField = root.get("name");
-            predicates.add(criteriaBuilder.like(nameField, "%" + name + "%"));
-        }
-        if (StringUtils.isNotEmpty(endPoint)) {
-            Path<String> endPointField = root.get("endpoint");
-            predicates.add(criteriaBuilder.like(endPointField, "%" + endPoint + "%"));
-        }
-        if (StringUtils.isNotEmpty(partyId)) {
-            Path<String> partyIdField = root.get("identifiers").get("partyId");
-            predicates.add(criteriaBuilder.like(partyIdField, "%" + partyId + "%"));
-        }
-        if (StringUtils.isNotEmpty(process)) {
-            *//*Path<Object> auditTargetField = root.get("id").get("auditTargetName");
-            predicates.add(auditTargetField.in(auditTargets));*//*
-        }
-        if (!predicates.isEmpty()) {
-            criteriaQuery.where(predicates.toArray(new Predicate[]{}));
-        }
-    }
-
-    void setEntityManager(EntityManager entityManager) {
-        em = entityManager;
-    }*/
-
-
 
 }

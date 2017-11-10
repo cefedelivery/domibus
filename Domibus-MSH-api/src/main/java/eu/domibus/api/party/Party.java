@@ -1,4 +1,4 @@
-package eu.domibus.core.party;
+package eu.domibus.api.party;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,7 @@ public class Party {
     protected Set<Identifier> identifiers; //NOSONAR
 
     protected List<Process> processesWithMeAsInitiator=new ArrayList<>();
+
     protected List<Process> processesWithMeAsResponder=new ArrayList<>();
 
     protected String name;
@@ -69,5 +70,18 @@ public class Party {
 
     public void addProcessesWithMeAsResponder(Process process) {
         this.processesWithMeAsResponder.add(process);
+    }
+
+    @Override
+    public String toString() {
+        return "Party{" +
+                "entityId=" + entityId +
+                ", identifiers=" + identifiers +
+                ", processesWithMeAsInitiator=" + processesWithMeAsInitiator.size() +
+                ", processesWithMeAsResponder=" + processesWithMeAsResponder.size() +
+                ", name='" + name + '\'' +
+                ", userName='" + userName + '\'' +
+                ", endpoint='" + endpoint + '\'' +
+                '}';
     }
 }
