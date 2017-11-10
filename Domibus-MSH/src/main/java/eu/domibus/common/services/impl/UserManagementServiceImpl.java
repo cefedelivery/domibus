@@ -173,7 +173,7 @@ public class UserManagementServiceImpl implements UserService {
             return false;
         }
         if (!user.isEnabled() && user.getSuspensionDate() != null) {
-            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
+            LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
             return false;
         }
         return true;

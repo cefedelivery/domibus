@@ -11,6 +11,7 @@ import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
@@ -28,6 +29,9 @@ import java.util.List;
 public class PModeDao extends PModeProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeDao.class);
+
+    @Autowired
+    private PartyDao partyDao;
 
     @Override
     public Party getGatewayParty() {
@@ -379,6 +383,16 @@ public class PModeDao extends PModeProvider {
     @Override
     public List<Process> findPullProcessByMpc(final String mpc) {
         return processDao.findPullProcessByMpc(mpc);
+    }
+
+    @Override
+    public List<Process> findAllProcesses() {
+        return processDao.findAllProcesses();
+    }
+
+    @Override
+    public List<Party> findAllParties() {
+        return partyDao.getParties();
     }
 
 }

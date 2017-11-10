@@ -66,6 +66,8 @@ import {RollbackDialogComponent} from "./pmode/rollback-dialog/rollback-dialog.c
 import {RollbackDirtyDialogComponent} from "./pmode/rollback-dirty-dialog/rollback-dirty-dialog.component";
 import {PmodeDirtyUploadComponent} from "./pmode/pmode-dirty-upload/pmode-dirty-upload.component";
 import {AuditComponent} from "./audit/audit.component";
+import {PartyComponent} from "./party/party.component";
+import {PartyDetailsComponent} from "./party/party-details/party-details.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -107,7 +109,9 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     RollbackDialogComponent,
     RollbackDirtyDialogComponent,
     PmodeDirtyUploadComponent,
-    AuditComponent
+    AuditComponent,
+    PartyComponent,
+    PartyDetailsComponent
   ],
   entryComponents: [
     AppComponent,
@@ -126,7 +130,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TrustStoreUploadComponent,
     RollbackDialogComponent,
     RollbackDirtyDialogComponent,
-    PmodeDirtyUploadComponent
+    PmodeDirtyUploadComponent,
+    PartyDetailsComponent
   ],
   imports: [
     BrowserModule,

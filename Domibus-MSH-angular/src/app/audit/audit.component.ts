@@ -84,7 +84,10 @@ export class AuditComponent implements OnInit {
       //on complete of auditLogsObservable Observable, we load the count
       //TODO load this in parrallel and merge the stream at the end.
       () => auditCountOservable.subscribe(auditCount => this.count = auditCount,
-        error => this.alertService.error("Could not count audits " + error))
+        error => {
+          this.alertService.error("Could not count audits " + error);
+          this.loading = false;
+        })
     );
   }
 

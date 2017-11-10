@@ -39,10 +39,15 @@
       <span *ngIf="fullMenu">Users</span>
     </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/audit']" *ngIf="hasAdmin()" id="audit_id">
-      <md-icon md-tooltip="Audit" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">visibility</md-icon>
+      <md-icon md-tooltip="Audit" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">update</md-icon>
       <span *ngIf="fullMenu">Audit</span>
     </button>
 
+    <button md-raised-button class="sideNavButton" [routerLink]="['/party']" *ngIf="hasAdmin()" id="party_id">
+      <md-icon md-tooltip="Party management" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">device_hub
+      </md-icon>
+      <span *ngIf="fullMenu">Party management</span>
+    </button>
     <div class="collapse-button">
       <button *ngIf="fullMenu" md-raised-button id="expand_id" (click)="toggleMenu()">
         <md-icon md-tooltip="Collapse" mdTooltipPosition="right">chevron_left</md-icon>

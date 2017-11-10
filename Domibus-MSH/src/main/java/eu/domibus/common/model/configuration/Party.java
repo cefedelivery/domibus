@@ -53,6 +53,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Table(name = "TB_PARTY")
 @NamedQueries({@NamedQuery(name = "Party.findPartyByIdentifier", query = "select p.name from Party p where :PARTY_IDENTIFIER member of p.identifiers"),
         @NamedQuery(name = "Party.findByName", query = "select p from Party p where p.name = :NAME"),
+        @NamedQuery(name = "Party.findAll", query = "select p from Party p"),
         @NamedQuery(name = "Party.findPartyIdentifiersByEndpoint", query = "select p.identifiers from Party p where p.endpoint = :ENDPOINT")})
 @Audited(withModifiedFlag = true)
 @RevisionLogicalName(value = "Party", auditOrder = 1)
