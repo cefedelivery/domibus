@@ -5,6 +5,10 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.util.Set;
 
+/**
+ * @author Tiago Miguel
+ * @since 3.3.1
+ */
 public class MessageProperties {
 
     private Set<Property> property;

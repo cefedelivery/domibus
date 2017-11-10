@@ -3,6 +3,10 @@ package eu.domibus.api.message.usermessage;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+/**
+ * @author Tiago Miguel
+ * @since 3.3.1
+ */
 public class PartyId {
 
     private String value;

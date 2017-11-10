@@ -14,6 +14,8 @@
     "name" : "acknowledgement"
   }, {
     "name" : "monitoring"
+  }, {
+    "name" : "usermessage"
   } ],
   "schemes" : [ "http", "https" ],
   "paths" : {
@@ -92,6 +94,32 @@
               "items" : {
                 "$ref" : "#/definitions/MessageAcknowledgementDTO"
               }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/ext/messages/usermessages/{messageId}" : {
+      "get" : {
+        "tags" : [ "usermessage" ],
+        "summary" : "Get user message",
+        "description" : "Retrieve the user message with the specified message id",
+        "operationId" : "getUserMessage",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string",
+          "pattern" : ".+"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/UserMessageDTO"
             }
           }
         },
@@ -267,6 +295,48 @@
     }
   },
   "definitions" : {
+    "AgreementRefDTO" : {
+      "type" : "object",
+      "properties" : {
+        "value" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string"
+        },
+        "pmode" : {
+          "type" : "string"
+        }
+      }
+    },
+    "CollaborationInfoDTO" : {
+      "type" : "object",
+      "properties" : {
+        "conversationId" : {
+          "type" : "string"
+        },
+        "action" : {
+          "type" : "string"
+        },
+        "agreementRef" : {
+          "$ref" : "#/definitions/AgreementRefDTO"
+        },
+        "service" : {
+          "$ref" : "#/definitions/ServiceDTO"
+        }
+      }
+    },
+    "DescriptionDTO" : {
+      "type" : "object",
+      "properties" : {
+        "value" : {
+          "type" : "string"
+        },
+        "lang" : {
+          "type" : "string"
+        }
+      }
+    },
     "FailedMessagesCriteriaRO" : {
       "type" : "object",
       "properties" : {
@@ -277,6 +347,21 @@
         "toDate" : {
           "type" : "string",
           "format" : "date-time"
+        }
+      }
+    },
+    "FromDTO" : {
+      "type" : "object",
+      "properties" : {
+        "partyId" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "$ref" : "#/definitions/PartyIdDTO"
+          }
+        },
+        "role" : {
+          "type" : "string"
         }
       }
     },
@@ -352,6 +437,186 @@
           "enum" : [ "SUCCESS", "ABORT", "ERROR" ]
         },
         "error" : {
+          "type" : "string"
+        }
+      }
+    },
+    "MessageInfoDTO" : {
+      "type" : "object",
+      "properties" : {
+        "timestamp" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "messageId" : {
+          "type" : "string"
+        },
+        "refToMessageId" : {
+          "type" : "string"
+        }
+      }
+    },
+    "MessagePropertiesDTO" : {
+      "type" : "object",
+      "properties" : {
+        "property" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "$ref" : "#/definitions/PropertyDTO"
+          }
+        }
+      }
+    },
+    "PartInfoDTO" : {
+      "type" : "object",
+      "properties" : {
+        "schema" : {
+          "$ref" : "#/definitions/SchemaDTO"
+        },
+        "description" : {
+          "$ref" : "#/definitions/DescriptionDTO"
+        },
+        "partProperties" : {
+          "$ref" : "#/definitions/PartPropertiesDTO"
+        },
+        "href" : {
+          "type" : "string"
+        },
+        "binaryData" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "format" : "byte"
+          }
+        },
+        "inBody" : {
+          "type" : "boolean"
+        },
+        "mime" : {
+          "type" : "string"
+        }
+      }
+    },
+    "PartPropertiesDTO" : {
+      "type" : "object",
+      "properties" : {
+        "property" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "$ref" : "#/definitions/PropertyDTO"
+          }
+        }
+      }
+    },
+    "PartyIdDTO" : {
+      "type" : "object",
+      "properties" : {
+        "value" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string"
+        }
+      }
+    },
+    "PartyInfoDTO" : {
+      "type" : "object",
+      "properties" : {
+        "from" : {
+          "$ref" : "#/definitions/FromDTO"
+        },
+        "to" : {
+          "$ref" : "#/definitions/ToDTO"
+        }
+      }
+    },
+    "PayloadInfoDTO" : {
+      "type" : "object",
+      "properties" : {
+        "partInfo" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "$ref" : "#/definitions/PartInfoDTO"
+          }
+        }
+      }
+    },
+    "PropertyDTO" : {
+      "type" : "object",
+      "properties" : {
+        "value" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string"
+        }
+      }
+    },
+    "SchemaDTO" : {
+      "type" : "object",
+      "properties" : {
+        "location" : {
+          "type" : "string"
+        },
+        "version" : {
+          "type" : "string"
+        },
+        "namespace" : {
+          "type" : "string"
+        }
+      }
+    },
+    "ServiceDTO" : {
+      "type" : "object",
+      "properties" : {
+        "value" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string"
+        }
+      }
+    },
+    "ToDTO" : {
+      "type" : "object",
+      "properties" : {
+        "partyId" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "$ref" : "#/definitions/PartyIdDTO"
+          }
+        },
+        "role" : {
+          "type" : "string"
+        }
+      }
+    },
+    "UserMessageDTO" : {
+      "type" : "object",
+      "properties" : {
+        "messageInfo" : {
+          "$ref" : "#/definitions/MessageInfoDTO"
+        },
+        "partyInfo" : {
+          "$ref" : "#/definitions/PartyInfoDTO"
+        },
+        "collaborationInfo" : {
+          "$ref" : "#/definitions/CollaborationInfoDTO"
+        },
+        "messageProperties" : {
+          "$ref" : "#/definitions/MessagePropertiesDTO"
+        },
+        "payloadInfo" : {
+          "$ref" : "#/definitions/PayloadInfoDTO"
+        },
+        "mpc" : {
           "type" : "string"
         }
       }
