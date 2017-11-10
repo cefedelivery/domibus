@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import com.google.common.collect.Lists;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.party.IdentifierRo;
 import eu.domibus.core.party.PartyResponseRo;
@@ -7,6 +8,7 @@ import eu.domibus.api.party.PartyService;
 import eu.domibus.core.party.ProcessRo;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -32,6 +34,7 @@ public class PartyResource {
     @Autowired
 
     private PartyService partyService;
+
     @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
     public List<PartyResponseRo> listParties(
             @RequestParam(value = "name", required = false) String name,
@@ -74,7 +77,7 @@ public class PartyResource {
             @RequestParam(value = "endPoint", required = false) String endPoint,
             @RequestParam(value = "partyId", required = false) String partyId,
             @RequestParam(value = "process", required = false) String process
-            ) {
+    ) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Counting party with parameters");
             LOG.debug("name [{}]", name);
@@ -92,6 +95,7 @@ public class PartyResource {
 
     /**
      * Flatten the list of identifiers of each party into a comma separated list for displaying in the console.
+     *
      * @param partyResponseRos the list of party to be adapted.
      */
     protected void flattenIdentifiers(List<PartyResponseRo> partyResponseRos) {
@@ -101,7 +105,7 @@ public class PartyResource {
                             stream().
                             map(IdentifierRo::getPartyId).
                             sorted().
-                            collect(Collectors.joining(","));
+                            collect(Collectors.joining(", "));
                     partyResponseRo.setJoinedIdentifiers(joinedIdentifiers);
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Flatten identifiers for [{}]=[{}]", partyResponseRo.getName(), partyResponseRo.getJoinedIdentifiers());
@@ -112,23 +116,66 @@ public class PartyResource {
 
     /**
      * Flatten the list of processes of each party into a comma separated list for displaying in the console.
+     *
      * @param partyResponseRos the list of party to be adapted.
      */
     protected void flattenProcesses(List<PartyResponseRo> partyResponseRos) {
         partyResponseRos.forEach(
                 partyResponseRo -> {
-                    String joinedProcessesWithMeAsInitiator = partyResponseRo.getProcessesWithPartyAsInitiator().
+
+                    List<ProcessRo> processesWithPartyAsInitiator = partyResponseRo.getProcessesWithPartyAsInitiator();
+                    List<ProcessRo> processesWithPartyAsResponder = partyResponseRo.getProcessesWithPartyAsResponder();
+
+                    List<ProcessRo> processesWithPartyAsInitiatorAndResponder =
+                            processesWithPartyAsInitiator.
+                                    stream().
+                                    filter(processesWithPartyAsResponder::contains).
+                                    collect(Collectors.toList());
+
+                    List<ProcessRo> processWithPartyAsInitiatorOnly = processesWithPartyAsInitiator
+                            .stream()
+                            .filter(processRo -> !processesWithPartyAsInitiatorAndResponder.contains(processRo))
+                            .collect(Collectors.toList());
+
+                    List<ProcessRo> processWithPartyAsResponderOnly = processesWithPartyAsResponder
+                            .stream()
+                            .filter(processRo -> !processesWithPartyAsInitiatorAndResponder.contains(processRo))
+                            .collect(Collectors.toList());
+
+                    String joinedProcessesWithMeAsInitiatorOnly = processWithPartyAsInitiatorOnly.
                             stream().
                             map(ProcessRo::getName).
-                            map(name->name.concat("(I)")).
+                            map(name -> name.concat("(I)")).
+                            collect(Collectors.joining(", "));
+
+                    String joinedProcessesWithMeAsResponderOnly = processWithPartyAsResponderOnly.
+                            stream().
+                            map(ProcessRo::getName).
+                            map(name -> name.concat("(R)")).
                             collect(Collectors.joining(","));
 
-                    String joinedProcessesWithMeAsResponder = partyResponseRo.getProcessesWithPartyAsResponder().
+                    String joinedProcessesWithMeAsInitiatorAndResponder = processesWithPartyAsInitiatorAndResponder.
                             stream().
                             map(ProcessRo::getName).
-                            map(name->name.concat("(R)")).
+                            map(name -> name.concat("(IR)")).
                             collect(Collectors.joining(","));
-                    partyResponseRo.setJoinedProcesses(joinedProcessesWithMeAsInitiator + "     " + joinedProcessesWithMeAsResponder);
+
+                    List<String> joinedProcess= Lists.newArrayList();
+
+                    if(StringUtils.isNotEmpty(joinedProcessesWithMeAsInitiatorOnly)){
+                        joinedProcess.add(joinedProcessesWithMeAsInitiatorOnly);
+                    }
+
+                    if(StringUtils.isNotEmpty(joinedProcessesWithMeAsResponderOnly)){
+                        joinedProcess.add(joinedProcessesWithMeAsResponderOnly);
+                    }
+
+                    if(StringUtils.isNotEmpty(joinedProcessesWithMeAsInitiatorAndResponder)){
+                        joinedProcess.add(joinedProcessesWithMeAsInitiatorAndResponder);
+                    }
+
+                    partyResponseRo.setJoinedProcesses(
+                            StringUtils.join(joinedProcess,", "));
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Flatten processes for [{}]=[{}]", partyResponseRo.getName(), partyResponseRo.getJoinedProcesses());
                     }

@@ -110,7 +110,7 @@ public class PartyResourceTest {
         partyResponseRo.setIdentifiers(Sets.newHashSet(firstId, secondId));
 
         partyResource.flattenIdentifiers(Lists.newArrayList(partyResponseRo));
-        assertEquals("blue,pale blue", partyResponseRo.getJoinedIdentifiers());
+        assertEquals("blue, pale blue", partyResponseRo.getJoinedIdentifiers());
     }
 
     @Test
@@ -124,11 +124,14 @@ public class PartyResourceTest {
         ProcessRo secondProcess = new ProcessRo();
         secondProcess.setName("tc2");
 
-        partyResponseRo.setProcessesWithPartyAsInitiator(Lists.newArrayList(firstProcess, secondProcess));
-        partyResponseRo.setProcessesWithPartyAsResponder(Lists.newArrayList(secondProcess, firstProcess));
+        ProcessRo thirdProcess = new ProcessRo();
+        thirdProcess.setName("tc3");
+
+        partyResponseRo.setProcessesWithPartyAsInitiator(Lists.newArrayList(firstProcess, thirdProcess));
+        partyResponseRo.setProcessesWithPartyAsResponder(Lists.newArrayList(secondProcess, thirdProcess));
 
         partyResource.flattenProcesses(Lists.newArrayList(partyResponseRo));
-        assertEquals("tc1(I),tc2(I)     tc2(R),tc1(R)", partyResponseRo.getJoinedProcesses());
+        assertEquals("tc1(I), tc2(R), tc3(IR)", partyResponseRo.getJoinedProcesses());
 
     }
 
