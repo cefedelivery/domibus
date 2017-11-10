@@ -55,6 +55,13 @@ public class CompressionService {
                 continue;
             }
 
+            if(partInfo.getPartProperties() == null) {
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE_MISSING_MIME_TYPE, partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId());
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId(), null);
+                ex.setMshRole(MSHRole.SENDING);
+                throw ex;
+            }
+
             String mimeType = null;
             for (final Property property : partInfo.getPartProperties().getProperties()) {
                 if (Property.MIME_TYPE.equals(property.getName())) {
@@ -110,14 +117,17 @@ public class CompressionService {
             String mimeType = null;
             boolean payloadCompressed = false;
 
-            for (final Property property : partInfo.getPartProperties().getProperties()) {
-                if (Property.MIME_TYPE.equals(property.getName())) {
-                    mimeType = property.getValue();
-                }
-                if (CompressionService.COMPRESSION_PROPERTY_KEY.equals(property.getName()) && CompressionService.COMPRESSION_PROPERTY_VALUE.equals(property.getValue())) {
-                    payloadCompressed = true;
+            if(partInfo.getPartProperties() != null) {
+                for (final Property property : partInfo.getPartProperties().getProperties()) {
+                    if (Property.MIME_TYPE.equals(property.getName())) {
+                        mimeType = property.getValue();
+                    }
+                    if (CompressionService.COMPRESSION_PROPERTY_KEY.equals(property.getName()) && CompressionService.COMPRESSION_PROPERTY_VALUE.equals(property.getValue())) {
+                        payloadCompressed = true;
+                    }
                 }
             }
+
 
             if (!payloadCompressed) {
                 LOG.debug("Decompression is not needed: payload is not compressed");
