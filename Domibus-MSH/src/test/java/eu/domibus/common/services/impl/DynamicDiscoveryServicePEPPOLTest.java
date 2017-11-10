@@ -26,7 +26,8 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
     private static final String TEST_KEYSTORE = "testkeystore.jks";
 
-    private static final String TEST_SML_ZONE = "isaitb.acc.edelivery.tech.ec.europa.eu";
+    //private static final String TEST_SML_ZONE = "isaitb.acc.edelivery.tech.ec.europa.eu";
+    private static final String TEST_SML_ZONE = "generalerds.acc.edelivery.tech.ec.europa.eu";
 
     private static final String ALIAS_CN_AVAILABLE = "cn_available";
     private static final String TEST_KEYSTORE_PASSWORD = "1234";
@@ -107,7 +108,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
     /* This is not a unit tests but a useful test for a real SMP entry. */
     @Test
-    @Ignore
+    //@Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
             domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
@@ -117,7 +118,9 @@ public class DynamicDiscoveryServicePEPPOLTest {
             result = Mode.TEST;
         }};
 
-        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:9311100000666", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
+        //EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:9311100000666", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
+        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("eu-gateway.setcce.si", "erds-gateway-id", "http://uri.etsi.org/02640/soapbinding/v2#::REMDispatch:2", "generalERDS:ver1.0", "urn:cef-eDelivery.europa.eu");
+
         assertNotNull(endpoint);
         System.out.println(endpoint.getAddress());
 
