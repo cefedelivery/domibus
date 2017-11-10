@@ -39,9 +39,4 @@ public class PartyDao extends BasicDao<Party> {
     public List<Party> getParties(){
         return em.createNamedQuery("Party.findAll",Party.class).getResultList();
     }
-
-    public void setEntityManager(EntityManager entityManager) {
-        this.em = entityManager;
-    }
-
 }

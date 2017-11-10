@@ -61,6 +61,9 @@ public class PartyServiceImpl implements PartyService {
 
     }
 
+    /**
+     *{@inheritDoc}
+     */
     @Override
     public long countParties(String name, String endPoint, String partyId, String processName) {
         final Predicate<Party> searchPredicate = getSearchPredicate(name, endPoint, partyId, processName);
@@ -143,7 +146,7 @@ public class PartyServiceImpl implements PartyService {
     /**
      * In the actual configuration the link between parties and processes exists from process to party.
      * We need to reverse this association, we want to have a relation party -> process I am involved in as a responder
-     * or initiation.
+     * or initiator.
      *
      * @return a list of party linked with their processes.
      */
@@ -152,9 +155,8 @@ public class PartyServiceImpl implements PartyService {
         //Retrieve all party entities.
         List<eu.domibus.common.model.configuration.Party> allParties = pModeProvider.findAllParties();
         if (LOG.isDebugEnabled()) {
-            LOG.debug("linkPartyAndProcesses for ");
-            LOG.debug("     party entities");
-            allParties.forEach(party -> LOG.debug("[{}]", party));
+            LOG.debug("linkPartyAndProcesses for party entities");
+            allParties.forEach(party -> LOG.debug("     [{}]", party));
         }
 
         //create a new Party to live outside the service per existing party entity in the pmode.

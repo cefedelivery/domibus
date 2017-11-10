@@ -45,10 +45,6 @@ public class Identifier extends AbstractBaseEntity {
     @JoinColumn(name = "FK_PARTY_ID_TYPE")
     private PartyIdType partyIdType;
 
-    //needed for dozer.
-  /*  public Identifier() {
-    }*/
-
     /**
      * Gets the value of the partyId property.
      *

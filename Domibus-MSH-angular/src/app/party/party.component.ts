@@ -7,12 +7,18 @@ import {PartyResponseRo} from "./party";
 import {Observable} from "rxjs/Observable";
 import {AlertService} from "../alert/alert.service";
 
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
+
 @Component({
   selector: 'app-party',
   providers: [PartyService],
   templateUrl: './party.component.html',
   styleUrls: ['./party.component.css']
 })
+
 export class PartyComponent implements OnInit {
 
   name: string;
@@ -40,7 +46,7 @@ export class PartyComponent implements OnInit {
     this.loading = true;
     let pageStart = this.offset * this.rowLimiter.pageSize;
     let pageSize = this.rowLimiter.pageSize;
-    console.log('Name '+this.name);
+
     let partyObservable: Observable<PartyResponseRo[]> = this.partyService.listParties(
       this.name,
       this.endPoint,
@@ -48,13 +54,14 @@ export class PartyComponent implements OnInit {
       this.process,
       pageStart,
       pageSize);
+
     let countObservable: Observable<number> = this.partyService.countParty(
       this.name,
       this.endPoint,
       this.partyID,
       this.process);
+
     Observable.zip(partyObservable, countObservable).subscribe((response) => {
-        console.log('zip result');
         console.log(response);
         this.rows = response[0];
         console.log(response[0]);

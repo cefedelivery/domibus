@@ -90,6 +90,10 @@ public class PartyResource {
         );
     }
 
+    /**
+     * Flatten the list of identifiers of each party into a comma separated list for displaying in the console.
+     * @param partyResponseRos the list of party to be adapted.
+     */
     private void flattenIdentifiers(List<PartyResponseRo> partyResponseRos) {
         partyResponseRos.forEach(
                 partyResponseRo -> {
@@ -104,6 +108,11 @@ public class PartyResource {
                 });
     }
 
+
+    /**
+     * Flatten the list of processes of each party into a comma separated list for displaying in the console.
+     * @param partyResponseRos the list of party to be adapted.
+     */
     private void flattenProcesses(List<PartyResponseRo> partyResponseRos) {
         partyResponseRos.forEach(
                 partyResponseRo -> {

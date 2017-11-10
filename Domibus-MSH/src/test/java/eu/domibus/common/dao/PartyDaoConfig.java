@@ -12,13 +12,11 @@ import javax.persistence.PersistenceContext;
 @Configuration
 public class PartyDaoConfig {
 
-    @PersistenceContext
-    private javax.persistence.EntityManager em;
+
 
     @Bean
     public PartyDao getPartyDao() {
         PartyDao partyDao = new PartyDao();
-        partyDao.setEntityManager(em);
         return partyDao;
     }
 }
