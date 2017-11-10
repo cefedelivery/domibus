@@ -57,6 +57,9 @@ public class PartyResourceTest {
             result = partyResponseRos;
             times = 1;
 
+            partyResource.flattenIdentifiers(withAny(new ArrayList<>()));
+            partyResource.flattenProcesses(withAny(new ArrayList<>()));
+
         }};
 
         partyResource.listParties(name,endPoint,partyId,processName,pageStart,pageSize);
@@ -125,7 +128,7 @@ public class PartyResourceTest {
         partyResponseRo.setProcessesWithPartyAsResponder(Lists.newArrayList(secondProcess, firstProcess));
 
         partyResource.flattenProcesses(Lists.newArrayList(partyResponseRo));
-        assertEquals("tc1,tc2     tc2,tc1", partyResponseRo.getJoinedProcesses());
+        assertEquals("tc1(I),tc2(I)     tc2(R),tc1(R)", partyResponseRo.getJoinedProcesses());
 
     }
 

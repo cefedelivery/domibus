@@ -120,11 +120,13 @@ public class PartyResource {
                     String joinedProcessesWithMeAsInitiator = partyResponseRo.getProcessesWithPartyAsInitiator().
                             stream().
                             map(ProcessRo::getName).
+                            map(name->name.concat("(I)")).
                             collect(Collectors.joining(","));
 
                     String joinedProcessesWithMeAsResponder = partyResponseRo.getProcessesWithPartyAsResponder().
                             stream().
                             map(ProcessRo::getName).
+                            map(name->name.concat("(R)")).
                             collect(Collectors.joining(","));
                     partyResponseRo.setJoinedProcesses(joinedProcessesWithMeAsInitiator + "     " + joinedProcessesWithMeAsResponder);
                     if (LOG.isDebugEnabled()) {
