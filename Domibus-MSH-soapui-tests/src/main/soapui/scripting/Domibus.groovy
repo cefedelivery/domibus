@@ -947,6 +947,29 @@ class Domibus
 			return source.replaceAll("/","\\\\");
 		}
     }
+	
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+// Return path to domibus folder
+static def String pathToDomibus(color, log, context){
+	// Return path to domibus folder base on the "color"
+		def propName = ""
+		switch(color.toLowerCase()){
+			case "blue":
+				propName =  "pathBlue"
+				break;
+			case "red":
+				propName = "pathRed"
+				break;
+			case "green":
+				propName  = "pathGreen"
+				break;
+			default:
+				assert (false) , "Unknown side color. Supported values: BLUE, RED, GREEN"
+		}
+
+		return context.expand("\${#Project#${propName}}")
+}
+	
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
    // Change Domibus configuration file 
     static def void changeDomibusProperties(color, propValueDict, log, context, testRunner){
@@ -955,7 +978,7 @@ class Domibus
 		// to restore configuration use method restoreDomibusPropertiesFromBackup(domibusPath,  log, context, testRunner)
 		def pathToPropertyFile = pathToDomibus(color, log, context) + context.expand('${#Project#subPathToDomibusProperties}')
 
-		// Check fiel exists
+		// Check file exists
 		def testFile = new File(pathToPropertyFile)
 		if (!testFile.exists()) testRunner.fail("File [${pathToPropertyFile}] does not exist. Can't change value.")
 		else log.info "File [${pathToPropertyFile}] exists."
@@ -998,41 +1021,25 @@ class Domibus
 		  log.info "Property file [${pathToPropertyFile}] amended" 
     }
 
-//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-// Return path to domibus folder
-static def String pathToDomibus(color, log, context){
-	// Return path to domibus folder base on the "color"
-		def propName = ""
-		switch(color.toLowerCase()){
-			case "blue":
-				propName =  "pathBlue"
-				break;
-			case "red":
-				propName = "pathRed"
-				break;
-			case "green":
-				propName  = "pathGreen"
-				break;
-			default:
-				assert (false) , "Unknown side color. Supported values: BLUE, RED, GREEN"
-		}
 
-		return context.expand("\${#Project#${propName}}")
-}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 
-
-   // Change Domibus configuration file 
+   // Restor Domibus configuration file 
     static def void restoreDomibusPropertiesFromBackup(color, log, context, testRunner){
 		// Restore from backup file domibus.properties file
 		def pathToPropertyFile = pathToDomibus(color, log, context) + context.expand('${#Project#subPathToDomibusProperties}')
 		def backupFile = "${pathToPropertyFile}${backup_file_sufix}"
-
-		copyFile(backupFile, pathToPropertyFile, log)
-		if (new File(backupFile).delete())
-		   log.info "Successufuly restory configuration from backup file and backup file was removed" 
-		else 
-		   testRunner.fail "Not able to delete configuration backup file" 
+		
+		// Check backup file exists
+		def backupFileHandler = new File(backupFile)
+		if (!backupFileHandler.exists()) testRunner.fail("CRITICAL ERROR: File [${backupFile}] does not exist.")
+		else {	
+			copyFile(backupFile, pathToPropertyFile, log)
+			if (backupFileHandler.delete())
+			   log.info "Successufuly restory configuration from backup file and backup file was removed" 
+			else 
+			   testRunner.fail "Not able to delete configuration backup file" 
+		}
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 
