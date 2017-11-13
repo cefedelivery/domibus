@@ -145,13 +145,13 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
         // Verifies that the message is really in the queue
         connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
         connection.start();
-        Message message = popQueueMessageWithTimeout(connection, JMS_DISPATCH_QUEUE_NAME, 2000);
+        Message message = popQueueMessageWithTimeout(connection, JMS_DISPATCH_QUEUE_NAME, 4000);
         connection.close();
         Assert.assertNull(message);
         System.out.println("Out message: " + message);
         connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");
         connection.start();
-        message = popQueueMessageWithTimeout(connection, JMS_BACKEND_REPLY_QUEUE_NAME, 2000);
+        message = popQueueMessageWithTimeout(connection, JMS_BACKEND_REPLY_QUEUE_NAME, 4000);
         connection.close();
         //Assert.assertNotNull(message); TODO Why the Reply queue is always empty ?
 

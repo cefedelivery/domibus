@@ -129,11 +129,14 @@ public class EbMS3MessageBuilder {
     private void attachPayload(final PartInfo partInfo, final SOAPMessage message) throws ParserConfigurationException, SOAPException, IOException, SAXException {
         String mimeType = null;
 
-        for (final Property prop : partInfo.getPartProperties().getProperties()) {
-            if (Property.MIME_TYPE.equals(prop.getName())) {
-                mimeType = prop.getValue();
+        if(partInfo.getPartProperties() != null) {
+            for (final Property prop : partInfo.getPartProperties().getProperties()) {
+                if (Property.MIME_TYPE.equals(prop.getName())) {
+                    mimeType = prop.getValue();
+                }
             }
         }
+
         final DataHandler dataHandler = partInfo.getPayloadDatahandler();
         if (partInfo.isInBody() && mimeType != null && mimeType.toLowerCase().contains("xml")) { //TODO: respect empty soap body config
             this.documentBuilderFactory.setNamespaceAware(true);

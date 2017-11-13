@@ -57,14 +57,18 @@ public class PayloadProfileValidator {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling for this exchange does not include a payload with CID: " + cid, messaging.getUserMessage().getMessageInfo().getMessageId(), null);
             }
             modifiableProfileList.remove(profiled);
-            final Collection<Property> partProperties = partInfo.getPartProperties().getProperties();
+
             String mime = null;
-            for (final Property partProperty : partProperties) {
-                if (Property.MIME_TYPE.equals(partProperty.getName())) {
-                    mime = partProperty.getValue();
-                    break;
+            if(partInfo.getPartProperties() != null) {
+                final Collection<Property> partProperties = partInfo.getPartProperties().getProperties();
+                for (final Property partProperty : partProperties) {
+                    if (Property.MIME_TYPE.equals(partProperty.getName())) {
+                        mime = partProperty.getValue();
+                        break;
+                    }
                 }
             }
+
             if (mime == null) {
                 LOG.businessError(DomibusMessageCode.BUS_PAYLOAD_WITH_MIME_TYPE_MISSING, partInfo.getHref());
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling for this exchange requires all message parts to declare a MimeType property" + partInfo.getHref(), messaging.getUserMessage().getMessageInfo().getMessageId(), null);
