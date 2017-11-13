@@ -701,7 +701,7 @@ class Domibus
 	    def outputCatcher = new StringBuffer();
         def errorCatcher = new StringBuffer();
         def proc=null; def commandString = null; 
-		def pmDescription = "Dummy";
+		def pmDescription = "SoapUI sample test description for PMode upload";
 		
 		def String output = fetchCookieHeader(side,context,log);		
 		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
