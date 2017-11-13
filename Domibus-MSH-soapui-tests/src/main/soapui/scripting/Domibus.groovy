@@ -23,6 +23,7 @@ class Domibus
     def sqlRed=null;
 	def sqlGreen=null;
 	def thirdGateway = "false";
+	static def backup_file_sufix = "_backup_for_soapui_tests"
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
@@ -947,6 +948,92 @@ class Domibus
 		}
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // Change Domibus configuration file 
+    static def void changeDomibusProperties(color, propValueDict, log, context, testRunner){
+		// Check that properties file exist and if yes create backup_file
+		// For all properties name and new value pairs change value in file
+		// to restore configuration use method restoreDomibusPropertiesFromBackup(domibusPath,  log, context, testRunner)
+		def pathToPropertyFile = pathToDomibus(color, log, context) + context.expand('${#Project#subPathToDomibusProperties}')
 
+		// Check fiel exists
+		def testFile = new File(pathToPropertyFile)
+		if (!testFile.exists()) testRunner.fail("File [${pathToPropertyFile}] does not exist. Can't change value.")
+		else log.info "File [${pathToPropertyFile}] exists."
+
+		// Create backup file 
+		Domibus.copyFile(pathToPropertyFile, "${pathToPropertyFile}${backup_file_sufix}",log)
+		
+		def fileContent = testFile.text
+		def found = false
+		def foundInCommentedRow = false
+		//run in loop for all properties key values pairs 
+		 propValueDict.each{ propertyToChangeName, newValueToAssign -> 
+		 	// Check that property exist in config file
+			 found = false
+			 foundInCommentedRow = false
+			testFile.eachLine{line, n ->
+			     n++
+			  if (line =~ /^${propertyToChangeName}=/) {
+			     log.info "In line $n searched property was found. Line value is: $line"
+			     found = true
+			  }
+			  if (line =~ ~/# *${propertyToChangeName}=.*/) {
+			     log.info "In line $n commented searched property was found. Line value is: $line"
+			     foundInCommentedRow = true
+			  }
+			}
+
+			// If property is present in file change it value
+			if (found) 
+				fileContent = fileContent.replaceAll(/(?m)^(${propertyToChangeName}=)(.*)/){ all, paramName, value -> "${paramName}${newValueToAssign}"} 
+			else 
+				if (foundInCommentedRow)  
+					fileContent = fileContent.replaceAll(/(?m)^# *(${propertyToChangeName}=)(.*)/){ all, paramName, value -> "${paramName}${newValueToAssign}"} 
+				else testRunner.fail("The search string ($propertyToChangeName) was not found in file [${pathToPropertyFile}].") 
+		    log.info "In [${pathToPropertyFile}] file property ${propertyToChangeName} was changed to value ${newValueToAssign}"
+		 } //loop end 
+		
+		 // Store new content of properties file after all changes
+		  testFile.text=fileContent
+		  log.info "Property file [${pathToPropertyFile}] amended" 
+    }
+
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+// Return path to domibus folder
+static def String pathToDomibus(color, log, context){
+	// Return path to domibus folder base on the "color"
+		def propName = ""
+		switch(color.toLowerCase()){
+			case "blue":
+				propName =  "pathBlue"
+				break;
+			case "red":
+				propName = "pathRed"
+				break;
+			case "green":
+				propName  = "pathGreen"
+				break;
+			default:
+				assert (false) , "Unknown side color. Supported values: BLUE, RED, GREEN"
+		}
+
+		return context.expand("\${#Project#${propName}}")
+}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+
+
+   // Change Domibus configuration file 
+    static def void restoreDomibusPropertiesFromBackup(color, log, context, testRunner){
+		// Restore from backup file domibus.properties file
+		def pathToPropertyFile = pathToDomibus(color, log, context) + context.expand('${#Project#subPathToDomibusProperties}')
+		def backupFile = "${pathToPropertyFile}${backup_file_sufix}"
+
+		copyFile(backupFile, pathToPropertyFile, log)
+		if (new File(backupFile).delete())
+		   log.info "Successufuly restory configuration from backup file and backup file was removed" 
+		else 
+		   testRunner.fail "Not able to delete configuration backup file" 
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 
 }
