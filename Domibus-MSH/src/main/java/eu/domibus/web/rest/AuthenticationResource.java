@@ -8,11 +8,13 @@ import eu.domibus.web.rest.ro.UserRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,6 +39,7 @@ public class AuthenticationResource {
     private AuthenticationService authenticationService;
 
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
+    @Transactional(noRollbackFor = BadCredentialsException.class)
     public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) {
         LOG.debug("Authenticating user [{}]", loginRO.getUsername());
         final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword());

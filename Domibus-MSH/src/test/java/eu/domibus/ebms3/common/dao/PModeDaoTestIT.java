@@ -2,10 +2,7 @@ package eu.domibus.ebms3.common.dao;
 
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
-import eu.domibus.common.dao.ConfigurationDAO;
-import eu.domibus.common.dao.ConfigurationRawDAO;
-import eu.domibus.common.dao.PModeDao;
-import eu.domibus.common.dao.ProcessDao;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
 import eu.domibus.ebms3.common.validators.ConfigurationValidator;
@@ -75,6 +72,11 @@ public class PModeDaoTestIT {
         @Bean
         public ProcessDao processDao() {
             return Mockito.mock(ProcessDao.class);
+        }
+
+        @Bean
+        public PartyDao partyDao() {
+            return Mockito.mock(PartyDao.class);
         }
 
         @Bean

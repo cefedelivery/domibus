@@ -40,8 +40,6 @@ public class CachingPModeProvider extends PModeProvider {
 
     private Map<String, List<Process>> pullProcessByMpcCache = new HashMap<>();
 
-
-
     protected synchronized Configuration getConfiguration() {
         if (this.configuration == null) {
             this.init();
@@ -388,5 +386,23 @@ public class CachingPModeProvider extends PModeProvider {
             return Lists.newArrayList();
         }
         return processes;
+    }
+
+    @Override
+    public List<Process> findAllProcesses() {
+        try {
+            return Lists.newArrayList(getConfiguration().getBusinessProcesses().getProcesses());
+        }catch (IllegalArgumentException e){
+            return Lists.newArrayList();
+        }
+    }
+
+    @Override
+    public List<Party> findAllParties() {
+        try {
+            return Lists.newArrayList(getConfiguration().getBusinessProcesses().getParties());
+        }catch (IllegalArgumentException e){
+            return Lists.newArrayList();
+        }
     }
 }

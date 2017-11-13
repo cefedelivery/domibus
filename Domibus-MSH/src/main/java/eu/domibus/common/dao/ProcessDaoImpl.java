@@ -77,6 +77,10 @@ public class ProcessDaoImpl implements ProcessDao{
         return processQuery.getResultList();
     }
 
+    @Override
+    public List<Process> findAllProcesses() {
+        return this.entityManager.createQuery(FIND_ALL_PROCESSES,Process.class).getResultList();
+    }
 
 
 }
