@@ -23,7 +23,6 @@ class Domibus
     def sqlRed=null;
 	def sqlGreen=null;
 	def thirdGateway = "false";
-	//com.eviware.soapui.support.GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
@@ -40,8 +39,9 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	// Connect to a schema
 	def connectTo(String database, String driver, String url, String dbUser, String dbPassword){
-		log.info("Open connection to DB: " + database + " Url: " + url);
-		//com.eviware.soapui.support.GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
+		log.info("Open connection to || DB: " + database + " || Url: " + url+ " || Driver: "+ driver+" ||");
+		GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
+		GroovyUtils.registerJdbcDriver( "oracle.jdbc.driver.OracleDriver" ) 
 		def sql = null;
 
         try{
@@ -54,6 +54,7 @@ class Domibus
 			return sql;
         }
         catch (SQLException ex){
+			log.error "Connection failed";
             assert 0,"SQLException occurred: " + ex;
         }
 	}
@@ -305,7 +306,7 @@ class Domibus
         }
         else
         {
-            MAX_WAIT_TIME=10_000
+            MAX_WAIT_TIME=20_000
         }
         messageStatus="INIT"
         if(RMSH){
@@ -448,6 +449,39 @@ class Domibus
 
         closeConnection()
     }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII	
+	// Check that an entry is created in the table TB_SEND_ATTEMPT
+	def checkSendAttempt(String messageID, int mapDoms=4){
+		def MAX_WAIT_TIME=10_000;
+		def STEP_WAIT_TIME=1000;
+		def sqlSender = null;
+		int total = 0;
+		openConnection();
+		switch(mapDoms){
+			case 4:
+				sqlSender = sqlBlue;
+				break;
+			case 2:
+				sqlSender = sqlRed;
+				break;
+			case 1:
+				sqlSender = sqlGreen;
+				break;
+			default:
+				sqlSender = sqlBlue;
+				break;
+		}
+		while((MAX_WAIT_TIME>0)&&(total==0)){
+			sqlSender.eachRow("Select count(*) lignes from tb_send_attempt where REPLACE(LOWER(MESSAGE_ID),' ','') = REPLACE(LOWER(${messageID}),' ','')"){
+				total=it.lignes
+			}
+			log.info "W: "+MAX_WAIT_TIME;
+			sleep(STEP_WAIT_TIME);
+			MAX_WAIT_TIME = MAX_WAIT_TIME - STEP_WAIT_TIME;
+		}
+		assert(total>0),locateTest(context)+"Error: Message "+messageID+" is not present in the table tb_send_attempt."
+		closeConnection();
+	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 // Static methods
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
@@ -666,31 +700,32 @@ class Domibus
 	    def outputCatcher = new StringBuffer();
         def errorCatcher = new StringBuffer();
         def proc=null; def commandString = null; 
+		def pmDescription = "Dummy";
 		
 		def String output = fetchCookieHeader(side,context,log);		
 		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
 		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context);
-		//log.info "PMODE FILE PATH: "+pmodeFile;
+		log.info "PMODE FILE PATH: "+pmodeFile;
 		
 		
 		switch(side.toLowerCase()){
 			case "sender":
-				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F  file=@"+pmodeFile;
+				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 				break;
 			case "receiver":
-				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F  file=@"+pmodeFile;
+				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 				break;
 			case "receivergreen":
-				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F  file=@"+pmodeFile;
+				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 				break;
 			case "testEnv":
-				commandString="curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F  file=@"+pmodeFile;
+				commandString="curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 				break;
 			default:
 				assert (false) , "Unknown side."
 		}
 
-		//log.info commandString
+		log.info commandString
 		if(commandString){
 			proc = commandString.execute();
 			if(proc!=null){
@@ -907,8 +942,11 @@ class Domibus
 
     // replace slashes in project custom properties values
     static def String formatPathSlashes(String source){
-		return source.replaceAll("/","\\\\");
+		if((source!=null)&&(source!="")){
+			return source.replaceAll("/","\\\\");
+		}
     }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 
 
 }
