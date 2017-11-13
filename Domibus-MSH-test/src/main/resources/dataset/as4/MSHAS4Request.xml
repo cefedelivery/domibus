@@ -1,0 +1,490 @@
+<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope">
+    <env:Header>
+        <eb:Messaging xmlns:eb="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"
+                      xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                      env:mustUnderstand="true" wsu:Id="_abfaa979-ae91-4530-8f0a-2e7347f23ccf">
+            <eb:UserMessage mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC">
+                <eb:MessageInfo>
+                    <eb:Timestamp>2017-10-24T11:29:12.000Z</eb:Timestamp>
+                    <eb:MessageId>bb22d1a8-1c23-4f90-ada9-46708d91d7ba@domibus.eu</eb:MessageId>
+                </eb:MessageInfo>
+                <eb:PartyInfo>
+                    <eb:From>
+                        <eb:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</eb:PartyId>
+                        <eb:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</eb:Role>
+                    </eb:From>
+                    <eb:To>
+                        <eb:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</eb:PartyId>
+                        <eb:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</eb:Role>
+                    </eb:To>
+                </eb:PartyInfo>
+                <eb:CollaborationInfo>
+                    <eb:Service type="tc1">bdx:noprocess</eb:Service>
+                    <eb:Action>TC1Leg1</eb:Action>
+                    <eb:ConversationId>a25b174c-c354-4042-bb35-5f7f0e49edac@domibus.eu</eb:ConversationId>
+                </eb:CollaborationInfo>
+                <eb:MessageProperties>
+                    <eb:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1
+                    </eb:Property>
+                    <eb:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4
+                    </eb:Property>
+                </eb:MessageProperties>
+                <eb:PayloadInfo>
+                    <eb:PartInfo>
+                        <eb:PartProperties>
+                            <eb:Property name="description">ECodexContentXML</eb:Property>
+                            <eb:Property name="MimeType">text/xml</eb:Property>
+                        </eb:PartProperties>
+                    </eb:PartInfo>
+                    <eb:PartInfo href="cid:payload_d13a58d3-0e86-4834-bb8a-4028780e18c9">
+                        <eb:PartProperties>
+                            <eb:Property name="MimeType">application/vnd.etsi.asic-s+zip</eb:Property>
+                            <eb:Property name="description">SignedContent.zip.asics</eb:Property>
+                        </eb:PartProperties>
+                    </eb:PartInfo>
+                </eb:PayloadInfo>
+            </eb:UserMessage>
+        </eb:Messaging>
+        <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+                       xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                       env:mustUnderstand="true">
+            <xenc:EncryptedKey xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
+                               Id="EK-c47a4315-532a-4f80-9483-97a89da5dfaf">
+                <xenc:EncryptionMethod Algorithm="http://www.w3.org/2009/xmlenc11#rsa-oaep">
+                    <ds:DigestMethod xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                                     Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <xenc11:MGF xmlns:xenc11="http://www.w3.org/2009/xmlenc11#"
+                                Algorithm="http://www.w3.org/2009/xmlenc11#mgf1sha256"/>
+                </xenc:EncryptionMethod>
+                <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                    <wsse:SecurityTokenReference>
+                        <wsse:KeyIdentifier
+                                EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary"
+                                ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509SubjectKeyIdentifier">
+                            HPqVjsgDN900CCgLwAvG03x+R2I=
+                        </wsse:KeyIdentifier>
+                    </wsse:SecurityTokenReference>
+                </ds:KeyInfo>
+                <xenc:CipherData>
+                    <xenc:CipherValue>
+                        Bsnu093pjOySm+9q4+oA7H3x4FQYf18o5XIB+Ms6sv4kTpTYlc2jQrPPg8GGgjb6Hq+dJ9+4NZrwL8gZNFBZCFygIwOV1EPmRbhe8XilqdB2PFDnNurWLFz9NdTVc35uzk5Ouym2vq2uestql9uxi6tkb2pGoGOjUdHMTWLnT8gyS1yGYaApp08/vjLcApIievbehcIhX6ABw5k9qqOjCc1jD1gNxQoi0q8dLf5cwE/xXqNxJhFjefuaJuW49dSLOd4MHK2c7NqPc+h2tie8yMRkhKnidHZ2dLFO0hT2Dne4F2/2O6VNwhY99PUsnaEM3gqiMad4EfRHf1sf8ZblmA==
+                    </xenc:CipherValue>
+                </xenc:CipherData>
+                <xenc:ReferenceList>
+                    <xenc:DataReference URI="#ED-a8f43ebf-1200-49f7-a5fa-383840d9e01b"/>
+                </xenc:ReferenceList>
+            </xenc:EncryptedKey>
+            <xenc:EncryptedData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
+                                Id="ED-a8f43ebf-1200-49f7-a5fa-383840d9e01b" MimeType="application/octet-stream"
+                                Type="http://docs.oasis-open.org/wss/oasis-wss-SwAProfile-1.1#Attachment-Content-Only">
+                <xenc:EncryptionMethod Algorithm="http://www.w3.org/2009/xmlenc11#aes128-gcm"/>
+                <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                    <wsse:SecurityTokenReference
+                            xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+                            xmlns:wsse11="http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd"
+                            wsse11:TokenType="http://docs.oasis-open.org/wss/oasis-wss-soap-message-security-1.1#EncryptedKey">
+                        <wsse:Reference URI="#EK-c47a4315-532a-4f80-9483-97a89da5dfaf"/>
+                    </wsse:SecurityTokenReference>
+                </ds:KeyInfo>
+                <xenc:CipherData>
+                    <xenc:CipherReference URI="cid:payload_d13a58d3-0e86-4834-bb8a-4028780e18c9">
+                        <xenc:Transforms>
+                            <ds:Transform xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                                          Algorithm="http://docs.oasis-open.org/wss/oasis-wss-SwAProfile-1.1#Attachment-Ciphertext-Transform"/>
+                        </xenc:Transforms>
+                    </xenc:CipherReference>
+                </xenc:CipherData>
+            </xenc:EncryptedData>
+            <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="SIG-6cc8d5d7-609e-460d-999e-0be8132d8202">
+                <ds:SignedInfo>
+                    <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#">
+                        <ec:InclusiveNamespaces xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#" PrefixList="env"/>
+                    </ds:CanonicalizationMethod>
+                    <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+                    <ds:Reference URI="#_bc907b10-0c49-4dd3-8a2b-7108e2477451">
+                        <ds:Transforms>
+                            <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                        </ds:Transforms>
+                        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                        <ds:DigestValue>6paVeHkk6G+ZumhAmhvPeOuuVS+guy0eoO+C7vfK0vA=</ds:DigestValue>
+                    </ds:Reference>
+                    <ds:Reference URI="#_abfaa979-ae91-4530-8f0a-2e7347f23ccf">
+                        <ds:Transforms>
+                            <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                        </ds:Transforms>
+                        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                        <ds:DigestValue>AliG7uII1Ya1TH2Cxrgp3MdqfaOWS9i27EGAFL+X64c=</ds:DigestValue>
+                    </ds:Reference>
+                    <ds:Reference URI="cid:payload_d13a58d3-0e86-4834-bb8a-4028780e18c9">
+                        <ds:Transforms>
+                            <ds:Transform
+                                    Algorithm="http://docs.oasis-open.org/wss/oasis-wss-SwAProfile-1.1#Attachment-Content-Signature-Transform"/>
+                        </ds:Transforms>
+                        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                        <ds:DigestValue>N7kV7QC/yxilD27siuoCz7wJ8PqKsVffYMXrkMRZ4HQ=</ds:DigestValue>
+                    </ds:Reference>
+                </ds:SignedInfo>
+                <ds:SignatureValue>
+                    UYj9Zv3xjTezXsU+Z+PlqqBG0oecA0+2QpKq0jtMNlvRxTKQ62wweRSTZYlWsH3SLxiUGDrEd02kqbFSK7ctUK/vfG9k5t2ABpgXwZdeoZhKAJTjB5gpgm4pbxX8ITbym69VJl9hgWtSgtZ7svUKa/aBs6cOQemjSm4dW7YzX3dHcRSqZV+RN9I9ijac1nS6JtfKi7XOJehb/ImkpURbtHJmExDlLnlzxKogwKryDfnoE3L4JyDOOqTNzAQ164y8QZ8GbFPzl+BcgwgaOY3xBJCVoymMNevgmXMlgSk5dPfdAYDQRXnBNJHzXGk4iikqN2JduwJS7cj+6Llaz+/CCw==
+                </ds:SignatureValue>
+                <ds:KeyInfo Id="KI-a5d6063b-816e-45c5-bcf3-232e20bae202">
+                    <wsse:SecurityTokenReference
+                            xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+                            xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                            wsu:Id="STR-cca970e5-9b6d-4812-952e-0d2caf074e2a">
+                        <wsse:KeyIdentifier
+                                EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary"
+                                ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509SubjectKeyIdentifier">
+                            HPqVjsgDN900CCgLwAvG03x+R2I=
+                        </wsse:KeyIdentifier>
+                    </wsse:SecurityTokenReference>
+                </ds:KeyInfo>
+            </ds:Signature>
+        </wsse:Security>
+    </env:Header>
+    <env:Body xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+              wsu:Id="_bc907b10-0c49-4dd3-8a2b-7108e2477451">
+        <ns5:EOPFormA xmlns="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader"
+                      xmlns:ns10="urn:un:unece:uncefact:codelist:standard:6:3055:D09B"
+                      xmlns:ns11="http://data.ecodex.eu/codelist-SpecificationOfSumCode"
+                      xmlns:ns12="http://data.ecodex.eu/codelist-IdentificationCode"
+                      xmlns:ns13="http://data.ecodex.eu/codelist-CommuncationChannelsCode"
+                      xmlns:ns14="http://data.ecodex.eu/codelist-KindOfAgreementCode"
+                      xmlns:ns15="http://data.ecodex.eu/codelist-DecisionsCode"
+                      xmlns:ns16="http://data.ecodex.eu/codelist-FreeFromLetterCode"
+                      xmlns:ns17="http://data.ecodex.eu/codelist-RoleCode"
+                      xmlns:ns18="http://data.ecodex.eu/codelist-GroundsJurisdictionCode"
+                      xmlns:ns19="http://data.ecodex.eu/codelist-CurrencyCode"
+                      xmlns:ns2="http://data.ecodex.eu/jus/dictionary-0"
+                      xmlns:ns20="http://data.ecodex.eu/codelist-CountryCode"
+                      xmlns:ns21="http://data.ecodex.eu/codelist-UsageOfAddressCode"
+                      xmlns:ns22="http://data.ecodex.eu/codelist-PeriodCode"
+                      xmlns:ns23="http://data.ecodex.eu/codelist-EULanguageCode"
+                      xmlns:ns24="http://data.ecodex.eu/codelist-CombinedTypeOfInterestCode"
+                      xmlns:ns25="http://data.ecodex.eu/codelist-TypeOfEvidenceCode"
+                      xmlns:ns26="http://data.ecodex.eu/codelist-SpecificsCode"
+                      xmlns:ns3="http://data.ecodex.eu/epo/dictionary-0"
+                      xmlns:ns4="http://data.ecodex.eu/ec/dictionary-0"
+                      xmlns:ns5="http://data.ecodex.eu/epo/document/EOPFormA-3"
+                      xmlns:ns6="http://data.ecodex.eu/codelist-ComplaintsCode"
+                      xmlns:ns7="http://data.ecodex.eu/codelist-WayOfPaymentCode"
+                      xmlns:ns8="http://data.ecodex.eu/codelist-TypeOfStatementCode"
+                      xmlns:ns9="http://data.ecodex.eu/codelist-IANAMimeMediaTypeCode">
+            <StandardBusinessDocumentHeader>
+                <HeaderVersion>1.0</HeaderVersion>
+                <Sender>
+                    <Identifier Authority="urn:ec:ec">musatmi</Identifier>
+                    <ContactInformation>
+                        <Contact>Albert Test Einstein</Contact>
+                        <EmailAddress>albert.einstein@noemail.com</EmailAddress>
+                        <FaxNumber>+49 (0)31-099998</FaxNumber>
+                        <TelephoneNumber>+49 (0)31-099999</TelephoneNumber>
+                        <ContactTypeIdentifier>Claimant</ContactTypeIdentifier>
+                    </ContactInformation>
+                </Sender>
+                <Receiver>
+                    <Identifier Authority="urn:bg:bg">BG</Identifier>
+                    <ContactInformation>
+                        <Contact>Tribunal d'instance de Nice</Contact>
+                        <ContactTypeIdentifier>Court</ContactTypeIdentifier>
+                    </ContactInformation>
+                </Receiver>
+                <DocumentIdentification>
+                    <Standard>e-CODEX</Standard>
+                    <TypeVersion>1.0</TypeVersion>
+                    <InstanceIdentifier>CLN_JLS_9207af3c_b4f6_45b5_8b4c_0d0c8affefee</InstanceIdentifier>
+                    <Type>ApplicationForEPO_BD00001</Type>
+                    <CreationDateAndTime>2017-06-28T10:42:30.632+02:00</CreationDateAndTime>
+                </DocumentIdentification>
+                <Manifest>
+                    <NumberOfItems>1</NumberOfItems>
+                    <ManifestItem>
+                        <MimeTypeQualifierCode>application/pdf</MimeTypeQualifierCode>
+                        <UniformResourceIdentifier>mainDocument</UniformResourceIdentifier>
+                    </ManifestItem>
+                </Manifest>
+                <BusinessScope>
+                    <Scope>
+                        <Type>Form_A</Type>
+                        <InstanceIdentifier>CLN_JLS_9207af3c_b4f6_45b5_8b4c_0d0c8affefee</InstanceIdentifier>
+                        <BusinessService>
+                            <BusinessServiceName>EPO</BusinessServiceName>
+                        </BusinessService>
+                    </Scope>
+                </BusinessScope>
+            </StandardBusinessDocumentHeader>
+            <ns5:Case>
+                <ns2:Filing>
+                    <ns2:Payment>
+                        <ns2:WayOfPaymentCode>02</ns2:WayOfPaymentCode>
+                        <ns2:CreditCardAccount>
+                            <ns2:NumberID>0123 4567 8901 2345</ns2:NumberID>
+                            <ns2:CompanyName>VISA</ns2:CompanyName>
+                            <ns2:ExpiryDate>2018-10-01</ns2:ExpiryDate>
+                            <ns2:SecurityNumberID>138</ns2:SecurityNumberID>
+                            <ns2:AccountHolder>ALBERT TEST EINSTEIN</ns2:AccountHolder>
+                        </ns2:CreditCardAccount>
+                    </ns2:Payment>
+                    <ns2:LanguageCode>fre</ns2:LanguageCode>
+                </ns2:Filing>
+                <ns2:CourtAuthority>
+                    <ns2:Name>Tribunal d'instance de Nice</ns2:Name>
+                    <ns2:Address>
+                        <ns2:PostalCode>06300</ns2:PostalCode>
+                        <ns2:AddressLine>
+                            <ns2:Description>Place du Palais de Justice</ns2:Description>
+                            <ns2:LineNumberNumeric>1</ns2:LineNumberNumeric>
+                        </ns2:AddressLine>
+                        <ns2:UsageCode listAgencyID="eCODEX">02</ns2:UsageCode>
+                        <ns2:City>
+                            <ns2:NameName>Nice</ns2:NameName>
+                        </ns2:City>
+                        <ns2:Country>
+                            <ns2:CountryCode>BG</ns2:CountryCode>
+                        </ns2:Country>
+                    </ns2:Address>
+                </ns2:CourtAuthority>
+                <ns2:Jurisdiction>
+                    <ns2:GroundCode listAgencyID="eCODEX">14</ns2:GroundCode>
+                    <ns2:Explanation>Former domicile of the claimant</ns2:Explanation>
+                </ns2:Jurisdiction>
+                <ns2:Claim>
+                    <ns2:PrincipalSum>
+                        <ns2:Amount>781.00</ns2:Amount>
+                        <ns2:CurrencyCode>EUR</ns2:CurrencyCode>
+                    </ns2:PrincipalSum>
+                    <ns2:ClaimItem>
+                        <ns2:Evidence>
+                            <ns2:Description>Patent application</ns2:Description>
+                            <ns2:TypeOfEvidenceCode listAgencyID="eCODEX">01</ns2:TypeOfEvidenceCode>
+                            <ns2:Date>1905-07-30</ns2:Date>
+                        </ns2:Evidence>
+                        <ns2:WithRespectToAgreement>
+                            <ns2:KindCode listAgencyID="eCODEX">19</ns2:KindCode>
+                        </ns2:WithRespectToAgreement>
+                        <ns2:Reason>
+                            <ns2:DescriptionCode>30</ns2:DescriptionCode>
+                            <ns2:SpecificsCode>44</ns2:SpecificsCode>
+                        </ns2:Reason>
+                        <ns2:Sum>
+                            <ns2:Amount>280.00</ns2:Amount>
+                            <ns2:Interest>
+                                <ns2:RatePercent>1.250</ns2:RatePercent>
+                                <ns2:PeriodOfInterestPeriod>
+                                    <ns2:StartDate>1916-01-01</ns2:StartDate>
+                                </ns2:PeriodOfInterestPeriod>
+                                <ns2:OnPartSum>
+                                    <ns2:Amount>280.00</ns2:Amount>
+                                </ns2:OnPartSum>
+                                <ns2:TypeOfInterestCode listAgencyID="eCODEX">05A</ns2:TypeOfInterestCode>
+                            </ns2:Interest>
+                        </ns2:Sum>
+                        <ns2:IdentifierID>0</ns2:IdentifierID>
+                    </ns2:ClaimItem>
+                    <ns2:ClaimItem>
+                        <ns2:Evidence>
+                            <ns2:Description>The expert's testimony will prove that the patent should have been
+                                granted
+                            </ns2:Description>
+                            <ns2:TypeOfEvidenceCode listAgencyID="eCODEX">03</ns2:TypeOfEvidenceCode>
+                            <ns2:Date>2013-10-18</ns2:Date>
+                        </ns2:Evidence>
+                        <ns2:Evidence>
+                            <ns2:Description>Published paper on General Relativity</ns2:Description>
+                            <ns2:TypeOfEvidenceCode listAgencyID="eCODEX">05</ns2:TypeOfEvidenceCode>
+                            <ns2:Date>1916-12-31</ns2:Date>
+                        </ns2:Evidence>
+                        <ns2:WithRespectToAgreement>
+                            <ns2:KindCode listAgencyID="eCODEX">25</ns2:KindCode>
+                        </ns2:WithRespectToAgreement>
+                        <ns2:Reason>
+                            <ns2:DescriptionCode>31</ns2:DescriptionCode>
+                            <ns2:TextualDescription>The patent for the practical application application theory of
+                                general relativity in device X was not awarded until 2014.
+                            </ns2:TextualDescription>
+                            <ns2:SpecificsCode>48</ns2:SpecificsCode>
+                        </ns2:Reason>
+                        <ns2:Sum>
+                            <ns2:Amount>501.00</ns2:Amount>
+                        </ns2:Sum>
+                        <ns2:IdentifierID>1</ns2:IdentifierID>
+                    </ns2:ClaimItem>
+                    <ns2:ContractualPenaltySum>
+                        <ns2:Amount>50.00</ns2:Amount>
+                        <ns2:Description>Penalty for wrongful denial of patent</ns2:Description>
+                    </ns2:ContractualPenaltySum>
+                    <ns2:CostSum>
+                        <ns2:Amount>100.00</ns2:Amount>
+                        <ns2:CurrencyCode>EUR</ns2:CurrencyCode>
+                        <ns2:SpecificationCode listAgencyID="eCODEX">07</ns2:SpecificationCode>
+                    </ns2:CostSum>
+                    <ns2:CostSum>
+                        <ns2:Amount>194.13</ns2:Amount>
+                        <ns2:CurrencyCode>EUR</ns2:CurrencyCode>
+                        <ns2:SpecificationCode listAgencyID="eCODEX">99</ns2:SpecificationCode>
+                        <ns2:Description>Return travel costs to The Netherlands</ns2:Description>
+                    </ns2:CostSum>
+                    <ns2:AdditionalSpecifications>
+                        <ns3:ConsumerContractIndicator>false</ns3:ConsumerContractIndicator>
+                    </ns2:AdditionalSpecifications>
+                </ns2:Claim>
+                <ns2:Decision>
+                    <ns2:Payment>
+                        <ns2:WayOfPaymentCode listAgencyID="eCODEX">01</ns2:WayOfPaymentCode>
+                        <ns2:BankAccount>
+                            <ns2:NumberID>1009534785</ns2:NumberID>
+                            <ns2:IBANID>DE89 3704 0044 1009 5347 85</ns2:IBANID>
+                            <ns2:BICID>DEUTDEFF</ns2:BICID>
+                            <ns2:AccountHolder>EINSTEIN, ALBERT TEST</ns2:AccountHolder>
+                        </ns2:BankAccount>
+                    </ns2:Payment>
+                </ns2:Decision>
+                <ns2:InvolvedParty>
+                    <ns2:Person>
+                        <ns4:FamilyNameName>Einstein</ns4:FamilyNameName>
+                        <ns4:GivenNameName>Albert Test</ns4:GivenNameName>
+                        <ns4:Occupation>physicist</ns4:Occupation>
+                    </ns2:Person>
+                    <ns2:Communication>
+                        <ns2:ChannelCode listAgencyID="eCODEX">02</ns2:ChannelCode>
+                        <ns2:CompleteNumber>+49 (0)31-099999</ns2:CompleteNumber>
+                    </ns2:Communication>
+                    <ns2:Communication>
+                        <ns2:ChannelCode listAgencyID="eCODEX">01</ns2:ChannelCode>
+                        <ns2:CompleteNumber>+49 (0)31-099998</ns2:CompleteNumber>
+                    </ns2:Communication>
+                    <ns2:Communication>
+                        <ns2:ChannelCode listAgencyID="eCODEX">04</ns2:ChannelCode>
+                        <ns2:URIID>albert.einstein@noemail.com</ns2:URIID>
+                    </ns2:Communication>
+                    <ns2:Involvement>
+                        <ns2:RoleCode listAgencyID="eCODEX">01</ns2:RoleCode>
+                    </ns2:Involvement>
+                    <ns2:Identification>
+                        <ns2:NumberID>urn:ec:ec::musatmi</ns2:NumberID>
+                    </ns2:Identification>
+                    <ns2:Address>
+                        <ns2:PostalCode>89073</ns2:PostalCode>
+                        <ns2:AddressLine>
+                            <ns2:Description>Bahnhofstraße 16?</ns2:Description>
+                            <ns2:LineNumberNumeric>1</ns2:LineNumberNumeric>
+                        </ns2:AddressLine>
+                        <ns2:UsageCode listAgencyID="eCODEX">02</ns2:UsageCode>
+                        <ns2:City>
+                            <ns2:NameName>Ulm</ns2:NameName>
+                        </ns2:City>
+                        <ns2:Country>
+                            <ns2:CountryCode>DE</ns2:CountryCode>
+                        </ns2:Country>
+                    </ns2:Address>
+                    <ns2:Address>
+                        <ns2:UsageCode listAgencyID="eCODEX">01</ns2:UsageCode>
+                        <ns2:Country>
+                            <ns2:CountryCode>DE</ns2:CountryCode>
+                        </ns2:Country>
+                    </ns2:Address>
+                    <ns2:OtherDetails>date of birth: 14 march 1879</ns2:OtherDetails>
+                </ns2:InvolvedParty>
+                <ns2:InvolvedParty>
+                    <ns2:LegalPerson>
+                        <ns2:Name>European Patent Office Test</ns2:Name>
+                    </ns2:LegalPerson>
+                    <ns2:Communication>
+                        <ns2:ChannelCode listAgencyID="eCODEX">02</ns2:ChannelCode>
+                        <ns2:CompleteNumber>+31 70 340-2040</ns2:CompleteNumber>
+                    </ns2:Communication>
+                    <ns2:Communication>
+                        <ns2:ChannelCode listAgencyID="eCODEX">01</ns2:ChannelCode>
+                        <ns2:CompleteNumber>+31 70 340-2041</ns2:CompleteNumber>
+                    </ns2:Communication>
+                    <ns2:Communication>
+                        <ns2:ChannelCode listAgencyID="eCODEX">04</ns2:ChannelCode>
+                        <ns2:URIID>epocontact@european-patent-office-test.com</ns2:URIID>
+                    </ns2:Communication>
+                    <ns2:Involvement>
+                        <ns2:RoleCode listAgencyID="eCODEX">02</ns2:RoleCode>
+                    </ns2:Involvement>
+                    <ns2:Identification>
+                        <ns2:NumberID>1234567890</ns2:NumberID>
+                    </ns2:Identification>
+                    <ns2:Address>
+                        <ns2:PostalCode>2288 EE</ns2:PostalCode>
+                        <ns2:AddressLine>
+                            <ns2:Description>Patentlaan 2</ns2:Description>
+                            <ns2:LineNumberNumeric>1</ns2:LineNumberNumeric>
+                        </ns2:AddressLine>
+                        <ns2:UsageCode listAgencyID="eCODEX">02</ns2:UsageCode>
+                        <ns2:City>
+                            <ns2:NameName>Rijswijk</ns2:NameName>
+                        </ns2:City>
+                        <ns2:Country>
+                            <ns2:CountryCode>NL</ns2:CountryCode>
+                        </ns2:Country>
+                    </ns2:Address>
+                    <ns2:Address>
+                        <ns2:UsageCode listAgencyID="eCODEX">01</ns2:UsageCode>
+                        <ns2:Country>
+                            <ns2:CountryCode>NL</ns2:CountryCode>
+                        </ns2:Country>
+                    </ns2:Address>
+                </ns2:InvolvedParty>
+                <ns2:InvolvedParty>
+                    <ns2:LegalPerson>
+                        <ns2:Name>Das Österreichische Patentamt</ns2:Name>
+                    </ns2:LegalPerson>
+                    <ns2:Involvement>
+                        <ns2:RoleCode listAgencyID="eCODEX">07</ns2:RoleCode>
+                    </ns2:Involvement>
+                    <ns2:Identification>
+                        <ns2:NumberID>0987654321</ns2:NumberID>
+                    </ns2:Identification>
+                    <ns2:Address>
+                        <ns2:PostalCode>1200</ns2:PostalCode>
+                        <ns2:AddressLine>
+                            <ns2:Description>Dresdner Straße 87</ns2:Description>
+                            <ns2:LineNumberNumeric>1</ns2:LineNumberNumeric>
+                        </ns2:AddressLine>
+                        <ns2:UsageCode listAgencyID="eCODEX">02</ns2:UsageCode>
+                        <ns2:City>
+                            <ns2:NameName>Wien</ns2:NameName>
+                        </ns2:City>
+                        <ns2:Country>
+                            <ns2:CountryCode>AT</ns2:CountryCode>
+                        </ns2:Country>
+                    </ns2:Address>
+                </ns2:InvolvedParty>
+            </ns5:Case>
+            <ns5:Statement>
+                <ns2:TypeCode>01</ns2:TypeCode>
+                <ns2:Specification>This is a test EPO Form A. Of course, this does not constitute a real claim.&#xd;
+                    &#xd;
+                    At the court's request, more details are provided.
+                </ns2:Specification>
+                <ns2:Signature>
+                    <ns2:DateOfSigningDate>2015-02-24</ns2:DateOfSigningDate>
+                    <ns2:NameOfPersonSigningName>signature électronique</ns2:NameOfPersonSigningName>
+                    <ns2:PlaceOfSigning>Brussels</ns2:PlaceOfSigning>
+                </ns2:Signature>
+            </ns5:Statement>
+            <ns5:Statement>
+                <ns2:TypeCode>04</ns2:TypeCode>
+                <ns2:Signature>
+                    <ns2:DateOfSigningDate>2015-02-24</ns2:DateOfSigningDate>
+                    <ns2:NameOfPersonSigningName>signature électronique</ns2:NameOfPersonSigningName>
+                    <ns2:PlaceOfSigning>Brussels</ns2:PlaceOfSigning>
+                </ns2:Signature>
+                <ns2:PartyReferencedParty>
+                    <ns2:Person>
+                        <ns4:FamilyNameName>Einstein</ns4:FamilyNameName>
+                        <ns4:GivenNameName>Albert Test</ns4:GivenNameName>
+                    </ns2:Person>
+                </ns2:PartyReferencedParty>
+            </ns5:Statement>
+            <ns5:Attachment>
+                <ns2:ContentID>mainDocument</ns2:ContentID>
+                <ns2:ContentTypeCode>application/pdf</ns2:ContentTypeCode>
+                <ns2:ContentDescription>EPO_Form_A</ns2:ContentDescription>
+            </ns5:Attachment>
+        </ns5:EOPFormA>
+    </env:Body>
+</env:Envelope>
