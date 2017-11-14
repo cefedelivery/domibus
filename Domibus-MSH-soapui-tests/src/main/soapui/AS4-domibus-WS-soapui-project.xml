@@ -1124,7 +1124,14 @@ log.info "Update done.";
 </script></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="486aaea1-16b8-4faf-a8e7-85ae42df9125"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
 Domibus.uploadPmode("sender","default","\\cloud\\wildfly\\blue\\domibus-pmode-blue.xml",context,log);
 Domibus.uploadPmode("receiver","default","\\cloud\\wildfly\\red\\domibus-pmode-red.xml",context,log);</script></con:config></con:testStep><con:tearDownScript>//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="8345ac14-50f6-466e-8f9e-417c5c9280e5" name="WS-Auto for Bamboo"><con:settings><con:setting id="IncludeOverview">true</con:setting><con:setting id="IncludeResults">true</con:setting><con:setting id="FlowLayout">false</con:setting><con:setting id="ErrorDetails">true</con:setting><con:setting id="IncludeCoverage">true</con:setting><con:setting id="GeneratableJUnitReport@Style">Single Page (Print)</con:setting><con:setting id="GeneratableJUnitReport@Folder"/></con:settings><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom000-Clean Database" searchProperties="true" id="a762ae95-e616-4d06-a45f-3a1cc31da287" disabled="true">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase id="d02b386f-c174-4ccb-afea-a57e3347ec8e" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Properties handling" searchProperties="true"><con:settings/><con:testStep type="groovy" name="Sample  domibus.property change" id="2fc9cce2-7d94-478e-a772-aa9a2d8e91dc"><con:settings/><con:config><script>def newValueToAssignOne="test1s23"
+def propertyToChangeNameOne = "domibus.security.keystore.password"
+def propValueDict = ["${propertyToChangeNameOne}" : newValueToAssignOne, 'domibus.database.port':'13306', 'domibus.deployment.clustered' : 'true']
+
+Domibus.changeDomibusProperties("RED", propValueDict,  log, context, testRunner)
+Domibus.restoreDomibusPropertiesFromBackup("RED",  log, context, testRunner)
+
+</script></con:config></con:testStep><con:properties/></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="8345ac14-50f6-466e-8f9e-417c5c9280e5" name="WS-Auto for Bamboo"><con:settings><con:setting id="IncludeOverview">true</con:setting><con:setting id="IncludeResults">true</con:setting><con:setting id="FlowLayout">false</con:setting><con:setting id="ErrorDetails">true</con:setting><con:setting id="IncludeCoverage">true</con:setting><con:setting id="GeneratableJUnitReport@Style">Single Page (Print)</con:setting><con:setting id="GeneratableJUnitReport@Folder"/></con:settings><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom000-Clean Database" searchProperties="true" id="a762ae95-e616-4d06-a45f-3a1cc31da287" disabled="true">
             <con:settings/>
             
             
@@ -17346,26 +17353,7 @@ Domibus.startMSH("receiver", context, log)
             
             
             
-            <con:testStep type="groovy" name="Set custom properties" id="c881a4a5-c85b-4d5b-8b3c-ae06207cd02e" disabled="true"><con:settings/><con:config><script>// blue: weblogic (edeltest1)
-testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://edeltest1.westeurope.cloudapp.azure.com:7005/domibus-weblogic");
-testRunner.testCase.testSuite.project.setPropertyValue("databaseBlue", "oracle");
-testRunner.testCase.testSuite.project.setPropertyValue("driverBlue", "oracle.jdbc.OracleDriver");
-testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlBlue", "jdbc:oracle:thin:@localhost:11521/xe");
-testRunner.testCase.testSuite.project.setPropertyValue("blueDbUser", "edelivery");
-testRunner.testCase.testSuite.project.setPropertyValue("blueDbPassword", "edelivery");
-
-// red: tomcat (edeltest2)
-testRunner.testCase.testSuite.project.setPropertyValue("remoteUrl", "http://edeltest2.westeurope.cloudapp.azure.com:9080/domibus");
-testRunner.testCase.testSuite.project.setPropertyValue("databaseRed", "mysql");
-testRunner.testCase.testSuite.project.setPropertyValue("driverRed", "com.mysql.jdbc.Driver");
-testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlRed", "jdbc:mysql://localhost:23306/domtestusr");
-testRunner.testCase.testSuite.project.setPropertyValue("redDbUser", "root");
-testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "edelCld2017");
-
-log.info "Update done.";
-</script></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="0b3023a3-4f73-4f3d-a141-000f637ae791" disabled="true"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
-Domibus.uploadPmode("sender","default","\\cloud\\weblogic\\blue\\domibus-pmode-blue.xml",context,log);
-Domibus.uploadPmode("receiver","default","\\cloud\\weblogic\\red\\domibus-pmode-red.xml",context,log);</script></con:config></con:testStep><con:testStep type="groovy" name="Setup properties and PMode" id="78f2ca0b-4443-474f-9f75-8485dd103fcd"><con:settings/><con:config><script>def tc = testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-cloud-weblogic-tomcat"]
+            <con:testStep type="groovy" name="Setup properties and PMode" id="78f2ca0b-4443-474f-9f75-8485dd103fcd"><con:settings/><con:config><script>def tc = testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-cloud-weblogic-tomcat"]
 def testStep = tc.testSteps['Set custom properties']
 testStep.run( testRunner, context )
 testStep = tc.testSteps['Upload default PModes Blue-Red']
@@ -17588,26 +17576,7 @@ test.finalize()
             
             
             
-            <con:testStep type="groovy" name="Set custom properties" id="e1fa6b52-d37a-4dbb-8694-a32ce0994e40" disabled="true"><con:settings/><con:config><script>// blue: wildfly (edeltest2)
-testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus-wildfly");
-testRunner.testCase.testSuite.project.setPropertyValue("databaseBlue", "mysql");
-testRunner.testCase.testSuite.project.setPropertyValue("driverBlue", "com.mysql.jdbc.Driver");
-testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlBlue", "jdbc:mysql://localhost:23306/domibus33wildfly");
-testRunner.testCase.testSuite.project.setPropertyValue("blueDbUser", "domibus33wildfly");
-testRunner.testCase.testSuite.project.setPropertyValue("blueDbPassword", "domibus33wildfly");
-
-// red: tomcat (edeltest2)
-testRunner.testCase.testSuite.project.setPropertyValue("remoteUrl", "http://edeltest2.westeurope.cloudapp.azure.com:9080/domibus");
-testRunner.testCase.testSuite.project.setPropertyValue("databaseRed", "mysql");
-testRunner.testCase.testSuite.project.setPropertyValue("driverRed", "com.mysql.jdbc.Driver");
-testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlRed", "jdbc:mysql://localhost:23306/domtestusr");
-testRunner.testCase.testSuite.project.setPropertyValue("redDbUser", "domtestusr");
-testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "domtestusr");
-
-log.info "Update done.";
-</script></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="e9aca4ce-cc8d-413a-a8ef-e46258dbab20" disabled="true"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
-Domibus.uploadPmode("sender","default","\\cloud\\wildfly\\blue\\domibus-pmode-blue.xml",context,log);
-Domibus.uploadPmode("receiver","default","\\cloud\\wildfly\\red\\domibus-pmode-red.xml",context,log);</script></con:config></con:testStep><con:testStep type="groovy" name="Set properties and PMode" id="77759d8d-705b-4fb2-840a-96791cf6817a"><con:settings/><con:config><script>def tc = testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-cloud-wildfly-tomcat"]
+            <con:testStep type="groovy" name="Set properties and PMode" id="77759d8d-705b-4fb2-840a-96791cf6817a"><con:settings/><con:config><script>def tc = testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-cloud-wildfly-tomcat"]
 def testStep = tc.testSteps['Set custom properties']
 testStep.run( testRunner, context )
 testStep = tc.testSteps['Upload default PModes Blue-Red']
@@ -18164,110 +18133,7 @@ log.info mssgID
 test.finalize();</scriptText></con:configuration></con:assertion><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="79c873b6-f63e-4831-adf4-0a6f7b5fd365"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>//def test = new Domibus(log,null,context);
 //test.cleanDBMessageIDStartsWith("-Dom125-");
 //test.finalize();
-//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>ae392797-6456-42c4-994c-bbe60c11540c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>63989107-7510-4f1a-b2f4-e46d2bba1ff4</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>5abb4c7c-a055-4115-b36d-c347d0a50516</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase id="f5ee6dfd-f5a7-4839-8550-59cef8ce436a" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Properties handling" searchProperties="true" disabled="true"><con:settings/><con:testStep type="groovy" name="Groovy Script" id="545e3b93-d356-453b-9d06-674d084d8542"><con:settings/><con:config><script>// input pathToDomibus, propertyToChangeName, newValueToAssign
-
-def newValueToAssign="test1s23"
-def propertyToChangeName = "domibus.security.keystore.password"
-// log.info context.expand('${#Project#pathExeSender}')
- def pathToPropertyFile = context.expand('${#Project#pathSender}/${#Project#subPathToDomibus}')
-// log.info pathToPropertyFile
-
-def pathToDomibus="c:\\ec\\blue"
-def fileName = "${pathToDomibus}\\..\\domibus.properties"
-log.info fileName
-
-// Check fiel exists
-def testFile = new File(fileName)
-if (!testFile.exists()) testRunner.fail("File $fileName does not exist. Can't change value.")
-else log.info "File $fileName exists."
-
-// Create backup file 
-Domibus.copyFile(fileName, "${fileName}_backup_for_soapui_tests",log);
-
-def newFileContent = testFile.text
-
-//run in loop for all properties values key pairs 
- def found = false
- def foundInCommentedRow = false
-
-testFile.eachLine{line, n ->
-     n++
-  if (line =~ /^${propertyToChangeName}=/) {
-     log.info "In line $n searched property was found. Line value is: $line"
-     found = true
-  }
-
-  if (line =~ ~/# *${propertyToChangeName}=.*/) {
-     log.info "In line $n searched property was found. Line value is: $line"
-     foundInCommentedRow = true
-  }
-}
-
-if (found) 
-	newFileContent = newFileContent.replaceAll(/(?m)^(${propertyToChangeName}=)(.*)/){ all, paramName, value -> "${paramName}${newValueToAssign}"} 
-else 
-	if (foundInCommentedRow)  
-		newFileContent = newFileContent.replaceAll(/(?m)^# *(${propertyToChangeName}=)(.*)/){ all, paramName, value -> "${paramName}${newValueToAssign}"} 
-	else testRunner.fail("The search string ($propertyToChangeName) was not found in file ($testFile).") 
-
-//loop end 
-
- // Store new content of properties file after all changes
-    testFile.text=newFileContent
-
-  log.info "-------------------------------------"</script></con:config></con:testStep><con:testStep type="groovy" name="Groovy Script 2" id="bd0f8f2f-249a-4cbd-b22f-09d31a4e08d4"><con:settings/><con:config><script>def newValueToAssign="test1s23"
-def propertyToChangeName = "domibus.security.keystore.password"
-// log.info context.expand('${#Project#pathExeSender}')
- def pathToPropertyFile = context.expand('${#Project#pathSender}/${#Project#subPathToDomibus}')
-// log.info pathToPropertyFile
-
-def pathToDomibus="c:\\ec\\blue"
-def fileName = "${pathToDomibus}\\..\\domibus.properties"
-log.info fileName
-
-// Check fiel exists
-def testFile = new File(fileName)
-if (!testFile.exists()) testRunner.fail("File $fileName does not exist. Can't change value.")
-else log.info "File $fileName exists."
-
-// Create backup file 
-
-
-def newFileContent = testFile.text
-
-//run in loop for all properties values key pairs 
- if (!(newFileContent =~ /${propertyToChangeName}=/))
- 	testRunner.fail("The search string ($propertyToChangeName) was not found in file ($testFile).") 
-
-def tmpString = newFileContent.replaceAll(/(?m)^(${propertyToChangeName}=)(.*)/){ all, paramName, value -> "${paramName}${newValueToAssign}"} 
-
-if (newFileContent == tmpString) 
-	tmpString = newFileContent.replaceAll(/(?m)^#\s*(${propertyToChangeName}=)(.*)/){ all, paramName, value -> "${paramName}${newValueToAssign}"} 
-	
-	
-newFileContent = tmpString
-
-//loop end 
-
- // Store new content of properties file after all changes
-    testFile.text=newFileContent
-
-  log.info "-------------------------------------"</script></con:config></con:testStep><con:testStep type="groovy" name="Groovy Script Ant" id="a2cee09f-0136-4f41-9852-af544ff6ac52"><con:settings/><con:config><script>// input pathToDomibus, propertyToChangeName, newValueToAssign
-import groovy.util.AntBuilder
-
-def newValueToAssign="test1s23"
-def propertyToChangeName = "domibus.security.keystore.password"
-
-def pathToDomibus="c:\\ec\\blue"
-def fileName = "${pathToDomibus}\\..\\domibus.properties"
-
-// Check file exists
-def testFile = new File(fileName)
-if (!testFile.exists()) testRunner.fail("File $fileName does not exist. Can't change value.")
-else log.info "File $fileName exists."
-
-def ant = new AntBuilder();
-ant.replace(file: fileName, token: "domibus.security.keystore.password=.*", value: "domibus.security.keystore.password=${newValueToAssign}")</script></con:config></con:testStep><con:properties/></con:testCase><con:testCase failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom137-Push-weblogic-tomcat-getStatus request with spaces at the begin and end of messageId" searchProperties="true" id="905782b1-e092-48a5-add8-acc260864fc3" timeout="0" wsrmEnabled="false" wsrmVersion="1.0" wsrmAckTo="" amfAuthorisation="false" amfEndpoint="" amfLogin="" amfPassword="">
+//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>ae392797-6456-42c4-994c-bbe60c11540c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>63989107-7510-4f1a-b2f4-e46d2bba1ff4</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>5abb4c7c-a055-4115-b36d-c347d0a50516</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom137-Push-weblogic-tomcat-getStatus request with spaces at the begin and end of messageId" searchProperties="true" id="905782b1-e092-48a5-add8-acc260864fc3" timeout="0" wsrmEnabled="false" wsrmVersion="1.0" wsrmAckTo="" amfAuthorisation="false" amfEndpoint="" amfLogin="" amfPassword="">
             <con:settings/>
             
             
@@ -25791,4 +25657,4 @@ test.cleanDBMessageID(context.expand('${Submit Message#Request#//ns:MessageId}')
 test.finalize();*/	
 
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ae53824d-2f38-4547-ad45-05fa2fa6d147</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>60b9acd1-7bf6-4d57-a0ec-faf421224279</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>5a9b581a-c0ae-42e2-a8e3-f8737a1642c7</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bee3f378-5d3c-407e-b77f-0b3c79a622e3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:requirements/><con:properties><con:property><con:name>localUrl</con:name><con:value>http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus-wildfly</con:value></con:property><con:property><con:name>databaseBlue</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverBlue</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlBlue</con:name><con:value>jdbc:mysql://localhost:23306/domibus33wildfly</con:value></con:property><con:property><con:name>blueDbUser</con:name><con:value>domibus33wildfly</con:value></con:property><con:property><con:name>blueDbPassword</con:name><con:value>domibus33wildfly</con:value></con:property><con:property><con:name>pathExeSender</con:name><con:value>${#Project#pathSender}bin/</con:value></con:property><con:property><con:name>remoteUrl</con:name><con:value>http://edeltest2.westeurope.cloudapp.azure.com:9080/domibus</con:value></con:property><con:property><con:name>databaseRed</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverRed</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlRed</con:name><con:value>jdbc:mysql://localhost:23306/domtestusr</con:value></con:property><con:property><con:name>redDbUser</con:name><con:value>domtestusr</con:value></con:property><con:property><con:name>redDbPassword</con:name><con:value>domtestusr</con:value></con:property><con:property><con:name>pathExeReceiver</con:name><con:value>${#Project#pathReceiver}bin/</con:value></con:property><con:property><con:name>greenUrl</con:name><con:value>http://localhost:8280/domibus</con:value></con:property><con:property><con:name>databaseGreen</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverGreen</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlGreen</con:name><con:value>jdbc:mysql://localhost:3306/domibus_green</con:value></con:property><con:property><con:name>greenDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>greenDbPassword</con:name><con:value>root</con:value></con:property><con:property><con:name>pathExeGreen</con:name><con:value>${#Project#pathGreen}/bin/</con:value></con:property><con:property><con:name>reportFilePath</con:name><con:value>${projectDir}\\reports\\Domibus_3_3_RC1_test_results.xlsx</con:value></con:property><con:property><con:name>updateReport</con:name><con:value>true</con:value></con:property><con:property><con:name>pdfAttachment</con:name><con:value>${projectDir}\\resources\\fileSmall.pdf </con:value></con:property><con:property><con:name>specialPModesPath</con:name><con:value>${projectDir}\\resources\\PModesandKeystoresSpecialTests</con:value></con:property><con:property><con:name>defaultPModesPath</con:name><con:value>${projectDir}\\resources\\PModesandKeystoresDefault</con:value></con:property><con:property><con:name>thirdGateway</con:name><con:value>false</con:value></con:property><con:property><con:name>testEnvUrl</con:name><con:value>http://10.57.40.24:1027/domibus-weblogic</con:value></con:property><con:property><con:name>moreThan100mbAttachment</con:name><con:value>${projectDir}\\resources\\videoplayback_mp4.pdf</con:value></con:property><con:property><con:name>pathSender</con:name><con:value>C:/domibus/blue/domibus/</con:value></con:property><con:property><con:name>pathReceiver</con:name><con:value>C:/domibus/red/domibus/</con:value></con:property><con:property><con:name>pathGreen</con:name><con:value>C:/domibus/greenReceiver/domibus/</con:value></con:property><con:property><con:name>subPathToDomibusProperties</con:name><con:value>conf/domibus/domibus.properties</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ae53824d-2f38-4547-ad45-05fa2fa6d147</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>60b9acd1-7bf6-4d57-a0ec-faf421224279</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>5a9b581a-c0ae-42e2-a8e3-f8737a1642c7</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bee3f378-5d3c-407e-b77f-0b3c79a622e3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:requirements/><con:properties><con:property><con:name>localUrl</con:name><con:value>http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus-wildfly</con:value></con:property><con:property><con:name>databaseBlue</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverBlue</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlBlue</con:name><con:value>jdbc:mysql://localhost:23306/domibus33wildfly</con:value></con:property><con:property><con:name>blueDbUser</con:name><con:value>domibus33wildfly</con:value></con:property><con:property><con:name>blueDbPassword</con:name><con:value>domibus33wildfly</con:value></con:property><con:property><con:name>pathExeSender</con:name><con:value>${#Project#pathBlue}bin/</con:value></con:property><con:property><con:name>remoteUrl</con:name><con:value>http://edeltest2.westeurope.cloudapp.azure.com:9080/domibus</con:value></con:property><con:property><con:name>databaseRed</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverRed</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlRed</con:name><con:value>jdbc:mysql://localhost:23306/domtestusr</con:value></con:property><con:property><con:name>redDbUser</con:name><con:value>domtestusr</con:value></con:property><con:property><con:name>redDbPassword</con:name><con:value>domtestusr</con:value></con:property><con:property><con:name>pathExeReceiver</con:name><con:value>${#Project#pathRed}bin/</con:value></con:property><con:property><con:name>greenUrl</con:name><con:value>http://localhost:8280/domibus</con:value></con:property><con:property><con:name>databaseGreen</con:name><con:value>mysql</con:value></con:property><con:property><con:name>driverGreen</con:name><con:value>com.mysql.jdbc.Driver</con:value></con:property><con:property><con:name>jdbcUrlGreen</con:name><con:value>jdbc:mysql://localhost:3306/domibus_green</con:value></con:property><con:property><con:name>greenDbUser</con:name><con:value>root</con:value></con:property><con:property><con:name>greenDbPassword</con:name><con:value>root</con:value></con:property><con:property><con:name>pathExeGreen</con:name><con:value>${#Project#pathGreen}/bin/</con:value></con:property><con:property><con:name>reportFilePath</con:name><con:value>${projectDir}\\reports\\Domibus_3_3_RC1_test_results.xlsx</con:value></con:property><con:property><con:name>updateReport</con:name><con:value>true</con:value></con:property><con:property><con:name>pdfAttachment</con:name><con:value>${projectDir}\\resources\\fileSmall.pdf </con:value></con:property><con:property><con:name>specialPModesPath</con:name><con:value>${projectDir}\\resources\\PModesandKeystoresSpecialTests</con:value></con:property><con:property><con:name>defaultPModesPath</con:name><con:value>${projectDir}\\resources\\PModesandKeystoresDefault</con:value></con:property><con:property><con:name>thirdGateway</con:name><con:value>false</con:value></con:property><con:property><con:name>testEnvUrl</con:name><con:value>http://10.57.40.24:1027/domibus-weblogic</con:value></con:property><con:property><con:name>moreThan100mbAttachment</con:name><con:value>${projectDir}\\resources\\videoplayback_mp4.pdf</con:value></con:property><con:property><con:name>pathBlue</con:name><con:value>C:/ec/blue/domibus/</con:value></con:property><con:property><con:name>pathRed</con:name><con:value>C:/ec/red/domibus/</con:value></con:property><con:property><con:name>pathGreen</con:name><con:value>C:/ec/greenReceiver/domibus/</con:value></con:property><con:property><con:name>subPathToDomibusProperties</con:name><con:value>conf/domibus/domibus.properties</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
