@@ -9,22 +9,44 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class PartyId {
 
+    /**
+     * Party Identifier {@link String}
+     */
     protected String value;
 
+    /**
+     * Party Type {@link String}
+     */
     protected String type;
 
+    /**
+     * Gets the Party Identifier
+     * @return Party Identifier {@link String}
+     */
     public String getValue() {
         return value;
     }
 
+    /**
+     * Sets the Party Identifier
+     * @param value Party Identifier {@link String}
+     */
     public void setValue(String value) {
         this.value = value;
     }
 
+    /**
+     * Gets the Party Type
+     * @return Party Type {@link String}
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * Sets the Party Type
+     * @param type Party Type {@link String}
+     */
     public void setType(String type) {
         this.type = type;
     }

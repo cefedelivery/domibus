@@ -9,22 +9,44 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class Description {
 
+    /**
+     * Description details {@link String}
+     */
     protected String value;
 
+    /**
+     * Description language {@link String}
+     */
     protected String lang;
 
+    /**
+     * Gets the description value
+     * @return Description value {@link String}
+     */
     public String getValue() {
         return value;
     }
 
+    /**
+     * Sets the description value
+     * @param value Description value {@link String}
+     */
     public void setValue(String value) {
         this.value = value;
     }
 
+    /**
+     * Gets the description language
+     * @return Description language {@link String}
+     */
     public String getLang() {
         return lang;
     }
 
+    /**
+     * Sets the description language
+     * @param lang Description language {@link String}
+     */
     public void setLang(String lang) {
         this.lang = lang;
     }

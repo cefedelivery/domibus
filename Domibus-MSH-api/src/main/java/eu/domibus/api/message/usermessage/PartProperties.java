@@ -11,12 +11,23 @@ import java.util.Set;
  */
 public class PartProperties {
 
+    /**
+     * {@link Set} of Properties {@link Property}
+     */
     protected Set<Property> property;
 
+    /**
+     * Gets the Set of Properties
+     * @return {@link Set} of Properties {@link Property}
+     */
     public Set<Property> getProperty() {
         return property;
     }
 
+    /**
+     * Sets the Set of Properties
+     * @param property {@link Set} of Properties {@link Property}
+     */
     public void setProperty(Set<Property> property) {
         this.property = property;
     }

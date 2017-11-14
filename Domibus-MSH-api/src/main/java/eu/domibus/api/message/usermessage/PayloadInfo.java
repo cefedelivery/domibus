@@ -11,12 +11,23 @@ import java.util.Set;
  */
 public class PayloadInfo {
 
+    /**
+     * {@link Set} of Part Info {@link PartInfo}
+     */
     protected Set<PartInfo> partInfo;
 
+    /**
+     * Gets the Set of Part Info
+     * @return {@link Set} of Part Info {@link PartInfo}
+     */
     public Set<PartInfo> getPartInfo() {
         return partInfo;
     }
 
+    /**
+     * Sets the Set of Part Info
+     * @param partInfo {@link Set} of Part Info {@link PartInfo}
+     */
     public void setPartInfo(Set<PartInfo> partInfo) {
         this.partInfo = partInfo;
     }

@@ -11,12 +11,23 @@ import java.util.Set;
  */
 public class MessageProperties {
 
+    /**
+     * Set of Message Properties {@link Set} {@link Property}
+     */
     protected Set<Property> property;
 
+    /**
+     * Gets the Set of Message Properties
+     * @return {@link Set} of Message Properties {@link Property}
+     */
     public Set<Property> getProperty() {
         return property;
     }
 
+    /**
+     * Sets the Set of Message Properties
+     * @param property {@link Set} of Message Properties {@link Property}
+     */
     public void setProperty(Set<Property> property) {
         this.property = property;
     }

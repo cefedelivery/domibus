@@ -9,22 +9,44 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class Service {
 
+    /**
+     * Service Value {@link String}
+     */
     protected String value;
 
+    /**
+     * Service Type {@link String}
+     */
     protected String type;
 
+    /**
+     * Gets Service Value
+     * @return Service Value {@link String}
+     */
     public String getValue() {
         return value;
     }
 
+    /**
+     * Sets Service Value
+     * @param value Service Value {@link String}
+     */
     public void setValue(String value) {
         this.value = value;
     }
 
+    /**
+     * Gets Service Type
+     * @return Service Type {@link String}
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * Sets Service Type
+     * @param type Service Type {@link String}
+     */
     public void setType(String type) {
         this.type = type;
     }
