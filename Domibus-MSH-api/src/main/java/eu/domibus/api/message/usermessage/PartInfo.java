@@ -3,25 +3,27 @@ package eu.domibus.api.message.usermessage;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import javax.activation.DataHandler;
+
 /**
  * @author Tiago Miguel
  * @since 3.3.1
  */
 public class PartInfo {
 
-    private Schema schema;
+    protected Schema schema;
 
-    private Description description;
+    protected Description description;
 
-    private PartProperties partProperties;
+    protected PartProperties partProperties;
 
-    private String href;
+    protected String href;
 
-    private byte[] binaryData;
+    protected boolean inBody;
 
-    private boolean inBody;
+    protected String mime;
 
-    private String mime;
+    protected DataHandler payloadDatahandler;
 
     public Schema getSchema() {
         return schema;
@@ -55,15 +57,7 @@ public class PartInfo {
         this.href = href;
     }
 
-    public byte[] getBinaryData() {
-        return binaryData;
-    }
-
-    public void setBinaryData(byte[] binaryData) {
-        this.binaryData = binaryData;
-    }
-
-    public boolean isInBody() {
+    public boolean getInBody() {
         return inBody;
     }
 
@@ -77,6 +71,14 @@ public class PartInfo {
 
     public void setMime(String mime) {
         this.mime = mime;
+    }
+
+    public DataHandler getPayloadDatahandler() {
+        return payloadDatahandler;
+    }
+
+    public void setPayloadDatahandler(DataHandler payloadDatahandler) {
+        this.payloadDatahandler = payloadDatahandler;
     }
 
     @Override
@@ -93,7 +95,6 @@ public class PartInfo {
                 .append(description, partInfo.description)
                 .append(partProperties, partInfo.partProperties)
                 .append(href, partInfo.href)
-                .append(binaryData, partInfo.binaryData)
                 .append(mime, partInfo.mime)
                 .isEquals();
     }
@@ -105,7 +106,6 @@ public class PartInfo {
                 .append(description)
                 .append(partProperties)
                 .append(href)
-                .append(binaryData)
                 .append(inBody)
                 .append(mime)
                 .toHashCode();

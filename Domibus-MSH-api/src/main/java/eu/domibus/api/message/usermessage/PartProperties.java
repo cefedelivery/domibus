@@ -11,7 +11,7 @@ import java.util.Set;
  */
 public class PartProperties {
 
-    private Set<Property> property;
+    protected Set<Property> property;
 
     public Set<Property> getProperty() {
         return property;

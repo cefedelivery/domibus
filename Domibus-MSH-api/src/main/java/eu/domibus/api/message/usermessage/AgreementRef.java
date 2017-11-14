@@ -9,11 +9,11 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class AgreementRef {
 
-    private String value;
+    protected String value;
 
-    private String type;
+    protected String type;
 
-    private String pmode;
+    protected String pmode;
 
     public String getValue() {
         return value;

@@ -9,9 +9,9 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class PartyInfo {
 
-    private From from;
+    protected From from;
 
-    private To to;
+    protected To to;
 
     public From getFrom() {
         return from;

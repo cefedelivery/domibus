@@ -11,11 +11,11 @@ import java.util.Date;
  */
 public class MessageInfo {
 
-    private Date timestamp;
+    protected Date timestamp;
 
-    private String messageId;
+    protected String messageId;
 
-    private String refToMessageId;
+    protected String refToMessageId;
 
     public Date getTimestamp() {
         return timestamp;

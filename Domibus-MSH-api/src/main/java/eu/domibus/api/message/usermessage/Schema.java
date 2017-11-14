@@ -9,11 +9,11 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class Schema {
 
-    private String location;
+    protected String location;
 
-    private String version;
+    protected String version;
 
-    private String namespace;
+    protected String namespace;
 
     public String getLocation() {
         return location;

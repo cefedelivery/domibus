@@ -9,9 +9,9 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class PartyId {
 
-    private String value;
+    protected String value;
 
-    private String type;
+    protected String type;
 
     public String getValue() {
         return value;

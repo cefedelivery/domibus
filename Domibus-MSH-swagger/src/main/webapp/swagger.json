@@ -483,13 +483,6 @@
         "href" : {
           "type" : "string"
         },
-        "binaryData" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
         "inBody" : {
           "type" : "boolean"
         },

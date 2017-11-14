@@ -35,6 +35,9 @@ public class UserMessageServiceDelegate implements UserMessageService{
         securityService.checkMessageAuthorization(messageId);
 
         final UserMessage userMessage = userMessageCoreService.getMessage(messageId);
+        if(userMessage == null) {
+            return null;
+        }
         return domainConverter.convert(userMessage, UserMessageDTO.class);
     }
 }

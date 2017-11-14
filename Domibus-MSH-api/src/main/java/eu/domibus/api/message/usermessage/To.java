@@ -11,9 +11,9 @@ import java.util.Set;
  */
 public class To {
 
-    private Set<PartyId> partyId;
+    protected Set<PartyId> partyId;
 
-    private String role;
+    protected String role;
 
     public Set<PartyId> getPartyId() {
         return partyId;

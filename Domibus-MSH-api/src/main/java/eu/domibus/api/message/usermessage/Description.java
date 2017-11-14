@@ -9,9 +9,9 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class Description {
 
-    private String value;
+    protected String value;
 
-    private String lang;
+    protected String lang;
 
     public String getValue() {
         return value;

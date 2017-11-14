@@ -170,7 +170,7 @@ public class UserMessageDefaultService implements UserMessageService {
     public eu.domibus.api.message.usermessage.UserMessage getMessage(String messageId) {
         final UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(messageId);
         if(userMessageByMessageId == null) {
-            throw new eu.domibus.ext.exceptions.UserMessageException(DomibusErrorCode.DOM_001, "Message [" + messageId + "] does not exist");
+            return null;
         }
         return domainExtConverter.convert(userMessageByMessageId, eu.domibus.api.message.usermessage.UserMessage.class);
     }

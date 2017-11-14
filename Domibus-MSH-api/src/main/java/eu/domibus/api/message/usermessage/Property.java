@@ -9,11 +9,11 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class Property {
 
-    private String value;
+    protected String value;
 
-    private String name;
+    protected String name;
 
-    private String type;
+    protected String type;
 
     public String getValue() {
         return value;

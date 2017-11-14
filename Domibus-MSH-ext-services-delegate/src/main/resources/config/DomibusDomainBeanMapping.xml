@@ -9,5 +9,12 @@
         <stop-on-errors>true</stop-on-errors>
         <date-format>MM/dd/yyyy HH:mm</date-format>
         <wildcard>true</wildcard>
+        
+        <custom-converters>
+            <converter type="eu.domibus.core.converter.DataHandlerConverter">
+                <class-a>javax.activation.DataHandler</class-a>
+                <class-b>javax.activation.DataHandler</class-b>
+            </converter>
+        </custom-converters>
     </configuration>
 </mappings>

@@ -9,17 +9,17 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class UserMessage {
 
-    private MessageInfo messageInfo;
+    protected MessageInfo messageInfo;
 
-    private PartyInfo partyInfo;
+    protected PartyInfo partyInfo;
 
-    private CollaborationInfo collaborationInfo;
+    protected CollaborationInfo collaborationInfo;
 
-    private MessageProperties messageProperties;
+    protected MessageProperties messageProperties;
 
-    private PayloadInfo payloadInfo;
+    protected PayloadInfo payloadInfo;
 
-    private String mpc;
+    protected String mpc;
 
     public MessageInfo getMessageInfo() {
         return messageInfo;

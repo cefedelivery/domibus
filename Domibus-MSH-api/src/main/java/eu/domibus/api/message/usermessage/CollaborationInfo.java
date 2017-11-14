@@ -9,13 +9,13 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  */
 public class CollaborationInfo {
 
-    private String conversationId;
+    protected String conversationId;
 
-    private String action;
+    protected String action;
 
-    private AgreementRef agreementRef;
+    protected AgreementRef agreementRef;
 
-    private Service service;
+    protected Service service;
 
     public String getConversationId() {
         return conversationId;

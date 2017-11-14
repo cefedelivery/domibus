@@ -11,7 +11,7 @@ import java.util.Set;
  */
 public class PayloadInfo {
 
-    private Set<PartInfo> partInfo;
+    protected Set<PartInfo> partInfo;
 
     public Set<PartInfo> getPartInfo() {
         return partInfo;
