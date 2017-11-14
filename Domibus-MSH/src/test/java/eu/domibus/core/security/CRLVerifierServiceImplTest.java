@@ -1,5 +1,6 @@
 package eu.domibus.core.security;
 
+import eu.domibus.api.security.AuthenticationException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateServiceImpl;
@@ -49,4 +50,13 @@ public class CRLVerifierServiceImplTest {
         String serial = certificate.getSerialNumber().toString();
         securityCRLVerifierServiceImpl.verifyCertificateCRLs(serial, "test.crl");
     }
+
+    @Test(expected = AuthenticationException.class)
+    public void verifyCertificateCRLsSerialInvalidTest() throws IOException {
+        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE_INVALID, ALIAS_INVALID, TEST_KEYSTORE_PASSWORD);
+        assertNotNull(certificate);
+        String serial = certificate.getSerialNumber().toString();
+        securityCRLVerifierServiceImpl.verifyCertificateCRLs(serial, "http://example.com/edelivery.crl");
+    }
+
 }
