@@ -114,11 +114,11 @@ public class CertificateServiceImpl implements CertificateService {
     /**
      * Verifies the existence and validity of a certificate.
      *
-     * @Author Federico Martini
-     * @Since 3.3
      * @param alias
      * @return boolean
      * @throws DomibusCertificateException
+     * @Author Federico Martini
+     * @Since 3.3
      */
     @Override
     public boolean isCertificateValid(String alias) throws DomibusCertificateException {
@@ -203,4 +203,23 @@ public class CertificateServiceImpl implements CertificateService {
             return Lists.newArrayList();
         }
     }
+
+    public void enrichCertificateData() {
+        final KeyStore trustStore = cryptoService.getTrustStore();
+        final Enumeration<String> aliases = trustStore.aliases();
+        while (aliases.hasMoreElements()) {
+            final String alias = aliases.nextElement();
+            final X509Certificate certificate = (X509Certificate) trustStore.getCertificate(alias);
+            TrustStoreEntry trustStoreEntry = new TrustStoreEntry(
+                    alias,
+                    certificate.getSubjectDN().getName(),
+                    certificate.getIssuerDN().getName(),
+                    certificate.getNotBefore(),
+                    certificate.getNotAfter());
+            trustStoreEntries.add(trustStoreEntry);
+        }
+
+    }
+
+    public List<String>
 }
