@@ -23,7 +23,7 @@ class Domibus
     def sqlRed=null;
 	def sqlGreen=null;
 	def thirdGateway = "false";
-	//com.eviware.soapui.support.GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
+	static def backup_file_sufix = "_backup_for_soapui_tests"
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
@@ -40,8 +40,9 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	// Connect to a schema
 	def connectTo(String database, String driver, String url, String dbUser, String dbPassword){
-		log.info("Open connection to DB: " + database + " Url: " + url);
-		//com.eviware.soapui.support.GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
+		log.info("Open connection to || DB: " + database + " || Url: " + url+ " || Driver: "+ driver+" ||");
+		GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
+		GroovyUtils.registerJdbcDriver( "oracle.jdbc.driver.OracleDriver" ) 
 		def sql = null;
 
         try{
@@ -54,6 +55,7 @@ class Domibus
 			return sql;
         }
         catch (SQLException ex){
+			log.error "Connection failed";
             assert 0,"SQLException occurred: " + ex;
         }
 	}
@@ -305,7 +307,7 @@ class Domibus
         }
         else
         {
-            MAX_WAIT_TIME=10_000
+            MAX_WAIT_TIME=20_000
         }
         messageStatus="INIT"
         if(RMSH){
@@ -448,6 +450,39 @@ class Domibus
 
         closeConnection()
     }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII	
+	// Check that an entry is created in the table TB_SEND_ATTEMPT
+	def checkSendAttempt(String messageID, int mapDoms=4){
+		def MAX_WAIT_TIME=10_000;
+		def STEP_WAIT_TIME=1000;
+		def sqlSender = null;
+		int total = 0;
+		openConnection();
+		switch(mapDoms){
+			case 4:
+				sqlSender = sqlBlue;
+				break;
+			case 2:
+				sqlSender = sqlRed;
+				break;
+			case 1:
+				sqlSender = sqlGreen;
+				break;
+			default:
+				sqlSender = sqlBlue;
+				break;
+		}
+		while((MAX_WAIT_TIME>0)&&(total==0)){
+			sqlSender.eachRow("Select count(*) lignes from tb_send_attempt where REPLACE(LOWER(MESSAGE_ID),' ','') = REPLACE(LOWER(${messageID}),' ','')"){
+				total=it.lignes
+			}
+			log.info "W: "+MAX_WAIT_TIME;
+			sleep(STEP_WAIT_TIME);
+			MAX_WAIT_TIME = MAX_WAIT_TIME - STEP_WAIT_TIME;
+		}
+		assert(total>0),locateTest(context)+"Error: Message "+messageID+" is not present in the table tb_send_attempt."
+		closeConnection();
+	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 // Static methods
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
@@ -666,31 +701,32 @@ class Domibus
 	    def outputCatcher = new StringBuffer();
         def errorCatcher = new StringBuffer();
         def proc=null; def commandString = null; 
+		def pmDescription = "SoapUI sample test description for PMode upload";
 		
 		def String output = fetchCookieHeader(side,context,log);		
 		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
 		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context);
-		//log.info "PMODE FILE PATH: "+pmodeFile;
+		log.info "PMODE FILE PATH: "+pmodeFile;
 		
 		
 		switch(side.toLowerCase()){
 			case "sender":
-				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F  file=@"+pmodeFile;
+				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 				break;
 			case "receiver":
-				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F  file=@"+pmodeFile;
+				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 				break;
 			case "receivergreen":
-				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F  file=@"+pmodeFile;
+				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 				break;
 			case "testEnv":
-				commandString="curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F  file=@"+pmodeFile;
+				commandString="curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 				break;
 			default:
 				assert (false) , "Unknown side."
 		}
 
-		//log.info commandString
+		log.info commandString
 		if(commandString){
 			proc = commandString.execute();
 			if(proc!=null){
@@ -907,8 +943,104 @@ class Domibus
 
     // replace slashes in project custom properties values
     static def String formatPathSlashes(String source){
-		return source.replaceAll("/","\\\\");
+		if((source!=null)&&(source!="")){
+			return source.replaceAll("/","\\\\");
+		}
+    }
+	
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+// Return path to domibus folder
+static def String pathToDomibus(color, log, context){
+	// Return path to domibus folder base on the "color"
+		def propName = ""
+		switch(color.toLowerCase()){
+			case "blue":
+				propName =  "pathBlue"
+				break;
+			case "red":
+				propName = "pathRed"
+				break;
+			case "green":
+				propName  = "pathGreen"
+				break;
+			default:
+				assert (false) , "Unknown side color. Supported values: BLUE, RED, GREEN"
+		}
+
+		return context.expand("\${#Project#${propName}}")
+}
+	
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // Change Domibus configuration file 
+    static def void changeDomibusProperties(color, propValueDict, log, context, testRunner){
+		// Check that properties file exist and if yes create backup_file
+		// For all properties name and new value pairs change value in file
+		// to restore configuration use method restoreDomibusPropertiesFromBackup(domibusPath,  log, context, testRunner)
+		def pathToPropertyFile = pathToDomibus(color, log, context) + context.expand('${#Project#subPathToDomibusProperties}')
+
+		// Check file exists
+		def testFile = new File(pathToPropertyFile)
+		if (!testFile.exists()) testRunner.fail("File [${pathToPropertyFile}] does not exist. Can't change value.")
+		else log.info "File [${pathToPropertyFile}] exists."
+
+		// Create backup file 
+		Domibus.copyFile(pathToPropertyFile, "${pathToPropertyFile}${backup_file_sufix}",log)
+		
+		def fileContent = testFile.text
+		def found = false
+		def foundInCommentedRow = false
+		//run in loop for all properties key values pairs 
+		 propValueDict.each{ propertyToChangeName, newValueToAssign -> 
+		 	// Check that property exist in config file
+			 found = false
+			 foundInCommentedRow = false
+			testFile.eachLine{line, n ->
+			     n++
+			  if (line =~ /^${propertyToChangeName}=/) {
+			     log.info "In line $n searched property was found. Line value is: $line"
+			     found = true
+			  }
+			  if (line =~ ~/# *${propertyToChangeName}=.*/) {
+			     log.info "In line $n commented searched property was found. Line value is: $line"
+			     foundInCommentedRow = true
+			  }
+			}
+
+			// If property is present in file change it value
+			if (found) 
+				fileContent = fileContent.replaceAll(/(?m)^(${propertyToChangeName}=)(.*)/){ all, paramName, value -> "${paramName}${newValueToAssign}"} 
+			else 
+				if (foundInCommentedRow)  
+					fileContent = fileContent.replaceAll(/(?m)^# *(${propertyToChangeName}=)(.*)/){ all, paramName, value -> "${paramName}${newValueToAssign}"} 
+				else testRunner.fail("The search string ($propertyToChangeName) was not found in file [${pathToPropertyFile}].") 
+		    log.info "In [${pathToPropertyFile}] file property ${propertyToChangeName} was changed to value ${newValueToAssign}"
+		 } //loop end 
+		
+		 // Store new content of properties file after all changes
+		  testFile.text=fileContent
+		  log.info "Property file [${pathToPropertyFile}] amended" 
     }
 
+
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+
+   // Restor Domibus configuration file 
+    static def void restoreDomibusPropertiesFromBackup(color, log, context, testRunner){
+		// Restore from backup file domibus.properties file
+		def pathToPropertyFile = pathToDomibus(color, log, context) + context.expand('${#Project#subPathToDomibusProperties}')
+		def backupFile = "${pathToPropertyFile}${backup_file_sufix}"
+		
+		// Check backup file exists
+		def backupFileHandler = new File(backupFile)
+		if (!backupFileHandler.exists()) testRunner.fail("CRITICAL ERROR: File [${backupFile}] does not exist.")
+		else {	
+			copyFile(backupFile, pathToPropertyFile, log)
+			if (backupFileHandler.delete())
+			   log.info "Successufuly restory configuration from backup file and backup file was removed" 
+			else 
+			   testRunner.fail "Not able to delete configuration backup file" 
+		}
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 
 }

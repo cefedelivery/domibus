@@ -97,6 +97,7 @@
             <url>https://ec.europa.eu/cefdigital/artifact/content/groups/public/</url>
             <releases>
                 <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
             </releases>
             <snapshots>
                 <enabled>false</enabled>
@@ -110,6 +111,7 @@
             </releases>
             <snapshots>
                 <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
             </snapshots>
         </repository>
     </repositories>
