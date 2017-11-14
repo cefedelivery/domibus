@@ -214,7 +214,7 @@ public class UserManagementServiceImpl implements UserService {
         User user = userDao.loadActiveUserByUsername(userName);
         LOG.debug("handleCorrectAuthentication for user [{}]",userName);
         if(user.getAttemptCount()>0){
-            LOG.debug("user [{}] add [{}] attempt ",userName,user.getAttemptCount());
+            LOG.debug("user [{}] has [{}] attempt ",userName,user.getAttemptCount());
             LOG.debug("reseting to 0");
             user.setAttemptCount(0);
             userDao.update(user);
