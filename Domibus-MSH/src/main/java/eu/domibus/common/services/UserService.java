@@ -1,6 +1,7 @@
 package eu.domibus.common.services;
 
 import eu.domibus.api.user.User;
+import eu.domibus.common.model.security.UserLoginErrorReason;
 
 import java.util.List;
 
@@ -36,8 +37,9 @@ public interface UserService{
      * Will log login attempt to the security log and inactivate user after certain amount of login attempt.
      *
      * @param userName the user loggin string
+     * @return the reason of the login error.
      */
-    void handleWrongAuthentication(final String userName);
+    UserLoginErrorReason handleWrongAuthentication(final String userName);
 
     /**
      * Search for all users that have been suspended (due to multiple unsuccessful login attempts)

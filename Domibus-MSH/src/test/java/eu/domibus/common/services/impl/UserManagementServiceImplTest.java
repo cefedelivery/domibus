@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusMessageCode;
@@ -72,7 +73,7 @@ public class UserManagementServiceImplTest {
             userDao.loadUserByUsername(anyString);
             result = user;
             userManagementService.canApplyAccountLockingPolicy(anyString, user);
-            result = false;
+            result = UserLoginErrorReason.UNKNOWN;
         }};
         userManagementService.handleWrongAuthentication("");
         new Verifications() {{
@@ -87,7 +88,7 @@ public class UserManagementServiceImplTest {
             userDao.loadUserByUsername(anyString);
             result = user;
             userManagementService.canApplyAccountLockingPolicy(anyString, user);
-            result = true;
+            result = UserLoginErrorReason.BAD_CREDENTIALS;
         }};
         userManagementService.handleWrongAuthentication("");
         new Verifications() {{
@@ -163,8 +164,8 @@ public class UserManagementServiceImplTest {
 
     @Test
     public void logOnlyUserNull(@Mocked final DomibusLogger LOG, final @Mocked User user) {
-        boolean test = userManagementService.canApplyAccountLockingPolicy("test", null);
-        assertFalse(test);
+        UserLoginErrorReason userLoginErrorReason = userManagementService.canApplyAccountLockingPolicy("test", null);
+        assertEquals(UserLoginErrorReason.UNKNOWN, userLoginErrorReason);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, "test");
             times = 1;
@@ -180,8 +181,8 @@ public class UserManagementServiceImplTest {
             user.getSuspensionDate();
             result = null;
         }};
-        boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
-        assertFalse(test);
+        UserLoginErrorReason userLoginErrorReason = userManagementService.canApplyAccountLockingPolicy("test", user);
+        assertEquals(UserLoginErrorReason.INACTIVE, userLoginErrorReason);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, "test");
             times = 1;
@@ -196,10 +197,10 @@ public class UserManagementServiceImplTest {
             user.getSuspensionDate();
             result = new Date();
         }};
-        boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
-        assertFalse(test);
+        UserLoginErrorReason userLoginErrorReason = userManagementService.canApplyAccountLockingPolicy("test", user);
+        assertEquals(UserLoginErrorReason.SUSPENDED, userLoginErrorReason);
         new Verifications() {{
-            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, "test");
+            LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, "test");
             times = 1;
         }};
     }
@@ -210,8 +211,8 @@ public class UserManagementServiceImplTest {
             user.isEnabled();
             result = true;
         }};
-        boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
-        assertTrue(test);
+        UserLoginErrorReason test = userManagementService.canApplyAccountLockingPolicy("test", user);
+        assertEquals(UserLoginErrorReason.BAD_CREDENTIALS,test);
     }
 
     @Test
