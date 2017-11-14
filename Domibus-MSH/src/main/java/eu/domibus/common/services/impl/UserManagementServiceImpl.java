@@ -205,6 +205,22 @@ public class UserManagementServiceImpl implements UserService {
         userDao.update(users);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     */
+    @Override
+    public void handleCorrectAuthentication(final String userName) {
+        User user = userDao.loadActiveUserByUsername(userName);
+        LOG.debug("handleCorrectAuthentication for user [{}]",userName);
+        if(user.getAttemptCount()>0){
+            LOG.debug("user [{}] add [{}] attempt ",userName,user.getAttemptCount());
+            LOG.debug("reseting to 0");
+            user.setAttemptCount(0);
+            userDao.update(user);
+        }
+    }
+
     private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
         List<User> result = new ArrayList<>(masterData);
         result.removeAll(newData);

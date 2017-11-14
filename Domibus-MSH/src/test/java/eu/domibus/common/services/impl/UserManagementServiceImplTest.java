@@ -271,5 +271,38 @@ public class UserManagementServiceImplTest {
         assertEquals(0, user1.getAttemptCount(), 0d);
     }
 
+    @Test
+    public void handleCorrectAuthenticationWithSomeFaileAttempts(){
+        final String userName="user";
+        final User userEntity = new User();
+        userEntity.setActive(true);
+        userEntity.setAttemptCount(1);
+        new Expectations() {{
+            userDao.loadActiveUserByUsername(userName);
+            result = userEntity;
+        }};
+        userManagementService.handleCorrectAuthentication(userName);
+        new Verifications(){{
+           User user;
+           userDao.update(user=withCapture());times=1;
+           assertEquals(0,user.getAttemptCount(),0d);
+        }};
+    }
+
+    @Test
+    public void handleCorrectAuthenticationWithOutSomeFaileAttempts(){
+        final String userName="user";
+        final User userEntity = new User();
+        userEntity.setActive(true);
+        userEntity.setAttemptCount(0);
+        new Expectations() {{
+            userDao.loadActiveUserByUsername(userName);
+            result = userEntity;
+        }};
+        userManagementService.handleCorrectAuthentication(userName);
+        new Verifications(){{
+            userDao.update(withAny(new User()));times=0;
+        }};
+    }
 
 }
