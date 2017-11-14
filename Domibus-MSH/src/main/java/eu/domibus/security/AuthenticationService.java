@@ -18,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthenticationService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuthenticationService.class);
+
     public static final String INACTIVE = "Inactive";
+
     public static final String SUSPENDED = "Suspended";
 
     @Autowired
