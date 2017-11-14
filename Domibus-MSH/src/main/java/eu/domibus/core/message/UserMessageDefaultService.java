@@ -13,6 +13,7 @@ import eu.domibus.api.pmode.domain.LegConfiguration;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
+import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
@@ -21,7 +22,6 @@ import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
-import eu.domibus.ext.exceptions.DomibusErrorCode;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -66,6 +66,9 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Autowired
     private SignalMessageDao signalMessageDao;
+
+    @Autowired
+    private SignalMessageLogDao signalMessageLogDao;
 
     @Autowired
     private BackendNotificationService backendNotificationService;
