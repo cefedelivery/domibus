@@ -59,7 +59,7 @@ public class UserManagementServiceImpl implements UserService {
     private Properties domibusProperties;
 
     /**
-     *{@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     @Transactional(readOnly = true)
@@ -85,7 +85,7 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     /**
-     *{@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     @Transactional
@@ -102,7 +102,7 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     /**
-     *{@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public List<eu.domibus.api.user.UserRole> findUserRoles() {
@@ -117,7 +117,7 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     /**
-     *{@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void updateUsers(List<eu.domibus.api.user.User> users) {
@@ -161,7 +161,7 @@ public class UserManagementServiceImpl implements UserService {
     public UserLoginErrorReason handleWrongAuthentication(final String userName) {
         User user = userDao.loadUserByUsername(userName);
         UserLoginErrorReason userLoginErrorReason = canApplyAccountLockingPolicy(userName, user);
-        if(BAD_CREDENTIALS.equals(userLoginErrorReason)){
+        if (BAD_CREDENTIALS.equals(userLoginErrorReason)) {
             applyAccountLockingPolicy(user);
         }
         return userLoginErrorReason;
@@ -192,8 +192,8 @@ public class UserManagementServiceImpl implements UserService {
         }
         user.setAttemptCount(user.getAttemptCount() + 1);
         if (user.getAttemptCount() >= maxAttemptAmount) {
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Applying account locking policy, max number of attempt ([{}]) reached for user [{}]",maxAttemptAmount,user.getUserName());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Applying account locking policy, max number of attempt ([{}]) reached for user [{}]", maxAttemptAmount, user.getUserName());
             }
             user.setActive(false);
             user.setSuspensionDate(new Date(System.currentTimeMillis()));
@@ -222,7 +222,7 @@ public class UserManagementServiceImpl implements UserService {
         List<User> users = userDao.getSuspendedUser(currentTimeMinusSuspensionInterval);
         for (User user : users) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Suspended user [{}] is going to be reactivated.",user.getUserName());
+                LOG.debug("Suspended user [{}] is going to be reactivated.", user.getUserName());
             }
             user.setSuspensionDate(null);
             user.setAttemptCount(0);
@@ -233,14 +233,13 @@ public class UserManagementServiceImpl implements UserService {
 
     /**
      * {@inheritDoc}
-     *
      */
     @Override
     public void handleCorrectAuthentication(final String userName) {
         User user = userDao.loadActiveUserByUsername(userName);
-        LOG.debug("handleCorrectAuthentication for user [{}]",userName);
-        if(user.getAttemptCount()>0){
-            LOG.debug("user [{}] has [{}] attempt ",userName,user.getAttemptCount());
+        LOG.debug("handleCorrectAuthentication for user [{}]", userName);
+        if (user.getAttemptCount() > 0) {
+            LOG.debug("user [{}] has [{}] attempt ", userName, user.getAttemptCount());
             LOG.debug("reseting to 0");
             user.setAttemptCount(0);
             userDao.update(user);
