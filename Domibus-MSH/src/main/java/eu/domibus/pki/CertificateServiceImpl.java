@@ -206,20 +206,33 @@ public class CertificateServiceImpl implements CertificateService {
 
     public void enrichCertificateData() {
         final KeyStore trustStore = cryptoService.getTrustStore();
-        final Enumeration<String> aliases = trustStore.aliases();
-        while (aliases.hasMoreElements()) {
-            final String alias = aliases.nextElement();
-            final X509Certificate certificate = (X509Certificate) trustStore.getCertificate(alias);
-            TrustStoreEntry trustStoreEntry = new TrustStoreEntry(
-                    alias,
-                    certificate.getSubjectDN().getName(),
-                    certificate.getIssuerDN().getName(),
-                    certificate.getNotBefore(),
-                    certificate.getNotAfter());
-            trustStoreEntries.add(trustStoreEntry);
-        }
+        List<eu.domibus.common.model.certificate.Certificate> certificates =
+                extractCertificateFromKeyStore(
+                        cryptoService.getTrustStore());
+        certificates.addAll(extractCertificateFromKeyStore(
+                cryptoService.getKeyStore()));
+        certificates.forEach();
+
 
     }
 
-    public List<String>
+    private List<eu.domibus.common.model.certificate.Certificate> extractCertificateFromKeyStore(KeyStore trustStore) {
+        List<eu.domibus.common.model.certificate.Certificate> certificates = new ArrayList<>();
+        try {
+            final Enumeration<String> aliases = trustStore.aliases();
+            while (aliases.hasMoreElements()) {
+                final String alias = aliases.nextElement();
+                final X509Certificate x509Certificate = (X509Certificate) trustStore.getCertificate(alias);
+                eu.domibus.common.model.certificate.Certificate certificate = new eu.domibus.common.model.certificate.Certificate();
+                certificate.setAlias(alias);
+                certificate.setNotAfter(x509Certificate.getNotAfter());
+                certificate.setNotBefore(x509Certificate.getNotBefore());
+                certificates.add(certificate);
+            }
+        } catch (KeyStoreException e) {
+            LOG.warn(e.getMessage(), e);
+        }
+        return certificates;
+    }
+
 }

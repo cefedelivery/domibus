@@ -30,7 +30,7 @@ public class AuthenticationService {
     @Transactional(noRollbackFor = BadCredentialsException.class)
     public UserDetail authenticate(String username, String password) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
-        Authentication authentication = null;
+        Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(authenticationToken);
         } catch (AuthenticationException ae) {
