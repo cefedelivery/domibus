@@ -1,4 +1,4 @@
-package eu.domibus.core.converter;
+package eu.domibus.ext.delegate.converter;
 
 import org.dozer.CustomConverter;
 
