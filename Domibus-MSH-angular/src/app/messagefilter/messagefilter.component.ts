@@ -67,7 +67,7 @@ export class MessageFilterComponent implements DirtyOperations {
         this.rows = newRows;
 
         if (!this.areFiltersPersisted && this.backendFilterNames.length > 1) {
-          this.alertService.error("Several filters in the table were not configured yet (Persisted flag is not checked). " +
+          this.alertService.error("One or several filters in the table were not configured yet (Persisted flag is not checked). " +
             "It is strongly recommended to double check the filters configuration and afterwards save it.");
           this.enableSave = true;
         }

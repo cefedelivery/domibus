@@ -4,7 +4,7 @@ import eu.domibus.api.jms.DomibusJMSException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;

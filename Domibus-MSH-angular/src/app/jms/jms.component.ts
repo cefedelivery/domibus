@@ -223,7 +223,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
       },
       error => {
-        this.alertService.error('An error occured while loading the JMS messages. In case you are using the Selector / JMS Type, please follow the rules for Selector/JMS Type according to Help Page / Admin Guide (Error Status: ' + error.status + ')');
+        this.alertService.error('An error occured while loading the JMS messages. In case you are using the Selector / JMS Type, please follow the rules for Selector / JMS Type according to Help Page / Admin Guide (Error Status: ' + error.status + ')');
         this.loading = false;
       }
     );
@@ -254,13 +254,21 @@ export class JmsComponent implements OnInit, DirtyOperations {
         dialogRef.componentInstance.queues.push(...this.queues);
       } else {
         for (let message of this.selectedMessages) {
+
           try {
             let originalQueue = message.customProperties.originalQueue;
+            // EDELIVERY-2814
+            let originalQueueName = originalQueue.substr(originalQueue.indexOf('!') + 1);
             if (!isNullOrUndefined(originalQueue)) {
-              let queue = this.queues.filter((queue) => queue.name === originalQueue).pop();
-              dialogRef.componentInstance.queues.push(queue);
-              dialogRef.componentInstance.destinationsChoiceDisabled = true;
-              dialogRef.componentInstance.selectedSource = queue;
+              let queues = this.queues.filter((queue) => queue.name.indexOf(originalQueueName) != -1);
+              console.debug(queues);
+              if (!isNullOrUndefined(queues)) {
+                dialogRef.componentInstance.queues = queues;
+                dialogRef.componentInstance.selectedSource = queues[0];
+              }
+              if (queues.length == 1) {
+                dialogRef.componentInstance.destinationsChoiceDisabled = true;
+              }
               break;
             }
           }
@@ -268,6 +276,8 @@ export class JmsComponent implements OnInit, DirtyOperations {
             console.error(e);
           }
         }
+
+
 
         if (dialogRef.componentInstance.queues.length == 0) {
           console.warn("Unable to determine the original queue for the selected messages");
@@ -278,6 +288,44 @@ export class JmsComponent implements OnInit, DirtyOperations {
       dialogRef.componentInstance.queues.push(...this.queues);
     }
 
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (!isNullOrUndefined(result) && !isNullOrUndefined(result.destination)) {
+        let messageIds = this.selectedMessages.map((message) => message.id);
+        this.serverMove(this.currentSearchSelectedSource.name, result.destination, messageIds);
+      }
+    });
+  }
+
+  moveAction(row) {
+    let dialogRef: MdDialogRef<MoveDialogComponent> = this.dialog.open(MoveDialogComponent);
+
+    if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
+      try {
+        let originalQueue = row.customProperties.originalQueue;
+        // EDELIVERY-2814
+        let originalQueueName = originalQueue.substr(originalQueue.indexOf('!') + 1);
+        let queues = this.queues.filter((queue) => queue.name.indexOf(originalQueueName) != -1);
+        console.debug(queues);
+        if(!isNullOrUndefined(queues)) {
+          dialogRef.componentInstance.queues = queues;
+          dialogRef.componentInstance.selectedSource = queues[0];
+        }
+        if (queues.length == 1) {
+          dialogRef.componentInstance.destinationsChoiceDisabled = true;
+        }
+      }
+      catch (e) {
+        console.error(e);
+      }
+
+      if (dialogRef.componentInstance.queues.length == 0) {
+        console.log(dialogRef.componentInstance.queues.length);
+        dialogRef.componentInstance.queues.push(...this.queues);
+      }
+    } else {
+      dialogRef.componentInstance.queues.push(...this.queues);
+    }
 
     dialogRef.afterClosed().subscribe(result => {
       if (!isNullOrUndefined(result) && !isNullOrUndefined(result.destination)) {
