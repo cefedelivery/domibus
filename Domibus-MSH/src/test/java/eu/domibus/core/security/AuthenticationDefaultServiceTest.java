@@ -16,6 +16,8 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.POST;
 import java.io.UnsupportedEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
@@ -35,6 +37,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 public class AuthenticationDefaultServiceTest {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuthenticationDefaultServiceTest.class);
 
+    private static final String DOMIBUS_URL = "https://localhost:8080/domibus/services/backend";
     private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/ebms3/common/dao/DynamicDiscoveryPModeProviderTest/";
     private static final String TEST_KEYSTORE = "testkeystore.jks";
     private static final String ALIAS_CN_AVAILABLE = "cn_available";
@@ -55,21 +58,15 @@ public class AuthenticationDefaultServiceTest {
 
     @Test
     public void authenticateX509Test() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "https://localhost:8080/domibus/services/backend" );
-        request.setScheme("https");
-
-        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
-        assertNotNull(certificate);
-
-        MockHttpServletRequest postProcessedRequest = x509(certificate).postProcessRequest(request);
-
-        X509Certificate[] certificates = (X509Certificate[]) postProcessedRequest
-                .getAttribute("javax.servlet.request.X509Certificate");
+        X509Certificate certificate = createCertificate(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
+        MockHttpServletRequest postProcessedRequest = createHttpRequest(certificate, "https");
 
         new Expectations() {{
             domibusProperties.getProperty(AuthenticationDefaultService.UNSECURE_LOGIN_ALLOWED, "true");
             result = false;
-            Authentication authentication = new X509CertificateAuthentication(certificates);
+            X509Certificate[] certs = new X509Certificate[1];
+            certs[0] = certificate;
+            Authentication authentication = new X509CertificateAuthentication(certs);
             authentication.setAuthenticated(true);
             securityCustomAuthenticationProvider.authenticate((Authentication)any);
             result = authentication;
@@ -78,10 +75,9 @@ public class AuthenticationDefaultServiceTest {
         authenticationService.authenticate(postProcessedRequest);
     }
 
-
     @Test(expected = AuthenticationException.class)
     public void authenticateX509MissingTest() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "https://localhost:8080/domibus/services/backend" );
+        MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.POST, DOMIBUS_URL);
         request.setScheme("https");
 
         authenticationService.authenticate(request);
@@ -94,42 +90,26 @@ public class AuthenticationDefaultServiceTest {
 
     @Test(expected = AuthenticationException.class)
     public void authenticateX509InvalidTest() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "https://localhost:8080/domibus/services/backend" );
-        request.setScheme("https");
-
-        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
-        assertNotNull(certificate);
-
-        MockHttpServletRequest postProcessedRequest = x509(certificate).postProcessRequest(request);
-
-        X509Certificate[] certificates = (X509Certificate[]) postProcessedRequest
-                .getAttribute("javax.servlet.request.X509Certificate");
+        X509Certificate certificate = createCertificate(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
 
         new Expectations() {{
             securityCustomAuthenticationProvider.authenticate((Authentication)any);
             result = new AuthenticationCredentialsNotFoundException(anyString);
         }};
 
+        MockHttpServletRequest postProcessedRequest = createHttpRequest(certificate, "https");
         authenticationService.authenticate(postProcessedRequest);
 
         new Verifications() {{
             securityCustomAuthenticationProvider.authenticate((Authentication)any);
             times = 1;
         }};
-
     }
+
     @Test
     public void authenticateDisabledTest() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "https://localhost:8080/domibus/services/backend" );
-        request.setScheme("https");
-
-        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
-        assertNotNull(certificate);
-
-        MockHttpServletRequest postProcessedRequest = x509(certificate).postProcessRequest(request);
-
-        X509Certificate[] certificates = (X509Certificate[]) postProcessedRequest
-                .getAttribute("javax.servlet.request.X509Certificate");
+        X509Certificate certificate = createCertificate(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
+        MockHttpServletRequest postProcessedRequest = createHttpRequest(certificate, "https");
 
         new Expectations() {{
             domibusProperties.getProperty(AuthenticationDefaultService.UNSECURE_LOGIN_ALLOWED, "true");
@@ -146,8 +126,7 @@ public class AuthenticationDefaultServiceTest {
 
     @Test
     public void authenticateBasicValidTest() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "https://localhost:8080/domibus/services/backend" );
-        request.addHeader(AuthenticationDefaultService.BASIC_HEADER_KEY, "Basic YWRtaW46MTIzNDU2");
+        MockHttpServletRequest request = createHttpBasicAuthRequest();
 
         new Expectations() {{
             Authentication authentication = new BasicAuthentication(AuthRole.ROLE_USER);
@@ -166,8 +145,7 @@ public class AuthenticationDefaultServiceTest {
 
     @Test(expected = AuthenticationException.class)
     public void authenticateBasicInvalidTest() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "https://localhost:8080/domibus/services/backend" );
-        request.addHeader(AuthenticationDefaultService.BASIC_HEADER_KEY, "Basic YWRtaW46MTIzNDU2");
+        MockHttpServletRequest request = createHttpBasicAuthRequest();
 
         new Expectations() {{
             Authentication authentication = new BasicAuthentication(AuthRole.ROLE_USER);
@@ -186,19 +164,8 @@ public class AuthenticationDefaultServiceTest {
 
     @Test
     public void authenticateBLueCoatValidTest() throws UnsupportedEncodingException, ParseException {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "https://localhost:8080/domibus/services/backend" );
-
-        String serial = "123ABCD";
-        String issuer = "CN=PEPPOL SERVICE METADATA PUBLISHER TEST CA,OU=FOR TEST PURPOSES ONLY,O=NATIONAL IT AND TELECOM AGENCY,C=DK";
-        String subject = "O=DG-DIGIT,CN=SMP_1000000007,C=BE";
-        DateFormat df = new SimpleDateFormat("MMM d hh:mm:ss yyyy zzz", Locale.US);
-        Date validFrom = df.parse("Jun 01 10:37:53 2015 CEST");
-        Date validTo = df.parse("Jun 01 10:37:53 2035 CEST");
-
-        String certHeaderValue = "serial=" + serial + "&subject=" + subject + "&validFrom="+ df.format(validFrom) +"&validTo=" + df.format(validTo) +"&issuer=" + issuer;
-
-        request.addHeader(AuthenticationDefaultService.CLIENT_CERT_HEADER_KEY, certHeaderValue);
-
+        String certHeaderValue = createCertHeaderValue();
+        MockHttpServletRequest request = createHttpBlueCoatRequest(certHeaderValue);
         new Expectations() {{
             Authentication authentication = new BlueCoatClientCertificateAuthentication(certHeaderValue);
             authentication.setAuthenticated(true);
@@ -216,7 +183,7 @@ public class AuthenticationDefaultServiceTest {
 
     @Test(expected = AuthenticationException.class)
     public void authenticateEnabledMissingTest() throws UnsupportedEncodingException, ParseException {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "https://localhost:8080/domibus/services/backend" );
+        MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.POST, DOMIBUS_URL);
 
         new Expectations() {{
             domibusProperties.getProperty(AuthenticationDefaultService.UNSECURE_LOGIN_ALLOWED, "true");
@@ -229,5 +196,55 @@ public class AuthenticationDefaultServiceTest {
             securityCustomAuthenticationProvider.authenticate((Authentication)any);
             times = 0;
         }};
+    }
+
+
+    private MockHttpServletRequest createHttpRequest(X509Certificate certificate) {
+        return createHttpRequest(certificate, null);
+
+    }
+
+    private MockHttpServletRequest createHttpRequest(X509Certificate certificate, String scheme) {
+        MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.POST, DOMIBUS_URL);
+        if(scheme != null) {
+            request.setScheme(scheme);
+        }
+
+        MockHttpServletRequest postProcessedRequest = x509(certificate).postProcessRequest(request);
+
+        return postProcessedRequest;
+    }
+
+    private X509Certificate createCertificate(String keystore, String alias, String password){
+        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(keystore, alias, password);
+        assertNotNull(certificate);
+        return certificate;
+    }
+
+    private MockHttpServletRequest createHttpBasicAuthRequest() {
+        String basicAuthCredentials = "Basic YWRtaW46MTIzNDU2";
+        MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.POST, DOMIBUS_URL);
+        request.addHeader(AuthenticationDefaultService.BASIC_HEADER_KEY, basicAuthCredentials);
+
+        return request;
+    }
+
+    private String createCertHeaderValue() throws ParseException {
+        String serial = "123ABCD";
+        String issuer = "CN=PEPPOL SERVICE METADATA PUBLISHER TEST CA,OU=FOR TEST PURPOSES ONLY,O=NATIONAL IT AND TELECOM AGENCY,C=DK";
+        String subject = "O=DG-DIGIT,CN=SMP_1000000007,C=BE";
+        DateFormat df = new SimpleDateFormat("MMM d hh:mm:ss yyyy zzz", Locale.US);
+        Date validFrom = df.parse("Jun 01 10:37:53 2015 CEST");
+        Date validTo = df.parse("Jun 01 10:37:53 2035 CEST");
+
+        String certHeaderValue = "serial=" + serial + "&subject=" + subject + "&validFrom="+ df.format(validFrom) +"&validTo=" + df.format(validTo) +"&issuer=" + issuer;
+        return certHeaderValue;
+    }
+
+    private MockHttpServletRequest createHttpBlueCoatRequest(String certHeaderValue) throws ParseException {
+        MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.POST, DOMIBUS_URL);
+        request.addHeader(AuthenticationDefaultService.CLIENT_CERT_HEADER_KEY, certHeaderValue);
+
+        return request;
     }
 }

@@ -44,29 +44,31 @@ public class X509CertificateServiceImplTest {
 
     @Test
     public void verifyCertificateTest() {
-        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
-        assertNotNull(certificate);
-        X509Certificate[] certificates = new X509Certificate[1];
-        certificates[0] = certificate;
+        X509Certificate[] certificates = createCertificates(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
         securityX509CertificateServiceImpl.isClientX509CertificateValid(certificates);
 
         new Verifications() {{
-            securityCRLVerifierServiceImpl.verifyCertificateCRLs(certificate);
+            securityCRLVerifierServiceImpl.verifyCertificateCRLs(certificates[0]);
             times = 1;
         }};
     }
 
     @Test(expected = AuthenticationException.class)
     public void verifyCertificateExpiredTest() {
-        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + EXPIRED_KEYSTORE, EXPIRED_ALIAS, EXPIRED_KEYSTORE_PASSWORD);
-        assertNotNull(certificate);
-        X509Certificate[] certificates = new X509Certificate[1];
-        certificates[0] = certificate;
+        X509Certificate[] certificates = createCertificates(RESOURCE_PATH + EXPIRED_KEYSTORE, EXPIRED_ALIAS, EXPIRED_KEYSTORE_PASSWORD);
         securityX509CertificateServiceImpl.isClientX509CertificateValid(certificates);
 
         new Verifications() {{
-            securityCRLVerifierServiceImpl.verifyCertificateCRLs(certificate);
+            securityCRLVerifierServiceImpl.verifyCertificateCRLs(certificates[0]);
             times = 0;
         }};
+    }
+
+    private X509Certificate[] createCertificates(String keystore_path, String alias, String password) {
+        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(keystore_path, alias, password);
+        assertNotNull(certificate);
+        X509Certificate[] certificates = new X509Certificate[1];
+        certificates[0] = certificate;
+        return certificates;
     }
 }

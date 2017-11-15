@@ -58,20 +58,11 @@ public class CustomAuthenticationProviderTest {
 
     @Test
     public void authenticateX509Test() {
-        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
-        assertNotNull(certificate);
-        X509Certificate[] certificates = new X509Certificate[1];
-        certificates[0] = certificate;
-
-        Authentication authentication = new X509CertificateAuthentication(certificates);
+        Authentication authentication = createX509Auth();
 
         new Expectations() {{
-            List<AuthRole> authRoles = new ArrayList<>();
-            authRoles.add(AuthRole.ROLE_ADMIN);
-            authRoles.add(AuthRole.ROLE_USER);
-
             securityAuthenticationDAO.getRolesForCertificateId(anyString);
-            result = authRoles;
+            result = createAuthRoles();;
         }};
 
         securityCustomAuthenticationProvider.authenticate(authentication);
@@ -79,23 +70,11 @@ public class CustomAuthenticationProviderTest {
 
     @Test
     public void authenticateBlueCoatTest()  throws UnsupportedEncodingException, ParseException {
-        String serial = "123ABCD";
-        String issuer = "CN=PEPPOL SERVICE METADATA PUBLISHER TEST CA,OU=FOR TEST PURPOSES ONLY,O=NATIONAL IT AND TELECOM AGENCY,C=DK";
-        String subject = "O=DG-DIGIT,CN=SMP_1000000007,C=BE";
-        DateFormat df = new SimpleDateFormat("MMM d hh:mm:ss yyyy zzz", Locale.US);
-        Date validFrom = df.parse("Jun 01 10:37:53 2015 CEST");
-        Date validTo = df.parse("Jun 01 10:37:53 2035 CEST");
-        String certHeaderValue = "serial=" + serial + "&subject=" + subject + "&validFrom="+ df.format(validFrom) +"&validTo=" + df.format(validTo) +"&issuer=" + issuer;
-
-        Authentication authentication = new BlueCoatClientCertificateAuthentication(certHeaderValue);
+        Authentication authentication = createBlueCoatAuth();
 
         new Expectations() {{
-            List<AuthRole> authRoles = new ArrayList<>();
-            authRoles.add(AuthRole.ROLE_ADMIN);
-            authRoles.add(AuthRole.ROLE_USER);
-
             securityAuthenticationDAO.getRolesForCertificateId(anyString);
-            result = authRoles;
+            result = createAuthRoles();;
         }};
 
         securityCustomAuthenticationProvider.authenticate(authentication);
@@ -114,14 +93,39 @@ public class CustomAuthenticationProviderTest {
             securityAuthenticationDAO.findByUser(anyString);
             result = basicAuthenticationEntity;
 
-            List<AuthRole> authRoles = new ArrayList<>();
-            authRoles.add(AuthRole.ROLE_ADMIN);
-            authRoles.add(AuthRole.ROLE_USER);
-
             securityAuthenticationDAO.getRolesForUser(anyString);
-            result = authRoles;
+            result = createAuthRoles();;
         }};
 
         securityCustomAuthenticationProvider.authenticate(authentication);
+    }
+
+    private List<AuthRole> createAuthRoles() {
+        List<AuthRole> authRoles = new ArrayList<>();
+        authRoles.add(AuthRole.ROLE_ADMIN);
+        authRoles.add(AuthRole.ROLE_USER);
+        return authRoles;
+    }
+
+    private Authentication createX509Auth() {
+        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
+        assertNotNull(certificate);
+        X509Certificate[] certificates = new X509Certificate[1];
+        certificates[0] = certificate;
+
+        Authentication authentication = new X509CertificateAuthentication(certificates);
+        return authentication;
+    }
+
+    private Authentication createBlueCoatAuth() throws ParseException {
+        String serial = "123ABCD";
+        String issuer = "CN=PEPPOL SERVICE METADATA PUBLISHER TEST CA,OU=FOR TEST PURPOSES ONLY,O=NATIONAL IT AND TELECOM AGENCY,C=DK";
+        String subject = "O=DG-DIGIT,CN=SMP_1000000007,C=BE";
+        DateFormat df = new SimpleDateFormat("MMM d hh:mm:ss yyyy zzz", Locale.US);
+        Date validFrom = df.parse("Jun 01 10:37:53 2015 CEST");
+        Date validTo = df.parse("Jun 01 10:37:53 2035 CEST");
+        String certHeaderValue = "serial=" + serial + "&subject=" + subject + "&validFrom="+ df.format(validFrom) +"&validTo=" + df.format(validTo) +"&issuer=" + issuer;
+
+        return new BlueCoatClientCertificateAuthentication(certHeaderValue);
     }
 }
