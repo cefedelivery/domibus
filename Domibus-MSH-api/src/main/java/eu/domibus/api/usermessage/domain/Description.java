@@ -1,4 +1,4 @@
-package eu.domibus.api.message.usermessage;
+package eu.domibus.api.usermessage.domain;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;

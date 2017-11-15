@@ -1,7 +1,7 @@
 package eu.domibus.ext.delegate.services.usermessage;
 
-import eu.domibus.api.message.UserMessageService;
-import eu.domibus.api.message.usermessage.*;
+import eu.domibus.api.usermessage.UserMessageService;
+import eu.domibus.api.usermessage.domain.*;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.ext.delegate.services.security.SecurityService;
 import eu.domibus.ext.domain.UserMessageDTO;

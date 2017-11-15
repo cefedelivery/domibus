@@ -1,6 +1,6 @@
 package eu.domibus.ext.delegate.services.usermessage;
 
-import eu.domibus.api.message.usermessage.UserMessage;
+import eu.domibus.api.usermessage.domain.UserMessage;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.ext.delegate.services.security.SecurityService;
 import eu.domibus.ext.domain.UserMessageDTO;
@@ -21,7 +21,7 @@ public class UserMessageServiceDelegate implements UserMessageService{
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageServiceDelegate.class);
 
     @Autowired
-    eu.domibus.api.message.UserMessageService userMessageCoreService;
+    eu.domibus.api.usermessage.UserMessageService userMessageCoreService;
 
     @Autowired
     DomainExtConverter domainConverter;

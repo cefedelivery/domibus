@@ -1,7 +1,7 @@
 package eu.domibus.ext.delegate.services.usermessage;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.util.AOPUtil;
 import eu.domibus.ext.domain.UserMessageDTO;
 import eu.domibus.ext.exceptions.DomibusErrorCode;

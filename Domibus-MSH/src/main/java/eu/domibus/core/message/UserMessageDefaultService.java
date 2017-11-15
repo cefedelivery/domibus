@@ -6,7 +6,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
 import eu.domibus.api.pmode.domain.LegConfiguration;
@@ -170,12 +170,12 @@ public class UserMessageDefaultService implements UserMessageService {
     }
 
     @Override
-    public eu.domibus.api.message.usermessage.UserMessage getMessage(String messageId) {
+    public eu.domibus.api.usermessage.domain.UserMessage getMessage(String messageId) {
         final UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(messageId);
         if(userMessageByMessageId == null) {
             return null;
         }
-        return domainExtConverter.convert(userMessageByMessageId, eu.domibus.api.message.usermessage.UserMessage.class);
+        return domainExtConverter.convert(userMessageByMessageId, eu.domibus.api.usermessage.domain.UserMessage.class);
     }
 
     @Override
