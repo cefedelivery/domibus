@@ -3,7 +3,7 @@ package eu.domibus.plugin.handler;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.ErrorCode;
