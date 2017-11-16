@@ -35,7 +35,7 @@
     </bean>
 
     <bean id="atomikosUserTransaction"
-          class="com.atomikos.icatch.jta.J2eeUserTransaction">
+          class="com.atomikos.icatch.jta.J2eeUserTransaction" depends-on="userTransactionService">
     </bean>
 
     <bean id="transactionManager"
