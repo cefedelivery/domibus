@@ -271,11 +271,11 @@ public class CertificateServiceImpl implements CertificateService {
         }
         certificate.setCertificateStatus(CertificateStatus.OK);
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime offsetDate = now.minusDays(revocationOffsetInDays);
+        LocalDateTime offsetDate = now.plusDays(revocationOffsetInDays);
         LocalDateTime notAfter = certificate.getNotAfter().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         if (now.isAfter(notAfter)) {
             certificate.setCertificateStatus(CertificateStatus.REVOKED);
-        } else if (offsetDate.isBefore(notAfter)) {
+        } else if (offsetDate.isAfter(notAfter)) {
             certificate.setCertificateStatus(CertificateStatus.SOON_REVOKED);
         }
         return certificate;

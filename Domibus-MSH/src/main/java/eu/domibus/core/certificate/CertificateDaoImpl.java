@@ -61,7 +61,7 @@ public class CertificateDaoImpl extends BasicDao<Certificate> implements Certifi
         Date currentDate = Date.from(LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
         TypedQuery<Certificate> namedQuery = em.createNamedQuery("Certificate.findOnStatusAndNotificationDate", Certificate.class);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Searching for revoked or soon revoked certificate for current date [{}]", currentDate);
+            LOG.debug("Searching certificate with status [{}] for current date [{}]", certificateStatus, currentDate);
         }
         namedQuery.setParameter("CERTIFICATE_STATUS", certificateStatus);
         namedQuery.setParameter("CURRENT_DATE", currentDate);
