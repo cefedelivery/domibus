@@ -3,6 +3,8 @@ package eu.domibus.core.certificate;
 import eu.domibus.audit.InMemoryDataBaseConfig;
 import eu.domibus.audit.OracleDataBaseConfig;
 import eu.domibus.common.model.certificate.Certificate;
+import eu.domibus.common.model.certificate.CertificateStatus;
+import eu.domibus.common.model.certificate.CertificateType;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Test;
@@ -72,6 +74,8 @@ public class CertificateDaoImplTest {
         firstCertificate.setAlias(firstCertificateName);
         firstCertificate.setNotBefore(notBefore);
         firstCertificate.setNotAfter(notAfter);
+        firstCertificate.setCertificateType(CertificateType.PUBLIC);
+        firstCertificate.setCertificateStatus(CertificateStatus.OK);
 
         certificateDao.saveOrUpdate(firstCertificate);
 
@@ -79,6 +83,8 @@ public class CertificateDaoImplTest {
         secondCertificate.setAlias(secondCertificateName);
         secondCertificate.setNotBefore(notBefore);
         secondCertificate.setNotAfter(notAfter);
+        secondCertificate.setCertificateType(CertificateType.PUBLIC);
+        secondCertificate.setCertificateStatus(CertificateStatus.SOON_REVOKED);
 
         em.persist(secondCertificate);
 
@@ -86,14 +92,16 @@ public class CertificateDaoImplTest {
         secondCertificate.setAlias(secondCertificateName);
         secondCertificate.setNotBefore(notBeforeChanged);
         secondCertificate.setNotAfter(notAfterChanged);
+        secondCertificate.setCertificateType(CertificateType.PUBLIC);
+        secondCertificate.setCertificateStatus(CertificateStatus.SOON_REVOKED);
 
         certificateDao.saveOrUpdate(secondCertificate);
 
-        Certificate certificate = certificateDao.getByAlias(firstCertificateName).get();
+        Certificate certificate = certificateDao.getByAliasAndType(firstCertificateName, CertificateType.PUBLIC).get();
         assertEquals(notBefore, certificate.getNotBefore());
         assertEquals(notAfter, certificate.getNotAfter());
 
-        certificate = certificateDao.getByAlias(secondCertificateName).get();
+        certificate = certificateDao.getByAliasAndType(secondCertificateName, CertificateType.PUBLIC).get();
         assertEquals(notBeforeChanged, certificate.getNotBefore());
         assertEquals(notAfterChanged, certificate.getNotAfter());
 
@@ -108,19 +116,23 @@ public class CertificateDaoImplTest {
         firstCertificate.setAlias(firstCertificateName);
         firstCertificate.setNotBefore(new Date());
         firstCertificate.setNotAfter(new Date());
+        firstCertificate.setCertificateType(CertificateType.PUBLIC);
+        firstCertificate.setCertificateStatus(CertificateStatus.SOON_REVOKED);
 
         Certificate secondCertificate = new Certificate();
         String secondCertificateName = "secondCertificateName";
         secondCertificate.setAlias(secondCertificateName);
         secondCertificate.setNotBefore(new Date());
         secondCertificate.setNotAfter(new Date());
+        secondCertificate.setCertificateType(CertificateType.PUBLIC);
+        secondCertificate.setCertificateStatus(CertificateStatus.SOON_REVOKED);
 
         em.persist(firstCertificate);
         em.persist(secondCertificate);
 
-        assertEquals(firstCertificate, certificateDao.getByAlias(firstCertificateName).get());
-        assertEquals(secondCertificate, certificateDao.getByAlias(secondCertificateName).get());
-        assertFalse(certificateDao.getByAlias("wrongAlias").isPresent());
+        assertEquals(firstCertificate, certificateDao.getByAliasAndType(firstCertificateName, CertificateType.PUBLIC).get());
+        assertEquals(secondCertificate, certificateDao.getByAliasAndType(secondCertificateName, CertificateType.PUBLIC).get());
+        assertFalse(certificateDao.getByAliasAndType("wrongAlias", CertificateType.PUBLIC).isPresent());
 
     }
 
@@ -130,21 +142,22 @@ public class CertificateDaoImplTest {
      */
     @Test
     @Transactional
-    public void getCloseToRevocationWithNothingToLog() {
-        LocalDate now = LocalDate.now();
-        LocalDate notAfter = now.plusDays(5);
-        LocalDate startDate = now.plusDays(6);
-        LocalDate endDate = now.plusDays(10);
-
-        Certificate firstCertificate = new Certificate();
+    public void getUnNotifiedSoonRevoked() {
+        Certificate certificate = new Certificate();
         String firstCertificateName = "firstCertificateName";
-        firstCertificate.setAlias(firstCertificateName);
-        firstCertificate.setNotBefore(new Date());
-        firstCertificate.setNotAfter(Date.from(notAfter.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-        em.persist(firstCertificate);
+        certificate.setAlias(firstCertificateName);
+        certificate.setNotBefore(new Date());
+        certificate.setCertificateStatus(CertificateStatus.SOON_REVOKED);
+        certificate.setCertificateType(CertificateType.PRIVATE);
+        certificate.setNotAfter(new Date());
+        em.persist(certificate);
+        List<Certificate> unNotifiedRevoked = certificateDao.getUnNotifiedSoonRevoked();
+        assertEquals(1, unNotifiedRevoked.size());
 
-        List<Certificate> closeToRevocation = certificateDao.getCloseToRevocation(Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()), Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-        assertEquals(0, closeToRevocation.size());
+        certificate.setLastNotification(Date.from(LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
+        em.persist(certificate);
+        unNotifiedRevoked = certificateDao.getUnNotifiedSoonRevoked();
+        assertEquals(0, unNotifiedRevoked.size());
     }
 
     /**
@@ -153,76 +166,23 @@ public class CertificateDaoImplTest {
      */
     @Test
     @Transactional
-    public void getCloseToRevocationWithOneCertificateToLog() {
-        LocalDate now = LocalDate.now();
-        LocalDate notAfter = now.plusDays(5);
-        LocalDate startDate = now.plusDays(4);
-        LocalDate endDate = now.plusDays(10);
+    public void getUnNotifiedRevoked() {
 
-        Certificate firstCertificate = new Certificate();
+        Certificate certificate = new Certificate();
         String firstCertificateName = "firstCertificateName";
-        firstCertificate.setAlias(firstCertificateName);
-        firstCertificate.setNotBefore(new Date());
-        firstCertificate.setNotAfter(Date.from(notAfter.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-        em.persist(firstCertificate);
-        LOG.info("Persisted certificate [{}]", firstCertificate);
+        certificate.setAlias(firstCertificateName);
+        certificate.setNotBefore(new Date());
+        certificate.setCertificateStatus(CertificateStatus.REVOKED);
+        certificate.setCertificateType(CertificateType.PRIVATE);
+        certificate.setNotAfter(new Date());
+        em.persist(certificate);
+        List<Certificate> unNotifiedRevoked = certificateDao.getUnNotifiedRevoked();
+        assertEquals(1, unNotifiedRevoked.size());
 
-        List<Certificate> closeToRevocation = certificateDao.getCloseToRevocation(Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()), Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-        assertEquals(1, closeToRevocation.size());
-        closeToRevocation.forEach(certificate -> certificateDao.notifyRevocation(certificate));
-        closeToRevocation = certificateDao.getCloseToRevocation(Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()), Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-        assertEquals(0, closeToRevocation.size());
-    }
-
-    /**
-     * In this scenario, notAfter is between start / end date and notification date is < then current date, so
-     * the method should return the certificate.
-     */
-    @Test
-    @Transactional
-    public void getCloseToRevocationWithOneCertificateToLogDueToNotificationDate() {
-        LocalDate now = LocalDate.now();
-        LocalDate notAfter = now.plusDays(5);
-        LocalDate startDate = now.plusDays(4);
-        LocalDate endDate = now.plusDays(10);
-
-        Certificate firstCertificate = new Certificate();
-        String firstCertificateName = "firstCertificateName";
-        firstCertificate.setAlias(firstCertificateName);
-        firstCertificate.setNotBefore(new Date());
-        firstCertificate.setNotAfter(Date.from(notAfter.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-        firstCertificate.setLastNotification(Date.from(now.minusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-        em.persist(firstCertificate);
-        LOG.info("Persisted certificate [{}]", firstCertificate);
-
-        List<Certificate> closeToRevocation = certificateDao.getCloseToRevocation(Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()), Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-        assertEquals(1, closeToRevocation.size());
-        closeToRevocation.forEach(certificate -> certificateDao.notifyRevocation(certificate));
-    }
-
-    /**
-     * In this scenario, notAfter is between start / end date and notification date == current date, so
-     * the method should not return the certificate.
-     */
-    @Test
-    @Transactional
-    public void getCloseToRevocationWithNoCertificateToLogDueToNotificationDate() {
-        LocalDate now = LocalDate.now();
-        LocalDate notAfter = now.plusDays(5);
-        LocalDate startDate = now.plusDays(4);
-        LocalDate endDate = now.plusDays(10);
-
-        Certificate firstCertificate = new Certificate();
-        String firstCertificateName = "firstCertificateName";
-        firstCertificate.setAlias(firstCertificateName);
-        firstCertificate.setNotBefore(new Date());
-        firstCertificate.setNotAfter(Date.from(notAfter.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-        firstCertificate.setLastNotification(Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-        em.persist(firstCertificate);
-        LOG.info("Persisted certificate [{}]", firstCertificate);
-
-        List<Certificate> closeToRevocation = certificateDao.getCloseToRevocation(Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()), Date.from(endDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-        assertEquals(0, closeToRevocation.size());
+        certificate.setLastNotification(Date.from(LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
+        em.persist(certificate);
+        unNotifiedRevoked = certificateDao.getUnNotifiedRevoked();
+        assertEquals(0, unNotifiedRevoked.size());
     }
 
 }

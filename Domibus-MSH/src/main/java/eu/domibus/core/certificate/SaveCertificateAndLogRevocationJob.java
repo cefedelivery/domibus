@@ -12,13 +12,13 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
  * @since 4.0
  */
 @DisallowConcurrentExecution
-public class SaveCertificateDataJob extends QuartzJobBean {
+public class SaveCertificateAndLogRevocationJob extends QuartzJobBean {
 
     @Autowired
     private CertificateService certificateService;
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        certificateService.saveCertificateData();
+        certificateService.saveCertificateAndLogRevocation();
     }
 }

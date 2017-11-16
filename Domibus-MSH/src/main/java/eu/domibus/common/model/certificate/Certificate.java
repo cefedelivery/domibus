@@ -21,7 +21,8 @@ import java.util.Objects;
 )
 @NamedQueries({
         @NamedQuery(name = "Certificate.findByAlias", query = "FROM Certificate c where c.alias=:ALIAS"),
-        @NamedQuery(name = "Certificate.findCloseToRevocation", query = "FROM Certificate c where c.notAfter between :START_DATE AND :END_DATE AND (c.lastNotification is null OR c.lastNotification<:CURRENT_DATE)")
+        @NamedQuery(name = "Certificate.findByAliasAndType", query = "FROM Certificate c where c.alias=:ALIAS AND c.certificateType=:CERTIFICATE_TYPE"),
+        @NamedQuery(name = "Certificate.findOnStatusAndNotificationDate", query = "FROM Certificate c where c.certificateStatus=:CERTIFICATE_STATUS AND (c.lastNotification is null OR c.lastNotification<:CURRENT_DATE)")
 })
 public class Certificate extends AbstractBaseEntity {
 
@@ -42,6 +43,16 @@ public class Certificate extends AbstractBaseEntity {
     @Column(name = "REVOKE_NOTIFICATION_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastNotification;
+
+    @Column(name = "CERTIFICATE_TYPE")
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private CertificateType certificateType;
+
+    @Column(name = "CERTIFICATE_STATUS")
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private CertificateStatus certificateStatus;
 
     public String getAlias() {
         return alias;
@@ -75,18 +86,39 @@ public class Certificate extends AbstractBaseEntity {
         this.lastNotification = lastNotification;
     }
 
+    public CertificateType getCertificateType() {
+        return certificateType;
+    }
+
+    public CertificateStatus getCertificateStatus() {
+        return certificateStatus;
+    }
+
+    public void setCertificateStatus(CertificateStatus certificateStatus) {
+        this.certificateStatus = certificateStatus;
+    }
+
+    public void setCertificateType(CertificateType certificateType) {
+        this.certificateType = certificateType;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Certificate that = (Certificate) o;
-        return Objects.equals(alias, that.alias);
+        return Objects.equals(alias, that.alias) &&
+                Objects.equals(notBefore, that.notBefore) &&
+                Objects.equals(notAfter, that.notAfter) &&
+                Objects.equals(lastNotification, that.lastNotification) &&
+                certificateType == that.certificateType &&
+                certificateStatus == that.certificateStatus;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), alias);
+        return Objects.hash(super.hashCode(), alias, notBefore, notAfter, lastNotification, certificateType, certificateStatus);
     }
 
     @Override
@@ -96,6 +128,8 @@ public class Certificate extends AbstractBaseEntity {
                 ", notBefore=" + notBefore +
                 ", notAfter=" + notAfter +
                 ", lastNotification=" + lastNotification +
+                ", certificateType=" + certificateType +
+                ", certificateStatus=" + certificateStatus +
                 '}';
     }
 }

@@ -85,7 +85,8 @@ public enum DomibusMessageCode implements MessageCode {
     SEC_CONSOLE_LOGIN_UNKNOWN_USER("SEC-013", "The user [{}] is unknown"),
     SEC_CONSOLE_LOGIN_INACTIVE_USER("SEC-014", "The user [{}] is not active"),
     SEC_CONSOLE_LOGIN_SUSPENDED_USER("SEC-015", "The user [{}] is suspended"),
-    SEC_CERTIFICATE_REVOCATION("SEC-016", "The certificate with alias[{}] will be revoked on [{}]");
+    SEC_CERTIFICATE_SOON_REVOKED("SEC-016", "The certificate with alias [{}] will be revoked on [{}]"),
+    SEC_CERTIFICATE_REVOKED("SEC-017", "The certificate with alias [{}] is revoked since [{}]");
 
     String code;
     String message;

@@ -13,7 +13,9 @@ public interface CertificateDao {
 
     void saveOrUpdate(Certificate certificate);
 
-    List<Certificate> getCloseToRevocation(Date startDate, Date endDate);
+    List<Certificate> getUnNotifiedSoonRevoked();
+
+    List<Certificate> getUnNotifiedRevoked();
 
     void notifyRevocation(Certificate certificate);
 }

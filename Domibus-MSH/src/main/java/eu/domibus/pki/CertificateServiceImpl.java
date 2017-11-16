@@ -3,6 +3,8 @@ package eu.domibus.pki;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import eu.domibus.api.security.TrustStoreEntry;
+import eu.domibus.common.model.certificate.CertificateStatus;
+import eu.domibus.common.model.certificate.CertificateType;
 import eu.domibus.core.certificate.CertificateDao;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -25,9 +27,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
-import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_REVOCATION;
+import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_REVOKED;
+import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_SOON_REVOKED;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -165,7 +170,6 @@ public class CertificateServiceImpl implements CertificateService {
         throw new IllegalArgumentException("The certificate does not contain a common name (CN): " + certificate.getSubjectDN().getName());
     }
 
-
     /**
      * Load certificate with alias from JKS file and return as {@code X509Certificate}.
      *
@@ -218,28 +222,66 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public void saveCertificateData() {
-        retrieveCertificates().forEach(certificate -> certificateDao.saveOrUpdate(certificate));
+    public void saveCertificateAndLogRevocation() {
+        saveCertificateData();
+        logCertificateRevocationWarning();
     }
 
-    private List<eu.domibus.common.model.certificate.Certificate> retrieveCertificates() {
+    protected void saveCertificateData() {
+        retrieveCertificates().forEach(
+                certificate -> certificateDao.saveOrUpdate(certificate));
+    }
+
+    protected void logCertificateRevocationWarning() {
+        certificateDao.getUnNotifiedSoonRevoked().
+                forEach(certificate -> {
+                    LOG.securityWarn(SEC_CERTIFICATE_SOON_REVOKED, certificate.getAlias(), certificate.getNotAfter());
+                    certificateDao.notifyRevocation(certificate);
+                });
+        certificateDao.getUnNotifiedRevoked().
+                forEach(certificate -> {
+                    LOG.securityError(SEC_CERTIFICATE_REVOKED, certificate.getAlias(), certificate.getNotAfter());
+                    certificateDao.notifyRevocation(certificate);
+                });
+    }
+
+    protected List<eu.domibus.common.model.certificate.Certificate> retrieveCertificates() {
         KeyStore trustStore = cryptoService.getTrustStore();
         List<eu.domibus.common.model.certificate.Certificate> certificates = new ArrayList<>();
         if (trustStore != null) {
             certificates.addAll(
                     extractCertificateFromKeyStore(
-                            trustStore));
+                            trustStore, CertificateType.PUBLIC));
         }
         KeyStore keyStore = cryptoService.getKeyStore();
         if (keyStore != null) {
             certificates.addAll(extractCertificateFromKeyStore(
-                    keyStore));
+                    keyStore, CertificateType.PRIVATE));
         }
-        return certificates.stream().
+        return certificates.stream().map(this::setCertificateStatus).
                 collect(collectingAndThen(toList(), ImmutableList::copyOf));
     }
 
-    private List<eu.domibus.common.model.certificate.Certificate> extractCertificateFromKeyStore(KeyStore trustStore) {
+    protected eu.domibus.common.model.certificate.Certificate setCertificateStatus(eu.domibus.common.model.certificate.Certificate certificate) {
+        int revocationOffsetInDays = Integer.valueOf(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
+        try {
+            revocationOffsetInDays = Integer.valueOf(domibusProperties.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
+        } catch (NumberFormatException n) {
+
+        }
+        certificate.setCertificateStatus(CertificateStatus.OK);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime offsetDate = now.minusDays(revocationOffsetInDays);
+        LocalDateTime notAfter = certificate.getNotAfter().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        if (now.isAfter(notAfter)) {
+            certificate.setCertificateStatus(CertificateStatus.REVOKED);
+        } else if (offsetDate.isBefore(notAfter)) {
+            certificate.setCertificateStatus(CertificateStatus.SOON_REVOKED);
+        }
+        return certificate;
+    }
+
+    protected List<eu.domibus.common.model.certificate.Certificate> extractCertificateFromKeyStore(KeyStore trustStore, CertificateType certificateType) {
         List<eu.domibus.common.model.certificate.Certificate> certificates = new ArrayList<>();
         try {
             final Enumeration<String> aliases = trustStore.aliases();
@@ -250,33 +292,18 @@ public class CertificateServiceImpl implements CertificateService {
                 certificate.setAlias(alias);
                 certificate.setNotAfter(x509Certificate.getNotAfter());
                 certificate.setNotBefore(x509Certificate.getNotBefore());
+                certificate.setCertificateType(certificateType);
                 certificates.add(certificate);
             }
         } catch (KeyStoreException e) {
             LOG.warn(e.getMessage(), e);
         }
-        return certificates;
-    }
-
-    public void logCertificateRevocationWarning() {
-
-        int maxAttemptAmount = Integer.valueOf(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
-        try {
-            maxAttemptAmount = Integer.valueOf(domibusProperties.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
-        } catch (NumberFormatException n) {
-
+        if (LOG.isDebugEnabled()) {
+            certificates.forEach(certificate -> {
+                LOG.debug("[{}]certificate[{}] extracted for database update", certificateType, certificate);
+            });
         }
-        //search for certificate in the range current date - numberOfdays where revocation date is not today.
-        //if found, display log it and update revocation date.
-        Date startDate = null;
-        Date endDate = null;
-        List<eu.domibus.common.model.certificate.Certificate> closeToRevocation = certificateDao.getCloseToRevocation(startDate, endDate);
-        closeToRevocation.forEach(certificate -> {
-            LOG.securityWarn(SEC_CERTIFICATE_REVOCATION, certificate.getAlias(), certificate.getNotAfter());
-            certificateDao.notifyRevocation(certificate);
-        });
-
-
+        return certificates;
     }
 
 }

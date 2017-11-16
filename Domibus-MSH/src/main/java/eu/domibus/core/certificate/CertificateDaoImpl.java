@@ -2,6 +2,8 @@ package eu.domibus.core.certificate;
 
 import eu.domibus.common.dao.BasicDao;
 import eu.domibus.common.model.certificate.Certificate;
+import eu.domibus.common.model.certificate.CertificateStatus;
+import eu.domibus.common.model.certificate.CertificateType;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -29,25 +31,39 @@ public class CertificateDaoImpl extends BasicDao<Certificate> implements Certifi
 
     @Override
     public void saveOrUpdate(final Certificate certificate) {
-        Optional<Certificate> byAlias = getByAlias(certificate.getAlias());
+        Optional<Certificate> byAlias = getByAliasAndType(certificate.getAlias(), certificate.getCertificateType());
         if (byAlias.isPresent()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Updating certificate [{}]", certificate);
+            }
             certificate.setEntityId(byAlias.get().getEntityId());
             em.merge(certificate);
             return;
         }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Saving certificate [{}]", certificate);
+        }
         em.persist(certificate);
     }
 
+
     @Override
-    public List<Certificate> getCloseToRevocation(final Date startDate, final Date endDate) {
+    public List<Certificate> getUnNotifiedSoonRevoked() {
+        return findOnStatusAndNotificationDate(CertificateStatus.SOON_REVOKED);
+    }
+
+    @Override
+    public List<Certificate> getUnNotifiedRevoked() {
+        return findOnStatusAndNotificationDate(CertificateStatus.REVOKED);
+    }
+
+    protected List<Certificate> findOnStatusAndNotificationDate(final CertificateStatus certificateStatus) {
         Date currentDate = Date.from(LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        TypedQuery<Certificate> namedQuery = em.createNamedQuery("Certificate.findCloseToRevocation", Certificate.class);
+        TypedQuery<Certificate> namedQuery = em.createNamedQuery("Certificate.findOnStatusAndNotificationDate", Certificate.class);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Searching for certificate close to revocation:");
-            LOG.debug(" revocation date between [{}] and [{}] and not yet notified for current date [{}]", startDate, endDate, currentDate);
+            LOG.debug("Searching for revoked or soon revoked certificate for current date [{}]", currentDate);
         }
-        namedQuery.setParameter("START_DATE", startDate);
-        namedQuery.setParameter("END_DATE", endDate);
+        namedQuery.setParameter("CERTIFICATE_STATUS", certificateStatus);
         namedQuery.setParameter("CURRENT_DATE", currentDate);
         return namedQuery.getResultList();
     }
@@ -59,9 +75,10 @@ public class CertificateDaoImpl extends BasicDao<Certificate> implements Certifi
         em.merge(certificate);
     }
 
-    protected Optional<Certificate> getByAlias(final String alias) {
-        TypedQuery<Certificate> namedQuery = em.createNamedQuery("Certificate.findByAlias", Certificate.class);
+    protected Optional<Certificate> getByAliasAndType(final String alias, final CertificateType certificateType) {
+        TypedQuery<Certificate> namedQuery = em.createNamedQuery("Certificate.findByAliasAndType", Certificate.class);
         namedQuery.setParameter("ALIAS", alias);
+        namedQuery.setParameter("CERTIFICATE_TYPE", certificateType);
         try {
             return Optional.of(namedQuery.getSingleResult());
         } catch (NoResultException ex) {

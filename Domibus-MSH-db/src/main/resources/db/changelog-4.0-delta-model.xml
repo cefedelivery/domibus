@@ -287,7 +287,14 @@
                 <constraints nullable="false"/>
             </column>
             <column name="REVOKE_NOTIFICATION_DATE" type="TIMESTAMP"/>
+            <column name="CERTIFICATE_STATUS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CERTIFICATE_TYPE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
-        <addUniqueConstraint columnNames="CERTIFICATE_ALIAS" constraintName="CERTIFICATE_ALIAS" tableName="TB_CERTIFICATE"/>
+        <addUniqueConstraint columnNames="CERTIFICATE_ALIAS,CERTIFICATE_TYPE" constraintName="CERTIFICATE_ALIAS"
+                             tableName="TB_CERTIFICATE"/>
     </changeSet>
 </databaseChangeLog>
