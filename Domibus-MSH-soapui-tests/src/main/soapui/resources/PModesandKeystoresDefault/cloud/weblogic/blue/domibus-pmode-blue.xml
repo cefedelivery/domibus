@@ -101,7 +101,8 @@
 			<service name="testService15" value="bdx:noprocess" type="tc15"/>
 			<service name="testService16" value="bdx:noprocess" type="tc16"/>
 			<service name="testService17" value="bdx:noprocess" type="tc17"/>	
-			<service name="testService18" value="bdx:noprocess" type="tc18"/>			
+			<service name="testService18" value="bdx:noprocess" type="tc18"/>
+			<service name="testService19" value="bdx:noprocess" type="tc19"/>			
 			<service name="connectivityservice" value="http://ec.europa.eu/e-delivery/services/connectivity-service" type="edelivery"/>			
 		</services>
 		<actions>
@@ -122,6 +123,7 @@
 			<action name="tc16Action" value="TC16Leg1"/>
 			<action name="tc17Action" value="TC17Leg1"/>
 			<action name="tc18Action" value="TC18Leg1"/>
+			<action name="tc19Action" value="TC19Leg1"/>
 			<action name="submitMessage" value="submitMessage"/>			
 		</actions>
 		<as4>
@@ -148,6 +150,7 @@
 			<legConfiguration name="pullTestcase16tc16Action" service="testService16" action="tc16Action" defaultMpc="defaultMpcFour" reliability="AS4Reliability" security="signOnly" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			<legConfiguration name="pullTestcase17tc17Action" service="testService17" action="tc17Action" defaultMpc="defaultMpcFive" reliability="noReliability" security="noSigNoEnc" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="false"/>
 			<legConfiguration name="pullTestcase18tc18Action" service="testService18" action="tc18Action" defaultMpc="defaultMpcSeven" reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase19tc19Action" service="testService19" action="tc19Action" defaultMpc="defaultMpcSeven" reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="false"/>
 			</legConfigurations>
 		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
@@ -379,6 +382,19 @@
 			</responderParties>
 			<legs>
 				<leg name="pullTestcase18tc18Action"/>
+			</legs>
+		</process>
+		<process name="tc19Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="blue_gw"/>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase19tc19Action"/>
 			</legs>
 		</process>
 	</businessProcesses>
