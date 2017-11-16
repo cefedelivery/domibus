@@ -28,4 +28,6 @@ public interface CertificateService {
      * @return a list of certificate
      */
     List<TrustStoreEntry> getTrustStoreEntries();
+
+    void saveCertificateData();
 }

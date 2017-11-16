@@ -36,6 +36,12 @@
         <property name="durability" value="true"/>
     </bean>
 
+    <bean id="saveCertificateDataJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.core.certificate.SaveCertificateDataJob"/>
+        <property name="durability" value="true"/>
+    </bean>
+
     <bean id="retryWorkerTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="retryWorkerJob"/>
@@ -53,6 +59,12 @@
         <property name="cronExpression" value="${domibus.account.unlock.cron}"/>
     </bean>
 
+    <bean id="saveCertificateDataTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="saveCertificateDataJob"/>
+        <property name="cronExpression" value="0/10 * * * * ?"/>
+    </bean>
+
     <!-- customizable list of triggers to be executed by quartz -->
     <bean id="userdefinedTriggerList"
           class="org.springframework.beans.factory.config.ListFactoryBean">
@@ -61,6 +73,7 @@
                 <ref bean="retryWorkerTrigger"/>
                 <ref bean="pullRequestTrigger"/>
                 <ref bean="activateSuspendedUserTrigger"/>
+                <ref bean="saveCertificateDataTrigger"/>
             </list>
         </property>
     </bean>

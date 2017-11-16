@@ -280,30 +280,20 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     private Collection<eu.domibus.api.user.User> filterNewUsers(List<eu.domibus.api.user.User> users) {
-        return Collections2.filter(users, new Predicate<eu.domibus.api.user.User>() {
-            @Override
-            public boolean apply(eu.domibus.api.user.User user) {
-                return UserState.NEW.name().equals(user.getStatus());
-            }
-        });
+        return Collections2.filter(users, user -> UserState.NEW.name().equals(user.getStatus()));
     }
 
     private Collection<eu.domibus.api.user.User> filterModifiedUserWithoutPasswordChange(List<eu.domibus.api.user.User> users) {
-        return Collections2.filter(users, new Predicate<eu.domibus.api.user.User>() {
-            @Override
-            public boolean apply(eu.domibus.api.user.User user) {
-                return UserState.UPDATED.name().equals(user.getStatus()) && user.getPassword() == null;
-            }
-        });
+        return Collections2.filter(users, user ->
+                UserState.UPDATED.name().equals(user.getStatus()) &&
+                        user.getPassword() == null);
     }
 
     private Collection<eu.domibus.api.user.User> filterModifiedUserWithPasswordChange(List<eu.domibus.api.user.User> users) {
-        return Collections2.filter(users, new Predicate<eu.domibus.api.user.User>() {
-            @Override
-            public boolean apply(eu.domibus.api.user.User user) {
-                return UserState.UPDATED.name().equals(user.getStatus()) && user.getPassword() != null && !user.getPassword().isEmpty();
-            }
-        });
+        return Collections2.filter(users, user ->
+                UserState.UPDATED.name().equals(user.getStatus()) &&
+                        user.getPassword() != null &&
+                        !user.getPassword().isEmpty());
     }
 
 }

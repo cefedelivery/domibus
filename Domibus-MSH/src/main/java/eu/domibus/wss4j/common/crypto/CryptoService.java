@@ -176,6 +176,11 @@ public class CryptoService {
     }
 
     public KeyStore getKeyStore() {
+        try {
+            initKeystore();
+        } catch (KeyStoreException e) {
+            LOG.debug("Error while loading keystore");
+        }
         return keyStore;
     }
 

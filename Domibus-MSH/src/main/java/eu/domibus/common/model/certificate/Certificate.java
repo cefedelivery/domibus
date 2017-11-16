@@ -2,10 +2,8 @@ package eu.domibus.common.model.certificate;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.Objects;
 
@@ -21,18 +19,28 @@ import java.util.Objects;
                 )
         }
 )
+@NamedQueries({
+        @NamedQuery(name = "Certificate.findByAlias", query = "FROM Certificate c where c.alias=:ALIAS"),
+        @NamedQuery(name = "Certificate.findCloseToRevocation", query = "FROM Certificate c where c.notAfter between :START_DATE AND :END_DATE AND (c.lastNotification is null OR c.lastNotification<:CURRENT_DATE)")
+})
 public class Certificate extends AbstractBaseEntity {
 
     @Column(name = "CERTIFICATE_ALIAS")
+    @NotNull
     private String alias;
 
     @Column(name = "NOT_VALID_BEFORE_DATE")
+    @NotNull
+    @Temporal(TemporalType.TIMESTAMP)
     private Date notBefore;
 
     @Column(name = "NOT_VALID_AFTER_DATE")
+    @NotNull
+    @Temporal(TemporalType.TIMESTAMP)
     private Date notAfter;
 
     @Column(name = "REVOKE_NOTIFICATION_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date lastNotification;
 
     public String getAlias() {
@@ -79,5 +87,15 @@ public class Certificate extends AbstractBaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), alias);
+    }
+
+    @Override
+    public String toString() {
+        return "Certificate{" +
+                "alias='" + alias + '\'' +
+                ", notBefore=" + notBefore +
+                ", notAfter=" + notAfter +
+                ", lastNotification=" + lastNotification +
+                '}';
     }
 }

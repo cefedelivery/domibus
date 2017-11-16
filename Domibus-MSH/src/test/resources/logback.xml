@@ -13,4 +13,6 @@
     <root level="INFO">
         <appender-ref ref="stdout"/>
     </root>
+
+    <logger name="eu.domibus.core.certificate.CertificateDaoImpl" level="DEBUG"/>
 </configuration>

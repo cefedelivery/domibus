@@ -22,7 +22,6 @@ import java.util.Map;
 @Profile("ORACLE_DATABASE")
 public class OracleDataBaseConfig extends AbstractDatabaseConfig{
 
-
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
