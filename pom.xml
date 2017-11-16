@@ -28,8 +28,8 @@
         <spring.security.version>4.2.2.RELEASE</spring.security.version>
         <activemq.version>5.15.2</activemq.version>
         <aspectj.version>1.8.9</aspectj.version>
-        <slf4j.version>1.7.21</slf4j.version>
-        <logback.version>1.1.8</logback.version>
+        <slf4j.version>1.7.25</slf4j.version>
+        <logback.version>1.2.3</logback.version>
         <logback.elasticsearch.appender.version>1.6</logback.elasticsearch.appender.version>
         <httpclient.version>4.5.2</httpclient.version>
         <commons-configuration.version>1.10</commons-configuration.version>
