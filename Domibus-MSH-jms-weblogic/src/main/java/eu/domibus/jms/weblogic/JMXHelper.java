@@ -1,7 +1,7 @@
 package eu.domibus.jms.weblogic;
 
 import eu.domibus.jms.spi.InternalJMSException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -7,7 +7,7 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.rest.PModeResource;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

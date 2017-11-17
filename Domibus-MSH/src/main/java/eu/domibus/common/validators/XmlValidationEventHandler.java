@@ -2,7 +2,7 @@ package eu.domibus.common.validators;
 
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.ValidationEvent;

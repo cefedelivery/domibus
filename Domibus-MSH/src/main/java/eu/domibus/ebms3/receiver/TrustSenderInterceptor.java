@@ -162,7 +162,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         }
 
         LOG.info("Verifying sender trust");
-        if(certificate != null && org.apache.commons.lang.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), sender) ) {
+        if(certificate != null && org.apache.commons.lang3.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), sender) ) {
             if (isPullMessage) {
                 LOG.info("[Pulling] - Sender [" + sender + "] is trusted.");
             } else {

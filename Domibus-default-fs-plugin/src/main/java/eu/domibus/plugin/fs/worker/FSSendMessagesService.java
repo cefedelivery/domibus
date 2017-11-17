@@ -5,7 +5,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.fs.*;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
