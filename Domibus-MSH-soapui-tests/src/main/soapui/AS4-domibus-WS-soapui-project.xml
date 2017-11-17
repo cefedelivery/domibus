@@ -1035,23 +1035,24 @@ test.openConnection();
 log.info "CONNECTION OPENED";
 test.closeConnection();
 log.info "CONNECTION CLOSED";
-test.finalize();</script></con:config></con:testStep><con:properties/></con:testCase><con:testCase id="a019701d-b57c-4895-93f6-ff87e6055e61" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Start default configuration" searchProperties="true"><con:settings/><con:testStep type="groovy" name="Set custom properties" id="6838ca63-c701-48dc-82fd-1a027baeb2dd"><con:settings/><con:config><script>// blue: tomcat (edeltest1)
+test.finalize();</script></con:config></con:testStep><con:properties/></con:testCase><con:testCase id="a019701d-b57c-4895-93f6-ff87e6055e61" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Start default configuration" searchProperties="true"><con:settings/><con:testStep type="groovy" name="Set custom properties" id="6838ca63-c701-48dc-82fd-1a027baeb2dd"><con:settings/><con:config><script>// blue: tomcat (localhost)
 testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://localhost:8080/domibus");
 testRunner.testCase.testSuite.project.setPropertyValue("databaseBlue", "mysql");
 testRunner.testCase.testSuite.project.setPropertyValue("driverBlue", "com.mysql.jdbc.Driver");
-testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlBlue", "jdbc:mysql://localhost:3306/domibus");
-testRunner.testCase.testSuite.project.setPropertyValue("blueDbPassword", "root");
+testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlBlue", "jdbc:mysql://localhost:3306/domibus_blue");
+testRunner.testCase.testSuite.project.setPropertyValue("blueDbUser", "root");
 testRunner.testCase.testSuite.project.setPropertyValue("blueDbPassword", "root");
 
-// red: tomcat (edeltest2)
+// red: tomcat (localhost)
 testRunner.testCase.testSuite.project.setPropertyValue("remoteUrl", "http://localhost:8180/domibus");
 testRunner.testCase.testSuite.project.setPropertyValue("databaseRed", "mysql");
 testRunner.testCase.testSuite.project.setPropertyValue("driverRed", "com.mysql.jdbc.Driver");
-testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlRed", "jdbc:mysql://localhost:3306/domibus");
-testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "root");
+testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlRed", "jdbc:mysql://localhost:3306/domibus_red");
+testRunner.testCase.testSuite.project.setPropertyValue("redDbUser", "root");
 testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "root");
 
 log.info "Update done.";
+
 </script></con:config></con:testStep><con:testStep type="groovy" name="Start Blue-Red" id="b9bd2782-7797-4995-973a-8aba80c4d415"><con:settings/><con:config><script>// Start 2 Domibus: sender and receiver
 Domibus.startSetMSHs(1,1,0,context,log);
 </script></con:config></con:testStep><con:testStep type="delay" name="D1" id="3bc33515-eae2-46e7-a50f-1104a8d1a301"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="65ecdf7b-e0e2-477b-b020-da4c7fb8c855"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
@@ -14780,7 +14781,7 @@ test.finalize();
 
 
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cfce5373-6318-43c6-8aab-2792786af2cf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>907b56bd-bff4-449d-b84c-8ed82b332327</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3fcf1617-5e90-450e-bc0e-c7cd7840450c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cb253836-9800-4570-99b9-82d1d6e205c8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>29296f70-95d5-4801-afcb-02cc210759bd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e0de97f3-e5ea-49e6-aa49-428b5af762d2</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b00c2e52-9cd7-4178-b65b-c16eac472360</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>eaa94670-f16f-4478-9858-ac876d84d50f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>176fd0a4-f682-442c-8e8b-d2262abb2b7d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bac416f9-9709-43d2-aed3-31c6fcff7d80</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d4b16c89-b64f-40c2-8ea4-22d9d2f0896a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d2822aff-64cc-4d3d-b01f-905092eaffb7</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b3a9d704-5f48-4b51-845e-30ad56a09d63</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>096cd24a-d7ef-4e0b-9a04-4e3fc56d0c84</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d316f7b3-f2c4-4da0-8ffe-257836a13c90</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>99411964-e893-44cc-b261-1e0b8c271948</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>09fda003-aac4-4441-a79c-634d215e7e74</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>c8f949d9-b820-463a-a6c3-48ed058c78ea</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>2d6adb0d-a4b5-4d01-b9a1-b3ea83f8ce3c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e110d38c-4b36-417e-9ab6-cad304a49587</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>41a7af78-2394-46d0-a1d7-897b737c4fae</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0524d26a-8fa5-4524-97d4-1721cd46c9d8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>7193cd40-c61f-4280-8130-d3e07792edec</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>06cbdd6a-cc2d-4182-a0fb-08deecd6b606</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>61d28264-b2b5-4079-b982-5f17aaba6579</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e73ca55c-ccb2-4626-8f66-199c5cb3c08d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>76333cec-611d-4545-a169-37eaf4a405e5</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>243248d2-e3f0-4743-9e6e-0518b99831cb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>670d472b-1f71-4664-b6b6-a5126853ef3d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>68aebfbf-18d6-4d28-bae3-fa24d80d8707</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ee85d2b8-508a-4944-a49b-c1dd2cce6c97</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0e2adb68-c93d-4f56-b400-5e88fed72da3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>6f2f591b-d1f8-44d0-baf1-0f0dd2a1327f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d116d1f6-ae2c-4e1b-8cc6-95fec04bac6d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>957d7076-7a15-4a61-9e09-4b458a371cdd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>8008c905-3f1f-4c49-94dc-4a3aaed5406a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>876ad7dd-a645-44dc-85fe-586c22959403</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>6088faa0-8522-4715-9bcb-b78d70630bcb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom144-EDELIVERY-2526-Pull mep: Unsuported policy exception" searchProperties="true" id="801e9376-da99-4f22-9309-a53cef6b212e" timeout="0" wsrmEnabled="false" wsrmVersion="1.0" wsrmAckTo="" amfAuthorisation="false" amfEndpoint="" amfLogin="" amfPassword="">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cfce5373-6318-43c6-8aab-2792786af2cf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>907b56bd-bff4-449d-b84c-8ed82b332327</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3fcf1617-5e90-450e-bc0e-c7cd7840450c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cb253836-9800-4570-99b9-82d1d6e205c8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>29296f70-95d5-4801-afcb-02cc210759bd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e0de97f3-e5ea-49e6-aa49-428b5af762d2</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b00c2e52-9cd7-4178-b65b-c16eac472360</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>eaa94670-f16f-4478-9858-ac876d84d50f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>176fd0a4-f682-442c-8e8b-d2262abb2b7d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bac416f9-9709-43d2-aed3-31c6fcff7d80</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d4b16c89-b64f-40c2-8ea4-22d9d2f0896a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d2822aff-64cc-4d3d-b01f-905092eaffb7</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b3a9d704-5f48-4b51-845e-30ad56a09d63</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>096cd24a-d7ef-4e0b-9a04-4e3fc56d0c84</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d316f7b3-f2c4-4da0-8ffe-257836a13c90</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>99411964-e893-44cc-b261-1e0b8c271948</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>09fda003-aac4-4441-a79c-634d215e7e74</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>c8f949d9-b820-463a-a6c3-48ed058c78ea</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>2d6adb0d-a4b5-4d01-b9a1-b3ea83f8ce3c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e110d38c-4b36-417e-9ab6-cad304a49587</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>41a7af78-2394-46d0-a1d7-897b737c4fae</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0524d26a-8fa5-4524-97d4-1721cd46c9d8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>7193cd40-c61f-4280-8130-d3e07792edec</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>06cbdd6a-cc2d-4182-a0fb-08deecd6b606</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>61d28264-b2b5-4079-b982-5f17aaba6579</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e73ca55c-ccb2-4626-8f66-199c5cb3c08d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>76333cec-611d-4545-a169-37eaf4a405e5</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>243248d2-e3f0-4743-9e6e-0518b99831cb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>670d472b-1f71-4664-b6b6-a5126853ef3d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>68aebfbf-18d6-4d28-bae3-fa24d80d8707</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ee85d2b8-508a-4944-a49b-c1dd2cce6c97</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0e2adb68-c93d-4f56-b400-5e88fed72da3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>6f2f591b-d1f8-44d0-baf1-0f0dd2a1327f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d116d1f6-ae2c-4e1b-8cc6-95fec04bac6d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>957d7076-7a15-4a61-9e09-4b458a371cdd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>8008c905-3f1f-4c49-94dc-4a3aaed5406a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>876ad7dd-a645-44dc-85fe-586c22959403</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>6088faa0-8522-4715-9bcb-b78d70630bcb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom144-Push-EDELIVERY-2201-Verification of the sender alias" searchProperties="true" id="e9acdb4e-b866-49d1-a4ca-215c64be566e">
             <con:settings/>
             
             
@@ -14794,32 +14795,49 @@ test.finalize();
             
             
             
-            <con:testStep type="groovy" name="Config" id="ea750623-0b08-46eb-9208-b421ba5b7bc8"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Set CXF log level to INFO then restart domibus."); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="request" id="39f0b904-8710-412b-be50-f0d3cd00b470" name="Submit Message"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+            <con:testStep type="groovy" name="Set alias and validation properties" id="00018d3d-eaad-417f-8b2a-a01a016caf6c"><con:settings/><con:config><script>// Blue
+def propValueDict1 = ['domibus.sender.trust.validation.onreceiving' : 'true', 'domibus.security.key.private.alias':'bluediff_gw']
+Domibus.changeDomibusProperties("BLUE", propValueDict1, log, context, testRunner)
+
+// Red
+def propValueDict2 = ['domibus.sender.trust.validation.onreceiving' : 'true']
+Domibus.changeDomibusProperties("RED", propValueDict2, log, context, testRunner)</script></con:config></con:testStep><con:testStep type="groovy" name="Copy keystore file for Blue" id="741003ab-4aee-45a0-a783-da6917e80660"><con:settings/><con:config><script>// Copy keystore blue
+def String source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\certificates\\aliasSubjectDiff\\gateway_keystore.jks";
+def String dest = "C:\\domibus\\sender\\domibus\\conf\\domibus\\keystores\\gateway_keystore.jks"; 
+Domibus.copyFile(source,dest,log);
+
+
+
+
+</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Domibus Blue and Red 1" id="76ba4679-1b83-49ce-9331-355bd5e06c6d"><con:settings/><con:config><script>// Stop blue and red
+Domibus.stopSetMSHs(1,1,0,context,log);
+// Start blue and red
+Domibus.startSetMSHs(1,1,0,context,log);
+
+log.info "--SENDER RESTART DONE--";
+</script></con:config></con:testStep><con:testStep type="groovy" name="Upload pmode Blue and Red" id="8c73b6a9-dffa-4fa9-826d-3174a6809ae9"><con:settings/><con:config><script>// Upload PModes: blue and red
+Domibus.uploadPmode("sender","special","\\certificates\\aliasSubjectDiff\\domibus-pmode-blue.xml",context,log);
+Domibus.uploadPmode("receiver","special","\\certificates\\aliasSubjectDiff\\domibus-pmode-red.xml",context,log);</script></con:config></con:testStep><con:testStep type="groovy" name="Upload truststores Blue-Red" id="34e36009-bdd3-40d0-8ea9-16d4c79a9d89"><con:settings/><con:config><script>// Upload truststores: blue for sender and red for receiver.  
+Domibus.uploadTruststore("sender","special","\\certificates\\aliasSubjectDiff\\gateway_truststore.jks",context,log);
+Domibus.uploadTruststore("receiver","special","\\certificates\\aliasSubjectDiff\\gateway_truststore.jks",context,log);
+
+</script></con:config></con:testStep><con:testStep type="request" id="fef34ca1-caec-48b9-8c1c-68e75f844c3b" name="Submit Message Failure"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message Failure" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
    <soap:Header>
       <ns:Messaging>
          <ns:UserMessage>
             <ns:PartyInfo>
                <ns:From>
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-BLue</ns:PartyId>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
                   <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
                </ns:From>
                <ns:To>
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-rED</ns:PartyId>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
                   <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
                </ns:To>
             </ns:PartyInfo>
             <ns:CollaborationInfo>
-               <ns:Service type="tc13">bdx:noprocess</ns:Service>
-               <ns:Action>TC13Leg1</ns:Action>
+               <ns:Service type="tc1">bdx:noprocess</ns:Service>
+               <ns:Action>TC1Leg1</ns:Action>
             </ns:CollaborationInfo>
             <ns:MessageProperties>
                <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
@@ -14837,31 +14855,85 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
    </soap:Header>
    <soap:Body>\r
       <_1:submitRequest>\r
-         <payload payloadId="cid:message">\r
-            <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>\r
+         <payload payloadId="cid:message" contentType="text/xml">
+         	<value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>
          </payload>\r
       </_1:submitRequest>\r
    </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="6da50573-4c2a-47d0-8b0c-88b66cbc5d87"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="65832da5-4cef-4fe9-a371-56d4b43c98ac"/><con:assertion type="XPath Match" name="XPath Match" id="903a69d6-fbf8-4154-8f78-eb72374621aa"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="327fcd66-8d38-459f-b8b6-f7b50830fe27"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
-test.waitForStatus("ACKNOWLEDGED","RECEIVED");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Check" id="4d7dd542-97c0-4c75-8bf6-c39107fa9b7a"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Verify that there is no \"Unsuported policy exception\" present in the logs."); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:tearDownScript>
-//ExcelReporting.reportTestCase(testRunner, log)
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="530f54aa-a767-4da0-a3da-f840a117d5ee"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="25613cb0-9773-4092-98d0-3543d6d2d550"/><con:assertion type="XPath Match" name="XPath Match" id="c491142a-9415-4d0a-a9ae-55b2d98222ee"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5978371d-94be-414f-a8f0-a8e468dc6549"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("WAITING_FOR_RETRY","");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Set validation property to false" id="34545cd7-259f-4338-8eb0-0a10b88881eb"><con:settings/><con:config><script>// Blue
+def propValueDict1 = ['domibus.sender.trust.validation.onreceiving' : 'false']
+Domibus.changeDomibusProperties("BLUE", propValueDict1, log, context, testRunner)
 
-def test = new Domibus(log,null,context)
-def msgID = context.expand( '${Submit Message#Response#//messageID}' )
-test.cleanDBMessageID(msgID)
-test.finalize()
+// Red
+def propValueDict2 = ['domibus.sender.trust.validation.onreceiving' : 'false']
+Domibus.changeDomibusProperties("RED", propValueDict2, log, context, testRunner)</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Domibus Blue and Red 2" id="764d5318-814c-40f4-a0ed-eaa23bbf2f56"><con:settings/><con:config><script>// Stop sender
+Domibus.stopSetMSHs(1,1,0,context,log);
+// Start sender
+Domibus.startSetMSHs(1,1,0,context,log);
+
+log.info "--SENDER RESTART DONE--";
+</script></con:config></con:testStep><con:testStep type="request" id="efe9f2e1-f56d-4212-afa2-adf364ae7176" name="Submit Message Success"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message Success" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+   <soap:Header>
+      <ns:Messaging>
+         <ns:UserMessage>
+            <ns:PartyInfo>
+               <ns:From>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
+               </ns:From>
+               <ns:To>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
+               </ns:To>
+            </ns:PartyInfo>
+            <ns:CollaborationInfo>
+               <ns:Service type="tc1">bdx:noprocess</ns:Service>
+               <ns:Action>TC1Leg1</ns:Action>
+            </ns:CollaborationInfo>
+            <ns:MessageProperties>
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
+            </ns:MessageProperties>
+            <ns:PayloadInfo>
+               <ns:PartInfo href="cid:message">
+                  <ns:PartProperties>
+                     <ns:Property name="MimeType">text/xml</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
+            </ns:PayloadInfo>
+         </ns:UserMessage>
+      </ns:Messaging>
+   </soap:Header>
+   <soap:Body>\r
+      <_1:submitRequest>\r
+         <payload payloadId="cid:message" contentType="text/xml">
+         	<value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>
+         </payload>\r
+      </_1:submitRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="530f54aa-a767-4da0-a3da-f840a117d5ee"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="25613cb0-9773-4092-98d0-3543d6d2d550"/><con:assertion type="XPath Match" name="XPath Match" id="c491142a-9415-4d0a-a9ae-55b2d98222ee"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5978371d-94be-414f-a8f0-a8e468dc6549"><con:configuration><scriptText>
+
+def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","RECEIVED");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Restore properties files" id="a3bc7106-22c6-4917-9b05-327ebb8b5267" disabled="true"><con:settings/><con:config><script>Domibus.restoreDomibusPropertiesFromBackup("BLUE",  log, context, testRunner)
+Domibus.restoreDomibusPropertiesFromBackup("RED",  log, context, testRunner)</script></con:config></con:testStep><con:testStep type="groovy" name="Restore keystore file default" id="3291a5cf-208e-4872-8914-861a00da1dc9" disabled="true"><con:settings/><con:config><script>// Copy keystore blue default
+def String source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresDefault\\blue\\gateway_keystore.jks";
+def String dest = "C:\\domibus\\sender\\domibus\\conf\\domibus\\keystores\\gateway_keystore.jks"; 
+Domibus.copyFile(source,dest,log);
+</script></con:config></con:testStep><con:testStep type="groovy" name="Upload default truststores Blue-Red" id="1f13720d-d10e-4158-b614-6b82891e51bf" disabled="true"><con:settings/><con:config><script>// Upload truststores: default truststores (blue for sender and red for receiver)  
+Domibus.uploadTruststore("sender","default","\\blue\\gateway_truststore.jks",context,log);
+Domibus.uploadTruststore("receiver","default","\\red\\gateway_truststore.jks",context,log);</script></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="ac615bdc-f15a-4663-9006-e305be13b662" disabled="true"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
+Domibus.uploadPmode("sender","default","\\blue\\domibus-pmode-blue.xml",context,log);
+Domibus.uploadPmode("receiver","default","\\red\\domibus-pmode-red.xml",context,log);</script></con:config></con:testStep><con:tearDownScript>testRunner.testCase.testSteps['Restore properties files'].run(testRunner, context);
+testRunner.testCase.testSteps['Restore keystore file default'].run(testRunner, context);
+testRunner.testCase.testSteps['Restart Domibus Blue and Red 1'].run(testRunner, context);
+testRunner.testCase.testSteps['Upload default PModes Blue-Red'].run(testRunner, context);
+//testRunner.testCase.testSteps['Upload default truststores Blue-Red'].run(testRunner, context);
+
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom145-EDELIVERY-2338-Null pointer exception in cxf interceptors when pmodes are not in synch" searchProperties="true" id="7aa3edba-694f-4a71-a67c-720e978f427a" timeout="0" wsrmEnabled="false" wsrmVersion="1.0" wsrmAckTo="" amfAuthorisation="false" amfEndpoint="" amfLogin="" amfPassword="">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cfce5373-6318-43c6-8aab-2792786af2cf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>907b56bd-bff4-449d-b84c-8ed82b332327</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3fcf1617-5e90-450e-bc0e-c7cd7840450c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cb253836-9800-4570-99b9-82d1d6e205c8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>29296f70-95d5-4801-afcb-02cc210759bd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e0de97f3-e5ea-49e6-aa49-428b5af762d2</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b00c2e52-9cd7-4178-b65b-c16eac472360</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>eaa94670-f16f-4478-9858-ac876d84d50f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>176fd0a4-f682-442c-8e8b-d2262abb2b7d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bac416f9-9709-43d2-aed3-31c6fcff7d80</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d4b16c89-b64f-40c2-8ea4-22d9d2f0896a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d2822aff-64cc-4d3d-b01f-905092eaffb7</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b3a9d704-5f48-4b51-845e-30ad56a09d63</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>096cd24a-d7ef-4e0b-9a04-4e3fc56d0c84</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d316f7b3-f2c4-4da0-8ffe-257836a13c90</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>99411964-e893-44cc-b261-1e0b8c271948</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>09fda003-aac4-4441-a79c-634d215e7e74</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>c8f949d9-b820-463a-a6c3-48ed058c78ea</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>2d6adb0d-a4b5-4d01-b9a1-b3ea83f8ce3c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e110d38c-4b36-417e-9ab6-cad304a49587</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>41a7af78-2394-46d0-a1d7-897b737c4fae</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0524d26a-8fa5-4524-97d4-1721cd46c9d8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>7193cd40-c61f-4280-8130-d3e07792edec</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>06cbdd6a-cc2d-4182-a0fb-08deecd6b606</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>61d28264-b2b5-4079-b982-5f17aaba6579</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e73ca55c-ccb2-4626-8f66-199c5cb3c08d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>76333cec-611d-4545-a169-37eaf4a405e5</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>243248d2-e3f0-4743-9e6e-0518b99831cb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>670d472b-1f71-4664-b6b6-a5126853ef3d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>68aebfbf-18d6-4d28-bae3-fa24d80d8707</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ee85d2b8-508a-4944-a49b-c1dd2cce6c97</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0e2adb68-c93d-4f56-b400-5e88fed72da3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>6f2f591b-d1f8-44d0-baf1-0f0dd2a1327f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d116d1f6-ae2c-4e1b-8cc6-95fec04bac6d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0fa6ef50-ede8-4ddc-970e-9ff7a6625e37</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>498c3117-cf06-400e-864e-93f43fce900a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e0b07235-fe1b-4a0d-91f4-5dce059daea6</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3c5aad99-870d-42a3-80c0-5f7589b7ff46</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom145-EDELIVERY-2338-Null pointer exception in cxf interceptors when pmodes are not in synch" searchProperties="true" id="7aa3edba-694f-4a71-a67c-720e978f427a" timeout="0" wsrmEnabled="false" wsrmVersion="1.0" wsrmAckTo="" amfAuthorisation="false" amfEndpoint="" amfLogin="" amfPassword="">
             <con:settings/>
             
             
@@ -16737,7 +16809,88 @@ test.finalize();
 
 
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cfce5373-6318-43c6-8aab-2792786af2cf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>907b56bd-bff4-449d-b84c-8ed82b332327</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3fcf1617-5e90-450e-bc0e-c7cd7840450c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cb253836-9800-4570-99b9-82d1d6e205c8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>29296f70-95d5-4801-afcb-02cc210759bd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e0de97f3-e5ea-49e6-aa49-428b5af762d2</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b00c2e52-9cd7-4178-b65b-c16eac472360</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>eaa94670-f16f-4478-9858-ac876d84d50f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>176fd0a4-f682-442c-8e8b-d2262abb2b7d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bac416f9-9709-43d2-aed3-31c6fcff7d80</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d4b16c89-b64f-40c2-8ea4-22d9d2f0896a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d2822aff-64cc-4d3d-b01f-905092eaffb7</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b3a9d704-5f48-4b51-845e-30ad56a09d63</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>096cd24a-d7ef-4e0b-9a04-4e3fc56d0c84</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d316f7b3-f2c4-4da0-8ffe-257836a13c90</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>99411964-e893-44cc-b261-1e0b8c271948</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>09fda003-aac4-4441-a79c-634d215e7e74</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>c8f949d9-b820-463a-a6c3-48ed058c78ea</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>2d6adb0d-a4b5-4d01-b9a1-b3ea83f8ce3c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e110d38c-4b36-417e-9ab6-cad304a49587</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>41a7af78-2394-46d0-a1d7-897b737c4fae</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0524d26a-8fa5-4524-97d4-1721cd46c9d8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>7193cd40-c61f-4280-8130-d3e07792edec</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>06cbdd6a-cc2d-4182-a0fb-08deecd6b606</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>61d28264-b2b5-4079-b982-5f17aaba6579</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e73ca55c-ccb2-4626-8f66-199c5cb3c08d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>76333cec-611d-4545-a169-37eaf4a405e5</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>243248d2-e3f0-4743-9e6e-0518b99831cb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>670d472b-1f71-4664-b6b6-a5126853ef3d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>68aebfbf-18d6-4d28-bae3-fa24d80d8707</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ee85d2b8-508a-4944-a49b-c1dd2cce6c97</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0e2adb68-c93d-4f56-b400-5e88fed72da3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>6f2f591b-d1f8-44d0-baf1-0f0dd2a1327f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d116d1f6-ae2c-4e1b-8cc6-95fec04bac6d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>957d7076-7a15-4a61-9e09-4b458a371cdd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>8008c905-3f1f-4c49-94dc-4a3aaed5406a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0a64c039-8ecd-4aa1-bb6b-2c74c69d7ad4</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d54736ab-8dc0-4094-b7ad-ea8059836dc3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="8f367ee8-0ac0-43e6-9864-9578b23b5999" name="WS-Dynamic discovery"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom133-Push-Dynamic Discovery-Basic Flow-PEPPOL" searchProperties="true" id="b672feb4-175e-4fa2-868e-daa42ec094eb">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cfce5373-6318-43c6-8aab-2792786af2cf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>907b56bd-bff4-449d-b84c-8ed82b332327</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3fcf1617-5e90-450e-bc0e-c7cd7840450c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cb253836-9800-4570-99b9-82d1d6e205c8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>29296f70-95d5-4801-afcb-02cc210759bd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e0de97f3-e5ea-49e6-aa49-428b5af762d2</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b00c2e52-9cd7-4178-b65b-c16eac472360</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>eaa94670-f16f-4478-9858-ac876d84d50f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>176fd0a4-f682-442c-8e8b-d2262abb2b7d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bac416f9-9709-43d2-aed3-31c6fcff7d80</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d4b16c89-b64f-40c2-8ea4-22d9d2f0896a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d2822aff-64cc-4d3d-b01f-905092eaffb7</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b3a9d704-5f48-4b51-845e-30ad56a09d63</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>096cd24a-d7ef-4e0b-9a04-4e3fc56d0c84</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d316f7b3-f2c4-4da0-8ffe-257836a13c90</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>99411964-e893-44cc-b261-1e0b8c271948</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>09fda003-aac4-4441-a79c-634d215e7e74</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>c8f949d9-b820-463a-a6c3-48ed058c78ea</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>2d6adb0d-a4b5-4d01-b9a1-b3ea83f8ce3c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e110d38c-4b36-417e-9ab6-cad304a49587</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>41a7af78-2394-46d0-a1d7-897b737c4fae</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0524d26a-8fa5-4524-97d4-1721cd46c9d8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>7193cd40-c61f-4280-8130-d3e07792edec</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>06cbdd6a-cc2d-4182-a0fb-08deecd6b606</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>61d28264-b2b5-4079-b982-5f17aaba6579</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e73ca55c-ccb2-4626-8f66-199c5cb3c08d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>76333cec-611d-4545-a169-37eaf4a405e5</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>243248d2-e3f0-4743-9e6e-0518b99831cb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>670d472b-1f71-4664-b6b6-a5126853ef3d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>68aebfbf-18d6-4d28-bae3-fa24d80d8707</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ee85d2b8-508a-4944-a49b-c1dd2cce6c97</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0e2adb68-c93d-4f56-b400-5e88fed72da3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>6f2f591b-d1f8-44d0-baf1-0f0dd2a1327f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d116d1f6-ae2c-4e1b-8cc6-95fec04bac6d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>957d7076-7a15-4a61-9e09-4b458a371cdd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>8008c905-3f1f-4c49-94dc-4a3aaed5406a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0a64c039-8ecd-4aa1-bb6b-2c74c69d7ad4</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d54736ab-8dc0-4094-b7ad-ea8059836dc3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom435-EDELIVERY-2526-Pull mep: Unsuported policy exception" searchProperties="true" id="801e9376-da99-4f22-9309-a53cef6b212e" timeout="0" wsrmEnabled="false" wsrmVersion="1.0" wsrmAckTo="" amfAuthorisation="false" amfEndpoint="" amfLogin="" amfPassword="">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Config" id="ea750623-0b08-46eb-9208-b421ba5b7bc8"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Set CXF log level to INFO then restart domibus."); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="request" id="39f0b904-8710-412b-be50-f0d3cd00b470" name="Submit Message"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+   <soap:Header>
+      <ns:Messaging>
+         <ns:UserMessage>
+            <ns:PartyInfo>
+               <ns:From>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-BLue</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
+               </ns:From>
+               <ns:To>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-rED</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
+               </ns:To>
+            </ns:PartyInfo>
+            <ns:CollaborationInfo>
+               <ns:Service type="tc13">bdx:noprocess</ns:Service>
+               <ns:Action>TC13Leg1</ns:Action>
+            </ns:CollaborationInfo>
+            <ns:MessageProperties>
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
+            </ns:MessageProperties>
+            <ns:PayloadInfo>
+               <ns:PartInfo href="cid:message">
+                  <ns:PartProperties>
+                     <ns:Property name="MimeType">text/xml</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
+            </ns:PayloadInfo>
+         </ns:UserMessage>
+      </ns:Messaging>
+   </soap:Header>
+   <soap:Body>\r
+      <_1:submitRequest>\r
+         <payload payloadId="cid:message">\r
+            <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>\r
+         </payload>\r
+      </_1:submitRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="6da50573-4c2a-47d0-8b0c-88b66cbc5d87"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="65832da5-4cef-4fe9-a371-56d4b43c98ac"/><con:assertion type="XPath Match" name="XPath Match" id="903a69d6-fbf8-4154-8f78-eb72374621aa"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="327fcd66-8d38-459f-b8b6-f7b50830fe27"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","RECEIVED");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Check" id="4d7dd542-97c0-4c75-8bf6-c39107fa9b7a"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Verify that there is no \"Unsuported policy exception\" present in the logs."); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:tearDownScript>
+//ExcelReporting.reportTestCase(testRunner, log)
+
+def test = new Domibus(log,null,context)
+def msgID = context.expand( '${Submit Message#Response#//messageID}' )
+test.cleanDBMessageID(msgID)
+test.finalize()
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="8f367ee8-0ac0-43e6-9864-9578b23b5999" name="WS-Dynamic discovery"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom133-Push-Dynamic Discovery-Basic Flow-PEPPOL" searchProperties="true" id="b672feb4-175e-4fa2-868e-daa42ec094eb">
             <con:settings/>
             
             
@@ -17576,7 +17729,18 @@ testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testC
             
             
             
-            <con:testStep type="groovy" name="Configuration" id="18e61837-c1b0-49ac-93e3-25e504fe6758"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the PEPPOL client for dynamic discovery. In the file domibus-configuration file add/replace properties:\ndomibus.dynamic.discovery.client.specification=PEPPOL\ndomibus.dynamic.discovery.peppolclient.mode=TEST\ndomibus.smlzone=isaitb.acc.edelivery.tech.ec.europa.eu"); 
+            <con:testStep type="groovy" name="Copy crl file" id="7939d36e-2eec-4234-9ca3-dcf61ed5d87d"><con:settings/><con:config><script>def String source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\DynamicDiscovery\\Sender\\revoked\\edeliveryDyn.crl";
+def String dest = "C:\\ec\\domibus\\revoked\\edeliveryDyn.crl"; 
+if(!new File("C:\\ec\\domibus\\revoked\\edeliveryDyn.crl").exists()){
+	Domibus.copyFile(source,dest,log);
+}
+else{
+	log.info "File already exists."
+}
+
+
+
+</script></con:config></con:testStep><con:testStep type="groovy" name="Configuration" id="18e61837-c1b0-49ac-93e3-25e504fe6758"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the PEPPOL client for dynamic discovery. In the file domibus-configuration file add/replace properties:\ndomibus.dynamic.discovery.client.specification=PEPPOL\ndomibus.dynamic.discovery.peppolclient.mode=TEST\ndomibus.smlzone=isaitb.acc.edelivery.tech.ec.europa.eu"); 
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -17712,7 +17876,18 @@ Domibus.copyFile(source,dest,log);
             
             
             
-            <con:testStep type="groovy" name="Configuration" id="6f0748a7-baf3-4860-986f-fa049543195b"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamic.discovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu"); 
+            <con:testStep type="groovy" name="Copy crl file" id="a6a25998-e8e7-4f23-91dc-b8880372c748"><con:settings/><con:config><script>def String source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\DynamicDiscovery\\Sender\\revoked\\edeliveryDyn.crl";
+def String dest = "C:\\ec\\domibus\\revoked\\edeliveryDyn.crl"; 
+if(!new File("C:\\ec\\domibus\\revoked\\edeliveryDyn.crl").exists()){
+	Domibus.copyFile(source,dest,log);
+}
+else{
+	log.info "File already exists."
+}
+
+
+
+</script></con:config></con:testStep><con:testStep type="groovy" name="Configuration" id="6f0748a7-baf3-4860-986f-fa049543195b"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamic.discovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu"); 
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
