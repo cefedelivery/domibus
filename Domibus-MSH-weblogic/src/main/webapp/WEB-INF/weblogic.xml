@@ -13,6 +13,7 @@
             <package-name>org.apache.commons.io.*</package-name>
             <package-name>org.apache.commons.lang.*</package-name>
             <package-name>org.apache.commons.fileupload.*</package-name>
+            <package-name>org.joda.time.*</package-name>
             <package-name>javax.wsdl.*</package-name>
             <package-name>org.hibernate.*</package-name>
             <package-name>org.springframework.*</package-name>
