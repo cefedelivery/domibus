@@ -7,6 +7,11 @@
 
     <bean id="userTransactionService" class="com.atomikos.icatch.config.UserTransactionServiceImp"
           init-method="init" destroy-method="shutdownWait">
+        <property name="initialTransactionServicePlugins">
+            <list>
+                <ref bean="domibusUserTransactionServiceImpConfigurationInit"/>
+            </list>
+        </property>
         <constructor-arg>
             <!-- IMPORTANT: specify all Atomikos properties here -->
             <props>
