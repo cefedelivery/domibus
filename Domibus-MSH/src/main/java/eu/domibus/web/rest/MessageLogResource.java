@@ -13,6 +13,8 @@ import eu.domibus.web.rest.ro.MessageLogResultRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -135,6 +137,56 @@ public class MessageLogResource {
         result.setPageSize(pageSize);
 
         return result;
+    }
+
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "orderBy", required = false) String column,
+            @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+            @RequestParam(value = "messageId", required = false) String messageId,
+            @RequestParam(value = "conversationId", required = false) String conversationId,
+            @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
+            @RequestParam(value = "messageType", defaultValue = "USER_MESSAGE") MessageType messageType,
+            @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus,
+            @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus,
+            @RequestParam(value = "fromPartyId", required = false) String fromPartyId,
+            @RequestParam(value = "toPartyId", required = false) String toPartyId,
+            @RequestParam(value = "refToMessageId", required = false) String refToMessageId,
+            @RequestParam(value = "originalSender", required = false) String originalSender,
+            @RequestParam(value = "finalRecipient", required = false) String finalRecipient,
+            @RequestParam(value = "receivedFrom", required = false) String receivedFrom,
+            @RequestParam(value = "receivedTo", required = false) String receivedTo) {
+        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient);
+        Date from = dateUtil.fromString(receivedFrom);
+        if (from == null) {
+            from = defaultFrom;
+        }
+        Date to = dateUtil.fromString(receivedTo);
+        if (to == null) {
+            to = defaultTo;
+        }
+        filters.put("receivedFrom", from);
+        filters.put("receivedTo", to);
+
+        List<MessageLogInfo> resultList = new ArrayList<>();
+        if (messageType == MessageType.SIGNAL_MESSAGE) {
+            resultList = signalMessageLogDao.findAllInfoPaged(0, 10000, column, asc, filters);
+        } else if (messageType == MessageType.USER_MESSAGE) {
+            resultList = userMessageLogDao.findAllInfoPaged(0, 10000, column, asc, filters);
+        }
+
+        StringBuilder resultText = new StringBuilder(MessageLogInfo.csvTitle()).append("\n");
+        for(MessageLogInfo messageLogInfo : resultList) {
+            resultText.append(messageLogInfo.toCsvString()).append("\n");
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .header("Content-Disposition", "attachment; filename=datatable.csv")
+                .body(resultText.toString());
     }
 
     protected List<MessageLogRO> convertMessageLogInfoList(List<MessageLogInfo> objects) {

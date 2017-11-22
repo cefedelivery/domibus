@@ -244,4 +244,50 @@ public class MessageLogInfo {
                 .append(restored)
                 .toHashCode();
     }
+
+    public static String csvTitle() {
+        return new StringBuilder()
+                .append("Conversation Id,")
+                .append("From Party Id,")
+                .append("To Party Id,")
+                .append("Original Sender,")
+                .append("Final Recipient,")
+                .append("Ref To Message Id,")
+                .append("Message Id,")
+                .append("Message Status,")
+                .append("Notification Status,")
+                .append("MSH Role,")
+                .append("Message Type,")
+                .append("Deleted,")
+                .append("Received,")
+                .append("Send Attempts,")
+                .append("Max Send Attempts,")
+                .append("Next Attempt,")
+                .append("Failed,")
+                .append("Restored")
+                .toString();
+    }
+
+    public String toCsvString() {
+        return new StringBuilder()
+                .append(conversationId).append(",")
+                .append(fromPartyId).append(",")
+                .append(toPartyId).append(",")
+                .append(originalSender).append(",")
+                .append(finalRecipient).append(",")
+                .append(refToMessageId).append(",")
+                .append(messageId).append(",")
+                .append(messageStatus).append(",")
+                .append(notificationStatus).append(",")
+                .append(mshRole).append(",")
+                .append(messageType).append(",")
+                .append(deleted).append(",")
+                .append(received).append(",")
+                .append(sendAttempts).append(",")
+                .append(sendAttemptsMax).append(",")
+                .append(nextAttempt).append(",")
+                .append(failed).append(",")
+                .append(restored)
+                .toString();
+    }
 }

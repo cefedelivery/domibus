@@ -8,6 +8,7 @@ import {MdDialog, MdDialogRef} from "@angular/material";
 import {MessagelogDetailsComponent} from "app/messagelog/messagelog-details/messagelog-details.component";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
+import { Angular2Csv } from 'angular2-csv/Angular2-csv';
 
 @Component({
   moduleId: module.id,
@@ -362,6 +363,72 @@ export class MessageLogComponent {
 
   download() {
     this.downloadMessage(this.selected[0].messageId);
+  }
+
+  isSaveAsCSVButtonEnabled() : boolean {
+    return true;
+  }
+
+  private getFilterPath() {
+    let result = '?';
+    //filters
+    if (this.filter.messageId) {
+      result += 'messageId=' + this.filter.messageId + '&';
+    }
+
+    if (this.filter.mshRole) {
+      result += 'mshRole=' + this.filter.mshRole + '&';
+    }
+
+    if (this.filter.conversationId) {
+      result += 'conversationId=' + this.filter.conversationId + '&';
+    }
+
+    if (this.filter.messageType) {
+      result += 'messageType' + this.filter.messageType + '&';
+    }
+
+    if (this.filter.messageStatus) {
+      result += 'messageStatus' + this.filter.messageStatus + '&';
+    }
+
+    if (this.filter.notificationStatus) {
+      result += 'notificationStatus' + this.filter.notificationStatus + '&';
+    }
+
+    if (this.filter.fromPartyId) {
+      result += 'fromPartyId' + this.filter.fromPartyId + '&';
+    }
+
+    if (this.filter.toPartyId) {
+      result += 'toPartyId' + this.filter.toPartyId + '&';
+    }
+
+    if (this.filter.originalSender) {
+      result += 'originalSender' + this.filter.originalSender + '&';
+    }
+
+    if (this.filter.finalRecipient) {
+      result += 'finalRecipient' + this.filter.finalRecipient + '&';
+    }
+
+    if (this.filter.refToMessageId) {
+      result += 'refToMessageId' + this.filter.refToMessageId + '&';
+    }
+
+    if (this.filter.receivedFrom) {
+      result += 'receivedFrom' + this.filter.receivedFrom.getTime() + '&';
+    }
+
+    if (this.filter.receivedTo) {
+      result += 'receivedTo' + this.filter.receivedTo.getTime() + '&';
+    }
+
+    return result;
+  }
+
+  saveAsCSV() {
+    this.downloadNative(MessageLogComponent.MESSAGE_LOG_URL + "/csv" + this.getFilterPath());
   }
 
   details(selectedRow: any) {

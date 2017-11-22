@@ -4,6 +4,10 @@
     <md-card>
       <md-card-content>
         <form name="messageFilterForm" #messageFilterForm="ngForm">
+          <button md-icon-button color="primary" [disabled]="!isSaveAsCSVButtonEnabled()" (click)="saveAsCSV()"
+                  id="saveascsvbutton_id">
+            <md-icon>view_comfy</md-icon>
+          </button>
           <ngx-datatable
             #mydatatable
             class="material striped"

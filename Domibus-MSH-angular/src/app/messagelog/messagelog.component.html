@@ -100,6 +100,10 @@
 
 <div class="panel">
   <div class="group-filter-button">
+    <button md-icon-button color="primary" [disabled]="!isSaveAsCSVButtonEnabled()" (click)="saveAsCSV()"
+            id="saveascsvbutton_id">
+      <md-icon>view_comfy</md-icon>
+    </button>
     <span class="row-button">
       <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
                        (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>

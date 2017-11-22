@@ -40,6 +40,8 @@ export class MessageFilterComponent implements DirtyOperations {
 
   areFiltersPersisted: boolean;
 
+  static readonly MESSAGE_FILTER_URL: string = 'rest/messagefilters';
+
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
@@ -80,7 +82,7 @@ export class MessageFilterComponent implements DirtyOperations {
   }
 
   getMessageFilterEntries(): Observable<MessageFilterResult> {
-    return this.http.get('rest/messagefilters').map((response: Response) =>
+    return this.http.get(MessageFilterComponent.MESSAGE_FILTER_URL).map((response: Response) =>
       response.json()
     );
   }
@@ -304,6 +306,23 @@ export class MessageFilterComponent implements DirtyOperations {
     this.enableDelete = false;
   }
 
+  isSaveAsCSVButtonEnabled() : boolean {
+    return true;
+  }
+
+  private downloadNative(content) {
+    let element = document.createElement('a');
+    element.setAttribute('href', content);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  }
+
+  saveAsCSV() {
+    this.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
+  }
+
   cancelDialog() {
     let dialogRef = this.dialog.open(CancelDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
@@ -320,7 +339,7 @@ export class MessageFilterComponent implements DirtyOperations {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.disableSelectionAndButtons();
-        this.http.put('rest/messagefilters', JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
+        this.http.put(MessageFilterComponent.MESSAGE_FILTER_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
           this.alertService.success("The operation 'update message filters' completed successfully.", false);
           this.getBackendFiltersInfo();
         }, err => {

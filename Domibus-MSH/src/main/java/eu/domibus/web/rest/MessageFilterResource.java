@@ -6,6 +6,8 @@ import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.web.rest.ro.MessageFilterRO;
 import eu.domibus.web.rest.ro.MessageFilterResultRO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -51,5 +53,14 @@ public class MessageFilterResource {
     public void updateMessageFilters(@RequestBody List<MessageFilterRO> messageFilterROS) {
         List<BackendFilter> backendFilters = coreConverter.convert(messageFilterROS, BackendFilter.class);
         routingService.updateBackendFilters(backendFilters);
+    }
+
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv() {
+        StringBuilder resultText = new StringBuilder("");
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .header("Content-Disposition", "attachment; filename=datatable.csv")
+                .body(resultText.toString());
     }
 }
