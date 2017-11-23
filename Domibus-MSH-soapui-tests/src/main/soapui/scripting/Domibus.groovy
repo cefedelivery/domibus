@@ -279,7 +279,7 @@ class Domibus
                     messageStatus=it.MESSAGE_STATUS
                     numberAttempts=it.SEND_ATTEMPTS
                 }
-                log.info "|MSG_ID: "+messageID+" | SENDER: Expected Message Status ="+ SMSH +"-- Current Message Status = "+messageStatus+" | maxNumberAttempts: "+maxNumberAttempts+"-- numberAttempts: "+numberAttempts; 
+                log.info "|MSG_ID: "+messageID+" | SENDER: Expected MSG Status ="+ SMSH +"-- Current MSG Status = "+messageStatus+" | maxNumbAttempts: "+maxNumberAttempts+"-- numbAttempts: "+numberAttempts; 
                 if(SMSH=="SEND_FAILURE"){
 					if(messageStatus=="WAITING_FOR_RETRY"){
 						if(((maxNumberAttempts-numberAttempts)>0)&&(!wait)){
@@ -719,7 +719,7 @@ class Domibus
 			case "receivergreen":
 				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 				break;
-			case "testEnv":
+			case "testenv":
 				commandString="curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 				break;
 			default:
