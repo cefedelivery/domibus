@@ -79,6 +79,7 @@ public class FSMessageTransformer
             }
             ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(1);
             payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, mimeType));
+            payloadProperties.add(new Submission.TypedProperty("filename", entry.getValue().getFilename()));
             submission.addPayload(contentId, dataHandler, payloadProperties);
         }
     }
@@ -87,9 +88,18 @@ public class FSMessageTransformer
         Map<String, FSPayload> result = new HashMap<>(submission.getPayloads().size());
         for (final Submission.Payload payload : submission.getPayloads()) {
             String mimeType = null;
+            String filename = null;
             for (Submission.TypedProperty payloadProperty : payload.getPayloadProperties()) {
                 if (payloadProperty.getKey().equals(MIME_TYPE)) {
                     mimeType = payloadProperty.getValue();
+                    break;
+                }
+            }
+
+            for (Submission.TypedProperty payloadProperty : payload.getPayloadProperties()) {
+                if (payloadProperty.getKey().equalsIgnoreCase("filename")) {
+                    filename = payloadProperty.getValue();
+                    filename = StringUtils.substringBefore(filename, ".pdf");
                     break;
                 }
             }
@@ -99,6 +109,7 @@ public class FSMessageTransformer
             }
             
             FSPayload fsPayload = new FSPayload(mimeType, payload.getPayloadDatahandler());
+            fsPayload.setFilename(filename);
             result.put(payload.getContentId(), fsPayload);
         }
         return result;

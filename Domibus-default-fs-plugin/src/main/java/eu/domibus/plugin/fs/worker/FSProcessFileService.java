@@ -57,7 +57,9 @@ public class FSProcessFileService {
 
                 DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
                 Map<String, FSPayload> fsPayloads = new HashMap<>(1);
-                fsPayloads.put(DEFAULT_CONTENT_ID, new FSPayload(null, dataHandler));
+                final FSPayload value = new FSPayload(null, dataHandler);
+                value.setFilename(processableFile.getName().getBaseName());
+                fsPayloads.put(DEFAULT_CONTENT_ID, value);
                 FSMessage message= new FSMessage(fsPayloads, metadata);
                 domain = backendFSImpl.resolveDomain(message);
                 String messageId = backendFSPlugin.submit(message);
@@ -71,7 +73,7 @@ public class FSProcessFileService {
             LOG.error("Error processing file " + processableFile.getName().getURI(), ex);
         } catch (JAXBException ex) {
             LOG.error("Metadata file is not an XML file", ex);
-        } catch (MessagingProcessingException ex) {
+        } catch (Exception ex) {
             LOG.error("Error occurred submitting message to Domibus", ex);
 
             handleSendFailedMessage(processableFile, domain, null, ex.getMessage());

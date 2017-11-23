@@ -58,6 +58,10 @@ public class JMSMessageTransformer
         properties.load(new FileReader(defaultProperties));
     }
 
+    public Properties getProperties() {
+        return properties;
+    }
+
     /**
      * Transforms {@link eu.domibus.plugin.Submission} to {@link javax.jms.MapMessage}
      *

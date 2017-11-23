@@ -6,10 +6,13 @@ import eu.domibus.common.NotificationType;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.AbstractBackendConnector;
+import eu.domibus.plugin.Submission;
+import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
@@ -18,12 +21,16 @@ import org.springframework.jms.core.MessageCreator;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.Session;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
@@ -34,6 +41,10 @@ import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
 public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendJMSImpl.class);
+
+    @Autowired
+    protected MessageRetriever<Submission> messageRetriever;
+
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
     private JmsOperations replyJmsTemplate;
@@ -51,6 +62,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private JmsOperations errorNotifyProducerTemplate;
     private MessageRetrievalTransformer<MapMessage> messageRetrievalTransformer;
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
+
+    @Autowired
+    JMSMessageTransformer jmsMessageTransformer;
 
     public BackendJMSImpl(String name) {
         super(name);
@@ -127,7 +141,45 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @Override
     public void deliverMessage(final String messageId) {
-        mshToBackendTemplate.send(new DownloadMessageCreator(messageId));
+        try {
+            final Submission submission = this.messageRetriever.downloadMessage(messageId);
+            final Set<Submission.Payload> payloads = submission.getPayloads();
+            if(payloads != null) {
+                final Submission.Payload payload = payloads.iterator().next();
+                final Submission.TypedProperty filenameProperty = getProperty("filename", payload.getPayloadProperties());
+                final String newFileName = StringUtils.substringBefore(filenameProperty.getValue(), ".xml") + ".pdf";
+                payload.getPayloadProperties().clear();
+                payload.getPayloadProperties().add(new Submission.TypedProperty("filename", newFileName, null));
+                payload.getPayloadProperties().add(new Submission.TypedProperty("MimeType", "application/pdf", null));
+                final String pdfLocation = jmsMessageTransformer.getProperties().getProperty("pdfLocation");
+                Submission.Payload submissionPayload = new Submission.Payload("message", new DataHandler(new FileDataSource(pdfLocation + "/" + newFileName)), payload.getPayloadProperties(), false, null, null);
+                submission.getPayloads().clear();
+                submission.addPayload(submissionPayload);
+
+                //invert from and to parties
+                final Submission.Party fromParty = submission.getFromParties().iterator().next();
+                final Submission.Party toParty = submission.getToParties().iterator().next();
+                submission.getFromParties().clear();
+                submission.getFromParties().add(toParty);
+                submission.getToParties().clear();
+                submission.getToParties().add(fromParty);
+                submission.setMessageId(null);
+            }
+            messageSubmitter.submit(submission, this.getName());
+            mshToBackendTemplate.send(new DownloadMessageCreator(messageId));
+        } catch (Exception e) {
+            LOG.error("Error getting the message [{}]", messageId, e);
+        }
+    }
+
+    protected Submission.TypedProperty getProperty(String name, final Collection<Submission.TypedProperty> payloadProperties) {
+        for (Submission.TypedProperty payloadProperty : payloadProperties) {
+            final String key = payloadProperty.getKey();
+            if(StringUtils.equalsIgnoreCase(key, name)) {
+                return payloadProperty;
+            }
+        }
+        return null;
     }
 
     @Override

@@ -119,7 +119,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 FSPayload fsPayload = entry.getValue();
                 DataHandler dataHandler = fsPayload.getDataHandler();
                 String contentId  = entry.getKey();
-                String fileName = getFileName(multiplePayloads, messageId, contentId, fsPayload.getMimeType());
+//                String fileName = getFileName(multiplePayloads, messageId, contentId, fsPayload.getMimeType());
+                String fileName = getFileName(entry.getValue().getFilename(), multiplePayloads, messageId, contentId, fsPayload.getMimeType());
 
                 try (FileObject fileObject = incomingFolder.resolveFile(fileName);
                      FileContent fileContent = fileObject.getContent()) {
@@ -132,8 +133,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         }
     }
 
-    private String getFileName(boolean multiplePayloads, String messageId, String contentId, String mimeType) {
-        String fileName = messageId;
+    private String getFileName(String originalFileName, boolean multiplePayloads, String messageId, String contentId, String mimeType) {
+        String fileName = originalFileName + "_" + messageId;
         if (multiplePayloads) {
             fileName += "_" + contentId.replaceFirst("cid:", "");
         }

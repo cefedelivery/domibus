@@ -10,7 +10,7 @@ import javax.activation.DataHandler;
 public class FSPayload {
     
     private final String mimeType;
-    
+    private String filename;
     private final DataHandler dataHandler;
 
     /**
@@ -36,5 +36,12 @@ public class FSPayload {
     public DataHandler getDataHandler() {
         return dataHandler;
     }
-    
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
 }
