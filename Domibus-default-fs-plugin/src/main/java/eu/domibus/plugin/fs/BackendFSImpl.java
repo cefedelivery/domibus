@@ -35,7 +35,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
 
     private static final String LS = System.lineSeparator();
-    private static final String ERROR_EXTENSION = ".error";
+    public static final String ERROR_EXTENSION = ".error";
 
     private static final Set<MessageStatus> SENDING_MESSAGE_STATUSES = EnumSet.of(
             READY_TO_SEND, SEND_ENQUEUED, SEND_IN_PROGRESS, WAITING_FOR_RECEIPT,
@@ -151,14 +151,14 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         return extension;
     }
 
-    private String resolveDomain(FSMessage fsMessage) {
+    public String resolveDomain(FSMessage fsMessage) {
         CollaborationInfo collaborationInfo = fsMessage.getMetadata().getCollaborationInfo();
         String service = collaborationInfo.getService().getValue();
         String action = collaborationInfo.getAction();
         return resolveDomain(service, action);
     }
 
-    String resolveDomain(String service, String action) {
+    public String resolveDomain(String service, String action) {
         String serviceAction = service + "#" + action;
         List<String> domains = fsPluginProperties.getDomains();
         for (String domain : domains) {

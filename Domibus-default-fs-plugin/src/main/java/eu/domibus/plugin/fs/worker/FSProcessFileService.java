@@ -1,12 +1,12 @@
 package eu.domibus.plugin.fs.worker;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.activation.DataHandler;
-import javax.annotation.Resource;
-import javax.xml.bind.JAXBException;
-
+import eu.domibus.common.MSHRole;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.plugin.fs.*;
+import eu.domibus.plugin.fs.ebms3.UserMessage;
+import eu.domibus.plugin.fs.exception.FSPluginException;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,17 +14,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.messaging.MessagingProcessingException;
-import eu.domibus.plugin.fs.BackendFSImpl;
-import eu.domibus.plugin.fs.FSFileNameHelper;
-import eu.domibus.plugin.fs.FSFilesManager;
-import eu.domibus.plugin.fs.FSMessage;
-import eu.domibus.plugin.fs.FSPayload;
-import eu.domibus.plugin.fs.FSXMLHelper;
-import eu.domibus.plugin.fs.ebms3.UserMessage;
-import eu.domibus.plugin.fs.exception.FSPluginException;
+import javax.activation.DataHandler;
+import javax.annotation.Resource;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -36,15 +32,24 @@ public class FSProcessFileService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSProcessFileService.class);
 
     private static final String DEFAULT_CONTENT_ID = "cid:message";
+
+    private static final String LS = System.lineSeparator();
     
     @Resource(name = "backendFSPlugin")
     private BackendFSImpl backendFSPlugin;
+
+    @Autowired
+    private FSPluginProperties fsPluginProperties;
     
     @Autowired
     private FSFilesManager fsFilesManager;
 
+    @Autowired
+    private BackendFSImpl backendFSImpl;
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processFile(FileObject processableFile) {
+        String domain = null;
         try (FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, FSSendMessagesService.METADATA_FILE_NAME)) {
             if (metadataFile.exists()) {
                 UserMessage metadata = parseMetadata(metadataFile);
@@ -54,6 +59,7 @@ public class FSProcessFileService {
                 Map<String, FSPayload> fsPayloads = new HashMap<>(1);
                 fsPayloads.put(DEFAULT_CONTENT_ID, new FSPayload(null, dataHandler));
                 FSMessage message= new FSMessage(fsPayloads, metadata);
+                domain = backendFSImpl.resolveDomain(message);
                 String messageId = backendFSPlugin.submit(message);
                 LOG.info("Message submitted: [{}]", processableFile.getName());
 
@@ -67,7 +73,60 @@ public class FSProcessFileService {
             LOG.error("Metadata file is not an XML file", ex);
         } catch (MessagingProcessingException ex) {
             LOG.error("Error occurred submitting message to Domibus", ex);
+
+            handleSendFailedMessage(processableFile, domain, null, ex.getMessage());
         }
+    }
+
+
+    private void handleSendFailedMessage(FileObject targetFileMessage, String domain, String messageId, String errorDetail) {
+        try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
+             FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);) {
+
+            if (targetFileMessage != null) {
+                String baseName = targetFileMessage.getName().getBaseName();
+                String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + BackendFSImpl.ERROR_EXTENSION;
+
+                String targetFileMessageURI = targetFileMessage.getParent().getName().getPath();
+                String failedDirectoryLocation = FSFileNameHelper.deriveFailedDirectoryLocation(targetFileMessageURI);
+                FileObject failedDirectory = fsFilesManager.getEnsureChildFolder(rootDir, failedDirectoryLocation);
+
+                try {
+                    if (fsPluginProperties.isFailedActionDelete(domain)) {
+                        // Delete
+                        fsFilesManager.deleteFile(targetFileMessage);
+                        LOG.debug("Send failed message file [{}] was deleted", messageId);
+                    } else if (fsPluginProperties.isFailedActionArchive(domain)) {
+                        // Archive
+                        String archivedFileName = FSFileNameHelper.stripStatusSuffix(baseName);
+                        FileObject archivedFile = failedDirectory.resolveFile(archivedFileName);
+                        fsFilesManager.moveFile(targetFileMessage, archivedFile);
+                        LOG.debug("Send failed message file [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
+                    }
+                } finally {
+                    // Create error file
+                    createErrorFile(errorDetail, errorFileName, failedDirectory);
+                }
+            } else {
+                LOG.error("The send failed message file [{}] was not found in domain [{}]", messageId, domain);
+            }
+        } catch (IOException e) {
+            throw new FSPluginException("Error handling the send failed message file " + messageId, e);
+        }
+    }
+
+
+    private void createErrorFile(String errorMessage, String errorFileName, FileObject failedDirectory) throws IOException {
+        String content = String.valueOf(getErrorFileContent(errorMessage));
+        fsFilesManager.createFile(failedDirectory, errorFileName, content);
+    }
+
+    private StringBuilder getErrorFileContent(String errorMessage) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("errorDetail: ").append(errorMessage).append(LS);
+        sb.append("mshRole: ").append(MSHRole.SENDING).append(LS);
+        sb.append("timestamp: ").append(new Date()).append(LS);
+        return sb;
     }
 
     private void renameProcessedFile(FileObject processableFile, String messageId) {
