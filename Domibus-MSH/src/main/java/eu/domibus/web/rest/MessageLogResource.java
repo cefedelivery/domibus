@@ -10,6 +10,7 @@ import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +118,25 @@ public class MessageLogResource {
             result.setCount(numberOfUserMessageLogs);
             resultList = userMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
         }
+
+
+
+        for (MessageLogInfo messageLogInfo : resultList) {
+            String newParty = null;
+            if(StringUtils.containsIgnoreCase(messageLogInfo.getFinalRecipient(), "RO-")) {
+                newParty = "Romania";
+            }
+            if(StringUtils.containsIgnoreCase(messageLogInfo.getFinalRecipient(), "IT-")) {
+                newParty = "Italy";
+            }
+            if("red_gw".equalsIgnoreCase(messageLogInfo.getFromPartyId())) {
+                messageLogInfo.setFromPartyId(newParty);
+            }
+            if("red_gw".equalsIgnoreCase(messageLogInfo.getToPartyId())) {
+                messageLogInfo.setToPartyId(newParty);
+            }
+        }
+
         //needed here because the info is not needed for the queries but is used by the gui as the filter is returned with
         //the result. Why??.
         filters.put("messageType", messageType);
