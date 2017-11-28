@@ -1,4 +1,6 @@
-package eu.domibus.api.message;
+package eu.domibus.api.usermessage;
+
+import eu.domibus.api.usermessage.domain.UserMessage;
 
 import java.util.Date;
 import java.util.List;
@@ -7,7 +9,6 @@ import java.util.List;
  * @author Cosmin Baciu
  * @since 3.3
  */
-//TODO create a model agnostic of peristence/JAXB annotations for exposing the UserMessage details
 public interface UserMessageService {
 
     String getFinalRecipient(final String messageId);
@@ -29,4 +30,11 @@ public interface UserMessageService {
     void scheduleSending(String messageId);
 
     void scheduleSending(String messageId, Long delay);
+
+    /**
+     * Gets a User Message based on the {@code messageId}
+     * @param messageId User Message Identifier
+     * @return User Message {@link UserMessage}
+     */
+    UserMessage getMessage(String messageId);
 }
