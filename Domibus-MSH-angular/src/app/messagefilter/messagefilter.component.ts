@@ -344,6 +344,10 @@ export class MessageFilterComponent implements DirtyOperations {
         }, err => {
           this.alertService.error("The operation 'update message filters' not completed successfully.", false);
         });
+      } else {
+        if(withDownload) {
+          DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
+        }
       }
     });
   }

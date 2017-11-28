@@ -221,8 +221,8 @@ public class ErrorLogEntry extends AbstractBaseEntity implements ErrorResult {
                 .append(Objects.toString(messageInErrorId,"")).append(",")
                 .append(errorCode!=null?errorCode.getErrorCodeName():"").append(",")
                 .append(Objects.toString(errorDetail,"")).append(",")
-                .append(Objects.toString(SimpleDateFormat.getInstance().format(timestamp), "")).append(",")
-                .append(Objects.toString(SimpleDateFormat.getInstance().format(notified),""))
+                .append(Objects.toString(timestamp, "")).append(",")
+                .append(Objects.toString(notified,""))
                 .append(System.lineSeparator())
                 .toString();
     }

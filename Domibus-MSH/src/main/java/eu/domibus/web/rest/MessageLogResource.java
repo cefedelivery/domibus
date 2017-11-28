@@ -13,6 +13,7 @@ import eu.domibus.web.rest.ro.MessageLogResultRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,10 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Tiago Miguel
@@ -37,6 +35,12 @@ import java.util.List;
 public class MessageLogResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageLogResource.class);
+
+    private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
+
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
@@ -171,11 +175,13 @@ public class MessageLogResource {
         filters.put("receivedFrom", from);
         filters.put("receivedTo", to);
 
+        int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS,"10000"));
+
         List<MessageLogInfo> resultList = new ArrayList<>();
         if (messageType == MessageType.SIGNAL_MESSAGE) {
-            resultList = signalMessageLogDao.findAllInfoPaged(0, 10000, column, asc, filters);
+            resultList = signalMessageLogDao.findAllInfoPaged(0, maxCSVrows, column, asc, filters);
         } else if (messageType == MessageType.USER_MESSAGE) {
-            resultList = userMessageLogDao.findAllInfoPaged(0, 10000, column, asc, filters);
+            resultList = userMessageLogDao.findAllInfoPaged(0, maxCSVrows, column, asc, filters);
         }
 
         StringBuilder resultText = new StringBuilder(MessageLogInfo.csvTitle());

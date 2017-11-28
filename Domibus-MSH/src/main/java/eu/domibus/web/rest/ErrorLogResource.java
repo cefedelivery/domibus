@@ -11,6 +11,7 @@ import eu.domibus.web.rest.ro.ErrorLogResultRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @author Cosmin Baciu
@@ -31,6 +33,12 @@ import java.util.List;
 public class ErrorLogResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorLogResource.class);
+
+    private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
+
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
 
     @Autowired
     private ErrorLogDao errorLogDao;
@@ -95,7 +103,9 @@ public class ErrorLogResource {
         HashMap<String, Object> filters = createFilterMap(errorSignalMessageId, mshRole, messageInErrorId, errorCode, errorDetail, timestampFrom, timestampTo, notifiedFrom, notifiedTo);
         result.setFilter(filters);
 
-        final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, 10000, column, asc, filters);
+        int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS,"10000"));
+
+        final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, maxCSVrows, column, asc, filters);
         StringBuilder resultText = new StringBuilder(ErrorLogEntry.csvTitle());
         for(ErrorLogEntry errorLogEntry : errorLogEntries) {
             resultText.append(errorLogEntry.toCsvString());
