@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusMessageCode;
@@ -113,7 +114,7 @@ public class UserManagementServiceImplTest {
             userDao.loadUserByUsername(anyString);
             result = user;
             userManagementService.canApplyAccountLockingPolicy(anyString, user);
-            result = false;
+            result = UserLoginErrorReason.UNKNOWN;
         }};
         userManagementService.handleWrongAuthentication("");
         new Verifications() {{
@@ -128,7 +129,7 @@ public class UserManagementServiceImplTest {
             userDao.loadUserByUsername(anyString);
             result = user;
             userManagementService.canApplyAccountLockingPolicy(anyString, user);
-            result = true;
+            result = UserLoginErrorReason.BAD_CREDENTIALS;
         }};
         userManagementService.handleWrongAuthentication("");
         new Verifications() {{
@@ -204,8 +205,8 @@ public class UserManagementServiceImplTest {
 
     @Test
     public void logOnlyUserNull(@Mocked final DomibusLogger LOG, final @Mocked User user) {
-        boolean test = userManagementService.canApplyAccountLockingPolicy("test", null);
-        assertFalse(test);
+        UserLoginErrorReason userLoginErrorReason = userManagementService.canApplyAccountLockingPolicy("test", null);
+        assertEquals(UserLoginErrorReason.UNKNOWN, userLoginErrorReason);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, "test");
             times = 1;
@@ -221,8 +222,8 @@ public class UserManagementServiceImplTest {
             user.getSuspensionDate();
             result = null;
         }};
-        boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
-        assertFalse(test);
+        UserLoginErrorReason userLoginErrorReason = userManagementService.canApplyAccountLockingPolicy("test", user);
+        assertEquals(UserLoginErrorReason.INACTIVE, userLoginErrorReason);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, "test");
             times = 1;
@@ -237,8 +238,8 @@ public class UserManagementServiceImplTest {
             user.getSuspensionDate();
             result = new Date();
         }};
-        boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
-        assertFalse(test);
+        UserLoginErrorReason userLoginErrorReason = userManagementService.canApplyAccountLockingPolicy("test", user);
+        assertEquals(UserLoginErrorReason.SUSPENDED, userLoginErrorReason);
         new Verifications() {{
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, "test");
             times = 1;
@@ -251,8 +252,8 @@ public class UserManagementServiceImplTest {
             user.isEnabled();
             result = true;
         }};
-        boolean test = userManagementService.canApplyAccountLockingPolicy("test", user);
-        assertTrue(test);
+        UserLoginErrorReason test = userManagementService.canApplyAccountLockingPolicy("test", user);
+        assertEquals(UserLoginErrorReason.BAD_CREDENTIALS,test);
     }
 
     @Test
@@ -311,5 +312,38 @@ public class UserManagementServiceImplTest {
         assertEquals(0, user1.getAttemptCount(), 0d);
     }
 
+    @Test
+    public void handleCorrectAuthenticationWithSomeFaileAttempts(){
+        final String userName="user";
+        final User userEntity = new User();
+        userEntity.setActive(true);
+        userEntity.setAttemptCount(1);
+        new Expectations() {{
+            userDao.loadActiveUserByUsername(userName);
+            result = userEntity;
+        }};
+        userManagementService.handleCorrectAuthentication(userName);
+        new Verifications(){{
+           User user;
+           userDao.update(user=withCapture());times=1;
+           assertEquals(0,user.getAttemptCount(),0d);
+        }};
+    }
+
+    @Test
+    public void handleCorrectAuthenticationWithOutSomeFaileAttempts(){
+        final String userName="user";
+        final User userEntity = new User();
+        userEntity.setActive(true);
+        userEntity.setAttemptCount(0);
+        new Expectations() {{
+            userDao.loadActiveUserByUsername(userName);
+            result = userEntity;
+        }};
+        userManagementService.handleCorrectAuthentication(userName);
+        new Verifications(){{
+            userDao.update(withAny(new User()));times=0;
+        }};
+    }
 
 }
