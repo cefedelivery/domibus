@@ -29,6 +29,19 @@ public class MessageFilterResource {
     @Autowired
     DomainCoreConverter coreConverter;
 
+    private List<MessageFilterRO> getBackendFiltersInformation() {
+        List<BackendFilter> backendFilters = routingService.getBackendFiltersUncached();
+        List<MessageFilterRO> messageFilterResultROS = coreConverter.convert(backendFilters, MessageFilterRO.class);
+        for (MessageFilterRO messageFilter : messageFilterResultROS) {
+            if(messageFilter.getEntityId() == 0) {
+                messageFilter.setPersisted(false);
+            } else {
+                messageFilter.setPersisted(true);
+            }
+        }
+        return messageFilterResultROS;
+    }
+
     @RequestMapping(method = RequestMethod.GET)
     public MessageFilterResultRO getMessageFilter() {
         List<BackendFilter> backendFilters = routingService.getBackendFiltersUncached();
@@ -57,10 +70,14 @@ public class MessageFilterResource {
 
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv() {
-        StringBuilder resultText = new StringBuilder("");
+        StringBuilder resultText = new StringBuilder(MessageFilterRO.csvTitle());
+        for(MessageFilterRO backendFilter : getBackendFiltersInformation()) {
+            resultText.append(backendFilter.toCsvString());
+        }
+
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
-                .header("Content-Disposition", "attachment; filename=datatable.csv")
+                .header("Content-Disposition", "attachment; filename=messagefilter_datatable.csv")
                 .body(resultText.toString());
     }
 }

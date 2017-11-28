@@ -11,6 +11,7 @@ import {EditMessageFilterComponent} from "./editmessagefilter-form/editmessagefi
 import {DirtyOperations} from "../common/dirty-operations";
 import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
 import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
+import {DownloadService} from "../download/download.service";
 
 @Component({
   moduleId: module.id,
@@ -307,20 +308,15 @@ export class MessageFilterComponent implements DirtyOperations {
   }
 
   isSaveAsCSVButtonEnabled() : boolean {
-    return true;
-  }
-
-  private downloadNative(content) {
-    let element = document.createElement('a');
-    element.setAttribute('href', content);
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+    return (this.rows.length < 10000);
   }
 
   saveAsCSV() {
-    this.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
+    if(this.isDirty()) {
+      this.saveDialog(true);
+    } else {
+      DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
+    }
   }
 
   cancelDialog() {
@@ -333,7 +329,7 @@ export class MessageFilterComponent implements DirtyOperations {
     });
   }
 
-  saveDialog() {
+  saveDialog(withDownload: boolean) {
     let headers = new Headers({'Content-Type': 'application/json'});
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
@@ -342,6 +338,9 @@ export class MessageFilterComponent implements DirtyOperations {
         this.http.put(MessageFilterComponent.MESSAGE_FILTER_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
           this.alertService.success("The operation 'update message filters' completed successfully.", false);
           this.getBackendFiltersInfo();
+          if(withDownload) {
+            DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
+          }
         }, err => {
           this.alertService.error("The operation 'update message filters' not completed successfully.", false);
         });

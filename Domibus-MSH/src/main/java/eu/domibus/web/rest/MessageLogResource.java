@@ -178,14 +178,14 @@ public class MessageLogResource {
             resultList = userMessageLogDao.findAllInfoPaged(0, 10000, column, asc, filters);
         }
 
-        StringBuilder resultText = new StringBuilder(MessageLogInfo.csvTitle()).append("\n");
+        StringBuilder resultText = new StringBuilder(MessageLogInfo.csvTitle());
         for(MessageLogInfo messageLogInfo : resultList) {
-            resultText.append(messageLogInfo.toCsvString()).append("\n");
+            resultText.append(messageLogInfo.toCsvString());
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
-                .header("Content-Disposition", "attachment; filename=datatable.csv")
+                .header("Content-Disposition", "attachment; filename=messages_datatable.csv")
                 .body(resultText.toString());
     }
 
