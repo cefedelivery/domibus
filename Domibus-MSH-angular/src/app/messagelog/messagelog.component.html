@@ -100,9 +100,10 @@
 
 <div class="panel">
   <div class="group-filter-button">
+
     <button md-icon-button color="primary" [disabled]="!isSaveAsCSVButtonEnabled()" (click)="saveAsCSV()"
             id="saveascsvbutton_id" md-tooltip="Export as CSV">
-      <md-icon>view_comfy</md-icon>
+      <img src="assets/images/csv.png">
     </button>
     <span class="row-button">
       <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
