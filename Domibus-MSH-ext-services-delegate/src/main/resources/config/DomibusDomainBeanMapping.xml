@@ -11,7 +11,7 @@
         <wildcard>true</wildcard>
         
         <custom-converters>
-            <converter type="eu.domibus.core.converter.DataHandlerConverter">
+            <converter type="eu.domibus.ext.delegate.converter.DataHandlerConverter">
                 <class-a>javax.activation.DataHandler</class-a>
                 <class-b>javax.activation.DataHandler</class-b>
             </converter>

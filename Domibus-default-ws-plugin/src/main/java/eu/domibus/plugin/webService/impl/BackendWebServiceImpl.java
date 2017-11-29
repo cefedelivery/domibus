@@ -429,8 +429,10 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
             LargePayloadType payloadType = WEBSERVICE_OF.createLargePayloadType();
-            LOG.debug("payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
-            payloadType.setValue(extPartInfo.getPayloadDatahandler());
+            if(extPartInfo.getPayloadDatahandler() != null) {
+                LOG.debug("payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
+                payloadType.setValue(extPartInfo.getPayloadDatahandler());
+            }
             if (extPartInfo.isInBody()) {
                 extPartInfo.setHref(BODYLOAD);
                 payloadType.setPayloadId(BODYLOAD);
