@@ -69,7 +69,8 @@
 			<security name="eDeliveryPolicy" policy="eDeliveryPolicy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
-			<security name="eSensPolicy" policy="eSensPolicy.v2.0.xml" signatureMethod="RSA_SHA256"/>			
+			<security name="eSensPolicy" policy="eSensPolicy.v2.0.xml" signatureMethod="RSA_SHA256"/>	
+			<security name="eSensPolicyV0" policy="eSensPolicy.xml" signatureMethod="RSA_SHA256"/>			
 		</securities>
 		<errorHandlings>
 			 <errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="false" businessErrorNotifyConsumer="false" deliveryFailureNotifyProducer="false"/> 
@@ -90,7 +91,8 @@
 			<service name="testService3" value="bdx:noprocess" type="tc3"/>
 			<service name="testService4" value="bdx:noprocess" type="tc4"/>
 			<service name="testService6" value="bdx:noprocess" type="tc6"/>
-			<service name="testService7" value="bdx:noprocess" type="tc7"/>			
+			<service name="testService7" value="bdx:noprocess" type="tc7"/>
+			<service name="testService07" value="bdx:noprocess" type="tc07"/>			
 			<service name="testService8" value="bdx:noprocess" type="tc8"/>					
 			<service name="testService9" value="bdx:noprocess" type="tc9"/>					
 			<service name="testService10" value="bdx:noprocess" type="tc10"/>	
@@ -111,7 +113,8 @@
 			<action name="tc3Action" value="TC3Leg1"/>
 			<action name="tc4Action" value="TC4Leg1"/>
 			<action name="tc6Action" value="TC6Leg1"/>
-			<action name="tc7Action" value="TC7Leg1"/>			
+			<action name="tc7Action" value="TC7Leg1"/>
+			<action name="tc07Action" value="TC07Leg1"/>			
 			<action name="tc8Action" value="TC8Leg1"/>						
 			<action name="tc9Action" value="TC9Leg1"/>									
 			<action name="tc10Action" value="TC10Leg1"/>	
@@ -138,6 +141,7 @@
 			<legConfiguration name="pushTestcase4tc1Action" service="testService4" action="tc4Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			<legConfiguration name="pushTestcase6tc1Action" service="testService6" action="tc6Action" defaultMpc="insolvencyMpc" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			<legConfiguration name="pushTestcase7tc7Action" service="testService7" action="tc7Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>			
+			<legConfiguration name="pushTestcase07tc07Action" service="testService07" action="tc07Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eSensPolicyV0" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			<legConfiguration name="pushTestcase8tc8Action" service="testService8" action="tc8Action" defaultMpc="defaultMpcJMS" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			<legConfiguration name="pushTestcase9tc9Action" service="testService9" action="tc9Action" defaultMpc="defaultMpcJMS" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			<legConfiguration name="pushTestcase10tc10Action" service="testService10" action="tc10Action" defaultMpc="defaultMpcJMS" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
@@ -239,7 +243,22 @@
 			<legs>
 				<leg name="pushTestcase7tc7Action"/>
 			</legs>
-		</process>					
+		</process>
+		<process name="tc07Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="blue_gw"/>
+				<initiatorParty name="red_gw"/>
+				<initiatorParty name="black_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="white_gw"/>
+				<responderParty name="blue_gw"/>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase07tc07Action"/>
+			</legs>
+		</process>		
 		<process name="tc8Process" agreement="agreementForDomJMS020" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="blue_gw"/>
