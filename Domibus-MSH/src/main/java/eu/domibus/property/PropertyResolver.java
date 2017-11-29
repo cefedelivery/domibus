@@ -26,7 +26,7 @@ public class PropertyResolver {
     /**
      * Resolves a value against the system properties
      *
-     * See {@link PropertyResolver#getResolvedProperty(String, Properties, boolean)}
+     * See {@link PropertyResolver#getResolvedValue(String, Properties, boolean)}
      * @param value
      * @return
      */
