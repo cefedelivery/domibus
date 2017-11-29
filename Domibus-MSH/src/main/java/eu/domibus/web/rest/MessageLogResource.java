@@ -37,8 +37,8 @@ public class MessageLogResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageLogResource.class);
 
     private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
-    public static final String RECEIVED_FROM_STR = "receivedFrom";
-    public static final String RECEIVED_TO_STR = "receivedTo";
+    private static final String RECEIVED_FROM_STR = "receivedFrom";
+    private static final String RECEIVED_TO_STR = "receivedTo";
 
     @Autowired
     @Qualifier("domibusProperties")
