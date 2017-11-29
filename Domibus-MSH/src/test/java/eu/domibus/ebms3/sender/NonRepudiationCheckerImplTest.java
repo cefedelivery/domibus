@@ -31,34 +31,54 @@ public class NonRepudiationCheckerImplTest {
 
     @Test
     public void testGetNonRepudiationNodeListFromRequest() throws Exception {
-        final NodeList referencesFromSecurityHeader = getNonRepudiationNodeListFromRequest();
+        final NodeList referencesFromSecurityHeader = getNonRepudiationNodeListFromRequest("dataset/as4/MSHAS4Request.xml");
         assertEquals(referencesFromSecurityHeader.getLength(), 6);
-    }
-
-    protected NodeList getNonRepudiationNodeListFromRequest() throws SOAPException, IOException, EbMS3Exception {
-        MessageFactory messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
-        SOAPMessage request = messageFactory.createMessage(null, new ClassPathResource("dataset/as4/MSHAS4Request.xml").getInputStream());
-        return nonRepudiationChecker.getNonRepudiationNodeList(request.getSOAPHeader().getElementsByTagNameNS(WSConstants.SIG_NS, WSConstants.SIG_LN).item(0));
     }
 
     @Test
     public void testGetNonRepudiationNodeListFromResponse() throws Exception {
-        final NodeList referencesFromNonRepudiationInformation = getNonRepudiationListFromResponse();
+        final NodeList referencesFromNonRepudiationInformation = getNonRepudiationListFromResponse("dataset/as4/MSHAS4Response.xml");
         assertEquals(referencesFromNonRepudiationInformation.getLength(), 6);
     }
 
-    protected NodeList getNonRepudiationListFromResponse() throws SOAPException, IOException, EbMS3Exception {
-        MessageFactory messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
-        SOAPMessage response = messageFactory.createMessage(null, new ClassPathResource("dataset/as4/MSHAS4Response.xml").getInputStream());
-        return nonRepudiationChecker.getNonRepudiationNodeList(response.getSOAPHeader().getElementsByTagNameNS(NonRepudiationConstants.NS_NRR, NonRepudiationConstants.NRR_LN).item(0));
+    @Test
+    public void testGetNonRepudiationNodeListFromRequestSignOnly() throws Exception {
+        final NodeList referencesFromSecurityHeader = getNonRepudiationNodeListFromRequest("dataset/as4/MSHAS4Request-signOnly.xml");
+        assertEquals(referencesFromSecurityHeader.getLength(), 6);
+    }
+
+    @Test
+    public void testGetNonRepudiationNodeListFromResponseSignOnly() throws Exception {
+        final NodeList referencesFromNonRepudiationInformation = getNonRepudiationListFromResponse("dataset/as4/MSHAS4Response-signOnly.xml");
+        assertEquals(referencesFromNonRepudiationInformation.getLength(), 6);
     }
 
     @Test
     public void compareUnorderedReferenceNodeLists() throws Exception {
-        final NodeList referencesFromSecurityHeader = getNonRepudiationNodeListFromRequest();
-        final NodeList referencesFromNonRepudiationInformation = getNonRepudiationListFromResponse();
+        final NodeList referencesFromSecurityHeader = getNonRepudiationNodeListFromRequest("dataset/as4/MSHAS4Request.xml");
+        final NodeList referencesFromNonRepudiationInformation = getNonRepudiationListFromResponse("dataset/as4/MSHAS4Response.xml");
         final boolean compareUnorderedReferenceNodeListsResult = nonRepudiationChecker.compareUnorderedReferenceNodeLists(referencesFromSecurityHeader, referencesFromNonRepudiationInformation);
         Assert.assertTrue(compareUnorderedReferenceNodeListsResult);
+    }
+
+    @Test
+    public void compareUnorderedReferenceNodeListsSignOnly() throws Exception {
+        final NodeList referencesFromSecurityHeader = getNonRepudiationNodeListFromRequest("dataset/as4/MSHAS4Request-signOnly.xml");
+        final NodeList referencesFromNonRepudiationInformation = getNonRepudiationListFromResponse("dataset/as4/MSHAS4Response-signOnly.xml");
+        final boolean compareUnorderedReferenceNodeListsResult = nonRepudiationChecker.compareUnorderedReferenceNodeLists(referencesFromSecurityHeader, referencesFromNonRepudiationInformation);
+        Assert.assertTrue(compareUnorderedReferenceNodeListsResult);
+    }
+
+    protected NodeList getNonRepudiationNodeListFromRequest(String path) throws SOAPException, IOException, EbMS3Exception {
+        MessageFactory messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
+        SOAPMessage request = messageFactory.createMessage(null, new ClassPathResource(path).getInputStream());
+        return nonRepudiationChecker.getNonRepudiationNodeList(request.getSOAPHeader().getElementsByTagNameNS(WSConstants.SIG_NS, WSConstants.SIG_INFO_LN).item(0));
+    }
+
+    protected NodeList getNonRepudiationListFromResponse(String path) throws SOAPException, IOException, EbMS3Exception {
+        MessageFactory messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
+        SOAPMessage response = messageFactory.createMessage(null, new ClassPathResource(path).getInputStream());
+        return nonRepudiationChecker.getNonRepudiationNodeList(response.getSOAPHeader().getElementsByTagNameNS(NonRepudiationConstants.NS_NRR, NonRepudiationConstants.NRR_LN).item(0));
     }
 
 }

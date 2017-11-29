@@ -6,7 +6,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
 import eu.domibus.api.pmode.domain.LegConfiguration;
@@ -21,6 +21,7 @@ import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
+import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -83,6 +84,9 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Autowired
     private MessageExchangeService messageExchangeService;
+
+    @Autowired
+    private DomainExtConverter domainExtConverter;
 
     @Override
     public String getFinalRecipient(String messageId) {
@@ -163,6 +167,15 @@ public class UserMessageDefaultService implements UserMessageService {
     @Override
     public void scheduleSending(String messageId, Long delay) {
         jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, delay).createMessage(), sendMessageQueue);
+    }
+
+    @Override
+    public eu.domibus.api.usermessage.domain.UserMessage getMessage(String messageId) {
+        final UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(messageId);
+        if(userMessageByMessageId == null) {
+            return null;
+        }
+        return domainExtConverter.convert(userMessageByMessageId, eu.domibus.api.usermessage.domain.UserMessage.class);
     }
 
     @Override
