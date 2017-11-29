@@ -6,6 +6,7 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.model.logging.ErrorLogEntry;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import eu.domibus.web.rest.ro.ErrorLogResultRO;
 import org.slf4j.Logger;
@@ -45,6 +46,9 @@ public class ErrorLogResource {
 
     @Autowired
     DateUtil dateUtil;
+
+    @Autowired
+    private DomainCoreConverter domainConverter;
 
     @RequestMapping(method = RequestMethod.GET)
     public ErrorLogResultRO getErrorLog(
@@ -106,8 +110,9 @@ public class ErrorLogResource {
         int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS,"10000"));
 
         final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, maxCSVrows, column, asc, filters);
-        StringBuilder resultText = new StringBuilder(ErrorLogEntry.csvTitle());
-        for(ErrorLogEntry errorLogEntry : errorLogEntries) {
+        final List<ErrorLogRO> errorLogROList = domainConverter.convert(errorLogEntries, ErrorLogRO.class);
+        StringBuilder resultText = new StringBuilder(ErrorLogRO.csvTitle());
+        for(ErrorLogRO errorLogEntry : errorLogROList) {
             resultText.append(errorLogEntry.toCsvString());
         }
 

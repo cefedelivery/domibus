@@ -7,16 +7,12 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import javax.persistence.*;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * An entry in the error log
@@ -199,31 +195,5 @@ public class ErrorLogEntry extends AbstractBaseEntity implements ErrorResult {
 
     public void setNotified(final Date notified) {
         this.notified = notified;
-    }
-
-    public static String csvTitle() {
-        return new StringBuilder()
-                .append("Signal Message Id").append(",")
-                .append("MSH Role").append(",")
-                .append("Message Id").append(",")
-                .append("Error Code").append(",")
-                .append("Error Detail").append(",")
-                .append("Timestamp").append(",")
-                .append("Notified")
-                .append(System.lineSeparator())
-                .toString();
-    }
-
-    public String toCsvString() {
-        return new StringBuilder()
-                .append(Objects.toString(errorSignalMessageId,"")).append(",")
-                .append(mshRole!=null?mshRole.name():"").append(",")
-                .append(Objects.toString(messageInErrorId,"")).append(",")
-                .append(errorCode!=null?errorCode.getErrorCodeName():"").append(",")
-                .append(Objects.toString(errorDetail,"")).append(",")
-                .append(Objects.toString(timestamp, "")).append(",")
-                .append(Objects.toString(notified,""))
-                .append(System.lineSeparator())
-                .toString();
     }
 }

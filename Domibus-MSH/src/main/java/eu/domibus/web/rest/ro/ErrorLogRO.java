@@ -5,6 +5,7 @@ import eu.domibus.common.MSHRole;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author Cosmin Baciu
@@ -74,5 +75,31 @@ public class ErrorLogRO implements Serializable {
 
     public void setErrorCode(ErrorCode errorCode) {
         this.errorCode = errorCode;
+    }
+
+    public static String csvTitle() {
+        return new StringBuilder()
+                .append("Signal Message Id").append(",")
+                .append("MSH Role").append(",")
+                .append("Message Id").append(",")
+                .append("Error Code").append(",")
+                .append("Error Detail").append(",")
+                .append("Timestamp").append(",")
+                .append("Notified")
+                .append(System.lineSeparator())
+                .toString();
+    }
+
+    public String toCsvString() {
+        return new StringBuilder()
+                .append(Objects.toString(errorSignalMessageId,"")).append(",")
+                .append(mshRole!=null?mshRole.name():"").append(",")
+                .append(Objects.toString(messageInErrorId,"")).append(",")
+                .append(errorCode!=null?errorCode.getErrorCodeName():"").append(",")
+                .append(Objects.toString(errorDetail,"")).append(",")
+                .append(Objects.toString(timestamp, "")).append(",")
+                .append(Objects.toString(notified,""))
+                .append(System.lineSeparator())
+                .toString();
     }
 }
