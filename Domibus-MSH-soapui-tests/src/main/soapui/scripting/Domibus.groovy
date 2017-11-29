@@ -252,6 +252,7 @@ class Domibus
 
         openConnection();
 		// Choose 2 Domibus between blue, red and green
+		// 3 bits GRB 
 		switch(mapDoms){
 			case 3:
 				sqlSender = sqlBlue; sqlReceiver = sqlRed;
@@ -279,7 +280,7 @@ class Domibus
                     messageStatus=it.MESSAGE_STATUS
                     numberAttempts=it.SEND_ATTEMPTS
                 }
-                log.info "|MSG_ID: "+messageID+" | SENDER: Expected MSG Status ="+ SMSH +"-- Current MSG Status = "+messageStatus+" | maxNumbAttempts: "+maxNumberAttempts+"-- numbAttempts: "+numberAttempts; 
+                log.info "|MSG_ID: "+messageID+" | SENDER: Expected Message Status ="+ SMSH +"-- Current Message Status = "+messageStatus+" | maxNumberAttempts: "+maxNumberAttempts+"-- numberAttempts: "+numberAttempts; 
                 if(SMSH=="SEND_FAILURE"){
 					if(messageStatus=="WAITING_FOR_RETRY"){
 						if(((maxNumberAttempts-numberAttempts)>0)&&(!wait)){
@@ -709,22 +710,7 @@ class Domibus
 		log.info "PMODE FILE PATH: "+pmodeFile;
 		
 		
-		switch(side.toLowerCase()){
-			case "sender":
-				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-				break;
-			case "receiver":
-				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-				break;
-			case "receivergreen":
-				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-				break;
-			case "testenv":
-				commandString="curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-				break;
-			default:
-				assert (false) , "Unknown side."
-		}
+		commandString="curl "+urlToDomibus(side, log, context)+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 
 		log.info commandString
 		if(commandString){
@@ -754,10 +740,10 @@ class Domibus
 		
 		
 	}
+
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	
-	
-	
-	static def uploadPmodeWithoutToken(String side, String baseFilePath, String extFilePath,context,log, String outcome = "successfully", String message =null,boolean logOutput =false){
+	static def uploadPmodeWithoutToken(String side, String baseFilePath, String extFilePath,context,log, String outcome = "successfully", String message =null,boolean  logOutput  =false){
 		log.info "Start upload PMode for Domibus \""+side+"\".";
 	    def outputCatcher = new StringBuffer();
         def errorCatcher = new StringBuffer();
@@ -770,24 +756,9 @@ class Domibus
 		//log.info "PMODE FILE PATH: "+pmodeFile;
 		
 		
-		switch(side.toLowerCase()){
-			case "sender":
-				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/pmode -v -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-				break;
-			case "receiver":
-				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/pmode -b -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-				break;
-			case "receivergreen":
-				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/pmode -b -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-				break;
-			case "testEnv":
-				commandString="curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/pmode -b -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-				break;
-			default:
-				assert (false) , "Unknown side."
-		}
+		commandString="curl " + urlToDomibus(side, log, context) + "/rest/pmode -v -F \"description=" + pmDescription + "\" -F  file=@" + pmodeFile ;
 
-		//log.info commandString
+		log.info commandString
 		if(commandString){
 			proc = commandString.execute();
 			if(proc!=null){
@@ -824,24 +795,9 @@ class Domibus
 		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
 		def String truststoreFile = computePathRessources(baseFilePath,extFilePath,context);
 				
-		switch(side.toLowerCase()){
-			case "sender":
-				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/truststore -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
-				break;
-			case "receiver":
-				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/truststore -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
-				break;
-			case "receivergreen":
-				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/truststore -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
-				break;
-			case "testEnv":
-				commandString="curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/truststore -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
-				break;
-			default:
-				assert (false) , "Unknown side."
-		}
+		commandString="curl "+ urlToDomibus(side, log, context) +"/rest/truststore/save -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
 
-		//log.info commandString
+		log.info commandString
 		if(commandString){
 			proc = commandString.execute();
 			if(proc!=null){
@@ -853,9 +809,33 @@ class Domibus
 		log.info errorCatcher.toString()
 		assert(outputCatcher.toString().contains("successfully")),"Error:uploadTruststore: Error while trying to connect to domibus."
 		log.info outputCatcher.toString()+" Domibus: \""+side+"\".";
-		
-
 	} 
+	
+	
+	//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+// Return url to specific domibus
+static def String urlToDomibus(side, log, context){
+	// Return url to specific domibus base on the "side"
+		def propName = ""
+		switch(side.toLowerCase()){
+			case "sender":
+				propName =  "localUrl"
+				break;
+			case "receiver":
+				propName = "remoteUrl"
+				break;
+			case "receivergreen":
+				propName  = "greenUrl"
+				break;
+			case "testEnv":
+				propName  = "testEnvUrl"
+				break;
+			default:
+				assert (false) , "Unknown side. Supported values: sender, receiver, receivergreen and testEnv"
+		}
+
+		return context.expand("\${#Project#${propName}}")
+}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	static def setMessageFilters(String side, String filterChoice,context,log){
 		log.info "Start update message filters for Domibus \""+side+"\".";
@@ -872,21 +852,9 @@ class Domibus
 			firstBck="Jms";firstEntId="2";secondBck="backendWebservice";SecondEntId="1";
 		}
 				
-		switch(side.toLowerCase()){
-			case "sender":
-				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
-				break;
-			case "receiver":
-				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
-				break;
-			case "receivergreen":
-				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
-				break;
-			default:
-				assert (false) , "Unknown side."
-		}
+		commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
 
-		//log.info commandString
+		log.info commandString
 		if(commandString){
 			proc = commandString.execute();
 			if(proc!=null){
@@ -906,23 +874,7 @@ class Domibus
         def proc=null; def commandString = null; 
 		//def JSESSIONID = null; def XSRFTOKEN = null;def XXSRFTOKEN = null;
 		
-		
-		switch(side.toLowerCase()){
-			case "sender":
-				commandString = "curl "+context.expand( '${#Project#localUrl}' )+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-				break;
-			case "receiver":
-				commandString = "curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-				break;
-			case "receivergreen":
-				commandString = "curl "+context.expand( '${#Project#greenUrl}' )+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-				break;
-			case "testEnv":
-				commandString = "curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-				break;
-			default:
-				assert (false) , "Unknown side."
-		}
+		commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
 		
 		//log.info commandString;
 		if(commandString){
@@ -954,22 +906,7 @@ class Domibus
         def proc=null
 		def commandString = null;
 
-		switch(side.toLowerCase()){
-			case "sender":
-				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#localUrl}' )+"/services";
-				break;
-			case "receiver":
-				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#remoteUrl}' )+"/services";
-				break;
-			case "receivergreen":
-				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#greenUrl}' )+"/services";
-				break;
-			case "testEnv":
-				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#testEnvUrl}' )+"/services"
-				break;
-			default:
-				assert (false) , "Unknown side."
-		}
+		commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+urlToDomibus(side, log, context)+"/services";
 		
 		if(commandString){
 			proc = commandString.execute();
