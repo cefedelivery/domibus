@@ -37,6 +37,8 @@ public class MessageLogResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageLogResource.class);
 
     private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
+    public static final String RECEIVED_FROM_STR = "receivedFrom";
+    public static final String RECEIVED_TO_STR = "receivedTo";
 
     @Autowired
     @Qualifier("domibusProperties")
@@ -86,8 +88,8 @@ public class MessageLogResource {
             @RequestParam(value = "refToMessageId", required = false) String refToMessageId,
             @RequestParam(value = "originalSender", required = false) String originalSender,
             @RequestParam(value = "finalRecipient", required = false) String finalRecipient,
-            @RequestParam(value = "receivedFrom", required = false) String receivedFrom,
-            @RequestParam(value = "receivedTo", required = false) String receivedTo) {
+            @RequestParam(value = RECEIVED_FROM_STR, required = false) String receivedFrom,
+            @RequestParam(value = RECEIVED_TO_STR, required = false) String receivedTo) {
 
         LOGGER.debug("Getting message log");
 
@@ -104,8 +106,8 @@ public class MessageLogResource {
         if (to == null) {
             to = defaultTo;
         }
-        filters.put("receivedFrom", from);
-        filters.put("receivedTo", to);
+        filters.put(RECEIVED_FROM_STR, from);
+        filters.put(RECEIVED_TO_STR, to);
 
         result.setFilter(filters);
         LOGGER.debug("using filters [{}]", filters);
@@ -126,11 +128,11 @@ public class MessageLogResource {
         //needed here because the info is not needed for the queries but is used by the gui as the filter is returned with
         //the result. Why??.
         filters.put("messageType", messageType);
-        if (filters.get("receivedFrom").equals(defaultFrom)) {
-            filters.remove("receivedFrom");
+        if (filters.get(RECEIVED_FROM_STR).equals(defaultFrom)) {
+            filters.remove(RECEIVED_FROM_STR);
         }
-        if (filters.get("receivedTo").equals(defaultTo)) {
-            filters.remove("receivedTo");
+        if (filters.get(RECEIVED_TO_STR).equals(defaultTo)) {
+            filters.remove(RECEIVED_TO_STR);
         }
         result.setMessageLogEntries(convertMessageLogInfoList(resultList));
         result.setMshRoles(MSHRole.values());
@@ -161,8 +163,8 @@ public class MessageLogResource {
             @RequestParam(value = "refToMessageId", required = false) String refToMessageId,
             @RequestParam(value = "originalSender", required = false) String originalSender,
             @RequestParam(value = "finalRecipient", required = false) String finalRecipient,
-            @RequestParam(value = "receivedFrom", required = false) String receivedFrom,
-            @RequestParam(value = "receivedTo", required = false) String receivedTo) {
+            @RequestParam(value = RECEIVED_FROM_STR, required = false) String receivedFrom,
+            @RequestParam(value = RECEIVED_TO_STR, required = false) String receivedTo) {
         HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient);
         Date from = dateUtil.fromString(receivedFrom);
         if (from == null) {
@@ -172,8 +174,8 @@ public class MessageLogResource {
         if (to == null) {
             to = defaultTo;
         }
-        filters.put("receivedFrom", from);
-        filters.put("receivedTo", to);
+        filters.put(RECEIVED_FROM_STR, from);
+        filters.put(RECEIVED_TO_STR, to);
 
         int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS,"10000"));
 
