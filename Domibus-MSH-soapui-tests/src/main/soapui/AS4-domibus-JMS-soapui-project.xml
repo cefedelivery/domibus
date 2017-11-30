@@ -3828,7 +3828,906 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 	testRunner.fail("Test aborted by user");
 }</script></con:config></con:testStep><con:tearDownScript>ExcelReporting.reportTestCase(testRunner, log)
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>90414ed1-d501-45a8-86b6-466a1352735c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cd8b9098-8fbd-42a9-8eb7-67404b5f59dd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>906220c2-8277-4fcb-a3bd-f15306888b25</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>53c0a958-b619-493b-b45b-7b9d7ecf4e43</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e138bc36-5999-4555-b848-c445b16888f9</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="b50931dc-7c79-4602-af91-9d1c071c704f" name="EDELIVERY-1388 - Differences in message parameters JMS and WS plugins" disabled="true"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS014-Submit Message-serviceType-Optional-service untyped" searchProperties="true" id="be94641f-1897-46b9-82bb-355f6ebaabaa">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>90414ed1-d501-45a8-86b6-466a1352735c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cd8b9098-8fbd-42a9-8eb7-67404b5f59dd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>906220c2-8277-4fcb-a3bd-f15306888b25</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>53c0a958-b619-493b-b45b-7b9d7ecf4e43</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e138bc36-5999-4555-b848-c445b16888f9</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="1e9e408e-be46-479a-83aa-d8c07e0a80dd" name="EDELIVERY-1340-Maximum number of sending attempts" disabled="true"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS005-Submit message-Exceptional flow-retry max reached" searchProperties="true" id="c1a12aba-d88a-43ed-9c3b-e2dcd7b75221" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Stop Receiver MSH" id="c2c033d6-c56a-4e70-8dc2-85910b94fa27"><con:settings/><con:config><script>Domibus.stopMSH("receiver",context, log);</script></con:config></con:testStep><con:testStep type="delay" name="D1" id="af1c8abf-19a2-42f7-811e-4c5390057bdf"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="02027f3d-c570-42a5-a683-a9137054dda7"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS005-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="8df6843a-7bc4-4f15-bebd-fc02c1783185"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.waitForStatus("WAITING_FOR_RETRY",null,"-DomJMS005-");
+test.verifyMessagePresence(1,0,"-DomJMS005-");
+test.finalize();</script></con:config></con:testStep><con:testStep type="request" name="Submit Message1" id="8f4b802a-2564-4ca8-bf81-056b58e7e08e" disabled="true">
+                <con:settings/>
+                <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <con:interface>BackendService_1_1SoapBinding</con:interface>
+                    <con:operation>sendMessage</con:operation>
+                    <con:request name="Submit Message1" id="7dc400ff-4173-4c4b-9146-54bd15cee994">
+                        <con:settings>
+                            <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+                        </con:settings>
+                        <con:encoding>UTF-8</con:encoding>
+                        <con:endpoint>${#Project#localUrl}/domibus/services/backend</con:endpoint>
+                        <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+   <soap:Header>
+      <ns:Messaging>
+         <ns:UserMessage>
+            <ns:MessageInfo>
+               <ns:MessageId>-Dom005-</ns:MessageId>
+            </ns:MessageInfo>
+            <ns:PartyInfo>
+               <ns:From>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
+               </ns:From>
+               <ns:To>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
+               </ns:To>
+            </ns:PartyInfo>
+            <ns:CollaborationInfo>
+               <ns:Service type="tc1">bdx:noprocess</ns:Service>
+               <ns:Action>TC1Leg1</ns:Action>
+            </ns:CollaborationInfo>
+            <ns:MessageProperties>
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
+            </ns:MessageProperties>
+            <ns:PayloadInfo>
+               <ns:PartInfo href="cid:message">
+                  <ns:PartProperties>
+                     <ns:Property name="MimeType">text/xml</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
+            </ns:PayloadInfo>
+         </ns:UserMessage>
+      </ns:Messaging>
+   </soap:Header>
+   <soap:Body>
+      <_1:sendRequest>
+         <payload payloadId="cid:message">PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</payload>
+      </_1:sendRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" id="3a65a26d-664a-40b6-9237-8cfd66c7c2db"/><con:assertion type="SOAP Fault Assertion" id="d3b2a875-2c73-4b67-a8c8-f45848cb70da" name="Not SOAP Fault"/><con:assertion type="XPath Match" id="f0667722-516b-4a0c-ba90-e95409275f02" name="XPath Match"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" id="c8a24d36-ed80-46f7-90dd-1c94f468ce2d" name="Script Assertion"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context,'${#Project#jdbcUrl1}','${#Project#jdbcUrl2}','${#Project#driver}');
+test.waitForStatus("WAITING_FOR_RETRY",null);
+test.verifyMessagePresence(1,0);
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D2" id="aa73096e-0b1d-4451-9932-d47cc6294209"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Check message submitted" id="5fe65c2d-545f-4a69-bb41-cc726042ad15"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.waitForStatus("SEND_FAILURE",null,"-DomJMS005-","Long");
+test.verifyMessagePresence(1,0,"-DomJMS005-");
+test.finalize();</script></con:config></con:testStep><con:tearDownScript>Domibus.startMSH("receiver", context, log)
+
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>c189cf14-cd7d-41a8-81fe-3e1d4e5c28fa</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bc00ae7a-2d2a-4e11-90d4-ae07623d92ea</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="9c5c128b-7a86-4a1d-ac3d-e8653520ddf8" name="EDELIVERY-1386 - FallBack issue" disabled="true"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS011-Submit Message-action-FallBack" searchProperties="true" id="ad1abfa4-3e36-400d-96a8-3c46af0beb08" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Update Default properties file" id="bb1299cb-5b95-4355-8122-cc7374b3e611"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\nAction = \"TC1Leg1\""); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="d5ede536-6f40-40b8-8761-9c641a58f2ab"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+//messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS011-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="bbec6380-2f98-4b92-9322-68574fab1c8b"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.verifyMessagePresence(1,1,"-DomJMS011-");
+test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS011-");
+test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS013-Submit Message-Service-FallBack" searchProperties="true" id="50e68cf4-fb6a-4aaf-b456-5bb2c3156ea3" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Update Default properties file" id="823bb11f-0d7b-4613-939c-846c82b93e04"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\n Service = \"bdx:noprocess\""); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="9684714d-a120-47b9-891a-d5920c577007"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+//messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS013-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="a16876dc-b140-49af-9c59-d9eb1086611c"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.verifyMessagePresence(1,1,"-DomJMS013-");
+test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS013-");
+test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS016-Submit Message-serviceType-FallBack-service typed" searchProperties="true" id="bcc10cfb-7768-4197-ba4a-3b159ec7a46e" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Update Default properties file" id="3f062391-d1bf-467f-870f-9e441556bf51"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\n serviceType = \"tc1\""); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="08383fb9-7ab1-4c91-b1fe-1f6a163cf932"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+//messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS016-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="7611528d-5a58-4ba2-95c9-580b45eabe7a"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.verifyMessagePresence(1,1,"-DomJMS016-");
+test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS016-");
+test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS021-Submit Message-agreementRef-FallBack" searchProperties="true" id="4140c67e-c7d8-4359-a783-4c7b0375f190" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Update Default properties file" id="7a7a2611-e08c-4175-9db3-8d218f51d937"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\nAgreementRef = \"backUpAgreementRef\""); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="31693f86-ef2d-4265-9364-e130a115d5c8"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS021-");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="32520f35-8bd1-4c66-a722-bd19f26e5fe4"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.waitForStatus("ACKNOWLEDGED","DOWNLOADED","-DomJMS021-");
+test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS021-");
+test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS026-Submit Message-fromRole-FallBack" searchProperties="true" id="f9a2857f-3b32-4152-af6a-1c9d9530a77a" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Update Default properties file" id="fbd980b5-1d59-415a-9dee-b143a2285fe5"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\nfromRole = \"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator\""); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="2b833887-18ff-42a0-8916-b29a774c4463"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+//messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS026-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="f88cfd1b-5a4d-4d6e-8cc5-f2214af439ae"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.verifyMessagePresence(1,1,"-DomJMS026-");
+test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS026-");
+test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS030-Submit Message-toRole-FallBack" searchProperties="true" id="c665c6b5-0ad6-42e5-92d0-97ac58d14b6e" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Update Default properties file" id="d485c1d5-840a-4f48-9249-06740816dbc8"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\ntoRole = \"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder\""); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="5241503d-9447-4033-89a8-c0ccdb2214a6"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+//messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS030-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="0e88be3f-c412-4c1c-ae5e-af1997211c79"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.verifyMessagePresence(1,1,"-DomJMS030-");
+test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS030-");
+test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>39528860-d05b-4e06-963c-ab716f1edcbc</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS033-Submit Message-fromPartyId-fallBack" searchProperties="true" id="18e916c0-2b6e-4fd0-a47e-9c6b75b71ea2" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Update Default properties file" id="a7e69f5d-80d5-4ce3-99a7-79752aadf8a6"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\nfromPartyID = \"domibus-blue\""); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="4304cb28-9411-4274-98bf-2b7a1d8c5423"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+//messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS033-");
+
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="2eaa5c22-c30c-4f84-aa84-9235c93476d4"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.verifyMessagePresence(1,1,"-DomJMS033-");
+test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS033-");
+test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS035-Submit Message-fromPartyType-fallBack" searchProperties="true" id="64e4086a-64ac-4387-a83b-756f6fb2e516" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Update Default properties file" id="7e03fb62-cf66-476a-95b1-356aa01e4f6b"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\nfromPartyType = \"urn:oasis:names:tc:ebcore:partyid-type:unregistered\""); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="37a4d2d4-85ed-4c4b-8777-ee78877ec25a"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+//messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS035-");
+
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="29886356-c012-4215-88d6-e744415c56ae"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.verifyMessagePresence(1,1,"-DomJMS035-");
+test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS035-");
+test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>2c35fd83-f603-4585-94ed-29800a1e4fc4</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS037-Submit Message-toPartyId-fallBack" searchProperties="true" id="df0cdded-e885-4443-bfc4-7ca6784792fa" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Update Default properties file" id="7b27883a-c7bb-40f9-9622-95342edf13ee"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\ntoPartyID = \"domibus-red\""); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="37eae58a-910e-42dc-8398-4d9e891e4678"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+//messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS037-");
+
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="c4c6f0e1-8433-4dfe-93a1-6d5f8251556d"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.verifyMessagePresence(1,1,"-DomJMS037-");
+test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS037-");
+test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS039-Submit Message-toPartyType-fallBack" searchProperties="true" id="76c132d2-c1a9-412a-9aa1-672da4a93bbb" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Update Default properties file" id="1beef9ee-efef-4a6c-a7c4-d926fa76da2d"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\ntoPartyType = \"urn:oasis:names:tc:ebcore:partyid-type:unregistered\""); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="956aa314-f763-4c4e-a8fe-a56248369605"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+//messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS039-");
+
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="2170fd66-892a-4ca1-b062-076b82998dc3"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.verifyMessagePresence(1,1,"-DomJMS039-");
+test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS039-");
+test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="b50931dc-7c79-4602-af91-9d1c071c704f" name="EDELIVERY-1388 - Differences in message parameters JMS and WS plugins" disabled="true"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS014-Submit Message-serviceType-Optional-service untyped" searchProperties="true" id="be94641f-1897-46b9-82bb-355f6ebaabaa">
             <con:settings/>
             
             
@@ -5156,906 +6055,7 @@ test.cleanDBMessageIDStartsWith("-DomJMS049-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>79d16b81-f2af-42dc-bac7-9f612c89790c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>6164c7d4-d54a-4386-a077-9c8ecc7be02b</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="9c5c128b-7a86-4a1d-ac3d-e8653520ddf8" name="EDELIVERY-1386 - FallBack issue" disabled="true"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS011-Submit Message-action-FallBack" searchProperties="true" id="ad1abfa4-3e36-400d-96a8-3c46af0beb08" disabled="true">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Update Default properties file" id="bb1299cb-5b95-4355-8122-cc7374b3e611"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\nAction = \"TC1Leg1\""); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="d5ede536-6f40-40b8-8761-9c641a58f2ab"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-messageMap.setStringProperty("service", "bdx:noprocess");
-messageMap.setStringProperty("serviceType", "tc10");
-//messageMap.setStringProperty("action", "TC10Leg1");
-messageMap.setStringProperty("fromPartyId", "domibus-blue");
-messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("toPartyId", "domibus-red");
-messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-DomJMS011-");
-// messageMap.setStringProperty("conversationId", "123");
-// messageMap.setStringProperty("refToMessageId", "11");
- 
-
-// messageMap.setJMSCorrelationID("12345");
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="bbec6380-2f98-4b92-9322-68574fab1c8b"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.verifyMessagePresence(1,1,"-DomJMS011-");
-test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
-test.cleanDBMessageID("-DomJMS011-");
-test.finalize();
-ExcelReporting.reportTestCase(testRunner, log)
-</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS013-Submit Message-Service-FallBack" searchProperties="true" id="50e68cf4-fb6a-4aaf-b456-5bb2c3156ea3" disabled="true">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Update Default properties file" id="823bb11f-0d7b-4613-939c-846c82b93e04"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\n Service = \"bdx:noprocess\""); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="9684714d-a120-47b9-891a-d5920c577007"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-//messageMap.setStringProperty("service", "bdx:noprocess");
-messageMap.setStringProperty("serviceType", "tc10");
-messageMap.setStringProperty("action", "TC10Leg1");
-messageMap.setStringProperty("fromPartyId", "domibus-blue");
-messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("toPartyId", "domibus-red");
-messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-DomJMS013-");
-// messageMap.setStringProperty("conversationId", "123");
-// messageMap.setStringProperty("refToMessageId", "11");
- 
-
-// messageMap.setJMSCorrelationID("12345");
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="a16876dc-b140-49af-9c59-d9eb1086611c"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.verifyMessagePresence(1,1,"-DomJMS013-");
-test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
-test.cleanDBMessageID("-DomJMS013-");
-test.finalize();
-ExcelReporting.reportTestCase(testRunner, log)
-</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS016-Submit Message-serviceType-FallBack-service typed" searchProperties="true" id="bcc10cfb-7768-4197-ba4a-3b159ec7a46e" disabled="true">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Update Default properties file" id="3f062391-d1bf-467f-870f-9e441556bf51"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\n serviceType = \"tc1\""); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="08383fb9-7ab1-4c91-b1fe-1f6a163cf932"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-messageMap.setStringProperty("service", "bdx:noprocess");
-//messageMap.setStringProperty("serviceType", "tc10");
-messageMap.setStringProperty("action", "TC10Leg1");
-messageMap.setStringProperty("fromPartyId", "domibus-blue");
-messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("toPartyId", "domibus-red");
-messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-DomJMS016-");
-// messageMap.setStringProperty("conversationId", "123");
-// messageMap.setStringProperty("refToMessageId", "11");
- 
-
-// messageMap.setJMSCorrelationID("12345");
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="7611528d-5a58-4ba2-95c9-580b45eabe7a"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.verifyMessagePresence(1,1,"-DomJMS016-");
-test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
-test.cleanDBMessageID("-DomJMS016-");
-test.finalize();
-ExcelReporting.reportTestCase(testRunner, log)
-</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS021-Submit Message-agreementRef-FallBack" searchProperties="true" id="4140c67e-c7d8-4359-a783-4c7b0375f190" disabled="true">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Update Default properties file" id="7a7a2611-e08c-4175-9db3-8d218f51d937"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\nAgreementRef = \"backUpAgreementRef\""); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="31693f86-ef2d-4265-9364-e130a115d5c8"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-messageMap.setStringProperty("service", "bdx:noprocess");
-messageMap.setStringProperty("serviceType", "tc10");
-messageMap.setStringProperty("action", "TC10Leg1");
-messageMap.setStringProperty("fromPartyId", "domibus-blue");
-messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("toPartyId", "domibus-red");
-messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-DomJMS021-");
- 
-
-// messageMap.setJMSCorrelationID("12345");
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="32520f35-8bd1-4c66-a722-bd19f26e5fe4"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.waitForStatus("ACKNOWLEDGED","DOWNLOADED","-DomJMS021-");
-test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
-test.cleanDBMessageID("-DomJMS021-");
-test.finalize();
-ExcelReporting.reportTestCase(testRunner, log)
-</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS026-Submit Message-fromRole-FallBack" searchProperties="true" id="f9a2857f-3b32-4152-af6a-1c9d9530a77a" disabled="true">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Update Default properties file" id="fbd980b5-1d59-415a-9dee-b143a2285fe5"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\nfromRole = \"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator\""); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="2b833887-18ff-42a0-8916-b29a774c4463"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-messageMap.setStringProperty("service", "bdx:noprocess");
-messageMap.setStringProperty("serviceType", "tc10");
-messageMap.setStringProperty("action", "TC10Leg1");
-messageMap.setStringProperty("fromPartyId", "domibus-blue");
-messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("toPartyId", "domibus-red");
-messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-//messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-DomJMS026-");
-// messageMap.setStringProperty("conversationId", "123");
-// messageMap.setStringProperty("refToMessageId", "11");
- 
-
-// messageMap.setJMSCorrelationID("12345");
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="f88cfd1b-5a4d-4d6e-8cc5-f2214af439ae"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.verifyMessagePresence(1,1,"-DomJMS026-");
-test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
-test.cleanDBMessageID("-DomJMS026-");
-test.finalize();
-ExcelReporting.reportTestCase(testRunner, log)
-</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS030-Submit Message-toRole-FallBack" searchProperties="true" id="c665c6b5-0ad6-42e5-92d0-97ac58d14b6e" disabled="true">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Update Default properties file" id="d485c1d5-840a-4f48-9249-06740816dbc8"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\ntoRole = \"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder\""); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="5241503d-9447-4033-89a8-c0ccdb2214a6"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-messageMap.setStringProperty("service", "bdx:noprocess");
-messageMap.setStringProperty("serviceType", "tc10");
-messageMap.setStringProperty("action", "TC10Leg1");
-messageMap.setStringProperty("fromPartyId", "domibus-blue");
-messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("toPartyId", "domibus-red");
-messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-//messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-DomJMS030-");
-// messageMap.setStringProperty("conversationId", "123");
-// messageMap.setStringProperty("refToMessageId", "11");
- 
-
-// messageMap.setJMSCorrelationID("12345");
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="0e88be3f-c412-4c1c-ae5e-af1997211c79"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.verifyMessagePresence(1,1,"-DomJMS030-");
-test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
-test.cleanDBMessageID("-DomJMS030-");
-test.finalize();
-ExcelReporting.reportTestCase(testRunner, log)
-</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>39528860-d05b-4e06-963c-ab716f1edcbc</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS033-Submit Message-fromPartyId-fallBack" searchProperties="true" id="18e916c0-2b6e-4fd0-a47e-9c6b75b71ea2" disabled="true">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Update Default properties file" id="a7e69f5d-80d5-4ce3-99a7-79752aadf8a6"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\nfromPartyID = \"domibus-blue\""); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="4304cb28-9411-4274-98bf-2b7a1d8c5423"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-messageMap.setStringProperty("service", "bdx:noprocess");
-messageMap.setStringProperty("serviceType", "tc10");
-messageMap.setStringProperty("action", "TC10Leg1");
-//messageMap.setStringProperty("fromPartyId", "domibus-blue");
-messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("toPartyId", "domibus-red");
-messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-DomJMS033-");
-
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="2eaa5c22-c30c-4f84-aa84-9235c93476d4"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.verifyMessagePresence(1,1,"-DomJMS033-");
-test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
-test.cleanDBMessageID("-DomJMS033-");
-test.finalize();
-ExcelReporting.reportTestCase(testRunner, log)
-</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS035-Submit Message-fromPartyType-fallBack" searchProperties="true" id="64e4086a-64ac-4387-a83b-756f6fb2e516" disabled="true">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Update Default properties file" id="7e03fb62-cf66-476a-95b1-356aa01e4f6b"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\nfromPartyType = \"urn:oasis:names:tc:ebcore:partyid-type:unregistered\""); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="37a4d2d4-85ed-4c4b-8777-ee78877ec25a"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-messageMap.setStringProperty("service", "bdx:noprocess");
-messageMap.setStringProperty("serviceType", "tc10");
-messageMap.setStringProperty("action", "TC10Leg1");
-messageMap.setStringProperty("fromPartyId", "domibus-blue");
-//messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("toPartyId", "domibus-red");
-messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-DomJMS035-");
-
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="29886356-c012-4215-88d6-e744415c56ae"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.verifyMessagePresence(1,1,"-DomJMS035-");
-test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
-test.cleanDBMessageID("-DomJMS035-");
-test.finalize();
-ExcelReporting.reportTestCase(testRunner, log)
-</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>2c35fd83-f603-4585-94ed-29800a1e4fc4</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS037-Submit Message-toPartyId-fallBack" searchProperties="true" id="df0cdded-e885-4443-bfc4-7ca6784792fa" disabled="true">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Update Default properties file" id="7b27883a-c7bb-40f9-9622-95342edf13ee"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\ntoPartyID = \"domibus-red\""); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="37eae58a-910e-42dc-8398-4d9e891e4678"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-messageMap.setStringProperty("service", "bdx:noprocess");
-messageMap.setStringProperty("serviceType", "tc10");
-messageMap.setStringProperty("action", "TC10Leg1");
-messageMap.setStringProperty("fromPartyId", "domibus-blue");
-messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-//messageMap.setStringProperty("toPartyId", "domibus-red");
-messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-DomJMS037-");
-
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="c4c6f0e1-8433-4dfe-93a1-6d5f8251556d"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.verifyMessagePresence(1,1,"-DomJMS037-");
-test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
-test.cleanDBMessageID("-DomJMS037-");
-test.finalize();
-ExcelReporting.reportTestCase(testRunner, log)
-</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS039-Submit Message-toPartyType-fallBack" searchProperties="true" id="76c132d2-c1a9-412a-9aa1-672da4a93bbb" disabled="true">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Update Default properties file" id="1beef9ee-efef-4a6c-a7c4-d926fa76da2d"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Add line:\ntoPartyType = \"urn:oasis:names:tc:ebcore:partyid-type:unregistered\""); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="956aa314-f763-4c4e-a8fe-a56248369605"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-messageMap.setStringProperty("service", "bdx:noprocess");
-messageMap.setStringProperty("serviceType", "tc10");
-messageMap.setStringProperty("action", "TC10Leg1");
-messageMap.setStringProperty("fromPartyId", "domibus-blue");
-messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("toPartyId", "domibus-red");
-//messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-DomJMS039-");
-
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="2170fd66-892a-4ca1-b062-076b82998dc3"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.verifyMessagePresence(1,1,"-DomJMS039-");
-test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
-test.cleanDBMessageID("-DomJMS039-");
-test.finalize();
-ExcelReporting.reportTestCase(testRunner, log)
-</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="1e9e408e-be46-479a-83aa-d8c07e0a80dd" name="EDELIVERY-1340" disabled="true"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS005-Submit message-Exceptional flow-retry max reached" searchProperties="true" id="c1a12aba-d88a-43ed-9c3b-e2dcd7b75221" disabled="true">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Stop Receiver MSH" id="c2c033d6-c56a-4e70-8dc2-85910b94fa27"><con:settings/><con:config><script>Domibus.stopMSH("receiver",context, log);</script></con:config></con:testStep><con:testStep type="delay" name="D1" id="af1c8abf-19a2-42f7-811e-4c5390057bdf"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Submit Message" id="02027f3d-c570-42a5-a683-a9137054dda7"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-messageMap.setStringProperty("service", "bdx:noprocess");
-messageMap.setStringProperty("serviceType", "tc10");
-messageMap.setStringProperty("action", "TC10Leg1");
-messageMap.setStringProperty("fromPartyId", "domibus-blue");
-messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("toPartyId", "domibus-red");
-messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-DomJMS005-");
-// messageMap.setStringProperty("conversationId", "123");
-// messageMap.setStringProperty("refToMessageId", "11");
- 
-
-// messageMap.setJMSCorrelationID("12345");
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="8df6843a-7bc4-4f15-bebd-fc02c1783185"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.waitForStatus("WAITING_FOR_RETRY",null,"-DomJMS005-");
-test.verifyMessagePresence(1,0,"-DomJMS005-");
-test.finalize();</script></con:config></con:testStep><con:testStep type="request" name="Submit Message1" id="8f4b802a-2564-4ca8-bf81-056b58e7e08e" disabled="true">
-                <con:settings/>
-                <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-                    <con:interface>BackendService_1_1SoapBinding</con:interface>
-                    <con:operation>sendMessage</con:operation>
-                    <con:request name="Submit Message1" id="7dc400ff-4173-4c4b-9146-54bd15cee994">
-                        <con:settings>
-                            <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
-                        </con:settings>
-                        <con:encoding>UTF-8</con:encoding>
-                        <con:endpoint>${#Project#localUrl}/domibus/services/backend</con:endpoint>
-                        <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
-   <soap:Header>
-      <ns:Messaging>
-         <ns:UserMessage>
-            <ns:MessageInfo>
-               <ns:MessageId>-Dom005-</ns:MessageId>
-            </ns:MessageInfo>
-            <ns:PartyInfo>
-               <ns:From>
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
-                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
-               </ns:From>
-               <ns:To>
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
-                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
-               </ns:To>
-            </ns:PartyInfo>
-            <ns:CollaborationInfo>
-               <ns:Service type="tc1">bdx:noprocess</ns:Service>
-               <ns:Action>TC1Leg1</ns:Action>
-            </ns:CollaborationInfo>
-            <ns:MessageProperties>
-               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
-               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
-            </ns:MessageProperties>
-            <ns:PayloadInfo>
-               <ns:PartInfo href="cid:message">
-                  <ns:PartProperties>
-                     <ns:Property name="MimeType">text/xml</ns:Property>
-                  </ns:PartProperties>
-               </ns:PartInfo>
-            </ns:PayloadInfo>
-         </ns:UserMessage>
-      </ns:Messaging>
-   </soap:Header>
-   <soap:Body>
-      <_1:sendRequest>
-         <payload payloadId="cid:message">PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</payload>
-      </_1:sendRequest>
-   </soap:Body>
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" id="3a65a26d-664a-40b6-9237-8cfd66c7c2db"/><con:assertion type="SOAP Fault Assertion" id="d3b2a875-2c73-4b67-a8c8-f45848cb70da" name="Not SOAP Fault"/><con:assertion type="XPath Match" id="f0667722-516b-4a0c-ba90-e95409275f02" name="XPath Match"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" id="c8a24d36-ed80-46f7-90dd-1c94f468ce2d" name="Script Assertion"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context,'${#Project#jdbcUrl1}','${#Project#jdbcUrl2}','${#Project#driver}');
-test.waitForStatus("WAITING_FOR_RETRY",null);
-test.verifyMessagePresence(1,0);
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D2" id="aa73096e-0b1d-4451-9932-d47cc6294209"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Check message submitted" id="5fe65c2d-545f-4a69-bb41-cc726042ad15"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.waitForStatus("SEND_FAILURE",null,"-DomJMS005-","Long");
-test.verifyMessagePresence(1,0,"-DomJMS005-");
-test.finalize();</script></con:config></con:testStep><con:tearDownScript>Domibus.startMSH("receiver", context, log)
-
-ExcelReporting.reportTestCase(testRunner, log)
-</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>c189cf14-cd7d-41a8-81fe-3e1d4e5c28fa</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bc00ae7a-2d2a-4e11-90d4-ae07623d92ea</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="7c8680c0-3d9a-4068-a781-cfb36bf9651c" name="Already disabled TCs" disabled="true"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS010-Submit Message-action-Unicity" searchProperties="true" id="de6ee72c-ab52-4ff3-ba1b-112a86e39bea" disabled="true">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>79d16b81-f2af-42dc-bac7-9f612c89790c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>6164c7d4-d54a-4386-a077-9c8ecc7be02b</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="7c8680c0-3d9a-4068-a781-cfb36bf9651c" name="Already disabled TCs" disabled="true"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS010-Submit Message-action-Unicity" searchProperties="true" id="de6ee72c-ab52-4ff3-ba1b-112a86e39bea" disabled="true">
             <con:settings/>
             
             

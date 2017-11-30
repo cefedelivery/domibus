@@ -20,7 +20,7 @@ public class PrefixedProperties extends Properties {
 
             if (propName.startsWith(prefix)) {
                 String key = propName.substring(prefix.length());
-                String resolved = propertyResolver.getResolvedProperty(propValue, props, false);
+                String resolved = propertyResolver.getResolvedValue(propValue, props, false);
                 setProperty(key, resolved);
             }
         }
