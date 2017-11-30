@@ -29,7 +29,7 @@ public class MessageFilterResource {
     @Autowired
     DomainCoreConverter coreConverter;
 
-    private List<MessageFilterRO> getBackendFiltersInformation() {
+    protected List<MessageFilterRO> getBackendFiltersInformation() {
         List<BackendFilter> backendFilters = routingService.getBackendFiltersUncached();
         List<MessageFilterRO> messageFilterResultROS = coreConverter.convert(backendFilters, MessageFilterRO.class);
         for (MessageFilterRO messageFilter : messageFilterResultROS) {

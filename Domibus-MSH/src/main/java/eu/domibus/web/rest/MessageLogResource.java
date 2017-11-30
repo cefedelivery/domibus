@@ -147,11 +147,6 @@ public class MessageLogResource {
 
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "orderBy", required = false) String column,
-            @RequestParam(value = "asc", defaultValue = "true") boolean asc,
             @RequestParam(value = "messageId", required = false) String messageId,
             @RequestParam(value = "conversationId", required = false) String conversationId,
             @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
@@ -181,9 +176,9 @@ public class MessageLogResource {
 
         List<MessageLogInfo> resultList = new ArrayList<>();
         if (messageType == MessageType.SIGNAL_MESSAGE) {
-            resultList = signalMessageLogDao.findAllInfoPaged(0, maxCSVrows, column, asc, filters);
+            resultList = signalMessageLogDao.findAllInfoPaged(0, maxCSVrows, null, true, filters);
         } else if (messageType == MessageType.USER_MESSAGE) {
-            resultList = userMessageLogDao.findAllInfoPaged(0, maxCSVrows, column, asc, filters);
+            resultList = userMessageLogDao.findAllInfoPaged(0, maxCSVrows, null, true, filters);
         }
 
         StringBuilder resultText = new StringBuilder(MessageLogInfo.csvTitle());

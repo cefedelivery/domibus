@@ -3,6 +3,7 @@ package eu.domibus.web.rest;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
@@ -19,11 +20,10 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Tiago Miguel
@@ -43,6 +43,9 @@ public class MessageLogResourceTest {
 
     @Injectable
     DateUtil dateUtil;
+
+    @Injectable
+    Properties domibusProperties;
 
     /**
      * Creates a UserMessageLof or SignalMessageLog depending on boolean argument
@@ -164,6 +167,68 @@ public class MessageLogResourceTest {
         Assert.assertEquals(signalMessageLog.getNotificationStatus(), messageLogRO.getNotificationStatus());
         Assert.assertEquals(signalMessageLog.getReceived(), messageLogRO.getReceived());
         Assert.assertEquals(signalMessageLog.getSendAttempts(), messageLogRO.getSendAttempts());
+    }
+
+    private List<MessageLogInfo> getMessageList(MessageType messageType, Date date) {
+        List<MessageLogInfo> result = new ArrayList<>();
+        MessageLogInfo messageLog = new MessageLogInfo("messageId", MessageStatus.ACKNOWLEDGED,
+                NotificationStatus.NOTIFIED, MSHRole.RECEIVING, messageType, date, date, 1, 5, date,
+                "conversationId", "fromPartyId", "toPartyId", "originalSender", "finalRecipient",
+                "refToMessageId", date, date);
+        result.add(messageLog);
+        return result;
+    }
+
+    private void assertCsvResult(MessageType messageType, Date date, ResponseEntity<String> csv) {
+        Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
+        Assert.assertEquals(MessageLogInfo.csvTitle() +
+                        "conversationId,fromPartyId,toPartyId,originalSender,finalRecipient,refToMessageId,messageId," + MessageStatus.ACKNOWLEDGED + "," + NotificationStatus.NOTIFIED + "," +
+                        MSHRole.RECEIVING + "," + messageType + "," + date + "," + date + ",1,5," + date + "," + date + "," + date + System.lineSeparator(),
+                csv.getBody());
+    }
+
+    @Test
+    public void testUserMessageGetCsv() {
+        // Given
+        Date date = new Date();
+        List<MessageLogInfo> userMessageList = getMessageList(MessageType.USER_MESSAGE, date);
+
+        new Expectations() {{
+            domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
+            result = "10000";
+            userMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
+            result = userMessageList;
+        }};
+
+        // When
+        final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, MessageType.USER_MESSAGE, null,
+                null, null, null, null, null,
+                null, null, null);
+
+        // Then
+        assertCsvResult(MessageType.USER_MESSAGE, date, csv);
+    }
+
+    @Test
+    public void testSignalMessageGetCsv(){
+        // Given
+        Date date = new Date();
+        List<MessageLogInfo> signalMessageList = getMessageList(MessageType.SIGNAL_MESSAGE, date);
+
+        new Expectations() {{
+            domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
+            result = "10000";
+            signalMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
+            result = signalMessageList;
+        }};
+
+        // When
+        final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, MessageType.SIGNAL_MESSAGE, null,
+                null, null, null, null, null,
+                null, null, null);
+
+        // Then
+        assertCsvResult(MessageType.SIGNAL_MESSAGE, date, csv);
     }
 
     private MessageLogResultRO getMessageLog(MessageType messageType) {

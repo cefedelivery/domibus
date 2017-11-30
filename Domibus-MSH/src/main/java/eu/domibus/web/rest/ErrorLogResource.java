@@ -89,10 +89,6 @@ public class ErrorLogResource {
 
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
-            @RequestParam(value = "orderBy", required = false) String column,
-            @RequestParam(value = "asc", defaultValue = "true") boolean asc,
             @RequestParam(value = "errorSignalMessageId", required = false) String errorSignalMessageId,
             @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
             @RequestParam(value = "messageInErrorId", required = false) String messageInErrorId,
@@ -109,7 +105,7 @@ public class ErrorLogResource {
 
         int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS,"10000"));
 
-        final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, maxCSVrows, column, asc, filters);
+        final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, maxCSVrows, null, true, filters);
         final List<ErrorLogRO> errorLogROList = domainConverter.convert(errorLogEntries, ErrorLogRO.class);
         StringBuilder resultText = new StringBuilder(ErrorLogRO.csvTitle());
         for(ErrorLogRO errorLogEntry : errorLogROList) {

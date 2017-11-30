@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.routing.BackendFilter;
+import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.web.rest.ro.MessageFilterRO;
@@ -12,6 +13,8 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +53,45 @@ public class MessageFilterResourceTest {
         Assert.assertNotNull(messageFilterResultRO);
         Assert.assertTrue(messageFilterResultRO.isAreFiltersPersisted());
         Assert.assertEquals(getMessageFilterROS(1), messageFilterResultRO.getMessageFilterEntries());
+    }
+
+    @Test
+    public void testGetMessageFilterCsv() {
+        // Given
+        final String backendName = "Backend Filter 1";
+        final String fromExpression = "from:expression";
+        List<MessageFilterRO> messageFilterResultROS = new ArrayList<>();
+
+        List<RoutingCriteria> routingCriterias = new ArrayList<>();
+        RoutingCriteria routingCriteria = new RoutingCriteria();
+        routingCriteria.setEntityId(1);
+        routingCriteria.setName("From");
+        routingCriteria.setExpression(fromExpression);
+        routingCriterias.add(routingCriteria);
+
+        MessageFilterRO messageFilterRO = new MessageFilterRO();
+        messageFilterRO.setIndex(1);
+
+        messageFilterRO.setBackendName(backendName);
+        messageFilterRO.setEntityId(1);
+        messageFilterRO.setRoutingCriterias(routingCriterias);
+        messageFilterRO.setPersisted(true);
+
+        messageFilterResultROS.add(messageFilterRO);
+
+        new Expectations(messageFilterResource){{
+            messageFilterResource.getBackendFiltersInformation();
+            result = messageFilterResultROS;
+        }};
+
+        // When
+        final ResponseEntity<String> csv = messageFilterResource.getCsv();
+
+        // Then
+        Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
+        Assert.assertEquals(MessageFilterRO.csvTitle() +
+                        backendName + "," + fromExpression + ", , , ," + true + System.lineSeparator(),
+                csv.getBody());
     }
 
     private MessageFilterResultRO getMessageFilterResultRO(int messageFilterEntityId) {
