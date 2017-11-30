@@ -14,6 +14,7 @@ import {DirtyOperations} from "../common/dirty-operations";
 import {RollbackDirtyDialogComponent} from "./rollback-dirty-dialog/rollback-dirty-dialog.component";
 import {PmodeDirtyUploadComponent} from "./pmode-dirty-upload/pmode-dirty-upload.component";
 import {Observable} from "rxjs/Observable";
+import {DownloadService} from "../download/download.service";
 
 @Component({
   moduleId: module.id,
@@ -27,7 +28,6 @@ import {Observable} from "rxjs/Observable";
  */
 export class PModeComponent implements OnInit, DirtyOperations {
   private ERROR_PMODE_EMPTY = "As PMode is empty, no file was downloaded.";
-  private url = "rest/pmode";
 
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
   @ViewChild('rowActions') rowActions: TemplateRef<any>;
@@ -63,6 +63,9 @@ export class PModeComponent implements OnInit, DirtyOperations {
   private uploaded = false;
 
   private headers = new Headers({'Content-Type': 'application/json'});
+
+  static readonly PMODE_URL: string = "rest/pmode";
+  static readonly PMODE_CSV_URL: string = PModeComponent.PMODE_URL + "/csv";
 
   /**
    * Constructor
@@ -125,7 +128,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
    * @returns {Observable<Response>}
    */
   getResultObservable():Observable<Response>{
-    return this.http.get(this.url + "/list")
+    return this.http.get(PModeComponent.PMODE_URL + "/list")
     .publishReplay(1).refCount();
   }
 
@@ -221,7 +224,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.http.delete(this.url,{params: {ids: JSON.stringify(this.deleteList)}}).subscribe(() => {
+        this.http.delete(PModeComponent.PMODE_URL,{params: {ids: JSON.stringify(this.deleteList)}}).subscribe(() => {
             this.alertService.success("The operation 'update pmodes' completed successfully.", false);
             this.disableAllButtons();
             this.selected = [];
@@ -322,7 +325,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
           this.allPModes[this.actualRow].current = false;
-          this.http.put(this.url + "/rollback/" + selectedRow.id, null,{headers: this.headers}).subscribe(res => {
+          this.http.put(PModeComponent.PMODE_URL + "/rollback/" + selectedRow.id, null,{headers: this.headers}).subscribe(res => {
             this.actualRow = 0;
 
             this.getAllPModeEntries();
@@ -336,12 +339,12 @@ export class PModeComponent implements OnInit, DirtyOperations {
       let dialogRef = this.dialog.open(RollbackDirtyDialogComponent);
       dialogRef.afterClosed().subscribe(result => {
         if (result === 'ok') {
-          this.http.delete(this.url, {params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
+          this.http.delete(PModeComponent.PMODE_URL, {params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
               this.deleteList = [];
               this.disableAllButtons();
               this.selected = [];
               this.allPModes[this.actualRow].current = false;
-              this.http.put(this.url + "/rollback/" + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
+              this.http.put(PModeComponent.PMODE_URL + "/rollback/" + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
                 this.actualRow = 0;
                 this.getAllPModeEntries();
               });
@@ -354,7 +357,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
         } else if (result === 'rollback_only') {
           this.deleteList = [];
           this.allPModes[this.actualRow].current = false;
-          this.http.put(this.url + "/rollback/" + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
+          this.http.put(PModeComponent.PMODE_URL + "/rollback/" + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
             this.actualRow = 0;
             this.getAllPModeEntries();
           });
@@ -369,8 +372,8 @@ export class PModeComponent implements OnInit, DirtyOperations {
    * Get Request for the Active PMode XML
    */
   getActivePMode() {
-    if (!isNullOrUndefined(this.url)) {
-      this.http.get(this.url + "/" + this.actualId).subscribe(res => {
+    if (!isNullOrUndefined(PModeComponent.PMODE_URL)) {
+      this.http.get(PModeComponent.PMODE_URL + "/" + this.actualId).subscribe(res => {
 
         const HTTP_OK = 200;
         if (res.status == HTTP_OK) {
@@ -391,7 +394,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
       let dialogRef = this.dialog.open(PmodeDirtyUploadComponent);
       dialogRef.afterClosed().subscribe(result => {
         if (result === 'ok') {
-          this.http.delete(this.url,{params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
+          this.http.delete(PModeComponent.PMODE_URL,{params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
               this.deleteList = [];
               this.disableAllButtons();
               this.selected = [];
@@ -431,7 +434,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
    */
   download(id) {
     if (this.pModeExists) {
-      this.http.get(this.url + "/" + id).subscribe(res => {
+      this.http.get(PModeComponent.PMODE_URL + "/" + id).subscribe(res => {
         PModeComponent.downloadFile(res.text());
       }, err => {
         this.alertService.error(err._body);
@@ -439,7 +442,21 @@ export class PModeComponent implements OnInit, DirtyOperations {
     } else {
       this.alertService.error(this.ERROR_PMODE_EMPTY)
     }
+  }
 
+  /**
+   * Method that checks if CSV Button export can be enabled
+   * @returns {boolean} true, if button can be enabled; and false, otherwise
+   */
+  isSaveAsCSVButtonEnabled() : boolean {
+    return this.allPModes.length < 10000;
+  }
+
+  /**
+   * Saves the content of the datatable into a CSV file
+   */
+  saveAsCSV() {
+    DownloadService.downloadNative(PModeComponent.PMODE_CSV_URL);
   }
 
   /**

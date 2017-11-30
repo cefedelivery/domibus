@@ -8,6 +8,7 @@ import {MdDialog, MdDialogRef} from "@angular/material";
 import {TrustStoreUploadComponent} from "./truststore-upload/truststore-upload.component";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
+import {DownloadService} from "../download/download.service";
 
 @Component({
   selector: 'app-truststore',
@@ -28,6 +29,9 @@ export class TruststoreComponent implements OnInit {
   loading: boolean = false;
 
   rows: Array<any> = [];
+
+  static readonly TRUSTSTORE_URL: string = "rest/truststore";
+  static readonly TRUSTSTORE_CSV_URL: string = TruststoreComponent.TRUSTSTORE_URL + "/csv";
 
   constructor(private trustStoreService: TrustStoreService, public dialog: MdDialog) {
   }
@@ -101,5 +105,20 @@ export class TruststoreComponent implements OnInit {
     dialogRef.componentInstance.onTruststoreUploaded.subscribe(updated => {
         this.getTrustStoreEntries();
     });
+  }
+
+  /**
+   * Method that checks if CSV Button export can be enabled
+   * @returns {boolean} true, if button can be enabled; and false, otherwise
+   */
+  isSaveAsCSVButtonEnabled() : boolean {
+    return this.rows.length < 10000;
+  }
+
+  /**
+   * Saves the content of the datatable into a CSV file
+   */
+  saveAsCSV() {
+    DownloadService.downloadNative(TruststoreComponent.TRUSTSTORE_CSV_URL);
   }
 }

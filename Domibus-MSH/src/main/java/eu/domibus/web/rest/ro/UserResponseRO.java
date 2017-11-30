@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Thomas Dussart
@@ -21,14 +22,14 @@ public class UserResponseRO {
     private String password;
     private boolean suspended;
 
+    public UserResponseRO() {
+    }
+
     public UserResponseRO(String userName, String email, boolean actif) {
         this.userName = userName;
         this.email = email;
         this.active = actif;
         this.authorities=new ArrayList<>();
-    }
-
-    public UserResponseRO() {
     }
 
     public String getUserName() {
@@ -102,6 +103,29 @@ public class UserResponseRO {
 
     public void setSuspended(boolean suspended) {
         this.suspended = suspended;
+    }
+
+    public String toCsvString() {
+        // RFC 4180
+        return new StringBuilder()
+                .append(Objects.toString(userName,"")).append(",")
+                .append(Objects.toString(email,"")).append(",")
+                .append("\"").append(Objects.toString(roles,"")).append("\"").append(",")
+                .append(Objects.toString(password,"******")).append(",")
+                .append(active)
+                .append(System.lineSeparator())
+                .toString();
+    }
+
+    public static String csvTitle() {
+        return new StringBuilder()
+                .append("Username").append(",")
+                .append("Email").append(",")
+                .append("Role").append(",")
+                .append("Password").append(",")
+                .append("Active")
+                .append(System.lineSeparator())
+                .toString();
     }
 
     @Override

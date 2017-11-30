@@ -8,6 +8,7 @@ import eu.domibus.pki.CertificateService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,6 +60,20 @@ public class TruststoreResource {
     @RequestMapping(value = {"/list"}, method = GET)
     public List<TrustStoreRO> trustStoreEntries() {
         return domainConverter.convert(certificateService.getTrustStoreEntries(), TrustStoreRO.class);
+    }
+
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv() {
+        StringBuilder resultText = new StringBuilder(TrustStoreRO.csvTitle());
+        final List<TrustStoreRO> trustStoreROS = trustStoreEntries();
+        for(TrustStoreRO trustStoreRO : trustStoreROS) {
+            resultText.append(trustStoreRO.toCsvString());
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .header("Content-Disposition", "attachment; filename=truststore_datatable.csv")
+                .body(resultText.toString());
     }
 
 }

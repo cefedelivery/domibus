@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Date;
+import java.util.Objects;
 
 public class PModeResponseRO {
 
@@ -13,6 +14,16 @@ public class PModeResponseRO {
     private String username;
     private String description;
     private boolean current;
+
+    public PModeResponseRO() {
+    }
+
+    public PModeResponseRO(int id, Date configurationDate, String username, String description) {
+        setId(id);
+        setConfigurationDate(configurationDate);
+        setUsername(username);
+        setDescription(description);
+    }
 
     public int getId() {
         return id;
@@ -52,6 +63,26 @@ public class PModeResponseRO {
 
     public void setCurrent(boolean current) {
         this.current = current;
+    }
+
+    public String toCsvString() {
+        return new StringBuilder()
+                .append(Objects.toString(configurationDate,"")).append(",")
+                .append(Objects.toString(username,"")).append(",")
+                .append(Objects.toString(description,"")).append(",")
+                .append(Objects.toString(current,""))
+                .append(System.lineSeparator())
+                .toString();
+    }
+
+    public static String csvTitle() {
+        return new StringBuilder()
+                .append("Configuration Date").append(",")
+                .append("Username").append(",")
+                .append("Description").append(",")
+                .append("Current")
+                .append(System.lineSeparator())
+                .toString();
     }
 
     @Override

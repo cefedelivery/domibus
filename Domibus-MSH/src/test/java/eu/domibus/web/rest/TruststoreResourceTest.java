@@ -1,8 +1,10 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.pki.CertificateService;
+import eu.domibus.web.rest.ro.TrustStoreRO;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -20,6 +22,9 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Tiago Miguel
@@ -88,6 +93,59 @@ public class TruststoreResourceTest {
         Assert.assertNotNull(responseEntity);
         Assert.assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         Assert.assertEquals("Failed to upload the truststore file due to => Impossible to access keystore", responseEntity.getBody());
+    }
 
+    private List<TrustStoreRO> getTestTrustStoreROList(Date date) {
+        List<TrustStoreRO> trustStoreROList = new ArrayList<>();
+        TrustStoreRO trustStoreRO = new TrustStoreRO();
+        trustStoreRO.setName("Name");
+        trustStoreRO.setSubject("Subject");
+        trustStoreRO.setIssuer("Issuer");
+        trustStoreRO.setValidFrom(date);
+        trustStoreRO.setValidUntil(date);
+        trustStoreROList.add(trustStoreRO);
+        return trustStoreROList;
+    }
+
+    @Test
+    public void testTrustStoreEntries() {
+        // Given
+        Date date = new Date();
+        List<TrustStoreEntry> trustStoreEntryList = new ArrayList<>();
+        TrustStoreEntry trustStoreEntry = new TrustStoreEntry("Name", "Subject", "Issuer", date, date);
+        trustStoreEntryList.add(trustStoreEntry);
+
+        new Expectations() {{
+            certificateService.getTrustStoreEntries();
+            result = trustStoreEntryList;
+            domainConverter.convert(trustStoreEntryList, TrustStoreRO.class);
+            result = getTestTrustStoreROList(date);
+        }};
+
+        // When
+        final List<TrustStoreRO> trustStoreROList = truststoreResource.trustStoreEntries();
+
+        // Then
+        Assert.assertEquals(getTestTrustStoreROList(date), trustStoreROList);
+    }
+
+    @Test
+    public void testGetCsv() {
+        // Given
+        Date date = new Date();
+        List<TrustStoreRO> trustStoreROList = getTestTrustStoreROList(date);
+        new Expectations(truststoreResource) {{
+            truststoreResource.trustStoreEntries();
+            result = trustStoreROList;
+        }};
+
+        // When
+        final ResponseEntity<String> csv = truststoreResource.getCsv();
+
+        // Then
+        Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
+        Assert.assertEquals(TrustStoreRO.csvTitle() +
+                getTestTrustStoreROList(date).get(0).toCsvString(),
+                csv.getBody());
     }
 }

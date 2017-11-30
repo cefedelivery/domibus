@@ -128,4 +128,23 @@ public class PModeResource {
     public List<PModeResponseRO> pmodeList() {
         return domainConverter.convert(pModeProvider.getRawConfigurationList(), PModeResponseRO.class);
     }
+
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv() {
+        StringBuilder resultText = new StringBuilder(PModeResponseRO.csvTitle());
+        List<PModeResponseRO> pModeResponseROList = pmodeList();
+        // set first PMode as current
+        if(!pModeResponseROList.isEmpty()) {
+            pModeResponseROList.get(0).setCurrent(true);
+        }
+        for(PModeResponseRO pModeResponseRO : pModeResponseROList) {
+            resultText.append(pModeResponseRO.toCsvString());
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .header("Content-Disposition", "attachment; filename=pmodearchive_datatable.csv")
+                .body(resultText.toString());
+    }
+
 }

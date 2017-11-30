@@ -10,6 +10,8 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -83,6 +85,20 @@ public class UserResource {
             result.add(userRole.getRole());
         }
         return result;
+    }
+
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv() {
+        StringBuilder resultText = new StringBuilder(UserResponseRO.csvTitle());
+        final List<UserResponseRO> userResponseROList = users();
+        for(UserResponseRO userResponseRO : userResponseROList) {
+            resultText.append(userResponseRO.toCsvString());
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .header("Content-Disposition", "attachment; filename=users_datatable.csv")
+                .body(resultText.toString());
     }
 
 

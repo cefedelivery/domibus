@@ -12,6 +12,8 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,5 +74,27 @@ public class UserResourceTest {
         Assert.assertNotNull(userResponseROS);
         UserResponseRO userResponseRO = getUserResponseRO();
         Assert.assertEquals(userResponseRO, userResponseROS.get(0));
+    }
+
+    @Test
+    public void testGetCsv() {
+        // Given
+        List<UserResponseRO> usersResponseROList = new ArrayList<>();
+        UserResponseRO userResponseRO = new UserResponseRO("user1", "email@email.com", true);
+        List<String> roles = new ArrayList<>();
+        roles.add("ROLE_ADMIN");
+        userResponseRO.setAuthorities(roles);
+        usersResponseROList.add(userResponseRO);
+        new Expectations(userResource) {{
+           userResource.users();
+           result = usersResponseROList;
+        }};
+
+        // When
+        final ResponseEntity<String> csv = userResource.getCsv();
+
+        // Then
+        Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
+        Assert.assertEquals(UserResponseRO.csvTitle() + userResponseRO.toCsvString(), csv.getBody());
     }
 }
