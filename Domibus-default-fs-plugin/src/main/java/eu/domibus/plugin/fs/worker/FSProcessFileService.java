@@ -3,10 +3,10 @@ package eu.domibus.plugin.fs.worker;
 import eu.domibus.common.MSHRole;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.fs.*;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
 import eu.domibus.plugin.fs.exception.FSPluginException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +50,12 @@ public class FSProcessFileService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processFile(FileObject processableFile) {
         String domain = null;
+
+        if(StringUtils.containsIgnoreCase(processableFile.getName().getBaseName(), "fmweb")) {
+            LOG.info("Skipping temporary file [{}]", processableFile.getName().getBaseName());
+            return;
+        }
+
         try (FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, FSSendMessagesService.METADATA_FILE_NAME)) {
             if (metadataFile.exists()) {
                 UserMessage metadata = parseMetadata(metadataFile);

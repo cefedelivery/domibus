@@ -123,8 +123,8 @@ public class MessageLogResource {
 
         for (MessageLogInfo messageLogInfo : resultList) {
             String newParty = null;
-            if(StringUtils.containsIgnoreCase(messageLogInfo.getFinalRecipient(), "RO-")) {
-                newParty = "Romania";
+            if(StringUtils.containsIgnoreCase(messageLogInfo.getFinalRecipient(), "BG-")) {
+                newParty = "Bulgaria";
             }
             if(StringUtils.containsIgnoreCase(messageLogInfo.getFinalRecipient(), "IT-")) {
                 newParty = "Italy";
