@@ -1,6 +1,7 @@
 package eu.domibus.common.services;
 
 import eu.domibus.api.user.User;
+import eu.domibus.common.model.security.UserLoginErrorReason;
 
 import java.util.List;
 
@@ -32,9 +33,31 @@ public interface UserService{
     void updateUsers(List<User> users);
 
     /**
+     * Handle the account lockout policy.
+     * Will log login attempt to the security log and inactivate user after certain amount of login attempt.
+     *
+     * @param userName the user loggin string
+     * @return the reason of the login error.
+     */
+    UserLoginErrorReason handleWrongAuthentication(final String userName);
+
+    /**
+     * Search for all users that have been suspended (due to multiple unsuccessful login attempts)
+     * and verify if the suspension date is smaller then current time - interval period defined in property file.
+     * If some user are found they will be reactivated.
+     */
+    void findAndReactivateSuspendedUsers();
+
+    /**
      * Get currently logged user name.
      *
      * @return the userName
      */
     String getLoggedUserNamed();
+
+    /**
+     * Verify if user add some incorrect login attempt and reset the attempt counter.
+     * @param username the userName
+     */
+    void handleCorrectAuthentication(String username);
 }

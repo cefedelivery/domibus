@@ -17,6 +17,7 @@ import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
+import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.messaging.DispatchMessageCreator;
 import eu.domibus.plugin.NotificationListener;
 import mockit.*;
@@ -71,6 +72,9 @@ public class UserMessageDefaultServiceTest {
 
     @Injectable
     private JMSManager jmsManager;
+
+    @Injectable
+    DomainExtConverter domainExtConverter;
 
     @Injectable
     PModeService pModeService;

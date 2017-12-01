@@ -41,4 +41,10 @@ public interface ProcessDao {
      * @return the matching processes.
      */
     List<Process> findPullProcessByLegName(String legName);
+
+    /**
+     *
+     * @return all configured processes.
+     */
+    List<Process> findAllProcesses();
 }

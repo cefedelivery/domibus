@@ -1,6 +1,6 @@
 package eu.domibus.ext.delegate.services.message;
 
-import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
