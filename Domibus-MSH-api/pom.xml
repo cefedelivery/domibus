@@ -59,7 +59,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Test -->
+        <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
