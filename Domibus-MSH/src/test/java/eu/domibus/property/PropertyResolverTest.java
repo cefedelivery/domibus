@@ -25,7 +25,7 @@ public class PropertyResolverTest {
         properties.setProperty("pluginsDirectory", "${domibus.conf.location}/plugins");
         properties.setProperty("wsPluginLocation", "${pluginsDirectory}/ws");
 
-        String resolvedProperty = propertyResolver.getResolvedProperty("${wsPluginLocation}", properties, false);
+        String resolvedProperty = propertyResolver.getResolvedProperty("wsPluginLocation", properties, false);
         assertEquals(resolvedProperty, "c:/plugins/ws");
     }
 
@@ -36,16 +36,15 @@ public class PropertyResolverTest {
         properties.setProperty("pluginsDirectory", "${domibus.conf.location}/plugins");
         properties.setProperty("wsPluginLocation", "${pluginsDirectory}/ws");
 
-        String resolvedProperty = propertyResolver.getResolvedProperty("${wsPluginLocation}", properties, true);
+        String resolvedProperty = propertyResolver.getResolvedProperty("wsPluginLocation", properties, true);
         assertEquals(resolvedProperty, "c:/plugins/ws");
     }
 
     @Test
     public void testResolvePropertyWithOnlySystemVariables() throws Exception {
-        Properties properties = new Properties();
         System.setProperty("domibus.conf.location", "c:");
 
-        String resolvedProperty = propertyResolver.getResolvedProperty("${domibus.conf.location}");
+        String resolvedProperty = propertyResolver.getResolvedProperty("domibus.conf.location");
         assertEquals(resolvedProperty, "c:");
     }
 
@@ -54,16 +53,26 @@ public class PropertyResolverTest {
         Properties properties = new Properties();
         properties.setProperty("wsPluginLocation", "${pluginsDirectory}/ws");
 
-        String resolvedProperty = propertyResolver.getResolvedProperty("${wsPluginLocation}", properties, false);
+        String resolvedProperty = propertyResolver.getResolvedProperty("wsPluginLocation", properties, false);
         assertEquals(resolvedProperty, "${pluginsDirectory}/ws");
     }
 
     @Test
-    public void testResolvePropertyWithInvalidProperty() throws Exception {
+    public void testResolveValue() throws Exception {
+        Properties properties = new Properties();
+        properties.setProperty("wsPluginLocation", "${pluginsDirectory}/plugins");
+        properties.setProperty("pluginsDirectory", "/home");
+
+        String resolvedProperty = propertyResolver.getResolvedValue("${wsPluginLocation}/ws", properties, false);
+        assertEquals(resolvedProperty, "/home/plugins/ws");
+    }
+
+    @Test
+    public void testResolveValueWithInvalidProperty() throws Exception {
         Properties properties = new Properties();
         properties.setProperty("wsPluginLocation", "${pluginsDirectory}/plugins");
 
-        String resolvedProperty = propertyResolver.getResolvedProperty("${wsPluginLocation/ws", properties, false);
+        String resolvedProperty = propertyResolver.getResolvedValue("${wsPluginLocation/ws", properties, false);
         assertEquals(resolvedProperty, "${wsPluginLocation/ws");
     }
 

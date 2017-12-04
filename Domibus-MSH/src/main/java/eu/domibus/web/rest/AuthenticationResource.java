@@ -2,23 +2,23 @@ package eu.domibus.web.rest;
 
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
+import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,6 +38,12 @@ public class AuthenticationResource {
     @Autowired
     private AuthenticationService authenticationService;
 
+    @ResponseStatus(value = HttpStatus.FORBIDDEN)
+    @ExceptionHandler({AuthenticationException.class})
+    public ErrorRO handleException(Exception ex) {
+        return new ErrorRO(ex.getMessage());
+    }
+
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
     @Transactional(noRollbackFor = BadCredentialsException.class)
     public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) {
@@ -46,6 +52,7 @@ public class AuthenticationResource {
         if(principal.isDefaultPasswordUsed()){
             LOG.warn(WarningUtil.warnOutput(principal.getUsername()+" is using default password."));
         }
+
         //Parse Granted authorities to a list of string authorities
         List<String> authorities = new ArrayList<>();
         for (GrantedAuthority grantedAuthority : principal.getAuthorities()) {

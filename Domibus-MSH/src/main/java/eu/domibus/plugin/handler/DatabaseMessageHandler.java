@@ -1,7 +1,7 @@
 package eu.domibus.plugin.handler;
 
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.*;
@@ -9,7 +9,6 @@ import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
-import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
