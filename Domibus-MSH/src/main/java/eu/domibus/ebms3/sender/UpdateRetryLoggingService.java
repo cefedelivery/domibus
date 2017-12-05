@@ -119,6 +119,9 @@ public class UpdateRetryLoggingService {
      * Check if the message can be sent again: there is time and attempts left
      */
     protected boolean hasAttemptsLeft(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
+        if(userMessageLog == null || legConfiguration == null) {
+            return false;
+        }
         // retries start after the first send attempt
         if (legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()
                 && (getScheduledStartTime(userMessageLog) + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis()) {

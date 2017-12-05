@@ -142,6 +142,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Override
     public void deliverMessage(final String messageId) {
         try {
+
+
             final Submission submission = this.messageRetriever.downloadMessage(messageId);
             final Set<Submission.Payload> payloads = submission.getPayloads();
             if(payloads != null) {
