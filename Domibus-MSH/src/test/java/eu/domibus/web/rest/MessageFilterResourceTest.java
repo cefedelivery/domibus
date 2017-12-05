@@ -2,6 +2,9 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
+import eu.domibus.common.ErrorCode;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.services.impl.MessageFilterCsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.web.rest.ro.MessageFilterRO;
@@ -26,6 +29,7 @@ import java.util.List;
 @RunWith(JMockit.class)
 public class MessageFilterResourceTest {
 
+    private static final String CSV_TITLE = "Backend Name, From, To, Action, Service, Is Persisted";
     @Tested
     MessageFilterResource messageFilterResource;
 
@@ -34,6 +38,10 @@ public class MessageFilterResourceTest {
 
     @Injectable
     DomainCoreConverter coreConverter;
+
+    @Injectable
+    MessageFilterCsvServiceImpl csvService;
+
 
     @Test
     public void testGetMessageFilterPersisted() {
@@ -56,7 +64,7 @@ public class MessageFilterResourceTest {
     }
 
     @Test
-    public void testGetMessageFilterCsv() {
+    public void testGetMessageFilterCsv() throws EbMS3Exception {
         // Given
         final String backendName = "Backend Filter 1";
         final String fromExpression = "from:expression";
@@ -75,13 +83,15 @@ public class MessageFilterResourceTest {
         messageFilterRO.setBackendName(backendName);
         messageFilterRO.setEntityId(1);
         messageFilterRO.setRoutingCriterias(routingCriterias);
-        messageFilterRO.setPersisted(true);
+        messageFilterRO.setIsPersisted(true);
 
         messageFilterResultROS.add(messageFilterRO);
 
         new Expectations(messageFilterResource){{
             messageFilterResource.getBackendFiltersInformation();
             result = messageFilterResultROS;
+            csvService.exportToCSV(messageFilterResultROS);
+            result = CSV_TITLE + backendName + "," + fromExpression + ", , , ," + true + System.lineSeparator();
         }};
 
         // When
@@ -89,9 +99,24 @@ public class MessageFilterResourceTest {
 
         // Then
         Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
-        Assert.assertEquals(MessageFilterRO.csvTitle() +
+        Assert.assertEquals(CSV_TITLE +
                         backendName + "," + fromExpression + ", , , ," + true + System.lineSeparator(),
                 csv.getBody());
+    }
+
+    @Test
+    public void testGetMessageFilterCsv_Exception() throws EbMS3Exception {
+        // Given
+        new Expectations() {{
+            csvService.exportToCSV((List<?>) any);
+            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Exception", null, new Exception());
+        }};
+
+        // When
+        final ResponseEntity<String> csv = messageFilterResource.getCsv();
+
+        // Then
+        Assert.assertEquals(HttpStatus.NO_CONTENT, csv.getStatusCode());
     }
 
     private MessageFilterResultRO getMessageFilterResultRO(int messageFilterEntityId) {
@@ -122,7 +147,7 @@ public class MessageFilterResourceTest {
         final List<MessageFilterRO> messageFilterROS = new ArrayList<>();
         MessageFilterRO messageFilterRO = new MessageFilterRO();
         messageFilterRO.setEntityId(messageFilterEntityId);
-        messageFilterRO.setPersisted(messageFilterEntityId != 0);
+        messageFilterRO.setIsPersisted(messageFilterEntityId != 0);
         messageFilterROS.add(messageFilterRO);
         return messageFilterROS;
     }

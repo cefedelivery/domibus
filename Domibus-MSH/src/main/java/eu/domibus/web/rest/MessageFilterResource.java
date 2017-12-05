@@ -1,6 +1,8 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.routing.BackendFilter;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.services.impl.MessageFilterCsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.web.rest.ro.MessageFilterRO;
@@ -29,14 +31,17 @@ public class MessageFilterResource {
     @Autowired
     DomainCoreConverter coreConverter;
 
+    @Autowired
+    MessageFilterCsvServiceImpl csvService;
+
     protected List<MessageFilterRO> getBackendFiltersInformation() {
         List<BackendFilter> backendFilters = routingService.getBackendFiltersUncached();
         List<MessageFilterRO> messageFilterResultROS = coreConverter.convert(backendFilters, MessageFilterRO.class);
         for (MessageFilterRO messageFilter : messageFilterResultROS) {
             if(messageFilter.getEntityId() == 0) {
-                messageFilter.setPersisted(false);
+                messageFilter.setIsPersisted(false);
             } else {
-                messageFilter.setPersisted(true);
+                messageFilter.setIsPersisted(true);
             }
         }
         return messageFilterResultROS;
@@ -49,10 +54,10 @@ public class MessageFilterResource {
         boolean areFiltersPersisted = true;
         for (MessageFilterRO messageFilter : messageFilterResultROS) {
             if(messageFilter.getEntityId() == 0) {
-                messageFilter.setPersisted(false);
+                messageFilter.setIsPersisted(false);
                 areFiltersPersisted = false;
             } else {
-                messageFilter.setPersisted(true);
+                messageFilter.setIsPersisted(true);
             }
         }
 
@@ -70,14 +75,16 @@ public class MessageFilterResource {
 
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv() {
-        StringBuilder resultText = new StringBuilder(MessageFilterRO.csvTitle());
-        for(MessageFilterRO backendFilter : getBackendFiltersInformation()) {
-            resultText.append(backendFilter.toCsvString());
+        String resultText;
+        try {
+            resultText = csvService.exportToCSV(getBackendFiltersInformation());
+        } catch (EbMS3Exception e) {
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
                 .header("Content-Disposition", "attachment; filename=messagefilter_datatable.csv")
-                .body(resultText.toString());
+                .body(resultText);
     }
 }

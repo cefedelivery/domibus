@@ -4,7 +4,9 @@ import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import eu.domibus.web.rest.ro.ErrorLogResultRO;
@@ -27,6 +29,8 @@ import java.util.*;
 @RunWith(JMockit.class)
 public class ErrorLogResourceTest {
 
+    private static final String CSV_TITLE = "Error Signal Message Id, Msh Role, Message In Error Id, Error Code, Error Detail, Timestamp, Notified";
+
     @Tested
     ErrorLogResource errorLogResource;
 
@@ -41,6 +45,9 @@ public class ErrorLogResourceTest {
 
     @Injectable
     DomainCoreConverter domainConverter;
+
+    @Injectable
+    CsvService errorLogCsvServiceImpl;
 
 
     @Test
@@ -86,7 +93,7 @@ public class ErrorLogResourceTest {
     }
 
     @Test
-    public void testGetCsv() {
+    public void testGetCsv() throws EbMS3Exception {
         // Given
         Date date = new Date();
         List<ErrorLogEntry> errorLogEntries = new ArrayList<>();
@@ -121,6 +128,10 @@ public class ErrorLogResourceTest {
             result = errorLogEntries;
             domainConverter.convert(errorLogEntries, ErrorLogRO.class);
             result = errorLogROEntries;
+            errorLogCsvServiceImpl.exportToCSV(errorLogROEntries);
+            result = CSV_TITLE +
+                    signalMessageIdStr + "," + MSHRole.RECEIVING + "," + refToMessageIdStr + "," + ErrorCode.EBMS_0001.getErrorCodeName() + "," +
+                    errorDetailStr + "," + date + "," + date+System.lineSeparator();
         }};
 
         // When
@@ -129,7 +140,7 @@ public class ErrorLogResourceTest {
 
         // Then
         Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
-        Assert.assertEquals(ErrorLogRO.csvTitle() +
+        Assert.assertEquals(CSV_TITLE +
                 signalMessageIdStr + "," + MSHRole.RECEIVING + "," + refToMessageIdStr + "," + ErrorCode.EBMS_0001.getErrorCodeName() + "," +
                 errorDetailStr + "," + date + "," + date+System.lineSeparator(),
                 csv.getBody());
