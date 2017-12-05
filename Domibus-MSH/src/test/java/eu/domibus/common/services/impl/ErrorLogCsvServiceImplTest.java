@@ -47,9 +47,16 @@ public class ErrorLogCsvServiceImplTest {
 
     @Test
     public void testExportToCsv() throws EbMS3Exception {
+        // Given
         Date date = new Date();
         List<ErrorLogRO> errorLogROList = getErrorLogList(date);
+
+        // When
         final String exportToCSV = errorLogCsvService.exportToCSV(errorLogROList);
+
+        // Then
+        Assert.assertEquals("Error Signal Message Id,Msh Role,Message In Error Id,Error Code,Error Detail,Timestamp,Notified"+System.lineSeparator()+
+                "signalMessageId,RECEIVING,messageInErrorId,EBMS:0001,errorDetail,"+date+","+date+System.lineSeparator(), exportToCSV);
     }
 
     private List<ErrorLogRO> getErrorLogList(Date date) {
