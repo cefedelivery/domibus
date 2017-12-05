@@ -5,7 +5,9 @@ import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import eu.domibus.web.rest.ro.ErrorLogResultRO;
@@ -49,6 +51,10 @@ public class ErrorLogResource {
 
     @Autowired
     private DomainCoreConverter domainConverter;
+
+    @Autowired
+    @Qualifier("errorLogCsvServiceImpl")
+    CsvService csvService;
 
     @RequestMapping(method = RequestMethod.GET)
     public ErrorLogResultRO getErrorLog(
@@ -107,15 +113,18 @@ public class ErrorLogResource {
 
         final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, maxCSVrows, null, true, filters);
         final List<ErrorLogRO> errorLogROList = domainConverter.convert(errorLogEntries, ErrorLogRO.class);
-        StringBuilder resultText = new StringBuilder(ErrorLogRO.csvTitle());
-        for(ErrorLogRO errorLogEntry : errorLogROList) {
-            resultText.append(errorLogEntry.toCsvString());
+
+        String resultText;
+        try {
+            resultText = csvService.exportToCSV(errorLogROList);
+        } catch (EbMS3Exception e) {
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
                 .header("Content-Disposition", "attachment; filename=errorlog_datatable.csv")
-                .body(resultText.toString());
+                .body(resultText);
     }
 
     private HashMap<String, Object> createFilterMap(

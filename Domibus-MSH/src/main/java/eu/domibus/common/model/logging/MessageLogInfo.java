@@ -8,7 +8,6 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * @author Tiago Miguel
@@ -244,53 +243,5 @@ public class MessageLogInfo {
                 .append(failed)
                 .append(restored)
                 .toHashCode();
-    }
-
-    public static String csvTitle() {
-        return new StringBuilder()
-                .append("Conversation Id").append(",")
-                .append("From Party Id").append(",")
-                .append("To Party Id").append(",")
-                .append("Original Sender").append(",")
-                .append("Final Recipient").append(",")
-                .append("Ref To Message Id").append(",")
-                .append("Message Id").append(",")
-                .append("Message Status").append(",")
-                .append("Notification Status").append(",")
-                .append("MSH Role").append(",")
-                .append("Message Type").append(",")
-                .append("Deleted").append(",")
-                .append("Received").append(",")
-                .append("Send Attempts").append(",")
-                .append("Max Send Attempts").append(",")
-                .append("Next Attempt").append(",")
-                .append("Failed").append(",")
-                .append("Restored")
-                .append(System.lineSeparator())
-                .toString();
-    }
-
-    public String toCsvString() {
-        return new StringBuilder()
-                .append(Objects.toString(conversationId,"")).append(",")
-                .append(Objects.toString(fromPartyId,"")).append(",")
-                .append(Objects.toString(toPartyId,"")).append(",")
-                .append(Objects.toString(originalSender,"")).append(",")
-                .append(Objects.toString(finalRecipient,"")).append(",")
-                .append(Objects.toString(refToMessageId,"")).append(",")
-                .append(Objects.toString(messageId, "")).append(",")
-                .append(Objects.toString(messageStatus, "")).append(",")
-                .append(Objects.toString(notificationStatus, "")).append(",")
-                .append(Objects.toString(mshRole, "")).append(",")
-                .append(Objects.toString(messageType,"")).append(",")
-                .append(Objects.toString(deleted,"")).append(",")
-                .append(Objects.toString(received, "")).append(",")
-                .append(Objects.toString(sendAttempts, "")).append(",")
-                .append(Objects.toString(sendAttemptsMax,"")).append(",")
-                .append(Objects.toString(nextAttempt,"")).append(",")
-                .append(Objects.toString(failed,"")).append(",")
-                .append(Objects.toString(restored,""))
-                .append(System.lineSeparator())
-                .toString();
     }
 }

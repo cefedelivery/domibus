@@ -5,9 +5,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author Tiago Miguel
@@ -57,11 +55,11 @@ public class MessageFilterRO implements Serializable {
         this.backendName = backendName;
     }
 
-    public boolean isPersisted() {
+    public boolean getIsPersisted() {
         return isPersisted;
     }
 
-    public void setPersisted(boolean isPersisted) {
+    public void setIsPersisted(boolean isPersisted) {
         this.isPersisted = isPersisted;
     }
 
@@ -91,47 +89,5 @@ public class MessageFilterRO implements Serializable {
                 .append(backendName)
                 .append(isPersisted)
                 .toHashCode();
-    }
-
-    private String routingCriteriasToCsvString() {
-        // I don't like this approach but we have a fixed table for Routing Criterias and we need to keep this order always
-        // even if routing criterias exist on a different order in backend filter object
-        String[] result = {"","","",""};
-        for(RoutingCriteria rc : routingCriterias) {
-            if(rc.getName().equalsIgnoreCase("from")) {
-                result[0] = Objects.toString(rc.getExpression(),"");
-            }
-            if(rc.getName().equalsIgnoreCase("to")) {
-                result[1] = Objects.toString(rc.getExpression(),"");
-            }
-            if(rc.getName().equalsIgnoreCase("action")) {
-                result[2] = Objects.toString(rc.getExpression(),"");
-            }
-            if(rc.getName().equalsIgnoreCase("service")) {
-                result[3] = Objects.toString(rc.getExpression(),"");
-            }
-        }
-        return Arrays.toString(result).replace("[","").replace("]", "");
-    }
-
-    public String toCsvString() {
-        return new StringBuilder()
-                .append(Objects.toString(backendName,"")).append(",")
-                .append(routingCriteriasToCsvString()).append(",")
-                .append(Objects.toString(isPersisted, ""))
-                .append(System.lineSeparator())
-                .toString();
-    }
-
-    public static String csvTitle() {
-        return new StringBuilder()
-                .append("Backend Name").append(",")
-                .append("From").append(",")
-                .append("To").append(",")
-                .append("Action").append(",")
-                .append("Service").append(",")
-                .append("Persisted")
-                .append(System.lineSeparator())
-                .toString();
     }
 }

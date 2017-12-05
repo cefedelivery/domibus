@@ -6,7 +6,9 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.MessageLogInfo;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -52,6 +54,10 @@ public class MessageLogResource {
 
     @Autowired
     DateUtil dateUtil;
+
+    @Autowired
+    @Qualifier("csvServiceImpl")
+    CsvService csvService;
 
     //significant improvements to the query execution plan have been found by always passing the date.
     //so we provide a default from and to.
@@ -181,15 +187,17 @@ public class MessageLogResource {
             resultList = userMessageLogDao.findAllInfoPaged(0, maxCSVrows, null, true, filters);
         }
 
-        StringBuilder resultText = new StringBuilder(MessageLogInfo.csvTitle());
-        for(MessageLogInfo messageLogInfo : resultList) {
-            resultText.append(messageLogInfo.toCsvString());
+        String resultText;
+        try {
+            resultText = csvService.exportToCSV(resultList);
+        } catch (EbMS3Exception e) {
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
                 .header("Content-Disposition", "attachment; filename=messages_datatable.csv")
-                .body(resultText.toString());
+                .body(resultText);
     }
 
     protected List<MessageLogRO> convertMessageLogInfoList(List<MessageLogInfo> objects) {
