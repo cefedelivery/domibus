@@ -6,17 +6,13 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.PKIUtil;
 import eu.domibus.spring.SpringContextProvider;
-import eu.domibus.util.SoapUtil;
-import eu.domibus.util.SoapUtilTest;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.cxf.Bus;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.bus.extension.ExtensionManagerBus;
@@ -29,30 +25,29 @@ import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.cxf.ws.policy.PolicyBuilderImpl;
-import org.apache.wss4j.common.crypto.CryptoFactory;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.jms.core.JmsOperations;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.soap.*;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPPart;
 import javax.xml.transform.dom.DOMSource;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
@@ -85,6 +80,12 @@ public class TrustSenderInterceptorTest {
     @Tested
     TrustSenderInterceptor trustSenderInterceptor;
 
+    @Bean
+    @Qualifier("jmsTemplateCommand")
+    public JmsOperations jmsOperations() throws JAXBException {
+        return Mockito.mock(JmsOperations.class);
+    }
+
     PKIUtil pkiUtil = new PKIUtil();
 
     @Before
@@ -110,6 +111,7 @@ public class TrustSenderInterceptorTest {
 
         cryptoService = new CryptoService();
         cryptoService.setTrustStoreProperties(prop);
+        cryptoService.setJmsOperations(jmsOperations());
         cryptoService.replaceTruststore(sourceKeyStore, "test123");
 
         new Expectations() {{
@@ -135,6 +137,7 @@ public class TrustSenderInterceptorTest {
 
         cryptoService = new CryptoService();
         cryptoService.setTrustStoreProperties(prop);
+        cryptoService.setJmsOperations(jmsOperations());
         cryptoService.replaceTruststore(sourceKeyStore, "1234");
 
         new Expectations() {{
@@ -230,37 +233,6 @@ public class TrustSenderInterceptorTest {
         msg.setExchange(exchange);
 
         return msg;
-    }
-
-    @Test
-    public void testHandleMessage() throws ParserConfigurationException, IOException, SAXException, SOAPException {
-        InputStream is = SoapUtilTest.class.getClassLoader().getResourceAsStream("dataset/as4/SoapRequest.xml");
-        String request = IOUtils.toString(is, StandardCharsets.UTF_8);
-        LOG.info(request + "");
-        SOAPMessage soapMessage = SoapUtil.createSOAPMessage(request);
-        AttachmentPart attachment = soapMessage.createAttachmentPart();
-        attachment.setContent(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()), "text/xml");
-        attachment.setContentId("sbdh-order");
-        soapMessage.addAttachmentPart(attachment);
-
-        soapMessage.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
-        try {
-            SOAPHeader soapHeader = soapMessage.getSOAPHeader();
-        } catch (Exception e) {
-            LOG.error("Could not get SOAPHeader", e);
-        }
-
-        SoapMessage sm = new SoapMessage(new MessageImpl());
-        sm.setContent(SOAPMessage.class, soapMessage);
-        InterceptorChain ic = new PhaseInterceptorChain((new PhaseManagerImpl()).getOutPhases());
-        sm.setInterceptorChain(ic);
-        ExchangeImpl exchange = new ExchangeImpl();
-        Bus bus = new ExtensionManagerBus();
-        bus.setExtension(new PolicyBuilderImpl(bus), PolicyBuilder.class);
-        exchange.put(Bus.class, bus);
-        sm.setExchange(exchange);
-        //SoapMessage sm = createSoapMessage("SoapRequest.xml");
-        trustSenderInterceptor.handleMessage(sm);
     }
 
 }
