@@ -837,24 +837,16 @@ static def String urlToDomibus(side, log, context){
 		return context.expand("\${#Project#${propName}}")
 }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-	static def setMessageFilters(String side, String filterChoice,context,log){
-		log.info "Start update message filters for Domibus \""+side+"\".";
+	static def getMessageFilters(String side,context,log){
+		log.info "Get message filters for Domibus \""+side+"\".";
 	    def outputCatcher = new StringBuffer();
         def errorCatcher = new StringBuffer();
-        def proc=null; def commandString = null;
-		def firstBck = "backendWebservice"; def secondBck = "Jms";
-		def firstEntId = "1"; def SecondEntId = "2";
-		
+        def proc=null; def commandString = null;		
 		def String output = fetchCookieHeader(side,context,log);		
 		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
 		
-		if(filterChoice.toLowerCase()!="ws"){
-			firstBck="Jms";firstEntId="2";secondBck="backendWebservice";SecondEntId="1";
-		}
-				
-		commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
+		commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X GET ";
 
-		log.info commandString
 		if(commandString){
 			proc = commandString.execute();
 			if(proc!=null){
@@ -862,8 +854,74 @@ static def String urlToDomibus(side, log, context){
 				proc.waitFor()
 			}
 		}
-		assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus."
 		
+		assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:getMessageFilter: Error while trying to connect to domibus."
+		return outputCatcher.toString();
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def formatFilters(String filters,String filterChoice,context,log){
+		//def resultString = "{\"messageFilterEntries\":[";
+		def resultString = "[\"";
+		def swapBck = null; def j = 0; def i = 0;
+		def tableBcks = filters.split(":",2)[1].split("}");
+		if(tableBcks.length==2){
+			return "ok";
+		}
+		
+		for(i=0;i<(tableBcks.length -1);i++){
+			tableBcks[i]="{\""+tableBcks[i].split("\"",2)[1]+"}";
+			tableBcks[i]=tableBcks[i].replace("\"","\"\"\"")
+		}
+		
+		while(j<(tableBcks.length -1)){
+			if(tableBcks[j].toLowerCase().contains(filterChoice.toLowerCase())){
+				swapBck = tableBcks[0];
+				tableBcks[0] = tableBcks[j];
+				tableBcks[j] = swapBck;
+				j = tableBcks.length;
+			}
+			j++;
+		}
+		
+		for(i=0;i<(tableBcks.length-1);i++){
+			if(i==tableBcks.length-2){
+				resultString = resultString + tableBcks[i];
+			}
+			else{
+				resultString = resultString + tableBcks[i]+",";
+			}
+		}
+		
+		return resultString+"\"]";
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def setMessageFilters(String side, String filterChoice,context,log){
+		log.info "Start update message filters for Domibus \""+side+"\".";
+		def String output = null; def XXSRFTOKEN = null;
+	    def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+        def proc=null; def commandString = null;
+		
+		def filtersString = getMessageFilters(side,context,log);
+		assert(filtersString.toLowerCase().contains(filterChoice.toLowerCase())),"Error:setMessageFilter: The backend you want to set is not installed."
+		def String bckParams = formatFilters(filtersString,filterChoice,context,log);
+
+		if(bckParams.equals("ok")){
+			log.info "Only one backend installed: Nothing to do.";
+		}
+		else{
+			output = fetchCookieHeader(side,context,log);		
+			XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");			
+			commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d "+bckParams;
+			if(commandString){
+				proc = commandString.execute();
+				if(proc!=null){
+					proc.consumeProcessOutput(outputCatcher, errorCatcher)
+					proc.waitFor()
+				}
+			}
+			assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus.";
+		}
 		log.info "Message filters update done successfully for Domibus: \""+side+"\".";
 
 	} 
