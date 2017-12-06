@@ -106,6 +106,14 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     public SOAPMessage invoke(final SOAPMessage request) {
+
+        try {
+            LOG.info("\n\n\n." + SoapUtil.getRawXMLMessage(request) + ".\n\n\n");
+        } catch (Exception e) {
+            LOG.info("Exception e = " + e);
+            e.printStackTrace();
+        }
+
         SOAPMessage responseMessage = null;
         Messaging messaging;
         messaging = getMessage(request);

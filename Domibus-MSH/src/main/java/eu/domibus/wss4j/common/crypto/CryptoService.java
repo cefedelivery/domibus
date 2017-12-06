@@ -119,7 +119,7 @@ public class CryptoService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateTrustStore() {
         // Sends a message into the topic queue in order to refresh all the singleton instances of the CryptoService.
-        jmsOperations.send(new ReloadTrustStoreMessageCreator());
+//        jmsOperations.send(new ReloadTrustStoreMessageCreator());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -184,7 +184,7 @@ public class CryptoService {
         }
     }
 
-    void setTrustStoreProperties(Properties trustStoreProperties) {
+    public void setTrustStoreProperties(Properties trustStoreProperties) {
         this.trustStoreProperties = trustStoreProperties;
     }
 

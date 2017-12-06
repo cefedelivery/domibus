@@ -68,7 +68,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     public static final QName KEYINFO = new QName("http://www.w3.org/2000/09/xmldsig#", "KeyInfo");
 
-    private Properties securityEncryptionProp;
+    protected Properties securityEncryptionProp;
 
     @Autowired
     @Qualifier("domibusProperties")
