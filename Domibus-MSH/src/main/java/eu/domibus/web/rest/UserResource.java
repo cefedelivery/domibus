@@ -1,18 +1,17 @@
 package eu.domibus.web.rest;
 
 
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.user.User;
 import eu.domibus.api.user.UserRole;
 import eu.domibus.api.user.UserState;
-import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.UserService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,8 +45,7 @@ public class UserResource {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    @Qualifier("csvServiceImpl")
-    private CsvService csvService;
+    private CsvServiceImpl csvService;
 
     /**
      * {@inheritDoc}
@@ -109,7 +107,7 @@ public class UserResource {
 
         try {
             resultText = csvService.exportToCSV(userResponseROList);
-        } catch (EbMS3Exception e) {
+        } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }
 

@@ -1,7 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.audit.AuditLog;
-import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.common.model.common.ModificationType;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.common.services.CsvService;
@@ -114,7 +114,7 @@ public class AuditResource {
         final List<AuditResponseRo> auditResponseRos = listAudits(auditCriteria);
         try {
             resultText = csvService.exportToCSV(auditResponseRos);
-        } catch (EbMS3Exception e) {
+        } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }
 

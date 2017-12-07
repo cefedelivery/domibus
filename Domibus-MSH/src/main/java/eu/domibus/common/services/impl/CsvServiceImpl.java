@@ -52,7 +52,11 @@ public class CsvServiceImpl extends CsvServiceAbstract {
                 }
                 field.setAccessible(true);
                 try {
-                    result.append(Objects.toString(field.get(elem), ""));
+                    String fieldValue = Objects.toString(field.get(elem), "");
+                    if(fieldValue.contains(",")) {
+                        fieldValue = "\"" + fieldValue + "\"";
+                    }
+                    result.append(fieldValue);
                     result.append(",");
                 } catch (IllegalAccessException e) {
                     LOG.error("Exception while writing on CSV ", e);

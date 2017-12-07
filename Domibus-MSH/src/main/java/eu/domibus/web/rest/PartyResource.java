@@ -1,9 +1,9 @@
 package eu.domibus.web.rest;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.party.PartyService;
-import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.party.IdentifierRo;
 import eu.domibus.core.party.PartyResponseRo;
@@ -12,7 +12,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,8 +40,7 @@ public class PartyResource {
     private PartyService partyService;
 
     @Autowired
-    @Qualifier("csvServiceImpl")
-    private CsvService csvService;
+    private CsvServiceImpl csvService;
 
     @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
     public List<PartyResponseRo> listParties(
@@ -120,7 +118,7 @@ public class PartyResource {
 
         try {
             resultText = csvService.exportToCSV(partyResponseRoList);
-        } catch (EbMS3Exception e) {
+        } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }
 

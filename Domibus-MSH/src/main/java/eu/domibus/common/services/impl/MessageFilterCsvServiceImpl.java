@@ -70,4 +70,8 @@ public class MessageFilterCsvServiceImpl extends CsvServiceAbstract {
         }
         return result.toString().replace("[","").replace("]", "");
     }
+
+    @Override
+    public void setExcludedItems(List<String> excludedItems) {
+    }
 }

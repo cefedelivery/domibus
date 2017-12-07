@@ -8,4 +8,6 @@ import java.util.List;
  */
 public interface CsvService {
     String exportToCSV(List<?> list);
+
+    void setExcludedItems(List<String> excludedItems);
 }

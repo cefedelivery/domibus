@@ -65,4 +65,8 @@ public class ErrorLogCsvServiceImpl extends CsvServiceAbstract {
 
         return result.toString();
     }
+
+    @Override
+    public void setExcludedItems(List<String> excludedItems) {
+    }
 }

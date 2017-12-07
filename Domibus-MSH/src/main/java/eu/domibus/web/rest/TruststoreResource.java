@@ -1,8 +1,8 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.services.CsvService;
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.common.services.DomibusCacheService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -10,7 +10,6 @@ import eu.domibus.pki.CertificateService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,8 +42,7 @@ public class TruststoreResource {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    @Qualifier("csvServiceImpl")
-    private CsvService csvService;
+    private CsvServiceImpl csvService;
 
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     public ResponseEntity<String> uploadTruststoreFile(@RequestPart("truststore") MultipartFile truststore, @RequestParam("password") String password) {
@@ -76,7 +74,7 @@ public class TruststoreResource {
 
         try {
             resultText = csvService.exportToCSV(trustStoreROS);
-        } catch (EbMS3Exception e) {
+        } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }
 

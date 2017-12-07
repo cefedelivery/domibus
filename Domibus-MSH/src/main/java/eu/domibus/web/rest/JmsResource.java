@@ -1,8 +1,8 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -120,7 +120,7 @@ public class JmsResource {
 
         try {
             resultText = csvService.exportToCSV(jmsMessageList);
-        } catch (EbMS3Exception e) {
+        } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }
 

@@ -1,8 +1,8 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
-import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
@@ -11,7 +11,6 @@ import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.rest.ro.PModeResponseRO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -43,8 +42,7 @@ public class PModeResource {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    @Qualifier("csvServiceImpl")
-    private CsvService csvService;
+    private CsvServiceImpl csvService;
 
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = "application/xml")
     public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value="id") int id) {
@@ -153,7 +151,7 @@ public class PModeResource {
 
         try {
             resultText = csvService.exportToCSV(pModeResponseROList);
-        } catch (EbMS3Exception e) {
+        } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }
 
