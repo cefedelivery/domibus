@@ -1,14 +1,14 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.MessageLogInfo;
-import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -56,8 +56,7 @@ public class MessageLogResource {
     DateUtil dateUtil;
 
     @Autowired
-    @Qualifier("csvServiceImpl")
-    CsvService csvService;
+    CsvServiceImpl csvService;
 
     //significant improvements to the query execution plan have been found by always passing the date.
     //so we provide a default from and to.
@@ -190,7 +189,8 @@ public class MessageLogResource {
         String resultText;
         try {
             resultText = csvService.exportToCSV(resultList);
-        } catch (EbMS3Exception e) {
+        } catch (CsvException e) {
+            LOGGER.error("Exception caught during export to CSV", e.getMessage());
             return ResponseEntity.noContent().build();
         }
 

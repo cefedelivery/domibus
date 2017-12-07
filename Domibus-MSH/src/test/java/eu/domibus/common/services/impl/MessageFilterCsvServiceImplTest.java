@@ -1,7 +1,7 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.routing.RoutingCriteria;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.web.rest.ro.MessageFilterRO;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
@@ -24,7 +24,7 @@ public class MessageFilterCsvServiceImplTest {
     MessageFilterCsvServiceImpl messageFilterCsvService;
 
     @Test
-    public void testExportToCsv_EmptyList() throws EbMS3Exception {
+    public void testExportToCsv_EmptyList() throws CsvException {
         // Given
         // When
         final String exportToCSV = messageFilterCsvService.exportToCSV(new ArrayList<>());
@@ -34,7 +34,7 @@ public class MessageFilterCsvServiceImplTest {
     }
 
     @Test
-    public void testExportToCsv_NullList() throws EbMS3Exception {
+    public void testExportToCsv_NullList() throws CsvException {
         // Given
         // When
         final String exportToCSV = messageFilterCsvService.exportToCSV(null);
@@ -44,7 +44,7 @@ public class MessageFilterCsvServiceImplTest {
     }
 
     @Test
-    public void testExportToCsv() throws EbMS3Exception {
+    public void testExportToCsv() throws CsvException {
         // Given
         List<MessageFilterRO> messageFilterROList = new ArrayList<>();
         MessageFilterRO messageFilterRO = new MessageFilterRO();
@@ -58,7 +58,7 @@ public class MessageFilterCsvServiceImplTest {
         fromRoutingCriteria.setEntityId(1);
         routingCriterias.add(fromRoutingCriteria);
         messageFilterRO.setRoutingCriterias(routingCriterias);
-        messageFilterRO.setIsPersisted(true);
+        messageFilterRO.setPersisted(true);
         messageFilterROList.add(messageFilterRO);
 
         // When

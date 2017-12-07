@@ -1,8 +1,8 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
@@ -26,7 +26,7 @@ public class ErrorLogCsvServiceImplTest {
     ErrorLogCsvServiceImpl errorLogCsvService;
 
     @Test
-    public void testExportToCsv_EmptyList() throws EbMS3Exception {
+    public void testExportToCsv_EmptyList() throws CsvException {
         // Given
         // When
         final String exportToCSV = errorLogCsvService.exportToCSV(new ArrayList<>());
@@ -36,7 +36,7 @@ public class ErrorLogCsvServiceImplTest {
     }
 
     @Test
-    public void testExportToCsv_NullList() throws EbMS3Exception {
+    public void testExportToCsv_NullList() throws CsvException {
         // Given
         // When
         final String exportToCSV = errorLogCsvService.exportToCSV(null);
@@ -46,7 +46,7 @@ public class ErrorLogCsvServiceImplTest {
     }
 
     @Test
-    public void testExportToCsv() throws EbMS3Exception {
+    public void testExportToCsv() throws CsvException {
         // Given
         Date date = new Date();
         List<ErrorLogRO> errorLogROList = getErrorLogList(date);

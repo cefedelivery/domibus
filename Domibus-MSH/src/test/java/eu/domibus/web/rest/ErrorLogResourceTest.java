@@ -1,12 +1,12 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.ErrorLogCsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import eu.domibus.web.rest.ro.ErrorLogResultRO;
@@ -47,7 +47,7 @@ public class ErrorLogResourceTest {
     DomainCoreConverter domainConverter;
 
     @Injectable
-    CsvService errorLogCsvServiceImpl;
+    ErrorLogCsvServiceImpl errorLogCsvServiceImpl;
 
 
     @Test
@@ -93,7 +93,7 @@ public class ErrorLogResourceTest {
     }
 
     @Test
-    public void testGetCsv() throws EbMS3Exception {
+    public void testGetCsv() throws CsvException {
         // Given
         Date date = new Date();
         List<ErrorLogEntry> errorLogEntries = new ArrayList<>();

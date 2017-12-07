@@ -55,11 +55,11 @@ public class MessageFilterRO implements Serializable {
         this.backendName = backendName;
     }
 
-    public boolean getIsPersisted() {
+    public boolean isPersisted() {
         return isPersisted;
     }
 
-    public void setIsPersisted(boolean isPersisted) {
+    public void setPersisted(boolean isPersisted) {
         this.isPersisted = isPersisted;
     }
 

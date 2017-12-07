@@ -1,13 +1,13 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.common.ErrorCode;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,13 +17,13 @@ import java.util.Objects;
  */
 
 @Service
-public class ErrorLogCsvServiceImpl extends CsvServiceImpl {
+public class ErrorLogCsvServiceImpl extends CsvServiceAbstract {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ErrorLogCsvServiceImpl.class);
 
 
     @Override
-    public String exportToCSV(List<?> list) throws EbMS3Exception {
+    public String exportToCSV(List<?> list) {
         if(list == null || list.isEmpty()) {
             return "";
         }
@@ -45,20 +45,18 @@ public class ErrorLogCsvServiceImpl extends CsvServiceImpl {
         // CSV contents
         for(Object elem : list) {
             for (Field field : fields) {
-                String varName = field.getName();
-                varName = varName.substring(0,1).toUpperCase() + varName.substring(1);
+                field.setAccessible(true);
                 try {
-                    final Method getMethod = aClass.getMethod("get" + varName);
-                    if(varName.equals("ErrorCode")) {
-                        final Object invoke = getMethod.invoke(elem);
-                        result.append(Objects.toString(((ErrorCode)invoke).getErrorCodeName(), ""));
-                    } else {
-                        result.append(Objects.toString(getMethod.invoke(elem), ""));
+                    Object varResult = field.get(elem);
+                    // special case for ErrorCode
+                    if(field.getName().equals("errorCode")) {
+                        varResult = ((ErrorCode)varResult).getErrorCodeName();
                     }
+                    result.append(Objects.toString(varResult,""));
                     result.append(",");
-                } catch (Exception e) {
+                } catch (IllegalAccessException e) {
                     LOG.error("Exception while writing on CSV ", e);
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Impossible to export as CSV", null, e);
+                    throw new CsvException(DomibusCoreErrorCode.DOM_001, "Exception while writing on CSV", e);
                 }
             }
             result.deleteCharAt(result.length() - 1);
