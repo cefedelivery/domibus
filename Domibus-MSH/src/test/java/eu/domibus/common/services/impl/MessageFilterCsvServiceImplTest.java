@@ -58,7 +58,7 @@ public class MessageFilterCsvServiceImplTest {
         fromRoutingCriteria.setEntityId(1);
         routingCriterias.add(fromRoutingCriteria);
         messageFilterRO.setRoutingCriterias(routingCriterias);
-        messageFilterRO.setIsPersisted(true);
+        messageFilterRO.setPersisted(true);
         messageFilterROList.add(messageFilterRO);
 
         // When

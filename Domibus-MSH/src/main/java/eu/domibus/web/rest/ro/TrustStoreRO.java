@@ -4,7 +4,6 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * @author Thomas Dussart
@@ -58,7 +57,7 @@ public class TrustStoreRO {
         this.validUntil = validUntil;
     }
 
-    public String toCsvString() {
+    /*public String toCsvString() {
         // RFC 4180
         return new StringBuilder()
                 .append(Objects.toString(name,"")).append(",")
@@ -79,7 +78,7 @@ public class TrustStoreRO {
                 .append("Valid Until")
                 .append(System.lineSeparator())
                 .toString();
-    }
+    }*/
 
     @Override
     public boolean equals(Object o) {

@@ -137,4 +137,12 @@ export class PartyComponent implements OnInit {
     this.search();
   }
 
+  isSaveAsCSVButtonEnabled() {
+    return true;
+  }
+
+  saveAsCSV() {
+    this.partyService.saveAsCsv(this.name, this.endPoint, this.partyID, this.process);
+  }
+
 }

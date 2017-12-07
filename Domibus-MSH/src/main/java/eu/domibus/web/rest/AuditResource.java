@@ -1,18 +1,20 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.audit.AuditLog;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.common.ModificationType;
 import eu.domibus.common.services.AuditService;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.criteria.AuditCriteria;
 import eu.domibus.web.rest.ro.AuditResponseRo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -37,6 +39,10 @@ public class AuditResource {
 
     @Autowired
     private AuditService auditService;
+
+    @Autowired
+    @Qualifier("csvServiceImpl")
+    CsvService csvService;
 
     /**
      * Entry point of the Audit rest service to list the system audit logs.
@@ -83,6 +89,9 @@ public class AuditResource {
      */
     private Set<String> changeActionType(Set<String> actions) {
         Set<String> modificationTypes = new HashSet<>();
+        if(actions == null || actions.isEmpty()) {
+            return modificationTypes;
+        }
         actions.forEach(action -> {
             Set<String> collect = Arrays.stream(ModificationType.values()).
                     filter(modificationType -> modificationType.getLabel().equals(action)).
@@ -96,5 +105,22 @@ public class AuditResource {
     @RequestMapping(value = {"/targets"}, method = RequestMethod.GET)
     public List<String> auditTargets() {
         return auditService.listAuditTarget();
+    }
+
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv(@RequestParam(value = "auditCriteria") AuditCriteria auditCriteria) {
+        String resultText;
+
+        final List<AuditResponseRo> auditResponseRos = listAudits(auditCriteria);
+        try {
+            resultText = csvService.exportToCSV(auditResponseRos);
+        } catch (EbMS3Exception e) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .header("Content-Disposition", "attachment; filename=audit_datatable.csv")
+                .body(resultText);
     }
 }

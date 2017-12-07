@@ -1,6 +1,8 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
@@ -9,6 +11,7 @@ import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.rest.ro.PModeResponseRO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -37,6 +41,10 @@ public class PModeResource {
 
     @Autowired
     private DomainCoreConverter domainConverter;
+
+    @Autowired
+    @Qualifier("csvServiceImpl")
+    private CsvService csvService;
 
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = "application/xml")
     public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value="id") int id) {
@@ -131,20 +139,28 @@ public class PModeResource {
 
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv() {
-        StringBuilder resultText = new StringBuilder(PModeResponseRO.csvTitle());
+        String resultText;
+
         List<PModeResponseRO> pModeResponseROList = pmodeList();
         // set first PMode as current
         if(!pModeResponseROList.isEmpty()) {
             pModeResponseROList.get(0).setCurrent(true);
         }
-        for(PModeResponseRO pModeResponseRO : pModeResponseROList) {
-            resultText.append(pModeResponseRO.toCsvString());
+
+        List<String> excludedItems = new ArrayList<>();
+        excludedItems.add("id");
+        csvService.setExcludedItems(excludedItems);
+
+        try {
+            resultText = csvService.exportToCSV(pModeResponseROList);
+        } catch (EbMS3Exception e) {
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
                 .header("Content-Disposition", "attachment; filename=pmodearchive_datatable.csv")
-                .body(resultText.toString());
+                .body(resultText);
     }
 
 }

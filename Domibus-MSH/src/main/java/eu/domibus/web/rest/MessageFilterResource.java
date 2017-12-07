@@ -39,9 +39,9 @@ public class MessageFilterResource {
         List<MessageFilterRO> messageFilterResultROS = coreConverter.convert(backendFilters, MessageFilterRO.class);
         for (MessageFilterRO messageFilter : messageFilterResultROS) {
             if(messageFilter.getEntityId() == 0) {
-                messageFilter.setIsPersisted(false);
+                messageFilter.setPersisted(false);
             } else {
-                messageFilter.setIsPersisted(true);
+                messageFilter.setPersisted(true);
             }
         }
         return messageFilterResultROS;
@@ -54,10 +54,10 @@ public class MessageFilterResource {
         boolean areFiltersPersisted = true;
         for (MessageFilterRO messageFilter : messageFilterResultROS) {
             if(messageFilter.getEntityId() == 0) {
-                messageFilter.setIsPersisted(false);
+                messageFilter.setPersisted(false);
                 areFiltersPersisted = false;
             } else {
-                messageFilter.setIsPersisted(true);
+                messageFilter.setPersisted(true);
             }
         }
 

@@ -3,6 +3,7 @@ import {AuditCriteria, AuditResponseRo} from "./audit";
 import {Observable} from "rxjs/Observable";
 import {AlertService} from "../alert/alert.service";
 import {Http} from "@angular/http";
+import {DownloadService} from "../download/download.service";
 
 /**
  * @author Thomas Dussart
@@ -33,6 +34,15 @@ export class AuditService {
 
   listActions(): Observable<string> {
     return Observable.from(["Created", "Modified", "Deleted", "Downloaded", "Resent", "Moved"]);
+  }
+
+  getFilterPath(auditCriteria: AuditCriteria) : string {
+    let result = '?';
+    return result;
+  }
+
+  saveAsCsv(auditCriteria: AuditCriteria) {
+    DownloadService.downloadNative("rest/audit/csv" + this.getFilterPath(auditCriteria));
   }
 
 }

@@ -220,7 +220,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
   /**
    * Method used when button save is clicked
    */
-  saveButton() {
+  saveButton(withDownloadCSV: boolean) {
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -229,6 +229,9 @@ export class PModeComponent implements OnInit, DirtyOperations {
             this.disableAllButtons();
             this.selected = [];
             this.deleteList = [];
+            if(withDownloadCSV) {
+              DownloadService.downloadNative(PModeComponent.PMODE_CSV_URL);
+            }
           },
           () => {
             this.alertService.error("The operation 'update pmodes' not completed successfully.", false);
@@ -236,6 +239,10 @@ export class PModeComponent implements OnInit, DirtyOperations {
             this.disableAllButtons();
             this.selected = [];
           });
+      } else {
+        if(withDownloadCSV) {
+          DownloadService.downloadNative(PModeComponent.PMODE_CSV_URL);
+        }
       }
     });
   }
@@ -456,7 +463,11 @@ export class PModeComponent implements OnInit, DirtyOperations {
    * Saves the content of the datatable into a CSV file
    */
   saveAsCSV() {
-    DownloadService.downloadNative(PModeComponent.PMODE_CSV_URL);
+    if(this.isDirty()) {
+      this.saveButton(true);
+    } else {
+      DownloadService.downloadNative(PModeComponent.PMODE_CSV_URL);
+    }
   }
 
   /**

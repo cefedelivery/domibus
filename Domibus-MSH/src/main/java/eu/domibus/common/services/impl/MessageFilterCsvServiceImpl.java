@@ -55,7 +55,7 @@ public class MessageFilterCsvServiceImpl extends CsvServiceImpl {
         return new StringBuilder()
                 .append(Objects.toString(messageFilterRO.getBackendName(),"")).append(",")
                 .append(routingCriteriasToCsvString(messageFilterRO.getRoutingCriterias())).append(",")
-                .append(Objects.toString(messageFilterRO.getIsPersisted(), ""))
+                .append(Objects.toString(messageFilterRO.isPersisted(), ""))
                 .append(System.lineSeparator())
                 .toString();
     }

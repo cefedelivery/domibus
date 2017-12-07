@@ -6,7 +6,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author Thomas Dussart
@@ -105,7 +104,7 @@ public class UserResponseRO {
         this.suspended = suspended;
     }
 
-    public String toCsvString() {
+    /*public String toCsvString() {
         // RFC 4180
         return new StringBuilder()
                 .append(Objects.toString(userName,"")).append(",")
@@ -126,7 +125,7 @@ public class UserResponseRO {
                 .append("Active")
                 .append(System.lineSeparator())
                 .toString();
-    }
+    }*/
 
     @Override
     public String toString() {

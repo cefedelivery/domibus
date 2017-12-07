@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,6 +22,8 @@ import java.util.Objects;
 public class CsvServiceImpl implements CsvService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CsvServiceImpl.class);
+
+    private List<String> excluded = new ArrayList<>();
 
     protected String uncamelcase(String str) {
         String result = str.replaceAll("(\\p{Ll})(\\p{Lu})","$1 $2");
@@ -39,6 +42,9 @@ public class CsvServiceImpl implements CsvService {
         Field[] fields = aClass.getDeclaredFields();
         for(Field field : fields) {
             final String varName = field.getName();
+            if (excluded.contains(varName)) {
+                continue;
+            }
             result.append(uncamelcase(varName));
             result.append(",");
         }
@@ -49,11 +55,28 @@ public class CsvServiceImpl implements CsvService {
         for(Object elem : list) {
             for (Field field : fields) {
                 String varName = field.getName();
+                if (excluded.contains(varName)) {
+                    continue;
+                }
                 varName = varName.substring(0,1).toUpperCase() + varName.substring(1);
                 try {
                     final Method getMethod = aClass.getMethod("get" + varName);
-                    result.append(Objects.toString(getMethod.invoke(elem),""));
+                    String getMethodResult = Objects.toString(getMethod.invoke(elem), "");
+                    if(getMethodResult.contains(",")) {
+                        getMethodResult = "\"" + getMethodResult + "\"";
+                    }
+                    result.append(getMethodResult);
                     result.append(",");
+                } catch (NoSuchMethodException e) {
+                    final Method getMethod;
+                    try {
+                        getMethod = aClass.getMethod("is" + varName);
+                        result.append(Objects.toString(getMethod.invoke(elem), ""));
+                        result.append(",");
+                    } catch (Exception e1) {
+                        LOG.error("Exception while writing on CSV ", e);
+                        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Impossible to export as CSV", null, e);
+                    }
                 } catch (Exception e) {
                     LOG.error("Exception while writing on CSV ", e);
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Impossible to export as CSV", null, e);
@@ -64,5 +87,9 @@ public class CsvServiceImpl implements CsvService {
         }
 
         return result.toString();
+    }
+
+    public void setExcludedItems(List<String> excludedItems) {
+        excluded = excludedItems;
     }
 }

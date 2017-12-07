@@ -4,12 +4,15 @@ package eu.domibus.web.rest;
 import eu.domibus.api.user.User;
 import eu.domibus.api.user.UserRole;
 import eu.domibus.api.user.UserState;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.UserService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,6 +45,10 @@ public class UserResource {
     @Autowired
     private DomainCoreConverter domainConverter;
 
+    @Autowired
+    @Qualifier("csvServiceImpl")
+    private CsvService csvService;
+
     /**
      * {@inheritDoc}
      */
@@ -73,7 +80,7 @@ public class UserResource {
     @RequestMapping(value = {"/save"}, method = RequestMethod.POST)
     public void save(@RequestBody List<UserResponseRO> usersRo) {
         LOG.debug("Saving " + usersRo);
-        List<eu.domibus.api.user.User> users = domainConverter.convert(usersRo, eu.domibus.api.user.User.class);
+        List<User> users = domainConverter.convert(usersRo, User.class);
         userService.saveUsers(users);
     }
 
@@ -89,16 +96,27 @@ public class UserResource {
 
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv() {
-        StringBuilder resultText = new StringBuilder(UserResponseRO.csvTitle());
+        String resultText;
+
         final List<UserResponseRO> userResponseROList = users();
-        for(UserResponseRO userResponseRO : userResponseROList) {
-            resultText.append(userResponseRO.toCsvString());
+
+        List<String> excludedItems = new ArrayList<>();
+        excludedItems.add("authorities");
+        excludedItems.add("status");
+        excludedItems.add("password");
+        excludedItems.add("suspended");
+        csvService.setExcludedItems(excludedItems);
+
+        try {
+            resultText = csvService.exportToCSV(userResponseROList);
+        } catch (EbMS3Exception e) {
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
                 .header("Content-Disposition", "attachment; filename=users_datatable.csv")
-                .body(resultText.toString());
+                .body(resultText);
     }
 
 

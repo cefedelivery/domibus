@@ -2,6 +2,8 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.user.User;
 import eu.domibus.api.user.UserState;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.UserService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.UserResponseRO;
@@ -33,6 +35,9 @@ public class UserResourceTest {
 
     @Injectable
     DomainCoreConverter domainConverter;
+
+    @Injectable
+    private CsvService csvServiceImpl;
 
     private List<UserResponseRO> getUserResponseList() {
         final List<UserResponseRO> userResponseROList = new ArrayList<>();
@@ -77,7 +82,7 @@ public class UserResourceTest {
     }
 
     @Test
-    public void testGetCsv() {
+    public void testGetCsv() throws EbMS3Exception {
         // Given
         List<UserResponseRO> usersResponseROList = new ArrayList<>();
         UserResponseRO userResponseRO = new UserResponseRO("user1", "email@email.com", true);
@@ -88,6 +93,9 @@ public class UserResourceTest {
         new Expectations(userResource) {{
            userResource.users();
            result = usersResponseROList;
+           csvServiceImpl.exportToCSV(usersResponseROList);
+           result = "Username, Email, Active, Roles" + System.lineSeparator() +
+                   "user1, email@email.com, true, ROLE_ADMIN" + System.lineSeparator();
         }};
 
         // When
@@ -95,6 +103,7 @@ public class UserResourceTest {
 
         // Then
         Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
-        Assert.assertEquals(UserResponseRO.csvTitle() + userResponseRO.toCsvString(), csv.getBody());
+        Assert.assertEquals("Username, Email, Active, Roles" + System.lineSeparator() +
+                "user1, email@email.com, true, ROLE_ADMIN" + System.lineSeparator(), csv.getBody());
     }
 }

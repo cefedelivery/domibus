@@ -10,4 +10,6 @@ import java.util.List;
  */
 public interface CsvService {
     String exportToCSV(List<?> list) throws EbMS3Exception;
+
+    void setExcludedItems(List<String> excludedItems);
 }

@@ -5,7 +5,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Date;
-import java.util.Objects;
 
 public class PModeResponseRO {
 
@@ -65,7 +64,7 @@ public class PModeResponseRO {
         this.current = current;
     }
 
-    public String toCsvString() {
+    /*public String toCsvString() {
         return new StringBuilder()
                 .append(Objects.toString(configurationDate,"")).append(",")
                 .append(Objects.toString(username,"")).append(",")
@@ -83,7 +82,7 @@ public class PModeResponseRO {
                 .append("Current")
                 .append(System.lineSeparator())
                 .toString();
-    }
+    }*/
 
     @Override
     public boolean equals(Object o) {

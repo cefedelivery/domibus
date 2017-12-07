@@ -1,15 +1,20 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -28,6 +33,9 @@ public class JmsResource {
     @Autowired
     JMSManager jmsManager;
 
+    @Autowired
+    @Qualifier("csvServiceImpl")
+    CsvService csvService;
 
     @RequestMapping(value = {"/destinations"}, method = GET)
     public ResponseEntity<DestinationsResponseRO> destinations() {
@@ -93,8 +101,33 @@ public class JmsResource {
                     .contentType(MediaType.parseMediaType(APPLICATION_JSON))
                     .body(response);
         }
+    }
 
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv() {
+        String resultText;
 
+        MessagesRequestRO request = new MessagesRequestRO();
+        final List<JmsMessage> jmsMessageList = jmsManager.browseMessages(request.getSource(), request.getJmsType(), request.getFromDate(), request.getToDate(), request.getSelector());
+
+        /*List<String> excludedItems = new ArrayList<>();
+        excludedItems.add("entityId");
+        excludedItems.add("identifiers");
+        excludedItems.add("userName");
+        excludedItems.add("processesWithPartyAsInitiator");
+        excludedItems.add("processesWithPartyAsResponder");
+        csvService.setExcludedItems(excludedItems);*/
+
+        try {
+            resultText = csvService.exportToCSV(jmsMessageList);
+        } catch (EbMS3Exception e) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .header("Content-Disposition", "attachment; filename=jms_datatable.csv")
+                .body(resultText);
     }
 
 

@@ -83,7 +83,7 @@ public class MessageFilterResourceTest {
         messageFilterRO.setBackendName(backendName);
         messageFilterRO.setEntityId(1);
         messageFilterRO.setRoutingCriterias(routingCriterias);
-        messageFilterRO.setIsPersisted(true);
+        messageFilterRO.setPersisted(true);
 
         messageFilterResultROS.add(messageFilterRO);
 
@@ -147,7 +147,7 @@ public class MessageFilterResourceTest {
         final List<MessageFilterRO> messageFilterROS = new ArrayList<>();
         MessageFilterRO messageFilterRO = new MessageFilterRO();
         messageFilterRO.setEntityId(messageFilterEntityId);
-        messageFilterRO.setIsPersisted(messageFilterEntityId != 0);
+        messageFilterRO.setPersisted(messageFilterEntityId != 0);
         messageFilterROS.add(messageFilterRO);
         return messageFilterROS;
     }

@@ -11,6 +11,7 @@ import {DirtyOperations} from "../common/dirty-operations";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {Observable} from "rxjs/Observable";
+import {DownloadService} from "../download/download.service";
 
 @Component({
   selector: 'app-jms',
@@ -405,6 +406,18 @@ export class JmsComponent implements OnInit, DirtyOperations {
         this.alertService.error("The operation 'updates on message(s)' could not be completed: " + error);
       }
     )
+  }
+
+  isSaveAsCSVButtonEnabled() {
+    return true;
+  }
+
+  getFilterPath() {
+    return "";
+  }
+
+  saveAsCSV() {
+    DownloadService.downloadNative("rest/jms/csv" + this.getFilterPath());
   }
 
   isDirty(): boolean {

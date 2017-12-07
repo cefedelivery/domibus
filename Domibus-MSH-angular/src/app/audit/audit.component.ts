@@ -6,6 +6,7 @@ import {AuditCriteria, AuditResponseRo} from "./audit";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {Observable} from "rxjs/Observable";
+import {DownloadService} from "../download/download.service";
 
 /**
  * @author Thomas Dussart
@@ -162,6 +163,15 @@ export class AuditComponent implements OnInit {
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ["Table", "User", "Action", 'Changed', 'Id'].indexOf(col.name) != -1
     })
+  }
+
+  isSaveAsCSVButtonEnabled() {
+    return (this.count < 10000);
+  }
+
+  saveAsCSV() {
+    let auditCriteria: AuditCriteria = this.buildCriteria();
+    this.auditService.saveAsCsv(auditCriteria);
   }
 
 }

@@ -1,6 +1,8 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.pmode.PModeArchiveInfo;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
@@ -37,6 +39,9 @@ public class PModeResourceTest {
 
     @Injectable
     private DomainCoreConverter domainConverter;
+
+    @Injectable
+    private CsvService csvServiceImpl;
 
     @Test
     public void testDownloadPmodes() {
@@ -303,7 +308,7 @@ public class PModeResourceTest {
     }
 
     @Test
-    public void testGetCsv() {
+    public void testGetCsv() throws EbMS3Exception {
         // Given
         Date date = new Date();
         List<PModeArchiveInfo> pModeArchiveInfoList = new ArrayList<>();
@@ -322,6 +327,10 @@ public class PModeResourceTest {
            result = pModeArchiveInfoList;
            domainConverter.convert(pModeArchiveInfoList, PModeResponseRO.class);
            result = pModeResponseROList;
+           csvServiceImpl.exportToCSV(pModeResponseROList);
+           result = "Configuration Date, Username, Description" + System.lineSeparator() +
+           date + ", user1, description1" + System.lineSeparator() +
+           date + ", user2, description2" + System.lineSeparator();
         }};
 
         // When
@@ -329,9 +338,9 @@ public class PModeResourceTest {
 
         // Then
         Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
-        Assert.assertEquals(PModeResponseRO.csvTitle() +
-                pModeResponseRO1.toCsvString() +
-                pModeResponseRO2.toCsvString(),
+        Assert.assertEquals("Configuration Date, Username, Description" + System.lineSeparator() +
+                        date + ", user1, description1" + System.lineSeparator() +
+                        date + ", user2, description2" + System.lineSeparator(),
                 csv.getBody());
     }
 }

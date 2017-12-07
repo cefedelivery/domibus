@@ -287,7 +287,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     });
   }
 
-  saveDialog() {
+  saveDialog(withDownloadCSV: boolean) {
     let headers = new Headers({'Content-Type': 'application/json'});
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
@@ -297,11 +297,18 @@ export class UserComponent implements OnInit, DirtyOperations {
           this.getUsers();
           this.getUserRoles();
           this.alertService.success("The operation 'update users' completed successfully.", false);
+          if(withDownloadCSV) {
+            DownloadService.downloadNative(UserComponent.USER_CSV_URL);
+          }
         }, err => {
           this.getUsers();
           this.getUserRoles();
           this.alertService.error("The operation 'update users' not completed successfully.", false);
         });
+      } else {
+        if(withDownloadCSV) {
+          DownloadService.downloadNative(UserComponent.USER_CSV_URL);
+        }
       }
     });
   }
@@ -318,7 +325,11 @@ export class UserComponent implements OnInit, DirtyOperations {
    * Saves the content of the datatable into a CSV file
    */
   saveAsCSV() {
-    DownloadService.downloadNative(UserComponent.USER_CSV_URL);
+    if(this.isDirty()) {
+      this.saveDialog(true);
+    } else {
+      DownloadService.downloadNative(UserComponent.USER_CSV_URL);
+    }
   }
 
   isDirty(): boolean {

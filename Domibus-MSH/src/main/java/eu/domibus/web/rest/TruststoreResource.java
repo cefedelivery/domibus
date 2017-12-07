@@ -1,5 +1,7 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
@@ -8,6 +10,7 @@ import eu.domibus.pki.CertificateService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +42,10 @@ public class TruststoreResource {
     @Autowired
     private DomainCoreConverter domainConverter;
 
+    @Autowired
+    @Qualifier("csvServiceImpl")
+    private CsvService csvService;
+
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     public ResponseEntity<String> uploadTruststoreFile(@RequestPart("truststore") MultipartFile truststore, @RequestParam("password") String password) {
 
@@ -64,16 +71,19 @@ public class TruststoreResource {
 
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv() {
-        StringBuilder resultText = new StringBuilder(TrustStoreRO.csvTitle());
+        String resultText;
         final List<TrustStoreRO> trustStoreROS = trustStoreEntries();
-        for(TrustStoreRO trustStoreRO : trustStoreROS) {
-            resultText.append(trustStoreRO.toCsvString());
+
+        try {
+            resultText = csvService.exportToCSV(trustStoreROS);
+        } catch (EbMS3Exception e) {
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
                 .header("Content-Disposition", "attachment; filename=truststore_datatable.csv")
-                .body(resultText.toString());
+                .body(resultText);
     }
 
 }

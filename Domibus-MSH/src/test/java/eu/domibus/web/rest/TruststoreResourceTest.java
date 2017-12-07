@@ -1,6 +1,8 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.security.TrustStoreEntry;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.pki.CertificateService;
@@ -47,6 +49,9 @@ public class TruststoreResourceTest {
 
     @Injectable
     DomainCoreConverter domainConverter;
+
+    @Injectable
+    private CsvService csvServiceImpl;
 
     @Test
     public void testUploadTruststoreFileSuccess() {
@@ -130,13 +135,16 @@ public class TruststoreResourceTest {
     }
 
     @Test
-    public void testGetCsv() {
+    public void testGetCsv() throws EbMS3Exception {
         // Given
         Date date = new Date();
         List<TrustStoreRO> trustStoreROList = getTestTrustStoreROList(date);
         new Expectations(truststoreResource) {{
             truststoreResource.trustStoreEntries();
             result = trustStoreROList;
+            csvServiceImpl.exportToCSV(trustStoreROList);
+            result = "Name, Subject, Issuer, Valid From, Valid Until" + System.lineSeparator() +
+                    "Name, Subject, Issuer, " + date + ", " + date + System.lineSeparator();
         }};
 
         // When
@@ -144,8 +152,8 @@ public class TruststoreResourceTest {
 
         // Then
         Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
-        Assert.assertEquals(TrustStoreRO.csvTitle() +
-                getTestTrustStoreROList(date).get(0).toCsvString(),
+        Assert.assertEquals("Name, Subject, Issuer, Valid From, Valid Until" + System.lineSeparator() +
+                        "Name, Subject, Issuer, " + date + ", " + date + System.lineSeparator(),
                 csv.getBody());
     }
 }
