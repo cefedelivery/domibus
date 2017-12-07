@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.ebms3.SoapInterceptorTest;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -7,16 +8,14 @@ import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.PKIUtil;
 import eu.domibus.spring.SpringContextProvider;
 import eu.domibus.wss4j.common.crypto.CryptoService;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.Tested;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.io.FileUtils;
 import org.apache.cxf.Bus;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.bus.extension.ExtensionManagerBus;
 import org.apache.cxf.bus.managers.PhaseManagerImpl;
+import org.apache.cxf.frontend.FaultInfoException;
 import org.apache.cxf.interceptor.InterceptorChain;
 import org.apache.cxf.message.Exchange;
 import org.apache.cxf.message.ExchangeImpl;
@@ -36,6 +35,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.core.JmsOperations;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -44,38 +44,35 @@ import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.dom.DOMSource;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Security;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 /**
  * @author idragusa
- * @since 3.3
+ * @since 4.0
  */
 @RunWith(JMockit.class)
-public class TrustSenderInterceptorTest {
+public class TrustSenderInterceptorTest extends SoapInterceptorTest {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TrustSenderInterceptorTest.class);
 
     private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/ebms3/receiver/";
-
-    private static final String SOURCE_TRUSTSTORE = "gateway_truststore.jks";
-
-    @Injectable
-    Properties domibusProperties;
 
     @Injectable
     CertificateService certificateService;
 
     @Injectable
     protected JAXBContext jaxbContextEBMS;
-
-    @InjectMocks
-    CryptoService cryptoService;
 
     @Tested
     TrustSenderInterceptor trustSenderInterceptor;
@@ -88,64 +85,69 @@ public class TrustSenderInterceptorTest {
 
     PKIUtil pkiUtil = new PKIUtil();
 
-    @Before
-    public void init() {
-        System.setProperty("javax.xml.soap.MessageFactory", "com.sun.xml.internal.messaging.saaj.soap.ver1_2.SOAPMessageFactory1_2Impl");
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-    }
-
     @Test
-    public void testHandleMessage2(@Mocked SpringContextProvider springContextProvider) throws Exception {
+    public void testHandleMessageKeyIdentifier(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         Document doc = readDocument("dataset/as4/SoapRequest.xml");
-        SoapMessage soapMessage = getSoapMessageForDom(doc);
-        Properties prop = new Properties();
-        prop.setProperty("org.apache.ws.security.crypto.merlin.trustStore.password", "test123");
-        prop.setProperty("org.apache.ws.security.crypto.merlin.load.cacerts", "false");
-        prop.setProperty("org.apache.ws.security.crypto.provider", "eu.domibus.wss4j.common.crypto.Merlin");
-        prop.setProperty("org.apache.ws.security.crypto.merlin.trustStore.file", RESOURCE_PATH + SOURCE_TRUSTSTORE);
-        prop.setProperty("org.apache.ws.security.crypto.merlin.trustStore.type", "jks");
-        trustSenderInterceptor.setSecurityEncryptionProp(prop);
+        String trustoreFilename = RESOURCE_PATH + "gateway_truststore.jks";
+        String trustorePassword = "test123";
 
-        byte[] sourceKeyStore = FileUtils.readFileToByteArray(new File(RESOURCE_PATH + SOURCE_TRUSTSTORE));
-
-        cryptoService = new CryptoService();
-        cryptoService.setTrustStoreProperties(prop);
-        cryptoService.setJmsOperations(jmsOperations());
-        cryptoService.replaceTruststore(sourceKeyStore, "test123");
-
-        new Expectations() {{
-            SpringContextProvider.getApplicationContext().getBean("cryptoService");
-            result = cryptoService;
-        }};
-        trustSenderInterceptor.handleMessage(soapMessage);
+        testHandleMessage(doc, trustoreFilename, trustorePassword);
     }
 
     @Test
-    public void testHandleMessage3(@Mocked SpringContextProvider springContextProvider) throws Exception {
+    public void testHandleMessageBinaryToken(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
+        String trustoreFilename = RESOURCE_PATH + "nonEmptySource.jks";
+        String trustorePassword = "1234";
+
+        testHandleMessage(doc, trustoreFilename, trustorePassword);
+    }
+
+    @Test(expected = org.apache.cxf.interceptor.Fault.class)
+    public void testSenderTrustFault(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
+        Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
+        String trustoreFilename = RESOURCE_PATH + "nonEmptySource.jks";
+        String trustorePassword = "1234";
+
+        new Expectations() {{
+            certificateService.isCertificateValid((X509Certificate)any);
+            result = false;
+            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
+            result = true;
+        }};
+        testHandleMessage(doc, trustoreFilename, trustorePassword);
+    }
+
+    @Test
+    public void testSenderTrustNoSenderVerification(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
+        Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
+        String trustoreFilename = RESOURCE_PATH + "nonEmptySource.jks";
+        String trustorePassword = "1234";
+
+        new Expectations() {{
+            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            result = false;
+        }};
+        testHandleMessage(doc, trustoreFilename, trustorePassword);
+        new Verifications() {{
+            certificateService.isCertificateValid((X509Certificate)any); times = 0;
+        }};
+    }
+
+    protected void testHandleMessage(Document doc, String trustoreFilename,  String trustorePassword) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         SoapMessage soapMessage = getSoapMessageForDom(doc);
-        Properties prop = new Properties();
-        prop.setProperty("org.apache.ws.security.crypto.merlin.trustStore.password", "1234");
-        prop.setProperty("org.apache.ws.security.crypto.merlin.load.cacerts", "false");
-        prop.setProperty("org.apache.ws.security.crypto.provider", "eu.domibus.wss4j.common.crypto.Merlin");
-        prop.setProperty("org.apache.ws.security.crypto.merlin.trustStore.file", RESOURCE_PATH + "nonEmptySource.jks");
-        prop.setProperty("org.apache.ws.security.crypto.merlin.trustStore.type", "jks");
-        trustSenderInterceptor.setSecurityEncryptionProp(prop);
-
-        byte[] sourceKeyStore = FileUtils.readFileToByteArray(new File(RESOURCE_PATH + "nonEmptySource.jks"));
-
-        cryptoService = new CryptoService();
-        cryptoService.setTrustStoreProperties(prop);
-        cryptoService.setJmsOperations(jmsOperations());
-        cryptoService.replaceTruststore(sourceKeyStore, "1234");
-
+        Properties properties = createTruststoreProperties(trustoreFilename, trustorePassword);
+        trustSenderInterceptor.setSecurityEncryptionProp(properties);
+        byte[] sourceTrustore = FileUtils.readFileToByteArray(new File(trustoreFilename));
+        CryptoService cryptoService = createCryptoService(sourceTrustore, trustorePassword, properties);
         new Expectations() {{
             SpringContextProvider.getApplicationContext().getBean("cryptoService");
             result = cryptoService;
+            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            result = true;
         }};
         trustSenderInterceptor.handleMessage(soapMessage);
     }
-
 
     @Test
     public void testCheckCertificateValidityEnabled() throws Exception {
@@ -202,36 +204,24 @@ public class TrustSenderInterceptorTest {
         Assert.assertTrue(trustSenderInterceptor.checkSenderPartyTrust(certificate, "test sender", "messageID123", false));
     }
 
-    protected Document readDocument(String name) throws Exception,
-            ParserConfigurationException {
-        InputStream inStream = getClass().getClassLoader().getResourceAsStream(name);
-        return StaxUtils.read(inStream);
+    protected Properties createTruststoreProperties(final String filename, final String password) {
+        Properties prop = new Properties();
+
+        prop.setProperty("org.apache.ws.security.crypto.merlin.trustStore.type", "jks");
+        prop.setProperty("org.apache.ws.security.crypto.merlin.load.cacerts", "false");
+        prop.setProperty("org.apache.ws.security.crypto.provider", "eu.domibus.wss4j.common.crypto.Merlin");
+        prop.setProperty("org.apache.ws.security.crypto.merlin.trustStore.file", filename);
+        prop.setProperty("org.apache.ws.security.crypto.merlin.trustStore.password", password);
+
+        return prop;
     }
 
-    protected SoapMessage getSoapMessageForDom(Document doc) throws SOAPException {
+    protected CryptoService createCryptoService(byte[] sourceTrustore, String trustorePassword, Properties properties ) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
+        CryptoService cryptoService = new CryptoService();
+        cryptoService.setTrustStoreProperties(properties);
+        cryptoService.setJmsOperations(jmsOperations());
+        cryptoService.replaceTruststore(sourceTrustore, trustorePassword);
 
-        SOAPMessage saajMsg = MessageFactory.newInstance().createMessage();
-        SOAPPart part = saajMsg.getSOAPPart();
-        part.setContent(new DOMSource(doc));
-        saajMsg.saveChanges();
-
-        // Hack to create the context map
-        MessageImpl message = new MessageImpl();
-        message.put(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
-        SoapMessage msg = new SoapMessage(message);
-        Exchange ex = new ExchangeImpl();
-        ex.setInMessage(msg);
-        msg.setContent(SOAPMessage.class, saajMsg);
-
-        InterceptorChain ic = new PhaseInterceptorChain((new PhaseManagerImpl()).getOutPhases());
-        msg.setInterceptorChain(ic);
-        ExchangeImpl exchange = new ExchangeImpl();
-        Bus bus = new ExtensionManagerBus();
-        bus.setExtension(new PolicyBuilderImpl(bus), PolicyBuilder.class);
-        exchange.put(Bus.class, bus);
-        msg.setExchange(exchange);
-
-        return msg;
+        return cryptoService;
     }
-
 }
