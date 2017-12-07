@@ -1,18 +1,18 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.util.DateUtil;
-import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -50,7 +50,7 @@ public class MessageLogResourceTest {
     DateUtil dateUtil;
 
     @Injectable
-    CsvService csvServiceImpl;
+    CsvServiceImpl csvServiceImpl;
 
     @Injectable
     Properties domibusProperties;
@@ -196,7 +196,7 @@ public class MessageLogResourceTest {
     }
 
     @Test
-    public void testUserMessageGetCsv() throws EbMS3Exception {
+    public void testUserMessageGetCsv() throws CsvException {
         // Given
         Date date = new Date();
         List<MessageLogInfo> userMessageList = getMessageList(MessageType.USER_MESSAGE, date);
@@ -223,7 +223,7 @@ public class MessageLogResourceTest {
     }
 
     @Test
-    public void testSignalMessageGetCsv() throws EbMS3Exception {
+    public void testSignalMessageGetCsv() throws CsvException {
         // Given
         Date date = new Date();
         List<MessageLogInfo> signalMessageList = getMessageList(MessageType.SIGNAL_MESSAGE, date);
@@ -250,13 +250,13 @@ public class MessageLogResourceTest {
     }
 
     @Test
-    public void testUserMessageGetCsv_Exception() throws EbMS3Exception {
+    public void testUserMessageGetCsv_Exception() throws CsvException {
         // Given
         new Expectations() {{
             domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
             result = "10000";
             csvServiceImpl.exportToCSV((List<?>) any);
-            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Exception", null, new Exception());
+            result = new CsvException(DomibusCoreErrorCode.DOM_001, "Exception", new Exception());
         }};
 
         // When

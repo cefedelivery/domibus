@@ -1,7 +1,6 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.routing.RoutingCriteria;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.web.rest.ro.MessageFilterRO;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +15,13 @@ import java.util.Objects;
  */
 
 @Service
-public class MessageFilterCsvServiceImpl extends CsvServiceImpl {
+public class MessageFilterCsvServiceImpl extends CsvServiceAbstract {
 
     private List<String> csvHeader = new ArrayList<>();
 
     private String[] routingCriteriasArray = {"From", "To", "Action", "Service"};
 
-    MessageFilterCsvServiceImpl() {
+    public MessageFilterCsvServiceImpl() {
         csvHeader.add("Backend Name");
         csvHeader.addAll(Arrays.asList(routingCriteriasArray));
         csvHeader.add("Persisted");
@@ -36,19 +35,17 @@ public class MessageFilterCsvServiceImpl extends CsvServiceImpl {
     }
 
     private String routingCriteriasToCsvString(List<RoutingCriteria> routingCriterias) {
-        // I don't like this approach but we have a fixed table for Routing Criterias and we need to keep this order always
-        // even if routing criterias exist on a different order in backend filter object
-        String[] result = new String[routingCriteriasArray.length];
+        List<String> result = new ArrayList<>(4);
         for(RoutingCriteria rc : routingCriterias) {
             for(int i = 0; i < routingCriteriasArray.length; i++) {
                 if(rc.getName().equalsIgnoreCase(routingCriteriasArray[i])) {
-                    result[i] = Objects.toString(rc.getExpression(),"");
+                    result.add(i, Objects.toString(rc.getExpression(),""));
                 } else {
-                    result[i] = "";
+                    result.add(i, "");
                 }
             }
         }
-        return Arrays.toString(result);
+        return result.toString();
     }
 
     private String toCsvString(MessageFilterRO messageFilterRO) {
@@ -61,7 +58,7 @@ public class MessageFilterCsvServiceImpl extends CsvServiceImpl {
     }
 
     @Override
-    public String exportToCSV(List<?> list) throws EbMS3Exception {
+    public String exportToCSV(List<?> list) {
         if(list == null || list.isEmpty()) {
             return "";
         }

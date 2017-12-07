@@ -1,9 +1,9 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.ebms3.common.model.MessageType;
 import mockit.Tested;
@@ -28,7 +28,7 @@ public class CsvServiceImplTest {
     CsvServiceImpl csvService;
 
     @Test
-    public void testExportToCsv_EmptyList() throws EbMS3Exception {
+    public void testExportToCsv_EmptyList() throws CsvException {
         // Given
         // When
         final String exportToCSV = csvService.exportToCSV(new ArrayList<>());
@@ -38,7 +38,7 @@ public class CsvServiceImplTest {
     }
 
     @Test
-    public void testExportToCsv_NullList() throws EbMS3Exception {
+    public void testExportToCsv_NullList() throws CsvException {
         // Given
         // When
         final String exportToCSV = csvService.exportToCSV(null);
@@ -48,7 +48,7 @@ public class CsvServiceImplTest {
     }
 
     @Test
-    public void testExportToCsv() throws EbMS3Exception {
+    public void testExportToCsv() throws CsvException {
         // Given
         Date date = new Date();
         List<MessageLogInfo> messageLogInfoList = getMessageList(MessageType.USER_MESSAGE, date);

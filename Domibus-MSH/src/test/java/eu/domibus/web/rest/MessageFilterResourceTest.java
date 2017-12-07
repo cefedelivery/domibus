@@ -1,14 +1,15 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
-import eu.domibus.common.ErrorCode;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.impl.MessageFilterCsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.web.rest.ro.MessageFilterRO;
 import eu.domibus.web.rest.ro.MessageFilterResultRO;
+import javafx.util.Pair;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -64,7 +65,7 @@ public class MessageFilterResourceTest {
     }
 
     @Test
-    public void testGetMessageFilterCsv() throws EbMS3Exception {
+    public void testGetMessageFilterCsv() throws CsvException {
         // Given
         final String backendName = "Backend Filter 1";
         final String fromExpression = "from:expression";
@@ -89,7 +90,7 @@ public class MessageFilterResourceTest {
 
         new Expectations(messageFilterResource){{
             messageFilterResource.getBackendFiltersInformation();
-            result = messageFilterResultROS;
+            result = new Pair<>(messageFilterResultROS, true);
             csvService.exportToCSV(messageFilterResultROS);
             result = CSV_TITLE + backendName + "," + fromExpression + ", , , ," + true + System.lineSeparator();
         }};
@@ -105,11 +106,11 @@ public class MessageFilterResourceTest {
     }
 
     @Test
-    public void testGetMessageFilterCsv_Exception() throws EbMS3Exception {
+    public void testGetMessageFilterCsv_Exception() throws CsvException {
         // Given
         new Expectations() {{
             csvService.exportToCSV((List<?>) any);
-            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Exception", null, new Exception());
+            result = new CsvException(DomibusCoreErrorCode.DOM_001, "Exception", new Exception());
         }};
 
         // When

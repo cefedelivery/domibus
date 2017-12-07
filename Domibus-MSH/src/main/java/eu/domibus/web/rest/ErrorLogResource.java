@@ -1,13 +1,13 @@
 package eu.domibus.web.rest;
 
 import com.google.common.primitives.Ints;
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.ErrorLogCsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import eu.domibus.web.rest.ro.ErrorLogResultRO;
@@ -53,8 +53,7 @@ public class ErrorLogResource {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    @Qualifier("errorLogCsvServiceImpl")
-    CsvService csvService;
+    ErrorLogCsvServiceImpl csvService;
 
     @RequestMapping(method = RequestMethod.GET)
     public ErrorLogResultRO getErrorLog(
@@ -117,7 +116,8 @@ public class ErrorLogResource {
         String resultText;
         try {
             resultText = csvService.exportToCSV(errorLogROList);
-        } catch (EbMS3Exception e) {
+        } catch (CsvException e) {
+            LOGGER.error("Exception caught during export to CSV", e.getMessage());
             return ResponseEntity.noContent().build();
         }
 
