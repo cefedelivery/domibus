@@ -55,8 +55,8 @@ public class ErrorLogCsvServiceImplTest {
         final String exportToCSV = errorLogCsvService.exportToCSV(errorLogROList);
 
         // Then
-        Assert.assertEquals("Error Signal Message Id,Msh Role,Message In Error Id,Error Code,Error Detail,Timestamp,Notified"+System.lineSeparator()+
-                "signalMessageId,RECEIVING,messageInErrorId,EBMS:0001,errorDetail,"+date+","+date+System.lineSeparator(), exportToCSV);
+        Assert.assertTrue(exportToCSV.contains("Error Signal Message Id,Msh Role,Message In Error Id,Error Code,Error Detail,Timestamp,Notified"));
+        Assert.assertTrue(exportToCSV.contains("signalMessageId,RECEIVING,messageInErrorId,EBMS:0001,errorDetail,"+date+","+date));
     }
 
     private List<ErrorLogRO> getErrorLogList(Date date) {
