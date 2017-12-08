@@ -1,14 +1,18 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -19,11 +23,10 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Tiago Miguel
@@ -32,6 +35,8 @@ import java.util.List;
 @RunWith(JMockit.class)
 public class MessageLogResourceTest {
 
+    private static final String CSV_TITLE = "Conversation Id, From Party Id, To Party Id, Original Sender, Final Recipient, ref To Message Id, Message Id, Message Status, Notification Status, " +
+            "MSH Role, Message Type, Deleted, Received, Send Attempts, Send Attempts Max, Next Attempt, Failed, Restored";
     @Tested
     MessageLogResource messageLogResource;
 
@@ -43,6 +48,12 @@ public class MessageLogResourceTest {
 
     @Injectable
     DateUtil dateUtil;
+
+    @Injectable
+    CsvServiceImpl csvServiceImpl;
+
+    @Injectable
+    Properties domibusProperties;
 
     /**
      * Creates a UserMessageLof or SignalMessageLog depending on boolean argument
@@ -164,6 +175,97 @@ public class MessageLogResourceTest {
         Assert.assertEquals(signalMessageLog.getNotificationStatus(), messageLogRO.getNotificationStatus());
         Assert.assertEquals(signalMessageLog.getReceived(), messageLogRO.getReceived());
         Assert.assertEquals(signalMessageLog.getSendAttempts(), messageLogRO.getSendAttempts());
+    }
+
+    private List<MessageLogInfo> getMessageList(MessageType messageType, Date date) {
+        List<MessageLogInfo> result = new ArrayList<>();
+        MessageLogInfo messageLog = new MessageLogInfo("messageId", MessageStatus.ACKNOWLEDGED,
+                NotificationStatus.NOTIFIED, MSHRole.RECEIVING, messageType, date, date, 1, 5, date,
+                "conversationId", "fromPartyId", "toPartyId", "originalSender", "finalRecipient",
+                "refToMessageId", date, date);
+        result.add(messageLog);
+        return result;
+    }
+
+    private void assertCsvResult(MessageType messageType, Date date, ResponseEntity<String> csv) {
+        Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
+        Assert.assertEquals(CSV_TITLE +
+                        "conversationId,fromPartyId,toPartyId,originalSender,finalRecipient,refToMessageId,messageId," + MessageStatus.ACKNOWLEDGED + "," + NotificationStatus.NOTIFIED + "," +
+                        MSHRole.RECEIVING + "," + messageType + "," + date + "," + date + ",1,5," + date + "," + date + "," + date + System.lineSeparator(),
+                csv.getBody());
+    }
+
+    @Test
+    public void testUserMessageGetCsv() throws CsvException {
+        // Given
+        Date date = new Date();
+        List<MessageLogInfo> userMessageList = getMessageList(MessageType.USER_MESSAGE, date);
+
+        new Expectations() {{
+            domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
+            result = "10000";
+            userMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
+            result = userMessageList;
+            csvServiceImpl.exportToCSV(userMessageList);
+            result = CSV_TITLE +
+                    "conversationId,fromPartyId,toPartyId,originalSender,finalRecipient,refToMessageId,messageId," + MessageStatus.ACKNOWLEDGED + "," +
+                    NotificationStatus.NOTIFIED + "," + MSHRole.RECEIVING + "," + MessageType.USER_MESSAGE + "," + date + "," + date + ",1,5," + date + "," +
+                    date + "," + date + System.lineSeparator();
+        }};
+
+        // When
+        final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, MessageType.USER_MESSAGE, null,
+                null, null, null, null, null,
+                null, null, null);
+
+        // Then
+        assertCsvResult(MessageType.USER_MESSAGE, date, csv);
+    }
+
+    @Test
+    public void testSignalMessageGetCsv() throws CsvException {
+        // Given
+        Date date = new Date();
+        List<MessageLogInfo> signalMessageList = getMessageList(MessageType.SIGNAL_MESSAGE, date);
+
+        new Expectations() {{
+            domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
+            result = "10000";
+            signalMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
+            result = signalMessageList;
+            csvServiceImpl.exportToCSV(signalMessageList);
+            result = CSV_TITLE +
+                    "conversationId,fromPartyId,toPartyId,originalSender,finalRecipient,refToMessageId,messageId," + MessageStatus.ACKNOWLEDGED + "," +
+                    NotificationStatus.NOTIFIED + "," + MSHRole.RECEIVING + "," + MessageType.SIGNAL_MESSAGE + "," + date + "," + date + ",1,5," + date + "," +
+                    date + "," + date + System.lineSeparator();
+        }};
+
+        // When
+        final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, MessageType.SIGNAL_MESSAGE, null,
+                null, null, null, null, null,
+                null, null, null);
+
+        // Then
+        assertCsvResult(MessageType.SIGNAL_MESSAGE, date, csv);
+    }
+
+    @Test
+    public void testUserMessageGetCsv_Exception() throws CsvException {
+        // Given
+        new Expectations() {{
+            domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
+            result = "10000";
+            csvServiceImpl.exportToCSV((List<?>) any);
+            result = new CsvException(DomibusCoreErrorCode.DOM_001, "Exception", new Exception());
+        }};
+
+        // When
+        final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, MessageType.USER_MESSAGE, null,
+                null, null, null, null, null,
+                null, null, null);
+
+        // Then
+        Assert.assertEquals(HttpStatus.NO_CONTENT, csv.getStatusCode());
     }
 
     private MessageLogResultRO getMessageLog(MessageType messageType) {
