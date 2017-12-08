@@ -38,7 +38,6 @@ import java.util.Properties;
  * @author idragusa
  * @since 4.0
  */
-@RunWith(JMockit.class)
 public class SoapInterceptorTest {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SoapInterceptorTest.class);
