@@ -1,7 +1,6 @@
 package eu.domibus.ebms3.sender;
 
 import eu.domibus.ebms3.SoapInterceptorTest;
-import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.spring.SpringContextProvider;

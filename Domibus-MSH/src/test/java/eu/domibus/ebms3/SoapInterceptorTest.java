@@ -6,7 +6,6 @@ import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import mockit.Injectable;
-import mockit.integration.junit4.JMockit;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.cxf.Bus;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -22,7 +21,6 @@ import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.cxf.ws.policy.PolicyBuilderImpl;
 import org.apache.wss4j.policy.SPConstants;
 import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.ParserConfigurationException;
