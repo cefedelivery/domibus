@@ -57,7 +57,7 @@
             **/web.xml,
             **/common/model/configuration/**,
             **/ebms3/model/configuration/**,
-            **/Domibus-MSH-api/src/main/java/eu/domibus/api/usermessage/domain/**
+            **/Domibus-MSH-api/**
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
         <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar/</sonar.host.url>
