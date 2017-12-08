@@ -1,12 +1,9 @@
 package eu.domibus.ebms3.sender;
 
-import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.SoapInterceptorTest;
-import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.spring.SpringContextProvider;
-import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
@@ -30,23 +27,18 @@ import java.security.cert.CertificateException;
  * @since 4.0
  */
 @RunWith(JMockit.class)
-public class SaveRawPulledMessageInterceptorTest extends SoapInterceptorTest {
-
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SaveRawPulledMessageInterceptorTest.class);
-
-    @Injectable
-    MessageExchangeService messageExchangeService;
+public class PrepareAttachmentInterceptorTest extends SoapInterceptorTest {
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PrepareAttachmentInterceptorTest.class);
 
     @Tested
-    SaveRawPulledMessageInterceptor saveRawPulledMessageInterceptor;
+    PrepareAttachmentInterceptor prepareAttachmentInterceptor;
 
     @Test
     public void testHandleMessage(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
         SoapMessage soapMessage = getSoapMessageForDom(doc);
-        saveRawPulledMessageInterceptor.handleMessage(soapMessage);
-        Assert.assertEquals(soapMessage.get(MSHDispatcher.MESSAGE_TYPE_OUT), MessageType.USER_MESSAGE);
+        prepareAttachmentInterceptor.handleMessage(soapMessage);
+        Assert.assertNotNull(soapMessage.getAttachments());
+        Assert.assertEquals(1, soapMessage.getAttachments().size());
     }
-
-
 }

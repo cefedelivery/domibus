@@ -7,6 +7,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import mockit.Injectable;
 import mockit.integration.junit4.JMockit;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.cxf.Bus;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.bus.extension.ExtensionManagerBus;
@@ -24,10 +25,7 @@ import org.junit.runner.RunWith;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPPart;
+import javax.xml.soap.*;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.dom.DOMSource;
 import java.io.InputStream;
@@ -62,6 +60,10 @@ public class SoapInterceptorTest {
         SOAPMessage saajMsg = MessageFactory.newInstance().createMessage();
         SOAPPart part = saajMsg.getSOAPPart();
         part.setContent(new DOMSource(doc));
+        AttachmentPart attachment = saajMsg.createAttachmentPart();
+        attachment.setContent(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()), "text/xml");
+        attachment.setContentId("sbdh-order");
+        saajMsg.addAttachmentPart(attachment);
         saajMsg.saveChanges();
 
         // Create the context map
