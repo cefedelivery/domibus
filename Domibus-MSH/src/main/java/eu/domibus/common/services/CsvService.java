@@ -1,5 +1,6 @@
 package eu.domibus.common.services;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -8,4 +9,6 @@ import java.util.List;
  */
 public interface CsvService {
     String exportToCSV(List<?> list);
+    void createCSVColumnHeader(StringBuilder result, Field[] fields);
+    void createCSVContents(List<?> list, StringBuilder result, Field[] fields);
 }

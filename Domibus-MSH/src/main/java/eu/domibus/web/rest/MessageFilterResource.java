@@ -76,7 +76,7 @@ public class MessageFilterResource {
         try {
             resultText = csvService.exportToCSV(getBackendFiltersInformation().getKey());
         } catch (CsvException e) {
-            LOGGER.error("Exception caught during export to CSV", e.getMessage());
+            LOGGER.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();
         }
 

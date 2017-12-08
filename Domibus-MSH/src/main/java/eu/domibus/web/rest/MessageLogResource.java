@@ -190,7 +190,7 @@ public class MessageLogResource {
         try {
             resultText = csvService.exportToCSV(resultList);
         } catch (CsvException e) {
-            LOGGER.error("Exception caught during export to CSV", e.getMessage());
+            LOGGER.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();
         }
 

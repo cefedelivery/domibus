@@ -117,7 +117,7 @@ public class ErrorLogResource {
         try {
             resultText = csvService.exportToCSV(errorLogROList);
         } catch (CsvException e) {
-            LOGGER.error("Exception caught during export to CSV", e.getMessage());
+            LOGGER.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();
         }
 

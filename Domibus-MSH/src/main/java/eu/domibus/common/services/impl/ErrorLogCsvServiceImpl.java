@@ -17,32 +17,12 @@ import java.util.Objects;
  */
 
 @Service
-public class ErrorLogCsvServiceImpl extends CsvServiceAbstract {
+public class ErrorLogCsvServiceImpl extends CsvServiceImpl {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ErrorLogCsvServiceImpl.class);
 
-
     @Override
-    public String exportToCSV(List<?> list) {
-        if(list == null || list.isEmpty()) {
-            return "";
-        }
-
-        StringBuilder result = new StringBuilder();
-        final Class<?> aClass = list.get(0).getClass();
-
-        Field[] fields = aClass.getDeclaredFields();
-
-        // Column Header
-        for(Field field : fields) {
-            final String varName = field.getName();
-            result.append(uncamelcase(varName));
-            result.append(",");
-        }
-        result.deleteCharAt(result.length() - 1);
-        result.append(System.lineSeparator());
-
-        // CSV contents
+    public void createCSVContents(List<?> list, StringBuilder result, Field[] fields) {
         for(Object elem : list) {
             for (Field field : fields) {
                 field.setAccessible(true);
@@ -62,7 +42,5 @@ public class ErrorLogCsvServiceImpl extends CsvServiceAbstract {
             result.deleteCharAt(result.length() - 1);
             result.append(System.lineSeparator());
         }
-
-        return result.toString();
     }
 }
