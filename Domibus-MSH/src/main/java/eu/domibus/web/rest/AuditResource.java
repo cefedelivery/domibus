@@ -108,9 +108,10 @@ public class AuditResource {
     }
 
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
-    public ResponseEntity<String> getCsv(@RequestParam(value = "auditCriteria") AuditCriteria auditCriteria) {
+    public ResponseEntity<String> getCsv(/*@RequestParam(value = "auditCriteria") AuditCriteria auditCriteria*/) {
         String resultText;
 
+        AuditCriteria auditCriteria = new AuditCriteria();
         final List<AuditResponseRo> auditResponseRos = listAudits(auditCriteria);
         try {
             resultText = csvService.exportToCSV(auditResponseRos);

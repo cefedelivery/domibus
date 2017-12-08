@@ -368,6 +368,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
             this.actualRow = 0;
             this.getAllPModeEntries();
           });
+          this.disableAllButtons();
         }
         this.selected = [];
       });

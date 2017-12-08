@@ -46,13 +46,18 @@ public class CsvServiceImpl extends CsvServiceAbstract {
 
         // CSV contents
         for(Object elem : list) {
+            // for each field of the class
             for (Field field : fields) {
+                // if it's not on the list of the excluded ones
                 if (excluded.contains(field.getName())) {
                     continue;
                 }
+                // set that field to be accessible
                 field.setAccessible(true);
                 try {
+                    // get the vield value
                     String fieldValue = Objects.toString(field.get(elem), "");
+                    // if field contains ,(comma) we should include ""
                     if(fieldValue.contains(",")) {
                         fieldValue = "\"" + fieldValue + "\"";
                     }
@@ -63,6 +68,7 @@ public class CsvServiceImpl extends CsvServiceAbstract {
                     throw new CsvException(DomibusCoreErrorCode.DOM_001, "Exception while writing on CSV", e);
                 }
             }
+            // delete the last ,(comma)
             result.deleteCharAt(result.length() - 1);
             result.append(System.lineSeparator());
         }
