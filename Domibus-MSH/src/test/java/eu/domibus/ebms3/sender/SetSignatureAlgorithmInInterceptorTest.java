@@ -11,6 +11,8 @@ import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.apache.cxf.binding.soap.SoapMessage;
+import org.apache.cxf.ws.security.SecurityConstants;
+import org.apache.wss4j.policy.SPConstants;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,21 +32,18 @@ import java.security.cert.CertificateException;
  * @since 4.0
  */
 @RunWith(JMockit.class)
-public class SaveRawPulledMessageInterceptorTest extends SoapInterceptorTest {
-
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SaveRawPulledMessageInterceptorTest.class);
-
-    @Injectable
-    MessageExchangeService messageExchangeService;
+public class SetSignatureAlgorithmInInterceptorTest extends SoapInterceptorTest {
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SetSignatureAlgorithmInInterceptorTest.class);
 
     @Tested
-    SaveRawPulledMessageInterceptor saveRawPulledMessageInterceptor;
+    SetSignatureAlgorithmInInterceptor setSignatureAlgorithmInInterceptor;
 
     @Test
     public void testHandleMessage(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
         SoapMessage soapMessage = getSoapMessageForDom(doc);
-        saveRawPulledMessageInterceptor.handleMessage(soapMessage);
-        Assert.assertEquals(soapMessage.get(MSHDispatcher.MESSAGE_TYPE_OUT), MessageType.USER_MESSAGE);
+        setSignatureAlgorithmInInterceptor.handleMessage(soapMessage);
+        Assert.assertEquals(soapMessage.get(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM), SPConstants.SHA256);
     }
+
 }

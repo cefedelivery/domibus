@@ -20,6 +20,7 @@ import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.cxf.ws.policy.PolicyBuilderImpl;
+import org.apache.wss4j.policy.SPConstants;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.w3c.dom.Document;
@@ -39,6 +40,8 @@ import java.util.Properties;
 public class SoapInterceptorTest {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SoapInterceptorTest.class);
+
+    protected static String MESSAGE_TYPE_OUT_TEST_VALUE = "MESSAGE_TYPE_OUT_TEST_VALUE";
 
     @Injectable
     protected Properties domibusProperties;
@@ -64,12 +67,14 @@ public class SoapInterceptorTest {
         attachment.setContent(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()), "text/xml");
         attachment.setContentId("sbdh-order");
         saajMsg.addAttachmentPart(attachment);
+        saajMsg.setProperty(MSHDispatcher.MESSAGE_TYPE_OUT, MESSAGE_TYPE_OUT_TEST_VALUE);
         saajMsg.saveChanges();
 
         // Create the context map
         MessageImpl message = new MessageImpl();
         message.put(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
         message.put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
+        message.put(DispatchClientDefaultProvider.ASYMMETRIC_SIG_ALGO_PROPERTY, SPConstants.SHA256);
         SoapMessage msg = new SoapMessage(message);
 
         Exchange ex = new ExchangeImpl();

@@ -2,16 +2,15 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.ebms3.SoapInterceptorTest;
 import eu.domibus.ebms3.common.model.MessageType;
-import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.spring.SpringContextProvider;
-import junit.framework.Assert;
 import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.apache.cxf.binding.soap.SoapMessage;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.w3c.dom.Document;
