@@ -4,13 +4,10 @@
     <md-card-content>
       <div>
           <input placeholder="File" #fileInput type="file" id="pmode" accept=".xml" (change)="checkFileAndDescription()" required on>
-          <!--<md-input-container>
-            <input mdInput placeholder="Description" name="description" [(ngModel)]="description" id="description_id" (input)="checkFileAndDescription()" required>
-          </md-input-container>-->
       </div>
       <div>
         <h3 style="font-style: normal; font-size: small">Description:</h3>
-        <textarea style="resize: none; width: 100%; height: 100%;" rows="6" [(ngModel)]="description" id="description_id" (input)="checkFileAndDescription()" required></textarea>
+        <textarea style="resize: none; width: 100%; height: 100%;" rows="5" [(ngModel)]="description" id="description_id" (input)="checkFileAndDescription()" maxlength="254" required></textarea>
       </div>
     </md-card-content>
   </md-card>
