@@ -24,7 +24,7 @@ class Domibus
 	def sqlGreen=null;
 	def thirdGateway = "false";
 	static def backup_file_sufix = "_backup_for_soapui_tests"
-	static def defaultLogLevel = 1
+	static def defaultLogLevel = 0
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
@@ -41,23 +41,8 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
    // Log information wrapper 
    static def void debugLog(logMsg, log,  logLevel = defaultLogLevel) {
-	switch (logLevel) {
-		case 1: 	
-			log.debug(logMsg)
-			break
-		case 2: 	
-			log.info (logMsg) 
-			break
-		case 3: 	
-			log.warn (logMsg) 	
-			break
-		case 4: 
-			log.error (logMsg)
-		 	break
-		 default: 
-		 	log.info (logMsg)
-		 	break
-	}
+	if (logLevel.toString()=="1" || logLevel.toString() == "true") 
+		log.info (logMsg)
   }
 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
