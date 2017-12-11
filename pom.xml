@@ -55,7 +55,9 @@
             **/Domibus-MSH-angular/node_modules/**,
             **/swagger*.js,
             **/web.xml,
-            **/common/model/configuration/**
+            **/common/model/configuration/**,
+            **/ebms3/model/configuration/**,
+            **/api/usermessage/domain/**
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
         <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar/</sonar.host.url>
