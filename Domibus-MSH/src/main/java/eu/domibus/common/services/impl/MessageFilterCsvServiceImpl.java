@@ -15,7 +15,7 @@ import java.util.Objects;
  */
 
 @Service
-public class MessageFilterCsvServiceImpl extends CsvServiceAbstract {
+public class MessageFilterCsvServiceImpl extends CsvServiceImpl {
 
     private List<String> csvHeader = new ArrayList<>();
 

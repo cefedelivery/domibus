@@ -56,7 +56,7 @@ public class MessageLogResource {
     DateUtil dateUtil;
 
     @Autowired
-    CsvServiceImpl csvService;
+    CsvServiceImpl csvServiceImpl;
 
     //significant improvements to the query execution plan have been found by always passing the date.
     //so we provide a default from and to.
@@ -188,9 +188,9 @@ public class MessageLogResource {
 
         String resultText;
         try {
-            resultText = csvService.exportToCSV(resultList);
+            resultText = csvServiceImpl.exportToCSV(resultList);
         } catch (CsvException e) {
-            LOGGER.error("Exception caught during export to CSV", e.getMessage());
+            LOGGER.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();
         }
 

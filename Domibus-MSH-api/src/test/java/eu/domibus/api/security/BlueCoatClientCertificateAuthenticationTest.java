@@ -1,4 +1,4 @@
-package eu.domibus.core.security;
+package eu.domibus.api.security;
 
 import eu.domibus.api.security.BlueCoatClientCertificateAuthentication;
 import eu.domibus.api.security.CertificateDetails;

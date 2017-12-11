@@ -280,7 +280,7 @@ class Domibus
                     messageStatus=it.MESSAGE_STATUS
                     numberAttempts=it.SEND_ATTEMPTS
                 }
-                log.info "|MSG_ID: "+messageID+" | SENDER: Expected Message Status ="+ SMSH +"-- Current Message Status = "+messageStatus+" | maxNumberAttempts: "+maxNumberAttempts+"-- numberAttempts: "+numberAttempts; 
+                log.info "|MSG_ID: "+messageID+" | SENDER: Expected MSG Status ="+ SMSH +"-- Current MSG Status = "+messageStatus+" | maxNumbAttempts: "+maxNumberAttempts+"-- numbAttempts: "+numberAttempts; 
                 if(SMSH=="SEND_FAILURE"){
 					if(messageStatus=="WAITING_FOR_RETRY"){
 						if(((maxNumberAttempts-numberAttempts)>0)&&(!wait)){
@@ -837,24 +837,16 @@ static def String urlToDomibus(side, log, context){
 		return context.expand("\${#Project#${propName}}")
 }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-	static def setMessageFilters(String side, String filterChoice,context,log){
-		log.info "Start update message filters for Domibus \""+side+"\".";
+	static def getMessageFilters(String side,context,log){
+		log.info "Get message filters for Domibus \""+side+"\".";
 	    def outputCatcher = new StringBuffer();
         def errorCatcher = new StringBuffer();
-        def proc=null; def commandString = null;
-		def firstBck = "backendWebservice"; def secondBck = "Jms";
-		def firstEntId = "1"; def SecondEntId = "2";
-		
+        def proc=null; def commandString = null;		
 		def String output = fetchCookieHeader(side,context,log);		
 		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
 		
-		if(filterChoice.toLowerCase()!="ws"){
-			firstBck="Jms";firstEntId="2";secondBck="backendWebservice";SecondEntId="1";
-		}
-				
-		commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
+		commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X GET ";
 
-		log.info commandString
 		if(commandString){
 			proc = commandString.execute();
 			if(proc!=null){
@@ -862,9 +854,114 @@ static def String urlToDomibus(side, log, context){
 				proc.waitFor()
 			}
 		}
-		assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus."
 		
-		log.info "Message filters update done successfully for Domibus: \""+side+"\".";
+		assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:getMessageFilter: Error while trying to connect to domibus."
+		return outputCatcher.toString();
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def formatFilters(String filters,String filterChoice,context,log, String extraCriteria=null){
+		log.info "Trying to re-order backends filters ..."
+		def backendFound=0;
+		def resultString = "[\"";
+		def swapBck = null; def j = 0; def i = 0;
+		
+		if(filters!=null){
+			filters=filters.substring(filters.indexOf("["),filters.lastIndexOf("]")-1);
+		}
+		assert(filters!=null),"Error:formatFilters: Not able to get the backend details."
+		def tableBcks = filters.split("},");
+
+		if(tableBcks.length==1){
+			return "ok";
+		}
+		
+		for(i=0;i<tableBcks.length;i++){
+			tableBcks[i]="{\""+tableBcks[i].split("\"",2)[1]+"}";
+			tableBcks[i]=tableBcks[i].replace("\"","\"\"\"");
+			//log.info "tableBcks["+i+"] = "+tableBcks[i];
+		}
+		while(j<tableBcks.length){
+			//log.info "tableBcks["+j+"] = "+tableBcks[j];
+			if(tableBcks[j].toLowerCase().contains(filterChoice.toLowerCase())){ 
+				if(extraCriteria==null){
+					if(j==0){
+						return "correct";
+					}
+					backendFound = 1;
+					swapBck = tableBcks[0];
+					tableBcks[0] = tableBcks[j];
+					tableBcks[j] = swapBck;
+					j = tableBcks.length;
+				}
+				else{
+					if(tableBcks[j].toLowerCase().contains(extraCriteria.toLowerCase())){
+						if(j==0){
+							return "correct";
+						}
+						backendFound = 1;
+						swapBck = tableBcks[0];
+						tableBcks[0] = tableBcks[j];
+						tableBcks[j] = swapBck;
+						j = tableBcks.length;
+					}
+				}
+			}
+			j++;
+		}
+		
+		if(backendFound==1){
+			for(i=0;i<tableBcks.length;i++){
+				if(i==tableBcks.length-1){
+					resultString = resultString + tableBcks[i];
+				}
+				else{
+					resultString = resultString + tableBcks[i]+",";
+				}
+			}
+		}
+		else{
+			return "ko";
+		}
+
+		return resultString+"\"]";
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def setMessageFilters(String side, String filterChoice,context,log,String extraCriteria=null){
+		log.info "Start setting message filters for Domibus \""+side+"\".";
+		def String output = null; def XXSRFTOKEN = null;
+	    def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+        def proc=null; def commandString = null;
+		
+		def filtersString = getMessageFilters(side,context,log);
+		assert(filtersString!=null),"Error:setMessageFilter: Not able to get the backend details."
+		assert(filtersString.toLowerCase().contains(filterChoice.toLowerCase())),"Error:setMessageFilter: The backend you want to set is not installed."
+		def String bckParams = formatFilters(filtersString,filterChoice,context,log);
+		assert(bckParams!="ko"),"Error:setMessageFilter: The backend you want to set is not installed."
+
+		if(bckParams.equals("ok")){
+			log.info "Only one backend installed: Nothing to do.";
+		}
+		else{
+			if(bckParams.equals("correct")){
+				log.info "The requested backend is already selected: Nothing to do.";
+			}
+			else{
+				output = fetchCookieHeader(side,context,log);		
+				XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");			
+				commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d "+bckParams;
+				log.info "commandString ="+commandString;
+				if(commandString){
+					proc = commandString.execute();
+					if(proc!=null){
+						proc.consumeProcessOutput(outputCatcher, errorCatcher)
+						proc.waitFor()
+					}
+				}
+				assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus.";
+				log.info "Message filters update done successfully for Domibus: \""+side+"\".";
+			}
+		}
 
 	} 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII

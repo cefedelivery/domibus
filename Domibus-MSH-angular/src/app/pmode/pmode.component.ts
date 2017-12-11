@@ -14,6 +14,7 @@ import {DirtyOperations} from "../common/dirty-operations";
 import {RollbackDirtyDialogComponent} from "./rollback-dirty-dialog/rollback-dirty-dialog.component";
 import {PmodeDirtyUploadComponent} from "./pmode-dirty-upload/pmode-dirty-upload.component";
 import {Observable} from "rxjs/Observable";
+import {DateFormatService} from "../customDate/dateformat.service";
 import {DownloadService} from "../download/download.service";
 
 @Component({
@@ -443,7 +444,13 @@ export class PModeComponent implements OnInit, DirtyOperations {
   download(id) {
     if (this.pModeExists) {
       this.http.get(PModeComponent.PMODE_URL + "/" + id).subscribe(res => {
-        PModeComponent.downloadFile(res.text());
+        var uploadDateStr: string = "";
+        if(this.selected.length == 1 && this.selected[0].id == id) {
+          uploadDateStr = DateFormatService.format(new Date(this.selected[0].configurationDate));
+        } else {
+          uploadDateStr = DateFormatService.format(new Date(this.tableRows[0].configurationDate));
+        }
+        PModeComponent.downloadFile(res.text(), uploadDateStr);
       }, err => {
         this.alertService.error(err._body);
       });
@@ -464,7 +471,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
    * Saves the content of the datatable into a CSV file
    */
   saveAsCSV() {
-    if(this.isDirty()) {
+    if (this.isDirty()) {
       this.saveButton(true);
     } else {
       DownloadService.downloadNative(PModeComponent.PMODE_CSV_URL);
@@ -475,9 +482,14 @@ export class PModeComponent implements OnInit, DirtyOperations {
    * Downloader for the XML file
    * @param data
    */
-  private static downloadFile(data: any) {
+  private static downloadFile(data: any, date: string) {
     const blob = new Blob([data], {type: 'text/xml'});
-    FileSaver.saveAs(blob, "Pmodes.xml");
+    let filename: string = "PMode";
+    if(date != "") {
+      filename += "-"+date;
+    }
+    filename += ".xml";
+    FileSaver.saveAs(blob, filename);
   }
 
   /**
