@@ -50,6 +50,8 @@ public class CryptoService {
 
     private KeyStore keyStore;
 
+    private Object kestoreLock = new Object();
+
     public synchronized KeyStore getTrustStore() {
         if (trustStore == null) {
             try {
@@ -143,7 +145,7 @@ public class CryptoService {
             trustStore.load(newTrustStoreBytes, password.toCharArray());
             trustStore.store(fileOutputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
         } finally {
-            if(fileOutputStream != null) {
+            if (fileOutputStream != null) {
                 fileOutputStream.close();
             }
         }
@@ -169,18 +171,35 @@ public class CryptoService {
     }
 
     public Certificate getCertificateFromKeystore(String alias) throws KeyStoreException {
+        initKeystore();
+        return keyStore.getCertificate(alias);
+    }
+
+    public KeyStore getKeyStore() {
         try {
-            if (keyStore == null) {
-                keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                String keyStoreFilename = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.file");
-                String keyStorePassword = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.keystore.password");
-                try (FileInputStream fileInputStream = new FileInputStream(keyStoreFilename)) {
-                    keyStore.load(fileInputStream, keyStorePassword.toCharArray());
+            initKeystore();
+        } catch (KeyStoreException e) {
+            LOG.debug("Error while loading keystore");
+        }
+        return keyStore;
+    }
+
+    public void initKeystore() throws KeyStoreException {
+        if (keyStore == null) {
+            try {
+                synchronized (kestoreLock) {
+                    if (keyStore != null) return;
+                    keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+                    String keyStoreFilename = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.file");
+                    String keyStorePassword = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.keystore.password");
+                    try (FileInputStream fileInputStream = new FileInputStream(keyStoreFilename)) {
+                        keyStore.load(fileInputStream, keyStorePassword.toCharArray());
+                    }
                 }
+            } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException ex) {
+                throw new KeyStoreException(ex);
             }
-            return keyStore.getCertificate(alias);
-        } catch (Exception ex) {
-            throw new KeyStoreException(ex);
         }
     }
 

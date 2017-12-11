@@ -6,6 +6,7 @@ import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Date;
 
 
@@ -38,5 +39,16 @@ public class DateUtilImpl implements DateUtil {
     public Timestamp fromISO8601(String value) {
         DateTime dateTime = new DateTime(value);
         return new Timestamp(dateTime.getMillis());
+    }
+
+    @Override
+    public Date getStartOfDay() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
     }
 }
