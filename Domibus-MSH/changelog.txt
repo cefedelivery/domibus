@@ -1,3 +1,7 @@
+Domibus 3.3.2
+- Add certificate revocation logging.
+    When a certificate is about to expire a warning message will be displayed in the logs.
+    When a certificate has expired a error message will be displayed in the logs.
 Domibus 3.3.1
 - Add an account locking policy mechanism. When a user has failed to provide the correct password five times, his account will be locked for a configurable amount of time (default to one hour).
 - Allow plugins to retrieve the metadata of a User Message

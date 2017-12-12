@@ -1,3 +1,9 @@
+Domibus 3.3.2 (from 3.3.1):
+                - In the file "\conf\domibus\domibus.properties" add the folowing properties :
+                    o in the security section:
+                        domibus.certificate.check.cron=0 0 0/1 * * ?
+                        domibus.certificate.revocation.offset=10 (Optional, default is 10)
+                - Run the appropriate DB migration script(mysql5innoDb-3.3.1-to-3.3.2-migration.ddl for MySQL or oracle10g-3.3.1-to-3.3.2-migration.ddl for Oracle)
 Domibus 3.3.1 (from 3.3):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - In the file "\conf\domibus\domibus.properties" add the folowing properties :

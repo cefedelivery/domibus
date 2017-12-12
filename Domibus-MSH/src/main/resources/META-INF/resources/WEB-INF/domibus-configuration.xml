@@ -59,7 +59,7 @@
     <bean id="saveCertificateAndLogRevocationTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="saveCertificateAndLogRevocationJob"/>
-        <property name="cronExpression" value="0/10 * * * * ?"/>
+        <property name="cronExpression" value="${domibus.certificate.check.cron}"/>
     </bean>
 
     <!-- customizable list of triggers to be executed by quartz -->

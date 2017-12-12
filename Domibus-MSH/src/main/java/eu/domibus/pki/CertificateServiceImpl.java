@@ -40,7 +40,7 @@ public class CertificateServiceImpl implements CertificateService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CertificateServiceImpl.class);
 
-    public static final String REVOCATION_TRIGGER_OFFSET_PROPERTY = "domibus.certificate.revocation.trigger.offset";
+    public static final String REVOCATION_TRIGGER_OFFSET_PROPERTY = "domibus.certificate.revocation.offset";
 
     public static final String REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE = "10";
 
