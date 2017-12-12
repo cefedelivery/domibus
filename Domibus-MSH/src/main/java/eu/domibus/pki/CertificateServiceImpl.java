@@ -216,19 +216,29 @@ public class CertificateServiceImpl implements CertificateService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void saveCertificateAndLogRevocation() {
         saveCertificateData();
         logCertificateRevocationWarning();
     }
 
+    /**
+     * Create or update certificate in the db.
+     */
     protected void saveCertificateData() {
-        List<eu.domibus.common.model.certificate.Certificate> certificates = retrieveCertificates();
+        List<eu.domibus.common.model.certificate.Certificate> certificates = groupAllKeystoreCertificates();
         for (eu.domibus.common.model.certificate.Certificate certificate : certificates) {
             certificateDao.saveOrUpdate(certificate);
         }
     }
 
+    /**
+     * Load expired and soon expired certificates, add a warning of error log, and save a flag saying the system already
+     * notified it for the day.
+     */
     protected void logCertificateRevocationWarning() {
         List<eu.domibus.common.model.certificate.Certificate> unNotifiedSoonRevoked = certificateDao.getUnNotifiedSoonRevoked();
         for (eu.domibus.common.model.certificate.Certificate certificate : unNotifiedSoonRevoked) {
@@ -236,54 +246,59 @@ public class CertificateServiceImpl implements CertificateService {
             certificateDao.notifyRevocation(certificate);
         }
 
-        List<eu.domibus.common.model.certificate.Certificate> unNotifiedRevoked =certificateDao.getUnNotifiedRevoked();
+        List<eu.domibus.common.model.certificate.Certificate> unNotifiedRevoked = certificateDao.getUnNotifiedRevoked();
         for (eu.domibus.common.model.certificate.Certificate certificate : unNotifiedRevoked) {
             LOG.securityError(SEC_CERTIFICATE_REVOKED, certificate.getAlias(), certificate.getNotAfter());
             certificateDao.notifyRevocation(certificate);
         }
     }
 
-    protected List<eu.domibus.common.model.certificate.Certificate> retrieveCertificates() {
+    /**
+     * Group keystore and trustStore certificates in a list.
+     * @return a list of certificate.
+     */
+    protected List<eu.domibus.common.model.certificate.Certificate> groupAllKeystoreCertificates() {
         KeyStore trustStore = cryptoService.getTrustStore();
-        List<eu.domibus.common.model.certificate.Certificate> certificates = new ArrayList<>();
-        if (trustStore != null) {
-            List<eu.domibus.common.model.certificate.Certificate> trustStoreCertificates = extractCertificateFromKeyStore(
-                    trustStore);
-            certificates.addAll(
-                    updateCertificateType(trustStoreCertificates, CertificateType.PUBLIC));
-        }
+        List<eu.domibus.common.model.certificate.Certificate> allCertificates=new ArrayList<>();
+        allCertificates.addAll(loadAndEnrichCertificateFromKeystore(trustStore, CertificateType.PUBLIC));
         KeyStore keyStore = cryptoService.getKeyStore();
+        allCertificates.addAll(loadAndEnrichCertificateFromKeystore(keyStore, CertificateType.PRIVATE));
+        return Collections.unmodifiableList(allCertificates);
+    }
+
+    /**
+     * Load certificate from a keystore and enrich them with status and type.
+     * @param keyStore the store where to retrieve the certificates.
+     * @param certificateType the type of the certificate (Public/Private)
+     * @return the list of certificates.
+     */
+    private List<eu.domibus.common.model.certificate.Certificate> loadAndEnrichCertificateFromKeystore(KeyStore keyStore, CertificateType certificateType) {
+        List<eu.domibus.common.model.certificate.Certificate> certificates = new ArrayList<>();
         if (keyStore != null) {
-            List<eu.domibus.common.model.certificate.Certificate> keystoreCertificates = extractCertificateFromKeyStore(
+            certificates = extractCertificateFromKeyStore(
                     keyStore);
-            certificates.addAll(updateCertificateType(keystoreCertificates, CertificateType.PRIVATE));
-        }
-        for (eu.domibus.common.model.certificate.Certificate certificate : certificates) {
-            updateCertificateStatus(certificate);
-        }
-        return Collections.unmodifiableList(certificates);
-    }
-
-    protected List<eu.domibus.common.model.certificate.Certificate> updateCertificateType(List<eu.domibus.common.model.certificate.Certificate> certificates, CertificateType certificateType) {
-        List<eu.domibus.common.model.certificate.Certificate> updatedCertificates = new ArrayList<>();
-        for (eu.domibus.common.model.certificate.Certificate certificate : certificates) {
-            certificate.setCertificateType(certificateType);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("[{}]certificate[{}] extracted for database update", certificateType, certificate);
+            for (eu.domibus.common.model.certificate.Certificate certificate : certificates) {
+                certificate.setCertificateType(certificateType);
+                CertificateStatus certificateStatus = getCertificateStatus(certificate.getNotAfter());
+                certificate.setCertificateStatus(certificateStatus);
             }
-            updatedCertificates.add(certificate);
         }
-        return Collections.unmodifiableList(updatedCertificates);
+        return certificates;
     }
 
-    protected eu.domibus.common.model.certificate.Certificate updateCertificateStatus(eu.domibus.common.model.certificate.Certificate certificate) {
+    /**
+     * Process the certificate status base on its expiration date.
+     *
+     * @param notAfter the expiration date of the certificate.
+     * @return the certificate status.
+     */
+    protected CertificateStatus getCertificateStatus(Date notAfter) {
         int revocationOffsetInDays = Integer.valueOf(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
         try {
             revocationOffsetInDays = Integer.valueOf(domibusProperties.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
         } catch (NumberFormatException n) {
 
         }
-        certificate.setCertificateStatus(CertificateStatus.OK);
 
         Date now = new Date();
         Calendar c = Calendar.getInstance();
@@ -291,14 +306,12 @@ public class CertificateServiceImpl implements CertificateService {
         c.add(Calendar.DATE, revocationOffsetInDays);
 
         Date offsetDate = c.getTime();
-        Date notAfter = certificate.getNotAfter();
-
         if (now.compareTo(notAfter) > 0) {
-            certificate.setCertificateStatus(CertificateStatus.REVOKED);
+            return CertificateStatus.REVOKED;
         } else if (offsetDate.compareTo(notAfter) > 0) {
-            certificate.setCertificateStatus(CertificateStatus.SOON_REVOKED);
+            return CertificateStatus.SOON_REVOKED;
         }
-        return certificate;
+        return CertificateStatus.OK;
     }
 
     protected List<eu.domibus.common.model.certificate.Certificate> extractCertificateFromKeyStore(KeyStore trustStore) {

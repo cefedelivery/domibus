@@ -51,17 +51,17 @@ public class CertificateDaoImpl extends BasicDao<Certificate> implements Certifi
 
     @Override
     public List<Certificate> getUnNotifiedSoonRevoked() {
-        return findOnStatusAndNotificationDate(CertificateStatus.SOON_REVOKED);
+        return findByStatusForCurrentDate(CertificateStatus.SOON_REVOKED);
     }
 
     @Override
     public List<Certificate> getUnNotifiedRevoked() {
-        return findOnStatusAndNotificationDate(CertificateStatus.REVOKED);
+        return findByStatusForCurrentDate(CertificateStatus.REVOKED);
     }
 
-    protected List<Certificate> findOnStatusAndNotificationDate(final CertificateStatus certificateStatus) {
+    protected List<Certificate> findByStatusForCurrentDate(final CertificateStatus certificateStatus) {
         Date currentDate = dateUtil.getStartOfDay();
-        TypedQuery<Certificate> namedQuery = em.createNamedQuery("Certificate.findOnStatusAndNotificationDate", Certificate.class);
+        TypedQuery<Certificate> namedQuery = em.createNamedQuery("Certificate.findByStatusAndNotificationDate", Certificate.class);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Searching certificate with status [{}] for current date [{}]", certificateStatus, currentDate);
         }

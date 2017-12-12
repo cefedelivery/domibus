@@ -253,7 +253,7 @@ public class CertificateServiceImplTest {
         final Certificate cert2 = new Certificate();
         final List<Certificate> certificates=Lists.newArrayList(cert1, cert2);
         new Expectations(certificateService){{
-            certificateService.retrieveCertificates();
+            certificateService.groupAllKeystoreCertificates();
             result=certificates;
         }};
         certificateService.saveCertificateData();
@@ -313,7 +313,7 @@ public class CertificateServiceImplTest {
             result=keyStoreCertificates;
         }};
 
-        List<Certificate> certificates = certificateService.retrieveCertificates();
+        List<Certificate> certificates = certificateService.groupAllKeystoreCertificates();
         assertEquals(CertificateType.PUBLIC,certificates.get(0).getCertificateType());
         assertEquals(CertificateType.PRIVATE,certificates.get(1).getCertificateType());
 
@@ -321,30 +321,25 @@ public class CertificateServiceImplTest {
 
     @Test
     public void updateCertificateStatus(){
-        Certificate certificate = new Certificate();
         Date now=new Date();
 
         Calendar c = Calendar.getInstance();
         c.setTime(now);
         c.add(Calendar.DATE, 11);
-        certificate.setNotAfter(c.getTime());
-        certificate = certificateService.updateCertificateStatus(certificate);
-        assertEquals(CertificateStatus.OK,certificate.getCertificateStatus());
+        CertificateStatus certificateStatus = certificateService.getCertificateStatus(c.getTime());
+        assertEquals(CertificateStatus.OK,certificateStatus);
 
         c = Calendar.getInstance();
         c.setTime(now);
         c.add(Calendar.DATE, 9);
-        certificate.setNotAfter(c.getTime());
-        certificate = certificateService.updateCertificateStatus(certificate);
-        assertEquals(CertificateStatus.SOON_REVOKED,certificate.getCertificateStatus());
+        certificateStatus = certificateService.getCertificateStatus(c.getTime());
+        assertEquals(CertificateStatus.SOON_REVOKED,certificateStatus);
 
         c = Calendar.getInstance();
         c.setTime(now);
         c.add(Calendar.DATE, -1);
-        certificate.setNotAfter(c.getTime());
-
-        certificate = certificateService.updateCertificateStatus(certificate);
-        assertEquals(CertificateStatus.REVOKED,certificate.getCertificateStatus());
+        certificateStatus = certificateService.getCertificateStatus(c.getTime());
+        assertEquals(CertificateStatus.REVOKED,certificateStatus);
     }
 
 
