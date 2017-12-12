@@ -25,13 +25,13 @@ import java.util.List;
 public class CsvServiceImplTest {
 
     @Tested
-    CsvServiceImpl csvService;
+    CsvServiceImpl csvServiceImpl;
 
     @Test
     public void testExportToCsv_EmptyList() throws CsvException {
         // Given
         // When
-        final String exportToCSV = csvService.exportToCSV(new ArrayList<>());
+        final String exportToCSV = csvServiceImpl.exportToCSV(new ArrayList<>());
 
         // Then
         Assert.assertTrue(exportToCSV.isEmpty());
@@ -41,7 +41,7 @@ public class CsvServiceImplTest {
     public void testExportToCsv_NullList() throws CsvException {
         // Given
         // When
-        final String exportToCSV = csvService.exportToCSV(null);
+        final String exportToCSV = csvServiceImpl.exportToCSV(null);
 
         // Then
         Assert.assertTrue(exportToCSV.isEmpty());
@@ -54,7 +54,7 @@ public class CsvServiceImplTest {
         List<MessageLogInfo> messageLogInfoList = getMessageList(MessageType.USER_MESSAGE, date);
 
         // When
-        final String exportToCSV = csvService.exportToCSV(messageLogInfoList);
+        final String exportToCSV = csvServiceImpl.exportToCSV(messageLogInfoList);
 
         // Then
         Assert.assertTrue(exportToCSV.contains("Conversation Id,From Party Id,To Party Id,Original Sender,Final Recipient,Ref To Message Id,Message Id,Message Status,Notification Status,Msh Role,Message Type,Deleted,Received,Send Attempts,Send Attempts Max,Next Attempt,Failed,Restored"));

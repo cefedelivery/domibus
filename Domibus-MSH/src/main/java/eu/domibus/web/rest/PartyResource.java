@@ -40,7 +40,7 @@ public class PartyResource {
     private PartyService partyService;
 
     @Autowired
-    private CsvServiceImpl csvService;
+    private CsvServiceImpl csvServiceImpl;
 
     @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
     public List<PartyResponseRo> listParties(
@@ -114,10 +114,10 @@ public class PartyResource {
         excludedItems.add("userName");
         excludedItems.add("processesWithPartyAsInitiator");
         excludedItems.add("processesWithPartyAsResponder");
-        csvService.setExcludedItems(excludedItems);
+        csvServiceImpl.setExcludedItems(excludedItems);
 
         try {
-            resultText = csvService.exportToCSV(partyResponseRoList);
+            resultText = csvServiceImpl.exportToCSV(partyResponseRoList);
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }

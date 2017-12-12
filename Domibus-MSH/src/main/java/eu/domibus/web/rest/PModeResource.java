@@ -42,7 +42,7 @@ public class PModeResource {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    private CsvServiceImpl csvService;
+    private CsvServiceImpl csvServiceImpl;
 
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = "application/xml")
     public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value="id") int id) {
@@ -147,10 +147,10 @@ public class PModeResource {
 
         List<String> excludedItems = new ArrayList<>();
         excludedItems.add("id");
-        csvService.setExcludedItems(excludedItems);
+        csvServiceImpl.setExcludedItems(excludedItems);
 
         try {
-            resultText = csvService.exportToCSV(pModeResponseROList);
+            resultText = csvServiceImpl.exportToCSV(pModeResponseROList);
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }

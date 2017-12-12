@@ -41,7 +41,7 @@ public class MessageFilterResourceTest {
     DomainCoreConverter coreConverter;
 
     @Injectable
-    MessageFilterCsvServiceImpl csvService;
+    MessageFilterCsvServiceImpl messageFilterCsvServiceImpl;
 
 
     @Test
@@ -91,7 +91,7 @@ public class MessageFilterResourceTest {
         new Expectations(messageFilterResource){{
             messageFilterResource.getBackendFiltersInformation();
             result = new Pair<>(messageFilterResultROS, true);
-            csvService.exportToCSV(messageFilterResultROS);
+            messageFilterCsvServiceImpl.exportToCSV(messageFilterResultROS);
             result = CSV_TITLE + backendName + "," + fromExpression + ", , , ," + true + System.lineSeparator();
         }};
 
@@ -109,7 +109,7 @@ public class MessageFilterResourceTest {
     public void testGetMessageFilterCsv_Exception() throws CsvException {
         // Given
         new Expectations() {{
-            csvService.exportToCSV((List<?>) any);
+            messageFilterCsvServiceImpl.exportToCSV((List<?>) any);
             result = new CsvException(DomibusCoreErrorCode.DOM_001, "Exception", new Exception());
         }};
 

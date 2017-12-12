@@ -3,12 +3,11 @@ package eu.domibus.web.rest;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +33,7 @@ public class JmsResource {
     JMSManager jmsManager;
 
     @Autowired
-    @Qualifier("csvServiceImpl")
-    CsvService csvService;
+    CsvServiceImpl csvServiceImpl;
 
     @RequestMapping(value = {"/destinations"}, method = GET)
     public ResponseEntity<DestinationsResponseRO> destinations() {
@@ -110,16 +108,8 @@ public class JmsResource {
         MessagesRequestRO request = new MessagesRequestRO();
         final List<JmsMessage> jmsMessageList = jmsManager.browseMessages(request.getSource(), request.getJmsType(), request.getFromDate(), request.getToDate(), request.getSelector());
 
-        /*List<String> excludedItems = new ArrayList<>();
-        excludedItems.add("entityId");
-        excludedItems.add("identifiers");
-        excludedItems.add("userName");
-        excludedItems.add("processesWithPartyAsInitiator");
-        excludedItems.add("processesWithPartyAsResponder");
-        csvService.setExcludedItems(excludedItems);*/
-
         try {
-            resultText = csvService.exportToCSV(jmsMessageList);
+            resultText = csvServiceImpl.exportToCSV(jmsMessageList);
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }

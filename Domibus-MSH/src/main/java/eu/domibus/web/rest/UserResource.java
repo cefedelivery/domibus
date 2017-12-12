@@ -45,7 +45,7 @@ public class UserResource {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    private CsvServiceImpl csvService;
+    private CsvServiceImpl csvServiceImpl;
 
     /**
      * {@inheritDoc}
@@ -103,10 +103,10 @@ public class UserResource {
         excludedItems.add("status");
         excludedItems.add("password");
         excludedItems.add("suspended");
-        csvService.setExcludedItems(excludedItems);
+        csvServiceImpl.setExcludedItems(excludedItems);
 
         try {
-            resultText = csvService.exportToCSV(userResponseROList);
+            resultText = csvServiceImpl.exportToCSV(userResponseROList);
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }

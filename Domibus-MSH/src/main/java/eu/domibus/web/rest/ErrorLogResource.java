@@ -53,7 +53,7 @@ public class ErrorLogResource {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    ErrorLogCsvServiceImpl csvService;
+    ErrorLogCsvServiceImpl errorLogCsvServiceImpl;
 
     @RequestMapping(method = RequestMethod.GET)
     public ErrorLogResultRO getErrorLog(
@@ -115,7 +115,7 @@ public class ErrorLogResource {
 
         String resultText;
         try {
-            resultText = csvService.exportToCSV(errorLogROList);
+            resultText = errorLogCsvServiceImpl.exportToCSV(errorLogROList);
         } catch (CsvException e) {
             LOGGER.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();

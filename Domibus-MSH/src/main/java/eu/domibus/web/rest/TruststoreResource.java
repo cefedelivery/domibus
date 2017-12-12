@@ -42,7 +42,7 @@ public class TruststoreResource {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    private CsvServiceImpl csvService;
+    private CsvServiceImpl csvServiceImpl;
 
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     public ResponseEntity<String> uploadTruststoreFile(@RequestPart("truststore") MultipartFile truststore, @RequestParam("password") String password) {
@@ -73,7 +73,7 @@ public class TruststoreResource {
         final List<TrustStoreRO> trustStoreROS = trustStoreEntries();
 
         try {
-            resultText = csvService.exportToCSV(trustStoreROS);
+            resultText = csvServiceImpl.exportToCSV(trustStoreROS);
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }

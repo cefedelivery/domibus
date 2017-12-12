@@ -37,7 +37,7 @@ public class MessageFilterResource {
     DomainCoreConverter coreConverter;
 
     @Autowired
-    MessageFilterCsvServiceImpl csvService;
+    MessageFilterCsvServiceImpl messageFilterCsvServiceImpl;
 
     protected Pair<List<MessageFilterRO>,Boolean> getBackendFiltersInformation() {
         boolean areFiltersPersisted = true;
@@ -74,7 +74,7 @@ public class MessageFilterResource {
     public ResponseEntity<String> getCsv() {
         String resultText;
         try {
-            resultText = csvService.exportToCSV(getBackendFiltersInformation().getKey());
+            resultText = messageFilterCsvServiceImpl.exportToCSV(getBackendFiltersInformation().getKey());
         } catch (CsvException e) {
             LOGGER.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();

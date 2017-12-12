@@ -6,7 +6,6 @@ import {AuditCriteria, AuditResponseRo} from "./audit";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {Observable} from "rxjs/Observable";
-import {DownloadService} from "../download/download.service";
 
 /**
  * @author Thomas Dussart

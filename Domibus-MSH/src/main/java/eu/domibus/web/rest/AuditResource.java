@@ -2,9 +2,10 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.audit.AuditLog;
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.model.common.ModificationType;
 import eu.domibus.common.services.AuditService;
-import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -16,10 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +32,12 @@ public class AuditResource {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuditResource.class);
 
+    private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
+
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
+
     @Autowired
     private DomainCoreConverter domainConverter;
 
@@ -41,8 +45,10 @@ public class AuditResource {
     private AuditService auditService;
 
     @Autowired
-    @Qualifier("csvServiceImpl")
-    CsvService csvService;
+    DateUtil dateUtil;
+
+    @Autowired
+    CsvServiceImpl csvServiceImpl;
 
     /**
      * Entry point of the Audit rest service to list the system audit logs.
@@ -108,13 +114,32 @@ public class AuditResource {
     }
 
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
-    public ResponseEntity<String> getCsv(/*@RequestParam(value = "auditCriteria") AuditCriteria auditCriteria*/) {
+    public ResponseEntity<String> getCsv(
+            @RequestParam(value = "auditTargetName", required = false) Set<String> auditTargetName,
+            @RequestParam(value = "user", required = false) Set<String> user,
+            @RequestParam(value = "action", required = false) Set<String> action,
+            @RequestParam(value = "from", required = false) String from,
+            @RequestParam(value = "to", required = false) String to) {
         String resultText;
 
+        int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS,"10000"));
+
         AuditCriteria auditCriteria = new AuditCriteria();
+        auditCriteria.setAuditTargetName(auditTargetName);
+        auditCriteria.setUser(user);
+        auditCriteria.setAction(action);
+        Date receivedFrom = dateUtil.fromString(from);
+        auditCriteria.setFrom(receivedFrom);
+        Date receivedTo = dateUtil.fromString(to);
+        auditCriteria.setTo(receivedTo);
+        auditCriteria.setStart(0);
+        auditCriteria.setMax(maxCSVrows);
         final List<AuditResponseRo> auditResponseRos = listAudits(auditCriteria);
+        List<String> excludedItems = new ArrayList<>();
+        excludedItems.add("revisionId");
+        csvServiceImpl.setExcludedItems(excludedItems);
         try {
-            resultText = csvService.exportToCSV(auditResponseRos);
+            resultText = csvServiceImpl.exportToCSV(auditResponseRos);
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }
