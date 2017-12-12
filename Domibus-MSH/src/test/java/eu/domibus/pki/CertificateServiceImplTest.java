@@ -288,8 +288,8 @@ public class CertificateServiceImplTest {
         new Verifications(){{
             LOG.securityWarn(SEC_CERTIFICATE_SOON_REVOKED, soonRevokedAlias, now);times=1;
             LOG.securityError(SEC_CERTIFICATE_REVOKED, revokedAlias, now);times=1;
-            certificateDao.notifyRevocation(soonRevokedCertificate);times=1;
-            certificateDao.notifyRevocation(revokedCertificate);times=1;
+            certificateDao.updateRevocation(soonRevokedCertificate);times=1;
+            certificateDao.updateRevocation(revokedCertificate);times=1;
         }};
     }
     @Test

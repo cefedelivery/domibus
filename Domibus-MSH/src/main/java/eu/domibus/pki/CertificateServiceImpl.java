@@ -9,6 +9,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
@@ -243,23 +244,24 @@ public class CertificateServiceImpl implements CertificateService {
         List<eu.domibus.common.model.certificate.Certificate> unNotifiedSoonRevoked = certificateDao.getUnNotifiedSoonRevoked();
         for (eu.domibus.common.model.certificate.Certificate certificate : unNotifiedSoonRevoked) {
             LOG.securityWarn(SEC_CERTIFICATE_SOON_REVOKED, certificate.getAlias(), certificate.getNotAfter());
-            certificateDao.notifyRevocation(certificate);
+            certificateDao.updateRevocation(certificate);
         }
 
         List<eu.domibus.common.model.certificate.Certificate> unNotifiedRevoked = certificateDao.getUnNotifiedRevoked();
         for (eu.domibus.common.model.certificate.Certificate certificate : unNotifiedRevoked) {
             LOG.securityError(SEC_CERTIFICATE_REVOKED, certificate.getAlias(), certificate.getNotAfter());
-            certificateDao.notifyRevocation(certificate);
+            certificateDao.updateRevocation(certificate);
         }
     }
 
     /**
      * Group keystore and trustStore certificates in a list.
+     *
      * @return a list of certificate.
      */
     protected List<eu.domibus.common.model.certificate.Certificate> groupAllKeystoreCertificates() {
         KeyStore trustStore = cryptoService.getTrustStore();
-        List<eu.domibus.common.model.certificate.Certificate> allCertificates=new ArrayList<>();
+        List<eu.domibus.common.model.certificate.Certificate> allCertificates = new ArrayList<>();
         allCertificates.addAll(loadAndEnrichCertificateFromKeystore(trustStore, CertificateType.PUBLIC));
         KeyStore keyStore = cryptoService.getKeyStore();
         allCertificates.addAll(loadAndEnrichCertificateFromKeystore(keyStore, CertificateType.PRIVATE));
@@ -268,7 +270,8 @@ public class CertificateServiceImpl implements CertificateService {
 
     /**
      * Load certificate from a keystore and enrich them with status and type.
-     * @param keyStore the store where to retrieve the certificates.
+     *
+     * @param keyStore        the store where to retrieve the certificates.
      * @param certificateType the type of the certificate (Public/Private)
      * @return the list of certificates.
      */
@@ -299,16 +302,11 @@ public class CertificateServiceImpl implements CertificateService {
         } catch (NumberFormatException n) {
 
         }
-
-        Date now = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime(now);
-        c.add(Calendar.DATE, revocationOffsetInDays);
-
-        Date offsetDate = c.getTime();
-        if (now.compareTo(notAfter) > 0) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime offsetDate = now.plusDays(revocationOffsetInDays);
+        if (now.isAfter(LocalDateTime.fromDateFields(notAfter))) {
             return CertificateStatus.REVOKED;
-        } else if (offsetDate.compareTo(notAfter) > 0) {
+        } else if (offsetDate.isAfter(LocalDateTime.fromDateFields(notAfter))) {
             return CertificateStatus.SOON_REVOKED;
         }
         return CertificateStatus.OK;

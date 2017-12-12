@@ -1,5 +1,6 @@
 package eu.domibus.wss4j.common.crypto;
 
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.clustering.Command;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.logging.DomibusLogger;
@@ -179,7 +180,7 @@ public class CryptoService {
         try {
             initKeystore();
         } catch (KeyStoreException e) {
-            LOG.debug("Error while loading keystore");
+            throw new eu.domibus.api.security.CertificateException(DomibusCoreErrorCode.DOM_005,e.getMessage());
         }
         return keyStore;
     }

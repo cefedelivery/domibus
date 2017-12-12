@@ -24,6 +24,10 @@ public class SaveCertificateAndLogRevocationJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         LOG.info("Checking certificate expiration");
-        certificateService.saveCertificateAndLogRevocation();
+        try {
+            certificateService.saveCertificateAndLogRevocation();
+        } catch (eu.domibus.api.security.CertificateException ex) {
+            LOG.warn("An problem occured while loading keystore:[{}]", ex.getMessage());
+        }
     }
 }

@@ -34,17 +34,13 @@ public class CertificateDaoImpl extends BasicDao<Certificate> implements Certifi
     @Override
     public void saveOrUpdate(final Certificate certificate) {
         Certificate byAliasAndType = getByAliasAndType(certificate.getAlias(), certificate.getCertificateType());
-        if (byAliasAndType!=null) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Updating certificate [{}]", certificate);
-            }
+        if (byAliasAndType != null) {
+            LOG.debug("Updating certificate [{}]", certificate);
             certificate.setEntityId(byAliasAndType.getEntityId());
             em.merge(certificate);
             return;
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Saving certificate [{}]", certificate);
-        }
+        LOG.debug("Saving certificate [{}]", certificate);
         em.persist(certificate);
     }
 
@@ -62,16 +58,14 @@ public class CertificateDaoImpl extends BasicDao<Certificate> implements Certifi
     protected List<Certificate> findByStatusForCurrentDate(final CertificateStatus certificateStatus) {
         Date currentDate = dateUtil.getStartOfDay();
         TypedQuery<Certificate> namedQuery = em.createNamedQuery("Certificate.findByStatusAndNotificationDate", Certificate.class);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Searching certificate with status [{}] for current date [{}]", certificateStatus, currentDate);
-        }
+        LOG.debug("Searching certificate with status [{}] for current date [{}]", certificateStatus, currentDate);
         namedQuery.setParameter("CERTIFICATE_STATUS", certificateStatus);
         namedQuery.setParameter("CURRENT_DATE", currentDate);
         return namedQuery.getResultList();
     }
 
     @Override
-    public void notifyRevocation(final Certificate certificate) {
+    public void updateRevocation(final Certificate certificate) {
         Date currentDate = dateUtil.getStartOfDay();
         certificate.setLastNotification(currentDate);
         em.merge(certificate);

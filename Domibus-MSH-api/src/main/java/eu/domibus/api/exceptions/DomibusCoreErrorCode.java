@@ -25,7 +25,11 @@ public enum DomibusCoreErrorCode {
     /**
      * Problem with Raw message when trying to handle non repudiation. (Pull)
      */
-    DOM_004("004");
+    DOM_004("004"),
+    /**
+     * Cetificate related exception.
+     */
+    DOM_005("005");
 
     private final String errorCode;
 

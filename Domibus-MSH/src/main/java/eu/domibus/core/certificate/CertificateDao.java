@@ -16,5 +16,5 @@ public interface CertificateDao {
 
     List<Certificate> getUnNotifiedRevoked();
 
-    void notifyRevocation(Certificate certificate);
+    void updateRevocation(Certificate certificate);
 }
