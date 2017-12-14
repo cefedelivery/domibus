@@ -1,5 +1,4 @@
 <h2 md-dialog-title>Party</h2>
-<!--
 <md-dialog-content style="height:450px;width:650px">
   <form name="filterForm">
     <div>
@@ -7,10 +6,11 @@
         <md-card-content>
           <div class="panel">
             <md-input-container style="width:100%">
-              <input mdInput placeholder="Name" name="name" id="name_id">
+              <input mdInput placeholder="Name" name="name" id="name_id" value="{{partyResponseRo.name}}">
             </md-input-container>
             <md-input-container style="width:100%">
-              <input mdInput placeholder="End point" name="endPoint" id="endPoint_id">
+              <input mdInput placeholder="End point" name="endPoint" id="endPoint_id"
+                     value="{{partyResponseRo.endpoint}}">
             </md-input-container>
           </div>
         </md-card-content>
@@ -49,7 +49,7 @@
             <ngx-datatable
               id="identifierTable"
               class="material striped"
-              [rows]="identifiersRow"
+              [rows]="partyResponseRo.identifiers"
               [columnMode]="'force'"
               [columns]="identifiersRowColumnPicker.selectedColumns"
               [headerHeight]="50"
@@ -78,7 +78,7 @@
             <ngx-datatable
               id="processTable"
               class="material striped"
-              [rows]="processesRow"
+              [rows]="partyResponseRo.processes"
               [columnMode]="'force'"
               [columns]="processesRowColumnPicker.selectedColumns"
               [headerHeight]="50"
@@ -97,6 +97,21 @@
         </md-card-content>
       </md-card>
     </div>
+    <table class="group-action-button">
+      <tr>
+        <td>
+          <button id="userCancelButton" md-raised-button (click)="cancelDialog()" color="primary"
+                  [disabled]="!enableCancel">
+            <md-icon>cancel</md-icon>
+            <span>Cancel</span>
+          </button>
+          <button id="userSaveButton" md-raised-button (click)="saveDialog()" color="primary">
+            <md-icon>save</md-icon>
+            <span>Save</span>
+          </button>
+        </td>
+      </tr>
+    </table>
   </form>
 </md-dialog-content>
--->
+

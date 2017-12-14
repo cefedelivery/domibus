@@ -37,7 +37,7 @@
                          (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
   </div>
-</div>
+
 
 <ngx-datatable
   id="auditTable"
@@ -55,8 +55,36 @@
   [count]="count"
   [offset]="offset"
   [limit]="rowLimiter.pageSize"
-  [offset]="offset"
-  [limit]="rowLimiter.pageSize"
+  (activate)="onActivate($event)"
   (page)='onPage($event)'
 >
 </ngx-datatable>
+  <table class="group-action-button">
+    <tr>
+      <td>
+        <button id="userCancelButton" md-raised-button (click)="cancelDialog()" color="primary"
+                [disabled]="!enableCancel">
+          <md-icon>cancel</md-icon>
+          <span>Cancel</span>
+        </button>
+        <button id="userSaveButton" md-raised-button (click)="saveDialog()" color="primary" [disabled]="!enableSave">
+          <md-icon>save</md-icon>
+          <span>Save</span>
+        </button>
+        <button id="userNewButton" md-raised-button (click)="buttonNew()" color="primary">
+          <md-icon>add</md-icon>
+          <span>New</span>
+        </button>
+        <button id="userEditButton" md-raised-button (click)="buttonEdit()" color="primary" [disabled]="!enableEdit">
+          <md-icon>edit</md-icon>
+          <span>Edit</span>
+        </button>
+        <button id="userDeleteButton" md-raised-button (click)="buttonDelete()" color="primary"
+                [disabled]="!enableDelete">
+          <md-icon>delete</md-icon>
+          <span>Delete</span>
+        </button>
+      </td>
+    </tr>
+  </table>
+</div>

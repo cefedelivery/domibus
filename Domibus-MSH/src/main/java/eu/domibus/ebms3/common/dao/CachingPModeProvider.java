@@ -392,7 +392,8 @@ public class CachingPModeProvider extends PModeProvider {
     public List<Process> findAllProcesses() {
         try {
             return Lists.newArrayList(getConfiguration().getBusinessProcesses().getProcesses());
-        }catch (IllegalArgumentException e){
+        } catch (IllegalStateException e) {
+            LOG.trace("No process:[{}]", e.getMessage());
             return Lists.newArrayList();
         }
     }
@@ -401,7 +402,8 @@ public class CachingPModeProvider extends PModeProvider {
     public List<Party> findAllParties() {
         try {
             return Lists.newArrayList(getConfiguration().getBusinessProcesses().getParties());
-        }catch (IllegalArgumentException e){
+        } catch (IllegalStateException e) {
+            LOG.trace("No party displayed as no configuration is loaded:[{}]", e.getMessage());
             return Lists.newArrayList();
         }
     }

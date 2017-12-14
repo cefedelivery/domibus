@@ -16,11 +16,18 @@ export class PartyResponseRo {
 
   partyIDs:string;
 
-  processes;
+  processes: ProcessRo[];
 
   joinedIdentifiers:string;
 
   joinedProcesses:string;
+
+}
+
+export class ProcessRo {
+
+  entityId: number;
+  name: string;
 
 }
 

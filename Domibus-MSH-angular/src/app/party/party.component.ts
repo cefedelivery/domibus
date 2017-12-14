@@ -1,11 +1,12 @@
 import {Component, OnInit} from "@angular/core";
-import {MdDialog} from "@angular/material";
+import {MdDialog, MdDialogRef} from "@angular/material";
 import {RowLimiterBase} from "app/common/row-limiter/row-limiter-base";
 import {ColumnPickerBase} from "app/common/column-picker/column-picker-base";
 import {PartyService} from "./party.service";
 import {PartyResponseRo} from "./party";
 import {Observable} from "rxjs/Observable";
 import {AlertService} from "../alert/alert.service";
+import {PartyDetailsComponent} from "./party-details/party-details.component";
 
 /**
  * @author Thomas Dussart
@@ -32,6 +33,10 @@ export class PartyComponent implements OnInit {
   offset: number = 0;
   count: number = 0;
   loading: boolean = false;
+
+  enableDelete;
+  enableEdit;
+  enableSave;
 
   constructor(public dialog: MdDialog, public partyService: PartyService, public alertService: AlertService) {
   }
@@ -74,7 +79,7 @@ export class PartyComponent implements OnInit {
     );
   }
 
-  search(){
+  search() {
     this.loading = true;
     let pageStart = this.offset * this.rowLimiter.pageSize;
     let pageSize = this.rowLimiter.pageSize;
@@ -137,4 +142,40 @@ export class PartyComponent implements OnInit {
     this.search();
   }
 
+  edit(row) {
+
+  }
+
+  onActivate(event) {
+    // console.log('Activate Event', event);
+    if ("dblclick" === event.type) {
+      let formRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
+        /* hasBackdrop:false,
+         disableClose:false,*/
+        data: {
+          edit: event.row
+        }
+      });
+    }
+  }
+
+  cancelDialog() {
+
+  }
+
+  saveDialog() {
+
+  }
+
+  buttonNew() {
+
+  }
+
+  buttonEdit() {
+
+  }
+
+  buttonDelete() {
+
+  }
 }

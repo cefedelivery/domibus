@@ -1,6 +1,7 @@
-import {Component, OnInit} from "@angular/core";
-import {MdDialogRef} from "@angular/material";
+import {Component, Inject, OnInit} from "@angular/core";
+import {MD_DIALOG_DATA, MdDialogRef} from "@angular/material";
 import {ColumnPickerBase} from "app/common/column-picker/column-picker-base";
+import {PartyResponseRo} from "../party";
 
 @Component({
   selector: 'app-party-details',
@@ -16,9 +17,12 @@ export class PartyDetailsComponent implements OnInit {
   identifiersRowCount = 0;
   processesRowCount = 0;
   loading;
+  partyResponseRo: PartyResponseRo;
 
-  constructor(public dialogRef: MdDialogRef<PartyDetailsComponent>) {
+  constructor(public dialogRef: MdDialogRef<PartyDetailsComponent>, @Inject(MD_DIALOG_DATA) public data: any) {
+    this.partyResponseRo = data.edit;
   }
+
 
   ngOnInit() {
     this.initColumns();
@@ -43,7 +47,7 @@ export class PartyDetailsComponent implements OnInit {
     this.processesRowColumnPicker.allColumns = [
       {
         name: 'Process',
-        prop: 'process',
+        prop: 'name',
         width: 20
       },
       {
@@ -64,6 +68,14 @@ export class PartyDetailsComponent implements OnInit {
 
   }
   onPage(){
+
+  }
+
+  cancelDialog() {
+
+  }
+
+  saveDialog() {
 
   }
 }
