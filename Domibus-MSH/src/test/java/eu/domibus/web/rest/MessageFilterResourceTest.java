@@ -9,11 +9,11 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.web.rest.ro.MessageFilterRO;
 import eu.domibus.web.rest.ro.MessageFilterResultRO;
-import javafx.util.Pair;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -90,7 +90,7 @@ public class MessageFilterResourceTest {
 
         new Expectations(messageFilterResource){{
             messageFilterResource.getBackendFiltersInformation();
-            result = new Pair<>(messageFilterResultROS, true);
+            result = new ImmutablePair<>(messageFilterResultROS, true);
             csvService.exportToCSV(messageFilterResultROS);
             result = CSV_TITLE + backendName + "," + fromExpression + ", , , ," + true + System.lineSeparator();
         }};
