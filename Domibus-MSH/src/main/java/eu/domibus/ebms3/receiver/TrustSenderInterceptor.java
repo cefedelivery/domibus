@@ -68,7 +68,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     public static final QName KEYINFO = new QName("http://www.w3.org/2000/09/xmldsig#", "KeyInfo");
 
-    private Properties securityEncryptionProp;
+    protected Properties securityEncryptionProp;
 
     @Autowired
     @Qualifier("domibusProperties")
@@ -206,7 +206,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         return contents.get(1);
     }
 
-    private X509Certificate getSenderCertificate(SoapMessage msg)  {
+    protected X509Certificate getSenderCertificate(SoapMessage msg)  {
         boolean utWithCallbacks = MessageUtils.getContextualBoolean(msg, "ws-security.validate.token", true);
         super.translateProperties(msg);
         CXFRequestData requestData = new CXFRequestData();
@@ -253,7 +253,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         }
     }
 
-    private X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader) throws WSSecurityException, CertificateException {
+    protected X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader) throws WSSecurityException, CertificateException {
 
         NodeList binarySecurityTokenElement = securityHeader.getElementsByTagName("wsse:BinarySecurityToken");
         if(binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null)

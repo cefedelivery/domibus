@@ -24,6 +24,7 @@ class Domibus
 	def sqlGreen=null;
 	def thirdGateway = "false";
 	static def backup_file_sufix = "_backup_for_soapui_tests"
+	static def defaultLogLevel = 0
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
@@ -37,6 +38,13 @@ class Domibus
     void finalize() {
         log.info "Test finished."
     }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // Log information wrapper 
+   static def void debugLog(logMsg, log,  logLevel = defaultLogLevel) {
+	if (logLevel.toString()=="1" || logLevel.toString() == "true") 
+		log.info (logMsg)
+  }
+
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	// Connect to a schema
 	def connectTo(String database, String driver, String url, String dbUser, String dbPassword){
@@ -280,7 +288,7 @@ class Domibus
                     messageStatus=it.MESSAGE_STATUS
                     numberAttempts=it.SEND_ATTEMPTS
                 }
-                log.info "|MSG_ID: "+messageID+" | SENDER: Expected Message Status ="+ SMSH +"-- Current Message Status = "+messageStatus+" | maxNumberAttempts: "+maxNumberAttempts+"-- numberAttempts: "+numberAttempts; 
+                log.info "|MSG_ID: "+messageID+" | SENDER: Expected MSG Status ="+ SMSH +"-- Current MSG Status = "+messageStatus+" | maxNumbAttempts: "+maxNumberAttempts+"-- numbAttempts: "+numberAttempts; 
                 if(SMSH=="SEND_FAILURE"){
 					if(messageStatus=="WAITING_FOR_RETRY"){
 						if(((maxNumberAttempts-numberAttempts)>0)&&(!wait)){
@@ -704,13 +712,10 @@ class Domibus
         def proc=null; def commandString = null; 
 		def pmDescription = "SoapUI sample test description for PMode upload";
 		
-		def String output = fetchCookieHeader(side,context,log);		
-		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
 		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context);
 		log.info "PMODE FILE PATH: "+pmodeFile;
 		
-		
-		commandString="curl "+urlToDomibus(side, log, context)+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
+		commandString="curl "+urlToDomibus(side, log, context)+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 
 		log.info commandString
 		if(commandString){
@@ -791,11 +796,9 @@ class Domibus
         def errorCatcher = new StringBuffer();
         def proc=null; def commandString = null; 
 		
-		def String output = fetchCookieHeader(side,context,log);		
-		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
 		def String truststoreFile = computePathRessources(baseFilePath,extFilePath,context);
 				
-		commandString="curl "+ urlToDomibus(side, log, context) +"/rest/truststore/save -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
+		commandString="curl "+ urlToDomibus(side, log, context) +"/rest/truststore/save -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
 
 		log.info commandString
 		if(commandString){
@@ -837,24 +840,14 @@ static def String urlToDomibus(side, log, context){
 		return context.expand("\${#Project#${propName}}")
 }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-	static def setMessageFilters(String side, String filterChoice,context,log){
-		log.info "Start update message filters for Domibus \""+side+"\".";
+	static def getMessageFilters(String side,context,log){
+		log.info "Get message filters for Domibus \""+side+"\".";
 	    def outputCatcher = new StringBuffer();
         def errorCatcher = new StringBuffer();
-        def proc=null; def commandString = null;
-		def firstBck = "backendWebservice"; def secondBck = "Jms";
-		def firstEntId = "1"; def SecondEntId = "2";
-		
-		def String output = fetchCookieHeader(side,context,log);		
-		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
-		
-		if(filterChoice.toLowerCase()!="ws"){
-			firstBck="Jms";firstEntId="2";secondBck="backendWebservice";SecondEntId="1";
-		}
-				
-		commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
+        def proc=null; def commandString = null;		
 
-		log.info commandString
+		commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -X GET ";
+
 		if(commandString){
 			proc = commandString.execute();
 			if(proc!=null){
@@ -862,9 +855,89 @@ static def String urlToDomibus(side, log, context){
 				proc.waitFor()
 			}
 		}
-		assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus."
 		
-		log.info "Message filters update done successfully for Domibus: \""+side+"\".";
+		assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:getMessageFilter: Error while trying to connect to domibus."
+		return outputCatcher.toString();
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def formatFilters(String filters,String filterChoice,context,log, String extraCriteria=null, logLevel = 1){
+		log.info "Trying to re-order backends filters ..."
+		def swapBck = null
+		debugLog("FILTERS:" + filters, log, logLevel)
+		
+		if(filters!=null){
+			filters=filters.substring(filters.indexOf("["),filters.lastIndexOf("]")-1);
+		}
+		assert(filters!=null),"Error:formatFilters: Not able to get the backend details."
+		def tableBcks = filters.split("},");
+		debugLog(tableBcks.toString(), log,  logLevel) 
+		
+		if(tableBcks.length==1){
+			return "ok";
+		}
+		
+		for(def i=0;i<tableBcks.length;i++){
+			tableBcks[i]="{\""+tableBcks[i].split("\"",2)[1]+"}";
+			tableBcks[i]=tableBcks[i].replace("\"","\"\"\"");
+		}
+		debugLog("after for loop", log, logLevel)
+		debugLog(tableBcks.toString(), log, logLevel)
+		
+		for(def  j = 0; j<tableBcks.length; j++){
+			if(tableBcks[j].toLowerCase().contains(filterChoice.toLowerCase()) ) { 
+				if(extraCriteria==null || (extraCriteria!=null && tableBcks[j].toLowerCase().contains(extraCriteria.toLowerCase()) ) ) {
+					if(j==0){
+						return "correct";
+					}
+					debugLog("switch $j element", log, logLevel)
+					swapBck = tableBcks[0];
+					tableBcks[0] = tableBcks[j];
+					tableBcks[j] = swapBck;
+					return   "[\"" + tableBcks.join(",")+"\"]"
+				}
+			}
+		}
+		
+		return "ko"
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def setMessageFilters(String side, String filterChoice,context,log,String extraCriteria=null, logLevel = 1){
+		log.info "Start setting message filters for Domibus \""+side+"\".";
+		def String output = null;
+	    def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+        def proc=null; def commandString = null;
+		
+		def filtersString = getMessageFilters(side,context,log);
+		debugLog("filtersString:" + filtersString, log,  logLevel)
+		assert(filtersString!=null),"Error:setMessageFilter: Not able to get the backend details."
+		assert(filtersString.toLowerCase().contains(filterChoice.toLowerCase())),"Error:setMessageFilter: The backend you want to set is not installed."
+		
+		def String bckParams = formatFilters(filtersString, filterChoice, context, log, extraCriteria, logLevel);
+		debugLog("bckParams:" + bckParams, log, logLevel)
+		assert(bckParams!="ko"),"Error:setMessageFilter: The backend you want to set is not installed."
+
+		if(bckParams.equals("ok")){
+			log.info "Only one backend installed: Nothing to do.";
+		}
+		else{
+			if(bckParams.equals("correct")){
+				log.info "The requested backend is already selected: Nothing to do.";
+			}
+			else{
+				commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -X PUT -d "+bckParams;
+				debugLog("commandString ="+commandString, log, logLevel)
+				if(commandString){
+					proc = commandString.execute();
+					if(proc!=null){
+						proc.consumeProcessOutput(outputCatcher, errorCatcher)
+						proc.waitFor()
+					}
+				}
+				assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus.";
+				log.info "Message filters update done successfully for Domibus: \""+side+"\".";
+			}
+		}
 
 	} 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
@@ -888,6 +961,11 @@ static def String urlToDomibus(side, log, context){
 		assert(outputCatcher.toString().contains("200 OK")),"Error:Authenticating user: Error while trying to connect to domibus."
 		return outputCatcher.toString();
 	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+static def String returnXsfrToken(String side,context,log){
+	def String output = fetchCookieHeader(side,context,log)		
+	return output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","")
+}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	static def computePathRessources(String type,String extension,context){
 		def returnPath = null;
@@ -1039,7 +1117,6 @@ static def String pathToDomibus(color, log, context){
 
 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII3IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-
    // Restor Domibus configuration file 
     static def void restoreDomibusPropertiesFromBackup(color, log, context, testRunner){
 		// Restore from backup file domibus.properties file

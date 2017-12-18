@@ -414,28 +414,4 @@ public class DynamicDiscoveryPModeProviderTest {
         }
         return true;
     }
-
-    /**
-     * Load certificate with alias from JKS and return as {@code X509Certificate}.
-     * The password is always 1234 in this test.
-     *
-     * @param filePath
-     * @param alias
-     * @return
-     */
-    private X509Certificate loadCertificateFromJKS(String filePath, String alias) {
-        try {
-            FileInputStream fileInputStream = new FileInputStream(filePath);
-
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(fileInputStream, "1234".toCharArray());
-
-            Certificate cert = keyStore.getCertificate(alias);
-
-            return (X509Certificate) cert;
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }

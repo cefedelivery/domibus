@@ -876,6 +876,8 @@ testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlRed", "jdbc:mysql
 testRunner.testCase.testSuite.project.setPropertyValue("redDbUser", "root");
 testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "root");
 
+testRunner.testCase.testSuite.project.setPropertyValue("thirdGateway", "false");
+
 log.info "Update done.";
 
 </script></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="38903868-8421-4031-b71c-7842652be2f1"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
@@ -911,6 +913,8 @@ testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlRed", "jdbc:mysql
 testRunner.testCase.testSuite.project.setPropertyValue("redDbUser", "root");
 testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "edelCld2017");
 
+testRunner.testCase.testSuite.project.setPropertyValue("thirdGateway", "false");
+
 log.info "Update done.";
 </script></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="11ace457-262d-4fbd-88b7-7d5aebcd9503"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
 Domibus.uploadPmode("sender","default","\\cloud\\weblogic\\blue\\domibus-pmode-blue.xml",context,log);
@@ -945,6 +949,8 @@ testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlRed", "jdbc:mysql
 testRunner.testCase.testSuite.project.setPropertyValue("redDbUser", "root");
 testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "edelCld2017");
 
+testRunner.testCase.testSuite.project.setPropertyValue("thirdGateway", "false");
+
 log.info "Update done.";
 </script></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="969211ad-25d7-4867-aa79-e57ef69c4882"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
 Domibus.uploadPmode("sender","default","\\cloud\\tomcat\\blue\\domibus-pmode-blue.xml",context,log);
@@ -978,6 +984,8 @@ testRunner.testCase.testSuite.project.setPropertyValue("driverRed", "com.mysql.j
 testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlRed", "jdbc:mysql://localhost:23306/domtestusr");
 testRunner.testCase.testSuite.project.setPropertyValue("redDbUser", "domtestusr");
 testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "domtestusr");
+
+testRunner.testCase.testSuite.project.setPropertyValue("thirdGateway", "false");
 
 log.info "Update done.";
 </script></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="c7a8aa83-4314-4d39-ba87-233d0082e110"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
@@ -1043,16 +1051,18 @@ testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlRed", "jdbc:mysql
 testRunner.testCase.testSuite.project.setPropertyValue("redDbUser", "root");
 testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "root");
 
+testRunner.testCase.testSuite.project.setPropertyValue("thirdGateway", "false");
+
 log.info "Update done.";
 
 </script></con:config></con:testStep><con:testStep type="groovy" name="Start Blue-Red" id="5e5ec351-fd1f-48bf-8164-c51974c2e3e7"><con:settings/><con:config><script>// Start 2 Domibus: sender and receiver
 Domibus.startSetMSHs(1,1,0,context,log);
 </script></con:config></con:testStep><con:testStep type="delay" name="D1" id="83a7dce8-242a-4042-92b2-4916c34fb291"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="574cdbea-2d13-498b-a7f1-282b1ab1e4f2"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
 Domibus.uploadPmode("sender","default","\\blue\\domibus-pmode-blue.xml",context,log);
-Domibus.uploadPmode("receiver","default","\\red\\domibus-pmode-red.xml",context,log);</script></con:config></con:testStep><con:testStep type="delay" name="D2" id="5b9fc052-2009-41a5-b70e-0f21dc44d889"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Upload default truststores Blue-Red" id="0312d29f-f769-4d48-b3df-b7629d4d39d0" disabled="true"><con:settings/><con:config><script>// Upload truststores: default truststores (blue for sender and red for receiver)  
+Domibus.uploadPmode("receiver","default","\\red\\domibus-pmode-red.xml",context,log);</script></con:config></con:testStep><con:testStep type="delay" name="D2" id="5b9fc052-2009-41a5-b70e-0f21dc44d889"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Upload default truststores Blue-Red" id="0312d29f-f769-4d48-b3df-b7629d4d39d0"><con:settings/><con:config><script>// Upload truststores: default truststores (blue for sender and red for receiver)  
 Domibus.uploadTruststore("sender","default","\\blue\\gateway_truststore.jks",context,log);
-Domibus.uploadTruststore("receiver","default","\\red\\gateway_truststore.jks",context,log);</script></con:config></con:testStep><con:testStep type="delay" name="D3" id="d27094c4-0a10-473b-abc5-572b984c8d04"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Set Message Filters to JMS Blue-Red" id="cb6e966f-130d-46cc-9796-ac954f138ffc"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","jms",context,log);
-Domibus.setMessageFilters("receiver","jms",context,log);
+Domibus.uploadTruststore("receiver","default","\\red\\gateway_truststore.jks",context,log);</script></con:config></con:testStep><con:testStep type="delay" name="D3" id="d27094c4-0a10-473b-abc5-572b984c8d04"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Set Message Filters to JMS Blue-Red" id="cb6e966f-130d-46cc-9796-ac954f138ffc"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","Jms",context,log);
+Domibus.setMessageFilters("receiver","Jms",context,log);
 </script></con:config></con:testStep><con:tearDownScript/><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>65ecdf7b-e0e2-477b-b020-da4c7fb8c855</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3bc33515-eae2-46e7-a50f-1104a8d1a301</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>7aefe4d7-98b5-43b1-8f34-4aa71764de77</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase id="b3cb71a7-643e-4018-aeef-06960585f246" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Start 3 gateways configuration" searchProperties="true"><con:settings/><con:testStep type="groovy" name="Set custom properties" id="675f3ce8-1ca1-4742-b103-e37a1fb27ec0"><con:settings/><con:config><script>// blue: tomcat (edeltest1)
 testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://localhost:8080/domibus");
 testRunner.testCase.testSuite.project.setPropertyValue("databaseBlue", "mysql");
@@ -1069,6 +1079,8 @@ testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlRed", "jdbc:mysql
 testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "root");
 testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "root");
 
+testRunner.testCase.testSuite.project.setPropertyValue("thirdGateway", "true");
+
 log.info "Update done.";
 </script></con:config></con:testStep><con:testStep type="groovy" name="Start Blue-Red-Green" id="68721198-3073-403d-8bff-6d7720f95d78"><con:settings/><con:config><script>// Start 3 Domibus: sender, receiver and green.
 Domibus.startSetMSHs(1,1,1,context,log);
@@ -1079,9 +1091,9 @@ Domibus.uploadPmode("receivergreen","special","\\Threegateways\\green\\domibus-p
 Domibus.uploadTruststore("sender","special","\\Threegateways\\blue\\gateway_truststore.jks",context,log);
 Domibus.uploadTruststore("receiver","special","\\Threegateways\\red\\gateway_truststore.jks",context,log);
 Domibus.uploadTruststore("receivergreen","special","\\Threegateways\\green\\gateway_truststore.jks",context,log);
-</script></con:config></con:testStep><con:testStep type="delay" name="D3" id="9cebac82-b705-4257-a840-fa27ca283204"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Set Message Filters to JMS Blue-Red-Green" id="2d86869e-76b7-40e0-b42f-c983047ef8a3"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","jms",context,log);
-Domibus.setMessageFilters("receiver","jms",context,log);
-Domibus.setMessageFilters("receivergreen","jms",context,log);
+</script></con:config></con:testStep><con:testStep type="delay" name="D3" id="9cebac82-b705-4257-a840-fa27ca283204"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Set Message Filters to JMS Blue-Red-Green" id="2d86869e-76b7-40e0-b42f-c983047ef8a3"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","Jms",context,log);
+Domibus.setMessageFilters("receiver","Jms",context,log);
+Domibus.setMessageFilters("receivergreen","Jms",context,log);
 </script></con:config></con:testStep><con:tearDownScript/><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>8d861779-0a64-417b-b81f-dbaed89dc796</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>42781f68-9908-4231-93af-c83bd2d27190</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f10dbea4-cf15-49a7-93b9-ab0ef7752097</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase id="75b4d7ff-fc7f-4c05-bd9b-1cad9c73b2ec" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Add or change Teardown script" searchProperties="true"><con:settings/><con:testStep type="groovy" name="AddToTearDown" id="235fe2c6-ac8e-4b5d-837c-1d73e27fcdc8"><con:settings/><con:config><script>def lineToAdd = "ExcelReporting.reportTestCase(testRunner, log)"
 log.info "START: Amendment tear down sciprts"
 testRunner.testCase.testSuite.project.getTestSuiteList().each { testSuite ->

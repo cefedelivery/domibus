@@ -11,6 +11,7 @@ import {EditMessageFilterComponent} from "./editmessagefilter-form/editmessagefi
 import {DirtyOperations} from "../common/dirty-operations";
 import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
 import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
+import {DownloadService} from "../download/download.service";
 
 @Component({
   moduleId: module.id,
@@ -39,6 +40,8 @@ export class MessageFilterComponent implements DirtyOperations {
   loading: boolean = false;
 
   areFiltersPersisted: boolean;
+
+  static readonly MESSAGE_FILTER_URL: string = 'rest/messagefilters';
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
@@ -80,7 +83,7 @@ export class MessageFilterComponent implements DirtyOperations {
   }
 
   getMessageFilterEntries(): Observable<MessageFilterResult> {
-    return this.http.get('rest/messagefilters').map((response: Response) =>
+    return this.http.get(MessageFilterComponent.MESSAGE_FILTER_URL).map((response: Response) =>
       response.json()
     );
   }
@@ -304,6 +307,18 @@ export class MessageFilterComponent implements DirtyOperations {
     this.enableDelete = false;
   }
 
+  isSaveAsCSVButtonEnabled() : boolean {
+    return (this.rows.length < 10000);
+  }
+
+  saveAsCSV() {
+    if(this.isDirty()) {
+      this.saveDialog(true);
+    } else {
+      DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
+    }
+  }
+
   cancelDialog() {
     let dialogRef = this.dialog.open(CancelDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
@@ -314,18 +329,25 @@ export class MessageFilterComponent implements DirtyOperations {
     });
   }
 
-  saveDialog() {
+  saveDialog(withDownload: boolean) {
     let headers = new Headers({'Content-Type': 'application/json'});
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.disableSelectionAndButtons();
-        this.http.put('rest/messagefilters', JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
+        this.http.put(MessageFilterComponent.MESSAGE_FILTER_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
           this.alertService.success("The operation 'update message filters' completed successfully.", false);
           this.getBackendFiltersInfo();
+          if(withDownload) {
+            DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
+          }
         }, err => {
           this.alertService.error("The operation 'update message filters' not completed successfully.", false);
         });
+      } else {
+        if(withDownload) {
+          DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
+        }
       }
     });
   }

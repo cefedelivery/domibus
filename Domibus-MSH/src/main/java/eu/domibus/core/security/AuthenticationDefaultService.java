@@ -22,10 +22,10 @@ public class AuthenticationDefaultService implements AuthenticationService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuthenticationDefaultService.class);
 
-    private static final String BASIC_HEADER_KEY = "Authorization";
-    private static final String CLIENT_CERT_ATTRIBUTE_KEY = "javax.servlet.request.X509Certificate";
-    private static final String CLIENT_CERT_HEADER_KEY = "Client-Cert";
-    private static final String UNSECURE_LOGIN_ALLOWED = "domibus.auth.unsecureLoginAllowed";
+    protected static final String BASIC_HEADER_KEY = "Authorization";
+    protected static final String CLIENT_CERT_ATTRIBUTE_KEY = "javax.servlet.request.X509Certificate";
+    protected static final String CLIENT_CERT_HEADER_KEY = "Client-Cert";
+    protected static final String UNSECURE_LOGIN_ALLOWED = "domibus.auth.unsecureLoginAllowed";
 
     @Autowired
     @Qualifier("domibusProperties")
